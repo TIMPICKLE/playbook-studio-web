@@ -23,7 +23,7 @@
 | 只读控件与脚本事件防护、角色更新、云端保存 | 通过 |
 | 完整 JSON 文件迁移与管理员邀请界面 | 通过 |
 
-自动化身份测试使用服务器验证上下文的测试替身；没有用真实多个 ChatGPT 账号完成手工登录协作验证。生产健康端点与匿名访问限制在发布阶段核验。完整结果和架构见 [CLOUD.md](CLOUD.md)。
+自动化身份测试使用服务器验证上下文的测试替身；没有用真实多个 ChatGPT 账号完成手工登录协作验证。生产健康端点返回 ready=true / cloud / 2.0.0；无用户身份的数据请求返回 401。已通过浏览器确认公开共享登录入口加载，生产 D1 六张数据表存在。完整结果和架构见 [CLOUD.md](CLOUD.md)。
 
 ## v1 已执行
 
@@ -57,7 +57,16 @@
 
 原版 Playmaker X 仅观察登录前入口和公开脚本，未验证账号内编辑器，也没有证明行为等价。REA 的完整语义图限制单列在 [调查报告](PUBLIC_BUNDLE_STATIC_FINDINGS.md)。
 
-## 发布核验
+## v2 发布核验
+
+- [云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/)：生产发布成功；公开入口显示登录界面。
+- D1 绑定 `DB` 的六张表已创建。
+- 线上健康接口返回 `ready: true, storage: cloud, version: 2.0.0`。
+- 不注入登录用户身份的请求：session 返回 null；workspaces 返回 401，不暴露战术数据。
+- [GitHub Checks #3](https://github.com/TIMPICKLE/playbook-studio-web/actions/runs/38429952333)：成功；47 项测试及语法 / 类型检查通过。
+- [GitHub Pages #3](https://github.com/TIMPICKLE/playbook-studio-web/actions/runs/38429952454)：成功；后续修正入口文件目标路径，额外检查入口和本地预览产物逐字等于对应源文件。
+
+## v1 发布核验
 
 - 首次发布的实现提交：`083d934a6137c8f81da82b1a3bc76997661e2105`。
 - [GitHub Actions Checks #1](https://github.com/TIMPICKLE/playbook-studio-web/actions/runs/38377984370)：成功；远端执行语法检查与相同测试集。
