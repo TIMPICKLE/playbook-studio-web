@@ -3,3 +3,15 @@ node_modules/
 .openai/.workflows/
 *.log
 .DS_Store
+
+.sites-runtime/
+.wrangler/
+.vinext/
+.next/
+dist/
+public/editor/
+pages/
+github-pages/
+.env*
+!.env.example
+*.tsbuildinfo

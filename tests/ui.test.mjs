@@ -2,15 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
-import { STORAGE_KEY, decodeWorkspace, encodeWorkspace } from '../dist/model.js';
+import { STORAGE_KEY, decodeWorkspace, encodeWorkspace } from '../web/model.js';
 
 test('DOM integration: edit, route drawing, undo, formation, playback, import UI and print layouts', async t => {
   const win = new Window({ url: 'http://localhost:3000/', width: 1440, height: 1000 });
-  win.document.body.innerHTML = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
+  win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
   const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame'];
   const previous = Object.fromEntries(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
   for (const name of names) Object.defineProperty(globalThis, name, { configurable: true, value: typeof win[name] === 'function' && ['requestAnimationFrame', 'cancelAnimationFrame'].includes(name) ? win[name].bind(win) : win[name] });
-  await import(`../dist/app.js?test=${Date.now()}`);
+  await import(`../web/app.js?test=${Date.now()}`);
   const doc = win.document, query = s => doc.querySelector(s), click = action => { const node = query(`[data-action="${action}"]`); assert.ok(node, `action exists: ${action}`); node.click(); };
   const change = (selector, value) => { const node = query(selector); assert.ok(node, selector); node.value = value; node.dispatchEvent(new win.Event('change', { bubbles: true })); };
   const pointer = (node, type, x = 700, y = 400) => node.dispatchEvent(new win.PointerEvent(type, { bubbles: true, button: 0, clientX: x, clientY: y, pointerId: 1 }));

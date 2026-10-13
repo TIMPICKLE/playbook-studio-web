@@ -1,3 +1,4 @@
+import { SharedWorkspace, cloudMode, CLOUD_SITE } from './cloud.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation } from './field.js';
 
@@ -15,12 +16,21 @@ let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false, sidebarOpen = false;
 let saveState = loadIssue ? '恢复提醒' : '本地已保存', frame = null, lastFrame = null, toastTimer = null;
 const history = new History();
+let shared = null;
+const canEdit = () => !cloudMode() || !!shared?.canEdit;
+const readActions = new Set(['choose','book','select-route','clear-selection','sidebar','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop']);
+function protectReadOnly() {
+  if (canEdit()) return;
+  document.querySelectorAll('[data-prop],[data-ball],#apply-formation,#show-names').forEach(n => { n.disabled = true; });
+  document.querySelectorAll('#app [data-action]').forEach(n => { const [action,value]=n.dataset.action.split(':'); if (!readActions.has(action) && !(action==='tool' && value==='select')) n.disabled=true; });
+}
 const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
 const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
 const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
 
 function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => $('#toast')?.classList.remove('visible'), 4200); }
 function save() {
+  if (cloudMode()) { shared?.schedule(state.data); return; }
   try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(state.data)); saveState = '本地已保存'; }
   catch { saveState = '尚未保存'; toast('浏览器存储不可用或已满，请导出 JSON 保存战术本。'); }
   $('#save-state')?.replaceChildren(document.createTextNode(saveState));
@@ -28,10 +38,11 @@ function save() {
 function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { stop(); time = 0; }
 function edit(fn, { redraw = true } = {}) {
+  if (!canEdit()) { toast('当前为只读权限，无法修改共享战术。'); return; }
   resetAnimation(); draft = null; history.record(state); fn(current(), state.data); save(); if (redraw) render();
 }
 function choose(id) { resetAnimation(); draft = null; selection = null; state.selectedId = id; sidebarOpen = false; tool = 'select'; render(); }
-function restore(next) { if (!next) return; resetAnimation(); state = next; book = current().book; selection = null; draft = null; save(); render(); }
+function restore(next) { if (!next || !canEdit()) return; resetAnimation(); state = next; book = current().book; selection = null; draft = null; save(); render(); }
 
 function render() {
   const p = current(); if (!p) return;
@@ -41,7 +52,7 @@ function render() {
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
   $('#app').innerHTML = `<div class="workspace ${sidebarOpen ? 'sidebar-open' : ''}">
     <aside class="sidebar">
-      <a class="brand" href="./" aria-label="Playbook Studio"><img src="./icon.svg" alt="" width="34" height="34"><span>PLAYBOOK<span>STUDIO</span></span><small>v1</small></a>
+      <a class="brand" href="./index.html" aria-label="Playbook Studio"><img src="./icon.svg" alt="" width="34" height="34"><span>PLAYBOOK<span>STUDIO</span></span><small>${cloudMode() ? 'v2' : 'v1'}</small></a>
       <button class="team-switch" data-action="team"><span class="team-avatar">${e(state.data.team.name.slice(0, 1))}</span><span><strong>${e(state.data.team.name)}</strong><small>${e(state.data.team.subtitle)}</small></span>${icon('chevron')}</button>
       <div class="side-label">WORKSPACE <span>战术本</span></div>
       <nav class="book-nav" aria-label="战术本类型">${Object.entries(BOOKS).map(([key, name]) => `<button data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${name}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
@@ -65,6 +76,7 @@ function render() {
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>画清路线，读懂比赛。</span><button data-action="help">快捷键与使用说明 ${icon('chevron')}</button></footer>
     </main></div>`;
   bindField();
+  protectReadOnly();
 }
 function hint() {
   if (playing || time > 0) return '演练中 · 拖动时间轴检查球员走位';
@@ -89,10 +101,10 @@ function inspector() {
   } else {
     content = `<div class="inspector-heading"><span>战术详情</span><span class="tag">${BOOKS[p.book]}</span></div>${fieldInput('战术名称', 'title', p.title, 'text', 'maxlength="120"')}${fieldInput('分类', 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>阵型模板</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput('人员组', 'personnel', p.personnel, 'text', 'maxlength="80"')}<div class="formation-actions"><button data-action="save-formation">${icon('save')} 保存当前阵型</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? '移除' : '添加'}对方阵型</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>教练笔记</span></div><textarea data-prop="notes" rows="5" aria-label="教练笔记" placeholder="阅读顺序、跑位要点、调整方案…" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><div class="inspector-heading"><span>足球移动</span>${icon('ball')}</div><label class="form-field"><span>持球人</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>传给</span><select data-ball="receiverId"><option value="">不传球 / 跑球</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput('出手时间', 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput('到达时间', 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div><div class="inspector-divider"></div><div class="inspector-heading"><span>添加对象</span></div><div class="route-quick"><button data-action="add-player:offense">${icon('plus')}进攻球员</button><button data-action="add-player:defense">${icon('plus')}防守球员</button></div><button class="button subtle full" data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）</button><label class="check-label"><input id="show-names" type="checkbox" ${state.data.settings.showNames ? 'checked' : ''}>显示球员姓名</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}删除此战术</button>`;
   }
-  return `${content}${selection ? '<button class="back-details" data-action="clear-selection">← 返回战术详情</button>' : ''}<div class="inspector-note">${icon('check')}所有修改自动保存在此浏览器</div>`;
+  return `${content}${selection ? '<button class="back-details" data-action="clear-selection">← 返回战术详情</button>' : ''}<div class="inspector-note">${icon('check')}${cloudMode() ? (canEdit() ? '所有修改自动同步到共享战术本' : '当前拥有只读权限') : '所有修改自动保存在此浏览器'}</div>`;
 }
 function renderField() { $('#field').innerHTML = fieldSVG(current(), state.data.settings, { selected: selection, time, drawing: draft }) + `<div class="field-tag">${icon('ball')} ${current().players.length} PLAYERS</div>`; }
-function refreshSelection() { $('.inspector').innerHTML = inspector(); renderField(); }
+function refreshSelection() { $('.inspector').innerHTML = inspector(); renderField(); protectReadOnly(); }
 function coordinates(event) { const svg = $('#field svg'), box = svg.getBoundingClientRect(); return { x: clamp(((event.clientX - box.left) / box.width * 1000 - 18) / 9.64), y: clamp(((event.clientY - box.top) / box.height * 800 - 20) / 7.6) }; }
 function pick(event) {
   const node = event.target.closest('[data-player],[data-route],[data-zone],[data-annotation]');
@@ -106,6 +118,7 @@ function bindField() {
     if (event.button !== 0) return;
     if (playing || time) { resetAnimation(); renderField(); return; }
     const at = coordinates(event), hit = pick(event);
+    if (!canEdit()) { selection = hit; refreshSelection(); return; }
     if (tool === 'text') { textModal(at); return; }
     if (['route', 'block', 'motion', 'pass'].includes(tool)) {
       if (hit?.type === 'player' && (!draft || draft.playerId !== hit.id)) {
@@ -128,7 +141,7 @@ function bindField() {
     refreshSelection();
   });
   field.addEventListener('pointermove', event => {
-    if (!drag) return;
+    if (!drag || !canEdit()) return;
     const at = coordinates(event), p = current();
     if (Math.hypot(at.x - drag.start.x, at.y - drag.start.y) < .2 && !drag.moved) return;
     drag.moved = true;
@@ -190,7 +203,7 @@ function teamModal() {
 }
 function rosterRow(r) { return `<div class="roster-row" data-roster-id="${e(r.id)}"><input data-roster-field="number" aria-label="球衣号码" value="${e(r.number)}" maxlength="5"><input data-roster-field="name" aria-label="球员姓名" value="${e(r.name)}" maxlength="80"><input data-roster-field="position" aria-label="球员位置" value="${e(r.position)}" maxlength="15">${btn('roster-remove', 'close', '移除此行', 'small-icon')}</div>`; }
 function helpModal() {
-  openModal('让战术动起来', `<div class="help-intro"><img src="./icon.svg" width="48" height="48" alt=""><div><strong>Playbook Studio</strong><p>从阵型到跑位，一张图说清楚。</p></div></div><ol class="help-steps"><li><b>选阵型</b>在右侧应用模板，或拖动球员排出自己的阵型。</li><li><b>画路线</b>点选球员 → 选择路线工具 → 点击转折点 → Enter 完成。</li><li><b>调时序</b>点选路线，设置启动延迟与时长。可设置足球的出手和到达时间。</li><li><b>播放与分享</b>空格播放，拖动时间轴逐帧检查。导出 JSON 或打印战术本与腕带。</li></ol><div class="keyboard-grid">${[['V', '选择移动'], ['R', '跑动路线'], ['B', '阻挡'], ['M', '开球前移动'], ['P', '传球线'], ['Z', '覆盖区域'], ['T', '文字标注'], ['Space', '播放 / 暂停'], ['Enter', '完成路线'], ['Esc', '取消绘制 / 关闭'], ['Ctrl / ⌘ Z', '撤销'], ['Delete', '删除选中对象']].map(([k, l]) => `<span><kbd>${k}</kbd>${l}</span>`).join('')}</div><div class="help-about"><strong>关于数据和实现</strong><p>战术保存在当前浏览器；导出 JSON 可备份和迁移。本版本提供本地设计、动画与打印，未接入多人协作或账号云同步。</p><p>这是参考 Playmaker X 公开功能独立实现的工具，非官方产品。动画用于战术教学，不模拟碰撞、对抗或完整比赛物理。</p><a href="https://github.com/TIMPICKLE/playbook-studio-web" target="_blank" rel="noopener">代码与公开功能调查 →</a></div>`, '<button class="button primary" data-action="close-modal">开始设计</button>', true);
+  openModal('让战术动起来', `<div class="help-intro"><img src="./icon.svg" width="48" height="48" alt=""><div><strong>Playbook Studio</strong><p>从阵型到跑位，一张图说清楚。</p></div></div><ol class="help-steps"><li><b>选阵型</b>在右侧应用模板，或拖动球员排出自己的阵型。</li><li><b>画路线</b>点选球员 → 选择路线工具 → 点击转折点 → Enter 完成。</li><li><b>调时序</b>点选路线，设置启动延迟与时长。可设置足球的出手和到达时间。</li><li><b>播放与分享</b>空格播放，拖动时间轴逐帧检查。导出 JSON 或打印战术本与腕带。</li></ol><div class="keyboard-grid">${[['V', '选择移动'], ['R', '跑动路线'], ['B', '阻挡'], ['M', '开球前移动'], ['P', '传球线'], ['Z', '覆盖区域'], ['T', '文字标注'], ['Space', '播放 / 暂停'], ['Enter', '完成路线'], ['Esc', '取消绘制 / 关闭'], ['Ctrl / ⌘ Z', '撤销'], ['Delete', '删除选中对象']].map(([k, l]) => `<span><kbd>${k}</kbd>${l}</span>`).join('')}</div><div class="help-about"><strong>关于数据和实现</strong><p>云端版按成员权限共享战术；导出 JSON 可备份和迁移。云端版支持共享保存、成员权限与版本记录；本地预览版使用浏览器存储。</p><p>这是参考 Playmaker X 公开功能独立实现的工具，非官方产品。动画用于战术教学，不模拟碰撞、对抗或完整比赛物理。</p><a href="https://github.com/TIMPICKLE/playbook-studio-web" target="_blank" rel="noopener">代码与公开功能调查 →</a></div>`, '<button class="button primary" data-action="close-modal">开始设计</button>', true);
 }
 
 function printModal() {
@@ -319,6 +332,7 @@ const actions = {
 document.addEventListener('click', event => {
   const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
   const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
+  if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast('当前为只读权限。'); return; }
   if (name === 'choose') return choose(value);
   if (name === 'book') { resetAnimation(); draft = null; selection = null; book = value; filter = ''; formationFilter = ''; query = ''; const p = filtered()[0]; if (p) state.selectedId = p.id; render(); return; }
   if (name === 'tool') { resetAnimation(); tool = value; draft = null; render(); return; }
@@ -333,6 +347,7 @@ document.addEventListener('input', event => {
 });
 document.addEventListener('change', event => {
   const input = event.target;
+  if (!canEdit() && (input.dataset.prop || input.dataset.ball || ['apply-formation','show-names'].includes(input.id))) return;
   if (input.id === 'category-filter') { filter = input.value; render(); }
   else if (input.id === 'formation-filter') { formationFilter = input.value; render(); }
   else if (input.id === 'speed') speed = Number(input.value);
@@ -389,8 +404,28 @@ document.addEventListener('keydown', event => {
   else if (event.key === 'Escape') { draft = null; selection = null; tool = 'select'; render(); }
   else if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); deleteSelected(); }
   else if (key === '?') helpModal();
-  else if (!event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) { resetAnimation(); draft = null; tool = ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]; render(); }
+  else if (canEdit() && !event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) { resetAnimation(); draft = null; tool = ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]; render(); }
 });
 render();
 if (loadIssue) toast(loadIssue);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+if (cloudMode()) {
+  document.body.classList.add('cloud-enabled');
+  shared = new SharedWorkspace({
+    onData(data) {
+      resetAnimation(); selection = null; draft = null; drag = null;
+      const selectedId = data.plays.some(p => p.id === state.selectedId) ? state.selectedId : data.plays[0].id;
+      state = { data, selectedId }; book = current().book; query = ''; filter = ''; formationFilter = '';
+      history.past = []; history.future = []; render();
+    },
+    onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
+    onPermissionLost(error) { resetAnimation(); draft = null; drag = null; render(); toast(error.message || '访问权限已变更，请重新登录或联系管理员。'); },
+    showEditor(show) { $('#app').hidden = !show; },
+    isBusy: () => !!drag || !!draft || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
+    openModal, closeModal, toast, download
+  });
+  shared.init();
+} else if (location.hostname !== 'localhost') {
+  $('#cloud-root').innerHTML = `<div class="cloud-local-entry"><span>本地离线预览 · 修改仅保存在此浏览器</span><a class="button primary" href="${CLOUD_SITE}/editor/index.html" target="_top">进入云端共享版</a></div>`;
+}

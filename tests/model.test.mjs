@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, addRoute, pointAlong, sampledRoute, animatedPlayer, animatedBall, encodeWorkspace, decodeWorkspace, History, clone, escapeHTML } from '../dist/model.js';
-import { fieldSVG, routePath } from '../dist/field.js';
+import { starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, addRoute, pointAlong, sampledRoute, animatedPlayer, animatedBall, encodeWorkspace, decodeWorkspace, History, clone, escapeHTML } from '../web/model.js';
+import { fieldSVG, routePath } from '../web/field.js';
 
 test('all starter plays roundtrip through the actual backup validation', () => {
   const w = starterWorkspace(); assert.deepEqual(decodeWorkspace(encodeWorkspace(w)), w);

@@ -3,7 +3,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'dist/**'
+      - 'web/**'
+      - 'scripts/prepare-pages.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
@@ -22,9 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - run: node scripts/prepare-pages.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: github-pages
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
