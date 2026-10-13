@@ -1,0 +1,2060 @@
+{
+  "format": "playbook-studio",
+  "version": 1,
+  "exportedAt": "2026-10-13T09:34:57.418Z",
+  "data": {
+    "team": {
+      "name": "TIM FOOTBALL",
+      "subtitle": "2026 SEASON",
+      "accent": "#285d3f"
+    },
+    "plays": [
+      {
+        "id": "bbdb76ff-16bc-4793-b167-b709acf67953",
+        "title": "Mesh · 浅交叉",
+        "book": "offense",
+        "formation": "Gun Trips",
+        "category": "传球",
+        "personnel": "11 personnel",
+        "notes": "Y 与 H 在防守前方交叉，保持 4–6 码深度，避免相撞。\nQB：先读 Y，再看 RB 的外摆；X 拉深牵制安全卫。\n这是一组教学示例，需根据球队能力调整时序。",
+        "favorite": true,
+        "players": [
+          {
+            "id": "d2a24ad6-9a14-4413-981a-d388da393684",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "7e2b6230-6b82-478c-8812-1d1ca874444d",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "9a5d4c1c-26eb-4344-ab3b-7b27cd04c297",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "6ad4380b-3161-445a-a4e8-72c8b2a4bef4",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "b465071f-0f5b-49ea-bc6e-130a4f989b85",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "2db75529-388d-4d08-96ea-55bc609909b2",
+            "label": "QB",
+            "x": 50,
+            "y": 77,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "84b92cc0-071c-4a4c-b64f-737d2224d40f",
+            "label": "RB",
+            "x": 60,
+            "y": 79,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "fa2c4803-e5ad-4ed9-a72d-c6d5d1910f7a",
+            "label": "X",
+            "x": 13,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "57ff3475-96c6-49ec-a4cf-0b32b708bd46",
+            "label": "Y",
+            "x": 72,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "2dd334d3-bc30-4878-87ab-d56fe397416e",
+            "label": "Z",
+            "x": 87,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "8eaa12ee-9905-423f-9da5-ea98c42852e0",
+            "label": "H",
+            "x": 80,
+            "y": 73,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "0f27f515-13be-49ef-86d9-da553e2688e8",
+            "playerId": "fa2c4803-e5ad-4ed9-a72d-c6d5d1910f7a",
+            "points": [
+              {
+                "x": 13,
+                "y": 67
+              },
+              {
+                "x": 13,
+                "y": 18
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "c612b42a-5f74-4935-8a5a-b4c485234562",
+            "playerId": "57ff3475-96c6-49ec-a4cf-0b32b708bd46",
+            "points": [
+              {
+                "x": 72,
+                "y": 70
+              },
+              {
+                "x": 66,
+                "y": 58
+              },
+              {
+                "x": 30,
+                "y": 58
+              }
+            ],
+            "kind": "route",
+            "color": "#ffd166",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0.2,
+            "duration": 4.2,
+            "optional": false
+          },
+          {
+            "id": "422395ba-f2d6-4178-9c1e-47329bb6c38b",
+            "playerId": "8eaa12ee-9905-423f-9da5-ea98c42852e0",
+            "points": [
+              {
+                "x": 80,
+                "y": 73
+              },
+              {
+                "x": 68,
+                "y": 52
+              },
+              {
+                "x": 24,
+                "y": 52
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4.5,
+            "optional": false
+          },
+          {
+            "id": "bb8b820a-884f-456f-95fe-420f27a391ec",
+            "playerId": "2dd334d3-bc30-4878-87ab-d56fe397416e",
+            "points": [
+              {
+                "x": 87,
+                "y": 67
+              },
+              {
+                "x": 87,
+                "y": 39
+              },
+              {
+                "x": 74,
+                "y": 27
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "6ba04d17-fdd2-4e5b-8d59-398a35e54024",
+            "playerId": "84b92cc0-071c-4a4c-b64f-737d2224d40f",
+            "points": [
+              {
+                "x": 60,
+                "y": 79
+              },
+              {
+                "x": 66,
+                "y": 73
+              },
+              {
+                "x": 91,
+                "y": 60
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": true,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "4aca4cba-7bdd-4c06-96a5-e56c6eccd7f9",
+            "playerId": "d2a24ad6-9a14-4413-981a-d388da393684",
+            "points": [
+              {
+                "x": 40,
+                "y": 67
+              },
+              {
+                "x": 40,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "680978e1-3028-4a30-aeb8-7b6b311babea",
+            "playerId": "7e2b6230-6b82-478c-8812-1d1ca874444d",
+            "points": [
+              {
+                "x": 45,
+                "y": 67
+              },
+              {
+                "x": 45,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "511c29a0-95b1-4903-80db-18575b4557f9",
+            "playerId": "9a5d4c1c-26eb-4344-ab3b-7b27cd04c297",
+            "points": [
+              {
+                "x": 50,
+                "y": 67
+              },
+              {
+                "x": 50,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "7e3efeb7-06f6-4716-a459-4fdd6b461fc0",
+            "playerId": "6ad4380b-3161-445a-a4e8-72c8b2a4bef4",
+            "points": [
+              {
+                "x": 55,
+                "y": 67
+              },
+              {
+                "x": 55,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "e6ab68ae-a4f6-4687-abfd-c982c49712c5",
+            "playerId": "b465071f-0f5b-49ea-bc6e-130a4f989b85",
+            "points": [
+              {
+                "x": 60,
+                "y": 67
+              },
+              {
+                "x": 60,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "2db75529-388d-4d08-96ea-55bc609909b2",
+          "receiverId": "57ff3475-96c6-49ec-a4cf-0b32b708bd46",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.415Z"
+      },
+      {
+        "id": "5cfc40b1-54ea-4279-b790-21ab6774a0fc",
+        "title": "Four Verticals · 四纵深",
+        "book": "offense",
+        "formation": "Gun Doubles",
+        "category": "传球",
+        "personnel": "11 personnel",
+        "notes": "外侧接球手纵向拉伸防线，内侧走 seam。观察单高位/双高位安全卫，再决定落点。",
+        "favorite": false,
+        "players": [
+          {
+            "id": "47341cd1-ba28-4bf3-a2fe-ea2945c8d800",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "9de1dbf4-80ca-4348-99af-84cea534a47c",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "9e7c5a8e-2c21-4474-bdd8-c6a686babb79",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "d3d3260e-5abd-4266-acd4-60b8d39ed8aa",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "df8d9bff-4e9f-4311-809c-88b8e3a37488",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "2b9d4f8a-376d-40a7-a95e-337d50f7ce8f",
+            "label": "QB",
+            "x": 50,
+            "y": 77,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "e473d463-1226-4652-9a82-eb0b7b2dca00",
+            "label": "RB",
+            "x": 60,
+            "y": 79,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "af10de01-ad75-4dce-9f7f-5dbf142db73b",
+            "label": "X",
+            "x": 13,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "2ae04bd8-85d5-40b0-ad0f-92c4a76ca871",
+            "label": "Y",
+            "x": 26,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "1f089b81-ef81-4faf-9cc4-6a013ff41c78",
+            "label": "Z",
+            "x": 87,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "43d74ad9-ed80-4019-a527-1b8307d1b6a8",
+            "label": "H",
+            "x": 73,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "42fdd107-09ca-42cc-b1bb-cb8ec56e113a",
+            "playerId": "af10de01-ad75-4dce-9f7f-5dbf142db73b",
+            "points": [
+              {
+                "x": 13,
+                "y": 67
+              },
+              {
+                "x": 13,
+                "y": 16
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4.8,
+            "optional": false
+          },
+          {
+            "id": "04b536ad-2e7a-489b-9816-1e7c2b56cab0",
+            "playerId": "2ae04bd8-85d5-40b0-ad0f-92c4a76ca871",
+            "points": [
+              {
+                "x": 26,
+                "y": 70
+              },
+              {
+                "x": 26,
+                "y": 16
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4.8,
+            "optional": false
+          },
+          {
+            "id": "de7d3fc1-9bdf-4d16-90de-ffa6c89dcac6",
+            "playerId": "1f089b81-ef81-4faf-9cc4-6a013ff41c78",
+            "points": [
+              {
+                "x": 87,
+                "y": 67
+              },
+              {
+                "x": 87,
+                "y": 16
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4.8,
+            "optional": false
+          },
+          {
+            "id": "d76c1d49-7bbb-4b55-8de6-0d4ee4347030",
+            "playerId": "43d74ad9-ed80-4019-a527-1b8307d1b6a8",
+            "points": [
+              {
+                "x": 73,
+                "y": 70
+              },
+              {
+                "x": 73,
+                "y": 16
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4.8,
+            "optional": false
+          },
+          {
+            "id": "d3394158-bdd4-4714-8551-78faf36ad935",
+            "playerId": "e473d463-1226-4652-9a82-eb0b7b2dca00",
+            "points": [
+              {
+                "x": 60,
+                "y": 79
+              },
+              {
+                "x": 61,
+                "y": 62
+              },
+              {
+                "x": 82,
+                "y": 58
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": true,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "2b9d4f8a-376d-40a7-a95e-337d50f7ce8f",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      },
+      {
+        "id": "a4df3004-0c2e-445d-9566-89c43bbd5281",
+        "title": "Flood · 右侧三层",
+        "book": "offense",
+        "formation": "Gun Trips",
+        "category": "传球",
+        "personnel": "11 personnel",
+        "notes": "右侧形成深、中、短三层落点。QB 按深到浅阅读同一侧覆盖。",
+        "favorite": false,
+        "players": [
+          {
+            "id": "4e782223-63b1-4f16-945c-60b986a83a51",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "2b55c2fe-6c12-4182-95c4-d42b3a4aaec4",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "7a39af77-6ca9-4d77-98ac-3355990ce220",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "64a4185c-1801-4d8b-a5bd-a396a5a8ef30",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "1968f1eb-660d-41a1-b541-ff5a223780f9",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "e3265ccf-97dc-4ec4-80a0-e6f56239e8f8",
+            "label": "QB",
+            "x": 50,
+            "y": 77,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "ceadc6c6-311d-4cfd-a4a1-f4e92ff81eeb",
+            "label": "RB",
+            "x": 60,
+            "y": 79,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "10b177d8-c4b3-48cf-913f-9aeaa78ff80a",
+            "label": "X",
+            "x": 13,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "867aad2e-be34-46a6-9fa0-5aad4617ad3d",
+            "label": "Y",
+            "x": 72,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "859a8943-01fa-4a9d-8554-62b2261f0c7a",
+            "label": "Z",
+            "x": 87,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "be50cea4-4e9f-475d-ae18-9591993a31ea",
+            "label": "H",
+            "x": 80,
+            "y": 73,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "3f8b1316-25c2-4fbc-ab0d-8661891bd658",
+            "playerId": "859a8943-01fa-4a9d-8554-62b2261f0c7a",
+            "points": [
+              {
+                "x": 87,
+                "y": 67
+              },
+              {
+                "x": 87,
+                "y": 17
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "5d1b420a-37eb-4943-a28d-fd22ac32881a",
+            "playerId": "867aad2e-be34-46a6-9fa0-5aad4617ad3d",
+            "points": [
+              {
+                "x": 72,
+                "y": 70
+              },
+              {
+                "x": 72,
+                "y": 44
+              },
+              {
+                "x": 94,
+                "y": 44
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "2d757916-b79c-4a9c-9a05-3ae84f3879b7",
+            "playerId": "ceadc6c6-311d-4cfd-a4a1-f4e92ff81eeb",
+            "points": [
+              {
+                "x": 60,
+                "y": 79
+              },
+              {
+                "x": 65,
+                "y": 73
+              },
+              {
+                "x": 92,
+                "y": 63
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": true,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "b3864aae-c972-441e-8f9f-3cb936d60504",
+            "playerId": "10b177d8-c4b3-48cf-913f-9aeaa78ff80a",
+            "points": [
+              {
+                "x": 13,
+                "y": 67
+              },
+              {
+                "x": 13,
+                "y": 35
+              },
+              {
+                "x": 60,
+                "y": 35
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "e3265ccf-97dc-4ec4-80a0-e6f56239e8f8",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      },
+      {
+        "id": "0bf67125-76b3-4063-b13e-aeb6adde371a",
+        "title": "Slants · 快速斜插",
+        "book": "offense",
+        "formation": "Gun Doubles",
+        "category": "传球",
+        "personnel": "11 personnel",
+        "notes": "",
+        "favorite": false,
+        "players": [
+          {
+            "id": "70b26919-e72b-4513-a708-766842d1f6aa",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "52e629a7-0203-421d-96a0-5350ff5aa628",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "2149e4f5-7578-495b-95b8-cb43d8b74255",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "30fc53d5-c56e-4182-9968-208aa2adba81",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "eb97991a-d6a5-4f3b-8403-f18e1d11f96a",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "d3e77904-ce18-4ca6-978f-54bc5b0f2f41",
+            "label": "QB",
+            "x": 50,
+            "y": 77,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "f35e1e3d-dfa2-41ff-a5ce-b1d6b61519c7",
+            "label": "RB",
+            "x": 60,
+            "y": 79,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "0cb6d6f9-9b5e-4e7d-92a5-76a609f5c972",
+            "label": "X",
+            "x": 13,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "47c9c4ec-9e60-4b22-bb78-e53988a87838",
+            "label": "Y",
+            "x": 26,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "28565985-c970-4a6f-8bf6-ccf49257a7e2",
+            "label": "Z",
+            "x": 87,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "3bab7318-ea7d-42f8-9424-773020b5d572",
+            "label": "H",
+            "x": 73,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "db17f6a8-d703-49c9-a40b-66b057f4f895",
+            "playerId": "0cb6d6f9-9b5e-4e7d-92a5-76a609f5c972",
+            "points": [
+              {
+                "x": 13,
+                "y": 67
+              },
+              {
+                "x": 13,
+                "y": 59
+              },
+              {
+                "x": 37,
+                "y": 35
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "c98bcd9e-93b0-44f7-a511-4113527bd810",
+            "playerId": "28565985-c970-4a6f-8bf6-ccf49257a7e2",
+            "points": [
+              {
+                "x": 87,
+                "y": 67
+              },
+              {
+                "x": 87,
+                "y": 59
+              },
+              {
+                "x": 62,
+                "y": 35
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "5459273c-a80c-478f-8d64-856924892f01",
+            "playerId": "3bab7318-ea7d-42f8-9424-773020b5d572",
+            "points": [
+              {
+                "x": 73,
+                "y": 70
+              },
+              {
+                "x": 73,
+                "y": 53
+              },
+              {
+                "x": 85,
+                "y": 48
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "b71d43cb-434d-45dd-9000-98cc2444d502",
+            "playerId": "47c9c4ec-9e60-4b22-bb78-e53988a87838",
+            "points": [
+              {
+                "x": 26,
+                "y": 70
+              },
+              {
+                "x": 26,
+                "y": 53
+              },
+              {
+                "x": 40,
+                "y": 48
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "d3e77904-ce18-4ca6-978f-54bc5b0f2f41",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      },
+      {
+        "id": "a13f72f2-d50f-4653-ae46-afb10c5dc08f",
+        "title": "Inside Zone · 内侧区域跑",
+        "book": "offense",
+        "formation": "Singleback",
+        "category": "跑球",
+        "personnel": "11 personnel",
+        "notes": "",
+        "favorite": false,
+        "players": [
+          {
+            "id": "b7356821-57ee-440b-b6eb-1dbdbf1f72ad",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "344f20f1-d17a-495d-8a30-17bd6d6314c7",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "a2ae8a14-2681-422e-9d7f-79b86e65871c",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "89017170-4f70-4001-9626-ecf22ed8c0c4",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "a1f1bc50-2188-4ef1-bd75-dcc32a66f826",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "de796202-1da8-41c7-a9f4-fd8c351fe12f",
+            "label": "QB",
+            "x": 50,
+            "y": 71,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "6a8da791-b738-42a9-9df8-c9e8975d5eba",
+            "label": "RB",
+            "x": 50,
+            "y": 83,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "47e32bce-038a-4c88-a766-234ab0216382",
+            "label": "X",
+            "x": 13,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "6c7f77cb-10dd-4ab4-8199-fa3005a2f1f8",
+            "label": "TE",
+            "x": 66,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "8aab7f9f-7c94-4972-b9e4-57b629dbbed9",
+            "label": "Z",
+            "x": 87,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "ab52f4a3-9adf-40b3-86ad-4d03deb71436",
+            "label": "H",
+            "x": 25,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "7ca21264-de73-455a-858e-d251a8d47000",
+            "playerId": "6a8da791-b738-42a9-9df8-c9e8975d5eba",
+            "points": [
+              {
+                "x": 50,
+                "y": 83
+              },
+              {
+                "x": 50,
+                "y": 72
+              },
+              {
+                "x": 57,
+                "y": 55
+              },
+              {
+                "x": 57,
+                "y": 35
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": true,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "2115ed9e-56c2-4719-b17f-e0e53da34074",
+            "playerId": "b7356821-57ee-440b-b6eb-1dbdbf1f72ad",
+            "points": [
+              {
+                "x": 40,
+                "y": 67
+              },
+              {
+                "x": 43,
+                "y": 58
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "b698ebd0-de07-49d8-a9db-d327577711ab",
+            "playerId": "344f20f1-d17a-495d-8a30-17bd6d6314c7",
+            "points": [
+              {
+                "x": 45,
+                "y": 67
+              },
+              {
+                "x": 48,
+                "y": 58
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "407066b4-4367-4311-9dca-07590020351f",
+            "playerId": "a2ae8a14-2681-422e-9d7f-79b86e65871c",
+            "points": [
+              {
+                "x": 50,
+                "y": 67
+              },
+              {
+                "x": 53,
+                "y": 58
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "fe3d19ae-e2f0-44f0-9b29-933e595fa195",
+            "playerId": "89017170-4f70-4001-9626-ecf22ed8c0c4",
+            "points": [
+              {
+                "x": 55,
+                "y": 67
+              },
+              {
+                "x": 58,
+                "y": 58
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "d127d7e6-45f3-432c-9be6-4390184c5892",
+            "playerId": "a1f1bc50-2188-4ef1-bd75-dcc32a66f826",
+            "points": [
+              {
+                "x": 60,
+                "y": 67
+              },
+              {
+                "x": 63,
+                "y": 58
+              }
+            ],
+            "kind": "block",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "6a8da791-b738-42a9-9df8-c9e8975d5eba",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      },
+      {
+        "id": "901eb184-d14d-4316-9544-36d89772280b",
+        "title": "Cover 3 · 三深区",
+        "book": "defense",
+        "formation": "4–3",
+        "category": "区域防守",
+        "personnel": "11 personnel",
+        "notes": "三名防守者负责纵深，各守三分之一；下层覆盖者保护短传区域。示例区域仅作教学示意。",
+        "favorite": true,
+        "players": [
+          {
+            "id": "dd5a5191-02f8-42f9-88dd-538bae7d8cdb",
+            "label": "DE",
+            "x": 34,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "067f7980-d543-43ea-99e3-48404cbe7145",
+            "label": "DT",
+            "x": 45,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "5be8860b-2e61-46c5-a0c9-11ba9464f9b3",
+            "label": "DT",
+            "x": 56,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "e0936bb7-235a-419b-add4-965a12e5b2d8",
+            "label": "DE",
+            "x": 67,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "5623ca4d-8ff8-4304-a978-3a5b087728b6",
+            "label": "W",
+            "x": 36,
+            "y": 46,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "8649798b-31a6-46ea-a22d-d64239e5d4f5",
+            "label": "M",
+            "x": 51,
+            "y": 46,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "8b2ac203-4ad9-4ea9-8ca8-5e063863702a",
+            "label": "S",
+            "x": 65,
+            "y": 46,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "d09af62a-6bd0-4511-947d-78397d11c2f8",
+            "label": "CB",
+            "x": 14,
+            "y": 53,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "50dcd429-d277-4b00-a18d-cfff5d43b91c",
+            "label": "CB",
+            "x": 86,
+            "y": 53,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "82149780-e5ce-4940-a804-d64aeff99a94",
+            "label": "SS",
+            "x": 35,
+            "y": 31,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "7df370b0-c8f7-436e-a74b-1dc90b66533c",
+            "label": "FS",
+            "x": 66,
+            "y": 29,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          }
+        ],
+        "routes": [
+          {
+            "id": "49ee520f-18bb-46b0-bf4f-1d893e61deef",
+            "playerId": "d09af62a-6bd0-4511-947d-78397d11c2f8",
+            "points": [
+              {
+                "x": 14,
+                "y": 53
+              },
+              {
+                "x": 14,
+                "y": 27
+              }
+            ],
+            "kind": "route",
+            "color": "#88bfff",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "3b27a3a1-017e-4ea0-9cf0-e8ac67940a08",
+            "playerId": "7df370b0-c8f7-436e-a74b-1dc90b66533c",
+            "points": [
+              {
+                "x": 66,
+                "y": 29
+              },
+              {
+                "x": 50,
+                "y": 20
+              }
+            ],
+            "kind": "route",
+            "color": "#88bfff",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "d8add374-540b-4b95-a5c7-64a6061eb2e1",
+            "playerId": "82149780-e5ce-4940-a804-d64aeff99a94",
+            "points": [
+              {
+                "x": 35,
+                "y": 31
+              },
+              {
+                "x": 80,
+                "y": 27
+              }
+            ],
+            "kind": "route",
+            "color": "#88bfff",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "9a99f02f-bc61-4ff5-8736-b4a66a19e461",
+            "playerId": "5623ca4d-8ff8-4304-a978-3a5b087728b6",
+            "points": [
+              {
+                "x": 36,
+                "y": 46
+              },
+              {
+                "x": 25,
+                "y": 49
+              }
+            ],
+            "kind": "route",
+            "color": "#88bfff",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "c34a8e6b-3d17-4c3d-960c-5219d95309db",
+            "playerId": "8649798b-31a6-46ea-a22d-d64239e5d4f5",
+            "points": [
+              {
+                "x": 51,
+                "y": 46
+              },
+              {
+                "x": 48,
+                "y": 46
+              }
+            ],
+            "kind": "route",
+            "color": "#88bfff",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "94ba04c0-5935-4934-aafd-54267dce3a83",
+            "playerId": "8b2ac203-4ad9-4ea9-8ca8-5e063863702a",
+            "points": [
+              {
+                "x": 65,
+                "y": 46
+              },
+              {
+                "x": 72,
+                "y": 49
+              }
+            ],
+            "kind": "route",
+            "color": "#88bfff",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          }
+        ],
+        "zones": [
+          {
+            "id": "7fdaf3c3-ca4a-40b0-9067-ebf34bf87412",
+            "x": 14,
+            "y": 27,
+            "rx": 16,
+            "ry": 12,
+            "color": "#88bfff",
+            "label": "DEEP ⅓"
+          },
+          {
+            "id": "9488eedd-bc34-4e0a-8e73-f8557b7787bc",
+            "x": 50,
+            "y": 20,
+            "rx": 16,
+            "ry": 12,
+            "color": "#88bfff",
+            "label": "DEEP ⅓"
+          },
+          {
+            "id": "5afed610-1119-465b-aebd-f8411b82a16e",
+            "x": 80,
+            "y": 27,
+            "rx": 16,
+            "ry": 12,
+            "color": "#88bfff",
+            "label": "DEEP ⅓"
+          },
+          {
+            "id": "387f3c51-5414-4d45-8271-b22f0fdaed08",
+            "x": 25,
+            "y": 49,
+            "rx": 12,
+            "ry": 12,
+            "color": "#88bfff",
+            "label": "UNDER"
+          },
+          {
+            "id": "6ac01649-8634-40f8-9089-0552e6e6291d",
+            "x": 48,
+            "y": 46,
+            "rx": 12,
+            "ry": 12,
+            "color": "#88bfff",
+            "label": "UNDER"
+          },
+          {
+            "id": "358793fb-52ac-4d35-8ebe-6a8bf15f7ef9",
+            "x": 72,
+            "y": 49,
+            "rx": 12,
+            "ry": 12,
+            "color": "#88bfff",
+            "label": "UNDER"
+          }
+        ],
+        "annotations": [],
+        "ball": {
+          "holderId": "dd5a5191-02f8-42f9-88dd-538bae7d8cdb",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      },
+      {
+        "id": "075ddf28-e1d6-4640-b2be-8ae7b6b41fcd",
+        "title": "Nickel Blitz · 槽位冲传",
+        "book": "defense",
+        "formation": "Nickel",
+        "category": "冲传",
+        "personnel": "11 personnel",
+        "notes": "",
+        "favorite": false,
+        "players": [
+          {
+            "id": "b02af9ea-750a-4304-a6a9-cfe659c49304",
+            "label": "DE",
+            "x": 34,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "5a217e56-9026-4164-b23c-954482fae8ea",
+            "label": "DT",
+            "x": 45,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "27074c31-7a8b-49eb-96c9-b4a9e9ce2ecc",
+            "label": "DT",
+            "x": 56,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "3edf16a3-a9c4-46ce-8e78-29bfb2c065ea",
+            "label": "DE",
+            "x": 67,
+            "y": 57,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "e0a693a1-8d82-4b86-976b-370b8c45166a",
+            "label": "W",
+            "x": 36,
+            "y": 46,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "46dc3783-bba2-489e-b10d-7788c31ffdba",
+            "label": "M",
+            "x": 51,
+            "y": 46,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "018ec971-20aa-4651-a43b-c1244bd045e0",
+            "label": "NB",
+            "x": 75,
+            "y": 45,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "38e038cd-4525-4f16-9f0c-c61f661abc57",
+            "label": "CB",
+            "x": 14,
+            "y": 53,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "fcaba501-835f-4170-8873-f7c15ce9cf16",
+            "label": "CB",
+            "x": 86,
+            "y": 53,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "725e08f1-1316-4191-8d32-19d7f6efb867",
+            "label": "SS",
+            "x": 35,
+            "y": 31,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          },
+          {
+            "id": "f7aae2b3-34da-4b55-a3aa-e9599293d57c",
+            "label": "FS",
+            "x": 66,
+            "y": 29,
+            "side": "defense",
+            "name": "",
+            "color": "#fb9b87",
+            "shape": "square"
+          }
+        ],
+        "routes": [
+          {
+            "id": "f3038518-801b-4ad4-99d1-77a0b32c2b40",
+            "playerId": "018ec971-20aa-4651-a43b-c1244bd045e0",
+            "points": [
+              {
+                "x": 75,
+                "y": 45
+              },
+              {
+                "x": 68,
+                "y": 64
+              },
+              {
+                "x": 53,
+                "y": 77
+              }
+            ],
+            "kind": "route",
+            "color": "#ffd166",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "79087a69-55af-4753-b9dd-17ed6974fd48",
+            "playerId": "b02af9ea-750a-4304-a6a9-cfe659c49304",
+            "points": [
+              {
+                "x": 34,
+                "y": 57
+              },
+              {
+                "x": 34,
+                "y": 75
+              }
+            ],
+            "kind": "route",
+            "color": "#fb9b87",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "61b5a765-7c7d-4595-b138-7ebb2776b310",
+            "playerId": "5a217e56-9026-4164-b23c-954482fae8ea",
+            "points": [
+              {
+                "x": 45,
+                "y": 57
+              },
+              {
+                "x": 45,
+                "y": 75
+              }
+            ],
+            "kind": "route",
+            "color": "#fb9b87",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "6b5f33cc-459b-4e18-8761-a8f4d54978d3",
+            "playerId": "46dc3783-bba2-489e-b10d-7788c31ffdba",
+            "points": [
+              {
+                "x": 51,
+                "y": 46
+              },
+              {
+                "x": 51,
+                "y": 75
+              }
+            ],
+            "kind": "route",
+            "color": "#fb9b87",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "b02af9ea-750a-4304-a6a9-cfe659c49304",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      },
+      {
+        "id": "6fcb8f6a-0076-41e8-83a9-a92f40acbb8d",
+        "title": "Field Goal · 射门保护",
+        "book": "special",
+        "formation": "Field Goal",
+        "category": "射门",
+        "personnel": "Field Goal Unit",
+        "notes": "",
+        "favorite": false,
+        "players": [
+          {
+            "id": "302d8680-1d0d-4ddc-8088-5e3001cd594c",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "d20c1603-e0c2-44c3-ae18-7d4242845deb",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "165d62ba-d3c0-4d0f-a133-94afcd2db909",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "31cc75bc-5e40-4437-af31-5f0b4965e48e",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "7d84e1f6-cad7-4fd7-a94f-296b3fd1e2f9",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "a1d032fa-e4f9-46ca-b36d-689e0bde95ca",
+            "label": "H",
+            "x": 50,
+            "y": 80,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "5e11982f-f832-49d0-8fd4-29150eca5970",
+            "label": "K",
+            "x": 62,
+            "y": 88,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "a6e32a42-083f-4da1-8d94-9c8097ca1591",
+            "label": "LE",
+            "x": 27,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "35507d33-7840-473f-81f7-2e8264374826",
+            "label": "TE",
+            "x": 67,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "a08832a1-1ead-4398-b2c0-2ee23e2592b9",
+            "label": "RE",
+            "x": 73,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          },
+          {
+            "id": "4f263e27-43d4-4da0-b368-3fc76b1a1b87",
+            "label": "TE",
+            "x": 33,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#d5f7be",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "2a4b3305-7ae5-473a-b989-d7613eb1e279",
+            "playerId": "5e11982f-f832-49d0-8fd4-29150eca5970",
+            "points": [
+              {
+                "x": 62,
+                "y": 88
+              },
+              {
+                "x": 53,
+                "y": 80
+              }
+            ],
+            "kind": "route",
+            "color": "#d5f7be",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "a1d032fa-e4f9-46ca-b36d-689e0bde95ca",
+          "receiverId": "",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-10-13T09:34:57.416Z"
+      }
+    ],
+    "roster": [
+      {
+        "id": "7ecf63b2-186a-4bd7-aa75-326a5c520693",
+        "name": "TIM",
+        "number": "12",
+        "position": "QB"
+      },
+      {
+        "id": "258cb2c8-f96a-4b57-be5f-1c20ed889e89",
+        "name": "Alex",
+        "number": "10",
+        "position": "WR"
+      },
+      {
+        "id": "eaa0d31e-8e7a-48cc-9a4f-2258204f4812",
+        "name": "Chris",
+        "number": "22",
+        "position": "RB"
+      }
+    ],
+    "formations": [],
+    "settings": {
+      "league": 11,
+      "fieldTheme": "dark",
+      "showGrid": true,
+      "showNames": false
+    }
+  }
+}

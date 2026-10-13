@@ -1,0 +1,383 @@
+import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
+import { fieldSVG, updateAnimation } from './field.js';
+
+const $ = selector => document.querySelector(selector);
+const icons = {
+  plus: '<path d="M12 5v14M5 12h14"/>', search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>', book: '<path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM20 4h-4a3 3 0 0 0-3 3M13 21a4 4 0 0 1 4-2h3V4"/>', select: '<path d="m5 3 14 10-7 1-3 7z"/>', route: '<path d="M5 20V7h14m-5-5 5 5-5 5"/>', block: '<path d="M5 20V7h14M19 2v10"/>', motion: '<path d="m4 20 3-5-3-5 3-5h13m-5-4 5 4-5 4"/>', pass: '<path stroke-dasharray="2 4" d="M4 19 19 4"/><path d="M12 4h7v7"/>', zone: '<ellipse cx="12" cy="12" rx="9" ry="7" stroke-dasharray="3 3"/>', text: '<path d="M4 5h16M12 5v15M8 20h8"/>', flip: '<path d="M12 3v18M8 8l-5 4 5 4M16 8l5 4-5 4"/>', undo: '<path d="m8 4-5 5 5 5M3 9h10a7 7 0 0 1 0 14"/>', redo: '<path d="m16 4 5 5-5 5M21 9H11a7 7 0 0 0 0 14"/>', copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>', export: '<path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/>', print: '<path d="M7 7V3h10v4M7 17H3V8h18v9h-4M7 14h10v7H7z"/>', star: '<path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L3.2 9.7l6.4-.9z"/>', play: '<path d="m8 4 13 8-13 8z"/>', pause: '<path d="M8 4v16M16 4v16"/>', reset: '<path d="M4 8V3m0 5h5M4 8a9 9 0 1 1-1 7"/>', loop: '<path d="m17 2 4 4-4 4M3 10V6h18M7 22l-4-4 4-4M21 14v4H3"/>', trash: '<path d="M4 6h16M9 6V3h6v3M7 6l1 15h8l1-15M10 10v7M14 10v7"/>', close: '<path d="m6 6 12 12M18 6 6 18"/>', chevron: '<path d="m9 5 7 7-7 7"/>', team: '<circle cx="9" cy="7" r="3"/><path d="M3 21v-4a6 6 0 0 1 12 0v4M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 6"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9 8a3 3 0 0 1 6 0c0 3-3 2-3 5M12 17h.01"/>', check: '<path d="m5 12 4 4L19 6"/>', sun: '<circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/>', grid: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>', save: '<path d="M5 3h13l3 3v15H3V3zM7 3v7h10V3M7 21v-7h10v7"/>', folder: '<path d="M3 6h7l2 3h9v12H3z"/>', menu: '<path d="M4 6h16M4 12h16M4 18h16"/>', ball: '<ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(-35 12 12)"/><path d="m8 15 8-6M9 11l3 3M12 8l3 3"/>', flag: '<path d="M5 21V3h14l-3 5 3 5H5"/>'
+};
+const icon = name => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.route}</svg>`;
+const btn = (action, name, label, cls = '', attrs = '') => `<button type="button" data-action="${action}" class="${cls}" title="${e(label)}" aria-label="${e(label)}" ${attrs}>${icon(name)}</button>`;
+let loadIssue = '';
+let workspace;
+try { const raw = localStorage.getItem(STORAGE_KEY); workspace = raw ? decodeWorkspace(raw) : starterWorkspace(); }
+catch { workspace = starterWorkspace(); loadIssue = '已有保存文件无法读取，已载入示例。原文件仍保留，请先导出备份后再编辑。'; }
+let state = { data: workspace, selectedId: workspace.plays[0].id };
+let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false, sidebarOpen = false;
+let saveState = loadIssue ? '恢复提醒' : '本地已保存', frame = null, lastFrame = null, toastTimer = null;
+const history = new History();
+const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
+const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
+const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
+
+function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => $('#toast')?.classList.remove('visible'), 4200); }
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(state.data)); saveState = '本地已保存'; }
+  catch { saveState = '尚未保存'; toast('浏览器存储不可用或已满，请导出 JSON 保存战术本。'); }
+  $('#save-state')?.replaceChildren(document.createTextNode(saveState));
+}
+function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
+function resetAnimation() { stop(); time = 0; }
+function edit(fn, { redraw = true } = {}) {
+  resetAnimation(); draft = null; history.record(state); fn(current(), state.data); save(); if (redraw) render();
+}
+function choose(id) { resetAnimation(); draft = null; selection = null; state.selectedId = id; sidebarOpen = false; tool = 'select'; render(); }
+function restore(next) { if (!next) return; resetAnimation(); state = next; book = current().book; selection = null; draft = null; save(); render(); }
+
+function render() {
+  const p = current(); if (!p) return;
+  document.documentElement.style.setProperty('--team-color', state.data.team.accent);
+  document.title = `${p.title} · Playbook Studio`;
+  const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
+  const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
+  $('#app').innerHTML = `<div class="workspace ${sidebarOpen ? 'sidebar-open' : ''}">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="Playbook Studio"><img src="./icon.svg" alt="" width="34" height="34"><span>PLAYBOOK<span>STUDIO</span></span><small>v1</small></a>
+      <button class="team-switch" data-action="team"><span class="team-avatar">${e(state.data.team.name.slice(0, 1))}</span><span><strong>${e(state.data.team.name)}</strong><small>${e(state.data.team.subtitle)}</small></span>${icon('chevron')}</button>
+      <div class="side-label">WORKSPACE <span>战术本</span></div>
+      <nav class="book-nav" aria-label="战术本类型">${Object.entries(BOOKS).map(([key, name]) => `<button data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${name}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
+      <div class="side-divider"></div>
+      <label class="search-box">${icon('search')}<input type="search" id="search" placeholder="搜索战术…" aria-label="搜索战术" value="${e(query)}"></label>
+      <div class="filters"><select aria-label="战术分类" id="category-filter"><option value="">全部分类</option><option value="favorite" ${filter === 'favorite' ? 'selected' : ''}>★ 已收藏</option>${categories.map(c => `<option value="${e(c)}" ${c === filter ? 'selected' : ''}>${e(c)}</option>`).join('')}</select><select aria-label="阵型筛选" id="formation-filter"><option value="">全部阵型</option>${formations.map(f => `<option value="${e(f)}" ${formationFilter === f ? 'selected' : ''}>${e(f)}</option>`).join('')}</select></div>
+      <div class="play-list-label"><span>${filter === 'favorite' ? '收藏的战术' : '我的战术'} <b>${plays.length}</b></span>${btn('new', 'plus', '新建战术', 'small-icon')}</div>
+      <div class="play-list">${plays.length ? plays.map((v, i) => `<button data-action="choose:${e(v.id)}" class="play-card ${p.id === v.id ? 'active' : ''}" aria-label="打开 ${e(v.title)}" aria-pressed="${p.id === v.id}"><div class="play-thumb">${fieldSVG(v, { showGrid: false }, { thumbnail: true, prefix: `thumb-${i}` })}</div><span class="play-card-info"><strong>${e(v.title)}</strong><small>${e(v.formation)} · ${e(v.category)}</small></span>${v.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : '<div class="empty-list">没有匹配的战术。<br>调整筛选条件或新建一个。</div>'}</div>
+      <button class="new-play" data-action="new">${icon('plus')} 新建战术</button>
+      <div class="sidebar-bottom"><button data-action="team">${icon('team')} 球队与名单</button><button data-action="import">${icon('folder')} 导入战术本</button><button data-action="help">${icon('help')} 使用指南 <kbd>?</kbd></button><span class="local-status"><i></i><span id="save-state">${e(saveState)}</span></span></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开战术本', 'mobile-menu')}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
+      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>把下一场比赛的想法，变成清楚的每一步。</p></div><div class="play-actions">${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
+      <div class="editor-layout"><section class="canvas-section">
+        <div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools">${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => btn(`tool:${a}`, i, l, `tool-button ${tool === a ? 'active' : ''}`, `aria-pressed="${tool === a}"`)).join('')}</div><div class="view-tools">${btn('grid', 'grid', '显示或隐藏码线', `tool-button ${state.data.settings.showGrid ? 'enabled' : ''}`)}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div></div>
+        <div id="field" class="field-wrap tool-${tool}">${fieldSVG(p, state.data.settings, { selected: selection, time, drawing: draft })}<div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div></div>
+        <div class="canvas-hint"><span><i class="hint-dot"></i>${hint()}</span>${draft ? '<button data-action="finish-route" class="text-button">完成路线 ↵</button><button data-action="cancel-draft" class="text-button">取消 Esc</button>' : `<span class="shortcut-hint">${selection ? 'Delete 删除选中项' : 'V 选择 · R 路线 · Space 播放'}</span>`}</div>
+        <div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>战术演练</span><small>ANIMATION</small></div><div class="playback-options"><label class="speed-label">速度 <select id="speed" aria-label="播放速度">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', '循环播放', `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? '暂停战术' : '播放战术', 'play-button')}${btn('reset', 'reset', '重置动画', 'icon-button')}<input type="range" id="timeline" aria-label="动画时间" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div>
+      </section><aside class="inspector" aria-label="战术属性">${inspector()}</aside></div>
+      <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>画清路线，读懂比赛。</span><button data-action="help">快捷键与使用说明 ${icon('chevron')}</button></footer>
+    </main></div>`;
+  bindField();
+}
+function hint() {
+  if (playing || time > 0) return '演练中 · 拖动时间轴检查球员走位';
+  if (draft) return '点击添加转折点；双击或 Enter 完成路线';
+  return { select: '拖动球员调整阵型；点击路线编辑节点', route: '先点球员，再点击球场画路线；Enter 完成', block: '先点球员，再点击阻挡终点；Enter 完成', motion: '先点球员，画开球前移动的锯齿线', pass: '先点持球球员，画虚线传球路径', zone: '在球场上拖动，画出防守覆盖区域', text: '点击球场，放置一条文字标注' }[tool];
+}
+const fieldInput = (label, key, value, type = 'text', attrs = '') => `<label class="form-field"><span>${label}</span><input data-prop="${key}" type="${type}" value="${e(value)}" ${attrs}></label>`;
+const option = (value, label, selected) => `<option value="${e(value)}" ${value === selected ? 'selected' : ''}>${e(label)}</option>`;
+function inspector() {
+  const p = current(), obj = selectedObject();
+  let content;
+  if (selection?.type === 'player' && obj) {
+    const assigned = state.data.roster.find(r => r.name === obj.name)?.id || '';
+    content = `<div class="inspector-heading"><span>球员设置</span><span class="tag">${obj.side === 'offense' ? '进攻' : '防守'}</span></div><div class="player-preview"><span style="background:${obj.color}">${e(obj.label)}</span><div><strong>${e(obj.name || '未分配球员')}</strong><small>拖动球场上的标记调整站位</small></div></div>${fieldInput('位置标签', 'label', obj.label, 'text', 'maxlength="10"')}<label class="form-field"><span>分配球队球员</span><select data-prop="roster"><option value="">不指定球员</option>${state.data.roster.map(r => option(r.id, `#${r.number} ${r.name} · ${r.position}`, assigned)).join('')}</select></label>${fieldInput('显示姓名', 'name', obj.name, 'text', 'maxlength="80"')}<div class="form-row">${fieldInput('标记颜色', 'color', obj.color, 'color')}<label class="form-field"><span>图形</span><select data-prop="shape">${[['circle', '圆形'], ['square', '方形'], ['triangle', '三角形']].map(([v, l]) => option(v, l, obj.shape)).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>画一条路线</span></div><div class="route-quick">${[['route', '跑动'], ['block', '阻挡'], ['motion', '移动'], ['pass', '传球']].map(([v, l]) => `<button data-action="tool:${v}" class="${tool === v ? 'active' : ''}">${icon(v)}${l}</button>`).join('')}</div><div class="route-list">${p.routes.filter(r => r.playerId === obj.id).map(r => `<button data-action="select-route:${e(r.id)}">${icon(r.kind)}<span>${r.optional ? '选项' : ''}${({ route: '跑动路线', block: '阻挡路线', motion: '移动路线', pass: '传球路线' })[r.kind]}</span>${icon('chevron')}</button>`).join('')}</div><button class="button danger full" data-action="delete-selection">${icon('trash')}移除球员</button>`;
+  } else if (selection?.type === 'route' && obj) {
+    const owner = p.players.find(v => v.id === obj.playerId);
+    content = `<div class="inspector-heading"><span>路线设置</span><span class="tag">${e(owner?.label)}</span></div><p class="muted small">拖动球场上的实心节点来调整路线。</p><label class="form-field"><span>线型</span><select data-prop="kind">${[['route', '跑动实线'], ['block', '阻挡路线'], ['motion', '移动锯齿线'], ['pass', '传球虚线']].map(([v, l]) => option(v, l, obj.kind)).join('')}</select></label><div class="form-row">${fieldInput('路线颜色', 'color', obj.color, 'color')}<label class="form-field"><span>末端样式</span><select data-prop="endCap">${[['arrow', '箭头'], ['bar', '阻挡横杠'], ['dot', '圆点']].map(([v, l]) => option(v, l, obj.endCap)).join('')}</select></label></div><label class="check-label"><input data-prop="smooth" type="checkbox" ${obj.smooth ? 'checked' : ''}>平滑曲线</label><label class="check-label"><input data-prop="optional" type="checkbox" ${obj.optional ? 'checked' : ''}>选项路线（不参与主线动画）</label><div class="inspector-divider"></div><div class="inspector-heading"><span>动画时序</span><small>秒</small></div><div class="form-row">${fieldInput('启动延迟', 'delay', obj.delay, 'number', 'min="0" max="10" step="0.1"')}${fieldInput('跑动时长', 'duration', obj.duration, 'number', 'min="0.2" max="10" step="0.1"')}</div><p class="muted small">球员按路线长度匀速运动。阻挡与传球线保留为图示。</p><button class="button danger full" data-action="delete-selection">${icon('trash')}删除路线</button>`;
+  } else if (selection?.type === 'zone' && obj) {
+    content = `<div class="inspector-heading"><span>防守区域</span></div>${fieldInput('区域名称', 'label', obj.label, 'text', 'maxlength="80"')}${fieldInput('区域颜色', 'color', obj.color, 'color')}<div class="form-row">${fieldInput('横向半径', 'rx', obj.rx, 'number', 'min="1" max="50" step="1"')}${fieldInput('纵向半径', 'ry', obj.ry, 'number', 'min="1" max="50" step="1"')}</div><p class="muted small">拖动区域中心移动覆盖范围。</p><button class="button danger full" data-action="delete-selection">${icon('trash')}删除区域</button>`;
+  } else if (selection?.type === 'annotation' && obj) {
+    content = `<div class="inspector-heading"><span>文字标注</span></div>${fieldInput('标注内容', 'text', obj.text, 'text', 'maxlength="200"')}<p class="muted small">拖动文字移动标注位置。</p><button class="button danger full" data-action="delete-selection">${icon('trash')}删除标注</button>`;
+  } else {
+    content = `<div class="inspector-heading"><span>战术详情</span><span class="tag">${BOOKS[p.book]}</span></div>${fieldInput('战术名称', 'title', p.title, 'text', 'maxlength="120"')}${fieldInput('分类', 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>阵型模板</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput('人员组', 'personnel', p.personnel, 'text', 'maxlength="80"')}<div class="formation-actions"><button data-action="save-formation">${icon('save')} 保存当前阵型</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? '移除' : '添加'}对方阵型</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>教练笔记</span></div><textarea data-prop="notes" rows="5" aria-label="教练笔记" placeholder="阅读顺序、跑位要点、调整方案…" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><div class="inspector-heading"><span>足球移动</span>${icon('ball')}</div><label class="form-field"><span>持球人</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>传给</span><select data-ball="receiverId"><option value="">不传球 / 跑球</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput('出手时间', 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput('到达时间', 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div><div class="inspector-divider"></div><div class="inspector-heading"><span>添加对象</span></div><div class="route-quick"><button data-action="add-player:offense">${icon('plus')}进攻球员</button><button data-action="add-player:defense">${icon('plus')}防守球员</button></div><label class="check-label"><input id="show-names" type="checkbox" ${state.data.settings.showNames ? 'checked' : ''}>显示球员姓名</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}删除此战术</button>`;
+  }
+  return `${content}${selection ? '<button class="back-details" data-action="clear-selection">← 返回战术详情</button>' : ''}<div class="inspector-note">${icon('check')}所有修改自动保存在此浏览器</div>`;
+}
+function renderField() { $('#field').innerHTML = fieldSVG(current(), state.data.settings, { selected: selection, time, drawing: draft }) + `<div class="field-tag">${icon('ball')} ${current().players.length} PLAYERS</div>`; }
+function refreshSelection() { $('.inspector').innerHTML = inspector(); renderField(); }
+function coordinates(event) { const svg = $('#field svg'), box = svg.getBoundingClientRect(); return { x: clamp(((event.clientX - box.left) / box.width * 1000 - 18) / 9.64), y: clamp(((event.clientY - box.top) / box.height * 800 - 20) / 7.6) }; }
+function pick(event) {
+  const node = event.target.closest('[data-player],[data-route],[data-zone],[data-annotation]');
+  if (!node) return null;
+  for (const type of ['player', 'route', 'zone', 'annotation']) if (node.dataset[type]) return { type, id: node.dataset[type] };
+  return null;
+}
+function bindField() {
+  const field = $('#field');
+  field.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    if (playing || time) { resetAnimation(); renderField(); return; }
+    const at = coordinates(event), hit = pick(event);
+    if (tool === 'text') { textModal(at); return; }
+    if (['route', 'block', 'motion', 'pass'].includes(tool)) {
+      if (hit?.type === 'player' && (!draft || draft.playerId !== hit.id)) {
+        selection = hit; const p = selectedObject(); draft = { playerId: p.id, points: [{ x: p.x, y: p.y }] }; render(); return;
+      }
+      if (!draft) {
+        const p = selection?.type === 'player' ? selectedObject() : current().players.find(v => v.id === selectedObject()?.playerId);
+        if (!p) { toast('先点击一个球员，再开始画路线。'); return; }
+        draft = { playerId: p.id, points: [{ x: p.x, y: p.y }] };
+      }
+      if (draft.points.length < 200 && (!draft.points.at(-1) || Math.hypot(at.x - draft.points.at(-1).x, at.y - draft.points.at(-1).y) > .3)) draft.points.push(at);
+      renderField(); $('.canvas-hint').innerHTML = `<span><i class="hint-dot"></i>${hint()}</span><button data-action="finish-route" class="text-button">完成路线 ↵</button><button data-action="cancel-draft" class="text-button">取消 Esc</button>`; return;
+    }
+    event.preventDefault(); field.setPointerCapture?.(event.pointerId);
+    if (tool === 'zone') { drag = { type: 'new-zone', start: at, before: clone(state), zoneId: uid() }; return; }
+    const point = event.target.closest('[data-point]');
+    if (point) { drag = { type: 'point', routeId: point.dataset.routeId, index: Number(point.dataset.point), start: at, before: clone(state) }; return; }
+    selection = hit;
+    if (hit) { drag = { ...hit, start: at, before: clone(state), original: clone(selectedObject()), moved: false }; }
+    refreshSelection();
+  });
+  field.addEventListener('pointermove', event => {
+    if (!drag) return;
+    const at = coordinates(event), p = current();
+    if (Math.hypot(at.x - drag.start.x, at.y - drag.start.y) < .2 && !drag.moved) return;
+    drag.moved = true;
+    if (drag.type === 'player') {
+      const initial = drag.before.data.plays.find(p => p.id === state.selectedId);
+      p.players = clone(initial.players); p.routes = clone(initial.routes);
+      movePlayer(p, drag.id, drag.original.x + at.x - drag.start.x, drag.original.y + at.y - drag.start.y);
+    } else if (drag.type === 'point') {
+      p.routes.find(r => r.id === drag.routeId).points[drag.index] = at;
+    } else if (drag.type === 'new-zone') {
+      let zone = p.zones.find(v => v.id === drag.zoneId);
+      if (!zone) { zone = { id: drag.zoneId, x: 50, y: 40, rx: 1, ry: 1, color: COLORS.zone, label: 'ZONE' }; p.zones.push(zone); }
+      Object.assign(zone, { x: (drag.start.x + at.x) / 2, y: (drag.start.y + at.y) / 2, rx: Math.max(1, Math.abs(at.x - drag.start.x) / 2), ry: Math.max(1, Math.abs(at.y - drag.start.y) / 2) });
+      selection = { type: 'zone', id: zone.id };
+    } else if (['zone', 'annotation'].includes(drag.type)) {
+      const v = selectedObject(); v.x = clamp(drag.original.x + at.x - drag.start.x); v.y = clamp(drag.original.y + at.y - drag.start.y);
+    }
+    renderField();
+  });
+  const endDrag = event => {
+    if (!drag) return;
+    const before = drag.before, moved = drag.moved;
+    if (field.hasPointerCapture?.(event.pointerId)) field.releasePointerCapture(event.pointerId);
+    drag = null;
+    if (moved) { history.record(before); save(); render(); }
+  };
+  field.addEventListener('pointerup', endDrag);
+  field.addEventListener('pointercancel', event => { if (drag) { state = drag.before; drag = null; render(); } });
+  field.addEventListener('dblclick', event => { if (draft) { event.preventDefault(); finishRoute(); } });
+  field.addEventListener('keydown', event => {
+    if (!['Enter', ' '].includes(event.key) || !event.target.dataset.player && !event.target.dataset.route && !event.target.dataset.zone) return;
+    event.preventDefault(); event.stopPropagation(); selection = pick(event); refreshSelection();
+  });
+}
+function finishRoute() {
+  if (!draft || draft.points.length < 2) { toast('至少点击一个路线终点。'); return; }
+  if (current().routes.length >= 100) { toast('每个战术最多 100 条路线。'); return; }
+  const alreadyMoving = current().routes.some(r => r.playerId === draft.playerId && !r.optional && ['route', 'motion'].includes(r.kind));
+  const route = { id: uid(), playerId: draft.playerId, points: clone(draft.points), kind: tool, color: tool === 'pass' ? COLORS.pass : current().players.find(p => p.id === draft.playerId).color, smooth: false, endCap: tool === 'block' ? 'bar' : 'arrow', delay: 0, duration: tool === 'block' ? 2 : 4, optional: alreadyMoving && ['route', 'motion'].includes(tool) };
+  selection = { type: 'route', id: route.id }; tool = 'select'; edit(p => p.routes.push(route)); toast('路线已保存，可拖动节点或调整时序。');
+}
+
+function openModal(title, body, footer = '', wide = false) {
+  const previous = document.activeElement;
+  $('#modal-root').innerHTML = `<div class="modal-backdrop"><section class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${e(title)}"><header><h2>${e(title)}</h2>${btn('close-modal', 'close', '关闭', 'icon-button')}</header><div class="modal-body">${body}</div>${footer ? `<footer>${footer}</footer>` : ''}</section></div>`;
+  $('#modal-root')._previous = previous;
+  $('#modal-root').querySelector('input,select,textarea,button')?.focus();
+}
+function closeModal() { $('#modal-root').innerHTML = ''; $('#print-root').innerHTML = ''; $('#modal-root')._previous?.focus?.(); }
+function newModal() {
+  openModal('新建战术', `<p class="muted">选一个阵型，把你的想法画在球场上。</p><label class="form-field"><span>战术名称</span><input id="new-title" value="新战术" maxlength="120"></label><div class="form-row"><label class="form-field"><span>战术本</span><select id="new-book">${Object.entries(BOOKS).map(([v, l]) => option(v, l, book)).join('')}</select></label><label class="form-field"><span>人数 / 每方</span><select id="new-count">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人`, String(state.data.settings.league))).join('')}</select></label></div><label class="form-field"><span>阵型</span><select id="new-formation">${FORMATIONS.map(v => option(v, v, book === 'defense' ? '4–3' : book === 'special' ? 'Field Goal' : 'Gun Trips')).join('')}${state.data.formations.map(f => option(`custom:${f.id}`, `${f.name} · 自定义`, '')).join('')}</select></label>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="create-play">创建战术</button>');
+}
+function textModal(at) { openModal('添加场上标注', '<label class="form-field"><span>标注内容</span><input id="annotation-text" placeholder="例如：Read 1 · 先读浅交叉" maxlength="200"></label>', `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">放置标注</button>`); }
+function exportModal() {
+  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>矢量战术图</strong><small>SVG · 任意放大，适合课件</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · 2000 × 1600</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">JSON 可在另一台设备导入。图片只包含战术图；当前浏览器的战术不会自动同步到其他设备。</p>`);
+}
+function teamModal() {
+  openModal('球队与球员名单', `<div class="form-row"><label class="form-field"><span>球队名称</span><input id="team-name" value="${e(state.data.team.name)}" maxlength="80"></label><label class="form-field"><span>赛季 / 副标题</span><input id="team-subtitle" value="${e(state.data.team.subtitle)}" maxlength="80"></label></div><div class="form-row"><label class="form-field"><span>球队颜色</span><input id="team-accent" type="color" value="${state.data.team.accent}"></label><label class="form-field"><span>默认人数</span><select id="team-league">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人制`, String(state.data.settings.league))).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>名单</span><small>选中球场球员后可分配</small></div><div class="roster-labels"><span>号码</span><span>姓名</span><span>位置</span><span></span></div><div id="roster-rows">${state.data.roster.map(rosterRow).join('')}</div><button class="text-button" data-action="roster-add">+ 添加球员</button>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="save-team">保存球队</button>', true);
+}
+function rosterRow(r) { return `<div class="roster-row" data-roster-id="${e(r.id)}"><input data-roster-field="number" aria-label="球衣号码" value="${e(r.number)}" maxlength="5"><input data-roster-field="name" aria-label="球员姓名" value="${e(r.name)}" maxlength="80"><input data-roster-field="position" aria-label="球员位置" value="${e(r.position)}" maxlength="15">${btn('roster-remove', 'close', '移除此行', 'small-icon')}</div>`; }
+function helpModal() {
+  openModal('让战术动起来', `<div class="help-intro"><img src="./icon.svg" width="48" height="48" alt=""><div><strong>Playbook Studio</strong><p>从阵型到跑位，一张图说清楚。</p></div></div><ol class="help-steps"><li><b>选阵型</b>在右侧应用模板，或拖动球员排出自己的阵型。</li><li><b>画路线</b>点选球员 → 选择路线工具 → 点击转折点 → Enter 完成。</li><li><b>调时序</b>点选路线，设置启动延迟与时长。可设置足球的出手和到达时间。</li><li><b>播放与分享</b>空格播放，拖动时间轴逐帧检查。导出 JSON 或打印战术本与腕带。</li></ol><div class="keyboard-grid">${[['V', '选择移动'], ['R', '跑动路线'], ['B', '阻挡'], ['M', '开球前移动'], ['P', '传球线'], ['Z', '覆盖区域'], ['T', '文字标注'], ['Space', '播放 / 暂停'], ['Enter', '完成路线'], ['Esc', '取消绘制 / 关闭'], ['Ctrl / ⌘ Z', '撤销'], ['Delete', '删除选中对象']].map(([k, l]) => `<span><kbd>${k}</kbd>${l}</span>`).join('')}</div><div class="help-about"><strong>关于数据和实现</strong><p>战术保存在当前浏览器；导出 JSON 可备份和迁移。本版本提供本地设计、动画与打印，未接入多人协作或账号云同步。</p><p>这是参考 Playmaker X 公开功能独立实现的工具，非官方产品。动画用于战术教学，不模拟碰撞、对抗或完整比赛物理。</p><a href="https://github.com/TIMPICKLE/playbook-studio-web" target="_blank" rel="noopener">代码与公开功能调查 →</a></div>`, '<button class="button primary" data-action="close-modal">开始设计</button>', true);
+}
+
+function printModal() {
+  openModal('打印战术本', `<div class="form-row"><label class="form-field"><span>内容范围</span><select id="print-scope"><option value="current">当前战术</option><option value="filtered">当前筛选（${filtered().length} 个）</option><option value="all">全部战术（${state.data.plays.length} 个）</option></select></label><label class="form-field"><span>打印版式</span><select id="print-layout"><option value="playbook">战术本 · 每页 2 个</option><option value="wristband">腕带卡 · 每页 9 个</option><option value="callsheet">Call Sheet · 战术清单</option></select></label></div><div id="print-preview" class="print-preview"></div><p class="muted small">建议 A4 纸，关闭浏览器页眉页脚；在打印窗口可选择「另存为 PDF」。</p>`, '<button class="button subtle" data-action="close-modal">关闭</button><button class="button primary" data-action="do-print">打开打印窗口</button>', true);
+  updatePrint();
+}
+function updatePrint() {
+  const scope = $('#print-scope').value, layout = $('#print-layout').value;
+  const plays = scope === 'current' ? [current()] : scope === 'all' ? state.data.plays : filtered();
+  const count = layout === 'wristband' ? 9 : layout === 'callsheet' ? 24 : 2;
+  let html = '';
+  for (let offset = 0; offset < plays.length; offset += count) {
+    const group = plays.slice(offset, offset + count);
+    const header = `<div class="print-heading"><strong>${e(state.data.team.name)}</strong><span>${layout === 'wristband' ? 'WRISTBAND' : layout === 'callsheet' ? 'CALL SHEET' : 'PLAYBOOK'} · ${e(state.data.team.subtitle)}</span></div>`;
+    html += `<article class="print-page ${layout}">${header}${layout === 'callsheet' ? `<table><thead><tr><th>#</th><th>战术</th><th>阵型</th><th>分类</th><th>人员组</th></tr></thead><tbody>${group.map((p, i) => `<tr><td>${offset + i + 1}</td><td>${e(p.title)}</td><td>${e(p.formation)}</td><td>${e(p.category)}</td><td>${e(p.personnel)}</td></tr>`).join('')}</tbody></table>` : `<div class="print-cards">${group.map((p, i) => `<section class="print-card"><h3><b>${String(offset + i + 1).padStart(2, '0')}</b> ${e(p.title)}</h3>${fieldSVG(p, { ...state.data.settings, showNames: false }, { print: true, prefix: `print-${offset + i}` })}${layout === 'playbook' ? `<div class="print-meta">${e(p.formation)} · ${e(p.category)} · ${e(p.personnel)}</div><p class="print-notes">${e(p.notes)}</p>` : ''}</section>`).join('')}</div>`}<div class="print-foot">Playbook Studio <span>${Math.floor(offset / count) + 1}</span></div></article>`;
+  }
+  $('#print-root').innerHTML = html;
+  $('#print-preview').innerHTML = html || '<p>当前筛选没有可打印的战术。</p>';
+  if (html) $('#print-preview').querySelectorAll('[id]').forEach(n => n.id = `preview-${n.id}`);
+  // Prefix SVG reference IDs in the preview to avoid duplicate marker bindings.
+  $('#print-preview').innerHTML = $('#print-preview').innerHTML.replace(/url\(#print-/g, 'url(#preview-print-');
+}
+function download(content, filename, mime) {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
+  const link = document.createElement('a'); link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
+async function pngExport() {
+  const svg = fieldSVG(current(), state.data.settings, { prefix: 'export' }), url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const canvas = document.createElement('canvas'); canvas.width = 2000; canvas.height = 1600; const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas unavailable'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(current().title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('高清 PNG 已生成。'); } else toast('PNG 生成失败，请尝试 SVG 导出。'); }, 'image/png');
+    } catch { toast('此浏览器无法生成 PNG，请尝试 SVG 导出。'); }
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('图片生成失败，请尝试 SVG 导出。'); }; img.src = url;
+}
+function togglePlay() {
+  if (playing) { stop(); render(); return; }
+  if (time >= animationLength(current())) time = 0;
+  draft = null; playing = true; render();
+  const tick = stamp => {
+    if (!playing) return;
+    if (lastFrame !== null) time += Math.min((stamp - lastFrame) / 1000, .15) * speed;
+    lastFrame = stamp;
+    if (time >= animationLength(current())) {
+      if (loop) time = 0;
+      else { time = animationLength(current()); stop(); render(); return; }
+    }
+    updateAnimation($('#field svg'), current(), time);
+    $('#timeline').value = time; $('#time-label').innerHTML = `${time.toFixed(1)} <span>/ ${animationLength(current()).toFixed(1)}s</span>`;
+    frame = requestAnimationFrame(tick);
+  };
+  frame = requestAnimationFrame(tick);
+}
+
+function deleteSelected() {
+  if (!selection || !selectedObject()) return;
+  const s = selection;
+  if (s.type === 'player' && current().players.length <= 1) { toast('请保留至少一个球员。'); return; }
+  selection = null;
+  edit(p => {
+    const key = { player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]; p[key] = p[key].filter(x => x.id !== s.id);
+    if (s.type === 'player') { p.routes = p.routes.filter(r => r.playerId !== s.id); if (p.ball.holderId === s.id) p.ball.holderId = p.players[0].id; if (p.ball.receiverId === s.id) p.ball.receiverId = ''; }
+  }); toast('对象已删除，可撤销恢复。');
+}
+const actions = {
+  new: newModal, 'close-modal': closeModal, export: exportModal, team: teamModal, help: helpModal, print: printModal,
+  sidebar: () => { sidebarOpen = !sidebarOpen; render(); },
+  favorite: () => edit(p => { p.favorite = !p.favorite; }),
+  undo: () => restore(history.undo(state)), redo: () => restore(history.redo(state)),
+  mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast('球员、路线、区域与标注已左右镜像。'); },
+  duplicate: () => { if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。'); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
+  'clear-selection': () => { selection = null; draft = null; tool = 'select'; render(); },
+  grid: () => edit((p, d) => { d.settings.showGrid = !d.settings.showGrid; }),
+  theme: () => edit((p, d) => { d.settings.fieldTheme = d.settings.fieldTheme === 'dark' ? 'light' : 'dark'; }),
+  'finish-route': finishRoute, 'cancel-draft': () => { draft = null; tool = 'select'; render(); },
+  'delete-selection': deleteSelected,
+  'create-play': () => {
+    if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。'); return; }
+    const title = $('#new-title').value.trim() || '新战术', b = $('#new-book').value, form = $('#new-formation').value, count = Number($('#new-count').value);
+    const custom = form.startsWith('custom:') ? state.data.formations.find(f => f.id === form.slice(7)) : null;
+    const p = makePlay({ title, formation: custom?.name || form, book: b, count });
+    if (custom) { p.players = clone(custom.players); p.ball.holderId = p.players.find(v => v.label === 'QB')?.id || p.players[0].id; }
+    closeModal(); selection = null; book = b; query = ''; filter = ''; formationFilter = ''; edit((_, d) => { d.plays.push(p); state.selectedId = p.id; d.settings.league = count; });
+  },
+  'create-text': node => { const value = $('#annotation-text').value.trim(); if (!value) { toast('请输入标注文字。'); return; } const a = { id: uid(), text: value, x: Number(node.dataset.x), y: Number(node.dataset.y) }; closeModal(); selection = { type: 'annotation', id: a.id }; tool = 'select'; edit(p => p.annotations.push(a)); },
+  'save-formation': () => openModal('保存自定义阵型', `<p class="muted small">只保存球员的初始站位、标签和颜色；路线仍保留在当前战术。</p><label class="form-field"><span>阵型名称</span><input id="formation-name" value="${e(current().formation)} · 自定义" maxlength="100"></label>`, '<button class="button primary" data-action="confirm-formation">保存阵型</button>'),
+  'confirm-formation': () => { const name = $('#formation-name').value.trim(); if (!name) return; if (state.data.formations.length >= 100) { toast('最多保存 100 个自定义阵型。'); return; } const f = { id: uid(), name, book: current().book, players: clone(current().players) }; closeModal(); edit((p, d) => { d.formations.push(f); p.formation = name; }); toast('自定义阵型已保存，可用于新战术。'); },
+  opponents: () => {
+    const side = current().book === 'defense' ? 'offense' : 'defense', remove = current().players.some(v => v.side === side);
+    if (remove && current().players.every(v => v.side === side)) { toast('当前阵型只有这一方球员，请保留至少一个球员。'); return; }
+    if (!remove && current().players.length + state.data.settings.league > 40) { toast('添加后会超过 40 个球员标记，请先移除部分球员。'); return; }
+    edit(p => { if (remove) { const ids = new Set(p.players.filter(v => v.side === side).map(v => v.id)); p.players = p.players.filter(v => !ids.has(v.id)); p.routes = p.routes.filter(r => !ids.has(r.playerId)); if (ids.has(p.ball.holderId)) p.ball.holderId = p.players[0].id; if (ids.has(p.ball.receiverId)) p.ball.receiverId = ''; } else p.players.push(...formationPlayers(side === 'offense' ? 'Gun Doubles' : '4–3', state.data.settings.league, side)); });
+  },
+  'delete-play': () => { if (state.data.plays.length === 1) { toast('请保留至少一个战术。'); return; } openModal('删除此战术', `<p>删除「${e(current().title)}」？本次编辑会保留在撤销历史中。</p>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button danger" data-action="confirm-delete">删除战术</button>'); },
+  'confirm-delete': () => { const id = current().id; closeModal(); selection = null; edit((p, d) => { d.plays = d.plays.filter(p => p.id !== id); state.selectedId = d.plays.find(p => p.book === book)?.id || d.plays[0].id; book = current().book; }); },
+  'roster-add': () => { if ($('#roster-rows').children.length >= 200) { toast('名单最多 200 人。'); return; } $('#roster-rows').insertAdjacentHTML('beforeend', rosterRow({ id: uid(), name: '', number: '', position: '' })); },
+  'roster-remove': node => node.closest('.roster-row').remove(),
+  'save-team': () => { const team = { name: $('#team-name').value.trim() || 'MY TEAM', subtitle: $('#team-subtitle').value, accent: $('#team-accent').value }; const league = Number($('#team-league').value); const roster = [...$('#roster-rows').children].map(row => ({ id: row.dataset.rosterId, ...Object.fromEntries([...row.querySelectorAll('input')].map(n => [n.dataset.rosterField, n.value.trim()])) })).filter(r => r.name); closeModal(); edit((p, d) => { d.team = team; d.roster = roster; d.settings.league = league; }); toast('球队与球员名单已保存。'); },
+  import: () => $('#import-input').click(),
+  'download-svg': () => { download(fieldSVG(current(), state.data.settings, { prefix: 'export' }), `${safeName(current().title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。'); },
+  'download-png': pngExport,
+  'download-json': () => { download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。'); },
+  'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast('当前战术已生成。'); },
+  'do-print': () => { if (!$('#print-root').children.length) { toast('没有可打印的战术。'); return; } window.print(); },
+  play: togglePlay, reset: () => { resetAnimation(); render(); }, loop: () => { loop = !loop; const wasPlaying = playing; if (wasPlaying) stop(); render(); if (wasPlaying) togglePlay(); }
+};
+
+document.addEventListener('click', event => {
+  const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
+  const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
+  if (name === 'choose') return choose(value);
+  if (name === 'book') { resetAnimation(); draft = null; selection = null; book = value; filter = ''; formationFilter = ''; query = ''; const p = filtered()[0]; if (p) state.selectedId = p.id; render(); return; }
+  if (name === 'tool') { resetAnimation(); tool = value; draft = null; render(); return; }
+  if (name === 'select-route') { selection = { type: 'route', id: value }; tool = 'select'; draft = null; refreshSelection(); return; }
+  if (name === 'add-player') { if (current().players.length >= 40) { toast('每个战术最多 40 个球员标记。'); return; } const p = { id: uid(), label: value === 'offense' ? 'WR' : 'DB', x: 25, y: value === 'offense' ? 75 : 45, name: '', side: value, color: COLORS[value], shape: value === 'offense' ? 'circle' : 'square' }; selection = { type: 'player', id: p.id }; edit(play => play.players.push(p)); return; }
+  actions[name]?.(node);
+});
+document.addEventListener('input', event => {
+  const input = event.target;
+  if (input.id === 'search') { query = input.value; const cursor = input.selectionStart; render(); $('#search').focus(); try { $('#search').setSelectionRange(cursor, cursor); } catch {} }
+  if (input.id === 'timeline') { stop(); time = Number(input.value); updateAnimation($('#field svg'), current(), time); $('#time-label').innerHTML = `${time.toFixed(1)} <span>/ ${animationLength(current()).toFixed(1)}s</span>`; const button = $('[data-action="play"]'); if (button) { button.innerHTML = icon('play'); button.setAttribute('aria-label', '播放战术'); } }
+});
+document.addEventListener('change', event => {
+  const input = event.target;
+  if (input.id === 'category-filter') { filter = input.value; render(); }
+  else if (input.id === 'formation-filter') { formationFilter = input.value; render(); }
+  else if (input.id === 'speed') speed = Number(input.value);
+  else if (input.id === 'show-names') edit((p, d) => { d.settings.showNames = input.checked; });
+  else if (input.id === 'print-scope' || input.id === 'print-layout') updatePrint();
+  else if (input.id === 'apply-formation' && input.value) {
+    const [kind, ...rest] = input.value.split(':'), value = rest.join(':');
+    const custom = kind === 'custom' ? state.data.formations.find(f => f.id === value) : null;
+    const players = custom ? clone(custom.players) : formationPlayers(value, state.data.settings.league, current().book === 'defense' ? 'defense' : 'offense');
+    edit(p => { p.players = players; p.formation = custom?.name || value; p.routes = []; p.zones = []; p.annotations = []; p.ball.holderId = players.find(v => v.label === 'QB')?.id || players[0].id; p.ball.receiverId = ''; }); toast('阵型已应用，路线已清空；可撤销恢复。');
+  } else if (input.dataset.ball) edit(p => { p.ball[input.dataset.ball] = input.value; if (p.ball.holderId === p.ball.receiverId) p.ball.receiverId = ''; });
+  else if (input.dataset.prop) {
+    const key = input.dataset.prop;
+    let value = input.type === 'checkbox' ? input.checked : input.type === 'number' ? Number(input.value) : input.value;
+    if (input.type === 'number') { if (!Number.isFinite(value)) return; value = clamp(value, Number(input.min), Number(input.max)); }
+    if (key.startsWith('ball.')) {
+      const name = key.slice(5), ball = { ...current().ball, [name]: value };
+      if (ball.arriveAt <= ball.passAt) { toast('到达时间必须晚于出手时间。'); input.value = current().ball[name]; return; }
+      edit(p => { p.ball[name] = value; });
+    } else {
+      const selected = !!selection, s = selection;
+      edit((p, d) => { const obj = selected ? p[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]].find(v => v.id === s.id) : p; if (!obj) return; if (key === 'roster') obj.name = d.roster.find(r => r.id === value)?.name || ''; else { obj[key] = value; if (key === 'kind' && value === 'block') obj.endCap = 'bar'; if (s?.type === 'route' && ((key === 'optional' && value === false) || key === 'kind') && !obj.optional && ['route', 'motion'].includes(obj.kind)) p.routes.filter(r => r.id !== obj.id && r.playerId === obj.playerId && ['route', 'motion'].includes(r.kind)).forEach(r => { r.optional = true; }); } });
+    }
+  }
+});
+$('#import-input').addEventListener('change', async event => {
+  const file = event.target.files[0]; if (!file) return;
+  try {
+    if (file.size > 5_000_000) throw new Error('请导入 5 MB 以内的文件');
+    const imported = decodeWorkspace(await file.text());
+    if (state.data.plays.length + imported.plays.length > 500) throw new Error('战术数量不能超过 500 个');
+    openModal('导入战术本', `<p>已验证文件，包含 <strong>${imported.plays.length} 个战术</strong>、${imported.formations.length} 个自定义阵型及 ${imported.roster.length} 名球员。</p><p class="muted small">导入将追加战术、阵型和名单，保留当前球队设置与已有战术。</p>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-import">追加导入</button>');
+    actions['confirm-import'] = () => {
+      if (state.data.formations.length + imported.formations.length > 100 || state.data.roster.length + imported.roster.length > 200) { toast('导入后阵型或名单数量超出上限。'); return; }
+      const plays = imported.plays.map(p => ({ ...p, id: uid() })), forms = imported.formations.map(f => ({ ...f, id: uid() })), roster = imported.roster.map(r => ({ ...r, id: uid() }));
+      closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); state.selectedId = plays[0].id; }); toast(`已导入 ${plays.length} 个战术。`); delete actions['confirm-import'];
+    };
+  } catch (error) { toast(`导入失败：${error.message}`); }
+  event.target.value = '';
+});
+document.addEventListener('keydown', event => {
+  const modal = $('.modal');
+  if (modal) {
+    if (event.key === 'Escape') closeModal();
+    if (event.key === 'Tab') { const inputs = [...modal.querySelectorAll('button,input,select,textarea,a[href]')].filter(n => !n.disabled); const first = inputs[0], last = inputs.at(-1); if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); } }
+    return;
+  }
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName) || event.target.isContentEditable) return;
+  const key = event.key.toLowerCase();
+  if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); restore(event.shiftKey ? history.redo(state) : history.undo(state)); return; }
+  if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); restore(history.redo(state)); return; }
+  if (event.key === ' ') { event.preventDefault(); togglePlay(); }
+  else if (event.key === 'Enter' && draft) { event.preventDefault(); finishRoute(); }
+  else if (event.key === 'Escape') { draft = null; selection = null; tool = 'select'; render(); }
+  else if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); deleteSelected(); }
+  else if (key === '?') helpModal();
+  else if (!event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) { resetAnimation(); draft = null; tool = ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]; render(); }
+});
+render();
+if (loadIssue) toast(loadIssue);
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});

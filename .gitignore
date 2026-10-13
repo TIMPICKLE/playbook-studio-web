@@ -1,0 +1,5 @@
+node_modules/
+.openai/*.local.json
+.openai/.workflows/
+*.log
+.DS_Store

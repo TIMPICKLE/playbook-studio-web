@@ -1,0 +1,293 @@
+{
+  "schema": "public-bundle-static-investigation-summary-v1",
+  "date": "2026-10-13",
+  "target": {
+    "target_url": "https://www.tacklefootballplaymaker.com/app/src/app.js",
+    "bytes": 1155611,
+    "sha256": "7860e5a05bcdd2932c6abba09d302dd762a1d69f2873e0dc5fd810e761ac131a"
+  },
+  "rea": {
+    "version": "6.4.0",
+    "evidence": [
+      {
+        "operation": "inspect_artifact",
+        "evidence_id": "ev_a9d9e2fae9b301a0018315d18e24e3154ec93ac8e588bb383c3c4486bbeda542",
+        "status": "success",
+        "authority": "shipped-artifact",
+        "coverage": {
+          "status": "complete-within-substeps",
+          "substeps_completed": 1,
+          "observations_retained": 1,
+          "observations_omitted": 0,
+          "hypotheses_retained": 1,
+          "hypotheses_omitted": 0,
+          "unexplored_branches_retained": 1,
+          "unexplored_branches_omitted": 0,
+          "next_probes_retained": 1,
+          "next_probes_omitted": 0
+        },
+        "inventory_evidence_id": "ev_ee479849a1bc07fcb30c24a55955ce50ff27dadee9820432cea9ca93b86bbeea"
+      },
+      {
+        "operation": "analyze_javascript_application",
+        "evidence_id": "ev_c58c80f6d15640646c2caf5f994f047d81d0eb8212943fc77d8d31f91c187d21",
+        "status": "blocked_before_source_analysis",
+        "reason": "Linux procps ps fails with fatal library error, lookup self; process ownership preparation unavailable",
+        "parsed_javascript_files": 0,
+        "visited_ast_nodes": 0,
+        "coverage": "partial"
+      },
+      {
+        "operation": "inspect_analysis_view",
+        "evidence_id": "ev_333ed21cfeee4f855d8d7e015886a1728d2166550cf3c651b26a816a20803d28",
+        "status": "success_partial_parent",
+        "authority": "shipped-artifact",
+        "coverage": {
+          "status": "complete-within-view",
+          "examined": 1,
+          "total": 3,
+          "next_offset": null,
+          "exhausted": true
+        },
+        "parent_evidence_id": "ev_c58c80f6d15640646c2caf5f994f047d81d0eb8212943fc77d8d31f91c187d21"
+      },
+      {
+        "operation": "inspect_analysis_view",
+        "evidence_id": "ev_5530731855751a84863b84020118868a4101671a2dc8338fa080ddd63212d7e2",
+        "status": "success_partial_parent",
+        "authority": "shipped-artifact",
+        "coverage": {
+          "status": "page",
+          "examined": 1,
+          "total": 1,
+          "next_offset": null,
+          "exhausted": true
+        },
+        "parent_evidence_id": "ev_c58c80f6d15640646c2caf5f994f047d81d0eb8212943fc77d8d31f91c187d21"
+      },
+      {
+        "operation": "trace_application_feature",
+        "evidence_id": "ev_94c556a6f791710225438404a1e705bebc1b69f852c1c3c5d22a8ce7c3a167fb",
+        "status": "success_partial_parent",
+        "authority": "analyst-inference",
+        "coverage": {
+          "status": "partial",
+          "source_graph_status": "partial",
+          "total_seed_matches": 1
+        },
+        "trace_summary": {
+          "matched_seeds": 1,
+          "traced_nodes": 2,
+          "traced_edges": 1,
+          "terminal_paths": 1,
+          "native_handoffs": 0,
+          "observed_facts": 2,
+          "inferred_facts": 0,
+          "unknown_facts": 0,
+          "unavailable_facts": 1
+        },
+        "seed_node_id": "jag_node_7435a79d9925ceb56028b17ab8c855ecb65637aedcfd8e72a43632ba6624a448"
+      }
+    ],
+    "semantic_application_analysis": "incomplete",
+    "safety_boundary": "REA did not execute target code. Browser observed only the public pre-login page. No login, registration, payment, private API request, ps spoofing or process-supervision override.",
+    "recovery_attempts": [
+      {
+        "method": "executor tty=true and login=false",
+        "direct_ps": "success",
+        "rea_analysis": "blocked with same partial evidence",
+        "reason": "Node execFile/execFileSync ps subprocess still fails process ownership inspection",
+        "modified_rea_or_ps": false,
+        "disabled_supervision": false
+      }
+    ]
+  },
+  "independent_ast_supplement": {
+    "tool": "@babel/parser",
+    "version": "8.0.4",
+    "visited_ast_nodes": 296011,
+    "parse_errors": 0,
+    "source_identity": "same target raw bytes SHA-256",
+    "offset_unit": "UTF-16 code units; inclusive start/exclusive end",
+    "raw_index_sha256": "6e4b7fc932eedd4679f652aaab5bb6cd97487938aed88beeb357f6d4db86d154",
+    "is_rea_semantic_evidence": false,
+    "facts": [
+      {
+        "id": "AST-F01",
+        "topic": "route_data",
+        "state": "observed_static_ast",
+        "module_ranges": [
+          [
+            953059,
+            953914
+          ],
+          [
+            953956,
+            954650
+          ],
+          [
+            935081,
+            935619
+          ],
+          [
+            955596,
+            956998
+          ]
+        ],
+        "finding": "Segment-based routes; location vectors, line style, end cap, curve, color and motion fields observed.",
+        "unknowns": [
+          "runtime editing behavior",
+          "actual persisted route JSON",
+          "curve interpolation",
+          "full defaults"
+        ]
+      },
+      {
+        "id": "AST-F02",
+        "topic": "players_and_formations",
+        "state": "observed_static_ast",
+        "module_ranges": [
+          [
+            950406,
+            952278
+          ],
+          [
+            935661,
+            939775
+          ],
+          [
+            943924,
+            945727
+          ],
+          [
+            209590,
+            237548
+          ]
+        ],
+        "finding": "Player appearance/role fields, mates, ball location, game phases, formations, opponents, players-per-side and touch handlers observed.",
+        "unknowns": [
+          "actual drag results",
+          "alignment grid behavior",
+          "preset formation coordinates",
+          "complete formation inventory"
+        ]
+      },
+      {
+        "id": "AST-F03",
+        "topic": "mirroring",
+        "state": "observed_static_ast",
+        "module_ranges": [
+          [
+            937963,
+            938505
+          ],
+          [
+            956641,
+            956810
+          ]
+        ],
+        "finding": "Horizontal/vertical mirror methods include route-section coordinate sign changes and player position/shading handling.",
+        "unknowns": [
+          "runtime reachability",
+          "all posture/opponent/annotation combinations"
+        ]
+      },
+      {
+        "id": "AST-F04",
+        "topic": "animation",
+        "state": "observed_static_ast",
+        "module_ranges": [
+          [
+            67190,
+            74741
+          ],
+          [
+            208369,
+            209539
+          ],
+          [
+            955596,
+            956998
+          ]
+        ],
+        "finding": "Reset, play/pause, replay, speed handlers and animation state callbacks observed.",
+        "unknowns": [
+          "actual animation timing",
+          "snap/motion coordination",
+          "ball transfer lifecycle",
+          "any physics or defensive AI simulation"
+        ]
+      },
+      {
+        "id": "AST-F05",
+        "topic": "playbooks",
+        "state": "observed_static_ast",
+        "module_ranges": [
+          [
+            946752,
+            948637
+          ],
+          [
+            976759,
+            983827
+          ]
+        ],
+        "finding": "Playbook metadata/list structures and document/JSON serialization plus download-link syntax observed.",
+        "unknowns": [
+          "original file compatibility",
+          "cloud sync",
+          "permissions enforcement",
+          "collaboration merge behavior"
+        ]
+      },
+      {
+        "id": "AST-F06",
+        "topic": "printing",
+        "state": "observed_static_ast",
+        "module_ranges": [
+          [
+            686704,
+            726119
+          ],
+          [
+            732272,
+            740489
+          ],
+          [
+            749943,
+            757439
+          ],
+          [
+            757488,
+            761625
+          ],
+          [
+            764701,
+            766564
+          ]
+        ],
+        "finding": "Print filters, multiple output-component kinds, sort and player-note structures plus print-call expression observed.",
+        "unknowns": [
+          "original rendered layouts",
+          "printer calibration",
+          "final output behavior",
+          "complete output feature behavior"
+        ]
+      }
+    ]
+  },
+  "scope_status": {
+    "routes": "partially_answered",
+    "players_formations": "partially_answered",
+    "mirroring_animation": "partially_answered",
+    "playbooks_print": "partially_answered",
+    "rea_semantic_graph": "unavailable"
+  },
+  "repository_contents": "Sanitized findings only; original source, source excerpts, credentials, original product assets and raw Evidence are excluded.",
+  "limits": [
+    "Static syntax observations do not prove runtime execution or feature reachability.",
+    "Zero parser errors does not establish behavioral equivalence or complete product coverage.",
+    "No original app file-format compatibility is claimed.",
+    "Frontend reconstruction choices are independent implementation choices."
+  ]
+}

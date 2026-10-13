@@ -1,0 +1,14 @@
+{
+  "name": "playbook-studio-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A local-first football playbook editor with routes, animation and printable playbooks.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/app.js && node --check dist/model.js && node --check dist/field.js",
+    "start": "node scripts/serve.mjs",
+    "build": "npm run check"
+  },
+  "devDependencies": { "happy-dom": "20.8.4" }
+}
