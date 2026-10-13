@@ -28,9 +28,16 @@
 
 ## 验证边界
 
-当前托管执行环境没有 Sites 所要求的 `control-browser` 能力，因此没有启动预览服务器或进行真实浏览器 UI / 视觉回归。Happy DOM 验证事件与 DOM 状态，不证明真实设备的布局、触摸手感、下载弹窗或打印尺寸。PNG 使用浏览器 Canvas、SVG 图像和 Blob 接口；已实现代码路径，但未在真实浏览器验证生成图片。离线 Service Worker 亦未进行真实浏览器离线切换测试。
+托管执行环境没有 Sites 所要求的 `control-browser` 能力，因此没有启动托管预览或进行系统性浏览器交互 / 视觉回归。发布后已打开 GitHub Pages 的实际网页，确认初始界面、球场和编辑控件加载，并保留交付截图。Happy DOM 测试与这次初始加载确认不证明真实设备的触摸手感、下载弹窗或打印尺寸。PNG 使用浏览器 Canvas、SVG 图像和 Blob 接口；已实现代码路径，但未在真实浏览器验证生成图片。离线 Service Worker 亦未进行真实浏览器离线切换测试。
 
 原版 Playmaker X 仅观察登录前入口和公开脚本，未验证账号内编辑器，也没有证明行为等价。REA 的完整语义图限制单列在 [调查报告](PUBLIC_BUNDLE_STATIC_FINDINGS.md)。
+
+## 发布核验
+
+- 实现提交：`083d934a6137c8f81da82b1a3bc76997661e2105`。
+- [GitHub Actions Checks #1](https://github.com/TIMPICKLE/playbook-studio-web/actions/runs/38377984370)：成功；远端执行语法检查与相同测试集。
+- [GitHub Pages Deploy #1](https://github.com/TIMPICKLE/playbook-studio-web/actions/runs/38377984422)：成功。
+- 公开访问地址：<https://timpickle.github.io/playbook-studio-web/>；实际网页首次加载确认成功。
 
 ## 使用时可复查
 

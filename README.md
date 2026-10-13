@@ -2,7 +2,9 @@
 
 中文美式橄榄球战术工作台。参考 Playmaker X 的公开功能与网页脚本结构，独立实现阵型编辑、路线绘制、战术演练、战术本管理和打印。前端运行不依赖第三方服务，也不需要账号。
 
-![Mesh play diagram](docs/assets/mesh.svg)
+**[在线使用 →](https://timpickle.github.io/playbook-studio-web/)** · [公开脚本调查](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [验证记录](docs/VALIDATION.md)
+
+![Playbook Studio workspace](docs/assets/published.jpg)
 
 ## 能做什么
 
