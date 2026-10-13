@@ -47,5 +47,34 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       Object.defineProperty(input, 'files', { configurable: true, value: [{ size: raw.length, text: async () => raw }] }); input.dispatchEvent(new win.Event('change', { bubbles: true })); await Promise.resolve(); await Promise.resolve();
       assert.match(query('#toast').textContent, /导入失败/); assert.equal(win.localStorage.getItem(STORAGE_KEY), before); assert.ok(!query('[data-action="confirm-import"]'));
     });
+    await t.test('one-click 4–3 adds all 11 defenders, preserves offense, avoids duplicates and supports undo', () => {
+      const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), selected = before.plays.find(p => query('h1').textContent.includes(p.title));
+      assert.equal(before.settings.league, 7);
+      const button = query('[data-action="add-defense-43"]'); assert.ok(button); assert.match(button.textContent, /添加.*4–3/);
+      click('add-defense-43');
+      const after = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), play = after.plays.find(p => p.id === selected.id), defenders = play.players.filter(p => p.side === 'defense');
+      assert.equal(defenders.length, 11);
+      assert.deepEqual(defenders.map(p => p.label), ['DE', 'DT', 'DT', 'DE', 'W', 'M', 'S', 'CB', 'CB', 'SS', 'FS']);
+      assert.deepEqual(play.players.filter(p => p.side === 'offense'), selected.players); assert.deepEqual(play.routes, selected.routes); assert.deepEqual(play.ball, selected.ball);
+      assert.match(query('[data-action="add-defense-43"]').textContent, /重设/);
+      click('add-defense-43'); const reset = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.find(p => p.id === selected.id);
+      assert.equal(reset.players.filter(p => p.side === 'defense').length, 11); assert.deepEqual(reset.players.filter(p => p.side === 'offense'), selected.players);
+      click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), after);
+      click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), before);
+    });
+    await t.test('resetting existing defenders removes only their routes and repairs ball references', () => {
+      const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
+      click('add-player:defense'); const first = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].players.at(-1);
+      click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 500, 300); click('finish-route'); click('clear-selection');
+      click('add-player:defense'); const second = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].players.at(-1); click('clear-selection');
+      change('[data-ball="holderId"]', first.id); change('[data-ball="receiverId"]', second.id);
+      const withDefenders = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
+      click('add-defense-43'); const after = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), play = after.plays[0];
+      assert.equal(play.players.filter(p => p.side === 'defense').length, 11);
+      assert.deepEqual(play.routes, before.plays[0].routes);
+      assert.equal(play.ball.holderId, play.players.find(p => p.label === 'QB').id); assert.equal(play.ball.receiverId, '');
+      assert.ok(play.routes.every(r => play.players.some(p => p.id === r.playerId)));
+      click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), withDefenders);
+    });
   } finally { await win.happyDOM.abort(); for (const name of names) { const desc = previous[name]; if (desc) Object.defineProperty(globalThis, name, desc); else delete globalThis[name]; } }
 });
