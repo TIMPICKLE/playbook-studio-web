@@ -17,9 +17,28 @@ GitHub Pages 发布入口和旧版导出工具，并保留 `local.html` 静态�
 
 D1 是持久云端数据库，战术不会因刷新或换设备消失。每个战术本隔离访问，不存在所有访客自动共享全部战术的公共目录。
 
-## 登录与权限
+## v3 团队账号与登录
 
-使用官方 `app/chatgpt-auth.ts`。浏览器通过普通链接前往 `/signin-with-chatgpt`，退出使用 `/signout-with-chatgpt`。生产环境由 Sites 边缘验证会话并注入身份；API 不接受 JSON 中的 userId / role 作为权限依据，也没有客户端保存的后端密钥。
+新增 `accounts`、`account_sessions`、`auth_throttles`、`app_setup` 四张表。团队账号为独立用户名 / 密码，不要求分发对象注册 ChatGPT。原有 `getChatGPTUser()` 与登录集成仍保留，旧数据与邮箱邀请可以继续使用。
+
+密码使用随机盐和 PBKDF2-SHA256（100,000 次），数据库不保存明文。登录 token 为 256 位随机值，数据库只保存 SHA-256 摘要。生产 Cookie 使用 `__Host-` 前缀、HttpOnly、Secure、SameSite=Lax，有效期 7 天。密码更新或管理员重置会使旧会话失效。登录和改密存在服务端尝试次数限制；所有修改请求仍检查 Origin。
+
+`PLAYBOOK_SETUP_KEY` 通过 Sites 原生运行时秘密配置，只用于一次性初始化。初始化 endpoint 不接受未授权请求；事务中的唯一配置行防止部署或重试时重新创建 / 重置账号。初始密码由所有者单独接收，不包含在源码、迁移、浏览器脚本或部署配置中。初始化后移除此运行时秘密。
+
+初始团队管理员及成员共用同一份战术本；若有站点所有者的现有战术本，则保留其内容并加入账号。后续可在「成员与权限」新建账号或调整角色。重置密码仅允许账号创建者在其管理的战术本中操作，防止其他战术本的管理员通过重置共享成员账号取得额外数据。
+
+| 方法与路径 | 用途 |
+|---|---|
+| POST `/api/auth/login` | 账号密码验证与 Cookie 会话 |
+| POST `/api/auth/logout` | 撤销会话 |
+| POST `/api/auth/password` | 验证当前密码后修改自己的密码，撤销旧会话 |
+| POST `/api/auth/bootstrap` | 运行时秘密授权的一次性初始账号配置 |
+| POST `/api/workspaces/:id/accounts` | 管理员创建 editor / viewer 账号并加入当前战术本 |
+| POST `/api/workspaces/:id/members/:userId/password` | 创建者管理员重置自己创建的成员账号密码 |
+
+## 原有 ChatGPT 登录与权限
+
+使用官方 `app/chatgpt-auth.ts`。选择原登录方式时，浏览器通过普通链接前往 `/signin-with-chatgpt`，退出使用 `/signout-with-chatgpt`。生产环境由 Sites 边缘验证会话并注入身份；API 不接受 JSON 中的 userId / role 作为权限依据，也没有客户端保存的后端密钥。
 
 入口允许访客打开登录页面，数据 API 必须有有效身份且属于对应战术本。管理员可邀请、移除、调整成员，并恢复历史；编辑者可改数据；只读成员只能读。创建者固定为 owner，不能被降级或移除。邀请 token 由加密随机数生成，仅数据库存摘要，绑定规范化邮箱，7 天有效；接受或撤销后不可再用。
 

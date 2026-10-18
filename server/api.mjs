@@ -1,26 +1,14 @@
 import { decodeWorkspace, starterWorkspace } from '../web/model.js';
-export const MAX_BODY = 950_000;
+import { MAX_BODY, ApiError, fail, json, readJson } from './http.mjs';
+import { resolveIdentity, handleAuth, createAccountStatements, resetAccount } from './auth.mjs';
+export { MAX_BODY } from './http.mjs';
 const ROLES = ['editor', 'viewer'];
 const normalizeEmail = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
-class ApiError extends Error { constructor(status, message) { super(message); this.status = status; } }
-const fail = (status, message) => { throw new ApiError(status, message); };
-const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store, private', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' } });
 const validId = value => /^[A-Za-z0-9_-]{1,100}$/.test(value);
 const revision = value => Number.isSafeInteger(value) && value > 0 ? value : fail(400, '版本号不正确');
 const role = value => ROLES.includes(value) ? value : fail(400, '仅支持编辑者或只读成员');
 const id = () => crypto.randomUUID();
 const timestamp = () => Date.now();
-async function readJson(request) {
-  if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) fail(415, '请使用 JSON 请求');
-  if (Number(request.headers.get('content-length')) > MAX_BODY) fail(413, '战术本过大，请拆分或先导出备份');
-  const reader = request.body?.getReader(); if (!reader) fail(400, '请求为空');
-  const chunks = []; let size = 0;
-  while (true) { const { value, done } = await reader.read(); if (done) break; size += value.byteLength; if (size > MAX_BODY) { await reader.cancel(); fail(413, '战术本过大，请拆分或先导出备份'); } chunks.push(value); }
-  const bytes = new Uint8Array(size); let offset = 0; for (const c of chunks) { bytes.set(c, offset); offset += c.byteLength; }
-  let body; try { body = JSON.parse(new TextDecoder().decode(bytes)); } catch { fail(400, 'JSON 格式不正确'); }
-  if (!body || typeof body !== 'object' || Array.isArray(body)) fail(400, '请求内容须为 JSON 对象');
-  return body;
-}
 function checkedData(value) { try { return decodeWorkspace(JSON.stringify({ format: 'playbook-studio', version: 1, data: value })); } catch (error) { fail(400, `战术本校验失败：${error.message}`); } }
 function title(value) { if (typeof value !== 'string' || !value.trim() || value.length > 80) fail(400, '战术本名称须为 1–80 个字符'); return value.trim(); }
 function email(value) { const v = normalizeEmail(value); if (v.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) fail(400, '邮箱格式不正确'); return v; }
@@ -53,8 +41,11 @@ async function writeWorkspace(db, workspaceId, user, data, expected, action = 's
 export async function handleApi(request, env, user) {
   try {
     const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
-    if (path[0] === 'health' && request.method === 'GET') { if (!env.DB) return json({ ready: false }, 503); await env.DB.prepare('SELECT id FROM workspaces LIMIT 1').first(); return json({ ready: true, storage: 'cloud', version: '2.0.0' }); }
-    if (path[0] === 'session' && request.method === 'GET') return json({ user: user ? { id: user.userId, email: user.email, name: user.displayName } : null });
+    if (path[0] === 'health' && request.method === 'GET') { if (!env.DB) return json({ ready: false }, 503); await env.DB.prepare('SELECT id FROM workspaces LIMIT 1').first(); return json({ ready: true, storage: 'cloud', version: '3.0.0' }); }
+    if (!['GET', 'HEAD'].includes(request.method) && request.headers.get('origin') !== new URL(request.url).origin) fail(403, '请求来源不正确');
+    user = await resolveIdentity(request, env, user);
+    if (path[0] === 'auth') return await handleAuth(request, env, user);
+    if (path[0] === 'session' && request.method === 'GET') return json({ user: user ? { id: user.userId, email: user.email, name: user.displayName, username: user.username, authMode: user.authMode } : null });
     if (!user?.userId || !user.email) fail(401, '请先登录');
     if (!env.DB) fail(503, '云端数据库暂不可用');
     if (!['GET', 'HEAD'].includes(request.method) && request.headers.get('origin') !== new URL(request.url).origin) fail(403, '请求来源不正确');
@@ -95,9 +86,18 @@ export async function handleApi(request, env, user) {
       if (request.method === 'GET') { const record = await access(db, workspaceId, user.userId); const after = Number(new URL(request.url).searchParams.get('after')); return json(after === record.revision ? { unchanged: true, revision: record.revision, role: record.role } : document(record)); }
       if (request.method === 'PUT') { const body = await readJson(request); return await writeWorkspace(db, workspaceId, user, body.data, body.revision); }
     }
+    if (path[2] === 'accounts' && path.length === 3 && request.method === 'POST') {
+      await access(db, workspaceId, user.userId, 'owner');
+      const body = await readJson(request, 4096), assigned = role(body.role);
+      const account = await createAccountStatements(db, body, user.userId, workspaceId, assigned);
+      try { await db.batch(account.statements); } catch (error) { if (String(error.message).includes('UNIQUE')) fail(409, '此账号名已使用，请更换账号名'); throw error; }
+      await event(db, workspaceId, user.userId, 'account_created', account.username);
+      return json({ id: account.userId, username: account.username, role: assigned }, 201);
+    }
     if (path[2] === 'members') {
       await access(db, workspaceId, user.userId, 'owner');
-      if (path.length === 3 && request.method === 'GET') { const members = await db.prepare('SELECT m.user_id AS id,u.email,u.name,m.role FROM members m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=? ORDER BY m.joined_at').bind(workspaceId).all(); const invites = await db.prepare("SELECT id,email,role,expires_at AS expiresAt FROM invites WHERE workspace_id=? AND status='pending' AND expires_at>? ORDER BY created_at DESC").bind(workspaceId, now).all(); return json({ members: members.results, invites: invites.results }); }
+      if (path.length === 3 && request.method === 'GET') { const members = await db.prepare('SELECT m.user_id AS id,u.email,u.name,m.role,a.username,a.created_by AS accountCreator FROM members m JOIN users u ON u.id=m.user_id LEFT JOIN accounts a ON a.user_id=m.user_id WHERE m.workspace_id=? ORDER BY m.joined_at').bind(workspaceId).all(); const invites = await db.prepare("SELECT id,email,role,expires_at AS expiresAt FROM invites WHERE workspace_id=? AND status='pending' AND expires_at>? ORDER BY created_at DESC").bind(workspaceId, now).all(); return json({ members: members.results.map(m => ({ ...m, canResetPassword: m.accountCreator === user.userId && m.id !== user.userId, accountCreator: undefined })), invites: invites.results }); }
+      if (path.length === 5 && path[4] === 'password' && request.method === 'POST') { const targetMember = await db.prepare('SELECT role FROM members WHERE workspace_id=? AND user_id=?').bind(workspaceId, path[3]).first(); if (!targetMember) fail(404, '成员不存在'); const body = await readJson(request, 4096); await resetAccount(db, user, path[3], body.password); await event(db, workspaceId, user.userId, 'password_reset', path[3]); return json({ success: true }); }
       const target = await db.prepare('SELECT role FROM members WHERE workspace_id=? AND user_id=?').bind(workspaceId, path[3] || '').first(); if (!target) fail(404, '成员不存在'); if (target.role === 'owner') fail(400, '管理员身份不能被移除或降级');
       if (request.method === 'PATCH') { const body = await readJson(request); await db.prepare("UPDATE members SET role=? WHERE workspace_id=? AND user_id=? AND role<>'owner'").bind(role(body.role), workspaceId, path[3]).run(); await event(db, workspaceId, user.userId, 'role_changed', `${path[3]}:${body.role}`); return json({ success: true }); }
       if (request.method === 'DELETE') { await db.prepare("DELETE FROM members WHERE workspace_id=? AND user_id=? AND role<>'owner'").bind(workspaceId, path[3]).run(); await event(db, workspaceId, user.userId, 'removed', path[3]); return json({ success: true }); }

@@ -62,6 +62,29 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), after);
       click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), before);
     });
+    await t.test('formation replacement asks before clearing routes, cancel preserves data, and undo restores the confirmed change', () => {
+      click('book:offense'); query('.play-card').click(); query('[data-action="clear-selection"]')?.click();
+      const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
+      change('#apply-formation', 'builtin:I Formation');
+      assert.ok(query('[data-action="confirm-apply-formation"]'));
+      assert.match(query('.modal-body').textContent, /清除.*路线/);
+      click('close-modal'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), before);
+      change('#apply-formation', 'builtin:I Formation'); click('confirm-apply-formation');
+      assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].routes.length, 0);
+      click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), before);
+    });
+    await t.test('unfinished route prompts before changing tools; keep and discard choices follow user intent', () => {
+      query('[data-action="clear-selection"]')?.click(); geometry(); pointer(query('#field [data-player]'), 'pointerdown', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 500, 350);
+      assert.ok(query('.drawing-steps')); assert.match(query('.drawing-steps').textContent, /完成并保存/);
+      click('tool:select'); assert.match(query('.modal h2').textContent, /还没有完成/);
+      click('keep-drawing'); assert.ok(query('[data-action="finish-route"]'));
+      click('tool:select'); click('discard-draft'); assert.equal(query('[data-action="finish-route"]'), null);
+      assert.equal(query('[data-action="tool:select"]').getAttribute('aria-pressed'), 'true');
+    });
+    await t.test('empty play names show an inline error and keep the dialog open without creating data', () => {
+      const before = win.localStorage.getItem(STORAGE_KEY); click('new'); query('#new-title').value = '  '; click('create-play');
+      assert.ok(query('.modal')); assert.match(query('.form-feedback').textContent, /名字/); assert.equal(win.localStorage.getItem(STORAGE_KEY), before); click('close-modal');
+    });
     await t.test('resetting existing defenders removes only their routes and repairs ball references', () => {
       const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
       click('add-player:defense'); const first = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].players.at(-1);

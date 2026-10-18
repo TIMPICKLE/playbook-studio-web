@@ -1,33 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
-import { readFileSync } from 'node:fs';
+import { database } from './helpers/db.mjs';
 import { handleApi, MAX_BODY } from '../server/api.mjs';
 import { clone } from '../web/model.js';
 
-// Executes the production SQL against SQLite, including transactional D1 batches.
-function database(t) {
-  const sql = new DatabaseSync(':memory:');
-  sql.exec('PRAGMA foreign_keys=ON');
-  sql.exec(readFileSync(new URL('../drizzle/0000_curved_toad_men.sql', import.meta.url), 'utf8'));
-  t.after(() => sql.close());
-  const db = {
-    sql, beforeBatch: null,
-    prepare(query) {
-      const statement = { query, args: [], bind(...args) { this.args = args; return this; },
-        async first() { return sql.prepare(query).get(...this.args) || null; },
-        async all() { return { results: sql.prepare(query).all(...this.args) }; },
-        async run() { return { success: true, meta: { changes: Number(sql.prepare(query).run(...this.args).changes) } }; },
-      }; return statement;
-    },
-    async batch(statements) {
-      if (this.beforeBatch) { const hook = this.beforeBatch; this.beforeBatch = null; hook(); }
-      sql.exec('BEGIN');
-      try { const results = []; for (const st of statements) results.push(await st.run()); sql.exec('COMMIT'); return results; }
-      catch (error) { sql.exec('ROLLBACK'); throw error; }
-    },
-  }; return db;
-}
 const owner = { userId: 'owner', email: 'coach@example.com', displayName: 'Coach' };
 const editor = { userId: 'editor', email: 'EDITOR@example.com', displayName: 'Assistant' };
 const viewer = { userId: 'viewer', email: 'viewer@example.com', displayName: 'Player' };

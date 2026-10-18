@@ -1,3 +1,4 @@
+import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, CLOUD_SITE } from './cloud.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation } from './field.js';
@@ -17,11 +18,13 @@ let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '
 let saveState = loadIssue ? '恢复提醒' : '本地已保存', frame = null, lastFrame = null, toastTimer = null;
 const history = new History();
 let shared = null;
+let pendingNavigation = null, viewOverrides = {};
+const viewSettings = () => ({ ...state.data.settings, ...viewOverrides });
 const canEdit = () => !cloudMode() || !!shared?.canEdit;
-const readActions = new Set(['choose','book','select-route','clear-selection','sidebar','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop']);
+const readActions = new Set(['choose','book','select-route','clear-selection','sidebar','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing']);
 function protectReadOnly() {
   if (canEdit()) return;
-  document.querySelectorAll('[data-prop],[data-ball],#apply-formation,#show-names').forEach(n => { n.disabled = true; });
+  document.querySelectorAll('[data-prop],[data-ball],#apply-formation').forEach(n => { n.disabled = true; });
   document.querySelectorAll('#app [data-action]').forEach(n => { const [action,value]=n.dataset.action.split(':'); if (!readActions.has(action) && !(action==='tool' && value==='select')) n.disabled=true; });
 }
 const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
@@ -41,18 +44,19 @@ function edit(fn, { redraw = true } = {}) {
   if (!canEdit()) { toast('当前为只读权限，无法修改共享战术。'); return; }
   resetAnimation(); draft = null; history.record(state); fn(current(), state.data); save(); if (redraw) render();
 }
-function choose(id) { resetAnimation(); draft = null; selection = null; state.selectedId = id; sidebarOpen = false; tool = 'select'; render(); }
+function choose(id) { if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; sidebarOpen = false; tool = 'select'; render(); }
 function restore(next) { if (!next || !canEdit()) return; resetAnimation(); state = next; book = current().book; selection = null; draft = null; save(); render(); }
 
 function render() {
   const p = current(); if (!p) return;
+  if (!cloudMode()) document.title = `${p.title} · 本地预览`;
   document.documentElement.style.setProperty('--team-color', state.data.team.accent);
   document.title = `${p.title} · Playbook Studio`;
   const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
   $('#app').innerHTML = `<div class="workspace ${sidebarOpen ? 'sidebar-open' : ''}">
-    <aside class="sidebar">
-      <a class="brand" href="./index.html" aria-label="Playbook Studio"><img src="./icon.svg" alt="" width="34" height="34"><span>PLAYBOOK<span>STUDIO</span></span><small>${cloudMode() ? 'v2' : 'v1'}</small></a>
+    <button class="sidebar-scrim" data-action="sidebar" aria-label="关闭战术列表"></button><aside class="sidebar" aria-label="战术列表">
+      <a class="brand" href="./index.html" aria-label="Playbook Studio"><img src="./icon.svg" alt="" width="34" height="34"><span>PLAYBOOK<span>STUDIO</span></span><small>${cloudMode() ? '共享' : '本地'}</small></a>
       <button class="team-switch" data-action="team"><span class="team-avatar">${e(state.data.team.name.slice(0, 1))}</span><span><strong>${e(state.data.team.name)}</strong><small>${e(state.data.team.subtitle)}</small></span>${icon('chevron')}</button>
       <div class="side-label">WORKSPACE <span>战术本</span></div>
       <nav class="book-nav" aria-label="战术本类型">${Object.entries(BOOKS).map(([key, name]) => `<button data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${name}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
@@ -60,23 +64,35 @@ function render() {
       <label class="search-box">${icon('search')}<input type="search" id="search" placeholder="搜索战术…" aria-label="搜索战术" value="${e(query)}"></label>
       <div class="filters"><select aria-label="战术分类" id="category-filter"><option value="">全部分类</option><option value="favorite" ${filter === 'favorite' ? 'selected' : ''}>★ 已收藏</option>${categories.map(c => `<option value="${e(c)}" ${c === filter ? 'selected' : ''}>${e(c)}</option>`).join('')}</select><select aria-label="阵型筛选" id="formation-filter"><option value="">全部阵型</option>${formations.map(f => `<option value="${e(f)}" ${formationFilter === f ? 'selected' : ''}>${e(f)}</option>`).join('')}</select></div>
       <div class="play-list-label"><span>${filter === 'favorite' ? '收藏的战术' : '我的战术'} <b>${plays.length}</b></span>${btn('new', 'plus', '新建战术', 'small-icon')}</div>
-      <div class="play-list">${plays.length ? plays.map((v, i) => `<button data-action="choose:${e(v.id)}" class="play-card ${p.id === v.id ? 'active' : ''}" aria-label="打开 ${e(v.title)}" aria-pressed="${p.id === v.id}"><div class="play-thumb">${fieldSVG(v, { showGrid: false }, { thumbnail: true, prefix: `thumb-${i}` })}</div><span class="play-card-info"><strong>${e(v.title)}</strong><small>${e(v.formation)} · ${e(v.category)}</small></span>${v.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : '<div class="empty-list">没有匹配的战术。<br>调整筛选条件或新建一个。</div>'}</div>
+      <div class="play-list">${plays.length ? plays.map((v, i) => `<button data-action="choose:${e(v.id)}" class="play-card ${p.id === v.id ? 'active' : ''}" aria-label="打开 ${e(v.title)}" aria-pressed="${p.id === v.id}"><div class="play-thumb">${fieldSVG(v, { showGrid: false }, { thumbnail: true, prefix: `thumb-${i}` })}</div><span class="play-card-info"><strong>${e(v.title)}</strong><small>${e(v.formation)} · ${e(v.category)}</small></span>${v.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : '<div class="empty-list">没有找到匹配战术。<br>试试其他关键词或清除筛选。<button class="text-button" data-action="clear-filters">清除全部筛选</button></div>'}</div>
       <button class="new-play" data-action="new">${icon('plus')} 新建战术</button>
       <div class="sidebar-bottom"><button data-action="team">${icon('team')} 球队与名单</button><button data-action="import">${icon('folder')} 导入战术本</button><button data-action="help">${icon('help')} 使用指南 <kbd>?</kbd></button><span class="local-status"><i></i><span id="save-state">${e(saveState)}</span></span></div>
     </aside>
-    <main class="main">
-      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开战术本', 'mobile-menu')}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
-      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>把下一场比赛的想法，变成清楚的每一步。</p></div><div class="play-actions">${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
-      <div class="editor-layout"><section class="canvas-section">
-        <div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools">${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => btn(`tool:${a}`, i, l, `tool-button ${tool === a ? 'active' : ''}`, `aria-pressed="${tool === a}"`)).join('')}</div><div class="view-tools">${btn('grid', 'grid', '显示或隐藏码线', `tool-button ${state.data.settings.showGrid ? 'enabled' : ''}`)}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div></div>
-        <div id="field" class="field-wrap tool-${tool}">${fieldSVG(p, state.data.settings, { selected: selection, time, drawing: draft })}<div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div></div>
-        <div class="canvas-hint"><span><i class="hint-dot"></i>${hint()}</span>${draft ? '<button data-action="finish-route" class="text-button">完成路线 ↵</button><button data-action="cancel-draft" class="text-button">取消 Esc</button>' : `<span class="shortcut-hint">${selection ? 'Delete 删除选中项' : 'V 选择 · R 路线 · Space 播放'}</span>`}</div>
+    <main class="main" id="main-content" tabindex="-1">
+      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${sidebarOpen}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
+      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${canEdit() ? '选择球员画路线，或直接拖动调整站位。' : '查看团队战术，播放演练并学习自己的跑位。'}</p></div><div class="play-actions">${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
+      ${!canEdit() ? '<div class="readonly-banner"><strong>只读模式</strong><span>你可以查看、演练、导出和打印。需要修改时，请联系管理员调整权限。</span></div>' : ''}<div class="editor-layout"><section class="canvas-section" aria-label="球场与演练">
+        <div class="canvas-heading"><span>${selection ? `${e(selectedObject()?.label || selectedObject()?.text || '已选择对象')}` : '战术绘图区'}</span><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', `tool-button ${viewSettings().showGrid ? 'enabled' : ''}`)}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div>
+        <div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools">${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:'选择',route:'跑动',block:'阻挡',motion:'移动',pass:'传球',zone:'区域',text:'文字'})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div>
+        <div id="field" class="field-wrap tool-${tool}">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}<div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div></div>
+        <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
         <div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>战术演练</span><small>ANIMATION</small></div><div class="playback-options"><label class="speed-label">速度 <select id="speed" aria-label="播放速度">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', '循环播放', `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? '暂停战术' : '播放战术', 'play-button')}${btn('reset', 'reset', '重置动画', 'icon-button')}<input type="range" id="timeline" aria-label="动画时间" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div>
       </section><aside class="inspector" aria-label="战术属性">${inspector()}</aside></div>
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>画清路线，读懂比赛。</span><button data-action="help">快捷键与使用说明 ${icon('chevron')}</button></footer>
     </main></div>`;
   bindField();
   protectReadOnly();
+}
+function canvasHint() {
+  const drawing = ['route','block','motion','pass'].includes(tool), active = draft ? (draft.points.length > 1 ? 3 : 2) : selection?.type === 'player' ? 2 : 1;
+  return `<span><i class="hint-dot"></i>${canEdit() ? hint() : '只读模式 · 点击球员或路线查看属性，按播放查看战术演练'}</span>${draft ? `<button data-action="finish-route" class="text-button" ${draft.points.length < 2 ? 'disabled' : ''}>完成路线 ↵</button><button data-action="cancel-draft" class="text-button">取消 Esc</button>` : `<span class="shortcut-hint">${selection ? 'Delete 删除选中项 · 可撤销' : 'V 选择 · R 路线 · Space 播放'}</span>`}${drawing && canEdit() ? `<div class="drawing-steps">${['选择一名球员','点击路线终点 / 转折点','完成并保存'].map((v,i)=>`<span class="${active === i+1 ? 'current' : ''}"><b>${i+1}</b>${v}</span>`).join('')}</div>` : ''}`;
+}
+function updateCanvasHint() { const n = $('.canvas-hint'); if(n) n.innerHTML = canvasHint(); }
+function confirmDraft(next) {
+  if (!draft) return true;
+  pendingNavigation = next;
+  openModal('这条路线还没有完成', '<p>切换会放弃正在绘制的路线点。你可以继续绘制，或放弃这条草稿后切换。</p><p class="muted small">已经完成并保存的路线不受影响。</p>', '<button class="button subtle" data-action="keep-drawing">继续绘制</button><button class="button danger" data-action="discard-draft">放弃草稿并继续</button>');
+  return false;
 }
 function hint() {
   if (playing || time > 0) return '演练中 · 拖动时间轴检查球员走位';
@@ -99,12 +115,12 @@ function inspector() {
   } else if (selection?.type === 'annotation' && obj) {
     content = `<div class="inspector-heading"><span>文字标注</span></div>${fieldInput('标注内容', 'text', obj.text, 'text', 'maxlength="200"')}<p class="muted small">拖动文字移动标注位置。</p><button class="button danger full" data-action="delete-selection">${icon('trash')}删除标注</button>`;
   } else {
-    content = `<div class="inspector-heading"><span>战术详情</span><span class="tag">${BOOKS[p.book]}</span></div>${fieldInput('战术名称', 'title', p.title, 'text', 'maxlength="120"')}${fieldInput('分类', 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>阵型模板</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput('人员组', 'personnel', p.personnel, 'text', 'maxlength="80"')}<div class="formation-actions"><button data-action="save-formation">${icon('save')} 保存当前阵型</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? '移除' : '添加'}对方阵型</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>教练笔记</span></div><textarea data-prop="notes" rows="5" aria-label="教练笔记" placeholder="阅读顺序、跑位要点、调整方案…" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><div class="inspector-heading"><span>足球移动</span>${icon('ball')}</div><label class="form-field"><span>持球人</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>传给</span><select data-ball="receiverId"><option value="">不传球 / 跑球</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput('出手时间', 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput('到达时间', 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div><div class="inspector-divider"></div><div class="inspector-heading"><span>添加对象</span></div><div class="route-quick"><button data-action="add-player:offense">${icon('plus')}进攻球员</button><button data-action="add-player:defense">${icon('plus')}防守球员</button></div><button class="button subtle full" data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）</button><label class="check-label"><input id="show-names" type="checkbox" ${state.data.settings.showNames ? 'checked' : ''}>显示球员姓名</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}删除此战术</button>`;
+    content = `<div class="inspector-heading"><span>战术详情</span><span class="tag">${BOOKS[p.book]}</span></div>${fieldInput('战术名称', 'title', p.title, 'text', 'maxlength="120"')}${fieldInput('分类', 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>阵型模板</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput('人员组', 'personnel', p.personnel, 'text', 'maxlength="80"')}<div class="formation-actions"><button data-action="save-formation">${icon('save')} 保存当前阵型</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? '移除' : '添加'}对方阵型</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>教练笔记</span></div><textarea data-prop="notes" rows="5" aria-label="教练笔记" placeholder="阅读顺序、跑位要点、调整方案…" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><div class="inspector-heading"><span>足球移动</span>${icon('ball')}</div><label class="form-field"><span>持球人</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>传给</span><select data-ball="receiverId"><option value="">不传球 / 跑球</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput('出手时间', 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput('到达时间', 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div><div class="inspector-divider"></div><div class="inspector-heading"><span>添加对象</span></div><div class="route-quick"><button data-action="add-player:offense">${icon('plus')}进攻球员</button><button data-action="add-player:defense">${icon('plus')}防守球员</button></div><button class="button subtle full" data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）</button><label class="check-label"><input id="show-names" type="checkbox" ${viewSettings().showNames ? 'checked' : ''}>显示球员姓名</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}删除此战术</button>`;
   }
   return `${content}${selection ? '<button class="back-details" data-action="clear-selection">← 返回战术详情</button>' : ''}<div class="inspector-note">${icon('check')}${cloudMode() ? (canEdit() ? '所有修改自动同步到共享战术本' : '当前拥有只读权限') : '所有修改自动保存在此浏览器'}</div>`;
 }
-function renderField() { $('#field').innerHTML = fieldSVG(current(), state.data.settings, { selected: selection, time, drawing: draft }) + `<div class="field-tag">${icon('ball')} ${current().players.length} PLAYERS</div>`; }
-function refreshSelection() { $('.inspector').innerHTML = inspector(); renderField(); protectReadOnly(); }
+function renderField() { $('#field').innerHTML = fieldSVG(current(), viewSettings(), { selected: selection, time, drawing: draft }) + `<div class="field-tag">${icon('ball')} ${current().players.length} PLAYERS</div>`; }
+function refreshSelection() { $('.inspector').innerHTML = inspector(); renderField(); updateCanvasHint(); protectReadOnly(); }
 function coordinates(event) { const svg = $('#field svg'), box = svg.getBoundingClientRect(); return { x: clamp(((event.clientX - box.left) / box.width * 1000 - 18) / 9.64), y: clamp(((event.clientY - box.top) / box.height * 800 - 20) / 7.6) }; }
 function pick(event) {
   const node = event.target.closest('[data-player],[data-route],[data-zone],[data-annotation]');
@@ -130,7 +146,7 @@ function bindField() {
         draft = { playerId: p.id, points: [{ x: p.x, y: p.y }] };
       }
       if (draft.points.length < 200 && (!draft.points.at(-1) || Math.hypot(at.x - draft.points.at(-1).x, at.y - draft.points.at(-1).y) > .3)) draft.points.push(at);
-      renderField(); $('.canvas-hint').innerHTML = `<span><i class="hint-dot"></i>${hint()}</span><button data-action="finish-route" class="text-button">完成路线 ↵</button><button data-action="cancel-draft" class="text-button">取消 Esc</button>`; return;
+      renderField(); updateCanvasHint(); return;
     }
     event.preventDefault(); field.setPointerCapture?.(event.pointerId);
     if (tool === 'zone') { drag = { type: 'new-zone', start: at, before: clone(state), zoneId: uid() }; return; }
@@ -186,17 +202,18 @@ function finishRoute() {
 
 function openModal(title, body, footer = '', wide = false) {
   const previous = document.activeElement;
-  $('#modal-root').innerHTML = `<div class="modal-backdrop"><section class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${e(title)}"><header><h2>${e(title)}</h2>${btn('close-modal', 'close', '关闭', 'icon-button')}</header><div class="modal-body">${body}</div>${footer ? `<footer>${footer}</footer>` : ''}</section></div>`;
+  $('#modal-root').innerHTML = `<div class="modal-backdrop"><section class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${e(title)}"><header><h2>${e(title)}</h2>${btn('close-modal', 'close', '关闭', 'icon-button')}</header><div class="modal-body">${body}${feedbackBox()}</div>${footer ? `<footer>${footer}</footer>` : ''}</section></div>`;
   $('#modal-root')._previous = previous;
-  $('#modal-root').querySelector('input,select,textarea,button')?.focus();
+  $('#app').inert = true; document.body.classList.add('modal-open');
+  ($('#modal-root').querySelector('.modal-body input:not([readonly]),.modal-body select,.modal-body textarea') || $('#modal-root').querySelector('footer .primary,header button'))?.focus();
 }
-function closeModal() { $('#modal-root').innerHTML = ''; $('#print-root').innerHTML = ''; $('#modal-root')._previous?.focus?.(); }
+function closeModal() { $('#app').inert = false; document.body.classList.remove('modal-open'); $('#modal-root').innerHTML = ''; $('#print-root').innerHTML = ''; $('#modal-root')._previous?.focus?.(); }
 function newModal() {
   openModal('新建战术', `<p class="muted">选一个阵型，把你的想法画在球场上。</p><label class="form-field"><span>战术名称</span><input id="new-title" value="新战术" maxlength="120"></label><div class="form-row"><label class="form-field"><span>战术本</span><select id="new-book">${Object.entries(BOOKS).map(([v, l]) => option(v, l, book)).join('')}</select></label><label class="form-field"><span>人数 / 每方</span><select id="new-count">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人`, String(state.data.settings.league))).join('')}</select></label></div><label class="form-field"><span>阵型</span><select id="new-formation">${FORMATIONS.map(v => option(v, v, book === 'defense' ? '4–3' : book === 'special' ? 'Field Goal' : 'Gun Trips')).join('')}${state.data.formations.map(f => option(`custom:${f.id}`, `${f.name} · 自定义`, '')).join('')}</select></label>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="create-play">创建战术</button>');
 }
 function textModal(at) { openModal('添加场上标注', '<label class="form-field"><span>标注内容</span><input id="annotation-text" placeholder="例如：Read 1 · 先读浅交叉" maxlength="200"></label>', `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">放置标注</button>`); }
 function exportModal() {
-  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>矢量战术图</strong><small>SVG · 任意放大，适合课件</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · 2000 × 1600</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">JSON 可在另一台设备导入。图片只包含战术图；当前浏览器的战术不会自动同步到其他设备。</p>`);
+  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>矢量战术图</strong><small>SVG · 任意放大，适合课件</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · 2000 × 1600</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
 }
 function teamModal() {
   openModal('球队与球员名单', `<div class="form-row"><label class="form-field"><span>球队名称</span><input id="team-name" value="${e(state.data.team.name)}" maxlength="80"></label><label class="form-field"><span>赛季 / 副标题</span><input id="team-subtitle" value="${e(state.data.team.subtitle)}" maxlength="80"></label></div><div class="form-row"><label class="form-field"><span>球队颜色</span><input id="team-accent" type="color" value="${state.data.team.accent}"></label><label class="form-field"><span>默认人数</span><select id="team-league">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人制`, String(state.data.settings.league))).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>名单</span><small>选中球场球员后可分配</small></div><div class="roster-labels"><span>号码</span><span>姓名</span><span>位置</span><span></span></div><div id="roster-rows">${state.data.roster.map(rosterRow).join('')}</div><button class="text-button" data-action="roster-add">+ 添加球员</button>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="save-team">保存球队</button>', true);
@@ -232,7 +249,7 @@ function download(content, filename, mime) {
 }
 const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
 async function pngExport() {
-  const svg = fieldSVG(current(), state.data.settings, { prefix: 'export' }), url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  const svg = fieldSVG(current(), viewSettings(), { prefix: 'export' }), url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   const img = new Image();
   img.onload = () => {
     try {
@@ -274,6 +291,9 @@ function deleteSelected() {
   }); toast('对象已删除，可撤销恢复。');
 }
 const actions = {
+  'clear-filters': () => { query=''; filter=''; formationFilter=''; render(); },
+  'keep-drawing': () => { pendingNavigation=null; closeModal(); },
+  'discard-draft': () => { draft=null; const next=pendingNavigation; pendingNavigation=null; closeModal(); next?.(); },
   new: newModal, 'close-modal': closeModal, export: exportModal, team: teamModal, help: helpModal, print: printModal,
   sidebar: () => { sidebarOpen = !sidebarOpen; render(); },
   favorite: () => edit(p => { p.favorite = !p.favorite; }),
@@ -281,13 +301,14 @@ const actions = {
   mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast('球员、路线、区域与标注已左右镜像。'); },
   duplicate: () => { if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。'); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
   'clear-selection': () => { selection = null; draft = null; tool = 'select'; render(); },
-  grid: () => edit((p, d) => { d.settings.showGrid = !d.settings.showGrid; }),
-  theme: () => edit((p, d) => { d.settings.fieldTheme = d.settings.fieldTheme === 'dark' ? 'light' : 'dark'; }),
+  grid: () => { viewOverrides.showGrid = !viewSettings().showGrid; render(); },
+  theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'dark' ? 'light' : 'dark'; render(); },
   'finish-route': finishRoute, 'cancel-draft': () => { draft = null; tool = 'select'; render(); },
   'delete-selection': deleteSelected,
   'create-play': () => {
     if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。'); return; }
-    const title = $('#new-title').value.trim() || '新战术', b = $('#new-book').value, form = $('#new-formation').value, count = Number($('#new-count').value);
+    const title = $('#new-title').value.trim(), b = $('#new-book').value, form = $('#new-formation').value, count = Number($('#new-count').value);
+    if (!title) { feedback('请给战术起一个名字，再创建。'); $('#new-title').focus(); return; }
     const custom = form.startsWith('custom:') ? state.data.formations.find(f => f.id === form.slice(7)) : null;
     const p = makePlay({ title, formation: custom?.name || form, book: b, count });
     if (custom) { p.players = clone(custom.players); p.ball.holderId = p.players.find(v => v.label === 'QB')?.id || p.players[0].id; }
@@ -321,7 +342,7 @@ const actions = {
   'roster-remove': node => node.closest('.roster-row').remove(),
   'save-team': () => { const team = { name: $('#team-name').value.trim() || 'MY TEAM', subtitle: $('#team-subtitle').value, accent: $('#team-accent').value }; const league = Number($('#team-league').value); const roster = [...$('#roster-rows').children].map(row => ({ id: row.dataset.rosterId, ...Object.fromEntries([...row.querySelectorAll('input')].map(n => [n.dataset.rosterField, n.value.trim()])) })).filter(r => r.name); closeModal(); edit((p, d) => { d.team = team; d.roster = roster; d.settings.league = league; }); toast('球队与球员名单已保存。'); },
   import: () => $('#import-input').click(),
-  'download-svg': () => { download(fieldSVG(current(), state.data.settings, { prefix: 'export' }), `${safeName(current().title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。'); },
+  'download-svg': () => { download(fieldSVG(current(), viewSettings(), { prefix: 'export' }), `${safeName(current().title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。'); },
   'download-png': pngExport,
   'download-json': () => { download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。'); },
   'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast('当前战术已生成。'); },
@@ -334,6 +355,7 @@ document.addEventListener('click', event => {
   const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
   if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast('当前为只读权限。'); return; }
   if (name === 'choose') return choose(value);
+  if (['book','tool','new','import'].includes(name) && !confirmDraft(() => node.click())) return;
   if (name === 'book') { resetAnimation(); draft = null; selection = null; book = value; filter = ''; formationFilter = ''; query = ''; const p = filtered()[0]; if (p) state.selectedId = p.id; render(); return; }
   if (name === 'tool') { resetAnimation(); tool = value; draft = null; render(); return; }
   if (name === 'select-route') { selection = { type: 'route', id: value }; tool = 'select'; draft = null; refreshSelection(); return; }
@@ -347,17 +369,22 @@ document.addEventListener('input', event => {
 });
 document.addEventListener('change', event => {
   const input = event.target;
-  if (!canEdit() && (input.dataset.prop || input.dataset.ball || ['apply-formation','show-names'].includes(input.id))) return;
+  if (!canEdit() && (input.dataset.prop || input.dataset.ball || input.id === 'apply-formation')) return;
   if (input.id === 'category-filter') { filter = input.value; render(); }
   else if (input.id === 'formation-filter') { formationFilter = input.value; render(); }
   else if (input.id === 'speed') speed = Number(input.value);
-  else if (input.id === 'show-names') edit((p, d) => { d.settings.showNames = input.checked; });
+  else if (input.id === 'show-names') { viewOverrides.showNames = input.checked; render(); }
   else if (input.id === 'print-scope' || input.id === 'print-layout') updatePrint();
   else if (input.id === 'apply-formation' && input.value) {
     const [kind, ...rest] = input.value.split(':'), value = rest.join(':');
     const custom = kind === 'custom' ? state.data.formations.find(f => f.id === value) : null;
     const players = custom ? clone(custom.players) : formationPlayers(value, state.data.settings.league, current().book === 'defense' ? 'defense' : 'offense');
-    edit(p => { p.players = players; p.formation = custom?.name || value; p.routes = []; p.zones = []; p.annotations = []; p.ball.holderId = players.find(v => v.label === 'QB')?.id || players[0].id; p.ball.receiverId = ''; }); toast('阵型已应用，路线已清空；可撤销恢复。');
+    const apply = () => { closeModal(); edit(p => { p.players = players; p.formation = custom?.name || value; p.routes = []; p.zones = []; p.annotations = []; p.ball.holderId = players.find(v => v.label === 'QB')?.id || players[0].id; p.ball.receiverId = ''; }); toast('已替换阵型。路线与标注已清空，可用撤销恢复。'); };
+    if (current().routes.length || current().zones.length || current().annotations.length) {
+      actions['confirm-apply-formation'] = () => { delete actions['confirm-apply-formation']; apply(); };
+      input.value = '';
+      openModal('替换初始阵型？', `<p>将当前战术替换为 <strong>${e(custom?.name || value)}</strong>。</p><p>这会清除当前的 ${current().routes.length} 条路线、${current().zones.length} 个区域和 ${current().annotations.length} 条标注。球队名单与其他战术保持原样，操作后可撤销。</p>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-apply-formation">替换阵型并清空路线</button>');
+    } else apply();
   } else if (input.dataset.ball) edit(p => { p.ball[input.dataset.ball] = input.value; if (p.ball.holderId === p.ball.receiverId) p.ball.receiverId = ''; });
   else if (input.dataset.prop) {
     const key = input.dataset.prop;
@@ -391,7 +418,8 @@ $('#import-input').addEventListener('change', async event => {
 document.addEventListener('keydown', event => {
   const modal = $('.modal');
   if (modal) {
-    if (event.key === 'Escape') closeModal();
+    if (event.key === 'Escape') { pendingNavigation=null; closeModal(); }
+    if (event.key === 'Enter' && event.target.matches('input') && !event.target.closest('form')) { const primary=modal.querySelector('footer .button.primary:not(:disabled)'); if(primary){event.preventDefault();primary.click();} }
     if (event.key === 'Tab') { const inputs = [...modal.querySelectorAll('button,input,select,textarea,a[href]')].filter(n => !n.disabled); const first = inputs[0], last = inputs.at(-1); if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); } }
     return;
   }
@@ -401,7 +429,7 @@ document.addEventListener('keydown', event => {
   if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); restore(history.redo(state)); return; }
   if (event.key === ' ') { event.preventDefault(); togglePlay(); }
   else if (event.key === 'Enter' && draft) { event.preventDefault(); finishRoute(); }
-  else if (event.key === 'Escape') { draft = null; selection = null; tool = 'select'; render(); }
+  else if (event.key === 'Escape') { sidebarOpen = false; draft = null; selection = null; tool = 'select'; render(); }
   else if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); deleteSelected(); }
   else if (key === '?') helpModal();
   else if (canEdit() && !event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) { resetAnimation(); draft = null; tool = ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]; render(); }
@@ -421,7 +449,7 @@ if (cloudMode()) {
     },
     onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
     onPermissionLost(error) { resetAnimation(); draft = null; drag = null; render(); toast(error.message || '访问权限已变更，请重新登录或联系管理员。'); },
-    showEditor(show) { $('#app').hidden = !show; },
+    showEditor(show) { $('#app').hidden = !show; $('.skip-link').hidden = !show; },
     isBusy: () => !!drag || !!draft || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
     openModal, closeModal, toast, download
   });
