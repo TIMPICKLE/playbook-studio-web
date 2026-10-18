@@ -72,3 +72,15 @@ test('initial accounts reuse existing owner data instead of replacing previously
   const auth = await login(db), read = await api(db, `/workspaces/${created.body.id}`, { cookie: auth.cookie });
   assert.equal(read.body.data.plays[0].title, 'Keep this diagram'); assert.equal(read.body.revision, 2);
 });
+test('existing accounts join another book with separate permissions and no password or owner-role changes', async t => {
+  const db = database(t), initial = await setup(db), admin = await login(db), coach = await login(db, 'coach_01', pass + '-coach');
+  const second = await api(db, '/workspaces', { cookie: admin.cookie, method: 'POST', body: { title: 'Second book' } });
+  const path = `/workspaces/${second.body.id}/members`;
+  assert.equal((await api(db,path,{cookie:coach.cookie,method:'POST',body:{username:'player_01',role:'editor'}})).status,404);
+  assert.equal((await api(db,path,{cookie:admin.cookie,method:'POST',body:{username:'coach_01',role:'viewer'}})).status,201);
+  assert.equal((await api(db,`/workspaces/${initial.workspaceId}`,{cookie:coach.cookie})).body.role,'editor');
+  assert.equal((await api(db,`/workspaces/${second.body.id}`,{cookie:coach.cookie})).body.role,'viewer');
+  assert.equal((await api(db,path,{cookie:admin.cookie,method:'POST',body:{username:'tim_admin',role:'viewer'}})).status,409);
+  assert.equal((await api(db,path,{cookie:admin.cookie,method:'POST',body:{username:'player_01',role:'owner'}})).status,400);
+  assert.equal((await login(db,'coach_01',pass+'-coach')).status,200);
+});

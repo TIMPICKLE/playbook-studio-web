@@ -96,6 +96,15 @@ export async function handleApi(request, env, user) {
     }
     if (path[2] === 'members') {
       await access(db, workspaceId, user.userId, 'owner');
+      if (path.length === 3 && request.method === 'POST') {
+        const body = await readJson(request, 4096), assigned = role(body.role), name = typeof body.username === 'string' ? body.username.trim().toLowerCase() : '';
+        const account = await db.prepare('SELECT user_id,username FROM accounts WHERE username=? AND disabled=0').bind(name).first();
+        if (!account) fail(404, '此账号不存在，请先新建成员账号');
+        const added = await db.prepare('INSERT INTO members(workspace_id,user_id,role,joined_at) VALUES(?,?,?,?) ON CONFLICT(workspace_id,user_id) DO NOTHING').bind(workspaceId, account.user_id, assigned, now).run();
+        if (!added.meta?.changes) fail(409, '该账号已经在此战术本中，请在列表中调整权限');
+        await event(db, workspaceId, user.userId, 'account_added', `${name}:${assigned}`);
+        return json({ id: account.user_id, username: name, role: assigned }, 201);
+      }
       if (path.length === 3 && request.method === 'GET') { const members = await db.prepare('SELECT m.user_id AS id,u.email,u.name,m.role,a.username,a.created_by AS accountCreator FROM members m JOIN users u ON u.id=m.user_id LEFT JOIN accounts a ON a.user_id=m.user_id WHERE m.workspace_id=? ORDER BY m.joined_at').bind(workspaceId).all(); const invites = await db.prepare("SELECT id,email,role,expires_at AS expiresAt FROM invites WHERE workspace_id=? AND status='pending' AND expires_at>? ORDER BY created_at DESC").bind(workspaceId, now).all(); return json({ members: members.results.map(m => ({ ...m, canResetPassword: m.accountCreator === user.userId && m.id !== user.userId, accountCreator: undefined })), invites: invites.results }); }
       if (path.length === 5 && path[4] === 'password' && request.method === 'POST') { const targetMember = await db.prepare('SELECT role FROM members WHERE workspace_id=? AND user_id=?').bind(workspaceId, path[3]).first(); if (!targetMember) fail(404, '成员不存在'); const body = await readJson(request, 4096); await resetAccount(db, user, path[3], body.password); await event(db, workspaceId, user.userId, 'password_reset', path[3]); return json({ success: true }); }
       const target = await db.prepare('SELECT role FROM members WHERE workspace_id=? AND user_id=?').bind(workspaceId, path[3] || '').first(); if (!target) fail(404, '成员不存在'); if (target.role === 'owner') fail(400, '管理员身份不能被移除或降级');

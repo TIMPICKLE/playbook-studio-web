@@ -33,6 +33,7 @@ D1 是持久云端数据库，战术不会因刷新或换设备消失。每个�
 | POST `/api/auth/logout` | 撤销会话 |
 | POST `/api/auth/password` | 验证当前密码后修改自己的密码，撤销旧会话 |
 | POST `/api/auth/bootstrap` | 运行时秘密授权的一次性初始账号配置 |
+| POST `/api/workspaces/:id/members` | 管理员将已有团队账号以 editor / viewer 加入当前战术本，不改其他战术本权限 |
 | POST `/api/workspaces/:id/accounts` | 管理员创建 editor / viewer 账号并加入当前战术本 |
 | POST `/api/workspaces/:id/members/:userId/password` | 创建者管理员重置自己创建的成员账号密码 |
 
