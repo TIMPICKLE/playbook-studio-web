@@ -92,12 +92,38 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       click('add-player:defense'); const second = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].players.at(-1); click('clear-selection');
       change('[data-ball="holderId"]', first.id); change('[data-ball="receiverId"]', second.id);
       const withDefenders = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
-      click('add-defense-43'); const after = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), play = after.plays[0];
+      click('add-defense-43'); assert.match(query('.modal-body').textContent,/清除.*路线/); click('confirm-defense-43'); const after = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), play = after.plays[0];
       assert.equal(play.players.filter(p => p.side === 'defense').length, 11);
       assert.deepEqual(play.routes, before.plays[0].routes);
       assert.equal(play.ball.holderId, play.players.find(p => p.label === 'QB').id); assert.equal(play.ball.receiverId, '');
       assert.ok(play.routes.every(r => play.players.some(p => p.id === r.playerId)));
       click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), withDefenders);
+    });
+    await t.test('editing a property keeps the inspector and the next field mounted, so changing focus does not swallow the next click', () => {
+      query('[data-action="clear-selection"]')?.click();const inspector=query('.inspector'), name=query('[data-prop="title"]'), next=query('[data-prop="category"]');
+      change('[data-prop="title"]','Stable inspector');assert.equal(query('.inspector'),inspector);assert.equal(query('[data-prop="title"]'),name);assert.equal(query('[data-prop="category"]'),next);assert.match(query('h1').textContent,/Stable inspector/);click('undo');
+    });
+    await t.test('drag batches pointer samples, preserves SVG nodes during movement, and commits the final position once', async () => {
+      click('edit-mode');query('[data-action="clear-selection"]')?.click();geometry();const before=win.localStorage.getItem(STORAGE_KEY);
+      pointer(query('#field [data-player]'),'pointerdown',400,500);geometry();const svg=query('#field svg'), player=query('#field [data-player]'), start=player.getAttribute('transform');
+      for(let i=1;i<=20;i++)pointer(query('#field'),'pointermove',400+i,500+i);
+      await new Promise(resolve=>win.requestAnimationFrame(resolve));
+      assert.equal(query('#field svg'),svg);assert.equal(query('#field [data-player]'),player);assert.notEqual(player.getAttribute('transform'),start);assert.equal(win.localStorage.getItem(STORAGE_KEY),before);
+      pointer(query('#field'),'pointerup',420,520);assert.notEqual(win.localStorage.getItem(STORAGE_KEY),before);click('undo');assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)),decodeWorkspace(before));
+    });
+    await t.test('live route preview never persists ghost points; backstep and same-tool clicks preserve the draft and HUD clicks reach their button', async () => {
+      geometry();pointer(query('#field [data-player]'),'pointerdown',400,500);pointer(query('#field'),'pointerup',400,500);click('tool:route');geometry();
+      const before=win.localStorage.getItem(STORAGE_KEY), svg=query('#field svg');pointer(query('#field'),'pointermove',650,300);
+      await new Promise(resolve=>win.requestAnimationFrame(resolve));
+      assert.equal(query('#field svg'),svg);assert.match(query('.draft-preview').getAttribute('d'),/ L/);assert.equal(query('.draft-cursor').getAttribute('visibility'),'visible');assert.equal(win.localStorage.getItem(STORAGE_KEY),before);
+      pointer(query('#field'),'pointerdown',500,350);pointer(query('#field'),'pointerdown',600,250);click('tool:route');assert.match(query('.context-player').textContent,/2 个路线点/);
+      click('undo-point');assert.match(query('.context-player').textContent,/1 个路线点/);assert.equal(win.localStorage.getItem(STORAGE_KEY),before);
+      const finish=query('[data-action="finish-route"]');pointer(finish,'pointerdown',500,350);finish.click();assert.ok(query('[data-prop="duration"]'));const saved=decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0],route=saved.routes.at(-1);assert.equal(route.points.length,2);assert.equal(route.optional,false);assert.equal(saved.routes.filter(r=>r.playerId===route.playerId&&!r.optional&&['route','motion'].includes(r.kind)).length,1);click('undo');
+    });
+    await t.test('pausing and scrubbing keep the same player nodes; returning to edit restores initial positions without changing saved data', () => {
+      query('[data-action="clear-selection"]')?.click();const before=win.localStorage.getItem(STORAGE_KEY);click('play');const svg=query('#field svg'), player=query('#field [data-player]');click('play');assert.equal(query('#field svg'),svg);assert.equal(query('#field [data-player]'),player);
+      query('#timeline').value='2.5';query('#timeline').dispatchEvent(new win.Event('input',{bubbles:true}));assert.equal(query('#field svg'),svg);assert.equal(query('[data-action="rehearse-mode"]').getAttribute('aria-pressed'),'true');assert.match(query('#playback-phase').textContent,/传球中/);
+      click('edit-mode');assert.equal(query('[data-action="edit-mode"]').getAttribute('aria-pressed'),'true');assert.match(query('#time-label').textContent,/0.0/);assert.equal(win.localStorage.getItem(STORAGE_KEY),before);
     });
   } finally { await win.happyDOM.abort(); for (const name of names) { const desc = previous[name]; if (desc) Object.defineProperty(globalThis, name, desc); else delete globalThis[name]; } }
 });

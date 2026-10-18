@@ -41,7 +41,7 @@ async function writeWorkspace(db, workspaceId, user, data, expected, action = 's
 export async function handleApi(request, env, user) {
   try {
     const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
-    if (path[0] === 'health' && request.method === 'GET') { if (!env.DB) return json({ ready: false }, 503); await env.DB.prepare('SELECT id FROM workspaces LIMIT 1').first(); return json({ ready: true, storage: 'cloud', version: '3.0.0' }); }
+    if (path[0] === 'health' && request.method === 'GET') { if (!env.DB) return json({ ready: false }, 503); await env.DB.prepare('SELECT id FROM workspaces LIMIT 1').first(); return json({ ready: true, storage: 'cloud', version: '3.1.0' }); }
     if (!['GET', 'HEAD'].includes(request.method) && request.headers.get('origin') !== new URL(request.url).origin) fail(403, '请求来源不正确');
     user = await resolveIdentity(request, env, user);
     if (path[0] === 'auth') return await handleAuth(request, env, user);

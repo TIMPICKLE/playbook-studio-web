@@ -57,19 +57,18 @@ export function fieldSVG(play, settings = {}, options = {}) {
     defs += marker(markerId, stroke);
     const d = r.kind === 'motion' ? motionPath(r) : routePath(r);
     const dash = r.kind === 'pass' ? '4 7' : r.optional ? '9 6' : '';
-    let path = `<g data-route="${e(r.id)}" role="button" aria-label="${e(play.players.find(p => p.id === r.playerId)?.label)} 的${r.optional ? '选项' : ''}路线" tabindex="0"><path d="${d}" fill="none" stroke="transparent" stroke-width="20" class="route-hit"/><path d="${d}" fill="none" stroke="${stroke}" stroke-width="${active ? 4 : thumbnail ? 4 : 2.8}" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''} opacity="${r.optional ? .65 : 1}" marker-end="url(#${markerId}-${r.endCap})" pointer-events="none"/></g>`;
+    let path = `<g data-route="${e(r.id)}" role="button" aria-label="${e(play.players.find(p => p.id === r.playerId)?.label)} 的${r.optional ? '选项' : ''}路线" tabindex="0"><path d="${d}" fill="none" stroke="transparent" stroke-width="20" class="route-hit"/><path class="route-stroke" ${dash ? '' : 'pathLength="1"'} d="${d}" fill="none" stroke="${stroke}" stroke-width="${active ? 4 : thumbnail ? 4 : 2.8}" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''} opacity="${r.optional ? .65 : 1}" marker-end="url(#${markerId}-${r.endCap})" pointer-events="none"/></g>`;
     if (active && !thumbnail && !print && time === 0) path += r.points.slice(1).map((p, j) => { const v = project(p); return `<circle data-point="${j + 1}" data-route-id="${e(r.id)}" cx="${n(v.x)}" cy="${n(v.y)}" r="6" fill="${stroke}" stroke="${bg}" stroke-width="2" class="point-handle"/>`; }).join('');
     return path;
   }).join('');
-  if (drawing?.points?.length > 1) {
-    const r = { points: drawing.points, smooth: false };
+  if (drawing?.points?.length) {
     defs += marker(`${prefix}-draft`, '#ffd166');
   }
-  const draft = drawing?.points?.length > 1 ? `<path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffd166" stroke-width="3" stroke-dasharray="6 5" fill="none" pointer-events="none" marker-end="url(#${prefix}-draft-arrow)"/>` : '';
+  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffd166" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffd166" stroke="#153c30" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffd166" stroke="#153c30" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffd166" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
   const players = play.players.map(p => {
     const v = project(animatedPlayer(play, p, time)), active = selected?.type === 'player' && selected.id === p.id;
     const fill = light && p.color === COLORS.offense ? '#356b3d' : p.color;
-    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" tabindex="0" class="player-token">${active && !thumbnail && !print ? '<circle r="24" fill="none" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="4 3"/>' : ''}${symbol(p, fill)}<text y="4.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${p.label.length > 3 ? 9 : 12}" font-weight="800" fill="${light && fill === '#356b3d' ? '#ffffff' : '#163325'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g>`;
+    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? '<circle class="selection-ring" r="25" fill="none" stroke="#ffd166" stroke-width="2"/>' : ''}<circle class="player-hit" r="27" fill="transparent"/>${symbol(p, fill)}<text y="4.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${p.label.length > 3 ? 9 : 12}" font-weight="800" fill="${light && fill === '#356b3d' ? '#ffffff' : '#163325'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
   }).join('');
   const annotations = play.annotations.map(a => { const p = project(a), active = selected?.type === 'annotation' && selected.id === a.id; return `<g data-annotation="${e(a.id)}" role="button" aria-label="标注 ${e(a.text)}" tabindex="0"><text x="${n(p.x)}" y="${n(p.y)}" fill="${active ? '#ffd166' : ink}" font-size="18" font-weight="600" paint-order="stroke" stroke="${bg}" stroke-width="5" stroke-linejoin="round">${e(a.text)}</text></g>`; }).join('');
   const b = animatedBall(play, time), bv = b ? project(b) : null;
@@ -79,11 +78,43 @@ export function fieldSVG(play, settings = {}, options = {}) {
 
 export function updateAnimation(svg, play, time, prefix = 'pitch') {
   if (!svg) return;
+  const nodes = new Map([...svg.querySelectorAll('[data-player]')].map(node => [node.dataset.player,node]));
   for (const p of play.players) {
     const v = project(animatedPlayer(play, p, time));
-    const node = [...svg.querySelectorAll('[data-player]')].find(n => n.dataset.player === p.id);
+    const node = nodes.get(p.id);
     node?.setAttribute('transform', `translate(${n(v.x)} ${n(v.y)})`);
   }
   const b = animatedBall(play, time), v = b ? project(b) : null;
   if (v) svg.querySelector(`#${prefix}-ball`)?.setAttribute('transform', `translate(${n(v.x + 23)} ${n(v.y - 11)})`);
+}
+
+// Preserve the SVG, focus, and pointer capture during a gesture. No markup replacement.
+export function updateGeometry(svg, play) {
+  updateAnimation(svg, play, 0);
+  const routes = new Map(play.routes.map(route => [route.id,route]));
+  for (const node of svg.querySelectorAll('[data-route]')) {
+    const route = routes.get(node.dataset.route); if (!route) continue;
+    const d = route.kind === 'motion' ? motionPath(route) : routePath(route);
+    for (const path of node.querySelectorAll('path')) path.setAttribute('d', d);
+  }
+  for (const node of svg.querySelectorAll('[data-point]')) {
+    const point = routes.get(node.dataset.routeId)?.points[Number(node.dataset.point)];
+    if (point) { const v=project(point); node.setAttribute('cx',n(v.x)); node.setAttribute('cy',n(v.y)); }
+  }
+  for (const node of svg.querySelectorAll('[data-zone]')) {
+    const zone=play.zones.find(z=>z.id===node.dataset.zone); if (!zone) continue;
+    const v=project(zone), ellipse=node.querySelector('ellipse'), text=node.querySelector('text');
+    ellipse.setAttribute('cx',n(v.x)); ellipse.setAttribute('cy',n(v.y)); ellipse.setAttribute('rx',n(zone.rx*9.64)); ellipse.setAttribute('ry',n(zone.ry*7.6)); text.setAttribute('x',n(v.x)); text.setAttribute('y',n(v.y+4));
+  }
+  for (const node of svg.querySelectorAll('[data-annotation]')) {
+    const annotation=play.annotations.find(a=>a.id===node.dataset.annotation); if(!annotation)continue;
+    const v=project(annotation), text=node.querySelector('text'); text.setAttribute('x',n(v.x)); text.setAttribute('y',n(v.y));
+  }
+}
+export function previewDraft(svg, drawing, point) {
+  const path=svg?.querySelector('.draft-preview'), cursor=svg?.querySelector('.draft-cursor');
+  if (!path || !drawing || !cursor) return;
+  path.setAttribute('d',point ? routePath({ points:[drawing.points.at(-1), point] }) : '');
+  cursor.setAttribute('visibility',point?'visible':'hidden');
+  if(point) { const v=project(point); cursor.setAttribute('cx',n(v.x));cursor.setAttribute('cy',n(v.y)); }
 }
