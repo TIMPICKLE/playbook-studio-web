@@ -4,7 +4,7 @@
 
 **[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html)** · [GitHub Pages 入口与旧版迁移](https://timpickle.github.io/playbook-studio-web/) · [云端技术说明](docs/CLOUD.md) · [验证记录](docs/VALIDATION.md)
 
-![Playbook Studio v3.2 glass workspace](docs/assets/v3-2-glass.jpg)
+![STINGERS v3.3 紫黄主题登录页](docs/assets/v3-3-stingers-login.jpg)
 
 ## 共享与权限
 
@@ -42,7 +42,7 @@
 
 ## v3 界面与操作
 
-依据 [taste-skill](https://github.com/Leonxlnx/taste-skill) 优化操作层级与反馈。v3.2 加入深绿色磨玻璃控件、自托管 tsParticles 粒子、鼠标互动、按钮涟漪、工具切换与球员入场动画。右上角「视觉效果」可选完整、轻量、关闭；偏好只作用于当前设备，并跟随系统减少动画设置。
+依据 [taste-skill](https://github.com/Leonxlnx/taste-skill) 优化操作层级与反馈。v3.3 使用 STINGERS 紫黄主题、透明队标、闪电与星形图标，并延续磨玻璃控件、自托管 tsParticles 粒子、鼠标互动、按钮涟漪、工具切换与球员入场动画。右上角「视觉效果」可选完整、轻量、关闭；偏好只作用于当前设备，并跟随系统减少动画设置。
 
 绘图工具有文字名称，路线绘制有步骤提示，草稿切换与阵型替换会先确认；请求提供加载、成功与错误状态。详见 [组件调研与设计记录](docs/DESIGN.md)。
 

@@ -1,7 +1,7 @@
 export const VERSION = 1;
 export const STORAGE_KEY = 'playbook-studio:v1';
 export const BOOKS = { offense: '进攻', defense: '防守', special: '特勤' };
-export const COLORS = { offense: '#d5f7be', defense: '#fb9b87', route: '#d5f7be', pass: '#ffd166', zone: '#88bfff' };
+export const COLORS = { offense: '#ffdc42', defense: '#c4a5f5', route: '#ffdc42', pass: '#ffd166', zone: '#88bfff' };
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const uid = () => globalThis.crypto?.randomUUID?.() || `id-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 export const clamp = (n, min = 0, max = 100) => Math.max(min, Math.min(max, n));
@@ -81,7 +81,7 @@ export function starterWorkspace() {
   for (const label of ['DE', 'DT', 'M']) { const p = blitz.players.find(p => p.label === label); addRoute(blitz, label, [[p.x, 75]], 'route', { duration: 3 }); }
   const goal = makePlay({ title: 'Field Goal · 射门保护', formation: 'Field Goal', book: 'special' }); goal.category = '射门'; goal.personnel = 'Field Goal Unit';
   addRoute(goal, 'K', [[53, 80]], 'route', { duration: 2 }); goal.ball.holderId = goal.players.find(p => p.label === 'H').id;
-  return { team: { name: 'TIM FOOTBALL', subtitle: '2026 SEASON', accent: '#285d3f' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster: [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }], formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
+  return { team: { name: 'TIM FOOTBALL', subtitle: '2026 SEASON', accent: '#46217a' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster: [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }], formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
 }
 
 export function mirrorPlay(play) {

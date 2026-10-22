@@ -22,10 +22,10 @@ export function particleOptions(mode, compact = false) {
     interactivity: { detectsOn: 'window', events: { onHover: { enable: !lite && !compact, mode: 'repulse' }, resize: { enable: true } }, modes: { repulse: { distance: 115, duration: .8, speed: .35 } } },
     particles: {
       number: { value: lite ? 28 : compact ? 42 : 90, density: { enable: false } },
-      color: { value: ['#b9eed9', '#dbedb0', '#65cbb0'] },
+      color: { value: ['#c2a1f4', '#ffdc42', '#9a70dc'] },
       shape: { type: 'circle' }, size: { value: { min: 1, max: compact ? 2.2 : 3.4 } },
       opacity: { value: { min: .16, max: .7 }, animation: { enable: true, speed: .45, sync: false } },
-      links: { enable: !lite && !compact, distance: 125, color: '#80c6ab', opacity: .13, width: .6 },
+      links: { enable: !lite && !compact, distance: 125, color: '#b68be9', opacity: .13, width: .6 },
       move: { enable: true, direction: 'top-right', speed: { min: .22, max: .75 }, random: true, straight: false, outModes: { default: 'out' } }
     }
   };

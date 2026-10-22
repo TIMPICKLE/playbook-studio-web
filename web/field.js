@@ -31,7 +31,7 @@ function symbol(p, color) {
 export function fieldSVG(play, settings = {}, options = {}) {
   const { thumbnail = false, selected = null, time = 0, drawing = null, print = false, prefix = 'pitch' } = options;
   const light = settings.fieldTheme === 'light' || print;
-  const bg = light ? '#f0f3e9' : '#153c30', line = light ? '#b7c8b3' : '#426051', ink = light ? '#4e6e55' : '#b4c7b8';
+  const bg = light ? '#f4effb' : '#24163b', line = light ? '#d1c4de' : '#59466f', ink = light ? '#6c5188' : '#c7b7db';
   const lines = [];
   for (let i = 0; i <= 10; i++) {
     const y = 20 + i * 76;
@@ -45,7 +45,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
     }
   }
   const los = project({ x: 0, y: 67 }).y;
-  lines.push(`<line x1="18" y1="${los}" x2="982" y2="${los}" stroke="${light ? '#90a877' : '#bdd09c'}" stroke-width="1.6" stroke-dasharray="8 8" opacity=".65"/>`);
+  lines.push(`<line x1="18" y1="${los}" x2="982" y2="${los}" stroke="${light ? '#987b1a' : '#ffdc42'}" stroke-width="1.6" stroke-dasharray="8 8" opacity=".65"/>`);
   if (!thumbnail) lines.push(`<text x="949" y="${los - 9}" fill="${ink}" font-size="11" text-anchor="end" letter-spacing="2">LINE OF SCRIMMAGE</text>`);
   const zones = play.zones.map(z => {
     const p = project(z), active = selected?.type === 'zone' && selected.id === z.id;
@@ -53,7 +53,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
   }).join('');
   let defs = '';
   const routes = play.routes.map((r, i) => {
-    const active = selected?.type === 'route' && selected.id === r.id, markerId = `${prefix}-r${i}`, stroke = light && r.color === COLORS.offense ? '#356b3d' : light && r.color === '#ffd166' ? '#bd8610' : r.color;
+    const active = selected?.type === 'route' && selected.id === r.id, markerId = `${prefix}-r${i}`, stroke = light && r.color === COLORS.offense ? '#5b2f91' : light && r.color === '#ffd166' ? '#bd8610' : r.color;
     defs += marker(markerId, stroke);
     const d = r.kind === 'motion' ? motionPath(r) : routePath(r);
     const dash = r.kind === 'pass' ? '4 7' : r.optional ? '9 6' : '';
@@ -64,11 +64,11 @@ export function fieldSVG(play, settings = {}, options = {}) {
   if (drawing?.points?.length) {
     defs += marker(`${prefix}-draft`, '#ffd166');
   }
-  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffd166" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffd166" stroke="#153c30" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffd166" stroke="#153c30" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffd166" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
+  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffd166" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffd166" stroke="#24163b" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffd166" stroke="#24163b" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffd166" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
   const players = play.players.map(p => {
     const v = project(animatedPlayer(play, p, time)), active = selected?.type === 'player' && selected.id === p.id;
-    const fill = light && p.color === COLORS.offense ? '#356b3d' : p.color;
-    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? '<circle class="selection-ring" r="25" fill="none" stroke="#ffd166" stroke-width="2"/>' : ''}<circle class="player-hit" r="27" fill="transparent"/>${symbol(p, fill)}<text y="4.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${p.label.length > 3 ? 9 : 12}" font-weight="800" fill="${light && fill === '#356b3d' ? '#ffffff' : '#163325'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
+    const fill = light && p.color === COLORS.offense ? '#5b2f91' : p.color;
+    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? '<circle class="selection-ring" r="25" fill="none" stroke="#ffd166" stroke-width="2"/>' : ''}<circle class="player-hit" r="27" fill="transparent"/>${symbol(p, fill)}<text y="4.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${p.label.length > 3 ? 9 : 12}" font-weight="800" fill="${light && fill === '#5b2f91' ? '#ffffff' : '#251637'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
   }).join('');
   const annotations = play.annotations.map(a => { const p = project(a), active = selected?.type === 'annotation' && selected.id === a.id; return `<g data-annotation="${e(a.id)}" role="button" aria-label="标注 ${e(a.text)}" tabindex="0"><text x="${n(p.x)}" y="${n(p.y)}" fill="${active ? '#ffd166' : ink}" font-size="18" font-weight="600" paint-order="stroke" stroke="${bg}" stroke-width="5" stroke-linejoin="round">${e(a.text)}</text></g>`; }).join('');
   const b = animatedBall(play, time), bv = b ? project(b) : null;
