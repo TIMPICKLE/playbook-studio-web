@@ -4,7 +4,7 @@
 
 **[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html)** · [GitHub Pages 入口与旧版迁移](https://timpickle.github.io/playbook-studio-web/) · [云端技术说明](docs/CLOUD.md) · [验证记录](docs/VALIDATION.md)
 
-![Playbook Studio workspace — v1 editor](docs/assets/published.jpg)
+![Playbook Studio v3.2 glass workspace](docs/assets/v3-2-glass.jpg)
 
 ## 共享与权限
 
@@ -42,7 +42,9 @@
 
 ## v3 界面与操作
 
-依据 [taste-skill 的现有项目改版规范](https://github.com/Leonxlnx/taste-skill/blob/main/skills/redesign-skill/SKILL.md)，重写登录、团队操作栏和编辑器样式。绘图工具有文字名称，球场上方可直接添加对象，路线绘制有分步提示，未完成草稿切换与阵型替换会先确认；请求有加载、成功、错误状态。只读模式明确说明可用操作，明暗与码线等视图选项不修改团队数据。详见 [设计记录](docs/DESIGN.md)。
+依据 [taste-skill](https://github.com/Leonxlnx/taste-skill) 优化操作层级与反馈。v3.2 加入深绿色磨玻璃控件、自托管 tsParticles 粒子、鼠标互动、按钮涟漪、工具切换与球员入场动画。右上角「视觉效果」可选完整、轻量、关闭；偏好只作用于当前设备，并跟随系统减少动画设置。
+
+绘图工具有文字名称，路线绘制有步骤提示，草稿切换与阵型替换会先确认；请求提供加载、成功与错误状态。详见 [组件调研与设计记录](docs/DESIGN.md)。
 
 ## 编辑功能
 

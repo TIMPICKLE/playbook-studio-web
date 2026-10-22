@@ -2,7 +2,8 @@ import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, CLOUD_SITE } from './cloud.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft } from './field.js';
-import { enterContext, enterPlayers, revealPlay } from './motion.js';
+import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
+import { effectsControl, initEffects, burstAt } from './effects.js';
 
 const $ = selector => document.querySelector(selector);
 const icons = {
@@ -77,7 +78,7 @@ function render() {
       <div class="sidebar-bottom"><button data-action="team">${icon('team')} 球队与名单</button><button data-action="import">${icon('folder')} 导入战术本</button><button data-action="help">${icon('help')} 使用指南 <kbd>?</kbd></button><span class="local-status"><i></i><span id="save-state">${e(saveState)}</span></span></div>
     </aside>
     <main class="main" id="main-content" tabindex="-1">
-      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${sidebarOpen}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
+      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${sidebarOpen}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions">${effectsControl()}<button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
       <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${canEdit() ? '选择球员画路线，或直接拖动调整站位。' : '查看团队战术，播放演练并学习自己的跑位。'}</p></div><div class="play-actions">${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
       ${!canEdit() ? '<div class="readonly-banner"><strong>只读模式</strong><span>你可以查看、演练、导出和打印。需要修改时，请联系管理员调整权限。</span></div>' : ''}<div class="editor-layout"><section class="canvas-section" aria-label="球场与演练">
         <div class="canvas-heading"><div class="editor-mode" role="group" aria-label="工作模式"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}布阵与画线</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}战术演练</button></div><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', `tool-button ${viewSettings().showGrid ? 'enabled' : ''}`)}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div>
@@ -92,6 +93,7 @@ function render() {
   for (const [selector,top] of scrolls) if($(selector))$(selector).scrollTop=top;
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
+  if(!previousPlay) enterWorkbench(document.querySelector('.workspace'));
   renderedPlayId=p.id;
 }
 function fieldContext() {
@@ -292,6 +294,7 @@ function finishRoute() {
   const route = { id: uid(), playerId: draft.playerId, points: clone(draft.points), kind: tool, color: tool === 'pass' ? COLORS.pass : current().players.find(p => p.id === draft.playerId).color, smooth: false, endCap: tool === 'block' ? 'bar' : 'arrow', delay: 0, duration: tool === 'block' ? 2 : 4, optional: alreadyMoving && draft.mode==='optional' && ['route', 'motion'].includes(tool) };
   selection={type:'route',id:route.id};tool='select';
   edit(p=>{if(!route.optional&&['route','motion'].includes(route.kind))p.routes.filter(r=>r.playerId===route.playerId&&!r.optional&&['route','motion'].includes(r.kind)).forEach(r=>{r.optional=true;});p.routes.push(route);});
+  burstAt(document.querySelector('#field-context'));
   toast(alreadyMoving&&!route.optional?'新路线已设为主路线，旧路线保留为选项。可撤销恢复。':route.optional?'选项路线已保存，演练继续使用原主路线。':'路线已保存，可拖动节点调整。可撤销恢复。');
 }
 
@@ -549,6 +552,7 @@ document.addEventListener('keydown', event => {
   else if (key === '?') helpModal();
   else if (canEdit() && !event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) {setTool(({v:'select',r:'route',b:'block',m:'motion',p:'pass',z:'zone',t:'text'})[key]);}
 });
+initEffects();
 render();
 if (loadIssue) toast(loadIssue);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});

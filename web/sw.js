@@ -1,5 +1,5 @@
-const CACHE = 'playbook-studio-v3.1.0';
-const FILES = ['./index.html', './styles.css', './cloud.css', './interaction.css', './app.js', './model.js', './field.js', './motion.js', './cloud.js', './sync.js', './ui.js', './icon.svg', './manifest.webmanifest'];
+const CACHE = 'playbook-studio-v3.2.0';
+const FILES = ['./index.html', './styles.css', './cloud.css', './interaction.css', './glass.css', './effects.js', './vendor/tsparticles.slim-4.4.0.min.js', './app.js', './model.js', './field.js', './motion.js', './cloud.js', './sync.js', './ui.js', './icon.svg', './manifest.webmanifest'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('playbook-studio-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', event => {
