@@ -17,6 +17,25 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
   const geometry = () => { const svg = query('#field svg'); svg.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, right: 1000, bottom: 800, width: 1000, height: 800 }); };
   try {
     await t.test('seed UI renders actual starter plays and an editable pitch', () => { assert.match(query('h1').textContent, /Mesh/); assert.equal(doc.querySelectorAll('.play-card').length, 5); assert.equal(doc.querySelectorAll('#field [data-player]').length, 11); assert.ok(query('#field svg[role="application"]')); });
+    await t.test('board resizing preserves the live SVG, drafts and playbook; cancellation, keyboard and reset work', async () => {
+      geometry(); pointer(query('#field [data-player]'), 'pointerdown', 400, 500); pointer(query('#field'), 'pointerup', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 500, 350);
+      const before = win.localStorage.getItem(STORAGE_KEY), svg = query('#field svg'), points = query('.context-player').textContent;
+      const initial = Number(query('#board-height').value), handle = query('[data-board-resize="height"]');
+      pointer(handle, 'pointerdown', 500, 500); pointer(handle, 'pointermove', 500, 550); pointer(handle, 'pointerup', 500, 640);
+      assert.equal(Number(query('#board-height').value), initial + 140);
+      assert.equal(query('#field svg'), svg); assert.equal(query('.context-player').textContent, points); assert.equal(win.localStorage.getItem(STORAGE_KEY), before);
+      assert.equal(JSON.parse(win.localStorage.getItem('playbook-studio-board-layout-v1')).height, initial + 140);
+      pointer(handle, 'pointerdown', 500, 640); pointer(handle, 'pointermove', 500, 740); await new Promise(resolve => win.requestAnimationFrame(resolve)); pointer(handle, 'pointercancel', 500, 740);
+      assert.equal(Number(query('#board-height').value), initial + 140); assert.equal(doc.body.classList.contains('board-resizing'), false);
+      const width = query('[data-board-resize="width"]'); pointer(width, 'pointerdown', 900, 500); pointer(width, 'pointerup', 840, 500);
+      assert.equal(width.getAttribute('aria-valuenow'), '310');
+      width.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); assert.equal(width.getAttribute('aria-valuenow'), '290');
+      query('[data-board-action="expand"]').click(); assert.equal(query('.workspace').classList.contains('board-expanded'), true);
+      assert.equal(query('#field svg'), svg); assert.equal(query('.context-player').textContent, points); assert.equal(win.localStorage.getItem(STORAGE_KEY), before);
+      click('cancel-draft'); doc.body.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); assert.equal(query('.workspace').classList.contains('board-expanded'), false);
+      query('[data-board-action="reset"]').click(); assert.equal(Number(query('#board-height').value), initial); assert.equal(width.getAttribute('aria-valuenow'), '250');
+      assert.deepEqual(JSON.parse(win.localStorage.getItem('playbook-studio-board-layout-v1')), {}); click('clear-selection');
+    });
     await t.test('editing persists a validated backup and undo restores the name', () => { change('[data-prop="title"]', 'Integration Test'); assert.match(query('h1').textContent, /Integration Test/); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].title, 'Integration Test'); click('undo'); assert.match(query('h1').textContent, /Mesh/); click('redo'); assert.match(query('h1').textContent, /Integration Test/); });
     await t.test('route pointer sequence creates an editable route with correct origin', () => {
       geometry(); const player = query('#field [data-player]'); pointer(player, 'pointerdown', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 480, 430); geometry(); pointer(query('#field'), 'pointerdown', 580, 350); click('finish-route');

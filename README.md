@@ -4,7 +4,7 @@
 
 **[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html)** · [GitHub Pages 入口与旧版迁移](https://timpickle.github.io/playbook-studio-web/) · [云端技术说明](docs/CLOUD.md) · [验证记录](docs/VALIDATION.md)
 
-![STINGERS v3.3 紫黄主题登录页](docs/assets/v3-3-stingers-login.jpg)
+![STINGERS 紫黄主题登录页](docs/assets/v3-3-stingers-login.jpg)
 
 ## 共享与权限
 
@@ -43,6 +43,8 @@
 ## v3 界面与操作
 
 依据 [taste-skill](https://github.com/Leonxlnx/taste-skill) 优化操作层级与反馈。v3.3 使用 STINGERS 紫黄主题、透明队标、闪电与星形图标，并延续磨玻璃控件、自托管 tsParticles 粒子、鼠标互动、按钮涟漪、工具切换与球员入场动画。右上角「视觉效果」可选完整、轻量、关闭；偏好只作用于当前设备，并跟随系统减少动画设置。
+
+v3.4 提高默认战术板高度。拖动画板底部调节高度，电脑上拖动画板与属性栏之间的分隔条调节宽度；也可以使用「画板高度」滑块。「展开画板」收起两侧面板并放大球场，Esc 或「退出展开」返回；「恢复默认」重置尺寸与布局。普通 / 展开高度分别记住，只保存在当前设备，不写入团队共享数据。手机支持高度滑块与触摸拖柄。
 
 绘图工具有文字名称，路线绘制有步骤提示，草稿切换与阵型替换会先确认；请求提供加载、成功与错误状态。详见 [组件调研与设计记录](docs/DESIGN.md)。
 

@@ -37,6 +37,15 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
       win.document.body.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Delete', bubbles: true })); await settle();
       assert.equal(calls.filter(c => c.method === 'PUT').length, 0); assert.notEqual(record.data.plays[0].title, 'Unauthorized');
     });
+    await t.test('viewers can resize and expand without changing shared data or issuing writes', async () => {
+      const before = JSON.stringify(record.data), field = q('#field svg');
+      assert.equal(q('[data-board-action="expand"]').disabled, false);
+      q('[data-board-action="expand"]').click(); assert.equal(q('.workspace').classList.contains('board-expanded'), true);
+      q('#board-height').value = '780'; q('#board-height').dispatchEvent(new win.Event('input', { bubbles: true })); q('#board-height').dispatchEvent(new win.Event('change', { bubbles: true }));
+      await settle(); assert.equal(q('#field svg'), field); assert.equal(JSON.stringify(record.data), before); assert.equal(calls.filter(c => c.method === 'PUT').length, 0);
+      assert.equal(win.localStorage.getItem(STORAGE_KEY), legacy); assert.equal(JSON.parse(win.localStorage.getItem('playbook-studio-board-layout-v1')).expandedHeight, 780);
+      q('[data-board-action="reset"]').click();
+    });
     await t.test('a server role change enables editing and one save reaches the shared API, preserving legacy local data', async () => {
       record.role = 'editor'; await poll(); await settle();
       assert.equal(q('[data-prop="title"]').disabled, false);

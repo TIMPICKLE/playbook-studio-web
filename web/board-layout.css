@@ -1,0 +1,49 @@
+/* The pitch keeps a 5:4 aspect ratio so pointer coordinates stay exact at every size. */
+.workspace { --board-height: 580px; --inspector-width: 250px; }
+.editor-layout { grid-template-columns:minmax(0,1fr) 16px var(--inspector-width); column-gap:6px; }
+.field-wrap { height:var(--board-height); min-height:280px; }
+.field-wrap > .pitch-svg { width:min(100%,calc(var(--board-height) * 1.25)); height:auto; max-height:none; max-width:100%; }
+.board-size-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:0 0 10px; color:var(--muted); font-size:11px; }
+.board-size-controls label { white-space:nowrap; }
+.board-size-controls input[type=range] { width:110px; min-width:60px; height:28px; padding:0; border:none; background:none; accent-color:var(--accent); cursor:ew-resize; }
+.board-size-controls output { min-width:48px; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:10px; }
+.board-size-actions { display:flex; gap:6px; margin-left:auto; }
+.board-size-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:34px; padding:5px 10px; border:1px solid var(--glass-edge); border-radius:8px; background:#d9c5fa0a; color:var(--ink); font-size:11px; }
+.board-size-actions button:hover { background:#d9c5fa20; border-color:#ffdc4270; }
+.board-size-actions button[aria-pressed=true] { color:var(--accent); border-color:#ffdc4260; }
+.board-size-actions svg { width:15px; height:15px; }
+.board-height-resizer,.board-width-resizer { display:flex; align-items:center; justify-content:center; touch-action:none; user-select:none; border-radius:8px; color:var(--muted); transition:background-color 150ms,color 150ms; }
+.board-height-resizer { min-height:30px; cursor:ns-resize; gap:10px; margin-top:3px; }
+.board-height-resizer small { font-size:10px; }
+.board-height-resizer > span { height:3px; width:28px; background:#b797df65; border-radius:4px; }
+.board-width-resizer { align-self:stretch; min-height:240px; position:relative; cursor:ew-resize; }
+.board-width-resizer::before { content:''; position:absolute; inset:0 7px; background:#b797df25; border-radius:4px; }
+.board-width-resizer > span { position:sticky; top:45dvh; align-self:flex-start; margin-top:200px; width:4px; height:42px; background:#b797df80; border-radius:4px; }
+.board-height-resizer:hover,.board-width-resizer:hover,.board-height-resizer:focus-visible,.board-width-resizer:focus-visible { background:#ffdc4212; color:var(--accent); }
+.board-height-resizer:hover > span,.board-width-resizer:hover > span { background:var(--accent); }
+.board-resizing,.board-resizing * { cursor:ns-resize!important; user-select:none!important; }
+.board-resizing-width,.board-resizing-width * { cursor:ew-resize!important; }
+.board-resizing .field-wrap,.board-resizing .editor-layout { transition:none!important; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+@media (max-width:1040px) {
+  .editor-layout { grid-template-columns:minmax(0,1fr); }
+  .board-width-resizer { display:none; }
+}
+@media (max-width:720px) {
+  .board-size-controls { gap:6px; }
+  .board-size-controls input[type=range] { width:90px; }
+  .board-size-actions { gap:4px; }
+  .board-size-actions button { min-height:40px; padding:5px 7px; font-size:10px; }
+  .board-height-resizer { min-height:40px; }
+  .field-wrap > .pitch-svg { width:min(100%,calc(var(--board-height) * 1.25)); max-height:none; }
+}
+@media screen {
+  .workspace.board-expanded { display:block; max-width:none; }
+  .board-expanded .sidebar,.board-expanded .sidebar-scrim,.board-expanded .inspector,.board-expanded .board-width-resizer,.board-expanded .app-footer { display:none; }
+  .board-expanded .editor-layout { grid-template-columns:minmax(0,1fr); padding:0 24px 24px; }
+  .board-expanded .play-header { padding-top:12px; padding-bottom:12px; }
+  .board-expanded .play-header p,.board-expanded .eyebrow { display:none; }
+  .board-expanded .play-header h1 { font-size:22px; margin:0; }
+  .board-expanded .canvas-section { width:100%; }
+  @media(max-width:720px) { .board-expanded .editor-layout { padding:0 14px 14px; } }
+}
