@@ -170,7 +170,9 @@ export function validatePlayers(value) {
   return unique(array(value, 40, '球员').map(p => ({ id: id(p.id), label: text(p.label, 10, '位置名称'), name: text(p.name ?? '', 80, '姓名'), x: num(p.x, 0, 100, '横坐标'), y: num(p.y, 0, 100, '纵坐标'), side: choice(p.side, ['offense', 'defense'], '球队'), color: col(p.color), shape: choice(p.shape, ['circle', 'square', 'triangle'], '图形') })), '球员');
 }
 export function validatePlay(p) {
-  const players = validatePlayers(p.players); if (!players.length) fail('战术至少需要一个球员');
+  const reference = p.reference == null ? null : validateReference(p.reference);
+  const players = validatePlayers(p.players); if (!players.length && !reference) fail('战术至少需要一个球员');
+  if (reference && (players.length || p.routes?.length || p.zones?.length || p.annotations?.length)) fail('原图战术不能包含未经验证的可编辑坐标');
   const playerIds = new Set(players.map(p => p.id));
   const routes = unique(array(p.routes, 100, '路线').map(r => {
     if (!playerIds.has(r.playerId)) fail('路线关联的球员不存在');
@@ -182,10 +184,20 @@ export function validatePlay(p) {
   }), '路线');
   const zones = unique(array(p.zones, 60, '区域').map(z => ({ id: id(z.id), x: num(z.x, 0, 100, '区域横坐标'), y: num(z.y, 0, 100, '区域纵坐标'), rx: num(z.rx, 1, 50, '区域半径'), ry: num(z.ry, 1, 50, '区域半径'), color: col(z.color), label: text(z.label, 80, '区域名称') })), '区域');
   const annotations = unique(array(p.annotations, 100, '标注').map(a => ({ id: id(a.id), x: num(a.x, 0, 100, '标注横坐标'), y: num(a.y, 0, 100, '标注纵坐标'), text: text(a.text, 200, '标注内容') })), '标注');
-  if (!p.ball || !playerIds.has(p.ball.holderId) || p.ball.receiverId && !playerIds.has(p.ball.receiverId)) fail('持球人或接球人不存在');
+  if (!p.ball || (reference ? p.ball.holderId !== '' || p.ball.receiverId !== '' : !playerIds.has(p.ball.holderId) || p.ball.receiverId && !playerIds.has(p.ball.receiverId))) fail('持球人或接球人不存在');
   const passAt = num(p.ball.passAt, 0, 10, '传球时间'), arriveAt = num(p.ball.arriveAt, .1, 15, '接球时间');
   if (arriveAt <= passAt) fail('接球时间须晚于传球时间');
-  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间') };
+  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}) };
+}
+export function validateReference(r) {
+  for (const key of ['provider', 'catalogId', 'team', 'game', 'sourceUrl', 'image']) text(r[key], 600, '战术来源');
+  if (r.provider !== 'huddle.gg' || !['eagles', 'ravens'].includes(r.team)) fail('战术来源无效');
+  if (!new RegExp(`^${r.team}-[a-f0-9]{20}$`).test(r.catalogId)) fail('来源战术 ID 无效');
+  if (!/^Madden \d{2}$/.test(r.game)) fail('游戏版本无效');
+  if (!/^data\/huddle-art\/[a-f0-9]{20}\.jpg$/.test(r.image)) fail('原图路径无效');
+  const version = r.game.split(' ')[1];
+  if (!new RegExp(`^https://huddle\\.gg/${version}/playbooks/${r.team}-off/[a-z0-9-]+/[a-z0-9-]+/$`).test(r.sourceUrl)) fail('战术来源链接无效');
+  return { provider: r.provider, catalogId: r.catalogId, team: r.team, game: r.game, sourceUrl: r.sourceUrl, image: r.image };
 }
 export function decodeWorkspace(raw) {
   if (typeof raw !== 'string' || raw.length > 5_000_000) fail('请导入 5 MB 以内的 JSON 文件');

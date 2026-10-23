@@ -9,7 +9,7 @@ export function feedback(message, type = 'error', root = document) {
 export function resetFeedback(root = document) { const box = root.querySelector('.form-feedback'); if (box) { box.hidden = true; box.textContent = ''; } }
 export const feedbackBox = () => '<div class="form-feedback" role="alert" aria-live="polite" hidden></div>';
 export function passwordField(id, label, autocomplete = 'current-password', help = '') {
-  return `<label class="form-field" for="${id}"><span>${e(label)}</span></label><div class="password-input"><input type="password" id="${id}" autocomplete="${autocomplete}" required minlength="12" maxlength="128" aria-describedby="${id}-help"><button type="button" data-cloud-action="toggle-password" data-target="${id}" aria-label="显示${e(label)}" aria-pressed="false">显示</button></div><small class="field-help" id="${id}-help">${e(help)}</small>`;
+  return `<label class="form-field" for="${id}"><span>${e(label)}</span></label><div class="password-input"><input type="password" id="${id}" autocomplete="${autocomplete}" required minlength="8" maxlength="128" aria-describedby="${id}-help"><button type="button" data-cloud-action="toggle-password" data-target="${id}" aria-label="显示${e(label)}" aria-pressed="false">显示</button></div><small class="field-help" id="${id}-help">${e(help)}</small>`;
 }
 export function readableError(error) {
   if (error.name === 'TimeoutError' || error.name === 'AbortError') return '连接超时，请检查网络后重试。你的更改仍保留在本机。';
