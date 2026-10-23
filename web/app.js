@@ -1,3 +1,5 @@
+import { createMaddenLibrary } from './madden.js';
+import { makeMaddenPlay } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, CLOUD_SITE } from './cloud.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
@@ -26,7 +28,7 @@ const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
 const viewSettings = () => ({ ...state.data.settings, ...viewOverrides });
 const canEdit = () => !cloudMode() || !!shared?.canEdit;
-const readActions = new Set(['choose','book','select-route','clear-selection','sidebar','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode']);
+const readActions = new Set(['madden-library','choose','book','select-route','clear-selection','sidebar','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode']);
 function protectReadOnly() {
   if (canEdit()) return;
   document.querySelectorAll('[data-prop],[data-ball],#apply-formation').forEach(n => { n.disabled = true; });
@@ -35,6 +37,24 @@ function protectReadOnly() {
 const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
 const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
 const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
+const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.plays, notify: toast, onImport(entry) {
+  if (!canEdit()) { toast('当前为只读权限。'); return; }
+  if (!confirmDraft(() => importMadden(entry))) return;
+  importMadden(entry);
+} });
+function importMadden(entry) {
+  if (!canEdit()) return;
+  if (state.data.plays.some(p => p.reference?.catalogId === entry.id)) { toast('这条战术已经在当前战术本中。'); return; }
+  if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术，请先整理后再加入。'); return; }
+  const play = makeMaddenPlay(entry);
+  book = 'offense'; filter = ''; formationFilter = ''; query = ''; selection = null; tool = 'select';
+  edit((p, data) => { data.plays.push(play); state.selectedId = play.id; });
+  toast(`已加入 ${entry.name} · 可撤销。关闭战术库即可查看。`);
+}
+function protectReference() {
+  if (!current().reference) return;
+  document.querySelectorAll('[data-action="mirror"],[data-action="rehearse-mode"],[data-action="play"]').forEach(n => { n.disabled = true; n.title = '原始战术图没有可编辑或播放的坐标'; });
+}
 
 function toast(message) {
   const node=$('#toast'), undoable=/可撤销|撤销恢复/.test(message) && history.past.length && canEdit();
@@ -65,12 +85,14 @@ function render() {
   document.title = `${p.title} · Playbook Studio`;
   const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
-  $('#app').innerHTML = `<div class="workspace ${sidebarOpen ? 'sidebar-open' : ''}">
+  $('#app').innerHTML = `<div class="workspace ${p.reference ? 'reference-play' : ''} ${sidebarOpen ? 'sidebar-open' : ''}">
     <button class="sidebar-scrim" data-action="sidebar" aria-label="关闭战术列表"></button><aside class="sidebar" aria-label="战术列表">
       <a class="brand" href="./index.html" aria-label="Playbook Studio"><img src="./assets/stingers-mark.png" alt="" width="34" height="34"><span>STINGERS<span>PLAYBOOK STUDIO</span></span><small>${cloudMode() ? '共享' : '本地'}</small></a>
       <button class="team-switch" data-action="team"><span class="team-avatar"><img src="./assets/stingers-mark.png" alt="STINGERS" width="34" height="34"></span><span><strong>${e(state.data.team.name)}</strong><small>${e(state.data.team.subtitle)}</small></span>${icon('chevron')}</button>
       <div class="side-label">WORKSPACE <span>战术本</span></div>
-      <nav class="book-nav" aria-label="战术本类型">${Object.entries(BOOKS).map(([key, name]) => `<button data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${name}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
+      <nav class="book-nav" aria-label="战术本类型">${Object.entries(BOOKS).map(([key, name]) => `<button ${key === 'offense' ? 'data-madden-drop="offense"' : ''} data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${name}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
+      <button class="madden-launch" data-action="madden-library">${icon('ball')}<span><strong>Madden NFL 战术库</strong><small>Eagles · Ravens · 拖入即用</small></span><b>↗</b></button>
+      <div class="madden-drop-target" data-madden-drop="offense">＋ 拖到这里，加入进攻战术本<small>${canEdit() ? '加入当前工作区 · 自动保存' : '当前只读，无法加入'}</small></div>
       <div class="side-divider"></div>
       <label class="search-box">${icon('search')}<input type="search" id="search" placeholder="搜索战术…" aria-label="搜索战术" value="${e(query)}"></label>
       <div class="filters"><select aria-label="战术分类" id="category-filter"><option value="">全部分类</option><option value="favorite" ${filter === 'favorite' ? 'selected' : ''}>★ 已收藏</option>${categories.map(c => `<option value="${e(c)}" ${c === filter ? 'selected' : ''}>${e(c)}</option>`).join('')}</select><select aria-label="阵型筛选" id="formation-filter"><option value="">全部阵型</option>${formations.map(f => `<option value="${e(f)}" ${formationFilter === f ? 'selected' : ''}>${e(f)}</option>`).join('')}</select></div>
@@ -80,8 +102,8 @@ function render() {
       <div class="sidebar-bottom"><button data-action="team">${icon('team')} 球队与名单</button><button data-action="import">${icon('folder')} 导入战术本</button><button data-action="help">${icon('help')} 使用指南 <kbd>?</kbd></button><span class="local-status"><i></i><span id="save-state">${e(saveState)}</span></span></div>
     </aside>
     <main class="main" id="main-content" tabindex="-1">
-      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${sidebarOpen}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions">${effectsControl()}<button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
-      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${canEdit() ? '选择球员画路线，或直接拖动调整站位。' : '查看团队战术，播放演练并学习自己的跑位。'}</p></div><div class="play-actions">${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
+      <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${sidebarOpen}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="madden-library">${icon('ball')}<span>Madden 战术库</span></button>${effectsControl()}<button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
+      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.reference ? 'Madden 原始战术图 · 可收藏、记录笔记、导出与打印。' : canEdit() ? '选择球员画路线，或直接拖动调整站位。' : '查看团队战术，播放演练并学习自己的跑位。'}</p></div><div class="play-actions">${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
       ${!canEdit() ? '<div class="readonly-banner"><strong>只读模式</strong><span>你可以查看、演练、导出和打印。需要修改时，请联系管理员调整权限。</span></div>' : ''}<div class="editor-layout"><section class="canvas-section" aria-label="球场与演练">
         <div class="canvas-heading"><div class="editor-mode" role="group" aria-label="工作模式"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}布阵与画线</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}战术演练</button></div><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', `tool-button ${viewSettings().showGrid ? 'enabled' : ''}`)}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div>
         <div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:'选择',route:'跑动',block:'阻挡',motion:'移动',pass:'传球',zone:'区域',text:'文字'})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div>
@@ -93,7 +115,7 @@ function render() {
       </section>${boardWidthHandle}<aside class="inspector" aria-label="战术属性">${inspector()}</aside></div>
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>画清路线，读懂比赛。</span><button data-action="help">快捷键与使用说明 ${icon('chevron')}</button></footer>
     </main></div>`;
-  bindField(); syncEditorChrome(); protectReadOnly(); boardLayout.mount();
+  bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh();
   for (const [selector,top] of scrolls) if($(selector))$(selector).scrollTop=top;
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
@@ -111,6 +133,7 @@ function fieldContext() {
   return '';
 }
 function canvasHint() {
+  if (current().reference) return '<span><i class="hint-dot"></i>Huddle.gg 原始战术图 · 原图路线不可拖动或播放；可在右侧记录教练笔记。</span>';
   const drawing = drawingTools.includes(tool), active = draft ? (draft.points.length > 1 ? 3 : 2) : selection?.type === 'player' ? 2 : 1;
   const hasMain=draft && ['route','motion'].includes(tool) && current().routes.some(r=>r.playerId===draft.playerId&&!r.optional&&['route','motion'].includes(r.kind));
   return `<span><i class="hint-dot"></i>${canEdit() ? hint() : '只读模式 · 点击球员或路线查看属性，按播放查看战术演练'}</span><span class="shortcut-hint">${draft?'点击落点 · Backspace 退一步 · Enter 完成':selection?'Esc 取消选择 · Delete 删除 · 可撤销':'V 选择 · R 路线 · Space 播放'}</span>${hasMain?`<label class="draft-behavior">该球员已有主路线<select id="draft-mode" aria-label="新路线用途"><option value="main" ${draft.mode!=='optional'?'selected':''}>新路线作为主路线，旧路线保留为选项</option><option value="optional" ${draft.mode==='optional'?'selected':''}>添加为选项，演练继续使用原主路线</option></select></label>`:''}${drawing && canEdit() ? `<div class="drawing-steps">${['选择一名球员','点击路线终点 / 转折点','完成并保存'].map((v,i)=>`<span class="${active === i+1 ? 'current' : ''}"><b>${i+1}</b>${v}</span>`).join('')}</div>` : ''}`;
@@ -147,6 +170,7 @@ function syncEditorChrome() {
   updateCanvasHint();syncPlayback();
 }
 function setTool(next) {
+  if (current().reference) { if (next !== 'select') toast('这是原始战术图，可记录笔记；没有可编辑的路线坐标。'); return; }
   if(next===tool && draft)return;
   if(next!==tool && !confirmDraft(()=>setTool(next)))return;
   resetAnimation(); rehearsal=false; tool=next; draft=null;previewPoint=null;
@@ -172,6 +196,7 @@ const option = (value, label, selected) => `<option value="${e(value)}" ${value 
 function inspector() {
   const p = current(), obj = selectedObject();
   let content;
+  if (p.reference) return `<div class="madden-source-box"><strong>${e(p.reference.game)} · ${p.reference.team === 'eagles' ? 'Eagles' : 'Ravens'}</strong><p>${e(p.formation)}</p><p>原始战术图保留原版路线与水印。图片不含球员坐标，不支持路线动画。</p><a href="${e(p.reference.sourceUrl)}" target="_blank" rel="noopener noreferrer">查看 Huddle.gg 原页面 ↗</a></div>${fieldInput('战术名称', 'title', p.title, 'text', 'maxlength="120"')}${fieldInput('分类', 'category', p.category, 'text', 'maxlength="60"')}<div class="inspector-heading"><span>教练笔记</span></div><textarea data-prop="notes" rows="8" aria-label="教练笔记" placeholder="使用场景、阅读顺序、调整方案…" maxlength="10000">${e(p.notes)}</textarea><button class="button danger quiet full" data-action="delete-play">${icon('trash')}删除此战术</button><div class="inspector-note">${icon('check')}${cloudMode() ? '沿用当前共享战术本的保存与成员权限' : '自动保存在此浏览器'}</div>`;
   if (selection?.type === 'player' && obj) {
     const assigned = state.data.roster.find(r => r.name === obj.name)?.id || '';
     content = `<div class="inspector-heading"><span>球员设置</span><span class="tag">${obj.side === 'offense' ? '进攻' : '防守'}</span></div><div class="player-preview"><span style="background:${obj.color}">${e(obj.label)}</span><div><strong>${e(obj.name || '未分配球员')}</strong><small>拖动球场上的标记调整站位</small></div></div>${fieldInput('位置标签', 'label', obj.label, 'text', 'maxlength="10"')}<label class="form-field"><span>分配球队球员</span><select data-prop="roster"><option value="">不指定球员</option>${state.data.roster.map(r => option(r.id, `#${r.number} ${r.name} · ${r.position}`, assigned)).join('')}</select></label>${fieldInput('显示姓名', 'name', obj.name, 'text', 'maxlength="80"')}<div class="form-row">${fieldInput('标记颜色', 'color', obj.color, 'color')}<label class="form-field"><span>图形</span><select data-prop="shape">${[['circle', '圆形'], ['square', '方形'], ['triangle', '三角形']].map(([v, l]) => option(v, l, obj.shape)).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>画一条路线</span></div><div class="route-quick">${[['route', '跑动'], ['block', '阻挡'], ['motion', '移动'], ['pass', '传球']].map(([v, l]) => `<button data-action="tool:${v}" class="${tool === v ? 'active' : ''}">${icon(v)}${l}</button>`).join('')}</div><div class="route-list">${p.routes.filter(r => r.playerId === obj.id).map(r => `<button data-action="select-route:${e(r.id)}">${icon(r.kind)}<span>${r.optional ? '选项' : ''}${({ route: '跑动路线', block: '阻挡路线', motion: '移动路线', pass: '传球路线' })[r.kind]}</span>${icon('chevron')}</button>`).join('')}</div><button class="button danger full" data-action="delete-selection">${icon('trash')}移除球员</button>`;
@@ -315,7 +340,7 @@ function newModal() {
 }
 function textModal(at) { openModal('添加场上标注', '<label class="form-field"><span>标注内容</span><input id="annotation-text" placeholder="例如：Read 1 · 先读浅交叉" maxlength="200"></label>', `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">放置标注</button>`); }
 function exportModal() {
-  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>矢量战术图</strong><small>SVG · 任意放大，适合课件</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · 2000 × 1600</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
+  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>${current().reference ? '原图战术文件' : '矢量战术图'}</strong><small>${current().reference ? 'SVG · 内嵌原始图片' : 'SVG · 任意放大，适合课件'}</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · ${current().reference ? '2000 × 1120 · 原图分辨率' : '2000 × 1600'}</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
 }
 function teamModal() {
   openModal('球队与球员名单', `<div class="form-row"><label class="form-field"><span>球队名称</span><input id="team-name" value="${e(state.data.team.name)}" maxlength="80"></label><label class="form-field"><span>赛季 / 副标题</span><input id="team-subtitle" value="${e(state.data.team.subtitle)}" maxlength="80"></label></div><div class="form-row"><label class="form-field"><span>球队颜色</span><input id="team-accent" type="color" value="${state.data.team.accent}"></label><label class="form-field"><span>默认人数</span><select id="team-league">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人制`, String(state.data.settings.league))).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>名单</span><small>选中球场球员后可分配</small></div><div class="roster-labels"><span>号码</span><span>姓名</span><span>位置</span><span></span></div><div id="roster-rows">${state.data.roster.map(rosterRow).join('')}</div><button class="text-button" data-action="roster-add">+ 添加球员</button>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="save-team">保存球队</button>', true);
@@ -350,20 +375,35 @@ function download(content, filename, mime) {
   const link = document.createElement('a'); link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
+async function standaloneSVG(play) {
+  let svg = fieldSVG(play, viewSettings(), { prefix: 'export' });
+  if (play.reference) {
+    const response = await fetch(new URL(`./${play.reference.image}`, import.meta.url));
+    if (!response.ok) throw new Error('原始战术图加载失败，请重试。');
+    const blob = await response.blob();
+    const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+    svg = svg.replace(`href="./${play.reference.image}"`, `href="${dataUrl}"`);
+  }
+  return svg;
+}
 async function pngExport() {
-  const svg = fieldSVG(current(), viewSettings(), { prefix: 'export' }), url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+  const play = clone(current());
+  let svg;
+  try { svg = await standaloneSVG(play); } catch { toast('原始战术图加载失败，请重试。'); return; }
+  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   const img = new Image();
   img.onload = () => {
     try {
-      const canvas = document.createElement('canvas'); canvas.width = 2000; canvas.height = 1600; const ctx = canvas.getContext('2d');
+      const canvas = document.createElement('canvas'); canvas.width = 2000; canvas.height = play.reference ? 1120 : 1600; const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas unavailable'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(current().title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('高清 PNG 已生成。'); } else toast('PNG 生成失败，请尝试 SVG 导出。'); }, 'image/png');
+      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(play.title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('PNG 已生成。原始战术图保留来源分辨率。'); } else toast('PNG 生成失败，请尝试 SVG 导出。'); }, 'image/png');
     } catch { toast('此浏览器无法生成 PNG，请尝试 SVG 导出。'); }
     URL.revokeObjectURL(url);
   };
   img.onerror = () => { URL.revokeObjectURL(url); toast('图片生成失败，请尝试 SVG 导出。'); }; img.src = url;
 }
 function togglePlay() {
+  if (current().reference) { toast('原始战术图不包含可播放的路线数据。'); return; }
   if(draft && !confirmDraft(togglePlay))return;
   if(playing){stop();syncPlayback();updateCanvasHint();return;}
   if(time>=animationLength(current()))time=0;
@@ -394,6 +434,7 @@ function deleteSelected() {
   }); toast('对象已删除，可撤销恢复。');
 }
 const actions = {
+  'madden-library': () => { resetAnimation(); if (confirmDraft(() => maddenLibrary.open())) maddenLibrary.open(); },
   'clear-filters': () => { query=''; filter=''; formationFilter=''; render(); },
   'keep-drawing': () => { pendingNavigation=null; closeModal(); },
   'discard-draft': () => { draft=null; const next=pendingNavigation; pendingNavigation=null; closeModal(); next?.(); },
@@ -454,7 +495,7 @@ const actions = {
   'roster-remove': node => node.closest('.roster-row').remove(),
   'save-team': () => { const team = { name: $('#team-name').value.trim() || 'MY TEAM', subtitle: $('#team-subtitle').value, accent: $('#team-accent').value }; const league = Number($('#team-league').value); const roster = [...$('#roster-rows').children].map(row => ({ id: row.dataset.rosterId, ...Object.fromEntries([...row.querySelectorAll('input')].map(n => [n.dataset.rosterField, n.value.trim()])) })).filter(r => r.name); closeModal(); edit((p, d) => { d.team = team; d.roster = roster; d.settings.league = league; }); toast('球队与球员名单已保存。'); },
   import: () => $('#import-input').click(),
-  'download-svg': () => { download(fieldSVG(current(), viewSettings(), { prefix: 'export' }), `${safeName(current().title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。'); },
+  'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。'); } catch { toast('原始战术图加载失败，请重试。'); } },
   'download-png': pngExport,
   'download-json': () => { download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。'); },
   'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast('当前战术已生成。'); },
@@ -466,6 +507,7 @@ document.addEventListener('click', event => {
   for(const menu of document.querySelectorAll('.add-object-menu[open],.account-menu[open]'))if(!menu.contains(event.target))menu.open=false;
   const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
   const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
+  if (current().reference && ['mirror','rehearse-mode','add-player','add-defense-43','opponents','save-formation'].includes(name)) { toast('原始战术图不包含可编辑的球员坐标。'); return; }
   if(name==='dismiss-toast'){actions[name]();return;}
   if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast('当前为只读权限。'); return; }
   if(node.closest('.add-object-menu'))node.closest('details').open=false;
@@ -537,6 +579,7 @@ $('#import-input').addEventListener('change', async event => {
   event.target.value = '';
 });
 document.addEventListener('keydown', event => {
+  if (maddenLibrary.isOpen) { if (event.key === 'Escape') maddenLibrary.close(); return; }
   const modal = $('.modal');
   if (modal) {
     if (event.key === 'Escape') { pendingNavigation=null; closeModal(); }
@@ -572,7 +615,7 @@ if (cloudMode()) {
     },
     onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
     onPermissionLost(error) { resetAnimation(); draft = null; drag = null; render(); toast(error.message || '访问权限已变更，请重新登录或联系管理员。'); },
-    showEditor(show) { $('#app').hidden = !show; $('.skip-link').hidden = !show; },
+    showEditor(show) { if (!show) maddenLibrary.close(); $('#app').hidden = !show; $('.skip-link').hidden = !show; },
     isBusy: () => !!drag || !!draft || playing || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
     openModal, closeModal, toast, download
   });

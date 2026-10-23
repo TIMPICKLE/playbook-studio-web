@@ -13,6 +13,18 @@ async function setup(db) {
   assert.equal(result.status, 201); return result.body;
 }
 const login = (db, name = 'tim_admin', password = pass) => api(db, '/auth/login', { method: 'POST', body: { username: name, password } });
+test('eight-character passwords support account creation, login, password changes and member resets', async t => {
+  const db = database(t), book = await setup(db), admin = await login(db), shortPassword = 'eight888';
+  const path = `/workspaces/${book.workspaceId}`;
+  assert.equal((await api(db, path + '/accounts', { method: 'POST', cookie: admin.cookie, body: { username: 'short_member', password: shortPassword.slice(1), role: 'viewer' } })).status, 400);
+  const created = await api(db, path + '/accounts', { method: 'POST', cookie: admin.cookie, body: { username: 'short_member', password: shortPassword, role: 'viewer' } });
+  assert.equal(created.status, 201);
+  const member = await login(db, 'short_member', shortPassword); assert.equal(member.status, 200);
+  assert.equal((await api(db, '/auth/password', { method: 'POST', cookie: member.cookie, body: { currentPassword: shortPassword, newPassword: 'changed8' } })).status, 200);
+  assert.equal((await login(db, 'short_member', shortPassword)).status, 401);
+  assert.equal((await api(db, path + `/members/${created.body.id}/password`, { method: 'POST', cookie: admin.cookie, body: { password: shortPassword } })).status, 200);
+  assert.equal((await login(db, 'short_member', shortPassword)).status, 200);
+});
 test('initial accounts provision atomically once, share the same book and never store plaintext passwords or sessions', async t => {
   const db = database(t);
   assert.equal((await api(db, '/auth/bootstrap', { method: 'POST', body: {}, setup: 'wrong' })).status, 404);

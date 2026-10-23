@@ -8,7 +8,7 @@ const random = () => hex(crypto.getRandomValues(new Uint8Array(32)));
 export const digest = async value => hex(await crypto.subtle.digest('SHA-256', bytes(value)));
 export function same(a, b) { if (typeof a !== 'string' || typeof b !== 'string') return false; let delta = a.length ^ b.length; for (let i = 0; i < Math.max(a.length, b.length); i++) delta |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0); return delta === 0; }
 function username(value) { const v = typeof value === 'string' ? value.trim().toLowerCase() : ''; if (!/^[a-z][a-z0-9_]{2,31}$/.test(v)) fail(400, '账号须为 3–32 位小写字母、数字或下划线，并以字母开头'); return v; }
-function password(value) { if (typeof value !== 'string' || value.length < 12 || value.length > 128) fail(400, '密码须为 12–128 个字符'); return value; }
+function password(value) { if (typeof value !== 'string' || value.length < 8 || value.length > 128) fail(400, '密码须为 8–128 个字符'); return value; }
 export async function passwordHash(value, salt = random().slice(0, 32)) {
   const key = await crypto.subtle.importKey('raw', bytes(value), 'PBKDF2', false, ['deriveBits']);
   return { salt, hash: hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: bytes(salt), iterations: ITERATIONS }, key, 256)) };

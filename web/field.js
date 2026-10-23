@@ -29,6 +29,7 @@ function symbol(p, color) {
   return `<circle r="17" fill="${color}"/>`;
 }
 export function fieldSVG(play, settings = {}, options = {}) {
+  if (play.reference) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" class="pitch-svg reference-svg" role="img" aria-label="${e(play.title)} · Huddle.gg 原始战术图"><rect width="1000" height="560" fill="#080808"/><image href="./${e(play.reference.image)}" width="1000" height="560" preserveAspectRatio="xMidYMid meet"/></svg>`;
   const { thumbnail = false, selected = null, time = 0, drawing = null, print = false, prefix = 'pitch' } = options;
   const light = settings.fieldTheme === 'light' || print;
   const bg = light ? '#f4effb' : '#24163b', line = light ? '#d1c4de' : '#59466f', ink = light ? '#6c5188' : '#c7b7db';
