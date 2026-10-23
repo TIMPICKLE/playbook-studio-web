@@ -1,3 +1,4 @@
+.sidebar > * { flex-shrink:0; }
 .madden-launch { display:flex; align-items:center; gap:10px; width:100%; padding:12px; margin:12px 0 0; text-align:left; border:1px solid #ffdc4250; border-radius:12px; background:linear-gradient(125deg,#59318488,#ffdc4211); color:var(--ink); }
 .madden-launch > span { display:grid; gap:3px; flex:1; }.madden-launch strong { font-size:12px; }.madden-launch small { font-size:10px; color:var(--muted); }.madden-launch b { color:var(--accent); font-size:20px; }
 .madden-drop-target { display:none; padding:20px 12px; margin-top:12px; border:1px dashed #ffdc4266; border-radius:12px; text-align:center; color:var(--accent); font-size:12px; background:#ffdc4208; transition:background .18s,border-color .18s,transform .18s; }
