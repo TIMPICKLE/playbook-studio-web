@@ -1,5 +1,11 @@
 /* The pitch keeps a 5:4 aspect ratio so pointer coordinates stay exact at every size. */
 .workspace { --board-height: 580px; --inspector-width: 250px; }
+.sidebar { align-self:start; min-height:0; overscroll-behavior:contain; }
+.sidebar > * { flex-shrink:0; }
+/* Stick the toolbar's host: a sticky child alone is confined to its short parent. */
+@media (min-width:721px) {
+  .cloud-enabled #cloud-root.sticky-cloud-header { position:sticky; top:0; z-index:var(--z-header); }
+}
 .editor-layout { grid-template-columns:minmax(0,1fr) 16px var(--inspector-width); column-gap:6px; }
 .field-wrap { height:var(--board-height); min-height:280px; }
 .field-wrap > .pitch-svg { width:min(100%,calc(var(--board-height) * 1.25)); height:auto; max-height:none; max-width:100%; }
