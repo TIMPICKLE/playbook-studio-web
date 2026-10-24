@@ -38,39 +38,47 @@ const current = () => state.data.plays.find(p => p.id === state.selectedId) || s
 const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
 const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
 const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.plays, notify: toast, onImport(entry) {
-  if (!canEdit()) { toast('当前为只读权限。'); return; }
+  if (!canEdit()) { toast('当前为只读权限。', { type: 'warning' }); return; }
   if (!confirmDraft(() => importMadden(entry))) return;
-  importMadden(entry);
+  return importMadden(entry);
 } });
 function importMadden(entry) {
   if (!canEdit()) return;
-  if (state.data.plays.some(p => p.reference?.catalogId === entry.id)) { toast('这条战术已经在当前战术本中。'); return; }
-  if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术，请先整理后再加入。'); return; }
+  if (state.data.plays.some(p => p.reference?.catalogId === entry.id)) { toast('这条战术已经在当前战术本中。', { type: 'success' }); return; }
+  if (state.data.plays.length >= 500) return { ok: false, message: '战术本最多 500 个战术，请先整理后再加入。' };
   const play = makeMaddenPlay(entry);
   book = 'offense'; filter = ''; formationFilter = ''; query = ''; selection = null; tool = 'select';
   edit((p, data) => { data.plays.push(play); state.selectedId = play.id; });
-  toast(`已加入 ${entry.name} · 可撤销。关闭战术库即可查看。`);
+  const checkpoint = history.past.at(-1);
+  return { ok: true, canUndo: () => canEdit() && history.past.at(-1) === checkpoint,
+    undo: () => { if (canEdit() && history.past.at(-1) === checkpoint) restore(history.undo(state)); },
+    view: () => { choose(play.id); const card = document.querySelector(`[data-action="choose:${play.id}"]`); card?.scrollIntoView?.({ block: 'nearest' }); $('#main-content')?.focus(); }
+  };
 }
 function protectReference() {
   if (!current().reference) return;
   document.querySelectorAll('[data-action="mirror"],[data-action="rehearse-mode"],[data-action="play"]').forEach(n => { n.disabled = true; n.title = '原始战术图没有可编辑或播放的坐标'; });
 }
 
-function toast(message) {
-  const node=$('#toast'), undoable=/可撤销|撤销恢复/.test(message) && history.past.length && canEdit();
-  node.innerHTML=`<span class="toast-icon">${icon('check')}</span><span>${e(message)}</span>${undoable?'<button data-action="undo" class="toast-undo">撤销</button>':''}<button class="toast-close" data-action="dismiss-toast" aria-label="关闭提示">${icon('close')}</button>`;
-  node.classList.add('visible'); window.clearTimeout(toastTimer); toastTimer = window.setTimeout(() => node.classList.remove('visible'), 5200);
+function toast(message, { type = 'info', action = '', label = '' } = {}) {
+  const node = $('#toast'), undoable = /可撤销|撤销恢复/.test(message) && history.past.length && canEdit();
+  node.dataset.type = type; node.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  const symbol = type === 'success' ? icon('check') : type === 'error' ? '!' : type === 'warning' ? '⚠' : 'i';
+  node.innerHTML = `<span class="toast-icon" aria-hidden="true">${symbol}</span><span>${e(message)}</span>${undoable ? '<button data-action="undo" class="toast-undo">撤销</button>' : ''}${action ? `<button data-action="${e(action)}" class="toast-action">${e(label)}</button>` : ''}<button class="toast-close" data-action="dismiss-toast" aria-label="关闭提示">${icon('close')}</button>`;
+  node.classList.add('visible'); window.clearTimeout(toastTimer);
+  if (type !== 'error') toastTimer = window.setTimeout(() => node.classList.remove('visible'), type === 'warning' ? 8000 : 5200);
 }
+
 function save() {
   if (cloudMode()) { shared?.schedule(state.data); return; }
   try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(state.data)); saveState = '本地已保存'; }
-  catch { saveState = '尚未保存'; toast('浏览器存储不可用或已满，请导出 JSON 保存战术本。'); }
+  catch { saveState = '尚未保存'; toast('保存失败：浏览器存储不可用或已满，请导出 JSON 保存战术本。', { type: 'error', action: 'download-json', label: '导出备份' }); }
   $('#save-state')?.replaceChildren(document.createTextNode(saveState));
 }
 function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { stop(); time = 0; }
 function edit(fn, { redraw = true } = {}) {
-  if (!canEdit()) { toast('当前为只读权限，无法修改共享战术。'); return; }
+  if (!canEdit()) { toast('当前为只读权限，无法修改共享战术。', { type: 'warning' }); return; }
   resetAnimation(); rehearsal = false; draft = null; previewPoint = null; history.record(state); fn(current(), state.data); save(); if (redraw) render(); else refreshMetadata();
 }
 function choose(id) { if(id===state.selectedId)return; if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; sidebarOpen = false; tool = 'select'; render(); }
@@ -170,7 +178,7 @@ function syncEditorChrome() {
   updateCanvasHint();syncPlayback();
 }
 function setTool(next) {
-  if (current().reference) { if (next !== 'select') toast('这是原始战术图，可记录笔记；没有可编辑的路线坐标。'); return; }
+  if (current().reference) { if (next !== 'select') toast('这是原始战术图，可记录笔记；没有可编辑的路线坐标。', { type: 'warning' }); return; }
   if(next===tool && draft)return;
   if(next!==tool && !confirmDraft(()=>setTool(next)))return;
   resetAnimation(); rehearsal=false; tool=next; draft=null;previewPoint=null;
@@ -247,7 +255,7 @@ function bindField() {
   field.addEventListener('pointerdown', event => {
     if(event.target.closest('.field-context'))return;
     if (event.button !== 0) return;
-    if (rehearsal || playing || time) { toast('当前在战术演练，点击「返回布阵」后可调整球员。'); return; }
+    if (rehearsal || playing || time) { toast('当前在战术演练，点击「返回布阵」后可调整球员。', { type: 'info' }); return; }
     const at = coordinates(event), hit = pick(event);
     if (!canEdit()) { selection = hit; refreshSelection(); return; }
     if (tool === 'text') { textModal(at); return; }
@@ -259,7 +267,7 @@ function bindField() {
       }
       if (!draft) {
         const p = selection?.type === 'player' ? selectedObject() : current().players.find(v => v.id === selectedObject()?.playerId);
-        if (!p) { toast('先点击一个球员，再开始画路线。'); return; }
+        if (!p) { toast('先点击一个球员，再开始画路线。', { type: 'warning' }); return; }
         draft = { playerId: p.id, points: [{ x: p.x, y: p.y }] };
       }
       if (draft.points.length < 200 && (!draft.points.at(-1) || Math.hypot(at.x - draft.points.at(-1).x, at.y - draft.points.at(-1).y) > .3)) draft.points.push(at);
@@ -317,8 +325,8 @@ function bindField() {
   });
 }
 function finishRoute() {
-  if (!draft || draft.points.length < 2) { toast('至少点击一个路线终点。'); return; }
-  if (current().routes.length >= 100) { toast('每个战术最多 100 条路线。'); return; }
+  if (!draft || draft.points.length < 2) { toast('至少点击一个路线终点。', { type: 'warning' }); return; }
+  if (current().routes.length >= 100) { toast('每个战术最多 100 条路线。', { type: 'warning' }); return; }
   const alreadyMoving = current().routes.some(r => r.playerId === draft.playerId && !r.optional && ['route', 'motion'].includes(r.kind));
   const route = { id: uid(), playerId: draft.playerId, points: clone(draft.points), kind: tool, color: tool === 'pass' ? COLORS.pass : current().players.find(p => p.id === draft.playerId).color, smooth: false, endCap: tool === 'block' ? 'bar' : 'arrow', delay: 0, duration: tool === 'block' ? 2 : 4, optional: alreadyMoving && draft.mode==='optional' && ['route', 'motion'].includes(tool) };
   selection={type:'route',id:route.id};tool='select';
@@ -389,21 +397,21 @@ async function standaloneSVG(play) {
 async function pngExport() {
   const play = clone(current());
   let svg;
-  try { svg = await standaloneSVG(play); } catch { toast('原始战术图加载失败，请重试。'); return; }
+  try { svg = await standaloneSVG(play); } catch { toast('原始战术图加载失败，请重试。', { type: 'error', action: 'download-png', label: '重试' }); return; }
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   const img = new Image();
   img.onload = () => {
     try {
       const canvas = document.createElement('canvas'); canvas.width = 2000; canvas.height = play.reference ? 1120 : 1600; const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas unavailable'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(play.title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('PNG 已生成。原始战术图保留来源分辨率。'); } else toast('PNG 生成失败，请尝试 SVG 导出。'); }, 'image/png');
-    } catch { toast('此浏览器无法生成 PNG，请尝试 SVG 导出。'); }
+      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(play.title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('PNG 已生成。原始战术图保留来源分辨率。', { type: 'success' }); } else toast('PNG 生成失败，请尝试 SVG 导出。', { type: 'error' }); }, 'image/png');
+    } catch { toast('此浏览器无法生成 PNG，请尝试 SVG 导出。', { type: 'error' }); }
     URL.revokeObjectURL(url);
   };
-  img.onerror = () => { URL.revokeObjectURL(url); toast('图片生成失败，请尝试 SVG 导出。'); }; img.src = url;
+  img.onerror = () => { URL.revokeObjectURL(url); toast('图片生成失败，请尝试 SVG 导出。', { type: 'error' }); }; img.src = url;
 }
 function togglePlay() {
-  if (current().reference) { toast('原始战术图不包含可播放的路线数据。'); return; }
+  if (current().reference) { toast('原始战术图不包含可播放的路线数据。', { type: 'info' }); return; }
   if(draft && !confirmDraft(togglePlay))return;
   if(playing){stop();syncPlayback();updateCanvasHint();return;}
   if(time>=animationLength(current()))time=0;
@@ -426,12 +434,12 @@ function togglePlay() {
 function deleteSelected() {
   if (!selection || !selectedObject()) return;
   const s = selection;
-  if (s.type === 'player' && current().players.length <= 1) { toast('请保留至少一个球员。'); return; }
+  if (s.type === 'player' && current().players.length <= 1) { toast('请保留至少一个球员。', { type: 'warning' }); return; }
   selection = null;
   edit(p => {
     const key = { player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]; p[key] = p[key].filter(x => x.id !== s.id);
     if (s.type === 'player') { p.routes = p.routes.filter(r => r.playerId !== s.id); if (p.ball.holderId === s.id) p.ball.holderId = p.players[0].id; if (p.ball.receiverId === s.id) p.ball.receiverId = ''; }
-  }); toast('对象已删除，可撤销恢复。');
+  }); toast('对象已删除，可撤销恢复。', { type: 'success' });
 }
 const actions = {
   'madden-library': () => { resetAnimation(); if (confirmDraft(() => maddenLibrary.open())) maddenLibrary.open(); },
@@ -446,15 +454,15 @@ const actions = {
   'rehearse-mode': () => {if(!confirmDraft(()=>actions['rehearse-mode']()))return;rehearsal=true;draft=null;renderField();syncEditorChrome();},
   favorite: () => edit(p => { p.favorite = !p.favorite; }),
   undo: () => restore(history.undo(state)), redo: () => restore(history.redo(state)),
-  mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast('球员、路线、区域与标注已左右镜像。'); },
-  duplicate: () => { if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。'); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
+  mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast('球员、路线、区域与标注已左右镜像。', { type: 'success' }); },
+  duplicate: () => { if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。', { type: 'warning' }); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
   'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';refreshSelection();syncEditorChrome();},
   grid: () => { viewOverrides.showGrid = !viewSettings().showGrid; render(); },
   theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'dark' ? 'light' : 'dark'; render(); },
   'finish-route': finishRoute, 'cancel-draft': () => { draft=null;previewPoint=null;tool='select';renderField();syncEditorChrome(); },
   'delete-selection': deleteSelected,
   'create-play': () => {
-    if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。'); return; }
+    if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。', { type: 'warning' }); return; }
     const title = $('#new-title').value.trim(), b = $('#new-book').value, form = $('#new-formation').value, count = Number($('#new-count').value);
     if (!title) { feedback('请给战术起一个名字，再创建。'); $('#new-title').focus(); return; }
     const custom = form.startsWith('custom:') ? state.data.formations.find(f => f.id === form.slice(7)) : null;
@@ -462,11 +470,11 @@ const actions = {
     if (custom) { p.players = clone(custom.players); p.ball.holderId = p.players.find(v => v.label === 'QB')?.id || p.players[0].id; }
     closeModal(); selection = null; book = b; query = ''; filter = ''; formationFilter = ''; edit((_, d) => { d.plays.push(p); state.selectedId = p.id; d.settings.league = count; });
   },
-  'create-text': node => { const value = $('#annotation-text').value.trim(); if (!value) { toast('请输入标注文字。'); return; } const a = { id: uid(), text: value, x: Number(node.dataset.x), y: Number(node.dataset.y) }; closeModal(); selection = { type: 'annotation', id: a.id }; tool = 'select'; edit(p => p.annotations.push(a)); },
+  'create-text': node => { const value = $('#annotation-text').value.trim(); if (!value) { toast('请输入标注文字。', { type: 'warning' }); return; } const a = { id: uid(), text: value, x: Number(node.dataset.x), y: Number(node.dataset.y) }; closeModal(); selection = { type: 'annotation', id: a.id }; tool = 'select'; edit(p => p.annotations.push(a)); },
   'save-formation': () => openModal('保存自定义阵型', `<p class="muted small">只保存球员的初始站位、标签和颜色；路线仍保留在当前战术。</p><label class="form-field"><span>阵型名称</span><input id="formation-name" value="${e(current().formation)} · 自定义" maxlength="100"></label>`, '<button class="button primary" data-action="confirm-formation">保存阵型</button>'),
-  'confirm-formation': () => { const name = $('#formation-name').value.trim(); if (!name) return; if (state.data.formations.length >= 100) { toast('最多保存 100 个自定义阵型。'); return; } const f = { id: uid(), name, book: current().book, players: clone(current().players) }; closeModal(); edit((p, d) => { d.formations.push(f); p.formation = name; }); toast('自定义阵型已保存，可用于新战术。'); },
+  'confirm-formation': () => { const name = $('#formation-name').value.trim(); if (!name) return; if (state.data.formations.length >= 100) { toast('最多保存 100 个自定义阵型。', { type: 'warning' }); return; } const f = { id: uid(), name, book: current().book, players: clone(current().players) }; closeModal(); edit((p, d) => { d.formations.push(f); p.formation = name; }); toast('自定义阵型已保存，可用于新战术。', { type: 'success' }); },
   'add-defense-43': confirmed => {
-    if (current().players.filter(p => p.side !== 'defense').length + 11 > 40) { toast('添加完整防守后会超过 40 个球员标记，请先移除部分进攻球员。'); return; }
+    if (current().players.filter(p => p.side !== 'defense').length + 11 > 40) { toast('添加完整防守后会超过 40 个球员标记，请先移除部分进攻球员。', { type: 'warning' }); return; }
     const defenders=new Set(current().players.filter(p=>p.side==='defense').map(p=>p.id)), routes=current().routes.filter(r=>defenders.has(r.playerId)).length;
     if(routes && confirmed!==true){
       actions['confirm-defense-43']=()=>{closeModal();actions['add-defense-43'](true);};
@@ -485,21 +493,21 @@ const actions = {
   },
   opponents: () => {
     const side = current().book === 'defense' ? 'offense' : 'defense', remove = current().players.some(v => v.side === side);
-    if (remove && current().players.every(v => v.side === side)) { toast('当前阵型只有这一方球员，请保留至少一个球员。'); return; }
-    if (!remove && current().players.length + state.data.settings.league > 40) { toast('添加后会超过 40 个球员标记，请先移除部分球员。'); return; }
+    if (remove && current().players.every(v => v.side === side)) { toast('当前阵型只有这一方球员，请保留至少一个球员。', { type: 'warning' }); return; }
+    if (!remove && current().players.length + state.data.settings.league > 40) { toast('添加后会超过 40 个球员标记，请先移除部分球员。', { type: 'warning' }); return; }
     edit(p => { if (remove) { const ids = new Set(p.players.filter(v => v.side === side).map(v => v.id)); p.players = p.players.filter(v => !ids.has(v.id)); p.routes = p.routes.filter(r => !ids.has(r.playerId)); if (ids.has(p.ball.holderId)) p.ball.holderId = p.players[0].id; if (ids.has(p.ball.receiverId)) p.ball.receiverId = ''; } else p.players.push(...formationPlayers(side === 'offense' ? 'Gun Doubles' : '4–3', state.data.settings.league, side)); });
   },
-  'delete-play': () => { if (state.data.plays.length === 1) { toast('请保留至少一个战术。'); return; } openModal('删除此战术', `<p>删除「${e(current().title)}」？本次编辑会保留在撤销历史中。</p>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button danger" data-action="confirm-delete">删除战术</button>'); },
+  'delete-play': () => { if (state.data.plays.length === 1) { toast('请保留至少一个战术。', { type: 'warning' }); return; } openModal('删除此战术', `<p>删除「${e(current().title)}」？本次编辑会保留在撤销历史中。</p>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button danger" data-action="confirm-delete">删除战术</button>'); },
   'confirm-delete': () => { const id = current().id; closeModal(); selection = null; edit((p, d) => { d.plays = d.plays.filter(p => p.id !== id); state.selectedId = d.plays.find(p => p.book === book)?.id || d.plays[0].id; book = current().book; }); },
-  'roster-add': () => { if ($('#roster-rows').children.length >= 200) { toast('名单最多 200 人。'); return; } $('#roster-rows').insertAdjacentHTML('beforeend', rosterRow({ id: uid(), name: '', number: '', position: '' })); },
+  'roster-add': () => { if ($('#roster-rows').children.length >= 200) { toast('名单最多 200 人。', { type: 'warning' }); return; } $('#roster-rows').insertAdjacentHTML('beforeend', rosterRow({ id: uid(), name: '', number: '', position: '' })); },
   'roster-remove': node => node.closest('.roster-row').remove(),
-  'save-team': () => { const team = { name: $('#team-name').value.trim() || 'MY TEAM', subtitle: $('#team-subtitle').value, accent: $('#team-accent').value }; const league = Number($('#team-league').value); const roster = [...$('#roster-rows').children].map(row => ({ id: row.dataset.rosterId, ...Object.fromEntries([...row.querySelectorAll('input')].map(n => [n.dataset.rosterField, n.value.trim()])) })).filter(r => r.name); closeModal(); edit((p, d) => { d.team = team; d.roster = roster; d.settings.league = league; }); toast('球队与球员名单已保存。'); },
+  'save-team': () => { const team = { name: $('#team-name').value.trim() || 'MY TEAM', subtitle: $('#team-subtitle').value, accent: $('#team-accent').value }; const league = Number($('#team-league').value); const roster = [...$('#roster-rows').children].map(row => ({ id: row.dataset.rosterId, ...Object.fromEntries([...row.querySelectorAll('input')].map(n => [n.dataset.rosterField, n.value.trim()])) })).filter(r => r.name); closeModal(); edit((p, d) => { d.team = team; d.roster = roster; d.settings.league = league; }); toast('球队与球员名单已保存。', { type: 'success' }); },
   import: () => $('#import-input').click(),
-  'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。'); } catch { toast('原始战术图加载失败，请重试。'); } },
+  'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。', { type: 'success' }); } catch { toast('原始战术图加载失败，请重试。', { type: 'error', action: 'download-svg', label: '重试' }); } },
   'download-png': pngExport,
-  'download-json': () => { download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。'); },
-  'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast('当前战术已生成。'); },
-  'do-print': () => { if (!$('#print-root').children.length) { toast('没有可打印的战术。'); return; } window.print(); },
+  'download-json': () => { download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。', { type: 'success' }); },
+  'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast('当前战术已生成。', { type: 'success' }); },
+  'do-print': () => { if (!$('#print-root').children.length) { toast('没有可打印的战术。', { type: 'warning' }); return; } window.print(); },
   play: togglePlay, reset: () => {resetAnimation();updateAnimation($('#field svg'),current(),0);syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
 };
 
@@ -507,21 +515,30 @@ document.addEventListener('click', event => {
   for(const menu of document.querySelectorAll('.add-object-menu[open],.account-menu[open]'))if(!menu.contains(event.target))menu.open=false;
   const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
   const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
-  if (current().reference && ['mirror','rehearse-mode','add-player','add-defense-43','opponents','save-formation'].includes(name)) { toast('原始战术图不包含可编辑的球员坐标。'); return; }
+  if (current().reference && ['mirror','rehearse-mode','add-player','add-defense-43','opponents','save-formation'].includes(name)) { toast('原始战术图不包含可编辑的球员坐标。', { type: 'info' }); return; }
   if(name==='dismiss-toast'){actions[name]();return;}
-  if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast('当前为只读权限。'); return; }
+  if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast('当前为只读权限。', { type: 'warning' }); return; }
   if(node.closest('.add-object-menu'))node.closest('details').open=false;
   if (name === 'choose') return choose(value);
   if (['book','new','import','add-player','add-defense-43','opponents','mirror'].includes(name) && !confirmDraft(() => node.click())) return;
   if (name === 'book') { resetAnimation(); draft = null; selection = null; book = value; filter = ''; formationFilter = ''; query = ''; const p = filtered()[0]; if (p) state.selectedId = p.id; render(); return; }
   if (name === 'tool') { setTool(value); return; }
   if (name === 'select-route') { selection = { type: 'route', id: value }; tool = 'select'; draft = null; refreshSelection(); return; }
-  if (name === 'add-player') { if (current().players.length >= 40) { toast('每个战术最多 40 个球员标记。'); return; } const p = { id: uid(), label: value === 'offense' ? 'WR' : 'DB', x: 25, y: value === 'offense' ? 75 : 45, name: '', side: value, color: COLORS[value], shape: value === 'offense' ? 'circle' : 'square' }; selection = { type: 'player', id: p.id }; edit(play => play.players.push(p)); return; }
+  if (name === 'add-player') { if (current().players.length >= 40) { toast('每个战术最多 40 个球员标记。', { type: 'warning' }); return; } const p = { id: uid(), label: value === 'offense' ? 'WR' : 'DB', x: 25, y: value === 'offense' ? 75 : 45, name: '', side: value, color: COLORS[value], shape: value === 'offense' ? 'circle' : 'square' }; selection = { type: 'player', id: p.id }; edit(play => play.players.push(p)); return; }
   actions[name]?.(node);
 });
+function refreshPlayList() {
+  const p = current(), plays = filtered();
+  $('.play-list').innerHTML = plays.length ? plays.map((v, i) => `<button data-action="choose:${e(v.id)}" class="play-card ${p.id === v.id ? 'active' : ''}" aria-label="打开 ${e(v.title)}" aria-pressed="${p.id === v.id}"><div class="play-thumb">${fieldSVG(v, { showGrid: false }, { thumbnail: true, prefix: `thumb-${i}` })}</div><span class="play-card-info"><strong>${e(v.title)}</strong><small>${e(v.formation)} · ${e(v.category)}</small></span>${v.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : '<div class="empty-list">没有找到匹配战术。<br>试试其他关键词或清除筛选。<button class="text-button" data-action="clear-filters">清除全部筛选</button></div>';
+  $('.play-list-label b').textContent = plays.length;
+}
+let composingSearch = false;
+function searchInput(input) { query = input.value; refreshPlayList(); }
+document.addEventListener('compositionstart', event => { if (event.target.id === 'search') composingSearch = true; });
+document.addEventListener('compositionend', event => { if (event.target.id === 'search') { composingSearch = false; searchInput(event.target); } });
 document.addEventListener('input', event => {
   const input = event.target;
-  if (input.id === 'search') { query = input.value; const cursor = input.selectionStart; render(); $('#search').focus(); try { $('#search').setSelectionRange(cursor, cursor); } catch {} }
+  if (input.id === 'search' && !composingSearch && !event.isComposing) searchInput(input);
   if(input.id==='timeline'){stop();rehearsal=true;time=Number(input.value);updateAnimation($('#field svg'),current(),time);syncEditorChrome();}
 });
 document.addEventListener('change', event => {
@@ -537,7 +554,7 @@ document.addEventListener('change', event => {
     const [kind, ...rest] = input.value.split(':'), value = rest.join(':');
     const custom = kind === 'custom' ? state.data.formations.find(f => f.id === value) : null;
     const players = custom ? clone(custom.players) : formationPlayers(value, state.data.settings.league, current().book === 'defense' ? 'defense' : 'offense');
-    const apply = () => { closeModal(); edit(p => { p.players = players; p.formation = custom?.name || value; p.routes = []; p.zones = []; p.annotations = []; p.ball.holderId = players.find(v => v.label === 'QB')?.id || players[0].id; p.ball.receiverId = ''; }); toast('已替换阵型。路线与标注已清空，可用撤销恢复。'); };
+    const apply = () => { closeModal(); edit(p => { p.players = players; p.formation = custom?.name || value; p.routes = []; p.zones = []; p.annotations = []; p.ball.holderId = players.find(v => v.label === 'QB')?.id || players[0].id; p.ball.receiverId = ''; }); toast('已替换阵型。路线与标注已清空，可用撤销恢复。', { type: 'success' }); };
     if (current().routes.length || current().zones.length || current().annotations.length) {
       actions['confirm-apply-formation'] = () => { delete actions['confirm-apply-formation']; apply(); };
       input.value = '';
@@ -553,7 +570,7 @@ document.addEventListener('change', event => {
     if (input.type === 'number') { if (!Number.isFinite(value)) return; value = clamp(value, Number(input.min), Number(input.max)); }
     if (key.startsWith('ball.')) {
       const name = key.slice(5), ball = { ...current().ball, [name]: value };
-      if (ball.arriveAt <= ball.passAt) { toast('到达时间必须晚于出手时间。'); input.value = current().ball[name]; return; }
+      if (ball.arriveAt <= ball.passAt) { toast('到达时间必须晚于出手时间。', { type: 'info' }); input.value = current().ball[name]; return; }
       edit(p => { p.ball[name] = value; }, {redraw:false});
     } else {
       const selected = !!selection, s = selection;
@@ -571,11 +588,11 @@ $('#import-input').addEventListener('change', async event => {
     if (state.data.plays.length + imported.plays.length > 500) throw new Error('战术数量不能超过 500 个');
     openModal('导入战术本', `<p>已验证文件，包含 <strong>${imported.plays.length} 个战术</strong>、${imported.formations.length} 个自定义阵型及 ${imported.roster.length} 名球员。</p><p class="muted small">导入将追加战术、阵型和名单，保留当前球队设置与已有战术。</p>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-import">追加导入</button>');
     actions['confirm-import'] = () => {
-      if (state.data.formations.length + imported.formations.length > 100 || state.data.roster.length + imported.roster.length > 200) { toast('导入后阵型或名单数量超出上限。'); return; }
+      if (state.data.formations.length + imported.formations.length > 100 || state.data.roster.length + imported.roster.length > 200) { toast('导入后阵型或名单数量超出上限。', { type: 'info' }); return; }
       const plays = imported.plays.map(p => ({ ...p, id: uid() })), forms = imported.formations.map(f => ({ ...f, id: uid() })), roster = imported.roster.map(r => ({ ...r, id: uid() }));
       closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); state.selectedId = plays[0].id; }); toast(`已导入 ${plays.length} 个战术。`); delete actions['confirm-import'];
     };
-  } catch (error) { toast(`导入失败：${error.message}`); }
+  } catch (error) { toast(`导入失败：${error.message}`, { type: 'error' }); }
   event.target.value = '';
 });
 document.addEventListener('keydown', event => {
@@ -614,7 +631,7 @@ if (cloudMode()) {
       history.past = []; history.future = []; render();
     },
     onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
-    onPermissionLost(error) { resetAnimation(); draft = null; drag = null; render(); toast(error.message || '访问权限已变更，请重新登录或联系管理员。'); },
+    onPermissionLost(error) { resetAnimation(); draft = null; drag = null; render(); toast(error.message || '访问权限已变更，请重新登录或联系管理员。', { type: 'error' }); },
     showEditor(show) { if (!show) maddenLibrary.close(); $('#app').hidden = !show; $('.skip-link').hidden = !show; },
     isBusy: () => !!drag || !!draft || playing || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
     openModal, closeModal, toast, download

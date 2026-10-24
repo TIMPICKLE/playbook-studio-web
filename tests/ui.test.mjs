@@ -17,6 +17,25 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
   const geometry = () => { const svg = query('#field svg'); svg.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, right: 1000, bottom: 800, width: 1000, height: 800 }); };
   try {
     await t.test('seed UI renders actual starter plays and an editable pitch', () => { assert.match(query('h1').textContent, /Mesh/); assert.equal(doc.querySelectorAll('.play-card').length, 5); assert.equal(doc.querySelectorAll('#field [data-player]').length, 11); assert.ok(query('#field svg[role="application"]')); });
+    await t.test('search preserves input, pitch, inspector and IME composition; errors have explicit recovery', () => {
+      const input = query('#search'), field = query('#field svg'), inspector = query('.inspector');
+      input.focus(); input.dispatchEvent(new win.CompositionEvent('compositionstart', { bubbles: true }));
+      input.value = 'Mesh · 浅交叉'; input.dispatchEvent(new win.InputEvent('input', { bubbles: true, isComposing: true }));
+      assert.equal(doc.querySelectorAll('.play-card').length, 5);
+      input.dispatchEvent(new win.CompositionEvent('compositionend', { bubbles: true }));
+      assert.equal(doc.querySelectorAll('.play-card').length, 1);
+      assert.equal(query('#search'), input); assert.equal(query('#field svg'), field); assert.equal(query('.inspector'), inspector);
+      assert.equal(doc.activeElement, input);
+      input.value = ''; input.dispatchEvent(new win.Event('input', { bubbles:true }));
+      assert.equal(doc.querySelectorAll('.play-card').length, 5);
+      const saved = globalThis.localStorage;
+      Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { setItem() { throw new Error('quota'); } } });
+      click('favorite');
+      assert.equal(query('#toast').dataset.type, 'error'); assert.equal(query('#toast').getAttribute('role'), 'alert');
+      assert.ok(query('#toast [data-action="download-json"]'));
+      assert.equal(query('#toast .toast-icon').textContent, '!');
+      Object.defineProperty(globalThis, 'localStorage', { configurable:true, value:saved }); click('undo');
+    });
     await t.test('board resizing preserves the live SVG, drafts and playbook; cancellation, keyboard and reset work', async () => {
       geometry(); pointer(query('#field [data-player]'), 'pointerdown', 400, 500); pointer(query('#field'), 'pointerup', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 500, 350);
       const before = win.localStorage.getItem(STORAGE_KEY), svg = query('#field svg'), points = query('.context-player').textContent;

@@ -62,6 +62,33 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     const doc = win.document, $ = s => doc.querySelector(s), click = action => $(`[data-action="${action}"]`).click();
     click('madden-library'); await new Promise(r => setTimeout(r, 50));
     assert.equal(doc.querySelectorAll('.madden-card').length, 30);
+    const panel = $('.madden-panel'), search = $('#madden-search'), firstCard = $('.madden-card');
+    const firstId = firstCard.dataset.maddenCard;
+    $('[data-madden="team"][data-id="ravens"]').focus();
+    $('[data-madden="team"][data-id="ravens"]').click();
+    assert.equal($('.madden-panel'), panel); assert.equal($('#madden-search'), search);
+    assert.equal(doc.activeElement.dataset.id, 'ravens');
+    $('[data-madden="team"][data-id="eagles"]').click();
+    const cardBefore = $('.madden-card');
+    $('.madden-card [data-madden="add"]').click();
+    assert.equal($('.madden-panel'), panel); assert.equal($('.madden-card'), cardBefore);
+    assert.match($('.madden-result-bar').textContent, /已加入/);
+    assert.ok($('[data-madden="undo-result"]')); assert.ok($('[data-madden="view-result"]'));
+    $('[data-madden="undo-result"]').click();
+    assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length, 8);
+    assert.equal($('.madden-card [data-madden="add"]').disabled, false);
+    assert.equal($('.madden-panel'), panel);
+    // Repeated addition updates cards without removing them or replaying panel entry.
+    for (let i=0;i<3;i++) {
+      const card = doc.querySelectorAll('.madden-card')[i];
+      card.querySelector('[data-madden="add"]').click();
+      assert.equal(doc.querySelectorAll('.madden-card')[i], card);
+      assert.equal($('.madden-panel'), panel);
+    }
+    $('[data-madden="undo-result"]').click();
+    $('[data-madden="close"]').click(); click('undo'); click('undo');
+    click('madden-library');
+
     $('.madden-card [data-madden="add"]').click();
     let data = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
     assert.equal(data.plays.length, 9); assert.ok(data.plays.at(-1).reference); assert.ok($('.reference-play'));
