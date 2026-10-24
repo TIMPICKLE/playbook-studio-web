@@ -17,6 +17,7 @@ function patch(parent, source) {
       for (const a of [...next.attributes]) if (node.getAttribute(a.name) !== a.value) node.setAttribute(a.name, a.value);
       // These slots are managed separately after the shell is patched.
       if (!node.matches('.madden-detail-slot,.madden-result-bar,.madden-results')) patch(node, next);
+      if (node.tagName === 'INPUT' && node.type === 'checkbox') node.checked = next.checked;
       if (node.tagName === 'INPUT' && node.value !== next.value) node.value = next.value;
     }
     retained.add(node);

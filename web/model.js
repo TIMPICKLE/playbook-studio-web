@@ -170,7 +170,9 @@ export function validatePlayers(value) {
   return unique(array(value, 40, '球员').map(p => ({ id: id(p.id), label: text(p.label, 10, '位置名称'), name: text(p.name ?? '', 80, '姓名'), x: num(p.x, 0, 100, '横坐标'), y: num(p.y, 0, 100, '纵坐标'), side: choice(p.side, ['offense', 'defense'], '球队'), color: col(p.color), shape: choice(p.shape, ['circle', 'square', 'triangle'], '图形') })), '球员');
 }
 export function validatePlay(p) {
+  const diagramSource = p.diagramSource == null ? null : { ...validateReference(p.diagramSource), traceVersion: choice(p.diagramSource.traceVersion, [1], '识别版本') };
   const reference = p.reference == null ? null : validateReference(p.reference);
+  if (reference && diagramSource) fail('战术不能同时为原图和可编辑版本');
   const players = validatePlayers(p.players); if (!players.length && !reference) fail('战术至少需要一个球员');
   if (reference && (players.length || p.routes?.length || p.zones?.length || p.annotations?.length)) fail('原图战术不能包含未经验证的可编辑坐标');
   const playerIds = new Set(players.map(p => p.id));
@@ -187,7 +189,7 @@ export function validatePlay(p) {
   if (!p.ball || (reference ? p.ball.holderId !== '' || p.ball.receiverId !== '' : !playerIds.has(p.ball.holderId) || p.ball.receiverId && !playerIds.has(p.ball.receiverId))) fail('持球人或接球人不存在');
   const passAt = num(p.ball.passAt, 0, 10, '传球时间'), arriveAt = num(p.ball.arriveAt, .1, 15, '接球时间');
   if (arriveAt <= passAt) fail('接球时间须晚于传球时间');
-  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}) };
+  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}), ...(diagramSource ? { diagramSource } : {}) };
 }
 export function validateReference(r) {
   for (const key of ['provider', 'catalogId', 'team', 'game', 'sourceUrl', 'image']) text(r[key], 600, '战术来源');
