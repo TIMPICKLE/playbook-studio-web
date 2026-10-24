@@ -15,7 +15,7 @@
 .book-arrows button { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--glass-edge); border-radius:10px; font-size:18px; background:#ffffff05; }
 .book-arrows button:hover:not(:disabled) { background:#ffdc4214; color:var(--accent); }
 .book-viewport { overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; padding:4px 4px 12px; }
-.book-track { display:flex; gap:12px; touch-action:pan-y pinch-zoom; }
+.book-track { display:flex; gap:12px; }
 .book-slide { flex:0 0 min(228px,86%); min-width:0; scroll-snap-align:start; }
 .book-card { display:flex; flex-direction:column; align-items:flex-start; text-align:left; width:100%; min-height:164px; padding:18px; gap:15px; border:1px solid #d7c4ed38; border-radius:16px; background:linear-gradient(145deg,#e5daf20b,#e5daf203); transition:border-color .18s,background-color .18s,box-shadow .18s; }
 .book-card:hover { border-color:#d7c4ed88; background-color:#ffffff06; color:var(--ink); }
@@ -31,6 +31,7 @@
 .book-switcher-message { min-height:22px; margin-top:8px; color:var(--accent); font-size:12px; }
 .book-switcher-empty { padding:28px 4px; color:var(--muted); font-size:13px; }
 .book-carousel-ready .book-viewport { overflow:hidden; scroll-snap-type:none; }
+.book-carousel-ready .book-track { touch-action:pan-y pinch-zoom; }
 .book-carousel-ready .book-slide { scroll-snap-align:none; }
 @media(max-width:1040px) {
   .cloud-bar .workspace-current-card { max-width:none; width:auto; flex:1; }

@@ -24,7 +24,7 @@ export function createBookSwitcher(root, { onChoose, onError = () => {} }) {
   function reveal(index) {
     if (index < 0) return;
     if (api) api.scrollTo(index, reduced());
-    else viewport.scrollTo?.({ left:cards()[index]?.offsetLeft || 0, behavior:reduced() ? 'auto' : 'smooth' });
+    else viewport.scrollTo?.({ left:viewport.scrollLeft + cards()[index].getBoundingClientRect().left - viewport.getBoundingClientRect().left, behavior:reduced() ? 'auto' : 'smooth' });
   }
   function setup() {
     if (api || !viewport.clientWidth || typeof ResizeObserver !== 'function' || typeof IntersectionObserver !== 'function') return;
