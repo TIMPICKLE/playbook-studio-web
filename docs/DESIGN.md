@@ -1,5 +1,15 @@
 # Playbook Studio v3 交互与视觉改版
 
+## 2026-10-24 · 战术本卡片切换器
+
+先调查了 [shadcn Carousel](https://ui.shadcn.com/docs/components/base/carousel)、[Embla 稳定版文档](https://www.embla-carousel.com/docs/v8)、[shadcn skill](https://ui.shadcn.com/docs/skills) 与 [Taste Skill](https://github.com/Leonxlnx/taste-skill/blob/main/skills/taste-skill/SKILL.md)。shadcn 的 Card + Carousel 组合适合战术本选择；项目已经通过 embla-carousel-react 安装 Embla 8.6.0，但实际编辑器使用原生 JavaScript。因此直接自托管该版本的原生 ESM 和 MIT 许可证，避免增加 React 挂载层；没有安装新 skill 或引入整套风格改造。
+
+顶栏改为紧凑的当前战术本卡片，展开后显示可拖动的横向卡片列表，保留紫黄配色。展示 API 已有的名称、权限和当前状态，不编造战术数量或封面。仅点选 / Enter 才切换；箭头、拖动和键盘浏览只改变视野。当前卡片高亮，异步加载有状态提示，失败保留当前内容；未同步时阻止切换、请求中禁止竞争选择。复用原有新建入口、模态焦点约束、只读权限与减少动画偏好。
+
+为手机弹窗限制网格最小宽度，避免横向卡片的固有尺寸撑出视口。浏览器中验证真实 Embla 拖动和点选，自动测试也加载同一份捆绑模块，检查拖动结束的点击抑制与后续正常点击。
+
+## 2026-10-18 · 初始改版
+
 使用 [taste-skill 仓库的 redesign-existing-projects](https://github.com/Leonxlnx/taste-skill/blob/main/skills/redesign-skill/SKILL.md) 指导现有应用改版。读取日期 2026-10-18。当时仓库主版 taste-skill v2 明确排除 dashboard / app screens，因此没有把用于营销展示页的随机构图、滚动固定或图片配额套用到战术编辑器。
 
 ## 改版依据
