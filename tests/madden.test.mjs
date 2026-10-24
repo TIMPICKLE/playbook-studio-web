@@ -62,7 +62,7 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     await import(`../web/app.js?madden-test=${Date.now()}`);
     const doc = win.document, $ = s => doc.querySelector(s), click = action => $(`[data-action="${action}"]`).click();
     click('madden-library'); await new Promise(r => setTimeout(r, 50));
-    assert.equal(doc.querySelectorAll('.madden-card').length, 10);
+    assert.equal(doc.querySelectorAll('.madden-card').length, Math.min(30, filterCatalog(catalog, { team:'eagles', editableOnly:true }).length));
     $('#madden-editable-only').checked = false; $('#madden-editable-only').dispatchEvent(new win.Event('change', { bubbles:true }));
     assert.equal(doc.querySelectorAll('.madden-card').length, 30);
     const panel = $('.madden-panel'), search = $('#madden-search'), firstCard = $('.madden-card');

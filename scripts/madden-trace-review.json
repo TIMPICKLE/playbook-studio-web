@@ -1,0 +1,2156 @@
+{
+  "source": "bundled Huddle.gg images",
+  "approved": {
+    "eagles-f7cc5994a6147a69d0ee": {
+      "sourceSha256": "aecab1cb1ece217c505e728f59c4a2bb6ee4e02b41bbf9ec92e8973fee0d4df5",
+      "trace": {
+        "id": "eagles-f7cc5994a6147a69d0ee",
+        "team": "eagles",
+        "name": "ALL HITCH",
+        "group": "Gun",
+        "formation": "Empty Base Flex",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-empty-base-flex/all-hitch/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/all-hitch.jpg",
+        "image": "data/huddle-art/b3a4ae05889e4a67c82b.jpg",
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              180.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              180.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              204.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              104.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              172.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              343.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              399.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              445.0,
+              187.0
+            ]
+          }
+        ],
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                104.0,
+                187.0
+              ],
+              [
+                104,
+                112
+              ],
+              [
+                116,
+                119
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                172.0,
+                178.0
+              ],
+              [
+                172,
+                113
+              ],
+              [
+                182,
+                120
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                343.0,
+                178.0
+              ],
+              [
+                309,
+                130
+              ],
+              [
+                304,
+                129
+              ],
+              [
+                294,
+                133
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                399.0,
+                187.0
+              ],
+              [
+                399,
+                130
+              ],
+              [
+                391,
+                138
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                445.0,
+                187.0
+              ],
+              [
+                445,
+                130
+              ],
+              [
+                434,
+                137
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "ravens-4df192a48d782ab222b3": {
+      "sourceSha256": "3039c99876a001aaaa782f45cc67de820725f643c09057959676e8e54c5b72e8",
+      "trace": {
+        "id": "ravens-4df192a48d782ab222b3",
+        "team": "ravens",
+        "name": "STICK SWITCH",
+        "group": "Gun",
+        "formation": "Deuce Close",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-deuce-close/stick-switch/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/stick-switch.jpg",
+        "image": "data/huddle-art/921fa0c10f5382c03163.jpg",
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              179.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              179.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              204.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              196.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              226.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              294.0,
+              213.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              323.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              352.0,
+              178.0
+            ]
+          }
+        ],
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                196.0,
+                178.0
+              ],
+              [
+                195.0,
+                123.0
+              ],
+              [
+                36.0,
+                123.0
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                323.0,
+                187.0
+              ],
+              [
+                323,
+                129
+              ],
+              [
+                335,
+                134
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                226.0,
+                187.0
+              ],
+              [
+                226,
+                130
+              ],
+              [
+                215,
+                137
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                352.0,
+                178.0
+              ],
+              [
+                352.0,
+                125.0
+              ],
+              [
+                354.0,
+                124.0
+              ],
+              [
+                512.0,
+                124.0
+              ],
+              [
+                512.0,
+                122.0
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                294.0,
+                213.0
+              ],
+              [
+                300.0,
+                165.0
+              ],
+              [
+                298.0,
+                157.0
+              ],
+              [
+                301.0,
+                151.0
+              ]
+            ],
+            "ink": "blue",
+            "kind": "block",
+            "optional": false
+          }
+        ],
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "ravens-6d340af05d478cf72b78": {
+      "sourceSha256": "d951898d6b49b1890480875907d1d82156ea11dc74ebd829d9b464324a581301",
+      "trace": {
+        "id": "ravens-6d340af05d478cf72b78",
+        "team": "ravens",
+        "name": "PA VERTS SHOT",
+        "group": "Gun",
+        "formation": "Trips TE Offset Wk",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-te-offset-wk/pa-verts-shot/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-offset-wk/pa-verts-shot.jpg",
+        "image": "data/huddle-art/9b70b3ae0ee1d134629a.jpg",
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              180.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              180.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              205.0
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              104.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              150.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              196.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              255.0,
+              213.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              323.0,
+              181.0
+            ]
+          }
+        ],
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                104.0,
+                178.0
+              ],
+              [
+                98.0,
+                170.0
+              ],
+              [
+                97.0,
+                164.0
+              ],
+              [
+                92.0,
+                159.0
+              ],
+              [
+                92.0,
+                2.0
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                196.0,
+                187.0
+              ],
+              [
+                248.0,
+                60.0
+              ],
+              [
+                261.0,
+                55.0
+              ],
+              [
+                297.0,
+                31.0
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                255.0,
+                213.0
+              ],
+              [
+                277.0,
+                198.0
+              ],
+              [
+                395.0,
+                185.0
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                150.0,
+                187.0
+              ],
+              [
+                150.0,
+                36.0
+              ],
+              [
+                175.0,
+                6.0
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                323.0,
+                181.0
+              ],
+              [
+                337.0,
+                166.0
+              ],
+              [
+                337.0,
+                156.0
+              ],
+              [
+                324.0,
+                131.0
+              ],
+              [
+                320.0,
+                128.0
+              ],
+              [
+                316.0,
+                128.0
+              ],
+              [
+                314.0,
+                131.0
+              ]
+            ],
+            "ink": "blue",
+            "kind": "block",
+            "optional": false
+          }
+        ],
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-472cff64ff73e76828d3": {
+      "sourceSha256": "87c2a8f4c16af846a17a8b8a97a09fc6968821e4bddc370d4e014725a9adad97",
+      "trace": {
+        "id": "eagles-472cff64ff73e76828d3",
+        "team": "eagles",
+        "name": "SPACING",
+        "group": "Gun",
+        "formation": "Bunch Quads",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-quads/spacing/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-quads/spacing.jpg",
+        "image": "data/huddle-art/f11ddc58d9e3461e6fc3.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              179.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              179.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              211.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              118.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              323.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              342.0,
+              179.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              362.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              445.0,
+              187.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                118.0,
+                178.0
+              ],
+              [
+                112,
+                132
+              ],
+              [
+                253,
+                96
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                323.0,
+                187.0
+              ],
+              [
+                526,
+                155
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                342.0,
+                179.0
+              ],
+              [
+                302,
+                154
+              ],
+              [
+                290,
+                161
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                362.0,
+                187.0
+              ],
+              [
+                378,
+                134
+              ],
+              [
+                370,
+                139
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                445.0,
+                187.0
+              ],
+              [
+                457,
+                169
+              ],
+              [
+                457,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-30367299cad650de2be2": {
+      "sourceSha256": "4f49b06a975b8c3982f19d62da6e91c5b630bc7bb23a652462b73f3eced62228",
+      "trace": {
+        "id": "eagles-30367299cad650de2be2",
+        "team": "eagles",
+        "name": "SPOT",
+        "group": "Gun",
+        "formation": "Bunch Quads",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-quads/spot/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-quads/spot.jpg",
+        "image": "data/huddle-art/13ec91fd4d4917dade22.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              179.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              179.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              211.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              119.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              323.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              342.0,
+              179.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              362.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              445.0,
+              187.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                119.0,
+                178.0
+              ],
+              [
+                167,
+                147
+              ],
+              [
+                167,
+                73
+              ],
+              [
+                255,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                323.0,
+                187.0
+              ],
+              [
+                526,
+                155
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                342.0,
+                179.0
+              ],
+              [
+                342,
+                112
+              ],
+              [
+                526,
+                45
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                362.0,
+                187.0
+              ],
+              [
+                307,
+                130
+              ],
+              [
+                300,
+                142
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                445.0,
+                187.0
+              ],
+              [
+                457,
+                169
+              ],
+              [
+                457,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-0b5edd04ecdfdd78596a": {
+      "sourceSha256": "20a85edf6a1bcafe048fb2375f31bdfff987a387d3cafaecc43ae08445c3afc9",
+      "trace": {
+        "id": "eagles-0b5edd04ecdfdd78596a",
+        "team": "eagles",
+        "name": "MESH",
+        "group": "Gun",
+        "formation": "Bunch TE",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-te/mesh/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/mesh.jpg",
+        "image": "data/huddle-art/edb612cf5be0ade5a8db.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              180.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              180.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              211.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              170.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              189.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              209.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              303.0,
+              211.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              323.0,
+              181.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                170.0,
+                187.0
+              ],
+              [
+                170,
+                94
+              ],
+              [
+                27,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                189.0,
+                178.0
+              ],
+              [
+                213,
+                150
+              ],
+              [
+                332,
+                150
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                209.0,
+                187.0
+              ],
+              [
+                174,
+                175
+              ],
+              [
+                25,
+                142
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                303.0,
+                211.0
+              ],
+              [
+                350,
+                224
+              ],
+              [
+                401,
+                222
+              ],
+              [
+                454,
+                211
+              ],
+              [
+                473,
+                190
+              ],
+              [
+                480,
+                173
+              ],
+              [
+                480,
+                150
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                323.0,
+                181.0
+              ],
+              [
+                307,
+                161
+              ],
+              [
+                295,
+                157
+              ],
+              [
+                171,
+                157
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-a7777a8b8a28f6b78db3": {
+      "sourceSha256": "3810a88485be3d2e6b770ca5b0efeb2687c9b47ad60240f11eabe689a155e544",
+      "trace": {
+        "id": "eagles-a7777a8b8a28f6b78db3",
+        "team": "eagles",
+        "name": "Y FLAT GOALLINE",
+        "group": "Gun",
+        "formation": "Bunch X Nasty",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-x-nasty/y-flat-goalline/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/y-flat-goalline.jpg",
+        "image": "data/huddle-art/630f2293ed2d264b3e03.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              179.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              179.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              211.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              196.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              246.0,
+              211.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              321.0,
+              188.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              335.0,
+              179.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              352.0,
+              187.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                196.0,
+                178.0
+              ],
+              [
+                193,
+                145
+              ],
+              [
+                194,
+                112
+              ],
+              [
+                277,
+                90
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                246.0,
+                211.0
+              ],
+              [
+                246,
+                222
+              ]
+            ],
+            "ink": "white",
+            "kind": "block",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                321.0,
+                188.0
+              ],
+              [
+                525,
+                156
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                335.0,
+                179.0
+              ],
+              [
+                315,
+                143
+              ],
+              [
+                315,
+                88
+              ],
+              [
+                462,
+                41
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                352.0,
+                187.0
+              ],
+              [
+                324,
+                136
+              ],
+              [
+                332,
+                132
+              ],
+              [
+                408,
+                129
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-34ca553a0c5c7883dda7": {
+      "sourceSha256": "ecc17fc0e4d865ea299766b4733751e26abf87fd4cfa995b322359f75c99bfbf",
+      "trace": {
+        "id": "eagles-34ca553a0c5c7883dda7",
+        "team": "eagles",
+        "name": "Z SPOT GOALLINE",
+        "group": "Gun",
+        "formation": "Bunch X Nasty",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-x-nasty/z-spot-goalline/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/z-spot-goalline.jpg",
+        "image": "data/huddle-art/b5e2e660d8001881e3fd.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              179.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              179.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              211.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              196.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              246.0,
+              211.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              321.0,
+              188.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              335.0,
+              179.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              352.0,
+              187.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                196.0,
+                178.0
+              ],
+              [
+                193,
+                145
+              ],
+              [
+                193,
+                109
+              ],
+              [
+                277,
+                90
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                246.0,
+                211.0
+              ],
+              [
+                246,
+                222
+              ]
+            ],
+            "ink": "white",
+            "kind": "block",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                321.0,
+                188.0
+              ],
+              [
+                324,
+                145
+              ],
+              [
+                327,
+                151
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                335.0,
+                179.0
+              ],
+              [
+                335,
+                130
+              ],
+              [
+                525,
+                81
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                352.0,
+                187.0
+              ],
+              [
+                525,
+                156
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-dd8a63144965b39980ca": {
+      "sourceSha256": "2ecdd9284c9fc970933c89e8a6fce0b508dd7ea61833d04518d1964e95cc80e2",
+      "trace": {
+        "id": "eagles-dd8a63144965b39980ca",
+        "team": "eagles",
+        "name": "FLOOD SEAM",
+        "group": "Gun",
+        "formation": "Doubles Clamp Stack",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-doubles-clamp-stack/flood-seam/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-clamp-stack/flood-seam.jpg",
+        "image": "data/huddle-art/bed9a15c309bd2c0e865.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              180.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              258.5,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              180.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              204.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              157.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              177.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              294.0,
+              213.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              323.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              352.0,
+              178.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                157.0,
+                187.0
+              ],
+              [
+                163,
+                165
+              ],
+              [
+                230,
+                158
+              ],
+              [
+                241,
+                146
+              ],
+              [
+                282,
+                74
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                177.0,
+                178.0
+              ],
+              [
+                146,
+                101
+              ],
+              [
+                146,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                294.0,
+                213.0
+              ],
+              [
+                355,
+                185
+              ],
+              [
+                377,
+                177
+              ],
+              [
+                525,
+                164
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                323.0,
+                187.0
+              ],
+              [
+                323,
+                82
+              ],
+              [
+                525,
+                82
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                352.0,
+                178.0
+              ],
+              [
+                419,
+                107
+              ],
+              [
+                458,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。"
+        ]
+      }
+    },
+    "eagles-f3e29ff9fa2682009c0c": {
+      "sourceSha256": "c34ea2d7d67f7a5ad2b2032f0592c1b6612a00a4b5abb929b78d77c352299d0a",
+      "trace": {
+        "id": "eagles-f3e29ff9fa2682009c0c",
+        "team": "eagles",
+        "name": "PIVOT IN SEAMS",
+        "group": "Gun",
+        "formation": "Doubles Off Close",
+        "game": "Madden 27",
+        "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-doubles-off-close/pivot-in-seams/",
+        "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-off-close/pivot-in-seams.jpg",
+        "image": "data/huddle-art/aef0d06053db576fc931.jpg",
+        "players": [
+          {
+            "label": "LT",
+            "at": [
+              242.0,
+              180.5
+            ]
+          },
+          {
+            "label": "LG",
+            "at": [
+              259.0,
+              178.5
+            ]
+          },
+          {
+            "label": "C",
+            "at": [
+              274.5,
+              176.5
+            ]
+          },
+          {
+            "label": "RG",
+            "at": [
+              290.5,
+              178.5
+            ]
+          },
+          {
+            "label": "RT",
+            "at": [
+              307.0,
+              180.5
+            ]
+          },
+          {
+            "label": "QB",
+            "at": [
+              274.0,
+              204.5
+            ]
+          },
+          {
+            "label": "E1",
+            "at": [
+              116.0,
+              178.0
+            ]
+          },
+          {
+            "label": "E2",
+            "at": [
+              177.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E3",
+            "at": [
+              255.0,
+              213.0
+            ]
+          },
+          {
+            "label": "E4",
+            "at": [
+              318.0,
+              187.0
+            ]
+          },
+          {
+            "label": "E5",
+            "at": [
+              372.0,
+              178.0
+            ]
+          }
+        ],
+        "traceVersion": 1,
+        "coordinateSystem": {
+          "width": 554,
+          "height": 256,
+          "lineOfScrimmageY": 174
+        },
+        "routes": [
+          {
+            "owner": "E1",
+            "points": [
+              [
+                116.0,
+                178.0
+              ],
+              [
+                116,
+                128
+              ],
+              [
+                124,
+                135
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                177.0,
+                187.0
+              ],
+              [
+                182,
+                104
+              ],
+              [
+                199,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E2",
+            "points": [
+              [
+                177.0,
+                187.0
+              ],
+              [
+                182,
+                104
+              ],
+              [
+                183,
+                88
+              ],
+              [
+                252,
+                40
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": true
+          },
+          {
+            "owner": "E3",
+            "points": [
+              [
+                255.0,
+                213.0
+              ],
+              [
+                255,
+                146
+              ]
+            ],
+            "ink": "blue",
+            "kind": "block",
+            "optional": false
+          },
+          {
+            "owner": "E4",
+            "points": [
+              [
+                318.0,
+                187.0
+              ],
+              [
+                350,
+                159
+              ],
+              [
+                355,
+                148
+              ],
+              [
+                355,
+                1
+              ]
+            ],
+            "ink": "yellow",
+            "kind": "route",
+            "optional": false
+          },
+          {
+            "owner": "E5",
+            "points": [
+              [
+                372.0,
+                178.0
+              ],
+              [
+                385,
+                147
+              ],
+              [
+                397,
+                134
+              ],
+              [
+                288,
+                134
+              ]
+            ],
+            "ink": "red",
+            "kind": "route",
+            "optional": false
+          }
+        ],
+        "method": "pixel-trace-visually-reviewed-batch-1",
+        "reviewNotes": [
+          "本批次经过原图与路径并排复核，修正了箭头端点或交叉处归属。E1–E5 仅为站位编号。只重建可辨认的路线；未扩展为防守判断和阻挡对抗。",
+          "可见分支保留为选项线，默认演练路线可自行切换；不代表已还原游戏内部决策。"
+        ]
+      }
+    }
+  }
+}

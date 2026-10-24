@@ -1,6 +1,9 @@
 import { EDITABLE_TRACES } from './data/madden-editable.js';
+import { RETAINED_REASONS } from './data/madden-trace-status.js';
 import { uid } from './model.js';
 
+export const editableTraceCount = Object.keys(EDITABLE_TRACES).length;
+export const retainedReason = id => RETAINED_REASONS[id] || '尚未确认可编辑路线';
 export const hasEditableTrace = id => Object.hasOwn(EDITABLE_TRACES, id);
 export const getEditableEntry = id => hasEditableTrace(id) ? EDITABLE_TRACES[id] : null;
 export const MADDEN_DRAG_TYPE = 'application/x-playbook-madden';

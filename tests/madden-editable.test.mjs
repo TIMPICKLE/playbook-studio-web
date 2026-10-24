@@ -8,11 +8,12 @@ import { validatePlay, starterWorkspace, encodeWorkspace, decodeWorkspace, moveP
 import { handleApi } from '../server/api.mjs';
 import { database } from './helpers/db.mjs';
 const entries = Object.values(EDITABLE_TRACES);
+const audit = JSON.parse(readFileSync(new URL('../docs/madden-conversion-audit.json', import.meta.url)));
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
 
-test('20 source-backed traces retain independent editable geometry across move, mirror and backup', () => {
-  assert.equal(entries.length, 20);
-  for (const team of ['eagles','ravens']) assert.equal(filterCatalog(catalog,{team,editableOnly:true}).length,10);
+test('all source-backed traces retain independent editable geometry across move, mirror and backup', () => {
+  assert.equal(entries.length, audit.summary.editableTotal);
+  for (const team of ['eagles','ravens']) assert.equal(filterCatalog(catalog,{team,editableOnly:true}).length,audit.summary.editableByTeam[team]);
   for (const entry of entries) {
     assert.equal(catalog.plays.find(p=>p.id===entry.id).image,entry.image);
     const play = validatePlay(makeMaddenPlay(entry)), other = makeMaddenPlay(entry);
@@ -31,13 +32,13 @@ test('20 source-backed traces retain independent editable geometry across move, 
   }
 });
 
-test('the cloud saves all 20 editable plays and source attribution without image-mode restrictions', async t=>{
+test('the cloud saves the full reviewed batch of editable plays and source attribution without image-mode restrictions', async t=>{
   const db=database(t),user={userId:'traced-coach',email:'trace@example.com',displayName:'Trace Coach'};
   const data=starterWorkspace();data.plays.push(...entries.map(makeMaddenPlay));
   const response=await handleApi(new Request('https://playbook.test/api/workspaces',{method:'POST',headers:{Origin:'https://playbook.test','Content-Type':'application/json'},body:JSON.stringify({title:'Editable batch',data})}),{DB:db},user);
   assert.equal(response.status,201); const record=await response.json();
   const read=await handleApi(new Request(`https://playbook.test/api/workspaces/${record.id}`),{DB:db},user);
-  const saved=await read.json();assert.equal(saved.data.plays.filter(p=>p.diagramSource).length,20);
+  const saved=await read.json();assert.equal(saved.data.plays.filter(p=>p.diagramSource).length,entries.length);
   assert.deepEqual(saved.data.plays.at(-1),data.plays.at(-1));
 });
 
@@ -67,7 +68,7 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
     click('undo');click('mirror');click('undo');click('play');click('play');click('reset');
     click('compare-source');assert.equal($('.source-comparison').getAttribute('src'),'./'+source.image);click('close-modal');
     click('madden-library');await new Promise(r=>setTimeout(r,30));
-    assert.equal(win.document.querySelectorAll('.madden-card').length,10);
+    assert.equal(win.document.querySelectorAll('.madden-card').length,Math.min(30,audit.summary.editableByTeam.eagles));
     const card=$(`[data-madden-card="${source.id}"]`);assert.equal(card.querySelector('[data-madden="add"]').disabled,true);
     const next=win.document.querySelectorAll('.madden-card')[1]; next.querySelector('[data-madden="add"]').click();
     assert.match($('.madden-result-bar').textContent,/可编辑/);
