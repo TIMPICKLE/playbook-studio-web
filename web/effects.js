@@ -1,7 +1,7 @@
 // tsParticles is self-hosted and loaded only when decorative motion is enabled.
 const KEY = 'playbook-visual-effects';
 const modes = new Set(['full', 'lite', 'off']);
-let instance, loading, generation = 0, initialized = false, sessionMode, startQueue = Promise.resolve();
+let instance, loading, engineReady, generation = 0, initialized = false, sessionMode, startQueue = Promise.resolve();
 const mq = query => window.matchMedia?.(query);
 export function preference() {
   if (sessionMode) return sessionMode;
@@ -41,6 +41,15 @@ function loadLibrary() {
   });
   return loading;
 }
+function prepareEngine() {
+  // tsParticles 4 closes plugin registration after its first load(). Mode changes
+  // reuse those plugins; registering them again would leave the layer empty.
+  if (!engineReady) engineReady = loadLibrary().then(async engine => {
+    await window.loadSlim(engine);
+    return engine;
+  }).catch(error => { engineReady = null; throw error; });
+  return engineReady;
+}
 async function applyMode() {
   const ticket = ++generation, mode = effectiveMode();
   document.documentElement.dataset.effects = mode;
@@ -57,9 +66,7 @@ async function applyMode() {
   if (typeof window.CanvasRenderingContext2D === 'undefined') return;
   startQueue = startQueue.then(async () => { try {
     if (ticket !== generation) return;
-    const engine = await loadLibrary();
-    if (ticket !== generation) return;
-    await window.loadSlim(engine);
+    const engine = await prepareEngine();
     if (ticket !== generation) return;
     const container = await engine.load({ id: 'ambient-particles', options: particleOptions(mode, !!mq('(max-width: 720px)')?.matches) });
     if (ticket !== generation) { container?.destroy(); return; }

@@ -17,6 +17,28 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
   const geometry = () => { const svg = query('#field svg'); svg.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, right: 1000, bottom: 800, width: 1000, height: 800 }); };
   try {
     await t.test('seed UI renders actual starter plays and an editable pitch', () => { assert.match(query('h1').textContent, /Mesh/); assert.equal(doc.querySelectorAll('.play-card').length, 5); assert.equal(doc.querySelectorAll('#field [data-player]').length, 11); assert.ok(query('#field svg[role="application"]')); });
+    await t.test('repeated field themes preserve yard lines, the independent grid choice, focus and panel state', () => {
+      const sidebar=query('.sidebar'), inspector=query('.inspector'), search=query('#search'), theme=query('[data-action="theme"]'), grid=query('[data-action="grid"]');
+      const saved=win.localStorage.getItem(STORAGE_KEY), lineCount=doc.querySelectorAll('#field .yard-lines line').length;
+      const dark=query('#field svg > rect').getAttribute('fill');
+      sidebar.scrollTop=120;inspector.scrollTop=80;theme.focus();
+      for(let i=0;i<10;i++){
+        click('theme');
+        assert.equal(doc.querySelectorAll('#field .yard-lines line').length,lineCount);
+        assert.equal(doc.querySelectorAll('#field .yard-lines text').length,19);
+        assert.equal(grid.getAttribute('aria-pressed'),'true');
+      }
+      assert.equal(query('#field svg > rect').getAttribute('fill'),dark);
+      assert.equal(query('[data-action="theme"]'),theme);assert.equal(doc.activeElement,theme);
+      assert.equal(query('.sidebar'),sidebar);assert.equal(query('.inspector'),inspector);assert.equal(query('#search'),search);
+      assert.equal(sidebar.scrollTop,120);assert.equal(inspector.scrollTop,80);
+      click('grid');assert.equal(grid.getAttribute('aria-pressed'),'false');
+      for(let i=0;i<4;i++){click('theme');assert.equal(doc.querySelectorAll('#field .yard-lines line').length,1);}
+      click('grid');assert.equal(grid.getAttribute('aria-pressed'),'true');
+      assert.equal(doc.querySelectorAll('#field .yard-lines line').length,lineCount);
+      assert.equal(win.localStorage.getItem(STORAGE_KEY),saved);
+      sidebar.scrollTop=0;inspector.scrollTop=0;
+    });
     await t.test('search preserves input, pitch, inspector and IME composition; errors have explicit recovery', () => {
       const input = query('#search'), field = query('#field svg'), inspector = query('.inspector');
       input.focus(); input.dispatchEvent(new win.CompositionEvent('compositionstart', { bubbles: true }));

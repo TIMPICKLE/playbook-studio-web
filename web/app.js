@@ -7,6 +7,7 @@ import { fieldSVG, updateAnimation, updateGeometry, previewDraft } from './field
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
 import { effectsControl, initEffects, burstAt } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
+import { initViewportLayout } from './viewport-layout.js';
 
 const $ = selector => document.querySelector(selector);
 const icons = {
@@ -113,7 +114,7 @@ function render() {
       <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${sidebarOpen}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="madden-library">${icon('ball')}<span>Madden 战术库</span></button>${effectsControl()}<button class="button subtle" data-action="print">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export">${icon('export')}<span>导出</span></button></div></header>
       <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.diagramSource ? '图片识别可编辑版 · 可拖动、画线与演练；时序可自行调整。' : p.reference ? 'Madden 原始战术图 · 可收藏、记录笔记、导出与打印。' : canEdit() ? '选择球员画路线，或直接拖动调整站位。' : '查看团队战术，播放演练并学习自己的跑位。'}</p></div><div class="play-actions">${p.diagramSource ? '<button class="button subtle" data-action="compare-source">原图对照</button>' : ''}${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
       ${!canEdit() ? '<div class="readonly-banner"><strong>只读模式</strong><span>你可以查看、演练、导出和打印。需要修改时，请联系管理员调整权限。</span></div>' : ''}<div class="editor-layout"><section class="canvas-section" aria-label="球场与演练">
-        <div class="canvas-heading"><div class="editor-mode" role="group" aria-label="工作模式"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}布阵与画线</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}战术演练</button></div><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', `tool-button ${viewSettings().showGrid ? 'enabled' : ''}`)}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div>
+        <div class="canvas-heading"><div class="editor-mode" role="group" aria-label="工作模式"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}布阵与画线</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}战术演练</button></div><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', 'tool-button')}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div>
         <div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:'选择',route:'跑动',block:'阻挡',motion:'移动',pass:'传球',zone:'区域',text:'文字'})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div>
         ${boardSizeControls()}
         <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}<div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
@@ -173,6 +174,10 @@ function syncEditorChrome() {
   for(const button of document.querySelectorAll('[data-action^="tool:"]')) {const active=button.dataset.action===`tool:${tool}`;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);}
   $('.draw-tools')?.style.setProperty('--tool-index',['select','route','block','motion','pass','zone','text'].indexOf(tool));
   $('.toolbar')?.classList.toggle('rehearsal-toolbar',rehearsal);
+  const gridButton=$('[data-action="grid"]'), gridVisible=viewSettings().showGrid!==false;
+  gridButton?.classList.toggle('enabled',gridVisible);
+  gridButton?.setAttribute('aria-pressed',String(gridVisible));
+  $('[data-action="theme"]')?.setAttribute('aria-pressed',String(viewSettings().fieldTheme==='light'));
   for(const action of ['edit-mode','rehearse-mode']) {const button=$(`[data-action="${action}"]`);if(button){const active=action==='rehearse-mode'?rehearsal:!rehearsal;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);}}
   const sidebar=$('.sidebar');if(sidebar)sidebar.inert=!!window.matchMedia?.('(max-width: 720px)').matches&&!sidebarOpen;
   updateCanvasHint();syncPlayback();
@@ -468,8 +473,8 @@ const actions = {
   mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast('球员、路线、区域与标注已左右镜像。', { type: 'success' }); },
   duplicate: () => { if (state.data.plays.length >= 500) { toast('战术本最多 500 个战术。', { type: 'warning' }); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
   'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';refreshSelection();syncEditorChrome();},
-  grid: () => { viewOverrides.showGrid = !viewSettings().showGrid; render(); },
-  theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'dark' ? 'light' : 'dark'; render(); },
+  grid: () => { viewOverrides.showGrid = viewSettings().showGrid === false; renderField(); syncEditorChrome(); },
+  theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'light' ? 'dark' : 'light'; renderField(); syncEditorChrome(); },
   'finish-route': finishRoute, 'cancel-draft': () => { draft=null;previewPoint=null;tool='select';renderField();syncEditorChrome(); },
   'delete-selection': deleteSelected,
   'create-play': () => {
@@ -627,6 +632,7 @@ document.addEventListener('keydown', event => {
   else if (key === '?') helpModal();
   else if (canEdit() && !event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) {setTool(({v:'select',r:'route',b:'block',m:'motion',p:'pass',z:'zone',t:'text'})[key]);}
 });
+initViewportLayout();
 initEffects();
 render();
 if (loadIssue) toast(loadIssue);
