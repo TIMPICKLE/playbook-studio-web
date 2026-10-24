@@ -17,3 +17,5 @@
 @media print { #madden-root { display:none!important; } }
 
 .madden-result-bar{position:relative;z-index:2;display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 20px;background:#302039;border-top:1px solid #ffdc4266;flex-shrink:0}.madden-result-message{flex:1;min-width:120px;font-size:12px}.madden-result-bar button{min-height:44px;padding:8px 14px;border:1px solid #ffdc4266;border-radius:8px;color:var(--accent)}.madden-result-bar[data-type=error]{border-color:#ff9185}.madden-detail-slot:has(.madden-detail)+.madden-result-bar{position:absolute;bottom:0;left:0;right:0}.madden-detail{padding-bottom:100px}.madden-card.just-added{animation:card-added .6s ease-out}@keyframes card-added{50%{box-shadow:0 0 0 2px #ffdc42}}@media(prefers-reduced-motion:reduce){.madden-card.just-added{animation:none}}
+
+.madden-editable-filter{display:flex;gap:8px;align-items:center;padding:6px 24px;color:var(--accent);font-size:12px}.madden-editable-filter input{width:18px;height:18px}.source-comparison{width:100%;background:#080808;border-radius:10px;margin-bottom:16px}.play-actions{flex-wrap:wrap}

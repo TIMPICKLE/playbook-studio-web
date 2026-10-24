@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
-import { makeMaddenPlay, filterCatalog, MADDEN_DRAG_TYPE } from '../web/madden-model.js';
+import { makeMaddenPlay, filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace } from '../web/madden-model.js';
 import { validatePlay, starterWorkspace, encodeWorkspace, decodeWorkspace, STORAGE_KEY } from '../web/model.js';
 import { fieldSVG } from '../web/field.js';
 import { handleApi } from '../server/api.mjs';
@@ -20,8 +20,9 @@ test('both complete team catalogs have unique identities and importable source m
   }
   for (const entry of catalog.plays) {
     const play = validatePlay(makeMaddenPlay(entry));
-    assert.equal(play.reference.sourceUrl, entry.sourceUrl);
-    assert.equal(play.players.length, 0); assert.equal(play.routes.length, 0);
+    assert.equal((play.diagramSource || play.reference).sourceUrl, entry.sourceUrl);
+    if (hasEditableTrace(entry.id)) { assert.equal(play.players.length, 11); assert.ok(play.routes.length >= 5); }
+    else { assert.equal(play.players.length, 0); assert.equal(play.routes.length, 0); }
   }
 });
 test('catalog filters intersect team, formation and case-insensitive multiword search', () => {
@@ -61,6 +62,8 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     await import(`../web/app.js?madden-test=${Date.now()}`);
     const doc = win.document, $ = s => doc.querySelector(s), click = action => $(`[data-action="${action}"]`).click();
     click('madden-library'); await new Promise(r => setTimeout(r, 50));
+    assert.equal(doc.querySelectorAll('.madden-card').length, 10);
+    $('#madden-editable-only').checked = false; $('#madden-editable-only').dispatchEvent(new win.Event('change', { bubbles:true }));
     assert.equal(doc.querySelectorAll('.madden-card').length, 30);
     const panel = $('.madden-panel'), search = $('#madden-search'), firstCard = $('.madden-card');
     const firstId = firstCard.dataset.maddenCard;
