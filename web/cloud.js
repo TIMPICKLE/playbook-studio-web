@@ -45,7 +45,7 @@ export class SharedWorkspace {
     if (!passive) { if (this.actionBusy) return; this.actionBusy = true; node.disabled = true; node.setAttribute('aria-busy', 'true'); node.textContent = ({login:'正在验证账号…',members:'正在加载成员…',history:'正在读取历史…',create:'正在创建战术本…',invite:'正在生成邀请…','save-now':'正在保存…','change-password':'正在更新密码…'}[node.dataset.cloudAction] || '正在处理…'); }
     resetFeedback(document.querySelector('.modal') || document.querySelector('#account-login') || document);
     try { await this.handleAction(node); }
-    catch (error) { const message = readableError(error); feedback(message, 'error', document.querySelector('.modal') || document.querySelector('#account-login') || document); this.hooks.toast(message); }
+    catch (error) { const message = readableError(error); feedback(message, 'error', document.querySelector('.modal') || document.querySelector('#account-login') || document); this.hooks.toast(message, { type: 'error' }); }
     finally { if (!passive) { this.actionBusy = false; node.disabled = false; node.removeAttribute('aria-busy'); node.innerHTML = before; } }
   }
   async init() {
