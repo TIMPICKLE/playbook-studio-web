@@ -3,6 +3,8 @@ import { starterWorkspace, clone, decodeWorkspace, escapeHTML as e, encodeWorksp
 import { CloudSync } from './sync.js';
 import { fieldSVG } from './field.js';
 import { feedback, resetFeedback, feedbackBox, passwordField, readableError, arrowIcon } from './ui.js';
+import { currentBookCard, createBookSwitcher } from './book-switcher.js';
+import { reconcileHTML } from './reconcile.js';
 export const CLOUD_SITE = 'https://playbook-studio-tim.kind-wolf-6204.chatgpt.site';
 export const cloudMode = () => location.pathname.startsWith('/editor/') && !/\/local(?:\.html)?\/?$/.test(location.pathname);
 export async function request(path, options = {}) {
@@ -18,15 +20,17 @@ export class SharedWorkspace {
   get canEdit() { return !!this.sync?.canEdit; }
   get current() { return this.sync?.current; }
   get dirty() { return !!this.sync?.dirty; }
-  setStatus(value) { this.status = value; this.hooks.onStatus(value); const node = document.querySelector('#cloud-status'); if (node) { node.innerHTML = `<i></i><span>${e(value)}</span>`; node.dataset.state = this.statusState(); } }
+  setStatus(value) { this.status = value; this.hooks.onStatus(value); const node = document.querySelector('#cloud-status'); if (node) { node.innerHTML = `<i></i><span>${e(value)}</span>`; node.dataset.state = this.statusState(); } queueMicrotask(() => this.updateBookCards()); }
   renderBar() {
     const root = document.querySelector('#cloud-root');
     if (!this.user) { this.renderLogin(); return; }
-    root.innerHTML = `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img src="./assets/stingers-mark.png" width="32" height="32" alt=""><span>STINGERS<small>Playbook Studio · 团队战术</small></span></a><label class="workspace-picker"><span>当前战术本</span><select id="cloud-workspace" aria-label="选择共享战术本">${this.books.length ? this.books.map(b => `<option value="${e(b.id)}" ${b.id === this.current?.id ? 'selected' : ''}>${e(b.title)}</option>`).join('') : '<option value="">还没有战术本</option>'}</select></label><div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="查看同步详情" data-state="${this.statusState()}"><i></i><span>${e(this.status)}</span></button>${this.current && this.canEdit ? '<button class="save-now" data-cloud-action="save-now">立即保存</button>' : ''}</div><nav class="cloud-bar-actions" aria-label="协作与账号"><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? '<button data-cloud-action="members">成员与权限</button>' : ''}${this.current ? '<button data-cloud-action="history">历史版本</button>' : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? '<button data-cloud-action="password">修改登录密码</button>' : ''}<button data-cloud-action="new">新建战术本</button><button data-cloud-action="migrate">导入旧版备份</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? '退出 / 切换账号' : '切换到团队账号'}</button></div></details></nav></header>`;
+    reconcileHTML(root, `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img src="./assets/stingers-mark.png" width="32" height="32" alt=""><span>STINGERS<small>Playbook Studio · 团队战术</small></span></a>${currentBookCard(this.books, this.current)}<div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="查看同步详情" data-state="${this.statusState()}"><i></i><span>${e(this.status)}</span></button>${this.current && this.canEdit ? '<button class="save-now" data-cloud-action="save-now">立即保存</button>' : ''}</div><nav class="cloud-bar-actions" aria-label="协作与账号"><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? '<button data-cloud-action="members">成员与权限</button>' : ''}${this.current ? '<button data-cloud-action="history">历史版本</button>' : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? '<button data-cloud-action="password">修改登录密码</button>' : ''}<button data-cloud-action="new">新建战术本</button><button data-cloud-action="migrate">导入旧版备份</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? '退出 / 切换账号' : '切换到团队账号'}</button></div></details></nav></header>`);
+    this.updateBookCards();
     if (!this.books.length) root.insertAdjacentHTML('beforeend', `<section class="cloud-empty"><div class="empty-illustration">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'empty' })}</div><div><span class="section-kicker">从一份战术本开始</span><h1>把球队的想法，放到一起。</h1><p>新建后你将成为管理员。邀请教练编辑，或让球员以只读方式学习战术。</p><div class="empty-actions"><button class="button primary" data-cloud-action="new">新建团队战术本 ${arrowIcon}</button><button class="button subtle" data-cloud-action="migrate">导入已有 JSON</button></div><small>${this.user.authMode === 'password' ? '没有看到团队战术？请让管理员把你的账号加入对应战术本。' : '你现在使用 ChatGPT 账号。若拿到了团队账号，请切换后登录，团队战术将自动加载。'}</small>${this.user.authMode !== 'password' ? '<button class="text-button" data-cloud-action="logout">切换到团队账号 →</button>' : ''}</div></section>`);
   }
   statusState() { return /冲突|失败|失效|不可用|尚未|变更/.test(this.status) ? 'error' : /离线|等待|正在|恢复/.test(this.status) ? 'pending' : 'saved'; }
   renderLogin() {
+    this.cardPicker?.destroy(); this.cardPicker = null;
     document.title = '登录 · Playbook Studio';
     const returnTo = `${location.pathname}${location.search}`;
     document.querySelector('#cloud-root').innerHTML = `<main class="login-layout"><section class="login-story"><a class="login-brand" href="/editor/"><img src="./assets/stingers-mark.png" width="38" height="38" alt=""><span>STINGERS<small>PLAYBOOK STUDIO</small></span></a><div class="login-heading"><span class="section-kicker brand-kicker"><img class="brand-bolt" src="./assets/stingers-bolt.svg" alt="" aria-hidden="true">为下一次开球，做好准备。</span><h1>同一份战术，<br>同一个计划。</h1><p>排阵型、画路线、一起演练。<br>让每位队员都知道，下一步去哪里。</p></div><div class="login-pitch">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'login' })}<div class="pitch-caption"><span>Mesh · 浅交叉</span><span>从真实战术开始</span></div></div><div class="brand-stars" aria-hidden="true"><img src="./assets/stingers-star.svg" alt=""><img src="./assets/stingers-star.svg" alt=""><img src="./assets/stingers-star.svg" alt=""></div><div class="login-story-bottom"><span>阵型编辑 · 路线演练 · 团队协作</span><span>STINGERS / PLAYBOOK STUDIO</span></div></section><section class="login-panel"><div class="login-visual-control">${effectsControl()}</div><div class="login-form-wrap"><span class="section-kicker">欢迎回到球场</span><h2>登录战术工作台</h2><p class="login-description">使用管理员分配的账号。登录后，你的团队战术会自动加载。</p><form id="account-login" novalidate><label class="form-field"><span>账号</span><input id="login-username" name="username" autocomplete="username" placeholder="例如 coach_01" required minlength="3" maxlength="32" autocapitalize="none" spellcheck="false"></label>${passwordField('login-password', '密码', 'current-password', '账号区分权限，密码区分大小写。')}<div class="caps-warning" hidden>大写锁定已开启，请注意密码大小写。</div>${feedbackBox()}<button class="button primary login-submit" type="submit" data-cloud-action="login">登录工作台 ${arrowIcon}</button></form><p class="login-assistance">还没有账号或忘记密码？请联系球队管理员。</p><details class="legacy-signin"><summary>使用之前的 ChatGPT 账号</summary><p>已有战术和邀请仍可通过原登录方式访问。</p><a href="/signin-with-chatgpt?return_to=${encodeURIComponent(returnTo)}" target="_top">使用 ChatGPT 登录 ${arrowIcon}</a></details><button class="privacy-link" data-cloud-action="privacy">数据保存在哪里，谁可以查看？</button></div><div class="login-panel-footer">你的战术由成员权限保护，修改自动保存到云端。</div></section></main>`;
@@ -35,12 +39,12 @@ export class SharedWorkspace {
     if (this.eventsBound) return; this.eventsBound = true;
     document.addEventListener('click', event => { const n = event.target.closest('[data-cloud-action]'); if (!n || n.disabled) return; event.preventDefault(); if (n.type === 'submit') return this.performAction(n); this.performAction(n); });
     document.addEventListener('submit', event => { if (event.target.id === 'account-login') { event.preventDefault(); this.performAction(event.target.querySelector('[data-cloud-action="login"]')); } });
-    document.addEventListener('change', event => { if (event.target.id === 'cloud-workspace') this.switchBook(event.target.value).catch(error => this.hooks.toast(readableError(error))); });
+    document.addEventListener('playbook:modal-closed', () => { if (!this.cardPicker) return; this.cardPicker.destroy(); this.cardPicker = null; document.querySelector('[data-cloud-action="books"]')?.focus({ preventScroll:true }); });
     document.addEventListener('input', event => { if (event.target.closest('#account-login,.modal')) { event.target.removeAttribute('aria-invalid'); resetFeedback(event.target.closest('form,.modal') || document); } });
     document.addEventListener('keyup', event => { if (event.target.id === 'login-password') { const n = document.querySelector('.caps-warning'); if (n) n.hidden = !event.getModifierState?.('CapsLock'); } });
   }
   async performAction(node) {
-    const passive = ['new','migrate','password','create-account','add-existing-account','reset-password','toggle-password','privacy','sync-status','remove-member','restore-version','copy-invite'].includes(node.dataset.cloudAction);
+    const passive = ['books','new','migrate','password','create-account','add-existing-account','reset-password','toggle-password','privacy','sync-status','remove-member','restore-version','copy-invite'].includes(node.dataset.cloudAction);
     const before = node.innerHTML;
     if (!passive) { if (this.actionBusy) return; this.actionBusy = true; node.disabled = true; node.setAttribute('aria-busy', 'true'); node.textContent = ({login:'正在验证账号…',members:'正在加载成员…',history:'正在读取历史…',create:'正在创建战术本…',invite:'正在生成邀请…','save-now':'正在保存…','change-password':'正在更新密码…'}[node.dataset.cloudAction] || '正在处理…'); }
     resetFeedback(document.querySelector('.modal') || document.querySelector('#account-login') || document);
@@ -69,15 +73,35 @@ export class SharedWorkspace {
     }
   }
   async refreshBooks() { this.books = (await request('/api/workspaces')).workspaces; this.renderBar(); }
+  updateBookCards() {
+    this.cardPicker?.update({ books:this.books.map(book => book.id === this.current?.id ? {...book, title:this.current.title, role:this.current.role} : book), currentId:this.current?.id, loadingId:this.switching || '', blocked:this.dirty || !!this.switching });
+  }
+  showBooks() {
+    if (this.cardPicker) return;
+    this.hooks.openModal('切换战术本', '<div id="book-card-picker"></div>', '<button class="button subtle" data-action="close-modal">返回编辑</button><button class="button primary" data-cloud-action="new">＋ 新建战术本</button>', true);
+    document.querySelector('#book-card-picker').closest('.modal').classList.add('book-switcher-modal');
+    document.querySelector('#book-card-picker').closest('.modal-backdrop').classList.add('book-picker-backdrop');
+    this.cardPicker = createBookSwitcher(document.querySelector('#book-card-picker'), {
+      onChoose:async id => { if (await this.switchBook(id)) this.hooks.closeModal(); },
+      onError:error => this.hooks.toast(readableError(error), { type:'error' })
+    });
+    this.updateBookCards();
+  }
   async switchBook(workspaceId) {
-    if (!workspaceId || this.current?.id === workspaceId) return;
-    if (this.dirty) { this.renderBar(); this.hooks.toast('请等当前更改同步完成，或先处理冲突再切换。'); return; }
-    const record = await request(`/api/workspaces/${encodeURIComponent(workspaceId)}`); this.sync.load(record);
-    const url = new URL(location.href); url.searchParams.set('workspace', record.id); if (!url.searchParams.has('invite')) history.replaceState(null, '', url);
+    if (!workspaceId || this.switching) return false;
+    if (this.current?.id === workspaceId) return true;
+    if (this.dirty) { this.updateBookCards(); this.hooks.toast('请等当前更改同步完成，或先处理冲突再切换。'); return false; }
+    this.switching = workspaceId; this.renderBar();
+    try {
+      const record = await request(`/api/workspaces/${encodeURIComponent(workspaceId)}`); this.sync.load(record);
+      const url = new URL(location.href); url.searchParams.set('workspace', record.id); if (!url.searchParams.has('invite')) history.replaceState(null, '', url);
+      return true;
+    } finally { this.switching = ''; this.renderBar(); }
   }
   schedule(data) { this.sync?.schedule(data); }
   showCreate(data = null, label = '新建云端战术本') {
     if (this.dirty) { this.hooks.toast('请先同步或处理当前更改。'); return; }
+    if (this.cardPicker) this.hooks.closeModal();
     this.createData = data;
     this.hooks.openModal(label, `<label class="form-field"><span>战术本名称</span><input id="cloud-new-title" value="${e(data ? data.team.name : '我的球队战术本')}" maxlength="80"></label>${data ? '' : '<label class="form-field"><span>从旧版 JSON 备份迁移（可选）</span><input id="cloud-new-file" type="file" accept=".json,application/json"></label>'}<p class="muted small">创建后你是管理员，可以邀请编辑者和只读成员。${data ? `将上传 ${data.plays.length} 个战术；本地原文件仍保留。` : '选择文件会完整导入；不选文件则包含 8 个教学示例。'}</p>`, '<button class="button primary" data-cloud-action="create">保存到云端</button>');
   }
@@ -107,6 +131,7 @@ export class SharedWorkspace {
   }
   async handleAction(node) {
     const action = node.dataset.cloudAction;
+    if (action === 'books') return this.showBooks();
     if (action === 'reload') return location.reload();
     if (action === 'login') {
       const input = document.querySelector('#login-username'), pass = document.querySelector('#login-password');
