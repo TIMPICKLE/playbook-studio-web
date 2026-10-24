@@ -110,6 +110,6 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
     if (result) bar.dataset.type = result.type;
   }
   async function open() { if (!root) attach(); opened = true; result = null; returnFocus = document.activeElement; document.body.classList.add('madden-open'); render(); root.querySelector('[data-madden="close"]')?.focus(); if (!catalog) await load(); }
-  function close() { opened = false; preview = null; if (root) { root.hidden = true; root.innerHTML = ''; } document.body.classList.remove('madden-open'); clearDrag(); if (returnFocus?.isConnected) returnFocus.focus(); else document.querySelector('[data-action="madden-library"]')?.focus(); }
+  function close() { opened = false; preview = null; if (root) { root.hidden = true; root.innerHTML = ''; } document.body.classList.remove('madden-open'); clearDrag(); if (returnFocus?.isConnected && !returnFocus.closest('[inert]')) returnFocus.focus(); else document.querySelector('.topbar [data-action="madden-library"]')?.focus(); }
   return { open, close, refresh: render, get isOpen() { return opened; } };
 }

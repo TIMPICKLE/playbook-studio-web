@@ -13,6 +13,8 @@ test('side panel offsets follow the sticky header through wrapping, replacement 
   win.document.body.innerHTML='<div id="cloud-root"></div><div class="workspace"><aside class="sidebar"><nav></nav></aside></div>';
   const root=win.document.querySelector('#cloud-root'), css=win.document.documentElement.style;
   let resized, observed, disconnected=0;
+  const visibleViewport=new win.EventTarget();visibleViewport.height=900;visibleViewport.offsetTop=0;
+  Object.defineProperty(win,'visualViewport',{configurable:true,value:visibleViewport});
   win.ResizeObserver=class {
     constructor(callback){resized=callback;}
     observe(node){observed=node;}
@@ -34,11 +36,17 @@ test('side panel offsets follow the sticky header through wrapping, replacement 
     win.happyDOM.setWindowSize({width:390,height:844});win.dispatchEvent(new win.Event('resize'));
     assert.equal(css.getPropertyValue('--cloud-height'),'0px');assert.equal(root.classList.contains('sticky-cloud-header'),false);
     win.happyDOM.setWindowSize({width:1024,height:900});win.dispatchEvent(new win.Event('resize'));
+    assert.equal(css.getPropertyValue('--cloud-height'),'0px');assert.equal(root.classList.contains('sticky-cloud-header'),false);
+    win.happyDOM.setWindowSize({width:1440,height:900});win.dispatchEvent(new win.Event('resize'));
     assert.equal(css.getPropertyValue('--cloud-height'),'99px');assert.equal(root.classList.contains('sticky-cloud-header'),true);
     root.insertAdjacentHTML('beforeend','<section class="cloud-empty"></section>');await settle();
     assert.equal(css.getPropertyValue('--cloud-height'),'0px');assert.equal(root.classList.contains('sticky-cloud-header'),false);
     root.innerHTML='<div class="cloud-local-entry">本地离线预览</div>';await settle();
     assert.equal(css.getPropertyValue('--cloud-height'),'0px');assert.equal(observed,null);
+    visibleViewport.height=340;visibleViewport.offsetTop=20;visibleViewport.dispatchEvent(new win.Event('resize'));
+    assert.equal(css.getPropertyValue('--visible-height'),'340px');assert.equal(css.getPropertyValue('--visible-top'),'20px');
+    visibleViewport.height=900;visibleViewport.offsetTop=0;visibleViewport.dispatchEvent(new win.Event('scroll'));
+    assert.equal(css.getPropertyValue('--visible-height'),'900px');assert.equal(css.getPropertyValue('--visible-top'),'0px');
     root.replaceChildren(replacement);await settle();
     assert.equal(win.getComputedStyle(root).position,'sticky');
     assert.equal(win.getComputedStyle(win.document.querySelector('.sidebar')).alignSelf,'start');
