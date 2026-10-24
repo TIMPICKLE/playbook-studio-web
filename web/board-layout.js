@@ -5,7 +5,8 @@ const heightMin = 280, heightMax = 1400;
 
 export function createBoardLayout({ notify = () => {}, hasDraft = () => false } = {}) {
   const q = selector => document.querySelector(selector);
-  let prefs = {}, expanded = false, gesture = null, frame = null, pending = null;
+  let prefs = {}, expanded = false, zoom = 1, gesture = null, frame = null, pending = null;
+  let smallScreen = window.innerWidth <= 600, dimensionsOpen = !smallScreen;
   try {
     const saved = JSON.parse(localStorage.getItem(BOARD_LAYOUT_KEY));
     if (Number.isFinite(saved?.height)) prefs.height = bound(saved.height, heightMin, heightMax);
@@ -14,8 +15,10 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
   } catch { /* A denied or invalid preference must not block the editor. */ }
 
   const defaultHeight = () => window.innerWidth <= 720
-    ? bound((window.innerWidth - 28) * .8, heightMin, 600)
-    : bound(window.innerHeight * .62, 420, 820);
+    ? bound(Math.min((window.innerWidth - 28) * .8, window.innerHeight * .7), heightMin, 600)
+    : window.innerWidth <= 1180
+      ? bound(Math.min((window.innerWidth - 36) * .8, window.innerHeight * .5), heightMin, 760)
+      : bound(window.innerHeight * .62, 420, 820);
   const height = () => expanded
     ? prefs.expandedHeight ?? bound((window.innerWidth - 48) * .8, heightMin, 1100)
     : prefs.height ?? defaultHeight();
@@ -30,8 +33,16 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     const workspace = q('.workspace');
     if (!workspace) return;
     workspace.classList.toggle('board-expanded', expanded);
+    const dimensions = q('.board-advanced'); if (dimensions && dimensions.open !== dimensionsOpen) dimensions.open = dimensionsOpen;
     workspace.style.setProperty('--board-height', `${height()}px`);
     workspace.style.setProperty('--inspector-width', `${inspector()}px`);
+    const viewport = q('.pitch-viewport'), ratio = workspace.classList.contains('reference-play') ? 1000 / 560 : 1.25;
+    const baseWidth = Math.min(viewport?.clientWidth || window.innerWidth - 32, (viewport?.clientHeight || height()) * ratio);
+    workspace.style.setProperty('--pitch-width', `${Math.floor(baseWidth * zoom)}px`);
+    workspace.classList.toggle('pitch-zoomed', zoom > 1);
+    if (q('#board-zoom-value')) q('#board-zoom-value').textContent = `${Math.round(zoom * 100)}%`;
+    for (const node of document.querySelectorAll('[data-board-action="zoom-in"]')) node.disabled = zoom >= 3;
+    for (const node of document.querySelectorAll('[data-board-action="zoom-out"]')) node.disabled = zoom <= 1;
     const slider = q('#board-height');
     if (slider) slider.value = height();
     if (q('#board-size-value')) q('#board-size-value').textContent = `${height()} px`;
@@ -93,7 +104,12 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
   document.addEventListener('pointercancel', event => { if (event.pointerId === gesture?.pointerId) finish(true); });
   document.addEventListener('lostpointercapture', event => { if (event.pointerId === gesture?.pointerId) finish(true); });
   window.addEventListener('blur', () => finish(true));
-  window.addEventListener('resize', () => { finish(true); apply(); });
+  window.addEventListener('resize', () => {
+    const next = window.innerWidth <= 600;
+    if (next !== smallScreen) { smallScreen = next; dimensionsOpen = !next; }
+    finish(true); apply();
+  });
+  document.addEventListener('toggle', event => { if (event.target.matches?.('.board-advanced')) dimensionsOpen = event.target.open; }, { capture: true });
 
   document.addEventListener('input', event => {
     if (event.target.id !== 'board-height') return;
@@ -106,6 +122,9 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     if (!action) return;
     finish(true);
     if (action === 'expand') expanded = !expanded;
+    if (action === 'zoom-in') zoom = Math.min(3, zoom + .25);
+    if (action === 'zoom-out') zoom = Math.max(1, zoom - .25);
+    if (action === 'fit' || action === 'reset') { zoom = 1; q('.pitch-viewport')?.scrollTo?.(0, 0); }
     if (action === 'reset') { prefs = {}; expanded = false; persist(); notify('已恢复默认画板大小和两侧面板。'); }
     apply();
   });
@@ -137,9 +156,11 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
 
 export function boardSizeControls() {
   return `<div class="board-size-controls" aria-label="战术板大小">
-    <label for="board-height">画板高度</label><input id="board-height" type="range" min="280" max="1400" step="1" aria-describedby="board-size-help"><output id="board-size-value" for="board-height"></output>
+    <div class="board-zoom-controls" role="group" aria-label="球场缩放"><button type="button" data-board-action="zoom-out" aria-label="缩小球场">−</button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" data-board-action="zoom-in" aria-label="放大球场">＋</button><button type="button" data-board-action="fit">适应屏幕</button></div>
+    <details class="board-advanced"><summary>尺寸</summary><div class="board-dimensions"><label for="board-height">画板高度</label><input id="board-height" type="range" min="280" max="1400" step="1" aria-describedby="board-size-help"><output id="board-size-value" for="board-height"></output>
     <div class="board-size-actions"><button type="button" data-board-action="expand" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg><span>展开画板</span></button><button type="button" data-board-action="reset" title="恢复默认画板大小和面板布局">恢复默认</button></div>
-    <span id="board-size-help" class="sr-only">拖动底部调节高度；电脑上可拖动右侧分隔条调节宽度。设置仅记在当前设备。</span>
+    </div></details>
+    <span class="touch-board-help">选择工具：滑动空白处平移，拖动球员布阵。</span><span id="board-size-help" class="sr-only">拖动底部调节高度；电脑上可拖动右侧分隔条调节宽度。设置仅记在当前设备。</span>
   </div>`;
 }
 

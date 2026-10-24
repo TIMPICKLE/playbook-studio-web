@@ -39,6 +39,9 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
     });
     await t.test('viewers can resize and expand without changing shared data or issuing writes', async () => {
       const before = JSON.stringify(record.data), field = q('#field svg');
+      assert.equal(q('[data-board-action="zoom-in"]').disabled,false);
+      q('[data-board-action="zoom-in"]').click();assert.equal(q('#board-zoom-value').textContent,'125%');
+      q('[data-board-action="fit"]').click();assert.equal(q('#board-zoom-value').textContent,'100%');
       assert.equal(q('[data-board-action="expand"]').disabled, false);
       q('[data-board-action="expand"]').click(); assert.equal(q('.workspace').classList.contains('board-expanded'), true);
       q('#board-height').value = '780'; q('#board-height').dispatchEvent(new win.Event('input', { bubbles: true })); q('#board-height').dispatchEvent(new win.Event('change', { bubbles: true }));
