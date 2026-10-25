@@ -1,19 +1,24 @@
 import { initLiquidMaterials } from './liquid-materials.js';
-// Decorative engines are self-hosted; preferences never enter shared playbooks.
-const KEY = 'playbook-visual-effects';
-const modes = new Set(['full', 'lite', 'off']);
+import { VISUAL_MODE_KEY as KEY, deviceIsTraditional, resolveVisualMode } from './visual-mode.js';
+const modes = new Set(['traditional', 'digital']);
 let instance, loading, engineReady, generation = 0, initialized = false, sessionMode, startQueue = Promise.resolve();
 const mq = query => window.matchMedia?.(query);
 export function preference() {
   if (sessionMode) return sessionMode;
-  try { const value = localStorage.getItem(KEY); return modes.has(value) ? value : 'full'; } catch { return 'full'; }
+  try { const value = localStorage.getItem(KEY); return modes.has(value) ? value : 'traditional'; } catch { return 'traditional'; }
 }
-export function effectiveMode(value = preference(), reduced = !!mq('(prefers-reduced-motion: reduce)')?.matches) {
-  return reduced ? 'off' : modes.has(value) ? value : 'full';
+export function visualMode() { return resolveVisualMode(preference(), deviceIsTraditional()); }
+export function effectiveMode(value = visualMode(), reduced = !!mq('(prefers-reduced-motion: reduce)')?.matches) {
+  return value === 'digital' && !reduced && !deviceIsTraditional() ? 'full' : 'off';
+}
+function modeNote() {
+  if (deviceIsTraditional()) return '手机和 iPad 固定使用传统模式，战术演练仍可正常播放。';
+  if (visualMode() === 'digital' && effectiveMode() === 'off') return '已跟随系统减少动态效果；保留立体材质和战术演练。';
+  return '只影响这台设备，不修改共享战术。';
 }
 export function effectsControl() {
-  const selected = preference();
-  return `<details class="effects-menu"><summary aria-label="视觉效果设置"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/><path d="m20 2 .6 1.4L22 4l-1.4.6L20 6l-.6-1.4L18 4l1.4-.6Z"/></svg><span>视觉效果</span></summary><div class="effects-panel"><strong>液态材质</strong><div role="group" aria-label="动效强度">${[['full','液态玻璃 · 全开','金属流动 · 厚边折射 · 触碰涟漪'],['lite','柔和流动','舒缓金属纹理 · 柔和光泽'],['off','关闭动效','静态玻璃 · 专注战术']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}"><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note">${effectiveMode()==='off'&&selected!=='off'?'已跟随系统“减少动态效果”设置。':'只影响这台设备，不修改共享战术。'}</p></div></details>`;
+  const selected = visualMode(), restricted = deviceIsTraditional();
+  return `<details class="effects-menu"><summary aria-label="视觉效果设置"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg><span>视觉效果</span></summary><div class="effects-panel"><strong>战术板模式</strong><div role="group" aria-label="战术板模式">${[['traditional','传统模式','平面棋子 · 关闭装饰动效'],['digital','数字化模式','玻璃金属棋子 · 路线光效']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}" ${restricted && value==='digital'?'disabled aria-describedby="visual-mode-note"':''}><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note" id="visual-mode-note">${modeNote()}</p></div></details>`;
 }
 export function particleOptions(mode, compact = false) {
   const lite = mode === 'lite';
@@ -53,10 +58,12 @@ function prepareEngine() {
 }
 async function applyMode() {
   const ticket = ++generation, mode = effectiveMode();
+  document.documentElement.dataset.visualMode = visualMode();
   document.documentElement.dataset.effects = mode;
-  document.dispatchEvent(new window.CustomEvent('playbook:effects-changed',{detail:{mode}}));
-  document.querySelectorAll('[data-effects-mode]').forEach(n => n.setAttribute('aria-pressed', n.dataset.effectsMode === preference()));
-  document.querySelectorAll('.effects-note').forEach(n => { n.textContent = mode === 'off' && preference() !== 'off' ? '已跟随系统“减少动态效果”设置。' : '只影响这台设备，不修改共享战术。'; });
+  document.dispatchEvent(new window.CustomEvent('playbook:effects-changed',{detail:{mode, visualMode:visualMode()}}));
+  document.querySelectorAll('[data-effects-mode]').forEach(n => n.setAttribute('aria-pressed', n.dataset.effectsMode === visualMode()));
+  document.querySelectorAll('.effects-note').forEach(n => { n.textContent = modeNote(); });
+  document.querySelectorAll('[data-effects-mode="digital"]').forEach(n => { n.disabled = deviceIsTraditional(); });
   instance?.destroy(); instance = null;
   document.querySelectorAll('.particle-burst,.press-wave').forEach(n => n.remove());
   if (mode === 'off') {
@@ -78,7 +85,7 @@ async function applyMode() {
   return startQueue;
 }
 export function setEffectsMode(mode) {
-  if (!modes.has(mode)) return;
+  if (!modes.has(mode) || (mode === 'digital' && deviceIsTraditional())) return;
   sessionMode = mode;
   try { localStorage.setItem(KEY, mode); } catch { /* Session preference still applies below. */ }
   return applyMode();
@@ -128,7 +135,7 @@ export function initEffects() {
     animation.onfinish = animation.oncancel = () => { wave.remove(); if (!button.querySelector('.press-wave')) button.classList.remove('has-press-wave'); };
   }, { passive: true });
   mq('(prefers-reduced-motion: reduce)')?.addEventListener('change', applyMode);
-  mq('(max-width: 720px)')?.addEventListener('change', applyMode);
+  for (const query of ['(pointer: coarse)', '(hover: none)']) mq(query)?.addEventListener('change', applyMode);
   document.addEventListener('visibilitychange', () => {
     document.documentElement.classList.toggle('page-hidden', document.hidden);
     if (document.hidden) instance?.pause(); else if (effectiveMode() !== 'off') instance?.play();

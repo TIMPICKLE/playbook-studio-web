@@ -140,10 +140,25 @@ export function pointAlong(points, ratio) {
   return { ...points.at(-1) };
 }
 export function animatedPlayer(play, player, time) {
-  const routes = play.routes.filter(r => r.playerId === player.id && !r.optional && !['pass', 'block'].includes(r.kind));
-  const route = routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind !== 'motion') || routes[0];
+  const routes = play.routes.filter(r => r.playerId === player.id && !r.optional && r.kind !== 'pass');
+  const route = routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind === 'route') || routes.find(r => r.kind === 'block') || routes[0];
   if (!route) return { x: player.x, y: player.y };
   return pointAlong(sampledRoute(route), (time - route.delay) / route.duration);
+}
+// Keep the drawn pass's bends while anchoring release/catch to the actual players.
+// Shared by the flight animation and the rehearsal path in both visual modes.
+export function passFlightRoute(play) {
+  const holder = play.players.find(p => p.id === play.ball.holderId);
+  const receiver = play.players.find(p => p.id === play.ball.receiverId);
+  if (!holder || !receiver) return null;
+  const route = play.routes.findLast(r => r.kind === 'pass' && r.playerId === holder.id && !r.optional && r.points.length > 1);
+  if (!route) return null;
+  const a = animatedPlayer(play, holder, play.ball.passAt), b = animatedPlayer(play, receiver, play.ball.arriveAt);
+  const first = route.points[0], last = route.points.at(-1);
+  return { ...route, points: route.points.map((p, i) => {
+    const t = i / (route.points.length - 1);
+    return { x: p.x + (a.x-first.x)*(1-t) + (b.x-last.x)*t, y: p.y + (a.y-first.y)*(1-t) + (b.y-last.y)*t };
+  }) };
 }
 export function animatedBall(play, time) {
   const holder = play.players.find(p => p.id === play.ball.holderId);
@@ -153,6 +168,8 @@ export function animatedBall(play, time) {
   if (time >= play.ball.arriveAt) return animatedPlayer(play, receiver, time);
   const a = animatedPlayer(play, holder, play.ball.passAt), b = animatedPlayer(play, receiver, play.ball.arriveAt);
   const t = (time - play.ball.passAt) / (play.ball.arriveAt - play.ball.passAt);
+  const route = passFlightRoute(play);
+  if (route) return pointAlong(sampledRoute(route), t);
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 export const animationLength = play => Math.max(6, play.ball.arriveAt, ...play.routes.filter(r => !r.optional).map(r => r.delay + r.duration));

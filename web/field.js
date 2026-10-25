@@ -1,4 +1,4 @@
-import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, COLORS } from './model.js';
+import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute, COLORS } from './model.js';
 export const project = p => ({ x: 18 + p.x * 9.64, y: 20 + p.y * 7.6 });
 const n = x => Number(x).toFixed(2);
 const xy = p => { const v = project(p); return `${n(v.x)},${n(v.y)}`; };
@@ -11,7 +11,7 @@ export function routePath(route) {
   } else for (const p of points.slice(1)) d += ` L${xy(p)}`;
   return d;
 }
-function motionPath(route) {
+export function motionPath(route) {
   const points = route.points.map(project), out = [points[0]];
   for (let i = 1; i < points.length; i++) {
     const a = points[i - 1], b = points[i], length = Math.hypot(b.x - a.x, b.y - a.y), steps = Math.max(2, Math.round(length / 14));
@@ -69,7 +69,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
   const players = play.players.map(p => {
     const v = project(animatedPlayer(play, p, time)), active = selected?.type === 'player' && selected.id === p.id;
     const fill = light && p.color === COLORS.offense ? '#5b2f91' : p.color;
-    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? '<circle class="selection-ring" r="25" fill="none" stroke="#ffd166" stroke-width="2"/>' : ''}<circle class="player-hit" r="27" fill="transparent"/>${symbol(p, fill)}<text y="4.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${p.label.length > 3 ? 9 : 12}" font-weight="800" fill="${light && fill === '#5b2f91' ? '#ffffff' : '#251637'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
+    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? '<circle class="selection-ring" r="25" fill="none" stroke="#ffd166" stroke-width="2"/>' : ''}<circle class="player-hit" r="27" fill="transparent"/><g class="player-body">${symbol(p, fill)}</g><text class="player-label" y="4.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="${p.label.length > 3 ? 9 : 12}" font-weight="800" fill="${light && fill === '#5b2f91' ? '#ffffff' : '#251637'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
   }).join('');
   const annotations = play.annotations.map(a => { const p = project(a), active = selected?.type === 'annotation' && selected.id === a.id; return `<g data-annotation="${e(a.id)}" role="button" aria-label="标注 ${e(a.text)}" tabindex="0"><text x="${n(p.x)}" y="${n(p.y)}" fill="${active ? '#ffd166' : ink}" font-size="18" font-weight="600" paint-order="stroke" stroke="${bg}" stroke-width="5" stroke-linejoin="round">${e(a.text)}</text></g>`; }).join('');
   const b = animatedBall(play, time), bv = b ? project(b) : null;
@@ -84,6 +84,11 @@ export function updateAnimation(svg, play, time, prefix = 'pitch') {
     const v = project(animatedPlayer(play, p, time));
     const node = nodes.get(p.id);
     node?.setAttribute('transform', `translate(${n(v.x)} ${n(v.y)})`);
+  }
+  const flight = time > 0 ? passFlightRoute(play) : null;
+  for (const node of svg.querySelectorAll('[data-route]')) {
+    const route = play.routes.find(r => r.id === node.dataset.route);
+    if (route?.kind === 'pass') for (const path of node.querySelectorAll('path')) path.setAttribute('d', routePath(flight?.id === route.id ? flight : route));
   }
   const b = animatedBall(play, time), v = b ? project(b) : null;
   if (v) svg.querySelector(`#${prefix}-ball`)?.setAttribute('transform', `translate(${n(v.x + 23)} ${n(v.y - 11)})`);

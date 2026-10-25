@@ -1,5 +1,7 @@
 # Liquid glass and liquid metal
 
+> v4 更新：此页保留面板材质的实现记录；当前模式入口和移动设备限制以 [数字化战术板](DIGITAL_BOARD.md) 为准。
+
 Implemented after reviewing upstream projects on 2026-10-25. This is an Apple-inspired material treatment for Playbook Studio, not Apple's proprietary renderer.
 
 ## Research and choice

@@ -37,43 +37,57 @@ test('visual preferences stay local and obsolete asynchronous particle startups 
   win.localStorage.setItem('playbook-shared-sentinel','unchanged');
   win.document.body.innerHTML=fx.effectsControl();
   try {
+    await t.test('existing users default to traditional with an explicit two-mode control',async()=>{
+      assert.equal(fx.preference(),'traditional');assert.equal(fx.effectiveMode(),'off');
+      assert.equal(win.document.querySelectorAll('[data-effects-mode]').length,2);
+      assert.match(win.document.body.textContent,/传统模式/);assert.match(win.document.body.textContent,/数字化模式/);
+    });
     await t.test('turning off during startup cancels the stale instance and skips queued intermediate choices',async()=>{
-      fx.initEffects();await settle();assert.equal(typeof resolveFirst,'function');
-      const lite=fx.setEffectsMode('lite');await fx.setEffectsMode('off');
+      win.localStorage.setItem('playbook-visual-mode','digital');fx.initEffects();await settle();assert.equal(typeof resolveFirst,'function');
+      const lite=fx.setEffectsMode('digital');await fx.setEffectsMode('traditional');
       resolveFirst();await lite;await settle();
       assert.equal(live.size,0);assert.equal(win.document.querySelectorAll('canvas').length,0);
       assert.equal(win.document.documentElement.dataset.effects,'off');
       assert.equal(win.localStorage.getItem('playbook-shared-sentinel'),'unchanged');
     });
     await t.test('restart owns exactly one canvas, hidden tabs pause and visible tabs resume',async()=>{
-      delayed=false;await fx.setEffectsMode('full');assert.equal(live.size,1);
+      delayed=false;await fx.setEffectsMode('digital');assert.equal(live.size,1);
       hidden=true;win.document.dispatchEvent(new win.Event('visibilitychange'));assert.equal(paused,1);
       hidden=false;win.document.dispatchEvent(new win.Event('visibilitychange'));assert.equal(resumed,1);
-      await fx.setEffectsMode('lite');assert.equal(live.size,1);assert.equal(win.document.querySelectorAll('canvas').length,1);
+      await fx.setEffectsMode('digital');assert.equal(live.size,1);assert.equal(win.document.querySelectorAll('canvas').length,1);
     });
-    await t.test('repeated full, lite and off switches keep particles alive without registering plugins again',async()=>{
-      for(let i=0;i<6;i++)for(const mode of ['full','lite','off','full']){
+    await t.test('repeated digital and traditional switches keep particles alive without registering plugins again',async()=>{
+      for(let i=0;i<6;i++)for(const mode of ['digital','traditional','digital']){
         await fx.setEffectsMode(mode);
-        assert.equal(win.document.documentElement.dataset.effects,mode);
-        assert.equal(live.size,mode==='off'?0:1);
-        assert.equal(win.document.querySelectorAll('#ambient-particles canvas').length,mode==='off'?0:1);
+        assert.equal(win.document.documentElement.dataset.effects,mode==='digital'?'full':'off');
+        assert.equal(live.size,mode==='traditional'?0:1);
+        assert.equal(win.document.querySelectorAll('#ambient-particles canvas').length,mode==='traditional'?0:1);
       }
       assert.equal(registrations,1);
-      await fx.setEffectsMode('lite');
+      await fx.setEffectsMode('digital');
     });
     await t.test('system reduced motion overrides decorative effects without overwriting the chosen preference',async()=>{
       reduced=true;for(const fn of reduceListeners)await fn();assert.equal(live.size,0);
-      assert.equal(win.document.documentElement.dataset.effects,'off');assert.equal(fx.preference(),'lite');
+      assert.equal(win.document.documentElement.dataset.effects,'off');assert.equal(fx.preference(),'digital');
       assert.match(win.document.querySelector('.effects-note').textContent,/系统/);
       reduced=false;for(const fn of reduceListeners)await fn();assert.equal(live.size,1);
-      assert.equal(win.document.documentElement.dataset.effects,'lite');
+      assert.equal(win.document.documentElement.dataset.effects,'full');
     });
     await t.test('a denied local-storage write preserves the session setting and leaves shared data untouched',async()=>{
       const setItem=win.localStorage.setItem.bind(win.localStorage);
       win.localStorage.setItem=()=>{throw new Error('storage unavailable');};
-      await fx.setEffectsMode('off');assert.equal(fx.preference(),'off');assert.equal(live.size,0);
+      await fx.setEffectsMode('traditional');assert.equal(fx.preference(),'traditional');assert.equal(live.size,0);
       assert.equal(win.localStorage.getItem('playbook-shared-sentinel'),'unchanged');
       win.localStorage.setItem=setItem;
     });
-  } finally {await fx.setEffectsMode('off');await win.happyDOM.abort();for(const n of names){if(previous[n])Object.defineProperty(globalThis,n,previous[n]);else delete globalThis[n];}}
+    await t.test('iPad desktop-site identity locks digital controls and ignores attempted digital activation',async()=>{
+      Object.defineProperty(win.navigator,'platform',{configurable:true,value:'MacIntel'});
+      Object.defineProperty(win.navigator,'maxTouchPoints',{configurable:true,value:5});
+      await fx.setEffectsMode('traditional');await fx.setEffectsMode('digital');
+      assert.equal(fx.visualMode(),'traditional');assert.equal(live.size,0);
+      assert.equal(win.document.querySelector('[data-effects-mode="digital"]').disabled,true);
+      assert.match(win.document.querySelector('.effects-note').textContent,/iPad/);
+      assert.equal(win.localStorage.getItem('playbook-visual-mode'),'traditional');
+    });
+  } finally {await fx.setEffectsMode('traditional');await win.happyDOM.abort();for(const n of names){if(previous[n])Object.defineProperty(globalThis,n,previous[n]);else delete globalThis[n];}}
 });
