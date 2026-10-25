@@ -29,12 +29,16 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async()=>{
     const animated=doc.documentElement.dataset.effects!=='off';
     if(last!==null&&animated&&(!state.rehearsal||state.playing))materialTime+=Math.min((stamp-last)/1000,.1);
     last=stamp;
-    try{feedback?.update({...state,materialTime,animated});(engine||fallback)?.draw({...state,materialTime,animated,hoveredId,pointer});}
-    catch(error){failed=true;engine?.destroy();engine=null;engineSvg=null;ensureFallback(state);doc.documentElement.dataset.digitalBoard='unavailable';notify('WebGL 不可用，已切换到立体棋子兼容视图。');win.console.warn('Digital board stopped:',error);}
-    if(engine)doc.documentElement.dataset.digitalBoard='ready';frame=win.requestAnimationFrame(update);
+    paint(state,animated);frame=win.requestAnimationFrame(update);
   }
-  function mount(current,state){feedback?.destroy();svg=current;projectStage();if(engine){fallback?.destroy();fallback=null;}else if(fallback)fallback.mount(svg,state.play,state.settings);else ensureFallback(state);engine?.mount(svg,state.play,state.settings);engineSvg=engine?svg:null;feedback=createRouteFeedback(svg,state.play);}
-  async function sync({retry=false}={}){
+  function paint(state,animated=doc.documentElement.dataset.effects!=='off'){
+    const view={...state,materialTime,animated,hoveredId,pointer};
+    try{feedback?.update(view);(engine||fallback)?.draw(view);}
+    catch(error){failed=true;engine?.destroy();engine=null;engineSvg=null;ensureFallback(state);fallback.draw(view);doc.documentElement.dataset.digitalBoard='unavailable';notify('WebGL 不可用，已切换到立体棋子兼容视图。');win.console.warn('Digital board stopped:',error);}
+    if(engine)doc.documentElement.dataset.digitalBoard='ready';
+  }
+  function mount(current,state){feedback?.destroy();svg=current;projectStage();feedback=createRouteFeedback(svg,state.play);feedback.update({...state,materialTime,animated:doc.documentElement.dataset.effects!=='off'});if(engine){fallback?.destroy();fallback=null;}else if(fallback)fallback.mount(svg,state.play,state.settings);else ensureFallback(state);engine?.mount(svg,state.play,state.settings);engineSvg=engine?svg:null;paint(state);}
+  async function sync({retry=false,contentChanged=false}={}){
     if(!allowed()){generation++;clear();delete doc.documentElement.dataset.digitalBoard;return;}
     if(retry)failed=false;
     if(typeof win.CanvasRenderingContext2D==='undefined')return;
@@ -44,12 +48,18 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async()=>{
         if(disposed||ticket!==generation||!allowed()){value.destroy();return;}engine=value;
       }).catch(error=>{if(!disposed&&ticket===generation){failed=true;doc.documentElement.dataset.digitalBoard='unavailable';notify('WebGL 不可用，已切换到立体棋子兼容视图。');win.console.warn('Digital board initialization failed:',error);}}).finally(()=>{pending=null;});
     }
-    await pending;
+    if(pending)await pending;
     if(!allowed())return;
     // A newer digital request may have outlived an obsolete startup.
     if(!engine&&!failed)return sync();
     const next=doc.querySelector('#field .pitch-svg');if(!next)return;
-    if(next!==svg||(engine&&engineSvg!==next))mount(next,getState());else engine?.refreshBackground();
+    const state=getState();
+    if(next!==svg||(engine&&engineSvg!==next))mount(next,state);
+    else {
+      if(contentChanged){feedback?.destroy();feedback=createRouteFeedback(svg,state.play);}
+      // Commit feedback and retained pieces now, before the browser can paint.
+      paint(state);engine?.refreshBackground();
+    }
     if(frame===null&&!doc.hidden)frame=win.requestAnimationFrame(update);
   }
   const changed=()=>sync({retry:true});

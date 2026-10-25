@@ -94,6 +94,7 @@ function render() {
   const p = current(); if (!p) return;
   const previousPlay=renderedPlayId, existingIds=new Set([...document.querySelectorAll('#field [data-player]')].map(n=>n.dataset.player));
   const restoreScroll=captureEditorScroll({samePlay:previousPlay===p.id});
+  const retainedStage=previousPlay===p.id ? $('#field .pitch-stage') : null;
   if (!cloudMode()) document.title = `${p.title} · 本地预览`;
   document.documentElement.style.setProperty('--team-color', state.data.team.accent);
   document.title = `${p.title} · Playbook Studio`;
@@ -130,6 +131,9 @@ function render() {
       </section>${boardWidthHandle}<section class="inspector-panel" id="properties-panel" aria-label="战术属性"><header class="panel-heading compact-only"><strong>属性与设置</strong><button class="panel-close" data-action="close-panel" aria-label="关闭战术属性">${icon('close')}</button></header><aside class="inspector" aria-label="战术属性">${inspector()}</aside></section></div>
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>画清路线，读懂比赛。</span><button data-action="help">快捷键与使用说明 ${icon('chevron')}</button></footer>
     </main><nav class="compact-nav" aria-label="工作区面板"><button data-action="sidebar" aria-controls="plays-panel">${icon('book')}<span>战术本</span></button><button data-action="panel-field" aria-pressed="true">${icon('grid')}<span>球场</span></button><button data-action="inspector-panel" aria-controls="properties-panel">${icon('select')}<span>属性</span></button></nav></div>`;
+  // Keep the live renderer and its SVG root through edits to the same play.
+  // Reconnecting them synchronously avoids a blank canvas between UI commits.
+  if(retainedStage){$('#field .pitch-stage').replaceWith(retainedStage);renderField();}
   bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh();
   restoreScroll();
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
@@ -235,9 +239,16 @@ function inspector() {
 function renderField() {
   const field=$('#field');if(!field)return;
   const template=document.createElement('template');template.innerHTML=fieldSVG(current(),viewSettings(),{selected:selection,time,drawing:draft});
-  field.querySelector('.pitch-svg').replaceWith(template.content.firstElementChild);
-  updateAnimation(field.querySelector('.pitch-svg'),current(),time);
-  digitalBoard?.sync();
+  const svg=field.querySelector('.pitch-svg'),next=template.content.firstElementChild;
+  // Preserve the SVG root and renderer readiness while replacing editable content
+  // in one synchronous transaction. Canvas and vector pieces are stage siblings.
+  for(const name of svg.getAttributeNames())if(name!=='class'&&!next.hasAttribute(name))svg.removeAttribute(name);
+  for(const attr of next.attributes)if(attr.name!=='class')svg.setAttribute(attr.name,attr.value);
+  const readyClasses=['digital-ready','digital-fallback-ready'].filter(name=>svg.classList.contains(name));
+  svg.setAttribute('class',[next.getAttribute('class'),...readyClasses].join(' '));
+  svg.replaceChildren(...next.childNodes);
+  updateAnimation(svg,current(),time);
+  digitalBoard?.sync({contentChanged:true});
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${current().players.filter(p=>p.side==='offense').length} O / ${current().players.filter(p=>p.side==='defense').length} D</span>`;
 }
 function refreshSelection() {

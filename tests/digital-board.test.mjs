@@ -104,3 +104,22 @@ test('perspective stage cleans up on mode switch and raised-piece picking reache
     assert.equal(f.controller.pick({clientX:71,clientY:25}),null);
   }finally{await f.close();}
 });
+
+test('in-place route edits refresh feedback and paint synchronously without remounting the scene',async()=>{
+  let mounts=0,draws=0;
+  const f=fixture(async()=>({mount(){mounts++;},draw(){draws++;},refreshBackground(){},destroy(){}}));
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
+    const svg=f.doc.querySelector('.pitch-svg'),stage=svg.parentElement,previousDraws=draws;
+    const route={...clone(f.state.play.routes[0]),id:'new-live-route'};f.state.play.routes.push(route);
+    const template=f.doc.createElement('template');template.innerHTML=fieldSVG(f.state.play);
+    svg.replaceChildren(...template.content.firstElementChild.childNodes);
+    const sync=f.controller.sync({contentChanged:true});
+    assert.equal(mounts,1);assert.equal(draws,previousDraws+1,'paint must happen before returning to the browser');
+    assert.equal(svg.parentElement,stage);assert.equal(f.doc.querySelectorAll('.digital-decoration').length,1);
+    assert.ok(svg.querySelector('[data-feedback-route="new-live-route"]'));await sync;
+    f.state.play.routes.pop();const next=f.doc.createElement('template');next.innerHTML=fieldSVG(f.state.play);svg.replaceChildren(...next.content.firstElementChild.childNodes);
+    await f.controller.sync({contentChanged:true});assert.equal(svg.querySelector('[data-feedback-route="new-live-route"]'),null);
+    assert.equal(mounts,1);
+  }finally{await f.close();}
+});
