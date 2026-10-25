@@ -90,3 +90,17 @@ test('unavailable WebGL keeps SVG route feedback and accessible players; switchi
     await f.controller.sync({retry:true});f.step(100);assert.equal(mounts,1);assert.equal(f.doc.documentElement.dataset.digitalBoard,'ready');
   }finally{await f.close();}
 });
+
+test('perspective stage cleans up on mode switch and raised-piece picking reaches the renderer',async()=>{
+  const f=fixture(async()=>({mount(){},draw(){},refreshBackground(){},destroy(){},pick(x,y){return x===71&&y===25?{type:'player',id:'raised'}:null;}}));
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
+    const stage=f.doc.querySelector('.pitch-stage');assert.ok(stage.classList.contains('is-perspective'));
+    assert.match(stage.style.getPropertyValue('--board-projection'),/^matrix3d\(/);
+    assert.deepEqual(f.controller.pick({clientX:71,clientY:25}),{type:'player',id:'raised'});
+    f.doc.documentElement.dataset.visualMode='traditional';await f.controller.sync();
+    assert.equal(stage.classList.contains('is-perspective'),false);
+    assert.equal(stage.style.getPropertyValue('--board-projection'),'');
+    assert.equal(f.controller.pick({clientX:71,clientY:25}),null);
+  }finally{await f.close();}
+});

@@ -40,3 +40,15 @@ test('non-matrix SVG environments retain ordinary zoomed rectangular coordinates
   near(fieldCoordinates({getScreenCTM:()=>null,getBoundingClientRect:()=>box},event),point);
   near(fieldCoordinates({getScreenCTM:()=>({inverse(){throw new Error('singular');}}),getBoundingClientRect:()=>box},event),point);
 });
+
+test('perspective input reverses camera projection with zoom and scroll',async()=>{
+  const {projectBoardPoint}=await import('../web/digital-projection.js');
+  for(const zoom of [1,1.5,3]){
+    const rect={left:-233,top:-391,width:1000*zoom,height:800*zoom};
+    const svg={closest:()=>({getBoundingClientRect:()=>rect}),getScreenCTM(){throw new Error('Perspective must use the untransformed stage');}};
+    for(const point of [{x:12,y:18},{x:50,y:50},{x:89,y:85}]){
+      const screen=projectBoardPoint(18+point.x*9.64,20+point.y*7.6);
+      near(fieldCoordinates(svg,{clientX:rect.left+screen.x*zoom,clientY:rect.top+screen.y*zoom}),point);
+    }
+  }
+});
