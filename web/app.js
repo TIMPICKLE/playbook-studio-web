@@ -1,14 +1,16 @@
 import { createDigitalBoard } from './digital-board.js';
+import { projectDigitalExport } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
 import { makeMaddenPlay, hasEditableTrace, getEditableEntry } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, CLOUD_SITE } from './cloud.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft } from './field.js';
+import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
 import { effectsControl, initEffects, burstAt } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
-import { initViewportLayout } from './viewport-layout.js';
+import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
 import { createWorkspacePanels } from './workspace-panels.js';
 
 const $ = selector => document.querySelector(selector);
@@ -91,7 +93,7 @@ function restore(next) { if (!next || !canEdit()) return; resetAnimation(); rehe
 function render() {
   const p = current(); if (!p) return;
   const previousPlay=renderedPlayId, existingIds=new Set([...document.querySelectorAll('#field [data-player]')].map(n=>n.dataset.player));
-  const scrolls=['.sidebar','.play-list','.inspector'].map(selector=>[selector,$(selector)?.scrollTop||0]);
+  const restoreScroll=captureEditorScroll({samePlay:previousPlay===p.id});
   if (!cloudMode()) document.title = `${p.title} · 本地预览`;
   document.documentElement.style.setProperty('--team-color', state.data.team.accent);
   document.title = `${p.title} · Playbook Studio`;
@@ -129,7 +131,7 @@ function render() {
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>画清路线，读懂比赛。</span><button data-action="help">快捷键与使用说明 ${icon('chevron')}</button></footer>
     </main><nav class="compact-nav" aria-label="工作区面板"><button data-action="sidebar" aria-controls="plays-panel">${icon('book')}<span>战术本</span></button><button data-action="panel-field" aria-pressed="true">${icon('grid')}<span>球场</span></button><button data-action="inspector-panel" aria-controls="properties-panel">${icon('select')}<span>属性</span></button></nav></div>`;
   bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh();
-  for (const [selector,top] of scrolls) if($(selector))$(selector).scrollTop=top;
+  restoreScroll();
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
   if(!previousPlay) enterWorkbench(document.querySelector('.workspace'));
@@ -255,7 +257,7 @@ function refreshMetadata() {
   $('[data-action="undo"]').disabled=!history.past.length;$('[data-action="redo"]').disabled=!history.future.length;
   renderField();syncEditorChrome();protectReadOnly();
 }
-function coordinates(event) { const svg = $('#field svg'), box = svg.getBoundingClientRect(); return { x: clamp(((event.clientX - box.left) / box.width * 1000 - 18) / 9.64), y: clamp(((event.clientY - box.top) / box.height * 800 - 20) / 7.6) }; }
+function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {
   const node = event.target.closest('[data-player],[data-route],[data-zone],[data-annotation]');
   if (!node) return null;
@@ -411,7 +413,7 @@ async function standaloneSVG(play, digital = false) {
       root.querySelectorAll('.player-body').forEach(n=>n.setAttribute('opacity','0'));
       root.querySelectorAll('.player-label').forEach(n=>{n.setAttribute('fill','#fff9ec');n.setAttribute('stroke','#201427');n.setAttribute('stroke-width','1.5');n.setAttribute('paint-order','stroke');});
     }
-    svg=root.outerHTML;
+    svg=projectDigitalExport(root,{material:!!capture.image}).outerHTML;
   }
   if (play.reference) {
     const response = await fetch(new URL(`./${play.reference.image}`, import.meta.url));

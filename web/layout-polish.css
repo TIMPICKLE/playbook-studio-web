@@ -1,0 +1,123 @@
+/* One radius scale. Inset controls follow the radius of the containing surface. */
+:root {
+  --ui-radius-panel:20px;
+  --ui-radius-card:16px;
+  --ui-radius-control:12px;
+  --ui-radius-inset:8px;
+  --ui-gap:12px;
+}
+
+/* These surfaces meet edge to edge; rounding both creates a pinched dark notch. */
+.workspace .sidebar,.workspace .topbar { border-radius:0; }
+.canvas-heading,.toolbar { margin-bottom:var(--ui-gap); }
+.canvas-heading { gap:var(--ui-gap); }
+.board-size-controls { margin-bottom:var(--ui-gap); }
+.board-size-actions { gap:8px; }
+.board-zoom-controls { gap:4px; }
+.board-zoom-controls button,.board-size-actions button,
+.board-advanced > summary { border-radius:var(--ui-radius-control); }
+
+/* Seven equal cells, with the same inset used by the moving selection plate. */
+.draw-tools {
+  padding:4px;
+  gap:0;
+  border-radius:var(--ui-radius-card);
+  min-height:50px;
+}
+.draw-tools .tool-button { border-radius:var(--ui-radius-control); }
+.draw-tools .tool-indicator {
+  inset:4px auto 4px 4px;
+  width:calc((100% - 8px) / 7);
+  border-radius:var(--ui-radius-control);
+}
+.editor-mode { border-radius:var(--ui-radius-card); padding:4px; }
+.editor-mode::before,.editor-mode button { border-radius:var(--ui-radius-control); }
+.field-wrap { border-radius:var(--ui-radius-panel); }
+.pitch-viewport { border-radius:inherit; }
+.field-context { padding:4px; gap:4px; border-radius:var(--ui-radius-card); }
+.field-context button { border-radius:var(--ui-radius-control); }
+.field-tag,.drag-readout { border-radius:var(--ui-radius-inset); }
+.board-height-resizer { margin-top:4px; }
+.canvas-hint { padding:8px 2px 12px; }
+.playback { border-radius:var(--ui-radius-panel); padding:16px; }
+.playback-top { margin-bottom:12px; }
+.transport { gap:8px; }
+.playback .play-button { border-radius:50%; }
+
+.inspector { border-radius:var(--ui-radius-panel); padding:18px; }
+.inspector-heading { margin-bottom:16px; }
+.inspector-divider { margin:20px 0; }
+.inspector .form-field { margin-bottom:16px; }
+.inspector .form-row { gap:12px; }
+.inspector .route-quick { gap:8px; }
+.inspector .route-list { margin-top:12px; }
+.inspector .route-list button,.inspector .route-quick button,
+.inspector .formation-actions button { border-radius:var(--ui-radius-control); }
+.inspector input:not([type=checkbox]):not([type=range]):not([type=color]),
+.inspector select,.inspector textarea { border-radius:var(--ui-radius-control); }
+
+.team-switch,.madden-launch,.play-card { border-radius:var(--ui-radius-card); }
+.play-card { padding:8px; gap:10px; }
+.play-thumb { border-radius:var(--ui-radius-inset); }
+.play-card.active::before { left:0; height:24px; }
+.play-card:hover { transform:none; }
+.book-nav button,.sidebar-bottom > button,.new-play { border-radius:var(--ui-radius-control); }
+.search-box,.filters select { border-radius:var(--ui-radius-control); }
+.sidebar .filters { gap:8px; }
+.side-divider { margin:20px 0; }
+.book-card { border-radius:var(--ui-radius-panel); padding:18px; }
+.book-track { gap:16px; }
+.cloud-bar .workspace-current-card { border-radius:var(--ui-radius-card); }
+
+.effects-panel,.add-object-menu > div,.account-menu-panel { border-radius:var(--ui-radius-panel); }
+.effects-panel { padding:12px; }
+.effects-panel [role=group] { display:grid; gap:4px; }
+.effects-panel button { border-radius:var(--ui-radius-control); }
+.add-object-menu > div { padding:8px; }
+.add-object-menu button,.account-menu-panel button { border-radius:var(--ui-radius-control); }
+.modal,.madden-panel { border-radius:var(--ui-radius-panel); overflow:hidden; }
+.modal > header { border-radius:inherit; border-bottom-left-radius:0; border-bottom-right-radius:0; }
+.modal > footer { border-radius:inherit; border-top-left-radius:0; border-top-right-radius:0; }
+.modal > header,.modal-body,.modal > footer { padding-left:20px; padding-right:20px; }
+
+@media screen and (min-width:1181px) {
+  .editor-layout { column-gap:8px; }
+  .board-width-resizer::before { background:#c8b9dd18; }
+}
+@media screen and (max-width:1180px) {
+  .workspace .sidebar { border-radius:0 var(--ui-radius-panel) var(--ui-radius-panel) 0; }
+  .inspector-panel { border-radius:var(--ui-radius-panel) 0 0 var(--ui-radius-panel); overflow:hidden; }
+  /* The outer drawer owns its surface. Its scroll area must not paint square corners. */
+  html[data-visual-mode] .inspector-panel .inspector {
+    background:transparent;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    padding:20px;
+  }
+  .panel-heading { padding:12px 12px 12px 20px; }
+  .compact-nav { border-radius:var(--ui-radius-panel) var(--ui-radius-panel) 0 0; }
+  .compact-nav button { border-radius:var(--ui-radius-control); }
+}
+@media screen and (max-width:600px) {
+  :root { --ui-radius-panel:18px; --ui-radius-card:14px; --ui-radius-control:10px; --ui-radius-inset:6px; }
+  .draw-tools { gap:4px; }
+  .draw-tools .tool-indicator { display:none; }
+  .draw-tools .tool-button { border-radius:var(--ui-radius-control); }
+  .field-context { max-width:calc(100% - 16px); gap:2px; }
+  .playback { padding:12px; }
+  .board-size-actions { gap:6px; }
+  .board-dimensions { border-radius:var(--ui-radius-card); }
+  .inspector-panel { border-radius:20px 20px 0 0; }
+  html[data-visual-mode] .inspector-panel .inspector { padding:16px; }
+  .panel-heading { padding-left:16px; }
+  .modal > header,.modal-body,.modal > footer { padding-left:16px; padding-right:16px; }
+  .book-card { padding:16px; }
+  .book-track { gap:12px; }
+}
+
+/* Keep moving reflections subordinate to the drawing surface. */
+html[data-visual-mode=digital] { --glass-shadow:inset 0 1px #f2e9ff26,0 10px 30px #06040b30; }
+html[data-visual-mode=digital] #liquid-metal-world { opacity:.22; }
+html[data-visual-mode=digital] .liquid-surface-canvas { opacity:.4; }
+html[data-visual-mode=digital] :is(.draw-tools,.effects-panel,.field-context) { border-color:#d9c7ef40;box-shadow:var(--glass-shadow); }

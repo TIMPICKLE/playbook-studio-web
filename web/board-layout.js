@@ -37,8 +37,16 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     workspace.style.setProperty('--board-height', `${height()}px`);
     workspace.style.setProperty('--inspector-width', `${inspector()}px`);
     const viewport = q('.pitch-viewport'), ratio = workspace.classList.contains('reference-play') ? 1000 / 560 : 1.25;
-    const baseWidth = Math.min(viewport?.clientWidth || window.innerWidth - 32, (viewport?.clientHeight || height()) * ratio);
+    const inset = viewport ? window.getComputedStyle(viewport) : null;
+    const digital = document.documentElement.dataset.visualMode === 'digital' && !workspace.classList.contains('reference-play');
+    // Fit against the base gutter, never the enlarged zoom gutter (which would
+    // otherwise feed back into the next zoom calculation).
+    const horizontal = digital ? (viewport?.clientWidth || window.innerWidth - 32) * .14
+      : (parseFloat(inset?.paddingLeft) || 0) + (parseFloat(inset?.paddingRight) || 0);
+    const vertical = (parseFloat(inset?.paddingTop) || 0) + (parseFloat(inset?.paddingBottom) || 0);
+    const baseWidth = Math.min((viewport?.clientWidth || window.innerWidth - 32) - horizontal, ((viewport?.clientHeight || height()) - vertical) * ratio);
     workspace.style.setProperty('--pitch-width', `${Math.floor(baseWidth * zoom)}px`);
+    workspace.style.setProperty('--pitch-gutter', `${Math.max((viewport?.clientWidth || 0) * .07, baseWidth * zoom * .056 + 12)}px`);
     workspace.classList.toggle('pitch-zoomed', zoom > 1);
     if (q('#board-zoom-value')) q('#board-zoom-value').textContent = `${Math.round(zoom * 100)}%`;
     for (const node of document.querySelectorAll('[data-board-action="zoom-in"]')) node.disabled = zoom >= 3;
@@ -110,6 +118,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     finish(true); apply();
   });
   document.addEventListener('toggle', event => { if (event.target.matches?.('.board-advanced')) dimensionsOpen = event.target.open; }, { capture: true });
+  document.addEventListener('playbook:effects-changed', apply);
 
   document.addEventListener('input', event => {
     if (event.target.id !== 'board-height') return;

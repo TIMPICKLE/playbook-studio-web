@@ -12,7 +12,12 @@ test('touch workspace panels, zoom and orientation preserve editable play data',
   for(const n of names)Object.defineProperty(globalThis,n,{configurable:true,value:['requestAnimationFrame','cancelAnimationFrame'].includes(n)?win[n].bind(win):win[n]});
   const doc=win.document,q=s=>doc.querySelector(s),click=s=>{const node=q(s);assert.ok(node,s);node.click();};
   const pointer=(node,type,x,y)=>node.dispatchEvent(new win.PointerEvent(type,{bubbles:true,cancelable:true,button:0,pointerId:1,pointerType:'touch',clientX:x,clientY:y}));
-  const geometry=()=>{q('#field svg').getBoundingClientRect=()=>({left:0,top:0,width:2000,height:1600});};
+  const geometry=()=>{
+    const svg=q('#field .pitch-svg');
+    svg.getBoundingClientRect=()=>({left:0,top:0,width:2000,height:1600});
+    // happy-dom has no layout engine; model the actual SVG screen transform at 2x.
+    svg.getScreenCTM=()=>({inverse:()=>({a:.5,b:0,c:0,d:.5,e:0,f:0})});
+  };
   try {
     await import(`../web/app.js?responsive=${Date.now()}`);
     await t.test('drawers are isolated, focus returns on close, and properties remain editable',()=>{
