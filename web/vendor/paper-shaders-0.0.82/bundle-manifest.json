@@ -1,0 +1,26 @@
+{
+  "esbuild": "0.28.0",
+  "sourceCommit": "71be01576e8402c62ac76386bb4a7c59092e24c7",
+  "files": [
+    {
+      "path": "paper-liquid-metal-0.0.82.js",
+      "bytes": 44896,
+      "sha256": "3e0ab5fd2dab35f71b065399af59e3442fc1b064f34c3b6ef0c1d3313a7e2554"
+    },
+    {
+      "path": "paper-liquid-metal-0.0.82.js.map",
+      "bytes": 96931,
+      "sha256": "a4b1664f50316ddc624231e472c66a85db23b345d77f2f49dd5aba9d909fb42b"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "NOTICE",
+      "bytes": 55,
+      "sha256": "c3155d6a359d9841d63f7feb4938d2c99bb4ef681fa20be1eb4bfa71307f746b"
+    }
+  ]
+}

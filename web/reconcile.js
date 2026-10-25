@@ -5,7 +5,8 @@ export function reconcileHTML(root, html) {
   patch(root, template.content);
 }
 function patch(parent, source) {
-  const old = [...parent.childNodes], wanted = [...source.childNodes];
+  // Material canvases are decorations managed independently of application state.
+  const old = [...parent.childNodes].filter(node=>!node.matches?.('.liquid-surface-canvas')), wanted = [...source.childNodes];
   const keyed = new Map(old.map((node, i) => [key(node, i), node]));
   const retained = new Set();
   wanted.forEach((next, i) => {
@@ -21,7 +22,8 @@ function patch(parent, source) {
       if (node.tagName === 'INPUT' && node.value !== next.value) node.value = next.value;
     }
     retained.add(node);
-    if (parent.childNodes[i] !== node) parent.insertBefore(node, parent.childNodes[i] || null);
+    const current = [...parent.childNodes].filter(child=>!child.matches?.('.liquid-surface-canvas'))[i];
+    if (current !== node) parent.insertBefore(node, current || null);
   });
   for (const node of old) if (!retained.has(node)) node.remove();
 }

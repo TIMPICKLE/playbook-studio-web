@@ -1,0 +1,73 @@
+{
+  "repository": "paper-design/shaders",
+  "version": "0.0.82",
+  "commit": "71be01576e8402c62ac76386bb4a7c59092e24c7",
+  "files": [
+    {
+      "path": "LICENSE",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "NOTICE",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/NOTICE",
+      "bytes": 55,
+      "sha256": "c3155d6a359d9841d63f7feb4938d2c99bb4ef681fa20be1eb4bfa71307f746b"
+    },
+    {
+      "path": "packages/shaders/package.json",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/package.json",
+      "bytes": 564,
+      "sha256": "6acad98febc381282cefd0fa6608a6b04836d78632a737a808b0278ec1203094"
+    },
+    {
+      "path": "packages/shaders/src/shaders/liquid-metal.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/shaders/liquid-metal.ts",
+      "bytes": 30090,
+      "sha256": "626419e92474cacbfb4f77bc8be6a80414bd2a10bf3e4da4f05ab8d591e64e4d"
+    },
+    {
+      "path": "packages/shaders/src/shader-mount.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/shader-mount.ts",
+      "bytes": 32151,
+      "sha256": "7e0383f642aa4613bf521d089c5df55751726cc47af37d998216e4994d70dd31"
+    },
+    {
+      "path": "packages/shaders/src/shader-sizing.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/shader-sizing.ts",
+      "bytes": 1068,
+      "sha256": "b4579aa325c6e662b271bed812415e5aed7cf8ff066a7940045f422458b7abeb"
+    },
+    {
+      "path": "packages/shaders/src/shader-utils.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/shader-utils.ts",
+      "bytes": 3456,
+      "sha256": "5805b80c74323b0a8fce8c8c3628b17372014f7417d0c7de3346fa532c6c903a"
+    },
+    {
+      "path": "packages/shaders/src/vertex-shader.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/vertex-shader.ts",
+      "bytes": 5131,
+      "sha256": "b2f8121916f21674ccb53174efa88f19e53287893035333bc65f6228a4bfd136"
+    },
+    {
+      "path": "packages/shaders/src/get-shader-color-from-string.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/get-shader-color-from-string.ts",
+      "bytes": 4368,
+      "sha256": "20fdc1a154ce9cc7d2d5b369150954e10b4845a0c5a764b814e2561e803deedd"
+    },
+    {
+      "path": "packages/shaders/src/empty-pixel.ts",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders/src/empty-pixel.ts",
+      "bytes": 104,
+      "sha256": "53be51a065786523fdda5c76e9d7323d299b4400154e2648c5b9dfb726c99ea1"
+    },
+    {
+      "path": "packages/shaders-react/src/shaders/liquid-metal.tsx",
+      "url": "https://github.com/paper-design/shaders/blob/71be01576e8402c62ac76386bb4a7c59092e24c7/packages/shaders-react/src/shaders/liquid-metal.tsx",
+      "bytes": 5512,
+      "sha256": "8917927d1b5c1de4eed9dc25c3f3217e8473222ceef2f5fe6eb8a25c2d238988"
+    }
+  ]
+}
