@@ -1,4 +1,32 @@
 import { COMPACT_WIDTH } from './workspace-panels.js';
+
+// Full editor renders replace the scroll containers. Restore the view only after
+// boardLayout.mount() has reapplied the zoom and size, otherwise the browser
+// clamps the saved pitch offsets against its temporary unzoomed dimensions.
+export function captureEditorScroll({doc=document,samePlay=false}={}) {
+  const selectors=['.sidebar','.play-list','.inspector-panel','.inspector'];
+  if(samePlay)selectors.push('.main','.pitch-viewport');
+  const positions=selectors.flatMap(selector=>{
+    const node=doc.querySelector(selector);
+    return node?[{selector,left:node.scrollLeft,top:node.scrollTop}]:[];
+  });
+  const page=doc.scrollingElement||doc.documentElement;
+  const pagePosition=samePlay&&page?{left:page.scrollLeft,top:page.scrollTop}:null;
+  function restore(node,position){
+    if(!node)return;
+    // The digital theme inherits html { scroll-behavior:smooth }. Property
+    // assignments use that behavior and leave a delayed page scroll running
+    // after the render. Restore both axes atomically and cancel that animation.
+    if(typeof node.scrollTo==='function')node.scrollTo({left:position.left,top:position.top,behavior:'instant'});
+    else {node.scrollLeft=position.left;node.scrollTop=position.top;}
+  }
+  return ()=>{
+    for(const position of positions)restore(doc.querySelector(position.selector),position);
+    // Restore the outer page last: nested scrollers and their size are settled.
+    if(pagePosition)restore(doc.scrollingElement||doc.documentElement,pagePosition);
+  };
+}
+
 // Match the side panels to the real sticky header, including wrapped toolbars.
 // Observe the host so replacing the cloud toolbar never leaves an old observer.
 export function initViewportLayout() {

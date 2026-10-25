@@ -1,6 +1,6 @@
 {
   "name": "playbook-studio-web",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -13,7 +13,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check web/app.js && node --check web/model.js && node --check web/field.js && node --check web/cloud.js && node --check web/book-switcher.js && node --check web/sync.js && node --check web/sw.js && node --check web/migrate.js && node --check server/api.mjs && node --check server/auth.mjs && node --check server/http.mjs && node --check web/ui.js && node --check web/motion.js && node --check web/effects.js && node --check web/liquid-materials.js && node --check web/liquid-optics.js && node --check web/liquid-canvas.js && node --check web/board-layout.js && node --check web/viewport-layout.js && node --check web/workspace-panels.js && node --check web/madden.js && node --check web/madden-model.js && node --check web/reconcile.js && node --check web/visual-mode.js && node --check web/digital-board.js && node --check web/digital-routes.js && node --check web/digital-materials.js",
+    "check": "node --check web/app.js && node --check web/model.js && node --check web/field.js && node --check web/cloud.js && node --check web/book-switcher.js && node --check web/sync.js && node --check web/sw.js && node --check web/migrate.js && node --check server/api.mjs && node --check server/auth.mjs && node --check server/http.mjs && node --check web/ui.js && node --check web/motion.js && node --check web/effects.js && node --check web/liquid-materials.js && node --check web/liquid-optics.js && node --check web/liquid-canvas.js && node --check web/board-layout.js && node --check web/viewport-layout.js && node --check web/workspace-panels.js && node --check web/madden.js && node --check web/madden-model.js && node --check web/reconcile.js && node --check web/visual-mode.js && node --check web/digital-board.js && node --check web/digital-routes.js && node --check web/digital-materials.js && node --check web/field-coordinates.js && node --check web/digital-projection.js && node --check web/digital-export.js",
     "typecheck": "tsc --noEmit --incremental false",
     "start:local": "node scripts/materialize-huddle.mjs && node scripts/serve.mjs",
     "import:huddle": "node scripts/import-huddle.mjs"
