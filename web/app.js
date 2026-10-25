@@ -1,5 +1,5 @@
 import { createDigitalBoard } from './digital-board.js';
-import { projectDigitalExport } from './digital-export.js';
+import { composeDigitalExport, pngExportDescription } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
 import { makeMaddenPlay, hasEditableTrace, getEditableEntry } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
@@ -123,7 +123,7 @@ function render() {
         <div class="canvas-heading"><div class="editor-mode" role="group" aria-label="工作模式"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}布阵与画线</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}战术演练</button></div><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', 'tool-button')}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div>
         <div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:'选择',route:'跑动',block:'阻挡',motion:'移动',pass:'传球',zone:'区域',text:'文字'})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div>
         ${boardSizeControls()}
-        <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="可缩放战术板">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div><div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
+        <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="可缩放战术板"><div class="pitch-stage">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
         ${boardHeightHandle}
         <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
         <div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>战术演练</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">速度 <select id="speed" aria-label="播放速度">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', '循环播放', `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? '暂停战术' : '播放战术', 'play-button')}${btn('reset', 'reset', '重置动画', 'icon-button')}<input type="range" id="timeline" aria-label="动画时间" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div>
@@ -259,6 +259,7 @@ function refreshMetadata() {
 }
 function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {
+  if(!event.target.closest('[data-point]')) { const spatial=digitalBoard?.pick(event); if(spatial)return spatial; }
   const node = event.target.closest('[data-player],[data-route],[data-zone],[data-annotation]');
   if (!node) return null;
   for (const type of ['player', 'route', 'zone', 'annotation']) if (node.dataset[type]) return { type, id: node.dataset[type] };
@@ -365,7 +366,8 @@ function newModal() {
 }
 function textModal(at) { openModal('添加场上标注', '<label class="form-field"><span>标注内容</span><input id="annotation-text" placeholder="例如：Read 1 · 先读浅交叉" maxlength="200"></label>', `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">放置标注</button>`); }
 function exportModal() {
-  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>${current().reference ? '原图战术文件' : '矢量战术图'}</strong><small>${current().reference ? 'SVG · 内嵌原始图片' : 'SVG · 平面矢量，适合课件'}</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · ${current().reference ? '2000 × 1120 · 原图分辨率' : '2000 × 1600 · 包含当前外观'}</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
+  const pngDescription=pngExportDescription({reference:!!current().reference,digital:document.documentElement.dataset.visualMode==='digital',ready:document.documentElement.dataset.digitalBoard==='ready'});
+  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>${current().reference ? '原图战术文件' : '矢量战术图'}</strong><small>${current().reference ? 'SVG · 内嵌原始图片' : 'SVG · 平面矢量，适合课件'}</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · ${pngDescription}</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
 }
 function teamModal() {
   openModal('球队与球员名单', `<div class="form-row"><label class="form-field"><span>球队名称</span><input id="team-name" value="${e(state.data.team.name)}" maxlength="80"></label><label class="form-field"><span>赛季 / 副标题</span><input id="team-subtitle" value="${e(state.data.team.subtitle)}" maxlength="80"></label></div><div class="form-row"><label class="form-field"><span>球队颜色</span><input id="team-accent" type="color" value="${state.data.team.accent}"></label><label class="form-field"><span>默认人数</span><select id="team-league">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人制`, String(state.data.settings.league))).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>名单</span><small>选中球场球员后可分配</small></div><div class="roster-labels"><span>号码</span><span>姓名</span><span>位置</span><span></span></div><div id="roster-rows">${state.data.roster.map(rosterRow).join('')}</div><button class="text-button" data-action="roster-add">+ 添加球员</button>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="save-team">保存球队</button>', true);
@@ -406,14 +408,7 @@ async function standaloneSVG(play, digital = false) {
   if (capture) {
     const template=document.createElement('template');template.innerHTML=svg;const root=template.content.firstElementChild;
     updateAnimation(root,play,capture.time,'export');
-    const players=root.querySelector('#export-players');
-    const decoration=document.createElementNS('http://www.w3.org/2000/svg','g');decoration.innerHTML=capture.decoration;root.insertBefore(decoration,players);
-    if(capture.image){
-      const image=document.createElementNS('http://www.w3.org/2000/svg','image');image.setAttribute('href',capture.image);image.setAttribute('width','1000');image.setAttribute('height','800');root.insertBefore(image,players);
-      root.querySelectorAll('.player-body').forEach(n=>n.setAttribute('opacity','0'));
-      root.querySelectorAll('.player-label').forEach(n=>{n.setAttribute('fill','#fff9ec');n.setAttribute('stroke','#201427');n.setAttribute('stroke-width','1.5');n.setAttribute('paint-order','stroke');});
-    }
-    svg=projectDigitalExport(root,{material:!!capture.image}).outerHTML;
+    svg=composeDigitalExport(root,capture).outerHTML;
   }
   if (play.reference) {
     const response = await fetch(new URL(`./${play.reference.image}`, import.meta.url));

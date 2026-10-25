@@ -1,23 +1,34 @@
 const SVG_NS='http://www.w3.org/2000/svg';
-export const DIGITAL_EXPORT_MATRIX={a:.86,b:0,c:-.1204,d:.7396,e:118,f:78};
 
-// Bake the on-screen affine tabletop view into the standalone PNG source. All
-// field layers share one transform, including the captured WebGL chip image.
-export function projectDigitalExport(root,{material=false}={}) {
+export function pngExportDescription({reference=false,digital=false,ready=false}={}) {
+  if(reference)return '2000 × 1120 · 原图分辨率';
+  if(digital&&!ready)return '2000 × 1600 · 兼容视图导出平面图';
+  return `2000 × 1600 · ${digital?'当前 3D 视图':'平面战术图'}`;
+}
+
+// A full-scene capture already includes the camera, field, routes, pieces and
+// labels. It must not be projected a second time or overlaid with SVG players.
+export function composeDigitalExport(root,capture) {
   const doc=root.ownerDocument;
-  const make=(tag,attributes)=>{
-    const node=doc.createElementNS(SVG_NS,tag);
-    for(const [key,value]of Object.entries(attributes))node.setAttribute(key,String(value));
-    return node;
-  };
-  const transform=Object.values(DIGITAL_EXPORT_MATRIX).join(' ');
-  const plane=make('g',{'data-digital-projection':'','transform':`matrix(${transform})`});
-  for(const node of [...root.children])if(node.tagName.toLowerCase()!=='defs')plane.append(node);
-  const background=make('rect',{width:1000,height:800,fill:'#14101c'});
-  const shadow=make('rect',{x:0,y:22,width:1000,height:800,rx:24,fill:'#08060c',opacity:.6,transform:`matrix(${transform})`});
-  const edge=make('rect',{x:0,y:12,width:1000,height:800,rx:20,fill:'#332a43',stroke:'#73617f','stroke-width':1,transform:`matrix(${transform})`});
-  const lowerEdge=make('rect',{x:0,y:16,width:1000,height:800,rx:20,fill:'#211a2c',transform:`matrix(${transform})`});
-  root.append(background,shadow,lowerEdge,edge,plane);
-  if(material)for(const label of plane.querySelectorAll('.player-label'))label.setAttribute('transform','translate(0 -3.7)');
+  if(capture.fullScene && capture.image) {
+    const image=doc.createElementNS(SVG_NS,'image');
+    image.setAttribute('href',capture.image);
+    image.setAttribute('width','1000');image.setAttribute('height','800');
+    image.setAttribute('x','0');image.setAttribute('y','0');
+    image.setAttribute('data-digital-scene','');
+    root.replaceChildren(image);
+    root.removeAttribute('class');root.removeAttribute('style');root.removeAttribute('transform');
+    root.setAttribute('viewBox','0 0 1000 800');
+    root.setAttribute('width','1000');root.setAttribute('height','800');
+    return root;
+  }
+  // The compatibility renderer uses perspective vector pieces on screen. Its
+  // export is deliberately a portable flat play diagram, as stated in the UI.
+  // Keep the current playback geometry and feedback supplied by the caller.
+  const players=root.querySelector('#export-players');
+  if(capture.decoration) {
+    const decoration=doc.createElementNS(SVG_NS,'g');
+    decoration.innerHTML=capture.decoration;root.insertBefore(decoration,players);
+  }
   return root;
 }
