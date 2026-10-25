@@ -1,3 +1,4 @@
+import { createDigitalBoard } from './digital-board.js';
 import { createMaddenLibrary } from './madden.js';
 import { makeMaddenPlay, hasEditableTrace, getEditableEntry } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
@@ -24,7 +25,7 @@ let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false;
 let saveState = loadIssue ? '恢复提醒' : '本地已保存', frame = null, lastFrame = null, toastTimer = null;
 const history = new History();
-let shared = null;
+let shared = null, digitalBoard = null;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
 const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
@@ -133,6 +134,7 @@ function render() {
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
   if(!previousPlay) enterWorkbench(document.querySelector('.workspace'));
   renderedPlayId=p.id;
+  digitalBoard?.sync();
 }
 function fieldContext() {
   if(rehearsal) return `<span class="context-status"><i class="live-dot"></i>${playing?'演练播放中':time>=animationLength(current())?'演练完成':time?'演练已暂停':'演练就绪'}</span><button class="context-primary" data-action="play" aria-label="${playing?'暂停演练':'开始演练'}">${icon(playing?'pause':'play')}${playing?'暂停':time>=animationLength(current())?'重播':'播放'}</button><button data-action="reset" aria-label="重新开始演练">${icon('reset')}</button><button data-action="edit-mode">返回布阵</button>`;
@@ -232,6 +234,8 @@ function renderField() {
   const field=$('#field');if(!field)return;
   const template=document.createElement('template');template.innerHTML=fieldSVG(current(),viewSettings(),{selected:selection,time,drawing:draft});
   field.querySelector('.pitch-svg').replaceWith(template.content.firstElementChild);
+  updateAnimation(field.querySelector('.pitch-svg'),current(),time);
+  digitalBoard?.sync();
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${current().players.filter(p=>p.side==='offense').length} O / ${current().players.filter(p=>p.side==='defense').length} D</span>`;
 }
 function refreshSelection() {
@@ -315,6 +319,7 @@ function bindField() {
       Object.assign(zone,{x:(drag.start.x+at.x)/2,y:(drag.start.y+at.y)/2,rx:Math.max(1,Math.abs(at.x-drag.start.x)/2),ry:Math.max(1,Math.abs(at.y-drag.start.y)/2)});
     } else if(['zone','annotation'].includes(drag.type)) {const obj=selectedObject();obj.x=clamp(drag.original.x+at.x-drag.start.x);obj.y=clamp(drag.original.y+at.y-drag.start.y);}
     updateGeometry(field.querySelector('svg'),p);
+    digitalBoard?.refreshBackground();
     const readout=field.querySelector('.drag-readout');readout.hidden=false;readout.textContent=`${drag.original?.label||'调整位置'} · X ${at.x.toFixed(1)} / Y ${at.y.toFixed(1)}`;
   }
   const endDrag = event => {
@@ -358,7 +363,7 @@ function newModal() {
 }
 function textModal(at) { openModal('添加场上标注', '<label class="form-field"><span>标注内容</span><input id="annotation-text" placeholder="例如：Read 1 · 先读浅交叉" maxlength="200"></label>', `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">放置标注</button>`); }
 function exportModal() {
-  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>${current().reference ? '原图战术文件' : '矢量战术图'}</strong><small>${current().reference ? 'SVG · 内嵌原始图片' : 'SVG · 任意放大，适合课件'}</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · ${current().reference ? '2000 × 1120 · 原图分辨率' : '2000 × 1600'}</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
+  openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>${current().reference ? '原图战术文件' : '矢量战术图'}</strong><small>${current().reference ? 'SVG · 内嵌原始图片' : 'SVG · 平面矢量，适合课件'}</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · ${current().reference ? '2000 × 1120 · 原图分辨率' : '2000 × 1600 · 包含当前外观'}</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
 }
 function teamModal() {
   openModal('球队与球员名单', `<div class="form-row"><label class="form-field"><span>球队名称</span><input id="team-name" value="${e(state.data.team.name)}" maxlength="80"></label><label class="form-field"><span>赛季 / 副标题</span><input id="team-subtitle" value="${e(state.data.team.subtitle)}" maxlength="80"></label></div><div class="form-row"><label class="form-field"><span>球队颜色</span><input id="team-accent" type="color" value="${state.data.team.accent}"></label><label class="form-field"><span>默认人数</span><select id="team-league">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人制`, String(state.data.settings.league))).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>名单</span><small>选中球场球员后可分配</small></div><div class="roster-labels"><span>号码</span><span>姓名</span><span>位置</span><span></span></div><div id="roster-rows">${state.data.roster.map(rosterRow).join('')}</div><button class="text-button" data-action="roster-add">+ 添加球员</button>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="save-team">保存球队</button>', true);
@@ -393,8 +398,21 @@ function download(content, filename, mime) {
   const link = document.createElement('a'); link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
-async function standaloneSVG(play) {
-  let svg = fieldSVG(play, viewSettings(), { prefix: 'export' });
+async function standaloneSVG(play, digital = false) {
+  const capture = digital && !play.reference ? digitalBoard?.capture() : null;
+  let svg = fieldSVG(play, viewSettings(), { prefix: 'export', time: capture?.time || 0 });
+  if (capture) {
+    const template=document.createElement('template');template.innerHTML=svg;const root=template.content.firstElementChild;
+    updateAnimation(root,play,capture.time,'export');
+    const players=root.querySelector('#export-players');
+    const decoration=document.createElementNS('http://www.w3.org/2000/svg','g');decoration.innerHTML=capture.decoration;root.insertBefore(decoration,players);
+    if(capture.image){
+      const image=document.createElementNS('http://www.w3.org/2000/svg','image');image.setAttribute('href',capture.image);image.setAttribute('width','1000');image.setAttribute('height','800');root.insertBefore(image,players);
+      root.querySelectorAll('.player-body').forEach(n=>n.setAttribute('opacity','0'));
+      root.querySelectorAll('.player-label').forEach(n=>{n.setAttribute('fill','#fff9ec');n.setAttribute('stroke','#201427');n.setAttribute('stroke-width','1.5');n.setAttribute('paint-order','stroke');});
+    }
+    svg=root.outerHTML;
+  }
   if (play.reference) {
     const response = await fetch(new URL(`./${play.reference.image}`, import.meta.url));
     if (!response.ok) throw new Error('原始战术图加载失败，请重试。');
@@ -407,14 +425,14 @@ async function standaloneSVG(play) {
 async function pngExport() {
   const play = clone(current());
   let svg;
-  try { svg = await standaloneSVG(play); } catch { toast('原始战术图加载失败，请重试。', { type: 'error', action: 'download-png', label: '重试' }); return; }
+  try { svg = await standaloneSVG(play, true); } catch { toast('图片生成失败，请切换传统模式重试。', { type: 'error', action: 'download-png', label: '重试' }); return; }
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   const img = new Image();
   img.onload = () => {
     try {
       const canvas = document.createElement('canvas'); canvas.width = 2000; canvas.height = play.reference ? 1120 : 1600; const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas unavailable'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(play.title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('PNG 已生成。原始战术图保留来源分辨率。', { type: 'success' }); } else toast('PNG 生成失败，请尝试 SVG 导出。', { type: 'error' }); }, 'image/png');
+      canvas.toBlob(blob => { if (blob) { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = `${safeName(play.title)}.png`; document.body.append(a); a.click(); a.remove(); window.setTimeout(() => URL.revokeObjectURL(u), 10000); toast('PNG 已生成。', { type: 'success' }); } else toast('PNG 生成失败，请尝试 SVG 导出。', { type: 'error' }); }, 'image/png');
     } catch { toast('此浏览器无法生成 PNG，请尝试 SVG 导出。', { type: 'error' }); }
     URL.revokeObjectURL(url);
   };
@@ -641,6 +659,7 @@ document.addEventListener('keydown', event => {
   else if (canEdit() && !event.ctrlKey && !event.metaKey && ({ v: 'select', r: 'route', b: 'block', m: 'motion', p: 'pass', z: 'zone', t: 'text' })[key]) {setTool(({v:'select',r:'route',b:'block',m:'motion',p:'pass',z:'zone',t:'text'})[key]);}
 });
 initViewportLayout();
+digitalBoard = createDigitalBoard({getState:()=>({play:current(),settings:viewSettings(),selected:selection,time,playing,rehearsal,draggingId:drag?.type==='player'&&drag.moved?drag.id:null}),notify:message=>toast(message,{type:'warning'})});
 initEffects();
 render();
 if (loadIssue) toast(loadIssue);
