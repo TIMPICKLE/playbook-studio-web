@@ -1,4 +1,5 @@
-// tsParticles is self-hosted and loaded only when decorative motion is enabled.
+import { initLiquidMaterials } from './liquid-materials.js';
+// Decorative engines are self-hosted; preferences never enter shared playbooks.
 const KEY = 'playbook-visual-effects';
 const modes = new Set(['full', 'lite', 'off']);
 let instance, loading, engineReady, generation = 0, initialized = false, sessionMode, startQueue = Promise.resolve();
@@ -12,7 +13,7 @@ export function effectiveMode(value = preference(), reduced = !!mq('(prefers-red
 }
 export function effectsControl() {
   const selected = preference();
-  return `<details class="effects-menu"><summary aria-label="视觉效果设置"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/><path d="m20 2 .6 1.4L22 4l-1.4.6L20 6l-.6-1.4L18 4l1.4-.6Z"/></svg><span>视觉效果</span></summary><div class="effects-panel"><strong>工作台视觉效果</strong><div role="group" aria-label="动效强度">${[['full','完整动效','流动粒子 · 鼠标互动'],['lite','轻量动效','少量粒子 · 降低耗电'],['off','关闭动效','静态玻璃 · 专注战术']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}"><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note">${effectiveMode()==='off'&&selected!=='off'?'已跟随系统“减少动态效果”设置。':'只影响这台设备，不修改共享战术。'}</p></div></details>`;
+  return `<details class="effects-menu"><summary aria-label="视觉效果设置"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/><path d="m20 2 .6 1.4L22 4l-1.4.6L20 6l-.6-1.4L18 4l1.4-.6Z"/></svg><span>视觉效果</span></summary><div class="effects-panel"><strong>液态材质</strong><div role="group" aria-label="动效强度">${[['full','液态玻璃 · 全开','金属流动 · 厚边折射 · 触碰涟漪'],['lite','柔和流动','舒缓金属纹理 · 柔和光泽'],['off','关闭动效','静态玻璃 · 专注战术']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}"><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note">${effectiveMode()==='off'&&selected!=='off'?'已跟随系统“减少动态效果”设置。':'只影响这台设备，不修改共享战术。'}</p></div></details>`;
 }
 export function particleOptions(mode, compact = false) {
   const lite = mode === 'lite';
@@ -53,6 +54,7 @@ function prepareEngine() {
 async function applyMode() {
   const ticket = ++generation, mode = effectiveMode();
   document.documentElement.dataset.effects = mode;
+  document.dispatchEvent(new window.CustomEvent('playbook:effects-changed',{detail:{mode}}));
   document.querySelectorAll('[data-effects-mode]').forEach(n => n.setAttribute('aria-pressed', n.dataset.effectsMode === preference()));
   document.querySelectorAll('.effects-note').forEach(n => { n.textContent = mode === 'off' && preference() !== 'off' ? '已跟随系统“减少动态效果”设置。' : '只影响这台设备，不修改共享战术。'; });
   instance?.destroy(); instance = null;
@@ -133,4 +135,5 @@ export function initEffects() {
   });
   window.addEventListener('storage', event => { if (event.key === KEY) { sessionMode = undefined; applyMode(); } });
   applyMode();
+  initLiquidMaterials();
 }
