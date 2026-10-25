@@ -46,15 +46,23 @@ export function createDigitalFallback(doc=document) {
   const players=new Map();
   function disposeItem(item){item.group.remove();}
   function mount(next){
-    svg?.classList.remove('digital-fallback-ready');stage?.classList.remove('is-fallback');overlay?.remove();
-    svg=next;stage=svg.closest('.pitch-stage');if(!stage)throw new Error('The perspective board stage is missing');
-    overlay=node(doc,'svg',{xmlns:NS,viewBox:'0 0 1000 800','class':'digital-token-overlay','aria-hidden':'true','data-renderer':'vector'});
-    overlay.style.cssText='position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:3';
-    const defs=node(doc,'defs');
-    const shadow=node(doc,'radialGradient',{id:'digital-fallback-shadow'});
-    shadow.append(node(doc,'stop',{offset:0,'stop-color':'#08050d','stop-opacity':.6}),node(doc,'stop',{offset:.6,'stop-color':'#08050d','stop-opacity':.3}),node(doc,'stop',{offset:1,'stop-color':'#08050d','stop-opacity':0}));
-    defs.append(shadow);overlay.append(defs);stage.append(overlay);
-    players.clear();stage.classList.add('is-fallback');svg.classList.add('digital-fallback-ready');
+    if(disposed)return;
+    const nextStage=next.closest('.pitch-stage');if(!nextStage)throw new Error('The perspective board stage is missing');
+    if(svg!==next)svg?.classList.remove('digital-fallback-ready');
+    if(stage!==nextStage)stage?.classList.remove('is-fallback');
+    svg=next;stage=nextStage;
+    if(!overlay){
+      overlay=node(doc,'svg',{xmlns:NS,viewBox:'0 0 1000 800','class':'digital-token-overlay','aria-hidden':'true','data-renderer':'vector'});
+      overlay.style.cssText='position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:3';
+      const defs=node(doc,'defs');
+      const shadow=node(doc,'radialGradient',{id:'digital-fallback-shadow'});
+      shadow.append(node(doc,'stop',{offset:0,'stop-color':'#08050d','stop-opacity':.6}),node(doc,'stop',{offset:.6,'stop-color':'#08050d','stop-opacity':.3}),node(doc,'stop',{offset:1,'stop-color':'#08050d','stop-opacity':0}));
+      defs.append(shadow);overlay.append(defs);
+    }
+    // Keep the last complete image and pick bounds until draw reconciles state.
+    // Route edits can replace the source SVG without replacing any piece mesh.
+    if(overlay.parentNode!==stage)stage.append(overlay);
+    stage.classList.add('is-fallback');svg.classList.add('digital-fallback-ready');
   }
   function makePlayer(p,lightTheme){
     const group=node(doc,'g',{'data-vector-player':p.id});

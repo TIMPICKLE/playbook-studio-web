@@ -44,6 +44,14 @@ When the selected holder has a non-optional drawn passing route and a receiver, 
 
 ![v4.2 perspective compatibility view — WebGL disabled](assets/v42-board-perspective.jpg)
 
+## v4.2.1 route-edit continuity
+
+Editing a route no longer replaces the live board stage or SVG root. Selection, inspector changes, point commits and undo/redo reconcile the same mounted scene; feedback and compatibility pieces update synchronously before the next paint. The Three renderer retains its last complete texture while the replacement SVG image decodes, then swaps a fully rasterized spare canvas atomically. Failed and superseded decodes cannot blank the field or overwrite a newer mounted play. Compatibility remounts retain the existing piece overlay and picking bounds.
+
+Regression coverage checks retained stage/SVG/canvas identity, synchronous feedback updates, compatibility remount continuity, delayed/out-of-order decoding and rasterization failures. All 157 tests, syntax checks and TypeScript checks pass. Browser checks covered route type changes, committed duration edits, node dragging, undo and redo with all 11 pieces and 92 yard lines retained. Hardware WebGL pixel verification remains subject to the limitation documented above.
+
+![Route edit compatibility-view verification](assets/v421-route-edit.jpg)
+
 ## Original v4.0 validation — 2026-10-25
 
 - `npm run check`, `npm run typecheck`, `npm test`: passed (116 tests).

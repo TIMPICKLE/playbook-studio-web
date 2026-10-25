@@ -5,7 +5,7 @@ import { Window } from 'happy-dom';
 import { createDigitalFallback, fallbackMesh } from '../web/digital-fallback.js';
 import { projectBoardPoint } from '../web/digital-projection.js';
 import { fieldSVG, project, updateAnimation } from '../web/field.js';
-import { starterWorkspace } from '../web/model.js';
+import { movePlayer, starterWorkspace } from '../web/model.js';
 
 function fixture(markup='<svg class="pitch-svg" xmlns="http://www.w3.org/2000/svg"></svg>'){
   const win=new Window(),doc=win.document;
@@ -53,6 +53,37 @@ test('fallback redraws colors, symbol shape and label changes and removes delete
   const next=f.doc.querySelector(`[data-vector-player="${p.id}"]`);assert.notEqual(next,old);assert.equal(next.querySelector('text').textContent,'T1');
   play.players.shift();f.renderer.draw({play,settings:{},time:0});assert.equal(f.doc.querySelectorAll('[data-vector-player]').length,10);
   f.renderer.destroy();
+});
+
+test('fallback keeps its rendered pieces when remounting a patched or replaced field',()=>{
+  const f=fixture(),play=starterWorkspace().plays[0];
+  f.renderer.draw({play,settings:{},time:0});
+  const overlay=f.doc.querySelector('.digital-token-overlay'),player=overlay.querySelector('[data-vector-player]');
+  const paths=[...player.querySelectorAll('path')],geometry=paths.map(path=>path.getAttribute('d'));
+  f.renderer.mount(f.svg);
+  assert.ok(f.doc.querySelector('.digital-token-overlay')===overlay,'mounting the same field must keep its existing image');
+  const next=f.svg.cloneNode(false);f.svg.replaceWith(next);f.renderer.mount(next);
+  assert.ok(overlay.parentNode===f.stage);assert.ok(overlay.querySelector('[data-vector-player]')===player);
+  assert.ok([...player.querySelectorAll('path')].every((path,i)=>path===paths[i]),'route edits must not rebuild player meshes');
+  assert.deepEqual(paths.map(path=>path.getAttribute('d')),geometry,'the last complete image must exist before another draw');
+  assert.equal(f.svg.classList.contains('digital-fallback-ready'),false);assert.equal(next.classList.contains('digital-fallback-ready'),true);
+  const p=play.players.find(p=>p.id===player.getAttribute('data-vector-player'));movePlayer(play,p.id,p.x+5,p.y);f.renderer.draw({play,settings:{},time:0});
+  assert.ok(overlay.querySelector('[data-vector-player]')===player);assert.notEqual(paths[0].getAttribute('d'),geometry[0]);
+  f.renderer.destroy();assert.equal(f.doc.querySelector('.digital-token-overlay'),null);assert.equal(next.classList.contains('digital-fallback-ready'),false);
+});
+
+test('fallback migrates its complete image and picking to a replacement stage before drawing',()=>{
+  const f=fixture(),play=starterWorkspace().plays[0],p=play.players.find(p=>p.label==='X');
+  f.renderer.draw({play,settings:{},time:0});
+  const overlay=f.doc.querySelector('.digital-token-overlay'),image=overlay.innerHTML;
+  const nextStage=f.doc.createElement('div');nextStage.className='pitch-stage';nextStage.append(f.svg.cloneNode(false));f.doc.body.append(nextStage);
+  nextStage.getBoundingClientRect=()=>({left:135,top:240,width:750,height:600});
+  const next=nextStage.querySelector('.pitch-svg');f.renderer.mount(next);
+  assert.ok(nextStage.querySelector('.digital-token-overlay')===overlay);assert.equal(overlay.innerHTML,image);
+  assert.equal(f.stage.classList.contains('is-fallback'),false);assert.equal(nextStage.classList.contains('is-fallback'),true);
+  const at=project(p),head=projectBoardPoint(at.x,at.y,42);
+  assert.deepEqual(f.renderer.pick(135+head.x*.75,240+head.y*.75),{type:'player',id:p.id});
+  f.renderer.destroy();assert.equal(nextStage.querySelector('.digital-token-overlay'),null);assert.equal(nextStage.classList.contains('is-fallback'),false);
 });
 
 test('fallback preserves the existing optional player name once and leaves it attached to animation',()=>{

@@ -180,6 +180,22 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       click('undo-point');assert.match(query('.context-player').textContent,/1 个路线点/);assert.equal(win.localStorage.getItem(STORAGE_KEY),before);
       const finish=query('[data-action="finish-route"]');pointer(finish,'pointerdown',500,350);finish.click();assert.ok(query('[data-prop="duration"]'));const saved=decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0],route=saved.routes.at(-1);assert.equal(route.points.length,2);assert.equal(route.optional,false);assert.equal(saved.routes.filter(r=>r.playerId===route.playerId&&!r.optional&&['route','motion'].includes(r.kind)).length,1);click('undo');
     });
+    await t.test('route selection, property edits, point commits and undo retain the live board stage and SVG',()=>{
+      click('edit-mode');query('[data-action="clear-selection"]')?.click();
+      const stage=query('#field .pitch-stage'),svg=query('#field .pitch-svg');
+      const canvas=doc.createElement('canvas');canvas.className='digital-scene-canvas';stage.append(canvas);
+      const retained=()=>{assert.equal(query('#field .pitch-stage'),stage);assert.equal(query('#field .pitch-svg'),svg);assert.equal(query('#field .digital-scene-canvas'),canvas);};
+      try{
+        const route=query('#field [data-route]');assert.ok(route);route.dispatchEvent(new win.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));retained();
+        change('[data-prop="duration"]','3.5');retained();
+        assert.equal(query('[data-prop="duration"]').value,'3.5');
+        const before=win.localStorage.getItem(STORAGE_KEY),handle=query('#field .point-handle');assert.ok(handle);
+        geometry();pointer(handle,'pointerdown',500,350);pointer(query('#field'),'pointermove',530,320);pointer(query('#field'),'pointerup',530,320);retained();
+        assert.notEqual(win.localStorage.getItem(STORAGE_KEY),before);click('undo');retained();
+        assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)),decodeWorkspace(before));
+        click('redo');retained();click('undo');retained();
+      }finally{canvas.remove();}
+    });
     await t.test('pausing and scrubbing keep the same player nodes; returning to edit restores initial positions without changing saved data', () => {
       query('[data-action="clear-selection"]')?.click();const before=win.localStorage.getItem(STORAGE_KEY);click('play');const svg=query('#field svg'), player=query('#field [data-player]');click('play');assert.equal(query('#field svg'),svg);assert.equal(query('#field [data-player]'),player);
       query('#timeline').value='2.5';query('#timeline').dispatchEvent(new win.Event('input',{bubbles:true}));assert.equal(query('#field svg'),svg);assert.equal(query('[data-action="rehearse-mode"]').getAttribute('aria-pressed'),'true');assert.match(query('#playback-phase').textContent,/传球中/);

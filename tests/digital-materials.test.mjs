@@ -11,10 +11,14 @@ import {projectBoardPoint} from '../web/digital-projection.js';
 // and ray casting. Only GPU submission / environment baking and canvas I/O are
 // replaced; this is deliberately not a claim that WebGL pixels were verified.
 async function sceneFixture(){
-  const win=new Window(),doc=win.document,renders=[],images=[];
+  const win=new Window(),doc=win.document,renders=[],images=[],contexts=new Map();
   const gradient={addColorStop(){}};
   const context={fillRect(){},clearRect(){},fillText(){},drawImage(){},createLinearGradient(){return gradient;},createRadialGradient(){return gradient;}};
-  win.HTMLCanvasElement.prototype.getContext=function(type){assert.equal(type,'2d');return {...context};};
+  win.HTMLCanvasElement.prototype.getContext=function(type){
+    assert.equal(type,'2d');
+    if(!contexts.has(this))contexts.set(this,{...context,operations:[],fillRect(){this.operations.push('fill');},clearRect(){this.operations.push('clear');},drawImage(image){if(image.failRasterize)throw new Error('Rasterization failed');this.image=image;this.operations.push('image');}});
+    return contexts.get(this);
+  };
   win.HTMLCanvasElement.prototype.toDataURL=()=> 'data:image/png;base64,c2NlbmU=';
   win.Image=class{set src(url){this.url=url;images.push(this);}};
   const renderer={shadowMap:{},debug:{},capabilities:{getMaxAnisotropy:()=>16},
@@ -38,7 +42,8 @@ async function sceneFixture(){
   const svg=doc.querySelector('svg'),stage=doc.querySelector('.pitch-stage');
   stage.getBoundingClientRect=()=>({left:70,top:110,width:500,height:400});
   const engine=createDigitalMaterials(doc);
-  return {win,doc,engine,svg,stage,play,settings,renderer,renders,images,environment,
+  return {win,doc,engine,svg,stage,play,settings,renderer,renders,images,environment,contexts,
+    fieldTexture(){let texture;renders.at(-1)?.scene.traverse(n=>{if(n.geometry?.parameters?.width===1000&&n.geometry?.parameters?.height===800)texture=n.material.map;});return texture;},
     close(){engine.destroy();delete globalThis[key];return win.happyDOM.abort();}};
 }
 
@@ -66,6 +71,64 @@ test('complete Three scene mounts, renders refraction and labels, picks a raised
     f.engine.destroy();assert.equal(f.doc.querySelector('.digital-scene-canvas'),null);assert.equal(f.svg.classList.contains('digital-ready'),false);assert.equal(f.stage.classList.contains('is-three'),false);
     assert.equal(f.renderer.disposed,true);assert.equal(f.renderer.lost,true);assert.equal(f.environment.disposed,true);
     assert.equal(f.engine.pick(100,100),null);f.engine.destroy();
+  }finally{await f.close();}
+});
+
+test('the SVG stays visible until the first complete field texture has been presented',async()=>{
+  const f=await sceneFixture();
+  try{
+    f.engine.mount(f.svg,f.play,f.settings);
+    const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});draw();
+    assert.equal(f.svg.classList.contains('digital-ready'),false,'an undecoded field must not hide the complete SVG');
+    f.images.shift().onload();
+    assert.equal(f.svg.classList.contains('digital-ready'),false,'decoding alone does not mean the GPU frame is presented');
+    draw();assert.equal(f.svg.classList.contains('digital-ready'),true);
+    while(f.images.length)f.images.shift().onload?.();
+    const lastImage=f.fieldTexture().image;
+    const nextPlay=starterWorkspace().plays[1],holder=f.doc.createElement('div');holder.innerHTML=fieldSVG(nextPlay,f.settings);const next=holder.firstElementChild;f.svg.replaceWith(next);
+    f.engine.mount(next,nextPlay,f.settings);
+    f.engine.draw({play:nextPlay,settings:f.settings,time:0,animated:false});
+    assert.equal(next.classList.contains('digital-ready'),false,'a different play must not present old routes as its own');
+    assert.equal(f.fieldTexture().image,lastImage,'changing plays keeps the last good texture until decoding succeeds');
+    f.images.shift().onload();f.engine.draw({play:nextPlay,settings:f.settings,time:0,animated:false});assert.equal(next.classList.contains('digital-ready'),true);
+  }finally{await f.close();}
+});
+
+test('same-play full rerenders retain the ready frame and ignore cancelled image completions',async()=>{
+  const f=await sceneFixture();
+  try{
+    const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();draw();
+    const texture=f.fieldTexture(),completeCanvas=texture.image,version=texture.version,canvas=f.renderer.canvas;
+    const oldPending=f.images.shift(),oldCompletion=oldPending.onload;
+    f.doc.body.innerHTML=`<div class="pitch-stage">${fieldSVG(f.play,f.settings)}</div>`;
+    const next=f.doc.querySelector('svg'),nextStage=f.doc.querySelector('.pitch-stage');f.engine.mount(next,f.play,f.settings);
+    assert.equal(next.classList.contains('digital-ready'),true,'same-play remount transfers readiness synchronously');
+    assert.equal(nextStage.firstElementChild,canvas);assert.equal(f.svg.classList.contains('digital-ready'),false);
+    assert.equal(texture.image,completeCanvas);assert.equal(texture.version,version,'mount never fills or uploads a blank texture');
+    assert.deepEqual(f.contexts.get(completeCanvas).operations,['clear','image']);
+    draw();assert.equal(texture.image,completeCanvas,'frames while decoding retain yard lines and routes');
+    const latest=f.images.shift();latest.onload();const replacementCanvas=texture.image;assert.notEqual(replacementCanvas,completeCanvas);
+    oldCompletion();assert.equal(texture.image,replacementCanvas,'a cancelled older decode cannot overwrite the new route image');
+    assert.equal(f.contexts.get(replacementCanvas).image,latest);assert.equal(next.classList.contains('digital-ready'),true);
+  }finally{await f.close();}
+});
+
+test('fast texture edits coalesce to the latest SVG and decode failures preserve the complete board',async()=>{
+  const f=await sceneFixture();
+  try{
+    const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();draw();while(f.images.length)f.images.shift().onload?.();
+    f.svg.setAttribute('data-edit','first');f.engine.refreshBackground();const first=f.images.shift();
+    f.svg.setAttribute('data-edit','intermediate');f.engine.refreshBackground();
+    f.svg.setAttribute('data-edit','latest');f.engine.refreshBackground();assert.equal(f.images.length,0,'only one decode is in flight');
+    first.onload();assert.equal(f.images.length,1,'the newest edit begins decoding without waiting for another animation frame');
+    const latest=f.images.shift();assert.match(await (await fetch(latest.url)).text(),/data-edit="latest"/);latest.onload();
+    const texture=f.fieldTexture(),completeCanvas=texture.image,version=texture.version;
+    f.engine.refreshBackground();f.images.shift().onerror();assert.equal(texture.image,completeCanvas);assert.equal(texture.version,version);
+    f.engine.refreshBackground();const broken=f.images.shift();broken.failRasterize=true;broken.onload();
+    assert.equal(texture.image,completeCanvas);assert.equal(texture.version,version,'failed rasterization never publishes a cleared staging canvas');
+    assert.equal(f.svg.classList.contains('digital-ready'),true);
   }finally{await f.close();}
 });
 
