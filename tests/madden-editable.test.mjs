@@ -69,8 +69,12 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
     click('compare-source');assert.equal($('.source-comparison').getAttribute('src'),'./'+source.image);click('close-modal');
     click('madden-library');await new Promise(r=>setTimeout(r,30));
     assert.equal(win.document.querySelectorAll('.madden-card').length,Math.min(30,audit.summary.editableByTeam.eagles));
-    const card=$(`[data-madden-card="${source.id}"]`);assert.equal(card.querySelector('[data-madden="add"]').disabled,true);
-    const next=win.document.querySelectorAll('.madden-card')[1]; next.querySelector('[data-madden="add"]').click();
+    // The original can now be on a later page as the library grows.
+    const search=$('#madden-search');search.value=source.name;search.dispatchEvent(new win.Event('input',{bubbles:true}));
+    const card=$(`[data-madden-card="${source.id}"]`);assert.ok(card);assert.equal(card.querySelector('[data-madden="add"]').disabled,true);
+    search.value='';search.dispatchEvent(new win.Event('input',{bubbles:true}));
+    const next=[...win.document.querySelectorAll('.madden-card')].find(node=>!node.querySelector('[data-madden="add"]').disabled);
+    assert.ok(next);next.querySelector('[data-madden="add"]').click();
     assert.match($('.madden-result-bar').textContent,/可编辑/);
     click('madden-library'); // editor controls can reopen the same persistent panel
     $('[data-madden="close"]').click();

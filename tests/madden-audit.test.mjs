@@ -6,6 +6,7 @@ import { materializeHuddleArt } from '../scripts/huddle-art.mjs';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
 import { SEED_TRACES } from '../web/data/madden-editable-seed.js';
 import { BATCH_TRACES } from '../web/data/madden-editable-batch.js';
+import { EXPANDED_TRACES } from '../web/data/madden-editable-80.js';
 import { TRACE_SUMMARY, RETAINED_REASONS } from '../web/data/madden-trace-status.js';
 import { hasEditableTrace, makeMaddenPlay, retainedReason } from '../web/madden-model.js';
 const catalogBytes=readFileSync(new URL('../web/data/huddle-catalog.json',import.meta.url));
@@ -13,6 +14,7 @@ const catalog=JSON.parse(catalogBytes);
 const manifest=JSON.parse(readFileSync(new URL('../vendor/huddle-art/manifest.json',import.meta.url))); 
 const audit=JSON.parse(readFileSync(new URL('../docs/madden-conversion-audit.json',import.meta.url)));
 const review=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review.json',import.meta.url)));
+const expandedReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-80.json',import.meta.url)));
 
 test('the audit covers every catalog entry exactly once, and unsuccessful images stay original',()=>{
   assert.deepEqual(audit.summary,TRACE_SUMMARY);
@@ -28,19 +30,42 @@ test('the audit covers every catalog entry exactly once, and unsuccessful images
     else {assert.equal(play.reference.image,entry.image);assert.equal(play.players.length,0);assert.equal(play.routes.length,0);assert.equal(retainedReason(entry.id),r.reasonText);}
   }
   assert.equal(Object.keys(RETAINED_REASONS).length,TRACE_SUMMARY.retainedOriginal);
-  assert.equal(Object.keys(BATCH_TRACES).length,TRACE_SUMMARY.newlyEditable);
+  assert.equal(Object.keys(BATCH_TRACES).length+Object.keys(EXPANDED_TRACES).length,TRACE_SUMMARY.newlyEditable);
   for(const [id,seed] of Object.entries(SEED_TRACES))assert.deepEqual(EDITABLE_TRACES[id],seed);
 });
 
 test('new traces have explicit visual review and match the exact bundled source image bytes',async()=>{
   await materializeHuddleArt();
   assert.deepEqual(Object.keys(review.approved).sort(),Object.keys(BATCH_TRACES).sort());
-  for(const [id,trace] of Object.entries(BATCH_TRACES)){
-    const approval=review.approved[id];assert.deepEqual(approval.trace,trace);
+  assert.deepEqual(Object.keys(expandedReview.approved).sort(),Object.keys(EXPANDED_TRACES).sort());
+  for(const [id,trace] of Object.entries({...BATCH_TRACES,...EXPANDED_TRACES})){
+    const approval=review.approved[id]||expandedReview.approved[id];assert.deepEqual(approval.trace,trace);
     const bytes=readFileSync(new URL('../web/'+trace.image,import.meta.url));
     const digest=createHash('sha256').update(bytes).digest('hex');
     assert.equal(digest,approval.sourceSha256);assert.equal(digest,manifest.images[trace.image.split('/').at(-1)]);
     assert.equal(audit.entries.find(r=>r.id===id).sourceSha256,digest);
+  }
+});
+
+test('the expansion covers 80 distinct images and preserves shared-source geometry across teams',()=>{
+  const traces=Object.values(EXPANDED_TRACES), byImage=new Map();
+  assert.equal(traces.length,90);
+  for(const trace of traces){
+    const group=byImage.get(trace.image)||[];group.push(trace);byImage.set(trace.image,group);
+  }
+  assert.equal(byImage.size,80);
+  assert.equal([...byImage.values()].filter(group=>group.length===2).length,10);
+  assert.equal(traces.filter(trace=>trace.team==='eagles').length,60);
+  assert.equal(traces.filter(trace=>trace.team==='ravens').length,30);
+  for(const group of byImage.values()){
+    assert.ok(group.length===1||group.length===2);
+    if(group.length===2){
+      assert.notEqual(group[0].team,group[1].team);
+      assert.equal(group[0].name,group[1].name);
+      assert.equal(group[0].formation,group[1].formation);
+      assert.deepEqual(group[0].players,group[1].players);
+      assert.deepEqual(group[0].routes,group[1].routes);
+    }
   }
 });
 

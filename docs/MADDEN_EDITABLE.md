@@ -1,6 +1,6 @@
 # 首批 20 个 Madden 图片识别可编辑战术
 
-2026-10-24。以下记录首批 Eagles / Ravens 各 10 个的基线；后续全目录处理与当前数量见 [批次记录](MADDEN_BATCH.md)。来源均为已打包的 Huddle.gg Madden 27 原图。
+2026-10-24。以下记录首批 Eagles / Ravens 各 10 个的基线；后续全目录处理见 [批次记录](MADDEN_BATCH.md)，当前数量见 [80 张原图重建记录](MADDEN_REVIEW_80.md)。来源均为已打包的 Huddle.gg Madden 27 原图。
 
 ## 使用
 
