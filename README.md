@@ -2,7 +2,7 @@
 
 中文美式橄榄球战术工作台。独立实现阵型、路线、演练和打印，现支持登录、共享数据库、云端保存和成员权限。
 
-**[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html)** · [GitHub Pages 入口与旧版迁移](https://timpickle.github.io/playbook-studio-web/) · [云端技术说明](docs/CLOUD.md) · [验证记录](docs/VALIDATION.md)
+**[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html)** · [GitHub Pages 入口与旧版迁移](https://timpickle.github.io/playbook-studio-web/) · [云端技术说明](docs/CLOUD.md) · [多球队多租户路线图](docs/MULTI_TENANCY_ROADMAP.md) · [验证记录](docs/VALIDATION.md)
 
 ![STINGERS 紫黄主题登录页](docs/assets/v3-3-stingers-login.jpg)
 
