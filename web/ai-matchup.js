@@ -6,6 +6,9 @@ const ref = (side, type, id) => `${side}:${type}:${id}`;
 const coverageLabels = { unknown: '未确认', cover3_spot: 'Cover 3 · 区域落位', cover3_match: 'Cover 3 · Match', cover2: 'Cover 2', man: '盯人' };
 const toolLabels = { get_matchup_context: '读取攻防战术和图形事实', inspect_player: '查看球员站位与路线', inspect_route_coverage: '检查路线与防守区域', read_coverage_rule: '查看覆盖规则' };
 const modelDefaults = { deepseek: 'deepseek-flash', anthropic: 'claude-sonnet-4-6', openrouter: '', openai: '', custom: '' };
+// Overlay colors communicate side and stay legible on the light field. They
+// only affect this rendering; saved play and route colors are never changed.
+const overlayColors = { offense: '#5b2f91', defense: '#c16f56' };
 const option = (value, label, current) => `<option value="${e(value)}" ${value === current ? 'selected' : ''}>${e(label)}</option>`;
 
 export function composeMatchup(offense, defense, mirrorDefense = false) {
@@ -14,8 +17,8 @@ export function composeMatchup(offense, defense, mirrorDefense = false) {
   for (const [side, play] of [['offense', offense], ['defense', defense]]) {
     if (!play || play.reference) continue;
     const chosen = play.players.filter(p => p.side === side), ids = new Set(chosen.map(p => p.id));
-    players.push(...chosen.map(p => ({ ...p, id: ref(side, 'player', p.id), name: '' })));
-    routes.push(...play.routes.filter(r => ids.has(r.playerId)).map(r => ({ ...r, id: ref(side, 'route', r.id), playerId: ref(side, 'player', r.playerId) })));
+    players.push(...chosen.map(p => ({ ...p, color: overlayColors[side], id: ref(side, 'player', p.id), name: '' })));
+    routes.push(...play.routes.filter(r => ids.has(r.playerId)).map(r => ({ ...r, color: overlayColors[side], id: ref(side, 'route', r.id), playerId: ref(side, 'player', r.playerId) })));
     if (side === 'defense') zones.push(...play.zones.map(z => ({ ...z, id: ref(side, 'zone', z.id) })));
   }
   const holderId = offense?.ball?.holderId ? ref('offense', 'player', offense.ball.holderId) : '';
