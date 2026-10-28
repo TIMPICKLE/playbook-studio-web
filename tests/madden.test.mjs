@@ -21,7 +21,14 @@ test('both complete team catalogs have unique identities and importable source m
   for (const entry of catalog.plays) {
     const play = validatePlay(makeMaddenPlay(entry));
     assert.equal((play.diagramSource || play.reference).sourceUrl, entry.sourceUrl);
-    if (hasEditableTrace(entry.id)) { assert.equal(play.players.length, 11); assert.ok(play.routes.length >= 5); }
+    if (hasEditableTrace(entry.id)) {
+      assert.equal(play.players.length, 11);
+      // These two originals show only four colored assignments; the remaining
+      // player is movable but does not acquire an invented fifth route.
+      const stationaryPlayer = ['eagles-435b4fe699a13e3c036f','ravens-ae97fd6e39071c3ae0e5'].includes(entry.id);
+      if (stationaryPlayer) assert.equal(play.routes.length,4);
+      else assert.ok(play.routes.length >= 5);
+    }
     else { assert.equal(play.players.length, 0); assert.equal(play.routes.length, 0); }
   }
 });

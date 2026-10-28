@@ -3,13 +3,50 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
-import { makeMaddenPlay, filterCatalog } from '../web/madden-model.js';
+import { makeMaddenPlay, filterCatalog, spaceMaddenLine } from '../web/madden-model.js';
 import { validatePlay, starterWorkspace, encodeWorkspace, decodeWorkspace, movePlayer, mirrorPlay, animatedPlayer, STORAGE_KEY } from '../web/model.js';
 import { handleApi } from '../server/api.mjs';
 import { database } from './helpers/db.mjs';
 const entries = Object.values(EDITABLE_TRACES);
 const audit = JSON.parse(readFileSync(new URL('../docs/madden-conversion-audit.json', import.meta.url)));
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
+
+// Reconstruct the pre-spacing import to exercise already-saved plays without
+// touching any real workspace or discarding user edits.
+function legacyPlay(entry) {
+  const play = makeMaddenPlay(entry);
+  const convert = ([x,y]) => ({ x: Number(((x - 10) / 534 * 100).toFixed(3)), y: Number((67 + (y - 174) * .2375).toFixed(3)) });
+  for (const raw of entry.players) Object.assign(play.players.find(p=>p.label===raw.label), convert(raw.at));
+  entry.routes.forEach((raw,i) => { play.routes[i].points=raw.points.map(convert); });
+  return play;
+}
+
+test('Madden imports and already-saved traces spread the line, preserve routes and work after mirroring', () => {
+  for (const entry of entries) {
+    const old = legacyPlay(entry), mirrored = mirrorPlay(old);
+    for (const play of [old, mirrored]) {
+      const ids=play.players.map(p=>p.id), labels=play.players.map(p=>p.label);
+      const result=spaceMaddenLine(play);
+      assert.equal(result.changed,true,entry.name);
+      assert.deepEqual(play.players.map(p=>p.id),ids);assert.deepEqual(play.players.map(p=>p.label),labels);
+      const line=play.players.filter(p=>['LT','LG','C','RG','RT'].includes(p.label)).sort((a,b)=>a.x-b.x);
+      for(let i=1;i<line.length;i++)assert.ok(line[i].x-line[i-1].x>=5-1e-7,entry.name);
+      for(const linePlayer of line)for(const p of play.players.filter(p=>p.side==='offense'&&!line.includes(p)))
+        assert.ok(Math.hypot((p.x-linePlayer.x)*9.64,(p.y-linePlayer.y)*7.6)>=36-1e-7,entry.name);
+      validatePlay(play);assert.equal(spaceMaddenLine(play).changed,false,entry.name);
+    }
+    const fresh=makeMaddenPlay(entry);assert.equal(spaceMaddenLine(fresh).changed,false,entry.name);validatePlay(fresh);
+  }
+});
+
+test('spacing leaves an unsafe or unrecognizable line unchanged and keeps edge routes attached', () => {
+  const old=legacyPlay(entries.find(entry=>entry.routes.some(r=>r.points.length>1)));
+  const near=old.players.find(p=>p.label==='LT');old.routes.push({id:'edge-route',playerId:near.id,points:[{x:near.x,y:near.y},{x:0,y:50}],kind:'route',color:'#ffdc42',smooth:false,endCap:'arrow',delay:0,duration:3,optional:false});
+  assert.equal(spaceMaddenLine(old).changed,true);const edge=old.routes.find(r=>r.id==='edge-route');assert.equal(edge.points[0].x,near.x);assert.equal(edge.points[1].x,0);validatePlay(old);
+  const tight=legacyPlay(entries[0]);['LT','LG','C','RG','RT'].forEach((label,i)=>{tight.players.find(p=>p.label===label).x=i;});
+  const before=structuredClone(tight);assert.equal(spaceMaddenLine(tight).reason,'no-room');assert.deepEqual(tight,before);
+  tight.players.find(p=>p.label==='C').label='changed';const missing=structuredClone(tight);assert.equal(spaceMaddenLine(tight).reason,'missing-line');assert.deepEqual(tight,missing);
+});
 
 test('all source-backed traces retain independent editable geometry across move, mirror and backup', () => {
   assert.equal(entries.length, audit.summary.editableTotal);
@@ -80,5 +117,20 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
     $('[data-madden="close"]').click();
     saved=decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));assert.equal(saved.plays.filter(p=>p.diagramSource).length,2);
     assert.deepEqual(saved.plays[0],original);
+  } finally { await win.happyDOM.close();for(const [n,d] of Object.entries(previous)){if(d)Object.defineProperty(globalThis,n,d);else delete globalThis[n];} }
+});
+
+test('saved Madden line is changed only when requested and the change can be undone',async()=>{
+  const win=new Window({url:'http://localhost:3000/',width:1440,height:1000});
+  win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
+  const data=starterWorkspace(),old=legacyPlay(entries[0]);data.plays.unshift(old);win.localStorage.setItem(STORAGE_KEY,encodeWorkspace(data));
+  const names=['window','document','navigator','localStorage','location','Image','Blob','requestAnimationFrame','cancelAnimationFrame','fetch'];
+  const previous=Object.fromEntries(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));
+  for(const n of names)Object.defineProperty(globalThis,n,{configurable:true,value:n==='fetch'?async()=>new Response(JSON.stringify(catalog)):['requestAnimationFrame','cancelAnimationFrame'].includes(n)?win[n].bind(win):win[n]});
+  try {
+    await import(`../web/app.js?legacy-spacing=${Date.now()}`);
+    const q=s=>win.document.querySelector(s);assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0],old);
+    q('[data-action="space-madden-line"]').click();const spaced=decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0];assert.notDeepEqual(spaced.players,old.players);
+    q('[data-action="undo"]').click();assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0],old);
   } finally { await win.happyDOM.close();for(const [n,d] of Object.entries(previous)){if(d)Object.defineProperty(globalThis,n,d);else delete globalThis[n];} }
 });

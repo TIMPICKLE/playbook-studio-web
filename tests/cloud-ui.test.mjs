@@ -3,12 +3,15 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
 import { clone, encodeWorkspace, starterWorkspace, STORAGE_KEY } from '../web/model.js';
+import { makeMaddenPlay } from '../web/madden-model.js';
+import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
 
 test('cloud editor restricts readers, saves editor changes, imports legacy JSON and manages owner invitations', async t => {
   const win = new Window({ url: 'https://playbook.test/editor/index.html', width: 1440, height: 1000 });
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
   const legacy = encodeWorkspace(starterWorkspace()); win.localStorage.setItem(STORAGE_KEY, legacy);
   const record = { id: 'book', title: 'Team', role: 'viewer', revision: 1, data: starterWorkspace() }, calls = [];
+  record.data.plays[0] = makeMaddenPlay(Object.values(EDITABLE_TRACES)[0]);
   let poll;
   win.setInterval = callback => { poll = callback; return 1; };
   const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'history', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame', 'fetch'];
@@ -33,6 +36,8 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
     await t.test('viewer sees shared data and exports but cannot mutate via controls, scripted events or keyboard', async () => {
       assert.equal(q('#app').hidden, false); assert.equal(q('[data-action="add-defense-43"]').disabled, true); assert.equal(q('[data-prop="title"]').disabled, true);
       assert.equal(q('[data-action="export"]').disabled, false); assert.equal(q('[data-cloud-action="members"]'), null);
+      const space = q('[data-action="space-madden-line"]'); assert.equal(space.disabled, true);
+      space.disabled = false; space.click(); // A scripted click must not bypass viewer permissions.
       const input = q('[data-prop="title"]'); input.value = 'Unauthorized'; input.dispatchEvent(new win.Event('change', { bubbles: true }));
       win.document.body.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Delete', bubbles: true })); await settle();
       assert.equal(calls.filter(c => c.method === 'PUT').length, 0); assert.notEqual(record.data.plays[0].title, 'Unauthorized');
