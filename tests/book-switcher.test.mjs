@@ -75,6 +75,7 @@ test('card switching loads the right workspace, guards pending changes and survi
   const reads=id=>calls.filter(c=>c.path===`/api/workspaces/${id}`&&c.method==='GET').length;
   try {
     await import(`../web/app.js?book-cards=${Date.now()}`);await settle();
+    click('[data-cloud-action="enter-editor"]');await settle();
     await t.test('current book is a card trigger and keyboard browsing does not switch data',async()=>{
       assert.equal(q('#cloud-workspace'),null);assert.match(q('.workspace-current-card strong').textContent,/进攻/);
       click('[data-cloud-action="books"]');assert.equal(q('.book-card[aria-pressed=true]').dataset.bookId,'a');

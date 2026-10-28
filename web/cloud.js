@@ -16,7 +16,7 @@ export async function request(path, options = {}) {
 }
 const roleName = role => ({ owner: '管理员', editor: '编辑者', viewer: '只读成员' })[role] || '';
 export class SharedWorkspace {
-  constructor(hooks) { this.hooks = hooks; this.user = null; this.books = []; this.sync = null; this.actions = {}; this.pollTimer = null; this.status = '正在连接云端'; }
+  constructor(hooks) { this.hooks = hooks; this.user = null; this.books = []; this.sync = null; this.actions = {}; this.pollTimer = null; this.status = '正在连接云端'; this.mode = 'home'; }
   get canEdit() { return !!this.sync?.canEdit; }
   get current() { return this.sync?.current; }
   get dirty() { return !!this.sync?.dirty; }
@@ -24,9 +24,23 @@ export class SharedWorkspace {
   renderBar() {
     const root = document.querySelector('#cloud-root');
     if (!this.user) { this.renderLogin(); return; }
-    reconcileHTML(root, `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img src="./assets/stingers-mark.png" width="32" height="32" alt=""><span>STINGERS<small>Playbook Studio · 团队战术</small></span></a>${currentBookCard(this.books, this.current)}<div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="查看同步详情" data-state="${this.statusState()}"><i></i><span>${e(this.status)}</span></button>${this.current && this.canEdit ? '<button class="save-now" data-cloud-action="save-now">立即保存</button>' : ''}</div><nav class="cloud-bar-actions" aria-label="协作与账号"><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? '<button data-cloud-action="members">成员与权限</button>' : ''}${this.current ? '<button data-cloud-action="history">历史版本</button>' : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? '<button data-cloud-action="password">修改登录密码</button>' : ''}<button data-cloud-action="new">新建战术本</button><button data-cloud-action="migrate">导入旧版备份</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? '退出 / 切换账号' : '切换到团队账号'}</button></div></details></nav></header>`);
+    if (this.mode === 'home') { this.renderHome(); return; }
+    reconcileHTML(root, `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img src="./assets/stingers-mark.png" width="32" height="32" alt=""><span>STINGERS<small>Playbook Studio · 团队战术</small></span></a>${currentBookCard(this.books, this.current)}<div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="查看同步详情" data-state="${this.statusState()}"><i></i><span>${e(this.status)}</span></button>${this.current && this.canEdit ? '<button class="save-now" data-cloud-action="save-now">立即保存</button>' : ''}</div><nav class="cloud-bar-actions" aria-label="协作与账号"><button data-cloud-action="home">← 工作台</button><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? '<button data-cloud-action="members">成员与权限</button>' : ''}${this.current ? '<button data-cloud-action="history">历史版本</button>' : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? '<button data-cloud-action="password">修改登录密码</button>' : ''}<button data-cloud-action="new">新建战术本</button><button data-cloud-action="migrate">导入旧版备份</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? '退出 / 切换账号' : '切换到团队账号'}</button></div></details></nav></header>`);
     this.updateBookCards();
-    if (!this.books.length) root.insertAdjacentHTML('beforeend', `<section class="cloud-empty"><div class="empty-illustration">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'empty' })}</div><div><span class="section-kicker">从一份战术本开始</span><h1>把球队的想法，放到一起。</h1><p>新建后你将成为管理员。邀请教练编辑，或让球员以只读方式学习战术。</p><div class="empty-actions"><button class="button primary" data-cloud-action="new">新建团队战术本 ${arrowIcon}</button><button class="button subtle" data-cloud-action="migrate">导入已有 JSON</button></div><small>${this.user.authMode === 'password' ? '没有看到团队战术？请让管理员把你的账号加入对应战术本。' : '你现在使用 ChatGPT 账号。若拿到了团队账号，请切换后登录，团队战术将自动加载。'}</small>${this.user.authMode !== 'password' ? '<button class="text-button" data-cloud-action="logout">切换到团队账号 →</button>' : ''}</div></section>`);
+    if (!this.books.length && this.mode === 'editor') root.insertAdjacentHTML('beforeend', `<section class="cloud-empty"><div class="empty-illustration">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'empty' })}</div><div><span class="section-kicker">从一份战术本开始</span><h1>把球队的想法，放到一起。</h1><p>新建后你将成为管理员。邀请教练编辑，或让球员以只读方式学习战术。</p><div class="empty-actions"><button class="button primary" data-cloud-action="new">新建团队战术本 ${arrowIcon}</button><button class="button subtle" data-cloud-action="migrate">导入已有 JSON</button></div><small>${this.user.authMode === 'password' ? '没有看到团队战术？请让管理员把你的账号加入对应战术本。' : '你现在使用 ChatGPT 账号。若拿到了团队账号，请切换后登录，团队战术将自动加载。'}</small>${this.user.authMode !== 'password' ? '<button class="text-button" data-cloud-action="logout">切换到团队账号 →</button>' : ''}</div></section>`);
+  }
+  renderHome() {
+    const name = this.user.name || this.user.username || '球员';
+    document.title = '工作台 · Playbook Studio';
+    document.querySelector('#cloud-root').innerHTML = `<div class="studio-home"><header class="studio-home-header"><div class="studio-home-brand"><img src="./assets/stingers-mark.png" alt="" width="38" height="38"><span>STINGERS<small>PLAYBOOK STUDIO</small></span></div><div class="studio-home-account"><span>你好，${e(name)}</span><button data-cloud-action="logout">${this.user.authMode === 'password' ? '退出登录' : '切换账号'}</button></div></header><main class="studio-home-main"><div class="studio-home-intro"><span class="studio-eyebrow">YOUR PLAYBOOK · YOUR NEXT MOVE</span><h1>准备好，迎接下一次开球。</h1><p>从战术设计到对局观察，在一个地方完成准备。</p></div><div class="studio-home-cards"><button class="studio-choice studio-choice-editor" data-cloud-action="enter-editor"><div class="choice-top"><span>01 / PLAYBOOK</span><b aria-hidden="true">↗</b></div><div class="choice-art choice-art-editor">${fieldSVG(starterWorkspace().plays[0], { showGrid:false }, { thumbnail:true, prefix:'home-editor' })}</div><div class="choice-body"><span class="choice-icon" aria-hidden="true">▧</span><h2>编辑战术本</h2><p>整理战术、绘制路线，与球队一起演练。</p><span class="choice-link">进入战术本 <b>→</b></span></div></button><button class="studio-choice studio-choice-ai" data-cloud-action="enter-analysis"><div class="choice-top"><span>02 / MATCHUP</span><b aria-hidden="true">↗</b></div><div class="choice-art choice-art-ai"><div class="choice-orbit orbit-one"></div><div class="choice-orbit orbit-two"></div><div class="choice-node node-offense">O</div><div class="choice-node node-defense">D</div><div class="choice-ai-label">IF / THEN <span>✳</span></div></div><div class="choice-body"><span class="choice-icon" aria-hidden="true">✳</span><h2>AI分析战局</h2><p>选择攻防战术，从球员视角观察可能的情况。</p><span class="choice-link">开始分析 <b>→</b></span></div></button></div><div class="studio-home-foot"><span>${this.books.length ? `你有 ${this.books.length} 本可访问的战术本` : '还没有战术本？进入编辑区即可创建或导入。'}</span><span>STINGERS · PLAYBOOK STUDIO</span></div></main></div>`;
+  }
+  setMode(mode) {
+    if (this.dirty) throw new Error('还有未同步更改，请先保存或处理冲突。');
+    this.mode = mode;
+    this.hooks.showEditor(mode === 'editor' && !!this.current);
+    this.hooks.showAnalysis?.(mode === 'analysis');
+    this.renderBar();
+    window.scrollTo?.(0, 0);
   }
   statusState() { return /冲突|失败|失效|不可用|尚未|变更/.test(this.status) ? 'error' : /离线|等待|正在|恢复/.test(this.status) ? 'pending' : 'saved'; }
   renderLogin() {
@@ -57,7 +71,7 @@ export class SharedWorkspace {
     document.querySelector('#cloud-root').innerHTML = '<div class="loading-workspace" aria-busy="true"><div></div><div></div><p>正在加载你的团队战术…</p></div>';
     try {
       this.user = (await request('/api/session')).user; this.renderBar(); if (!this.user) return;
-      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { try { const validated = decodeWorkspace(encodeWorkspace(data)); this.hooks.onData(validated, record); this.hooks.showEditor(true); this.renderBar(); } catch { this.setStatus('更改需要人工合并，请导出备份'); } }, onConflict: (remote, local) => this.conflictModal(remote, local), onAccessLost: error => this.accessLost(error) });
+      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { try { const validated = decodeWorkspace(encodeWorkspace(data)); this.hooks.onData(validated, record); this.hooks.onAnalysisData?.(validated, record); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); } catch { this.setStatus('更改需要人工合并，请导出备份'); } }, onConflict: (remote, local) => this.conflictModal(remote, local), onAccessLost: error => this.accessLost(error) });
       window.addEventListener('beforeunload', event => { if (this.dirty) { event.preventDefault(); event.returnValue = ''; } });
       await this.refreshBooks();
       const invite = new URLSearchParams(location.search).get('invite');
@@ -126,11 +140,14 @@ export class SharedWorkspace {
   accessLost(error) {
     this.accessError = error;
     this.sync.current.role = error.status === 403 ? 'viewer' : 'removed';
-    this.sync.dispose(); this.hooks.onPermissionLost(error); this.hooks.showEditor(error.status === 403); this.renderBar();
+    this.sync.dispose(); this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.renderBar();
     this.hooks.openModal('访问权限已变更', `<p>${e(error.message)}</p><p class="muted small">未同步草稿保留在本机，可先下载备份。</p>`, `${this.sync.pending ? '<button class="button subtle" data-cloud-action="export-conflict">下载未同步草稿</button>' : ''}${error.status === 403 ? '<button class="button primary" data-cloud-action="reload-cloud">以只读方式重新加载</button>' : '<a class="button primary" href="/editor/index.html" target="_top">重新打开战术本</a>'}`, true);
   }
   async handleAction(node) {
     const action = node.dataset.cloudAction;
+    if (action === 'enter-editor') return this.setMode('editor');
+    if (action === 'enter-analysis') return this.setMode('analysis');
+    if (action === 'home') return this.setMode('home');
     if (action === 'books') return this.showBooks();
     if (action === 'reload') return location.reload();
     if (action === 'login') {

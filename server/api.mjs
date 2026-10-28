@@ -1,6 +1,7 @@
 import { decodeWorkspace, starterWorkspace } from '../web/model.js';
 import { MAX_BODY, ApiError, fail, json, readJson } from './http.mjs';
 import { resolveIdentity, handleAuth, createAccountStatements, resetAccount } from './auth.mjs';
+import { buildMatchup, modelEndpoint, runModel } from './matchup.mjs';
 export { MAX_BODY } from './http.mjs';
 const ROLES = ['editor', 'viewer'];
 const normalizeEmail = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -85,6 +86,40 @@ export async function handleApi(request, env, user) {
     if (path.length === 2) {
       if (request.method === 'GET') { const record = await access(db, workspaceId, user.userId); const after = Number(new URL(request.url).searchParams.get('after')); return json(after === record.revision ? { unchanged: true, revision: record.revision, role: record.role } : document(record)); }
       if (request.method === 'PUT') { const body = await readJson(request); return await writeWorkspace(db, workspaceId, user, body.data, body.revision); }
+    }
+    if (path[2] === 'matchup-analysis' && path.length === 3 && request.method === 'POST') {
+      const record = await access(db, workspaceId, user.userId);
+      const body = await readJson(request, 12000);
+      if (revision(body.revision) !== record.revision) return json({ error: '战术本已更新，请刷新后重新选择战术', code: 'revision_conflict' }, 409);
+      if (body.consent !== true) fail(400, '请先确认将所选战术发送给模型服务商');
+      if (body.coverage && !['unknown', 'cover3_spot', 'cover3_match', 'cover2', 'man'].includes(body.coverage)) fail(400, '覆盖类型不正确');
+      if (body.mode && !['real_football', 'madden'].includes(body.mode)) fail(400, '分析语境不正确');
+      const data = JSON.parse(record.data_json);
+      const offense = data.plays.find(p => p.id === body.offensePlayId && p.book === 'offense');
+      const defense = data.plays.find(p => p.id === body.defensePlayId && p.book === 'defense');
+      if (!offense || !defense) fail(400, '请选择当前战术本中有效的进攻和防守战术');
+      let perspective = null;
+      if (body.perspective != null) {
+        const side = body.perspective.side, play = side === 'offense' ? offense : side === 'defense' ? defense : null;
+        const player = play?.players.find(p => p.id === body.perspective.playerId && p.side === side);
+        if (!player) fail(400, '所选观察球员不属于对应战术');
+        perspective = { side, playerId: `${side}:player:${player.id}`, label: player.label };
+      }
+      modelEndpoint(body.model, env);
+      const throttleNow = Date.now(), key = await hash(`matchup:${user.userId}`);
+      const counter = await db.prepare('INSERT INTO auth_throttles(key,started_at,attempts) VALUES(?,?,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN started_at<? THEN 1 ELSE attempts+1 END,started_at=CASE WHEN started_at<? THEN excluded.started_at ELSE started_at END RETURNING attempts').bind(key, throttleNow, throttleNow - 60000, throttleNow - 60000).first();
+      if (counter.attempts > 12) fail(429, '分析请求过于频繁，请稍后重试');
+      const matchup = buildMatchup(offense, defense, { coverage: body.coverage, includeNotes: body.includeNotes === true, mirrorDefense: body.mirrorDefense === true });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 45000);
+      const abort = () => controller.abort();
+      request.signal.addEventListener('abort', abort, { once: true });
+      let result;
+      try { result = await runModel(matchup, { model: body.model, perspective, context: body.context, mode: body.mode }, env, controller.signal); }
+      finally { clearTimeout(timer); request.signal.removeEventListener('abort', abort); }
+      const latest = await access(db, workspaceId, user.userId);
+      if (latest.revision !== record.revision) return json({ error: '分析期间战术本已更新，请重新分析', code: 'revision_conflict' }, 409);
+      return json({ ...result, evidence: matchup.evidence, warnings: matchup.warnings, revision: record.revision });
     }
     if (path[2] === 'accounts' && path.length === 3 && request.method === 'POST') {
       await access(db, workspaceId, user.userId, 'owner');
