@@ -8,7 +8,7 @@
 
 一个中文美式橄榄球战术工作台：布阵、画路线、播放演练、整理战术本，与教练和球员共享。
 
-[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) · [无需登录，先试用本地演示](https://timpickle.github.io/playbook-studio-web/local.html) · [查看使用指南](#从一张战术开始) · [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md) · [AI 对局分析路线图（规划）](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
+[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) · [无需登录，先试用本地演示](https://timpickle.github.io/playbook-studio-web/local.html) · [查看使用指南](#从一张战术开始) · [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md) · [球员 AI 对局分析路线图（规划）](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
 
 <sub>封面为 AI 生成的概念插画，实际软件界面见下方截图。</sub>
 
