@@ -4,7 +4,7 @@ import { ApiError, fail } from './http.mjs';
 import { limitedResponse, modelEndpoint, parseModelResult } from './matchup.mjs';
 
 // These limits apply to one user-authorized run, not to each graph node.
-export const AGENT_LIMITS = Object.freeze({ modelCalls: 4, toolRounds: 2, toolCalls: 6, toolArguments: 2048, contextBytes: 120000, conversationBytes: 250000 });
+export const AGENT_LIMITS = Object.freeze({ modelCalls: 4, toolRounds: 2, toolCalls: 6, toolRequestsPerTurn: 12, toolArguments: 2048, contextBytes: 120000, conversationBytes: 250000 });
 const AgentState = Annotation.Root({
   modelCalls: Annotation(),
   toolRounds: Annotation(),
@@ -85,26 +85,76 @@ function makeToolRunner(matchup, perspective, mode, context) {
   return { run, used };
 }
 
+// The graph uses a common internal message shape. Anthropic requires system
+// separately and all results for parallel tool calls in one user message.
+function anthropicMessages(messages) {
+  const converted = [];
+  for (const message of messages) {
+    if (message.role === 'system') continue;
+    if (message.role === 'tool') {
+      const block = { type: 'tool_result', tool_use_id: message.tool_call_id, content: message.content };
+      const last = converted.at(-1);
+      if (last?.role === 'user' && Array.isArray(last.content) && last.content.every(item => item.type === 'tool_result')) last.content.push(block);
+      else converted.push({ role: 'user', content: [block] });
+    } else if (message.role === 'assistant') {
+      // Preserve signed thinking blocks exactly for Anthropic's multi-turn API.
+      if (!Array.isArray(message.anthropicContent)) fail(502, '模型回复缺少可继续分析的内容');
+      converted.push({ role: 'assistant', content: message.anthropicContent });
+    } else if (message.role === 'user') converted.push({ role: 'user', content: message.content });
+  }
+  return converted;
+}
+
 async function callProvider(config, messages, choice, signal) {
   if (signal?.aborted) fail(504, '分析已取消或超时；已发起的请求可能仍由服务商计费');
-  const body = { model: config.model, messages, tools: TOOLS, tool_choice: choice, stream: false };
-  if (config.provider === 'openai') body.max_completion_tokens = 1800;
-  else body.max_tokens = 1800;
+  let body, headers;
+  if (config.protocol === 'anthropic') {
+    // New Claude models can reject forced tool selection. Offer only the
+    // mandatory context tool on the first turn and verify it was actually used.
+    const first = typeof choice === 'object';
+    const tools = first ? TOOLS.filter(tool => tool.function.name === 'get_matchup_context') : TOOLS;
+    body = { model: config.model, system: messages[0].content, messages: anthropicMessages(messages), max_tokens: 3000, stream: false,
+      tools: tools.map(({ function: fn }) => ({ name: fn.name, description: fn.description, input_schema: fn.parameters })),
+      tool_choice: { type: first ? 'auto' : choice } };
+    if (config.provider === 'deepseek') body.thinking = { type: 'disabled' };
+    headers = { 'Content-Type': 'application/json', 'x-api-key': config.apiKey, 'anthropic-version': '2023-06-01' };
+  } else {
+    body = { model: config.model, messages, tools: TOOLS, tool_choice: choice, stream: false };
+    if (config.provider === 'openai') body.max_completion_tokens = 1800;
+    else body.max_tokens = 1800;
+    // DeepSeek defaults to thinking mode, which rejects a named tool_choice.
+    if (config.provider === 'deepseek') body.thinking = { type: 'disabled' };
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` };
+  }
   if (byteLength(JSON.stringify(body)) > AGENT_LIMITS.conversationBytes) fail(400, '分析上下文过大，请简化战术后重试');
   let response;
   try {
-    response = await fetch(config.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` }, body: JSON.stringify(body), redirect: 'manual', signal });
+    response = await fetch(config.endpoint, { method: 'POST', headers, body: JSON.stringify(body), redirect: 'manual', signal });
   } catch {
     if (signal?.aborted) fail(504, '分析已取消或超时；已发起的请求可能仍由服务商计费');
     fail(502, '无法连接模型服务，请检查网络和服务配置');
   }
   if (response.status === 401 || response.status === 403) fail(502, '模型服务拒绝了 API Key 或账号权限，请检查配置');
+  if (response.status === 402) fail(502, '模型服务账户余额不足，请检查服务商账户');
   if (response.status === 429) fail(502, '模型服务达到额度或频率限制，请稍后重试');
   if (response.status === 400 || response.status === 404) fail(502, '模型服务不支持工具调用配置或模型 ID 不正确，请检查服务商说明');
   if (!response.ok) fail(502, '模型服务暂时无法完成请求，请检查模型 ID 和服务状态');
   let data;
   try { data = await limitedResponse(response); }
   catch (error) { if (error instanceof ApiError) throw error; fail(502, '读取模型回复失败或已超时，请重试'); }
+  if (config.protocol === 'anthropic') {
+    if (data?.stop_reason === 'max_tokens') fail(502, '模型回复被截断，请使用支持工具调用且输出长度足够的模型');
+    if (data?.stop_reason === 'refusal') fail(502, '模型服务未能返回可用分析');
+    if (!Array.isArray(data?.content) || data.content.some(block => !block || !['text', 'tool_use', 'thinking', 'redacted_thinking'].includes(block.type))) fail(502, '模型服务未返回可用消息');
+    const calls = data.content.filter(block => block.type === 'tool_use').map(block => {
+      if (!block.input || typeof block.input !== 'object' || Array.isArray(block.input)) fail(502, '模型返回了无效的工具调用');
+      return { id: block.id, type: 'function', function: { name: block.name, arguments: JSON.stringify(block.input) } };
+    });
+    if ((data.stop_reason === 'tool_use') !== (calls.length > 0)) fail(502, '模型服务返回的工具调用状态无效');
+    const usage = data.usage;
+    const validUsage = Number.isSafeInteger(usage?.input_tokens) && usage.input_tokens >= 0 && Number.isSafeInteger(usage?.output_tokens) && usage.output_tokens >= 0;
+    return { message: { content: data.content.filter(block => block.type === 'text').map(block => block.text || '').join('\n'), ...(calls.length ? { tool_calls: calls } : {}), anthropicContent: data.content }, usage: validUsage ? { inputTokens: usage.input_tokens, outputTokens: usage.output_tokens } : null };
+  }
   const item = data?.choices?.[0];
   if (item?.finish_reason === 'length') fail(502, '模型回复被截断，请使用支持工具调用且输出长度足够的模型');
   if (item?.finish_reason === 'content_filter') fail(502, '模型服务未能返回可用分析');
@@ -120,6 +170,7 @@ function assistantMessage(message, provider, toolCalls) {
   // Protocol-specific reasoning is returned only to the same provider, never to the UI or logs.
   if ((provider === 'deepseek' || provider === 'custom') && typeof message.reasoning_content === 'string') out.reasoning_content = message.reasoning_content;
   if (provider === 'openrouter' && Array.isArray(message.reasoning_details)) out.reasoning_details = message.reasoning_details;
+  if (Array.isArray(message.anthropicContent)) out.anthropicContent = message.anthropicContent;
   return out;
 }
 
@@ -147,7 +198,7 @@ export async function runMatchupAgent(matchup, options, env, signal) {
     .addNode('tools', async state => {
       await options.reauthorize?.();
       const message = privateRun.pending, calls = message.tool_calls;
-      if (!Array.isArray(calls) || !calls.length || state.toolRounds >= AGENT_LIMITS.toolRounds || state.toolCalls + calls.length > AGENT_LIMITS.toolCalls) fail(502, '模型工具调用超过限制，请重试或更换模型');
+      if (!Array.isArray(calls) || !calls.length || state.toolRounds >= AGENT_LIMITS.toolRounds || calls.length > AGENT_LIMITS.toolRequestsPerTurn) fail(502, '模型工具调用超过限制，请重试或更换模型');
       if (!privateRun.hasContext && calls[0]?.function?.name !== 'get_matchup_context') fail(502, '模型未按要求读取对局，请使用支持工具调用的模型');
       const normalized = calls.map(call => {
         checkedArguments(call);
@@ -156,12 +207,16 @@ export async function runMatchupAgent(matchup, options, env, signal) {
         return { id: call.id, type: 'function', function: { name: call.function.name, arguments: call.function.arguments } };
       });
       privateRun.messages.push(assistantMessage(message, config.provider, normalized));
+      let executed = 0;
       for (const call of normalized) {
-        const args = checkedArguments(call), result = tools.run(call.function.name, args);
+        const args = checkedArguments(call);
+        let result;
+        if (state.toolCalls + executed < AGENT_LIMITS.toolCalls) { executed++; result = tools.run(call.function.name, args); }
+        else result = { error: '本次工具额度已用完，请根据已有信息回答。' };
         if (call.function.name === 'get_matchup_context' && !result.error) privateRun.hasContext = true;
         privateRun.messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
       }
-      return { toolRounds: state.toolRounds + 1, toolCalls: state.toolCalls + normalized.length };
+      return { toolRounds: state.toolRounds + 1, toolCalls: state.toolCalls + executed };
     })
     .addNode('validate', async state => {
       if (!privateRun.hasContext) fail(502, '模型未读取所选对局，请使用支持工具调用的模型');
@@ -169,7 +224,10 @@ export async function runMatchupAgent(matchup, options, env, signal) {
       catch (error) {
         if (!(error instanceof ApiError) || error.status !== 502 || state.repaired || state.modelCalls >= AGENT_LIMITS.modelCalls) throw error;
         privateRun.messages.push(assistantMessage(privateRun.pending, config.provider));
-        privateRun.messages.push({ role: 'user', content: `上一次输出不符合格式或证据要求：${error.message}。请仅使用已提供证据 ID，返回完整 JSON；无法引用时用空数组。` });
+        const evidenceRepair = error.message.includes('引用了不存在的战术对象')
+          ? '为避免再次编造引用，请将每个情景的 evidenceIds 都设为 []；不要填写任何证据 ID。'
+          : '请仅使用已提供的完整证据 ID；无法准确复制时使用空数组。';
+        privateRun.messages.push({ role: 'user', content: `上一次输出不符合格式或证据要求：${error.message}。${evidenceRepair}请返回完整 JSON。` });
         privateRun.repairNeeded = true;
         return { repaired: true };
       }

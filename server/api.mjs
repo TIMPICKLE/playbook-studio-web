@@ -93,7 +93,6 @@ export async function handleApi(request, env, user) {
       const record = await access(db, workspaceId, user.userId);
       const body = await readJson(request, 12000);
       if (revision(body.revision) !== record.revision) return json({ error: '战术本已更新，请刷新后重新选择战术', code: 'revision_conflict' }, 409);
-      if (body.consent !== true) fail(400, '请先确认将所选战术发送给模型服务商');
       if (body.coverage && !['unknown', 'cover3_spot', 'cover3_match', 'cover2', 'man'].includes(body.coverage)) fail(400, '覆盖类型不正确');
       if (body.mode && !['real_football', 'madden'].includes(body.mode)) fail(400, '分析语境不正确');
       const data = JSON.parse(record.data_json);

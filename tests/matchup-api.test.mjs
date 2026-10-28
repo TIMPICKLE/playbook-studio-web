@@ -46,11 +46,16 @@ test('mirroring is consistent with the original coordinates and never mutates th
 
 test('endpoint restrictions prevent the service becoming an open proxy',()=>{
   assert.equal(modelEndpoint({provider:'deepseek',model:'model',apiKey:'abc'}).endpoint,'https://api.deepseek.com/chat/completions');
+  assert.equal(modelEndpoint({provider:'deepseek',protocol:'anthropic',model:'model',apiKey:'abc'}).endpoint,'https://api.deepseek.com/anthropic/v1/messages');
+  assert.equal(modelEndpoint({provider:'anthropic',model:'model',apiKey:'abc'}).endpoint,'https://api.anthropic.com/v1/messages');
   assert.equal(modelEndpoint({provider:'custom',baseUrl:'https://models.example/v1',model:'model',apiKey:'abc'},{AI_ALLOWED_HOSTS:'models.example'}).endpoint,'https://models.example/v1/chat/completions');
+  assert.equal(modelEndpoint({provider:'custom',protocol:'anthropic',baseUrl:'https://models.example/v1',model:'model',apiKey:'abc'},{AI_ALLOWED_HOSTS:'models.example'}).endpoint,'https://models.example/v1/messages');
+  assert.throws(()=>modelEndpoint({provider:'anthropic',protocol:'openai',model:'model',apiKey:'abc'}));
+  assert.throws(()=>modelEndpoint({provider:'deepseek',protocol:'unknown',model:'model',apiKey:'abc'}));
   for(const baseUrl of ['http://models.example/v1','https://user:pass@models.example/v1','https://127.0.0.1/v1','https://models.example/v1?key=abc','https://not-allowed.example/v1']) assert.throws(()=>modelEndpoint({provider:'custom',baseUrl,model:'model',apiKey:'abc'},{AI_ALLOWED_HOSTS:'models.example,127.0.0.1'}));
 });
 
-test('analysis uses authorized snapshots, minimizes sent data and rejects stale, unconsented or unauthorized requests',async t=>{
+test('analysis uses authorized snapshots, minimizes sent data and rejects stale or unauthorized requests',async t=>{
   const {db,record,off,body,path}=await setup(t);let count=0,sent;
   // Sensitive details must not be sent by default.
   const data=JSON.parse(db.sql.prepare('SELECT data_json FROM workspaces WHERE id=?').get(record.id).data_json);
@@ -59,7 +64,6 @@ test('analysis uses authorized snapshots, minimizes sent data and rejects stale,
   const routeId=`offense:route:${off.routes[0].id}`;
   stubFetch(t,async(url,opts)=>{count++;assert.equal(url,'https://api.deepseek.com/chat/completions');assert.equal(opts.redirect,'manual');sent=JSON.parse(opts.body);if(sent.messages.length===2)return contextTool();return modelResponse({choices:[{message:{content:JSON.stringify(goodResult(routeId))}}]});});
   assert.equal((await call(db,path,outsider,body)).status,404);
-  assert.equal((await call(db,path,viewer,{...body,consent:false})).status,400);
   assert.equal((await call(db,path,viewer,{...body,revision:2})).status,409);
   assert.equal(count,0);
   const result=await call(db,path,viewer,body);
