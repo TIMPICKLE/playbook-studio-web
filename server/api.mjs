@@ -114,6 +114,7 @@ export async function handleApi(request, env, user) {
       const timer = setTimeout(() => controller.abort(), 45000);
       const abort = () => controller.abort();
       request.signal.addEventListener('abort', abort, { once: true });
+      if (request.signal.aborted) controller.abort();
       let result;
       try { result = await runModel(matchup, { model: body.model, perspective, context: body.context, mode: body.mode }, env, controller.signal); }
       finally { clearTimeout(timer); request.signal.removeEventListener('abort', abort); }

@@ -12,13 +12,18 @@ test('signed-in players can choose a matchup, consent, view scenarios, and retur
   const previous=Object.fromEntries(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));
   for(const n of names.filter(n=>n!=='fetch'))Object.defineProperty(globalThis,n,{configurable:true,value:['requestAnimationFrame','cancelAnimationFrame'].includes(n)?win[n].bind(win):win[n]});
   const data=starterWorkspace(), record={id:'book',title:'Team',role:'viewer',revision:1,data}, calls=[];
+  let finishDelayed;
   const off=data.plays.find(p=>p.book==='offense'), routeId=`offense:route:${off.routes[0].id}`;
   const response=body=>new Response(JSON.stringify(body),{headers:{'Content-Type':'application/json'}});
   Object.defineProperty(globalThis,'fetch',{configurable:true,value:async(path,options={})=>{
     const body=options.body?JSON.parse(options.body):undefined;calls.push({path,body,method:options.method||'GET'});
     if(path==='/api/session')return response({user:{id:'me',name:'球员',email:'player@example.com'}});
     if(path==='/api/workspaces')return response({workspaces:[{id:'book',title:'Team',role:'viewer'}]});
-    if(path.endsWith('/matchup-analysis'))return response({summary:'一次教学情景',scenarios:[{title:'情景 A',condition:'如果向外',observation:'留意防守者',possibility:'<img src=x onerror=alert(1)>',action:'依球队规则',limitations:'时序未知',evidenceIds:[routeId]},{title:'情景 B',condition:'如果留中',observation:'留意外侧',possibility:'短传可能出现空间',action:'',limitations:'',evidenceIds:[]}],missingInfo:['责任'],warnings:['未确认时序'],evidence:[{id:routeId,label:'X · 路线',type:'route'}]});
+    if(path.endsWith('/matchup-analysis')){
+      const result={summary:'一次教学情景',scenarios:[{title:'情景 A',condition:'如果向外',observation:'留意防守者',possibility:'<img src=x onerror=alert(1)>',action:'依球队规则',limitations:'时序未知',evidenceIds:[routeId]},{title:'情景 B',condition:'如果留中',observation:'留意外侧',possibility:'短传可能出现空间',action:'',limitations:'',evidenceIds:[]}],missingInfo:['责任'],warnings:['未确认时序'],evidence:[{id:routeId,label:'X · 路线',type:'route'}]};
+      if(body.context==='pending')return new Promise(resolve=>{finishDelayed=()=>resolve(response(result));});
+      return response(result);
+    }
     return response(clone(record));
   }});
   const q=s=>win.document.querySelector(s), settle=async()=>{for(let i=0;i<12;i++)await new Promise(resolve=>setImmediate(resolve));};
@@ -35,7 +40,10 @@ test('signed-in players can choose a matchup, consent, view scenarios, and retur
     assert.match(q('.ai-scenario').textContent,/<img src=x/);assert.equal(q('.ai-scenario img'),null);
     assert.ok([...q('.ai-board').querySelectorAll('[data-route]')].some(n=>n.dataset.route===routeId&&n.classList.contains('ai-evidence-active')));
     q('[data-ai-scenario="1"]').click();assert.match(q('.ai-scenario').textContent,/短传可能/);assert.equal(q('.ai-board .ai-evidence-active'),null);
-    input('context','第三档');assert.equal(q('.ai-scenario'),null);
+    input('context','pending');assert.equal(q('.ai-scenario'),null);q('[data-ai-field="consent"]').click();q('[data-ai-action="analyze"]').click();await settle();
+    assert.equal(typeof finishDelayed,'function');
+    q('[data-cloud-action="home"]').click();await settle();q('[data-cloud-action="enter-analysis"]').click();await settle();
+    finishDelayed();await settle();assert.equal(q('.ai-scenario'),null);
     q('[data-cloud-action="home"]').click();await settle();assert.equal(q('#ai-matchup-root').hidden,true);
     q('[data-cloud-action="enter-editor"]').click();await settle();assert.equal(q('#app').hidden,false);
     assert.equal(calls.filter(c=>c.method==='PUT').length,0);

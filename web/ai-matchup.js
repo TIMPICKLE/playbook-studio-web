@@ -41,7 +41,7 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty 
   }
   function show(showing) {
     active = showing; root.hidden = !showing;
-    if (!showing) { controller?.abort(); controller = null; return; }
+    if (!showing) { if (controller) { generation++; controller.abort(); controller = null; } return; }
     render();
   }
   function onData(_data, record) {
