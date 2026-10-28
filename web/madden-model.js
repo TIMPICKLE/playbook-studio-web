@@ -77,7 +77,7 @@ export function spaceMaddenLine(play) {
 function makeTracedPlay(entry, trace) {
   const convert = ([x, y]) => ({ x: Number(((x - 10) / 534 * 100).toFixed(3)), y: Number((67 + (y - 174) * .2375).toFixed(3)) });
   const players = trace.players.map(p => ({ id: uid(), label: p.label, name: '', ...convert(p.at), side: 'offense', color: '#ffdc42', shape: p.label === 'C' ? 'square' : 'circle' }));
-  const routes = trace.routes.map(r => ({ id: uid(), playerId: players.find(p => p.label === r.owner).id, points: r.points.map(convert), kind: r.kind, color: INKS[r.ink], smooth: false, endCap: r.ink === 'white' ? 'bar' : 'arrow', delay: 0, duration: 3, optional: r.optional }));
+  const routes = trace.routes.map(r => ({ id: uid(), playerId: players.find(p => p.label === r.owner).id, points: r.points.map(convert), kind: r.kind, color: r.ink === 'white' && r.kind === 'motion' ? '#b8eff5' : INKS[r.ink], smooth: false, endCap: r.kind === 'block' && r.ink === 'white' ? 'bar' : 'arrow', delay: 0, duration: 3, optional: r.optional }));
   const play = {
     id: uid(), title: entry.name, book: 'offense', formation: `${trace.group} ${trace.formation}`,
     category: 'Madden 可编辑', personnel: `${trace.team === 'eagles' ? 'Eagles' : 'Ravens'} · ${trace.game}`,

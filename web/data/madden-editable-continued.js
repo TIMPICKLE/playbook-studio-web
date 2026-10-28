@@ -1,0 +1,31873 @@
+// Source image and route overlay reviewed for 137 distinct images.
+export const CONTINUED_TRACES = {
+  "eagles-a382b1bdb386e70cf781": {
+    "id": "eagles-a382b1bdb386e70cf781",
+    "team": "eagles",
+    "name": "CHOICE PIVOT RETURN",
+    "group": "Gun",
+    "formation": "Tight Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off/choice-pivot-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/choice-pivot-return.jpg",
+    "image": "data/huddle-art/648b52b5710400ae9977.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            190.0,
+            74.0
+          ],
+          [
+            82.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            427.0,
+            100.0
+          ],
+          [
+            522.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            188.0
+          ],
+          [
+            338.0,
+            187.0
+          ],
+          [
+            338.0,
+            163.0
+          ],
+          [
+            343.0,
+            159.0
+          ],
+          [
+            343.0,
+            152.0
+          ],
+          [
+            244.0,
+            153.0
+          ],
+          [
+            245.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            462.0,
+            194.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            471.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            173.0,
+            136.0
+          ],
+          [
+            25.0,
+            136.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            172,
+            187
+          ],
+          [
+            173,
+            136
+          ],
+          [
+            245,
+            96
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-026b754d6e2772e768c6": {
+    "id": "eagles-026b754d6e2772e768c6",
+    "team": "eagles",
+    "name": "SLUGGO SEAM",
+    "group": "Singleback",
+    "formation": "Wing Tight",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-wing-tight/sluggo-seam/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight/sluggo-seam.jpg",
+    "image": "data/huddle-art/11a0f9e265220d8e3fd8.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          181
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          339,
+          188
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            324.0,
+            94.0
+          ],
+          [
+            327.0,
+            91.0
+          ],
+          [
+            342.0,
+            10.0
+          ],
+          [
+            343.0,
+            3.0
+          ],
+          [
+            340.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            339.0,
+            188.0
+          ],
+          [
+            363.0,
+            183.0
+          ],
+          [
+            398.0,
+            142.0
+          ],
+          [
+            400.0,
+            133.0
+          ],
+          [
+            406.0,
+            130.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            187.0
+          ],
+          [
+            118.0,
+            150.0
+          ],
+          [
+            144.0,
+            142.0
+          ],
+          [
+            144.0,
+            134.0
+          ],
+          [
+            108.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            284.0,
+            147.0
+          ],
+          [
+            284.0,
+            141.0
+          ],
+          [
+            278.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            96
+          ],
+          [
+            246,
+            44
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-d32f45a1843361c83a21": {
+    "id": "ravens-d32f45a1843361c83a21",
+    "team": "ravens",
+    "name": "DBL INS",
+    "group": "Gun",
+    "formation": "Trey Open Str",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trey-open-str/dbl-ins/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open-str/dbl-ins.jpg",
+    "image": "data/huddle-art/a798e5581f3121c6eeed.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            87.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            445.0,
+            95.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            350.0,
+            166.0
+          ],
+          [
+            331.0,
+            142.0
+          ],
+          [
+            202.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399.0,
+            187.0
+          ],
+          [
+            412.0,
+            137.0
+          ],
+          [
+            412.0,
+            133.0
+          ],
+          [
+            402.0,
+            123.0
+          ],
+          [
+            291.0,
+            116.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            357,
+            178
+          ],
+          [
+            331,
+            142
+          ],
+          [
+            255,
+            143
+          ],
+          [
+            255,
+            155
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-fa4dc03c4a61f5dad5bd": {
+    "id": "ravens-fa4dc03c4a61f5dad5bd",
+    "team": "ravens",
+    "name": "QUICK SHORT POST",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/quick-short-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/quick-short-post.jpg",
+    "image": "data/huddle-art/5fd9f0ed6235e9a69a64.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255.0,
+            213.0
+          ],
+          [
+            201.0,
+            203.0
+          ],
+          [
+            77.0,
+            165.0
+          ],
+          [
+            71.0,
+            157.0
+          ],
+          [
+            29.0,
+            54.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            213.0,
+            145.0
+          ],
+          [
+            226.0,
+            147.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328.0,
+            187.0
+          ],
+          [
+            327.0,
+            173.0
+          ],
+          [
+            310.0,
+            157.0
+          ],
+          [
+            296.0,
+            161.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384.0,
+            187.0
+          ],
+          [
+            381.0,
+            165.0
+          ],
+          [
+            367.0,
+            165.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            178.0
+          ],
+          [
+            431.0,
+            164.0
+          ],
+          [
+            445.0,
+            115.0
+          ],
+          [
+            446.0,
+            102.0
+          ],
+          [
+            437.0,
+            98.0
+          ],
+          [
+            369.0,
+            93.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-5848f7df75699593294b": {
+    "id": "ravens-5848f7df75699593294b",
+    "team": "ravens",
+    "name": "TE ATTACK",
+    "group": "Singleback",
+    "formation": "Wing Tight Z",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-wing-tight-z/te-attack/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight-z/te-attack.jpg",
+    "image": "data/huddle-art/8a177c42a9aea4fce6b6.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          226,
+          181
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          337,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            337.0,
+            188.0
+          ],
+          [
+            353.0,
+            145.0
+          ],
+          [
+            357.0,
+            143.0
+          ],
+          [
+            361.0,
+            126.0
+          ],
+          [
+            380.0,
+            84.0
+          ],
+          [
+            380.0,
+            78.0
+          ],
+          [
+            314.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            442.0,
+            167.0
+          ],
+          [
+            442.0,
+            2.0
+          ],
+          [
+            440.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            181.0
+          ],
+          [
+            233.0,
+            171.0
+          ],
+          [
+            248.0,
+            148.0
+          ],
+          [
+            253.0,
+            145.0
+          ],
+          [
+            371,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            321.0,
+            93.0
+          ],
+          [
+            172.0,
+            59.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            92.0,
+            175.0
+          ],
+          [
+            74.0,
+            173.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-081254f5bce5962fa46b": {
+    "id": "eagles-081254f5bce5962fa46b",
+    "team": "eagles",
+    "name": "BENCH DIG CURL",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-deuce-close/bench-dig-curl/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/bench-dig-curl.jpg",
+    "image": "data/huddle-art/9eb36b43a5400bbaf543.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            352.0,
+            92.0
+          ],
+          [
+            344.0,
+            85.0
+          ],
+          [
+            338.0,
+            82.0
+          ],
+          [
+            203.0,
+            82.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            323.0,
+            116.0
+          ],
+          [
+            314.0,
+            117.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            187.0
+          ],
+          [
+            225.0,
+            133.0
+          ],
+          [
+            63,
+            133
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            196.0,
+            90.0
+          ],
+          [
+            193.0,
+            86.0
+          ],
+          [
+            93.0,
+            39.0
+          ],
+          [
+            88.0,
+            39.0
+          ],
+          [
+            65.0,
+            26.0
+          ],
+          [
+            52.0,
+            23.0
+          ],
+          [
+            27.0,
+            9.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            334.0,
+            221.0
+          ],
+          [
+            409.0,
+            216.0
+          ],
+          [
+            461.0,
+            204.0
+          ],
+          [
+            472.0,
+            200.0
+          ],
+          [
+            483.0,
+            190.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-05decf940422b8ec6ba2": {
+    "id": "eagles-05decf940422b8ec6ba2",
+    "team": "eagles",
+    "name": "FOUR VERTICALS",
+    "group": "Gun",
+    "formation": "Wing Slot Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing-slot-wk/four-verticals/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-wk/four-verticals.jpg",
+    "image": "data/huddle-art/19230766433d10f0ab00.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            139.0
+          ],
+          [
+            91.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            334.0,
+            162.0
+          ],
+          [
+            336.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            425.0,
+            130.0
+          ],
+          [
+            425.0,
+            2.0
+          ],
+          [
+            428.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            174,
+            163
+          ],
+          [
+            200,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            242,
+            145
+          ],
+          [
+            25,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            174,
+            163
+          ],
+          [
+            184,
+            85
+          ],
+          [
+            252,
+            43
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": true,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            242,
+            145
+          ],
+          [
+            350,
+            145
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-aabce98ef8b8a495fa1b": {
+    "id": "ravens-aabce98ef8b8a495fa1b",
+    "team": "ravens",
+    "name": "FOUR VERTICALS",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/four-verticals/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/four-verticals.jpg",
+    "image": "data/huddle-art/95636a2a517a934e2cc1.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            139.0
+          ],
+          [
+            91.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            442.0,
+            167.0
+          ],
+          [
+            442.0,
+            3.0
+          ],
+          [
+            439.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            323.0,
+            174.0
+          ],
+          [
+            319.0,
+            166.0
+          ],
+          [
+            282.0,
+            114.0
+          ],
+          [
+            204.0,
+            63.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            90
+          ],
+          [
+            391,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            246.0,
+            195.0
+          ],
+          [
+            249.0,
+            159.0
+          ],
+          [
+            262.0,
+            152.0
+          ],
+          [
+            375,
+            150
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            90
+          ],
+          [
+            300,
+            42
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-6bd9dcee411d92151690": {
+    "id": "ravens-6bd9dcee411d92151690",
+    "team": "ravens",
+    "name": "SMASH",
+    "group": "Singleback",
+    "formation": "U Off Stack",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-u-off-stack/smash/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/u-off-stack/smash.jpg",
+    "image": "data/huddle-art/854cd3ee610cc2d49f2d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          162,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          226,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          183
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            188.0
+          ],
+          [
+            222.0,
+            125.0
+          ],
+          [
+            241.0,
+            5.0
+          ],
+          [
+            244.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            183.0
+          ],
+          [
+            324.0,
+            93.0
+          ],
+          [
+            521.0,
+            20.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            162.0,
+            187.0
+          ],
+          [
+            121.0,
+            172.0
+          ],
+          [
+            115.0,
+            169.0
+          ],
+          [
+            109.0,
+            160.0
+          ],
+          [
+            213,
+            155
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            352.0,
+            184.0
+          ],
+          [
+            498.0,
+            169.0
+          ],
+          [
+            522.0,
+            170.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            175.0,
+            87.0
+          ],
+          [
+            49.0,
+            5.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-b4ba27433b508c064103": {
+    "id": "eagles-b4ba27433b508c064103",
+    "team": "eagles",
+    "name": "LEVELS",
+    "group": "Gun",
+    "formation": "Stack Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-stack-y-off/levels/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/stack-y-off/levels.jpg",
+    "image": "data/huddle-art/2adff64051b07ad1fd94.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          435,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            324.0,
+            104.0
+          ],
+          [
+            344.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            435.0,
+            178.0
+          ],
+          [
+            447.0,
+            158.0
+          ],
+          [
+            445.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192,
+            178
+          ],
+          [
+            133,
+            159
+          ],
+          [
+            136,
+            154
+          ],
+          [
+            265,
+            154
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            356.0,
+            221.0
+          ],
+          [
+            409.0,
+            216.0
+          ],
+          [
+            441.0,
+            209.0
+          ],
+          [
+            461.0,
+            193.0
+          ],
+          [
+            468.0,
+            174.0
+          ],
+          [
+            467.0,
+            152.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            193,
+            178
+          ],
+          [
+            193,
+            80
+          ],
+          [
+            309,
+            80
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            324,
+            104
+          ],
+          [
+            240,
+            46
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-23b54c7b8a3a7d5c2922": {
+    "id": "eagles-23b54c7b8a3a7d5c2922",
+    "team": "eagles",
+    "name": "WR UNDER",
+    "group": "Gun",
+    "formation": "Tight Y Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off-wk/wr-under/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/wr-under.jpg",
+    "image": "data/huddle-art/fc1a65b7e8bcdd6e8770.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            372.0,
+            73.0
+          ],
+          [
+            522.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            188.0
+          ],
+          [
+            329.0,
+            148.0
+          ],
+          [
+            335.0,
+            142.0
+          ],
+          [
+            335.0,
+            136.0
+          ],
+          [
+            236.0,
+            137.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192,
+            178
+          ],
+          [
+            192,
+            60
+          ],
+          [
+            104,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            166.0,
+            146.0
+          ],
+          [
+            169.0,
+            141.0
+          ],
+          [
+            304.0,
+            106.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-ce5ad6b2e9a857ad496e": {
+    "id": "eagles-ce5ad6b2e9a857ad496e",
+    "team": "eagles",
+    "name": "FLOOD",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/flood.jpg",
+    "image": "data/huddle-art/9d9747c8bd834cc9d75e.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            326.0,
+            161.0
+          ],
+          [
+            326.0,
+            125.0
+          ],
+          [
+            299.0,
+            92.0
+          ],
+          [
+            161.0,
+            60.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            178
+          ],
+          [
+            94,
+            161
+          ],
+          [
+            94,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            187.0
+          ],
+          [
+            173.0,
+            176.0
+          ],
+          [
+            155.0,
+            173.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            149.0,
+            82.0
+          ],
+          [
+            26.0,
+            82.0
+          ],
+          [
+            26.0,
+            76.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            173,
+            176
+          ],
+          [
+            155,
+            173
+          ],
+          [
+            28,
+            144
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-62b46dd01c3407056aa5": {
+    "id": "eagles-62b46dd01c3407056aa5",
+    "team": "eagles",
+    "name": "SPOT TE SEAM",
+    "group": "Gun",
+    "formation": "Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing/spot-te-seam/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing/spot-te-seam.jpg",
+    "image": "data/huddle-art/a2c396b35ab0635f7458.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          340,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          431,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            331.0,
+            120.0
+          ],
+          [
+            363.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            425.0,
+            90.0
+          ],
+          [
+            523.0,
+            77.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            164.0
+          ],
+          [
+            108.0,
+            157.0
+          ],
+          [
+            108.0,
+            102.0
+          ],
+          [
+            112.0,
+            101.0
+          ],
+          [
+            117.0,
+            105.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            431.0,
+            187.0
+          ],
+          [
+            404.0,
+            151.0
+          ],
+          [
+            392.0,
+            152.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            380,
+            174
+          ],
+          [
+            525,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-70a79aa21ebd643e7fa1": {
+    "id": "eagles-70a79aa21ebd643e7fa1",
+    "team": "eagles",
+    "name": "Y DRIVE CLOWN",
+    "group": "Gun",
+    "formation": "Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing/y-drive-clown/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing/y-drive-clown.jpg",
+    "image": "data/huddle-art/dce0b2a01122c4d3a566.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          340,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            126.0,
+            174.0
+          ],
+          [
+            149.0,
+            158.0
+          ],
+          [
+            149.0,
+            90.0
+          ],
+          [
+            142.0,
+            82.0
+          ],
+          [
+            153.0,
+            73.0
+          ],
+          [
+            199.0,
+            6.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            430.0,
+            95.0
+          ],
+          [
+            522.0,
+            94.0
+          ],
+          [
+            521.0,
+            92.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            340,
+            164
+          ],
+          [
+            330,
+            149
+          ],
+          [
+            320,
+            143
+          ],
+          [
+            190,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            333.0,
+            162.0
+          ],
+          [
+            334.0,
+            98.0
+          ],
+          [
+            325.0,
+            90.0
+          ],
+          [
+            185.0,
+            88.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-3e5eba0857d61c00129a": {
+    "id": "eagles-3e5eba0857d61c00129a",
+    "team": "eagles",
+    "name": "OHIO SPACING",
+    "group": "Gun",
+    "formation": "Wing Stack",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing-stack/ohio-spacing/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-stack/ohio-spacing.jpg",
+    "image": "data/huddle-art/25c38dc9f629e0bbf1d0.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          167,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            184.0,
+            175.0
+          ],
+          [
+            183.0,
+            130.0
+          ],
+          [
+            25,
+            125
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            363.0,
+            182.0
+          ],
+          [
+            399.0,
+            140.0
+          ],
+          [
+            401.0,
+            131.0
+          ],
+          [
+            407.0,
+            128.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            322.0,
+            163.0
+          ],
+          [
+            283.0,
+            138.0
+          ],
+          [
+            274.0,
+            141.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            462.0,
+            194.0
+          ],
+          [
+            463.0,
+            188.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            469.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            167,
+            187
+          ],
+          [
+            85,
+            135
+          ],
+          [
+            48,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-4212d2ffac2848ff1d5f": {
+    "id": "eagles-4212d2ffac2848ff1d5f",
+    "team": "eagles",
+    "name": "SHORT POST",
+    "group": "Pistol",
+    "formation": "Deuce",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-deuce/short-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/deuce/short-post.jpg",
+    "image": "data/huddle-art/91fb0fea6155ad5589bd.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          128,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          421,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            421.0,
+            178.0
+          ],
+          [
+            419.0,
+            164.0
+          ],
+          [
+            434.0,
+            111.0
+          ],
+          [
+            434.0,
+            101.0
+          ],
+          [
+            427.0,
+            98.0
+          ],
+          [
+            356.0,
+            92.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            347.0,
+            163.0
+          ],
+          [
+            355.0,
+            162.0
+          ],
+          [
+            362.0,
+            165.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            187.0
+          ],
+          [
+            223.0,
+            165.0
+          ],
+          [
+            208.0,
+            165.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            128.0,
+            178.0
+          ],
+          [
+            152.0,
+            161.0
+          ],
+          [
+            154.0,
+            104.0
+          ],
+          [
+            233.0,
+            98.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            276,
+            196
+          ],
+          [
+            282,
+            161
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-e53ea3e9f9fa54ae1203": {
+    "id": "eagles-e53ea3e9f9fa54ae1203",
+    "team": "eagles",
+    "name": "WR UNDER",
+    "group": "Pistol",
+    "formation": "Wing Flex Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-wing-flex-close/wr-under/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/wing-flex-close/wr-under.jpg",
+    "image": "data/huddle-art/b6b6bb42f5061f6ff3af.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          197,
+          179
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            335.0,
+            164.0
+          ],
+          [
+            335.0,
+            131.0
+          ],
+          [
+            301.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            411.0,
+            140.0
+          ],
+          [
+            410.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            197.0,
+            179.0
+          ],
+          [
+            184.0,
+            155.0
+          ],
+          [
+            184,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            178.0,
+            126.0
+          ],
+          [
+            263.0,
+            126.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            320,
+            233
+          ],
+          [
+            360,
+            233
+          ],
+          [
+            410,
+            228
+          ],
+          [
+            440,
+            219
+          ],
+          [
+            450,
+            207
+          ],
+          [
+            453,
+            190
+          ],
+          [
+            453,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-4e8d5371fbb52f69636f": {
+    "id": "eagles-4e8d5371fbb52f69636f",
+    "team": "eagles",
+    "name": "DRIVE FLOOD",
+    "group": "Singleback",
+    "formation": "Tight Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-tight-y-off/drive-flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/drive-flood.jpg",
+    "image": "data/huddle-art/27331c4a837613553f7a.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          216,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            364.0,
+            155.0
+          ],
+          [
+            364,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            196.0,
+            109.0
+          ],
+          [
+            199.0,
+            105.0
+          ],
+          [
+            211.0,
+            98.0
+          ],
+          [
+            298.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            216.0,
+            187.0
+          ],
+          [
+            242.0,
+            152.0
+          ],
+          [
+            364,
+            151
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            311.0,
+            163.0
+          ],
+          [
+            311.0,
+            105.0
+          ],
+          [
+            323.0,
+            95.0
+          ],
+          [
+            522.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            140,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-b083d2fd003ed84f775b": {
+    "id": "eagles-b083d2fd003ed84f775b",
+    "team": "eagles",
+    "name": "CURL COMBO",
+    "group": "Singleback",
+    "formation": "Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-wing/curl-combo/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing/curl-combo.jpg",
+    "image": "data/huddle-art/904877d501c45d9221e2.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          340,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            119.0,
+            91.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            322.0,
+            166.0
+          ],
+          [
+            306.0,
+            151.0
+          ],
+          [
+            302.0,
+            150.0
+          ],
+          [
+            292.0,
+            155.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            361.0,
+            176.0
+          ],
+          [
+            386.0,
+            173.0
+          ],
+          [
+            525,
+            144
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            430.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            235,
+            230
+          ],
+          [
+            210,
+            230
+          ],
+          [
+            170,
+            227
+          ],
+          [
+            125,
+            217
+          ],
+          [
+            106,
+            202
+          ],
+          [
+            97,
+            185
+          ],
+          [
+            97,
+            159
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-0d57ca6c5367f111e671": {
+    "id": "eagles-0d57ca6c5367f111e671",
+    "team": "eagles",
+    "name": "DRIVE",
+    "group": "Singleback",
+    "formation": "Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-wing/drive/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing/drive.jpg",
+    "image": "data/huddle-art/fe3dc44ef1596014e17b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          340,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            416.0,
+            171.0
+          ],
+          [
+            395.0,
+            141.0
+          ],
+          [
+            395.0,
+            48.0
+          ],
+          [
+            349.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            73.0
+          ],
+          [
+            26.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            340,
+            163
+          ],
+          [
+            327,
+            143
+          ],
+          [
+            190,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            322.0,
+            94.0
+          ],
+          [
+            188.0,
+            95.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            327,
+            169
+          ],
+          [
+            350,
+            166
+          ],
+          [
+            369,
+            166
+          ],
+          [
+            385,
+            174
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-ffb81db90e9888f2dd17": {
+    "id": "eagles-ffb81db90e9888f2dd17",
+    "team": "eagles",
+    "name": "Y STICK",
+    "group": "Singleback",
+    "formation": "Wing Tight",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-wing-tight/y-stick/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight/y-stick.jpg",
+    "image": "data/huddle-art/4706faf76937fdd74726.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          181
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          339,
+          188
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            187.0
+          ],
+          [
+            117.0,
+            140.0
+          ],
+          [
+            110.0,
+            136.0
+          ],
+          [
+            58.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            339.0,
+            188.0
+          ],
+          [
+            364.0,
+            176.0
+          ],
+          [
+            391.0,
+            173.0
+          ],
+          [
+            463.0,
+            155.0
+          ],
+          [
+            525.0,
+            145.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            181.0
+          ],
+          [
+            226.0,
+            167.0
+          ],
+          [
+            246.0,
+            151.0
+          ],
+          [
+            253.0,
+            149.0
+          ],
+          [
+            261.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            148.0
+          ],
+          [
+            338.0,
+            141.0
+          ],
+          [
+            523.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            240,
+            238
+          ],
+          [
+            215,
+            238
+          ],
+          [
+            170,
+            231
+          ],
+          [
+            138,
+            225
+          ],
+          [
+            118,
+            208
+          ],
+          [
+            108,
+            190
+          ],
+          [
+            108,
+            168
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            118,
+            187
+          ],
+          [
+            118,
+            136
+          ],
+          [
+            128,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            335,
+            148
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-dee006f50d0f5272325d": {
+    "id": "ravens-dee006f50d0f5272325d",
+    "team": "ravens",
+    "name": "FAKE SCREEN WHEEL",
+    "group": "Gun",
+    "formation": "Bunch Open Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-open-offset/fake-screen-wheel/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/fake-screen-wheel.jpg",
+    "image": "data/huddle-art/64061a3a57c9d1a77c92.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          392,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          411,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            176.0,
+            78.0
+          ],
+          [
+            27.0,
+            39.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            392.0,
+            187.0
+          ],
+          [
+            388.0,
+            165.0
+          ],
+          [
+            343.0,
+            102.0
+          ],
+          [
+            263.0,
+            50.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            411.0,
+            178.0
+          ],
+          [
+            459.0,
+            72.0
+          ],
+          [
+            458.0,
+            63.0
+          ],
+          [
+            434.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            301.0,
+            160.0
+          ],
+          [
+            299.0,
+            153.0
+          ],
+          [
+            302.0,
+            149.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            400,
+            187
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-432054255cbfe0da5763": {
+    "id": "ravens-432054255cbfe0da5763",
+    "team": "ravens",
+    "name": "JET PULL SHALLOW",
+    "group": "Gun",
+    "formation": "Bunch Y-Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-y--flex/jet-pull-shallow/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/jet-pull-shallow.jpg",
+    "image": "data/huddle-art/edec03d3091537677797.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          377,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          396,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            163.0,
+            147.0
+          ],
+          [
+            160.0,
+            139.0
+          ],
+          [
+            161.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            396.0,
+            187.0
+          ],
+          [
+            395.0,
+            103.0
+          ],
+          [
+            383.0,
+            99.0
+          ],
+          [
+            355.0,
+            80.0
+          ],
+          [
+            245.0,
+            81.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            377.0,
+            178.0
+          ],
+          [
+            349.0,
+            140.0
+          ],
+          [
+            224.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            210,
+            230
+          ],
+          [
+            180,
+            230
+          ],
+          [
+            150,
+            225
+          ],
+          [
+            110,
+            215
+          ],
+          [
+            90,
+            200
+          ],
+          [
+            80,
+            185
+          ],
+          [
+            80,
+            160
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357,
+            187
+          ],
+          [
+            380,
+            182
+          ],
+          [
+            380,
+            129
+          ],
+          [
+            370,
+            137
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            377,
+            178
+          ],
+          [
+            349,
+            140
+          ],
+          [
+            272,
+            140
+          ],
+          [
+            272,
+            154
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-3e06a362c5db24c1944f": {
+    "id": "ravens-3e06a362c5db24c1944f",
+    "team": "ravens",
+    "name": "SPACING",
+    "group": "Gun",
+    "formation": "Bunch Y-Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-y--flex/spacing/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/spacing.jpg",
+    "image": "data/huddle-art/341833422530dac05da8.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          377,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          396,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            209.0,
+            220.0
+          ],
+          [
+            172.0,
+            220.0
+          ],
+          [
+            122.0,
+            214.0
+          ],
+          [
+            98.0,
+            208.0
+          ],
+          [
+            77.0,
+            193.0
+          ],
+          [
+            69.0,
+            175.0
+          ],
+          [
+            70.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            203.0,
+            173.0
+          ],
+          [
+            222.0,
+            153.0
+          ],
+          [
+            235.0,
+            155.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            377.0,
+            178.0
+          ],
+          [
+            336.0,
+            151.0
+          ],
+          [
+            327.0,
+            155.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            396.0,
+            187.0
+          ],
+          [
+            414.0,
+            149.0
+          ],
+          [
+            415.0,
+            139.0
+          ],
+          [
+            411.0,
+            139.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357,
+            187
+          ],
+          [
+            395,
+            175
+          ],
+          [
+            460,
+            168
+          ],
+          [
+            525,
+            161
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-98eae5dbcd84d494cd7f": {
+    "id": "ravens-98eae5dbcd84d494cd7f",
+    "team": "ravens",
+    "name": "X DAGGER",
+    "group": "Gun",
+    "formation": "Doubles HB Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-doubles-hb-wk/x-dagger/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-hb-wk/x-dagger.jpg",
+    "image": "data/huddle-art/6de86c49bb51e8af150d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          173,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            187.0
+          ],
+          [
+            450.0,
+            172.0
+          ],
+          [
+            471.0,
+            148.0
+          ],
+          [
+            471.0,
+            40.0
+          ],
+          [
+            488.0,
+            44.0
+          ],
+          [
+            521.0,
+            63.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            173.0,
+            187.0
+          ],
+          [
+            173.0,
+            60.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            86.0
+          ],
+          [
+            121.0,
+            81.0
+          ],
+          [
+            138.0,
+            73.0
+          ],
+          [
+            164.0,
+            54.0
+          ],
+          [
+            275.0,
+            54.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            337.0,
+            167.0
+          ],
+          [
+            337.0,
+            156.0
+          ],
+          [
+            324.0,
+            131.0
+          ],
+          [
+            319.0,
+            128.0
+          ],
+          [
+            314.0,
+            131.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            172,
+            171
+          ],
+          [
+            25,
+            166
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-69c8818e1a9a93acefb3": {
+    "id": "ravens-69c8818e1a9a93acefb3",
+    "team": "ravens",
+    "name": "DRIVE POST",
+    "group": "Gun",
+    "formation": "Trey Open Str",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trey-open-str/drive-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open-str/drive-post.jpg",
+    "image": "data/huddle-art/5212dd50c474167f30a3.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            141.0
+          ],
+          [
+            88.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            445.0,
+            97.0
+          ],
+          [
+            303.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            379,
+            158
+          ],
+          [
+            375,
+            154
+          ],
+          [
+            240,
+            154
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            369.0,
+            152.0
+          ],
+          [
+            369.0,
+            95.0
+          ],
+          [
+            366.0,
+            92.0
+          ],
+          [
+            355.0,
+            86.0
+          ],
+          [
+            219.0,
+            86.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-ce40bf4366b98ff84ca0": {
+    "id": "ravens-ce40bf4366b98ff84ca0",
+    "team": "ravens",
+    "name": "SLOT FADE",
+    "group": "Gun",
+    "formation": "Trey Open Str",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trey-open-str/slot-fade/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open-str/slot-fade.jpg",
+    "image": "data/huddle-art/deadaf021c01d1d300e3.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            93.0,
+            158.0
+          ],
+          [
+            81.0,
+            143.0
+          ],
+          [
+            81.0,
+            38.0
+          ],
+          [
+            78.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357,
+            178
+          ],
+          [
+            357,
+            116
+          ],
+          [
+            365,
+            114
+          ],
+          [
+            392,
+            114
+          ],
+          [
+            400,
+            124
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            445.0,
+            142.0
+          ],
+          [
+            435.0,
+            146.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            457,
+            122
+          ],
+          [
+            507,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            308,
+            146
+          ],
+          [
+            195,
+            146
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-dce160819cf177f952dd": {
+    "id": "ravens-dce160819cf177f952dd",
+    "team": "ravens",
+    "name": "STICK",
+    "group": "Gun",
+    "formation": "Trey Open Str",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trey-open-str/stick/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open-str/stick.jpg",
+    "image": "data/huddle-art/80c4e038dc581c6cc55c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            454.0,
+            173.0
+          ],
+          [
+            457.0,
+            160.0
+          ],
+          [
+            456.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            117.0,
+            139.0
+          ],
+          [
+            254.0,
+            102.0
+          ],
+          [
+            256.0,
+            105.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399.0,
+            187.0
+          ],
+          [
+            400.0,
+            142.0
+          ],
+          [
+            525,
+            142
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            358.0,
+            144.0
+          ],
+          [
+            374.0,
+            139.0
+          ],
+          [
+            523.0,
+            140.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-cd6b0318ec441dd3e624": {
+    "id": "ravens-cd6b0318ec441dd3e624",
+    "team": "ravens",
+    "name": "DRAGON SPACING",
+    "group": "Gun",
+    "formation": "Wing Slot Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-wing-slot-offset/dragon-spacing/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset/dragon-spacing.jpg",
+    "image": "data/huddle-art/d0d6ea470f57811a68f2.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            362.0,
+            182.0
+          ],
+          [
+            372.0,
+            173.0
+          ],
+          [
+            399.0,
+            140.0
+          ],
+          [
+            401.0,
+            131.0
+          ],
+          [
+            405.0,
+            130.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            322.0,
+            163.0
+          ],
+          [
+            283.0,
+            138.0
+          ],
+          [
+            272.0,
+            142.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            460.0,
+            197.0
+          ],
+          [
+            462.0,
+            190.0
+          ],
+          [
+            470.0,
+            181.0
+          ],
+          [
+            470.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            111.0,
+            133.0
+          ],
+          [
+            249.0,
+            95.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            150,
+            174
+          ],
+          [
+            25,
+            149
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-2f0780ceab1629be294e": {
+    "id": "ravens-2f0780ceab1629be294e",
+    "team": "ravens",
+    "name": "IN GO",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/in-go/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/in-go.jpg",
+    "image": "data/huddle-art/75a1dffe22556cda5e90.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            90.0,
+            153.0
+          ],
+          [
+            82.0,
+            138.0
+          ],
+          [
+            82.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            374.0,
+            123.0
+          ],
+          [
+            346.0,
+            90.0
+          ],
+          [
+            206.0,
+            57.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            182.0,
+            182.0
+          ],
+          [
+            172.0,
+            174.0
+          ],
+          [
+            159.0,
+            172.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            430.0,
+            108.0
+          ],
+          [
+            389.0,
+            104.0
+          ],
+          [
+            401.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            470,
+            152
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-0125c9993acbc0952abe": {
+    "id": "ravens-0125c9993acbc0952abe",
+    "team": "ravens",
+    "name": "ASA F FLAT",
+    "group": "Pistol",
+    "formation": "Strong",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/pistol-strong/asa-f-flat/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/strong/asa-f-flat.jpg",
+    "image": "data/huddle-art/7fee5574f2f6f96e2801.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          203
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            179.0
+          ],
+          [
+            334.0,
+            160.0
+          ],
+          [
+            334.0,
+            101.0
+          ],
+          [
+            242.0,
+            51.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            91.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303.0,
+            203.0
+          ],
+          [
+            396.0,
+            167.0
+          ],
+          [
+            525,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            187.0
+          ],
+          [
+            432.0,
+            98.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            230,
+            234
+          ],
+          [
+            190,
+            233
+          ],
+          [
+            145,
+            228
+          ],
+          [
+            125,
+            220
+          ],
+          [
+            108,
+            205
+          ],
+          [
+            97,
+            185
+          ],
+          [
+            97,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-518ace0c313870800942": {
+    "id": "ravens-518ace0c313870800942",
+    "team": "ravens",
+    "name": "PA SLOT OUT",
+    "group": "Pistol",
+    "formation": "U Off Trips",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/pistol-u-off-trips/pa-slot-out/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/u-off-trips/pa-slot-out.jpg",
+    "image": "data/huddle-art/ffdc6c2bf0e9ee122972.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          226,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          183
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116,
+            178
+          ],
+          [
+            104,
+            156
+          ],
+          [
+            104,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226,
+            188
+          ],
+          [
+            226,
+            143
+          ],
+          [
+            25,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            264,
+            223
+          ],
+          [
+            258,
+            200
+          ],
+          [
+            261,
+            151
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            171.0,
+            75.0
+          ],
+          [
+            27.0,
+            74.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-7231afcbbe5242504c2c": {
+    "id": "ravens-7231afcbbe5242504c2c",
+    "team": "ravens",
+    "name": "SHOCK",
+    "group": "Pistol",
+    "formation": "U Off Trips",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/pistol-u-off-trips/shock/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/u-off-trips/shock.jpg",
+    "image": "data/huddle-art/612fdda3c72eb8a88d84.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          226,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          183
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            183.0
+          ],
+          [
+            294.0,
+            141.0
+          ],
+          [
+            279.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            144.0
+          ],
+          [
+            123.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            187
+          ],
+          [
+            172,
+            174
+          ],
+          [
+            115,
+            120
+          ],
+          [
+            50,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            188.0
+          ],
+          [
+            225.0,
+            146.0
+          ],
+          [
+            221.0,
+            140.0
+          ],
+          [
+            211.0,
+            136.0
+          ],
+          [
+            26.0,
+            137.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            320,
+            233
+          ],
+          [
+            360,
+            233
+          ],
+          [
+            410,
+            228
+          ],
+          [
+            440,
+            219
+          ],
+          [
+            450,
+            207
+          ],
+          [
+            453,
+            190
+          ],
+          [
+            453,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-beff1e02606c463d21b5": {
+    "id": "ravens-beff1e02606c463d21b5",
+    "team": "ravens",
+    "name": "PA SPRINT HB FLAT",
+    "group": "Singleback",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-deuce-close/pa-sprint-hb-flat/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/deuce-close/pa-sprint-hb-flat.jpg",
+    "image": "data/huddle-art/c36489b2a577f2145ffd.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            196,
+            165
+          ],
+          [
+            260,
+            90
+          ],
+          [
+            395,
+            85
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            178
+          ],
+          [
+            309,
+            72
+          ],
+          [
+            380,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            369.0,
+            196.0
+          ],
+          [
+            476.0,
+            183.0
+          ],
+          [
+            496.0,
+            178.0
+          ],
+          [
+            522.0,
+            178.0
+          ],
+          [
+            522.0,
+            175.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            329.0,
+            161.0
+          ],
+          [
+            334.0,
+            155.0
+          ],
+          [
+            334.0,
+            145.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            196,
+            186
+          ],
+          [
+            104,
+            156
+          ],
+          [
+            93,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-5c77e37ba82641a2324e": {
+    "id": "eagles-5c77e37ba82641a2324e",
+    "team": "eagles",
+    "name": "INSIDE POST",
+    "group": "Gun",
+    "formation": "Bunch Quads",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-quads/inside-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-quads/inside-post.jpg",
+    "image": "data/huddle-art/c165356d2b047fcdf069.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          343,
+          179
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          362,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            139.0
+          ],
+          [
+            91.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            179.0
+          ],
+          [
+            345.0,
+            124.0
+          ],
+          [
+            318.0,
+            91.0
+          ],
+          [
+            176.0,
+            58.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362.0,
+            187.0
+          ],
+          [
+            395.0,
+            104.0
+          ],
+          [
+            371.0,
+            77.0
+          ],
+          [
+            363.0,
+            73.0
+          ],
+          [
+            315.0,
+            26.0
+          ],
+          [
+            306.0,
+            21.0
+          ],
+          [
+            305.0,
+            17.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            187
+          ],
+          [
+            365,
+            174
+          ],
+          [
+            525,
+            156
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445,
+            187
+          ],
+          [
+            445,
+            100
+          ],
+          [
+            435,
+            110
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-fd2267e23547b4dab4d8": {
+    "id": "eagles-fd2267e23547b4dab4d8",
+    "team": "eagles",
+    "name": "RPO ALERT DRAW STICK",
+    "group": "Gun",
+    "formation": "Empty Base Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-empty-base-flex/rpo-alert-draw-stick/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/rpo-alert-draw-stick.jpg",
+    "image": "data/huddle-art/915a046628e82455a3d6.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          343,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445,
+            187
+          ],
+          [
+            445,
+            130
+          ],
+          [
+            435,
+            138
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            399,
+            165
+          ],
+          [
+            453,
+            103
+          ],
+          [
+            495,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            178.0
+          ],
+          [
+            343.0,
+            142.0
+          ],
+          [
+            386.0,
+            139.0
+          ],
+          [
+            523.0,
+            139.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            187
+          ],
+          [
+            93,
+            166
+          ],
+          [
+            93,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            172,
+            139
+          ],
+          [
+            161,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            172,
+            140
+          ],
+          [
+            25,
+            140
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-693ecda88ecbf448f181": {
+    "id": "eagles-693ecda88ecbf448f181",
+    "team": "eagles",
+    "name": "SHOCKWR OPTION",
+    "group": "Gun",
+    "formation": "Empty Base Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-empty-base-flex/shockwr-option/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/shockwr-option.jpg",
+    "image": "data/huddle-art/1986ffcd77f104f2889a.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          343,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            399,
+            165
+          ],
+          [
+            453,
+            103
+          ],
+          [
+            495,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445,
+            187
+          ],
+          [
+            451,
+            160
+          ],
+          [
+            442,
+            165
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            178.0
+          ],
+          [
+            343.0,
+            142.0
+          ],
+          [
+            385.0,
+            139.0
+          ],
+          [
+            522.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            187
+          ],
+          [
+            104,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            172,
+            130
+          ],
+          [
+            184,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            172,
+            140
+          ],
+          [
+            25,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            172,
+            130
+          ],
+          [
+            245,
+            100
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-abcbd31c1ee8aa22c4bf": {
+    "id": "eagles-abcbd31c1ee8aa22c4bf",
+    "team": "eagles",
+    "name": "SWITCH WR DRAG",
+    "group": "Gun",
+    "formation": "Stack Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-stack-y-off/switch-wr-drag/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/stack-y-off/switch-wr-drag.jpg",
+    "image": "data/huddle-art/518308aaf78d18f692ce.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          435,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            334.0,
+            221.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            460.0,
+            196.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            470.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            453,
+            148
+          ],
+          [
+            495,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            435.0,
+            178.0
+          ],
+          [
+            400.0,
+            134.0
+          ],
+          [
+            400.0,
+            41.0
+          ],
+          [
+            389.0,
+            26.0
+          ],
+          [
+            365.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            192,
+            165
+          ],
+          [
+            314,
+            165
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192,
+            178
+          ],
+          [
+            192,
+            88
+          ],
+          [
+            25,
+            25
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-a17195daba29578ace80": {
+    "id": "eagles-a17195daba29578ace80",
+    "team": "eagles",
+    "name": "CURLS",
+    "group": "Gun",
+    "formation": "Tight Y Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off-wk/curls/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/curls.jpg",
+    "image": "data/huddle-art/465503f7dfcae48314fe.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            173.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255.0,
+            213.0
+          ],
+          [
+            215.0,
+            221.0
+          ],
+          [
+            186.0,
+            221.0
+          ],
+          [
+            133.0,
+            216.0
+          ],
+          [
+            108.0,
+            210.0
+          ],
+          [
+            92.0,
+            199.0
+          ],
+          [
+            79.0,
+            181.0
+          ],
+          [
+            78.0,
+            155.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            238.0,
+            147.0
+          ],
+          [
+            247.0,
+            146.0
+          ],
+          [
+            253.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            350,
+            174
+          ],
+          [
+            525,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            102
+          ],
+          [
+            362,
+            110
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-d4aaeb4455ae9d64a557": {
+    "id": "eagles-d4aaeb4455ae9d64a557",
+    "team": "eagles",
+    "name": "CROSS UNDER",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/cross-under/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/cross-under.jpg",
+    "image": "data/huddle-art/41d723572f7437d4bd9b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150,
+            187
+          ],
+          [
+            196,
+            77
+          ],
+          [
+            257,
+            35
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            104.0,
+            73.0
+          ],
+          [
+            213.0,
+            72.0
+          ],
+          [
+            239.0,
+            75.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            304,
+            154
+          ],
+          [
+            518,
+            152
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            196,
+            149
+          ],
+          [
+            259,
+            73
+          ],
+          [
+            387,
+            44
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            304,
+            158
+          ],
+          [
+            190,
+            158
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-eba9fafc399f41e5ce88": {
+    "id": "eagles-eba9fafc399f41e5ce88",
+    "team": "eagles",
+    "name": "SLOT QUICK FLAT",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/slot-quick-flat/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/slot-quick-flat.jpg",
+    "image": "data/huddle-art/a24ab5a2f94b8db49d9f.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            187.0
+          ],
+          [
+            169.0,
+            175.0
+          ],
+          [
+            29.0,
+            147.0
+          ],
+          [
+            28.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            123.0
+          ],
+          [
+            327.0,
+            120.0
+          ],
+          [
+            481.0,
+            102.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            303.0,
+            211.0
+          ],
+          [
+            459.0,
+            174.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            178
+          ],
+          [
+            104,
+            139
+          ],
+          [
+            246,
+            101
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150,
+            187
+          ],
+          [
+            150,
+            149
+          ],
+          [
+            292,
+            111
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-5776192f0c2f297ad8f1": {
+    "id": "eagles-5776192f0c2f297ad8f1",
+    "team": "eagles",
+    "name": "STICK",
+    "group": "Gun",
+    "formation": "Wing Stack",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing-stack/stick/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-stack/stick.jpg",
+    "image": "data/huddle-art/a987e8b623edeb44fbed.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          167,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            167.0,
+            187.0
+          ],
+          [
+            141.0,
+            175.0
+          ],
+          [
+            26.0,
+            152.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            176.0,
+            145.0
+          ],
+          [
+            162.0,
+            139.0
+          ],
+          [
+            26.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            304.0,
+            136.0
+          ],
+          [
+            302.0,
+            132.0
+          ],
+          [
+            305.0,
+            126.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            335,
+            148
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            525,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            525,
+            143
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-66c2f2f176cfa7911cdb": {
+    "id": "eagles-66c2f2f176cfa7911cdb",
+    "team": "eagles",
+    "name": "DASH FLOOD",
+    "group": "Gun",
+    "formation": "Y Off Trio Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-y-off-trio-close/dash-flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/dash-flood.jpg",
+    "image": "data/huddle-art/39f01b5941f59ccf7d0d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          362,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          382,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187.0,
+            178.0
+          ],
+          [
+            242.0,
+            100.0
+          ],
+          [
+            329.0,
+            101.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            435,
+            160
+          ],
+          [
+            525,
+            151
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362,
+            178
+          ],
+          [
+            332,
+            144
+          ],
+          [
+            331,
+            39
+          ],
+          [
+            410,
+            3
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            382,
+            187
+          ],
+          [
+            395,
+            169
+          ],
+          [
+            395,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-64ac6128e65374859f16": {
+    "id": "eagles-64ac6128e65374859f16",
+    "team": "eagles",
+    "name": "SMASH RETURN",
+    "group": "Gun",
+    "formation": "Y Off Trio Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-y-off-trio-close/smash-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/smash-return.jpg",
+    "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          362,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          382,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362,
+            178
+          ],
+          [
+            331,
+            145
+          ],
+          [
+            331,
+            43
+          ],
+          [
+            415,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            460.0,
+            197.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            469.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            382.0,
+            187.0
+          ],
+          [
+            394.0,
+            155.0
+          ],
+          [
+            400.0,
+            149.0
+          ],
+          [
+            400.0,
+            142.0
+          ],
+          [
+            301.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187,
+            178
+          ],
+          [
+            239,
+            145
+          ],
+          [
+            239,
+            67
+          ],
+          [
+            380,
+            67
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            300,
+            155
+          ],
+          [
+            180,
+            155
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-3146585d0447492ffa87": {
+    "id": "ravens-3146585d0447492ffa87",
+    "team": "ravens",
+    "name": "SMASH RETURN",
+    "group": "Gun",
+    "formation": "Y Off Trio Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-close/smash-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/smash-return.jpg",
+    "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          362,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          382,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362,
+            178
+          ],
+          [
+            331,
+            145
+          ],
+          [
+            331,
+            43
+          ],
+          [
+            415,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            460.0,
+            197.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            469.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            382.0,
+            187.0
+          ],
+          [
+            394.0,
+            155.0
+          ],
+          [
+            400.0,
+            149.0
+          ],
+          [
+            400.0,
+            142.0
+          ],
+          [
+            301.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187,
+            178
+          ],
+          [
+            239,
+            145
+          ],
+          [
+            239,
+            67
+          ],
+          [
+            380,
+            67
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            300,
+            155
+          ],
+          [
+            180,
+            155
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-56621ebf973cc126f119": {
+    "id": "eagles-56621ebf973cc126f119",
+    "team": "eagles",
+    "name": "DASH FLOOD",
+    "group": "Pistol",
+    "formation": "Bunch",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-bunch/dash-flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/bunch/dash-flood.jpg",
+    "image": "data/huddle-art/7ba1dc7890e621c7f8d9.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          128,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          343,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          362,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            128.0,
+            178.0
+          ],
+          [
+            129.0,
+            137.0
+          ],
+          [
+            148.0,
+            125.0
+          ],
+          [
+            230.0,
+            90.0
+          ],
+          [
+            308.0,
+            75.0
+          ],
+          [
+            333.0,
+            73.0
+          ],
+          [
+            361.0,
+            65.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343,
+            179
+          ],
+          [
+            313,
+            138
+          ],
+          [
+            520,
+            138
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362.0,
+            187.0
+          ],
+          [
+            363.0,
+            68.0
+          ],
+          [
+            458.0,
+            7.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            412,
+            170
+          ],
+          [
+            525,
+            159
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-b00013dc3380c2f5b538": {
+    "id": "eagles-b00013dc3380c2f5b538",
+    "team": "eagles",
+    "name": "DASH SLOT CORNER",
+    "group": "Pistol",
+    "formation": "Bunch",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-bunch/dash-slot-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/bunch/dash-slot-corner.jpg",
+    "image": "data/huddle-art/6aaa9fb6871f185b1a15.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          128,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          343,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          362,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            128.0,
+            178.0
+          ],
+          [
+            161.0,
+            120.0
+          ],
+          [
+            294.0,
+            106.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            179.0
+          ],
+          [
+            343.0,
+            80.0
+          ],
+          [
+            520.0,
+            15.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            362.0,
+            187.0
+          ],
+          [
+            369.0,
+            157.0
+          ],
+          [
+            373.0,
+            154.0
+          ],
+          [
+            373.0,
+            145.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            412,
+            170
+          ],
+          [
+            525,
+            159
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-59c53ee625586c1caae1": {
+    "id": "eagles-59c53ee625586c1caae1",
+    "team": "eagles",
+    "name": "SEATTLE",
+    "group": "Pistol",
+    "formation": "Bunch",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-bunch/seattle/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/bunch/seattle.jpg",
+    "image": "data/huddle-art/54a9112dd9b301f9b41e.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          128,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          343,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          362,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            128.0,
+            178.0
+          ],
+          [
+            128.0,
+            140.0
+          ],
+          [
+            102.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362.0,
+            187.0
+          ],
+          [
+            389.0,
+            185.0
+          ],
+          [
+            413.0,
+            176.0
+          ],
+          [
+            436.0,
+            172.0
+          ],
+          [
+            448.0,
+            166.0
+          ],
+          [
+            461.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            187
+          ],
+          [
+            371,
+            170
+          ],
+          [
+            404,
+            154
+          ],
+          [
+            405,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343,
+            179
+          ],
+          [
+            345,
+            124
+          ],
+          [
+            318,
+            91
+          ],
+          [
+            176,
+            58
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            276,
+            196
+          ],
+          [
+            282,
+            161
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-5629dec866c2e449b5f8": {
+    "id": "eagles-5629dec866c2e449b5f8",
+    "team": "eagles",
+    "name": "SPACING",
+    "group": "Pistol",
+    "formation": "Bunch",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-bunch/spacing/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/bunch/spacing.jpg",
+    "image": "data/huddle-art/e48b5cae43797287a68d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          128,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          343,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          362,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            128.0,
+            178.0
+          ],
+          [
+            122.0,
+            136.0
+          ],
+          [
+            124.0,
+            132.0
+          ],
+          [
+            259.0,
+            96.0
+          ],
+          [
+            262.0,
+            98.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            179.0
+          ],
+          [
+            303.0,
+            153.0
+          ],
+          [
+            293.0,
+            156.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            187
+          ],
+          [
+            525,
+            156
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362,
+            187
+          ],
+          [
+            386,
+            134
+          ],
+          [
+            372,
+            141
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            230,
+            234
+          ],
+          [
+            190,
+            233
+          ],
+          [
+            145,
+            228
+          ],
+          [
+            125,
+            220
+          ],
+          [
+            108,
+            205
+          ],
+          [
+            97,
+            185
+          ],
+          [
+            97,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-bfc84457b51c9dd48ecb": {
+    "id": "eagles-bfc84457b51c9dd48ecb",
+    "team": "eagles",
+    "name": "OMAHA",
+    "group": "Singleback",
+    "formation": "Tight Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-tight-y-off/omaha/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/omaha.jpg",
+    "image": "data/huddle-art/2ecac828cfda1f20b3fb.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          216,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            216.0,
+            187.0
+          ],
+          [
+            215.0,
+            145.0
+          ],
+          [
+            201.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            189.0,
+            131.0
+          ],
+          [
+            186.0,
+            126.0
+          ],
+          [
+            180.0,
+            124.0
+          ],
+          [
+            31.0,
+            124.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            283.0,
+            139.0
+          ],
+          [
+            286.0,
+            134.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            187
+          ],
+          [
+            323,
+            146
+          ],
+          [
+            335,
+            154
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            187
+          ],
+          [
+            323,
+            146
+          ],
+          [
+            525,
+            149
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            178
+          ],
+          [
+            358,
+            128
+          ],
+          [
+            365,
+            125
+          ],
+          [
+            520,
+            125
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-04fefb4847df09ed513a": {
+    "id": "ravens-04fefb4847df09ed513a",
+    "team": "ravens",
+    "name": "FADE STOP",
+    "group": "Gun",
+    "formation": "Trey Open Str",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trey-open-str/fade-stop/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open-str/fade-stop.jpg",
+    "image": "data/huddle-art/e80d1ebc3612e2bfc32c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399.0,
+            187.0
+          ],
+          [
+            401.0,
+            163.0
+          ],
+          [
+            393.0,
+            98.0
+          ],
+          [
+            380.0,
+            77.0
+          ],
+          [
+            380.0,
+            69.0
+          ],
+          [
+            353.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            164.0
+          ],
+          [
+            105.0,
+            157.0
+          ],
+          [
+            105.0,
+            102.0
+          ],
+          [
+            110.0,
+            101.0
+          ],
+          [
+            115.0,
+            105.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            445.0,
+            175.0
+          ],
+          [
+            455.0,
+            167.0
+          ],
+          [
+            455.0,
+            110.0
+          ],
+          [
+            447.0,
+            112.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            354.0,
+            157.0
+          ],
+          [
+            309.0,
+            94.0
+          ],
+          [
+            236.0,
+            46.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            305,
+            143
+          ],
+          [
+            195,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": true,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            305,
+            143
+          ],
+          [
+            525,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            401,
+            163
+          ],
+          [
+            393,
+            98
+          ],
+          [
+            320,
+            43
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-492be26a404de2908b36": {
+    "id": "ravens-492be26a404de2908b36",
+    "team": "ravens",
+    "name": "FOUR VERTICALS",
+    "group": "Gun",
+    "formation": "Trey Open Str",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trey-open-str/four-verticals/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open-str/four-verticals.jpg",
+    "image": "data/huddle-art/507368cbf21074e79c00.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            141.0
+          ],
+          [
+            90.0,
+            3.0
+          ],
+          [
+            87.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399.0,
+            187.0
+          ],
+          [
+            401.0,
+            163.0
+          ],
+          [
+            393.0,
+            98.0
+          ],
+          [
+            380.0,
+            77.0
+          ],
+          [
+            380.0,
+            69.0
+          ],
+          [
+            352.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            454.0,
+            173.0
+          ],
+          [
+            457.0,
+            160.0
+          ],
+          [
+            456.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            354.0,
+            157.0
+          ],
+          [
+            309.0,
+            94.0
+          ],
+          [
+            236.0,
+            46.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            305,
+            143
+          ],
+          [
+            195,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": true,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            305,
+            143
+          ],
+          [
+            525,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            401,
+            163
+          ],
+          [
+            393,
+            98
+          ],
+          [
+            320,
+            43
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-29e019a87ac6699ce318": {
+    "id": "ravens-29e019a87ac6699ce318",
+    "team": "ravens",
+    "name": "QUICK UNDERS",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/quick-unders/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/quick-unders.jpg",
+    "image": "data/huddle-art/c2bc207a76790d1ad3e4.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433,
+            178
+          ],
+          [
+            433,
+            151
+          ],
+          [
+            420,
+            143
+          ],
+          [
+            280,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            193.0,
+            144.0
+          ],
+          [
+            153.0,
+            100.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328,
+            187
+          ],
+          [
+            356,
+            135
+          ],
+          [
+            290,
+            95
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384.0,
+            187.0
+          ],
+          [
+            363.0,
+            158.0
+          ],
+          [
+            351.0,
+            154.0
+          ],
+          [
+            229.0,
+            155.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            220,
+            233
+          ],
+          [
+            190,
+            233
+          ],
+          [
+            150,
+            228
+          ],
+          [
+            120,
+            220
+          ],
+          [
+            100,
+            207
+          ],
+          [
+            88,
+            190
+          ],
+          [
+            88,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-d56616ba682fe46a1803": {
+    "id": "ravens-d56616ba682fe46a1803",
+    "team": "ravens",
+    "name": "SHOCK",
+    "group": "Gun",
+    "formation": "U Off Trips",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-u-off-trips/shock/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/u-off-trips/shock.jpg",
+    "image": "data/huddle-art/8f62b9afdf6464d77bb5.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          183
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            144.0
+          ],
+          [
+            123.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            183.0
+          ],
+          [
+            294.0,
+            141.0
+          ],
+          [
+            279.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            187
+          ],
+          [
+            172,
+            174
+          ],
+          [
+            115,
+            120
+          ],
+          [
+            50,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            408.0,
+            217.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            461.0,
+            195.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            470.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            187.0
+          ],
+          [
+            225.0,
+            142.0
+          ],
+          [
+            211.0,
+            135.0
+          ],
+          [
+            26.0,
+            136.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-00670b12eb93875cf152": {
+    "id": "ravens-00670b12eb93875cf152",
+    "team": "ravens",
+    "name": "QUICK UNDERS",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/quick-unders/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/quick-unders.jpg",
+    "image": "data/huddle-art/88aa8be7c5d2740f3896.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            114.0,
+            156.0
+          ],
+          [
+            116.0,
+            145.0
+          ],
+          [
+            74.0,
+            100.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            430,
+            162
+          ],
+          [
+            419,
+            153
+          ],
+          [
+            280,
+            152
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            350,
+            135
+          ],
+          [
+            288,
+            95
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            355.0,
+            156.0
+          ],
+          [
+            239.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            210,
+            230
+          ],
+          [
+            180,
+            230
+          ],
+          [
+            150,
+            225
+          ],
+          [
+            110,
+            215
+          ],
+          [
+            90,
+            200
+          ],
+          [
+            80,
+            185
+          ],
+          [
+            80,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-0c1113ff4ce658cc48bc": {
+    "id": "ravens-0c1113ff4ce658cc48bc",
+    "team": "ravens",
+    "name": "STICK N UP",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/stick-n-up/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/stick-n-up.jpg",
+    "image": "data/huddle-art/e2dc4310a50ad855ed49.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            442.0,
+            167.0
+          ],
+          [
+            442.0,
+            2.0
+          ],
+          [
+            440.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            119.0,
+            99.0
+          ],
+          [
+            249.0,
+            50.0
+          ],
+          [
+            251.0,
+            53.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            154
+          ],
+          [
+            380,
+            142
+          ],
+          [
+            275,
+            142
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            323.0,
+            152.0
+          ],
+          [
+            346.0,
+            150.0
+          ],
+          [
+            347.0,
+            146.0
+          ],
+          [
+            330.0,
+            122.0
+          ],
+          [
+            303.0,
+            72.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            179.0,
+            159.0
+          ],
+          [
+            167.0,
+            163.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-b8f62d5d19d01126dad1": {
+    "id": "ravens-b8f62d5d19d01126dad1",
+    "team": "ravens",
+    "name": "PA SCISSORS",
+    "group": "I Form",
+    "formation": "H Tight",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/i-form-h-tight/pa-scissors/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/h-tight/pa-scissors.jpg",
+    "image": "data/huddle-art/8631751853ba0cc091f7.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          226,
+          183
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          202
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          275,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          183
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            183.0
+          ],
+          [
+            225.0,
+            93.0
+          ],
+          [
+            89.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            183.0
+          ],
+          [
+            323.0,
+            115.0
+          ],
+          [
+            525,
+            38
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            202
+          ],
+          [
+            355,
+            176
+          ],
+          [
+            500,
+            151
+          ],
+          [
+            525,
+            151
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            430.0,
+            98.0
+          ],
+          [
+            289.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            275,
+            220
+          ],
+          [
+            287,
+            220
+          ],
+          [
+            287,
+            154
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-aa2c9ab7d264493ae0a4": {
+    "id": "ravens-aa2c9ab7d264493ae0a4",
+    "team": "ravens",
+    "name": "BINGO CROSS",
+    "group": "Singleback",
+    "formation": "Tight Doubles",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-tight-doubles/bingo-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-doubles/bingo-cross.jpg",
+    "image": "data/huddle-art/7f3203b370df4b7a5a02.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          216,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            187
+          ],
+          [
+            352,
+            75
+          ],
+          [
+            452,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            196,
+            46
+          ],
+          [
+            236,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            216,
+            187
+          ],
+          [
+            216,
+            75
+          ],
+          [
+            352,
+            75
+          ],
+          [
+            452,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            270,
+            154
+          ],
+          [
+            386,
+            154
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            179.0
+          ],
+          [
+            311.0,
+            160.0
+          ],
+          [
+            303.0,
+            156.0
+          ],
+          [
+            189.0,
+            157.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-864ac980a7569b405d32": {
+    "id": "ravens-864ac980a7569b405d32",
+    "team": "ravens",
+    "name": "CURL FLAT SEAM",
+    "group": "Singleback",
+    "formation": "Wing Tight Z",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-wing-tight-z/curl-flat-seam/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight-z/curl-flat-seam.jpg",
+    "image": "data/huddle-art/0006042bf0b5147a1063.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          225,
+          181
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          337,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            335.0,
+            164.0
+          ],
+          [
+            335.0,
+            131.0
+          ],
+          [
+            301.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            225.0,
+            181.0
+          ],
+          [
+            224.0,
+            90.0
+          ],
+          [
+            166.0,
+            75.0
+          ],
+          [
+            146.0,
+            73.0
+          ],
+          [
+            28.0,
+            42.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            337.0,
+            188.0
+          ],
+          [
+            362.0,
+            176.0
+          ],
+          [
+            389.0,
+            173.0
+          ],
+          [
+            525,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            256,
+            203
+          ],
+          [
+            256,
+            142
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            430.0,
+            99.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-b139e13c8d88d234dca2": {
+    "id": "eagles-b139e13c8d88d234dca2",
+    "team": "eagles",
+    "name": "CORNER OUT DIG",
+    "group": "Gun",
+    "formation": "Bunch X Nasty",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-x-nasty/corner-out-dig/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/corner-out-dig.jpg",
+    "image": "data/huddle-art/d4242ee9d5f65307fbdf.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          335,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            197.0,
+            73.0
+          ],
+          [
+            332.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            187.0
+          ],
+          [
+            409.0,
+            108.0
+          ],
+          [
+            523.0,
+            108.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            335,
+            179
+          ],
+          [
+            335,
+            77
+          ],
+          [
+            452,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            210,
+            230
+          ],
+          [
+            180,
+            230
+          ],
+          [
+            150,
+            225
+          ],
+          [
+            110,
+            215
+          ],
+          [
+            90,
+            200
+          ],
+          [
+            80,
+            185
+          ],
+          [
+            80,
+            160
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            344,
+            183
+          ],
+          [
+            344,
+            128
+          ],
+          [
+            333,
+            138
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-8b6a1052b431556d3600": {
+    "id": "eagles-8b6a1052b431556d3600",
+    "team": "eagles",
+    "name": "TEXAS SMASH",
+    "group": "Gun",
+    "formation": "Doubles Clamp Stack",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-doubles-clamp-stack/texas-smash/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-clamp-stack/texas-smash.jpg",
+    "image": "data/huddle-art/83823e09f9d392c42fcf.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          157,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            176.0,
+            75.0
+          ],
+          [
+            68.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            353.0,
+            85.0
+          ],
+          [
+            522.0,
+            85.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            157.0,
+            187.0
+          ],
+          [
+            157.0,
+            134.0
+          ],
+          [
+            162.0,
+            133.0
+          ],
+          [
+            166.0,
+            136.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            346,
+            160
+          ],
+          [
+            279,
+            128
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            187
+          ],
+          [
+            337,
+            164
+          ],
+          [
+            337,
+            140
+          ],
+          [
+            299,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-50664f26db7ebc2ea3d1": {
+    "id": "eagles-50664f26db7ebc2ea3d1",
+    "team": "eagles",
+    "name": "Y-SAIL",
+    "group": "Gun",
+    "formation": "Normal Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-normal-y-off-close/y--sail/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/y--sail.jpg",
+    "image": "data/huddle-art/b66bf8ea4576f2123afe.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            525,
+            161
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            117.0,
+            73.0
+          ],
+          [
+            252.0,
+            72.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            176.0,
+            133.0
+          ],
+          [
+            180.0,
+            132.0
+          ],
+          [
+            185.0,
+            136.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            187.0
+          ],
+          [
+            322.0,
+            74.0
+          ],
+          [
+            500.0,
+            6.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            145
+          ],
+          [
+            399,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-099d020a044bf7878ca6": {
+    "id": "ravens-099d020a044bf7878ca6",
+    "team": "ravens",
+    "name": "DIG RETURN",
+    "group": "Gun",
+    "formation": "Bunch Open Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-open-offset/dig-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/dig-return.jpg",
+    "image": "data/huddle-art/c2a85cc58ca9041c9cb5.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          392,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          411,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            176.0,
+            122.0
+          ],
+          [
+            170.0,
+            112.0
+          ],
+          [
+            181.0,
+            102.0
+          ],
+          [
+            238.0,
+            23.0
+          ],
+          [
+            248.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            411,
+            178
+          ],
+          [
+            411,
+            92
+          ],
+          [
+            272,
+            92
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            417.0,
+            154.0
+          ],
+          [
+            412.0,
+            149.0
+          ],
+          [
+            413.0,
+            142.0
+          ],
+          [
+            522.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            392,
+            187
+          ],
+          [
+            525,
+            165
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-21f9a4e252d617078635": {
+    "id": "ravens-21f9a4e252d617078635",
+    "team": "ravens",
+    "name": "Y TRAIL",
+    "group": "Gun",
+    "formation": "Bunch Open Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-open-offset/y-trail/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/y-trail.jpg",
+    "image": "data/huddle-art/968d1e158e96e9b3776d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          391,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          411,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            132.0,
+            148.0
+          ],
+          [
+            132.0,
+            34.0
+          ],
+          [
+            119.0,
+            35.0
+          ],
+          [
+            69.0,
+            61.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            326.0,
+            220.0
+          ],
+          [
+            361.0,
+            221.0
+          ],
+          [
+            408.0,
+            217.0
+          ],
+          [
+            443.0,
+            209.0
+          ],
+          [
+            461.0,
+            195.0
+          ],
+          [
+            469.0,
+            181.0
+          ],
+          [
+            471.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            391,
+            187
+          ],
+          [
+            450,
+            165
+          ],
+          [
+            450,
+            157
+          ],
+          [
+            349,
+            153
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            411,
+            178
+          ],
+          [
+            411,
+            88
+          ],
+          [
+            280,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            408,
+            144
+          ],
+          [
+            390,
+            140
+          ],
+          [
+            250,
+            140
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-c44eb2052be5fd37b086": {
+    "id": "ravens-c44eb2052be5fd37b086",
+    "team": "ravens",
+    "name": "HB SCISSORS",
+    "group": "Gun",
+    "formation": "Normal Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-normal-y-off-close/hb-scissors/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/hb-scissors.jpg",
+    "image": "data/huddle-art/ac432dec4006e26f59a0.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            71.0,
+            147.0
+          ],
+          [
+            72.0,
+            50.0
+          ],
+          [
+            66.0,
+            49.0
+          ],
+          [
+            27.0,
+            62.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            178.0,
+            125.0
+          ],
+          [
+            263.0,
+            126.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            388,
+            170
+          ],
+          [
+            404,
+            107
+          ],
+          [
+            521,
+            57
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            187
+          ],
+          [
+            525,
+            156
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            336,
+            134
+          ],
+          [
+            336,
+            40
+          ],
+          [
+            299,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-339a491b0ae8f76544f9": {
+    "id": "ravens-339a491b0ae8f76544f9",
+    "team": "ravens",
+    "name": "Y-STICK DIG",
+    "group": "Gun",
+    "formation": "Normal Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-normal-y-off-close/y--stick-dig/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/y--stick-dig.jpg",
+    "image": "data/huddle-art/50d8276459bc70720ef6.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            187.0
+          ],
+          [
+            323.0,
+            158.0
+          ],
+          [
+            317.0,
+            136.0
+          ],
+          [
+            313.0,
+            135.0
+          ],
+          [
+            307.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303.0,
+            211.0
+          ],
+          [
+            355.0,
+            210.0
+          ],
+          [
+            522.0,
+            191.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            371.0,
+            73.0
+          ],
+          [
+            236.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116,
+            178
+          ],
+          [
+            169,
+            149
+          ],
+          [
+            169,
+            57
+          ],
+          [
+            230,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            61,
+            143
+          ],
+          [
+            30,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-ec61ea34c633286d640d": {
+    "id": "ravens-ec61ea34c633286d640d",
+    "team": "ravens",
+    "name": "DRIVE TRAIL",
+    "group": "Gun",
+    "formation": "Tight Slots",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-tight-slots/drive-trail/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-slots/drive-trail.jpg",
+    "image": "data/huddle-art/9b78dc04389da6b720d7.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          197,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          216,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          333,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            197.0,
+            178.0
+          ],
+          [
+            196.0,
+            88.0
+          ],
+          [
+            68.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            178
+          ],
+          [
+            335,
+            149
+          ],
+          [
+            220,
+            149
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            333.0,
+            187.0
+          ],
+          [
+            331.0,
+            82.0
+          ],
+          [
+            197.0,
+            82.0
+          ],
+          [
+            196.0,
+            78.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            216,
+            187
+          ],
+          [
+            197,
+            178
+          ],
+          [
+            25,
+            141
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            359,
+            146
+          ],
+          [
+            295,
+            105
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-fb749f795d6dd35f6f7c": {
+    "id": "ravens-fb749f795d6dd35f6f7c",
+    "team": "ravens",
+    "name": "SCAT",
+    "group": "Gun",
+    "formation": "Trips TE Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-te-offset/scat/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-offset/scat.jpg",
+    "image": "data/huddle-art/630ab284670c77c7d056.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            335,
+            147
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            460.0,
+            196.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            471.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            166.0,
+            155.0
+          ],
+          [
+            179.0,
+            155.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            178
+          ],
+          [
+            104,
+            140
+          ],
+          [
+            76,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            180,
+            193
+          ],
+          [
+            140,
+            193
+          ],
+          [
+            120,
+            181
+          ],
+          [
+            104,
+            159
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            525,
+            141
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-001e6733c4292da759d6": {
+    "id": "ravens-001e6733c4292da759d6",
+    "team": "ravens",
+    "name": "SWITCH DAGGER",
+    "group": "Gun",
+    "formation": "Trips TE Offset Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-te-offset-wk/switch-dagger/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-offset-wk/switch-dagger.jpg",
+    "image": "data/huddle-art/d42e8b9c235f155a2e45.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            104.0,
+            73.0
+          ],
+          [
+            239.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            468.0,
+            147.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            125,
+            182
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150,
+            187
+          ],
+          [
+            150,
+            145
+          ],
+          [
+            250,
+            100
+          ],
+          [
+            398,
+            73
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            196,
+            73
+          ],
+          [
+            253,
+            31
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-c0edd30acebab8210c27": {
+    "id": "ravens-c0edd30acebab8210c27",
+    "team": "ravens",
+    "name": "VERTICALS",
+    "group": "Gun",
+    "formation": "Trips TE Offset Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-te-offset-wk/verticals/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-offset-wk/verticals.jpg",
+    "image": "data/huddle-art/5c550be38f6a46a6210c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          197,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            325.0,
+            125.0
+          ],
+          [
+            485.0,
+            125.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            259,
+            150
+          ],
+          [
+            248,
+            143
+          ],
+          [
+            35,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            197.0,
+            187.0
+          ],
+          [
+            241.0,
+            77.0
+          ],
+          [
+            299.0,
+            41.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            178
+          ],
+          [
+            93,
+            166
+          ],
+          [
+            93,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150,
+            187
+          ],
+          [
+            148,
+            130
+          ],
+          [
+            168,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-e5de0730015b3942d5f4": {
+    "id": "ravens-e5de0730015b3942d5f4",
+    "team": "ravens",
+    "name": "HI LO DIG",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/hi-lo-dig/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/hi-lo-dig.jpg",
+    "image": "data/huddle-art/c69afa014bcd01a650b8.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328.0,
+            187.0
+          ],
+          [
+            339.0,
+            173.0
+          ],
+          [
+            340.0,
+            138.0
+          ],
+          [
+            303,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384.0,
+            187.0
+          ],
+          [
+            365.0,
+            143.0
+          ],
+          [
+            525,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            178.0
+          ],
+          [
+            432.0,
+            73.0
+          ],
+          [
+            298.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            196,
+            80
+          ],
+          [
+            25,
+            15
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            196,
+            178
+          ],
+          [
+            60,
+            154
+          ],
+          [
+            33,
+            154
+          ],
+          [
+            29,
+            164
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-c920ddf25f5775817b73": {
+    "id": "ravens-c920ddf25f5775817b73",
+    "team": "ravens",
+    "name": "QUICK FORK ZIG",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/quick-fork-zig/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/quick-fork-zig.jpg",
+    "image": "data/huddle-art/2e59e599fb5168c9aca7.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          119,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            119.0,
+            178.0
+          ],
+          [
+            125.0,
+            144.0
+          ],
+          [
+            131.0,
+            137.0
+          ],
+          [
+            130.0,
+            133.0
+          ],
+          [
+            26.0,
+            133.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            182.0,
+            182.0
+          ],
+          [
+            172.0,
+            174.0
+          ],
+          [
+            159.0,
+            172.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            325.0,
+            140.0
+          ],
+          [
+            522.0,
+            88.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            127
+          ],
+          [
+            230,
+            90
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            405,
+            187
+          ],
+          [
+            349,
+            155
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-304c31bcc002121769fa": {
+    "id": "ravens-304c31bcc002121769fa",
+    "team": "ravens",
+    "name": "QUICK SHORT POST",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/quick-short-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/quick-short-post.jpg",
+    "image": "data/huddle-art/755cbb470d0d71dd8b22.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            215,
+            208
+          ],
+          [
+            64,
+            159
+          ],
+          [
+            29,
+            74
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            368.0,
+            155.0
+          ],
+          [
+            353.0,
+            156.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            428.0,
+            174.0
+          ],
+          [
+            444.0,
+            111.0
+          ],
+          [
+            427.0,
+            106.0
+          ],
+          [
+            365.0,
+            101.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118,
+            178
+          ],
+          [
+            145,
+            150
+          ],
+          [
+            160,
+            155
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            294,
+            170
+          ],
+          [
+            278,
+            177
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-b58657162d219ebad949": {
+    "id": "ravens-b58657162d219ebad949",
+    "team": "ravens",
+    "name": "SHOCKH OPTION",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/shockh-option/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/shockh-option.jpg",
+    "image": "data/huddle-art/b57e7cc49499c9437cf2.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            372.0,
+            155.0
+          ],
+          [
+            426.0,
+            95.0
+          ],
+          [
+            463.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            437.0,
+            157.0
+          ],
+          [
+            428.0,
+            159.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            322.0,
+            139.0
+          ],
+          [
+            325.0,
+            130.0
+          ],
+          [
+            346.0,
+            127.0
+          ],
+          [
+            522.0,
+            127.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118,
+            178
+          ],
+          [
+            82,
+            143
+          ],
+          [
+            82,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            188,
+            174
+          ],
+          [
+            196,
+            122
+          ],
+          [
+            210,
+            134
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            188,
+            174
+          ],
+          [
+            196,
+            126
+          ],
+          [
+            25,
+            126
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            188,
+            174
+          ],
+          [
+            196,
+            122
+          ],
+          [
+            272,
+            90
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-038f3e33d95bffdc7117": {
+    "id": "ravens-038f3e33d95bffdc7117",
+    "team": "ravens",
+    "name": "DBL POST",
+    "group": "Pistol",
+    "formation": "U Off Trips",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/pistol-u-off-trips/dbl-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/u-off-trips/dbl-post.jpg",
+    "image": "data/huddle-art/087c435b549ca180a342.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          226,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          183
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            188.0
+          ],
+          [
+            226.0,
+            109.0
+          ],
+          [
+            381.0,
+            82.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            193.0,
+            162.0
+          ],
+          [
+            194.0,
+            139.0
+          ],
+          [
+            206.0,
+            138.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            89.0
+          ],
+          [
+            138.0,
+            77.0
+          ],
+          [
+            156.0,
+            73.0
+          ],
+          [
+            163.0,
+            68.0
+          ],
+          [
+            228.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            320,
+            233
+          ],
+          [
+            360,
+            233
+          ],
+          [
+            410,
+            228
+          ],
+          [
+            440,
+            219
+          ],
+          [
+            450,
+            207
+          ],
+          [
+            450,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-6a94f4697ed589326649": {
+    "id": "ravens-6a94f4697ed589326649",
+    "team": "ravens",
+    "name": "BENCH",
+    "group": "Singleback",
+    "formation": "Ace Double Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-ace-double-wing/bench/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/ace-double-wing/bench.jpg",
+    "image": "data/huddle-art/9c2650dba4e3526815e9.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          273,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          211,
+          188
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          183
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          183
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          338,
+          188
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226,
+            183
+          ],
+          [
+            226,
+            139
+          ],
+          [
+            25,
+            139
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            211.0,
+            188.0
+          ],
+          [
+            211.0,
+            99.0
+          ],
+          [
+            67.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            281.0,
+            174.0
+          ],
+          [
+            279.0,
+            167.0
+          ],
+          [
+            282.0,
+            162.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            183
+          ],
+          [
+            323,
+            139
+          ],
+          [
+            525,
+            139
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            338,
+            188
+          ],
+          [
+            338,
+            99
+          ],
+          [
+            485,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-d74a5d42e4f274c36011": {
+    "id": "ravens-d74a5d42e4f274c36011",
+    "team": "ravens",
+    "name": "SHALLOW CROSS",
+    "group": "Singleback",
+    "formation": "Tight Doubles",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/singleback-tight-doubles/shallow-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-doubles/shallow-cross.jpg",
+    "image": "data/huddle-art/046dda570e290a1c4e08.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          216,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          353,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            353.0,
+            187.0
+          ],
+          [
+            352.0,
+            96.0
+          ],
+          [
+            309.0,
+            47.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            179
+          ],
+          [
+            294,
+            128
+          ],
+          [
+            280,
+            133
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            213.0,
+            154.0
+          ],
+          [
+            222.0,
+            150.0
+          ],
+          [
+            349.0,
+            151.0
+          ],
+          [
+            349.0,
+            146.0
+          ],
+          [
+            345.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            216,
+            187
+          ],
+          [
+            172,
+            158
+          ],
+          [
+            172,
+            108
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            240,
+            238
+          ],
+          [
+            215,
+            238
+          ],
+          [
+            170,
+            231
+          ],
+          [
+            138,
+            225
+          ],
+          [
+            118,
+            208
+          ],
+          [
+            108,
+            190
+          ],
+          [
+            108,
+            168
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-8eee931cea2aa604bf1b": {
+    "id": "eagles-8eee931cea2aa604bf1b",
+    "team": "eagles",
+    "name": "HOSS Y JUKE",
+    "group": "Gun",
+    "formation": "Empty Base Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-empty-base-flex/hoss-y-juke/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/hoss-y-juke.jpg",
+    "image": "data/huddle-art/ce18a4828db8b035b5c1.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          343,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            187.0
+          ],
+          [
+            102.0,
+            139.0
+          ],
+          [
+            93.0,
+            129.0
+          ],
+          [
+            43.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            169,
+            157
+          ],
+          [
+            179,
+            76
+          ],
+          [
+            192,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            399.0,
+            187.0
+          ],
+          [
+            395.0,
+            124.0
+          ],
+          [
+            355.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            446.0,
+            138.0
+          ],
+          [
+            435.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            178.0
+          ],
+          [
+            321.0,
+            157.0
+          ],
+          [
+            310.0,
+            151.0
+          ],
+          [
+            309.0,
+            145.0
+          ],
+          [
+            301.0,
+            139.0
+          ],
+          [
+            301.0,
+            134.0
+          ],
+          [
+            306.0,
+            132.0
+          ],
+          [
+            505.0,
+            132.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            104,
+            187
+          ],
+          [
+            104,
+            134
+          ],
+          [
+            116,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            172,
+            178
+          ],
+          [
+            169,
+            157
+          ],
+          [
+            179,
+            76
+          ],
+          [
+            241,
+            40
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            445,
+            187
+          ],
+          [
+            446,
+            138
+          ],
+          [
+            472,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            343,
+            178
+          ],
+          [
+            311,
+            152
+          ],
+          [
+            235,
+            152
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-141b2db09c63e1b0191f": {
+    "id": "eagles-141b2db09c63e1b0191f",
+    "team": "eagles",
+    "name": "POST WHEEL DRAG",
+    "group": "Gun",
+    "formation": "Tight Y Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off-wk/post-wheel-drag/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/post-wheel-drag.jpg",
+    "image": "data/huddle-art/9be4c671e66a3f6c70ae.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255.0,
+            213.0
+          ],
+          [
+            215.0,
+            221.0
+          ],
+          [
+            167.0,
+            220.0
+          ],
+          [
+            108.0,
+            210.0
+          ],
+          [
+            89.0,
+            197.0
+          ],
+          [
+            79.0,
+            181.0
+          ],
+          [
+            78.0,
+            155.0
+          ],
+          [
+            71.0,
+            146.0
+          ],
+          [
+            45.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            371.0,
+            92.0
+          ],
+          [
+            236.0,
+            91.0
+          ],
+          [
+            237.0,
+            89.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            188.0
+          ],
+          [
+            321.0,
+            165.0
+          ],
+          [
+            310.0,
+            149.0
+          ],
+          [
+            302.0,
+            145.0
+          ],
+          [
+            174.0,
+            145.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192,
+            178
+          ],
+          [
+            78,
+            155
+          ],
+          [
+            45,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            157.0,
+            161.0
+          ],
+          [
+            158.0,
+            106.0
+          ],
+          [
+            237.0,
+            17.0
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-f587e5e43a58841e70a2": {
+    "id": "eagles-f587e5e43a58841e70a2",
+    "team": "eagles",
+    "name": "DOUBLE INS STACK OUT",
+    "group": "Gun",
+    "formation": "Tight Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off/double-ins-stack-out/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/double-ins-stack-out.jpg",
+    "image": "data/huddle-art/93f07e4af6ced8df7e06.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            370.0,
+            113.0
+          ],
+          [
+            285.0,
+            114.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            188.0
+          ],
+          [
+            320.0,
+            133.0
+          ],
+          [
+            234.0,
+            133.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            461.0,
+            195.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            470.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            187
+          ],
+          [
+            192,
+            178
+          ],
+          [
+            228,
+            163
+          ],
+          [
+            227,
+            94
+          ],
+          [
+            27,
+            94
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192,
+            178
+          ],
+          [
+            150,
+            166
+          ],
+          [
+            25,
+            159
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-004aafb2837a5faa9f28": {
+    "id": "eagles-004aafb2837a5faa9f28",
+    "team": "eagles",
+    "name": "DIG HB OPTION",
+    "group": "Gun",
+    "formation": "Tight Y Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off-wk/dig-hb-option/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/dig-hb-option.jpg",
+    "image": "data/huddle-art/86747c915e7c12d2aa5c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            157.0,
+            175.0
+          ],
+          [
+            148.0,
+            173.0
+          ],
+          [
+            145.0,
+            168.0
+          ],
+          [
+            97.0,
+            136.0
+          ],
+          [
+            94.0,
+            95.0
+          ],
+          [
+            96.0,
+            3.0
+          ],
+          [
+            93.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            372.0,
+            73.0
+          ],
+          [
+            522.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321.0,
+            188.0
+          ],
+          [
+            335.0,
+            154.0
+          ],
+          [
+            341.0,
+            148.0
+          ],
+          [
+            340.0,
+            144.0
+          ],
+          [
+            241.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            193.0,
+            73.0
+          ],
+          [
+            327.0,
+            72.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            196,
+            174
+          ],
+          [
+            205,
+            123
+          ],
+          [
+            215,
+            134
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            196,
+            174
+          ],
+          [
+            205,
+            129
+          ],
+          [
+            25,
+            129
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            196,
+            174
+          ],
+          [
+            205,
+            123
+          ],
+          [
+            280,
+            92
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-27f54731267daa362cb8": {
+    "id": "eagles-27f54731267daa362cb8",
+    "team": "eagles",
+    "name": "SLOT 2 BUC",
+    "group": "Gun",
+    "formation": "Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing/slot-2-buc/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing/slot-2-buc.jpg",
+    "image": "data/huddle-art/01c7c5a1537eacd18aef.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          340,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            340.0,
+            68.0
+          ],
+          [
+            285.0,
+            33.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            119.0,
+            85.0
+          ],
+          [
+            254.0,
+            85.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            288.0,
+            132.0
+          ],
+          [
+            275.0,
+            135.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            442.0,
+            163.0
+          ],
+          [
+            442.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            350,
+            173
+          ],
+          [
+            357,
+            177
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-35e45c5b8468fc5c10ad": {
+    "id": "eagles-35e45c5b8468fc5c10ad",
+    "team": "eagles",
+    "name": "PA SCISSORS",
+    "group": "I Form",
+    "formation": "Pro",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/i-form-pro/pa-scissors/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/pro/pa-scissors.jpg",
+    "image": "data/huddle-art/3ab68031a686a704dbbc.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          275,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          431,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            170.0,
+            144.0
+          ],
+          [
+            172.0,
+            67.0
+          ],
+          [
+            306.0,
+            67.0
+          ],
+          [
+            305.0,
+            69.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            204
+          ],
+          [
+            370,
+            166
+          ],
+          [
+            505,
+            156
+          ],
+          [
+            510,
+            171
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            325.0,
+            101.0
+          ],
+          [
+            521.0,
+            28.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            275,
+            220
+          ],
+          [
+            287,
+            220
+          ],
+          [
+            287,
+            154
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            431,
+            187
+          ],
+          [
+            431,
+            97
+          ],
+          [
+            349,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-fb6a246072cba614afb1": {
+    "id": "eagles-fb6a246072cba614afb1",
+    "team": "eagles",
+    "name": "PA TE CORNER",
+    "group": "I Form",
+    "formation": "Tight",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/i-form-tight/pa-te-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/tight/pa-te-corner.jpg",
+    "image": "data/huddle-art/5ad23e343020dce22edc.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          226,
+          181
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          275,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          431,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            181.0
+          ],
+          [
+            226.0,
+            90.0
+          ],
+          [
+            295.0,
+            46.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            204
+          ],
+          [
+            375,
+            165
+          ],
+          [
+            525,
+            141
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            324.0,
+            91.0
+          ],
+          [
+            521.0,
+            31.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            275,
+            220
+          ],
+          [
+            287,
+            220
+          ],
+          [
+            287,
+            154
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            431,
+            187
+          ],
+          [
+            442,
+            165
+          ],
+          [
+            442,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-840bc8fe301c9302cd97": {
+    "id": "eagles-840bc8fe301c9302cd97",
+    "team": "eagles",
+    "name": "INSIDE CROSS",
+    "group": "Pistol",
+    "formation": "Deuce",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-deuce/inside-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/deuce/inside-cross.jpg",
+    "image": "data/huddle-art/615c4a8a8f13bbebb2ac.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          128,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          421,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            128.0,
+            178.0
+          ],
+          [
+            128.0,
+            89.0
+          ],
+          [
+            256.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            421.0,
+            178.0
+          ],
+          [
+            420.0,
+            73.0
+          ],
+          [
+            284.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            240,
+            170
+          ],
+          [
+            250,
+            165
+          ],
+          [
+            366,
+            165
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            308.0,
+            166.0
+          ],
+          [
+            300.0,
+            164.0
+          ],
+          [
+            174.0,
+            164.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            281,
+            158
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-ac52279279f67c696a29": {
+    "id": "ravens-ac52279279f67c696a29",
+    "team": "ravens",
+    "name": "PA FLOOD",
+    "group": "Gun",
+    "formation": "Trips TE Offset Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-te-offset-wk/pa-flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-offset-wk/pa-flood.jpg",
+    "image": "data/huddle-art/da0d0df3bde6fc72b66f.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            78.0
+          ],
+          [
+            261.0,
+            38.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            97.0,
+            164.0
+          ],
+          [
+            92.0,
+            159.0
+          ],
+          [
+            91,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255.0,
+            213.0
+          ],
+          [
+            277.0,
+            198.0
+          ],
+          [
+            395.0,
+            185.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            148.0,
+            95.0
+          ],
+          [
+            28.0,
+            18.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            180,
+            193
+          ],
+          [
+            140,
+            193
+          ],
+          [
+            120,
+            181
+          ],
+          [
+            109,
+            159
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-94eee13fc260da93707c": {
+    "id": "ravens-94eee13fc260da93707c",
+    "team": "ravens",
+    "name": "SNAG SLOT DIGS",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/snag-slot-digs/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/snag-slot-digs.jpg",
+    "image": "data/huddle-art/8796e04694783b1faf22.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328.0,
+            187.0
+          ],
+          [
+            327.0,
+            103.0
+          ],
+          [
+            192.0,
+            104.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            178.0
+          ],
+          [
+            433.0,
+            141.0
+          ],
+          [
+            423.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            196,
+            178
+          ],
+          [
+            65,
+            154
+          ],
+          [
+            33,
+            154
+          ],
+          [
+            30,
+            162
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384.0,
+            187.0
+          ],
+          [
+            428.0,
+            88.0
+          ],
+          [
+            325.0,
+            86.0
+          ],
+          [
+            326.0,
+            83.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            227,
+            156
+          ],
+          [
+            240,
+            165
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-525f084bff5c03ffb06b": {
+    "id": "ravens-525f084bff5c03ffb06b",
+    "team": "ravens",
+    "name": "PA UCORNER FLOOD",
+    "group": "Gun",
+    "formation": "U Off Trips",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-u-off-trips/pa-ucorner-flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/u-off-trips/pa-ucorner-flood.jpg",
+    "image": "data/huddle-art/002693cacd6903480a94.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          183
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116,
+            178
+          ],
+          [
+            116,
+            25
+          ],
+          [
+            139,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172,
+            187
+          ],
+          [
+            172,
+            55
+          ],
+          [
+            220,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            183.0
+          ],
+          [
+            322.0,
+            162.0
+          ],
+          [
+            281.0,
+            119.0
+          ],
+          [
+            150,
+            96
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            187.0
+          ],
+          [
+            224.0,
+            96.0
+          ],
+          [
+            84.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            125,
+            190
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-3c51daa4785de3fdd91f": {
+    "id": "ravens-3c51daa4785de3fdd91f",
+    "team": "ravens",
+    "name": "CURLS",
+    "group": "I Form",
+    "formation": "Wing",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/i-form-wing/curls/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/wing/curls.jpg",
+    "image": "data/huddle-art/e5a6f8207434d13bf40d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          183
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            124.0
+          ],
+          [
+            119.0,
+            120.0
+          ],
+          [
+            127.0,
+            120.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            204
+          ],
+          [
+            358,
+            176
+          ],
+          [
+            522,
+            152
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            183.0
+          ],
+          [
+            322.0,
+            170.0
+          ],
+          [
+            302.0,
+            154.0
+          ],
+          [
+            288.0,
+            156.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            204.0
+          ],
+          [
+            299.0,
+            195.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            365,
+            134
+          ],
+          [
+            352,
+            140
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-0bc8e46e853f532fcba3": {
+    "id": "eagles-0bc8e46e853f532fcba3",
+    "team": "eagles",
+    "name": "SMASH RETURN",
+    "group": "Gun",
+    "formation": "Bunch X Nasty",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-x-nasty/smash-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/smash-return.jpg",
+    "image": "data/huddle-art/25eb2263512c442c0eeb.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          335,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          353,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            196,
+            73
+          ],
+          [
+            335,
+            73
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            335.0,
+            179.0
+          ],
+          [
+            310.0,
+            146.0
+          ],
+          [
+            196.0,
+            146.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            210,
+            230
+          ],
+          [
+            180,
+            230
+          ],
+          [
+            150,
+            225
+          ],
+          [
+            110,
+            215
+          ],
+          [
+            90,
+            200
+          ],
+          [
+            80,
+            185
+          ],
+          [
+            80,
+            160
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            345,
+            184
+          ],
+          [
+            359,
+            114
+          ],
+          [
+            479,
+            36
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            353,
+            187
+          ],
+          [
+            367,
+            143
+          ],
+          [
+            380,
+            143
+          ],
+          [
+            270,
+            143
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-dc8d7d3fffb2a12825c6": {
+    "id": "eagles-dc8d7d3fffb2a12825c6",
+    "team": "eagles",
+    "name": "PA WEAK FLOOD",
+    "group": "I Form",
+    "formation": "Pro",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/i-form-pro/pa-weak-flood/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/pro/pa-weak-flood.jpg",
+    "image": "data/huddle-art/062f6537c62f4f7e4b73.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          119,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          431,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            119.0,
+            178.0
+          ],
+          [
+            171.0,
+            143.0
+          ],
+          [
+            171.0,
+            82.0
+          ],
+          [
+            27.0,
+            48.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            300,
+            157
+          ],
+          [
+            170,
+            157
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            431.0,
+            187.0
+          ],
+          [
+            378.0,
+            152.0
+          ],
+          [
+            377.0,
+            76.0
+          ],
+          [
+            292.0,
+            76.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            204
+          ],
+          [
+            385,
+            163
+          ],
+          [
+            525,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            280,
+            150
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-d31f27b2c587abbe115d": {
+    "id": "eagles-d31f27b2c587abbe115d",
+    "team": "eagles",
+    "name": "TEXAS",
+    "group": "I Form",
+    "formation": "Pro",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/i-form-pro/texas/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/pro/texas.jpg",
+    "image": "data/huddle-art/35634d2c34002471d244.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            117.0,
+            91.0
+          ],
+          [
+            26.0,
+            91.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430.0,
+            187.0
+          ],
+          [
+            430.0,
+            105.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            92.0
+          ],
+          [
+            252.0,
+            44.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            204
+          ],
+          [
+            390,
+            176
+          ],
+          [
+            277,
+            98
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-2d1026ef8db01bde4845": {
+    "id": "eagles-2d1026ef8db01bde4845",
+    "team": "eagles",
+    "name": "PA Z OVER",
+    "group": "Pistol",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-deuce-close/pa-z-over/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/deuce-close/pa-z-over.jpg",
+    "image": "data/huddle-art/a311cb1f4c8ed80b1555.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            252,
+            139
+          ],
+          [
+            252,
+            85
+          ],
+          [
+            135,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            351.0,
+            137.0
+          ],
+          [
+            310.0,
+            90.0
+          ],
+          [
+            235.0,
+            77.0
+          ],
+          [
+            162.0,
+            70.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            260,
+            220
+          ],
+          [
+            245,
+            149
+          ],
+          [
+            110,
+            149
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            290,
+            187
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-af09126bdaf4b564ca76": {
+    "id": "eagles-af09126bdaf4b564ca76",
+    "team": "eagles",
+    "name": "Y CROSS",
+    "group": "Pistol",
+    "formation": "Strong Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/pistol-strong-y-off-close/y-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/pistol/strong-y-off-close/y-cross.jpg",
+    "image": "data/huddle-art/1358eec442689cb68f1d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          203
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          223
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          203
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            370.0,
+            90.0
+          ],
+          [
+            328.0,
+            67.0
+          ],
+          [
+            318.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303.0,
+            203.0
+          ],
+          [
+            344.0,
+            213.0
+          ],
+          [
+            368.0,
+            213.0
+          ],
+          [
+            449.0,
+            201.0
+          ],
+          [
+            472.0,
+            184.0
+          ],
+          [
+            478.0,
+            168.0
+          ],
+          [
+            480.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            286.0,
+            145.0
+          ],
+          [
+            150.0,
+            122.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            178
+          ],
+          [
+            177,
+            119
+          ],
+          [
+            167,
+            114
+          ],
+          [
+            251,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274,
+            223
+          ],
+          [
+            274,
+            210
+          ],
+          [
+            151,
+            174
+          ],
+          [
+            142,
+            182
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-2011af002be8c50cedfb": {
+    "id": "ravens-2011af002be8c50cedfb",
+    "team": "ravens",
+    "name": "DIG RETURN",
+    "group": "Gun",
+    "formation": "Bunch Y-Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-y--flex/dig-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/dig-return.jpg",
+    "image": "data/huddle-art/4e4617ed43ed4fdb365a.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          197,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          377,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          396,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            197,
+            178
+          ],
+          [
+            197,
+            88
+          ],
+          [
+            68,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            377,
+            178
+          ],
+          [
+            377,
+            91
+          ],
+          [
+            239,
+            91
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            396.0,
+            187.0
+          ],
+          [
+            383.0,
+            154.0
+          ],
+          [
+            377.0,
+            150.0
+          ],
+          [
+            376.0,
+            142.0
+          ],
+          [
+            522.0,
+            143.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            188,
+            174
+          ],
+          [
+            197,
+            117
+          ],
+          [
+            207,
+            135
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            188,
+            174
+          ],
+          [
+            197,
+            127
+          ],
+          [
+            25,
+            127
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            188,
+            174
+          ],
+          [
+            197,
+            117
+          ],
+          [
+            272,
+            92
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357,
+            187
+          ],
+          [
+            525,
+            162
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-10a4775644bccc36aec3": {
+    "id": "ravens-10a4775644bccc36aec3",
+    "team": "ravens",
+    "name": "SMASH RETURN",
+    "group": "Gun",
+    "formation": "Bunch Y-Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-y--flex/smash-return/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/smash-return.jpg",
+    "image": "data/huddle-art/003e1ab8ffa41be8ecc5.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          377,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          396,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            248,
+            145
+          ],
+          [
+            248,
+            55
+          ],
+          [
+            386,
+            55
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            377.0,
+            178.0
+          ],
+          [
+            370.0,
+            171.0
+          ],
+          [
+            355.0,
+            146.0
+          ],
+          [
+            346.0,
+            143.0
+          ],
+          [
+            198.0,
+            144.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            210,
+            230
+          ],
+          [
+            180,
+            230
+          ],
+          [
+            150,
+            225
+          ],
+          [
+            110,
+            215
+          ],
+          [
+            90,
+            200
+          ],
+          [
+            80,
+            185
+          ],
+          [
+            80,
+            160
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357,
+            187
+          ],
+          [
+            384,
+            180
+          ],
+          [
+            397,
+            113
+          ],
+          [
+            516,
+            35
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            396,
+            187
+          ],
+          [
+            410,
+            142
+          ],
+          [
+            425,
+            142
+          ],
+          [
+            314,
+            142
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-3f10fa0d8eae78615dfe": {
+    "id": "ravens-3f10fa0d8eae78615dfe",
+    "team": "ravens",
+    "name": "DBL OUTS",
+    "group": "I Form",
+    "formation": "Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/i-form-y-off-close/dbl-outs/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/dbl-outs.jpg",
+    "image": "data/huddle-art/5f3256c5ef16a6301ed7.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          362,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            334.0,
+            167.0
+          ],
+          [
+            334.0,
+            109.0
+          ],
+          [
+            234.0,
+            54.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362.0,
+            178.0
+          ],
+          [
+            419.0,
+            99.0
+          ],
+          [
+            522.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187.0,
+            178.0
+          ],
+          [
+            139.0,
+            112.0
+          ],
+          [
+            26.0,
+            112.0
+          ],
+          [
+            27.0,
+            110.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            204
+          ],
+          [
+            470,
+            184
+          ],
+          [
+            470,
+            195
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-759643d4abcb6712beaa": {
+    "id": "eagles-759643d4abcb6712beaa",
+    "team": "eagles",
+    "name": "MTN SPACING",
+    "group": "Gun",
+    "formation": "Bunch TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-te/mtn-spacing/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/mtn-spacing.jpg",
+    "image": "data/huddle-art/6f04ce3ad48ccee17f8b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          170,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          189,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          209,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            189.0,
+            178.0
+          ],
+          [
+            190.0,
+            109.0
+          ],
+          [
+            312.0,
+            63.0
+          ],
+          [
+            321.0,
+            61.0
+          ],
+          [
+            321.0,
+            64.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            335,
+            148
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            209.0,
+            187.0
+          ],
+          [
+            243.0,
+            160.0
+          ],
+          [
+            253.0,
+            165.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            170.0,
+            187.0
+          ],
+          [
+            169.0,
+            149.0
+          ],
+          [
+            179.0,
+            150.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            323,
+            181
+          ],
+          [
+            323,
+            140
+          ],
+          [
+            525,
+            141
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            270,
+            223
+          ],
+          [
+            240,
+            225
+          ],
+          [
+            50,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-3a45eb796798fc6d5515": {
+    "id": "eagles-3a45eb796798fc6d5515",
+    "team": "eagles",
+    "name": "MTN WR CORNER",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-deuce-close/mtn-wr-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/mtn-wr-corner.jpg",
+    "image": "data/huddle-art/4213e55244f8f49d24b0.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            196.0,
+            109.0
+          ],
+          [
+            199.0,
+            105.0
+          ],
+          [
+            211.0,
+            98.0
+          ],
+          [
+            298.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            354.0,
+            87.0
+          ],
+          [
+            373.0,
+            83.0
+          ],
+          [
+            381.0,
+            77.0
+          ],
+          [
+            399.0,
+            73.0
+          ],
+          [
+            521.0,
+            26.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            337.0,
+            131.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            301.0,
+            161.0
+          ],
+          [
+            301.0,
+            152.0
+          ],
+          [
+            295.0,
+            146.0
+          ],
+          [
+            283.0,
+            141.0
+          ],
+          [
+            202.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            360,
+            192
+          ],
+          [
+            525,
+            173
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-ad5f39a5533508fd6d5b": {
+    "id": "ravens-ad5f39a5533508fd6d5b",
+    "team": "ravens",
+    "name": "MTN WR CORNER",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-deuce-close/mtn-wr-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/mtn-wr-corner.jpg",
+    "image": "data/huddle-art/4213e55244f8f49d24b0.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            196.0,
+            109.0
+          ],
+          [
+            199.0,
+            105.0
+          ],
+          [
+            211.0,
+            98.0
+          ],
+          [
+            298.0,
+            99.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            354.0,
+            87.0
+          ],
+          [
+            373.0,
+            83.0
+          ],
+          [
+            381.0,
+            77.0
+          ],
+          [
+            399.0,
+            73.0
+          ],
+          [
+            521.0,
+            26.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            337.0,
+            131.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            301.0,
+            161.0
+          ],
+          [
+            301.0,
+            152.0
+          ],
+          [
+            295.0,
+            146.0
+          ],
+          [
+            283.0,
+            141.0
+          ],
+          [
+            202.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            360,
+            192
+          ],
+          [
+            525,
+            173
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-bef0a3c9603b6d3ed04e": {
+    "id": "eagles-bef0a3c9603b6d3ed04e",
+    "team": "eagles",
+    "name": "MTN Y CORNER",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-deuce-close/mtn-y-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/mtn-y-corner.jpg",
+    "image": "data/huddle-art/b89fc4ad1d5027af8176.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            145.0,
+            106.0
+          ],
+          [
+            140.0,
+            94.0
+          ],
+          [
+            140.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            178
+          ],
+          [
+            352,
+            94
+          ],
+          [
+            315,
+            94
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            324.0,
+            108.0
+          ],
+          [
+            351.0,
+            100.0
+          ],
+          [
+            355.0,
+            96.0
+          ],
+          [
+            460.0,
+            59.0
+          ],
+          [
+            464.0,
+            55.0
+          ],
+          [
+            521.0,
+            34.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            301.0,
+            152.0
+          ],
+          [
+            292.0,
+            144.0
+          ],
+          [
+            285.0,
+            141.0
+          ],
+          [
+            179.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            371,
+            190
+          ],
+          [
+            371,
+            166
+          ],
+          [
+            385,
+            160
+          ],
+          [
+            270,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-29843a6a1dd63a5d5067": {
+    "id": "ravens-29843a6a1dd63a5d5067",
+    "team": "ravens",
+    "name": "MTN Y CORNER",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-deuce-close/mtn-y-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/mtn-y-corner.jpg",
+    "image": "data/huddle-art/b89fc4ad1d5027af8176.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            145.0,
+            106.0
+          ],
+          [
+            140.0,
+            94.0
+          ],
+          [
+            140.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            178
+          ],
+          [
+            352,
+            94
+          ],
+          [
+            315,
+            94
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            324.0,
+            108.0
+          ],
+          [
+            351.0,
+            100.0
+          ],
+          [
+            355.0,
+            96.0
+          ],
+          [
+            460.0,
+            59.0
+          ],
+          [
+            464.0,
+            55.0
+          ],
+          [
+            521.0,
+            34.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            301.0,
+            152.0
+          ],
+          [
+            292.0,
+            144.0
+          ],
+          [
+            285.0,
+            141.0
+          ],
+          [
+            179.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            371,
+            190
+          ],
+          [
+            371,
+            166
+          ],
+          [
+            385,
+            160
+          ],
+          [
+            270,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-74c574bc59044cf38eec": {
+    "id": "eagles-74c574bc59044cf38eec",
+    "team": "eagles",
+    "name": "MTN Y OPTION",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-deuce-close/mtn-y-option/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/mtn-y-option.jpg",
+    "image": "data/huddle-art/1a18eb38ca4adfcd6e4c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            352.0,
+            66.0
+          ],
+          [
+            365.0,
+            56.0
+          ],
+          [
+            410.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            138.0,
+            140.0
+          ],
+          [
+            137.0,
+            58.0
+          ],
+          [
+            250.0,
+            56.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            323.0,
+            130.0
+          ],
+          [
+            333.0,
+            126.0
+          ],
+          [
+            522.0,
+            126.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            334.0,
+            221.0
+          ],
+          [
+            409.0,
+            216.0
+          ],
+          [
+            471.0,
+            201.0
+          ],
+          [
+            483.0,
+            190.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            371,
+            190
+          ],
+          [
+            360,
+            141
+          ],
+          [
+            223,
+            141
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-a6a6195a059c7d1e84b6": {
+    "id": "ravens-a6a6195a059c7d1e84b6",
+    "team": "ravens",
+    "name": "MTN Y OPTION",
+    "group": "Gun",
+    "formation": "Deuce Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-deuce-close/mtn-y-option/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/mtn-y-option.jpg",
+    "image": "data/huddle-art/1a18eb38ca4adfcd6e4c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            178.0
+          ],
+          [
+            352.0,
+            66.0
+          ],
+          [
+            365.0,
+            56.0
+          ],
+          [
+            410.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            138.0,
+            140.0
+          ],
+          [
+            137.0,
+            58.0
+          ],
+          [
+            250.0,
+            56.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            323.0,
+            130.0
+          ],
+          [
+            333.0,
+            126.0
+          ],
+          [
+            522.0,
+            126.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            334.0,
+            221.0
+          ],
+          [
+            409.0,
+            216.0
+          ],
+          [
+            471.0,
+            201.0
+          ],
+          [
+            483.0,
+            190.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            226,
+            187
+          ],
+          [
+            371,
+            190
+          ],
+          [
+            360,
+            141
+          ],
+          [
+            223,
+            141
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-d6dfd2a0505c924ad9f1": {
+    "id": "eagles-d6dfd2a0505c924ad9f1",
+    "team": "eagles",
+    "name": "CHEAT FLAT X POST",
+    "group": "Gun",
+    "formation": "Normal Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-normal-y-off-close/cheat-flat-x-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/cheat-flat-x-post.jpg",
+    "image": "data/huddle-art/6f79239028caf1a9aaf8.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            89.0
+          ],
+          [
+            243.0,
+            6.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            370.0,
+            91.0
+          ],
+          [
+            244.0,
+            61.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            176.0,
+            162.0
+          ],
+          [
+            171.0,
+            156.0
+          ],
+          [
+            172.0,
+            151.0
+          ],
+          [
+            272.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            305,
+            143
+          ],
+          [
+            195,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": true,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            305,
+            143
+          ],
+          [
+            525,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            321,
+            187
+          ],
+          [
+            240,
+            193
+          ],
+          [
+            155,
+            171
+          ],
+          [
+            50,
+            164
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-d4dcd8ec8b7cf2b00bc0": {
+    "id": "eagles-d4dcd8ec8b7cf2b00bc0",
+    "team": "eagles",
+    "name": "ORBIT STICK N NOD",
+    "group": "Gun",
+    "formation": "Spread Flex Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-spread-flex-wk/orbit-stick-n-nod/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/spread-flex-wk/orbit-stick-n-nod.jpg",
+    "image": "data/huddle-art/eb045c303647bd7e1260.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          170,
+          189
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          376,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            187.0
+          ],
+          [
+            444.0,
+            167.0
+          ],
+          [
+            446.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            89.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            209.0,
+            220.0
+          ],
+          [
+            172.0,
+            220.0
+          ],
+          [
+            122.0,
+            214.0
+          ],
+          [
+            98.0,
+            208.0
+          ],
+          [
+            77.0,
+            193.0
+          ],
+          [
+            69.0,
+            175.0
+          ],
+          [
+            70.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            376.0,
+            178.0
+          ],
+          [
+            374.0,
+            142.0
+          ],
+          [
+            399.0,
+            140.0
+          ],
+          [
+            398.0,
+            132.0
+          ],
+          [
+            315.0,
+            37.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            170,
+            189
+          ],
+          [
+            225,
+            219
+          ],
+          [
+            295,
+            219
+          ],
+          [
+            470,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-fa97fbc231bb13853bf9": {
+    "id": "eagles-fa97fbc231bb13853bf9",
+    "team": "eagles",
+    "name": "ORBIT Y STICK",
+    "group": "Gun",
+    "formation": "Spread Flex Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-spread-flex-wk/orbit-y-stick/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/spread-flex-wk/orbit-y-stick.jpg",
+    "image": "data/huddle-art/c9821392bf6af41c431b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          170,
+          189
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          376,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            187.0
+          ],
+          [
+            444.0,
+            167.0
+          ],
+          [
+            442.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            147.0,
+            157.0
+          ],
+          [
+            147.0,
+            106.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            376.0,
+            178.0
+          ],
+          [
+            374.0,
+            126.0
+          ],
+          [
+            366.0,
+            125.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            201,
+            161
+          ],
+          [
+            195,
+            133
+          ],
+          [
+            25,
+            133
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            170,
+            189
+          ],
+          [
+            225,
+            219
+          ],
+          [
+            295,
+            219
+          ],
+          [
+            470,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-8fb7a6cbdc069066e6fe": {
+    "id": "eagles-8fb7a6cbdc069066e6fe",
+    "team": "eagles",
+    "name": "PA JET SWEEP",
+    "group": "Gun",
+    "formation": "Stack Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-stack-y-off/pa-jet-sweep/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/stack-y-off/pa-jet-sweep.jpg",
+    "image": "data/huddle-art/0712351dc0701c83043b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          435,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            435.0,
+            178.0
+          ],
+          [
+            435.0,
+            88.0
+          ],
+          [
+            307.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192,
+            178
+          ],
+          [
+            192,
+            59
+          ],
+          [
+            104,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            288,
+            193
+          ],
+          [
+            260,
+            165
+          ],
+          [
+            192,
+            164
+          ],
+          [
+            48,
+            129
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            297.0,
+            141.0
+          ],
+          [
+            290.0,
+            136.0
+          ],
+          [
+            154.0,
+            112.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            220,
+            202
+          ],
+          [
+            420,
+            200
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-8b4b6c65e95bf3aca8bf": {
+    "id": "eagles-8b4b6c65e95bf3aca8bf",
+    "team": "eagles",
+    "name": "MTN SLASH WHEEL CROSS",
+    "group": "Gun",
+    "formation": "Tight Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off/mtn-slash-wheel-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/mtn-slash-wheel-cross.jpg",
+    "image": "data/huddle-art/2f59e860b0d94a9f15cb.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            144.0,
+            185.0
+          ],
+          [
+            51.0,
+            156.0
+          ],
+          [
+            39.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            381.0,
+            171.0
+          ],
+          [
+            410.0,
+            140.0
+          ],
+          [
+            410.0,
+            45.0
+          ],
+          [
+            427.0,
+            48.0
+          ],
+          [
+            474.0,
+            74.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            224.0,
+            120.0
+          ],
+          [
+            356.0,
+            105.0
+          ],
+          [
+            357.0,
+            109.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            467.0,
+            191.0
+          ],
+          [
+            498.0,
+            191.0
+          ],
+          [
+            501.0,
+            192.0
+          ],
+          [
+            503.0,
+            201.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            225,
+            190
+          ],
+          [
+            225,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-eac7d04acdb4b1b94481": {
+    "id": "eagles-eac7d04acdb4b1b94481",
+    "team": "eagles",
+    "name": "MTN SPOT Y QUICK",
+    "group": "Gun",
+    "formation": "Tight Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-tight-y-off/mtn-spot-y-quick/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/mtn-spot-y-quick.jpg",
+    "image": "data/huddle-art/7577fe1c7eb0a4ae4b5b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            191.0,
+            59.0
+          ],
+          [
+            107.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            123
+          ],
+          [
+            384,
+            130
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            172.0,
+            132.0
+          ],
+          [
+            174.0,
+            129.0
+          ],
+          [
+            182.0,
+            130.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294.0,
+            213.0
+          ],
+          [
+            325.0,
+            220.0
+          ],
+          [
+            363.0,
+            221.0
+          ],
+          [
+            416.0,
+            216.0
+          ],
+          [
+            441.0,
+            210.0
+          ],
+          [
+            460.0,
+            196.0
+          ],
+          [
+            470.0,
+            180.0
+          ],
+          [
+            469.0,
+            153.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            372,
+            123
+          ],
+          [
+            525,
+            123
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            240,
+            192
+          ],
+          [
+            155,
+            171
+          ],
+          [
+            50,
+            164
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-112322fd13a4cdf47de9": {
+    "id": "eagles-112322fd13a4cdf47de9",
+    "team": "eagles",
+    "name": "H MTN MESH",
+    "group": "Gun",
+    "formation": "Trey Open",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trey-open/h-mtn-mesh/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open/h-mtn-mesh.jpg",
+    "image": "data/huddle-art/0424905fd4078bafb63f.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            445.0,
+            82.0
+          ],
+          [
+            522.0,
+            82.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            333.0,
+            144.0
+          ],
+          [
+            217.0,
+            144.0
+          ],
+          [
+            218.0,
+            142.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            209.0,
+            220.0
+          ],
+          [
+            172.0,
+            220.0
+          ],
+          [
+            122.0,
+            214.0
+          ],
+          [
+            98.0,
+            208.0
+          ],
+          [
+            77.0,
+            193.0
+          ],
+          [
+            69.0,
+            175.0
+          ],
+          [
+            70.0,
+            152.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187.0,
+            178.0
+          ],
+          [
+            220.0,
+            130.0
+          ],
+          [
+            226.0,
+            127.0
+          ],
+          [
+            356.0,
+            127.0
+          ],
+          [
+            356.0,
+            130.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            225,
+            187
+          ],
+          [
+            130,
+            150
+          ],
+          [
+            124,
+            125
+          ],
+          [
+            118,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-d1a1ed46acdb2078ddaa": {
+    "id": "eagles-d1a1ed46acdb2078ddaa",
+    "team": "eagles",
+    "name": "H MTNX SHALLOW CROSS",
+    "group": "Gun",
+    "formation": "Trey Open",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trey-open/h-mtnx-shallow-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trey-open/h-mtnx-shallow-cross.jpg",
+    "image": "data/huddle-art/0f8ba2ea769f802f3bc5.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          178
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          399,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          445,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            445.0,
+            187.0
+          ],
+          [
+            445.0,
+            87.0
+          ],
+          [
+            318.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            357.0,
+            178.0
+          ],
+          [
+            357.0,
+            92.0
+          ],
+          [
+            221.0,
+            91.0
+          ],
+          [
+            222.0,
+            89.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187.0,
+            178.0
+          ],
+          [
+            190.0,
+            171.0
+          ],
+          [
+            197.0,
+            162.0
+          ],
+          [
+            210.0,
+            154.0
+          ],
+          [
+            320.0,
+            154.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            173,
+            158
+          ],
+          [
+            164,
+            165
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            399,
+            187
+          ],
+          [
+            225,
+            187
+          ],
+          [
+            130,
+            150
+          ],
+          [
+            124,
+            125
+          ],
+          [
+            118,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-18b5754314290abf602b": {
+    "id": "eagles-18b5754314290abf602b",
+    "team": "eagles",
+    "name": "CHEAT FLOOD DIVIDE",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/cheat-flood-divide/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/cheat-flood-divide.jpg",
+    "image": "data/huddle-art/11c5cb5e73927f88034b.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          197,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            92.0,
+            159.0
+          ],
+          [
+            92.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            151.0,
+            97.0
+          ],
+          [
+            226.0,
+            47.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303.0,
+            211.0
+          ],
+          [
+            379.0,
+            175.0
+          ],
+          [
+            420.0,
+            173.0
+          ],
+          [
+            522.0,
+            161.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            325.0,
+            88.0
+          ],
+          [
+            522.0,
+            88.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            197,
+            187
+          ],
+          [
+            245,
+            199
+          ],
+          [
+            365,
+            202
+          ],
+          [
+            460,
+            167
+          ],
+          [
+            488,
+            115
+          ],
+          [
+            502,
+            5
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-f17635cdbb69e5fef1b5": {
+    "id": "eagles-f17635cdbb69e5fef1b5",
+    "team": "eagles",
+    "name": "MTN LEVELS Y-CORNER",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/mtn-levels-y--corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/mtn-levels-y--corner.jpg",
+    "image": "data/huddle-art/03a22e9413cd713671f3.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            324.0,
+            62.0
+          ],
+          [
+            411.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150,
+            187
+          ],
+          [
+            138,
+            165
+          ],
+          [
+            138,
+            70
+          ],
+          [
+            150,
+            60
+          ],
+          [
+            290,
+            46
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            196,
+            174
+          ],
+          [
+            235,
+            130
+          ],
+          [
+            375,
+            122
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            102.0,
+            132.0
+          ],
+          [
+            105.0,
+            124.0
+          ],
+          [
+            264.0,
+            125.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            334,
+            211
+          ],
+          [
+            275,
+            225
+          ],
+          [
+            97,
+            211
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-1314e53480636cc81709": {
+    "id": "eagles-1314e53480636cc81709",
+    "team": "eagles",
+    "name": "MTN PA CROSS",
+    "group": "Gun",
+    "formation": "Wing Slot Offset Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing-slot-offset-wk/mtn-pa-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset-wk/mtn-pa-cross.jpg",
+    "image": "data/huddle-art/3122a523681e84c16f8c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            48.0
+          ],
+          [
+            182.0,
+            6.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            350,
+            171
+          ],
+          [
+            350,
+            107
+          ],
+          [
+            340,
+            115
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            277,
+            198
+          ],
+          [
+            470,
+            175
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            326.0,
+            162.0
+          ],
+          [
+            326.0,
+            126.0
+          ],
+          [
+            298.0,
+            93.0
+          ],
+          [
+            160.0,
+            61.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            226,
+            187
+          ],
+          [
+            195,
+            171
+          ],
+          [
+            25,
+            150
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-87489630d4a0aafcb28f": {
+    "id": "eagles-87489630d4a0aafcb28f",
+    "team": "eagles",
+    "name": "MTN PA VERTICALS",
+    "group": "Gun",
+    "formation": "Wing Slot Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-wing-slot-wk/mtn-pa-verticals/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-wk/mtn-pa-verticals.jpg",
+    "image": "data/huddle-art/bfb14f4e65a4fb28f4ea.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            90.0,
+            153.0
+          ],
+          [
+            82.0,
+            139.0
+          ],
+          [
+            82.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            176.0,
+            58.0
+          ],
+          [
+            219.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            429.0,
+            189.0
+          ],
+          [
+            433.0,
+            189.0
+          ],
+          [
+            433.0,
+            192.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            91.0
+          ],
+          [
+            453.0,
+            7.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            225,
+            190
+          ],
+          [
+            240,
+            110
+          ],
+          [
+            292,
+            50
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-2c8b6ace500b4d1a87a8": {
+    "id": "ravens-2c8b6ace500b4d1a87a8",
+    "team": "ravens",
+    "name": "MTN PA VERTICALS",
+    "group": "Gun",
+    "formation": "Wing Slot Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-wing-slot-wk/mtn-pa-verticals/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-wk/mtn-pa-verticals.jpg",
+    "image": "data/huddle-art/bfb14f4e65a4fb28f4ea.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            90.0,
+            153.0
+          ],
+          [
+            82.0,
+            139.0
+          ],
+          [
+            82.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            176.0,
+            58.0
+          ],
+          [
+            219.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            429.0,
+            189.0
+          ],
+          [
+            433.0,
+            189.0
+          ],
+          [
+            433.0,
+            192.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            91.0
+          ],
+          [
+            453.0,
+            7.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            340,
+            187
+          ],
+          [
+            225,
+            190
+          ],
+          [
+            240,
+            110
+          ],
+          [
+            292,
+            50
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-08b56dff2e08ce0e93b1": {
+    "id": "ravens-08b56dff2e08ce0e93b1",
+    "team": "ravens",
+    "name": "RELOAD FLOOD X-CHOICE",
+    "group": "Gun",
+    "formation": "Bunch Open Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-open-offset/reload-flood-x--choice/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/reload-flood-x--choice.jpg",
+    "image": "data/huddle-art/94c46a0ab0879a5f596c.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          119,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          391,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          411,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177,
+            178
+          ],
+          [
+            64,
+            135
+          ],
+          [
+            52,
+            81
+          ],
+          [
+            53,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            442,
+            166
+          ],
+          [
+            472,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            391,
+            187
+          ],
+          [
+            391,
+            150
+          ],
+          [
+            408,
+            142
+          ],
+          [
+            525,
+            136
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            411.0,
+            178.0
+          ],
+          [
+            364.0,
+            133.0
+          ],
+          [
+            365.0,
+            83.0
+          ],
+          [
+            522.0,
+            82.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": true,
+        "points": [
+          [
+            177,
+            178
+          ],
+          [
+            64,
+            135
+          ],
+          [
+            52,
+            81
+          ],
+          [
+            258,
+            77
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            119,
+            187
+          ],
+          [
+            255,
+            213
+          ],
+          [
+            294,
+            213
+          ],
+          [
+            355,
+            180
+          ],
+          [
+            240,
+            104
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-bdfa1a26fbd5d19ec1e1": {
+    "id": "ravens-bdfa1a26fbd5d19ec1e1",
+    "team": "ravens",
+    "name": "BOOMERANG SLOT SWING",
+    "group": "Gun",
+    "formation": "Doubles HB Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-doubles-hb-wk/boomerang-slot-swing/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-hb-wk/boomerang-slot-swing.jpg",
+    "image": "data/huddle-art/06c9349d2e54c00818f6.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          173,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            325.0,
+            87.0
+          ],
+          [
+            523.0,
+            87.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            116.0,
+            102.0
+          ],
+          [
+            158.0,
+            101.0
+          ],
+          [
+            157.0,
+            111.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            187.0
+          ],
+          [
+            430.0,
+            168.0
+          ],
+          [
+            401.0,
+            149.0
+          ],
+          [
+            392.0,
+            144.0
+          ],
+          [
+            381.0,
+            149.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            238.0,
+            213.0
+          ],
+          [
+            209.0,
+            220.0
+          ],
+          [
+            172.0,
+            220.0
+          ],
+          [
+            101.0,
+            209.0
+          ],
+          [
+            78.0,
+            194.0
+          ],
+          [
+            69.0,
+            175.0
+          ],
+          [
+            70.0,
+            151.0
+          ],
+          [
+            67.0,
+            152.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            173,
+            187
+          ],
+          [
+            313,
+            191
+          ],
+          [
+            313,
+            224
+          ],
+          [
+            283,
+            224
+          ],
+          [
+            461,
+            213
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-f63d46625d2125b7c7ff": {
+    "id": "ravens-f63d46625d2125b7c7ff",
+    "team": "ravens",
+    "name": "BOUNCE SHALLOW CROSS",
+    "group": "Gun",
+    "formation": "Trips TE Offset Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-te-offset-wk/bounce-shallow-cross/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-offset-wk/bounce-shallow-cross.jpg",
+    "image": "data/huddle-art/bd9b8bf5be4c0af81dc5.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            147.0,
+            122.0
+          ],
+          [
+            167.0,
+            3.0
+          ],
+          [
+            164.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            103.0,
+            137.0
+          ],
+          [
+            111.0,
+            137.0
+          ],
+          [
+            113.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            187.0
+          ],
+          [
+            197.0,
+            163.0
+          ],
+          [
+            204.0,
+            153.0
+          ],
+          [
+            214.0,
+            149.0
+          ],
+          [
+            325.0,
+            149.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            334.0,
+            159.0
+          ],
+          [
+            334.0,
+            83.0
+          ],
+          [
+            324.0,
+            75.0
+          ],
+          [
+            185.0,
+            74.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            294,
+            213
+          ],
+          [
+            350,
+            185
+          ],
+          [
+            402,
+            155
+          ],
+          [
+            448,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-1ded835a4fa23ebf5524": {
+    "id": "ravens-1ded835a4fa23ebf5524",
+    "team": "ravens",
+    "name": "MTN DRAG SLUGGO",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/mtn-drag-sluggo/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/mtn-drag-sluggo.jpg",
+    "image": "data/huddle-art/500dd1696defa8cc63ff.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            196,
+            165
+          ],
+          [
+            261,
+            90
+          ],
+          [
+            395,
+            84
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384,
+            187
+          ],
+          [
+            384,
+            67
+          ],
+          [
+            485,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328,
+            187
+          ],
+          [
+            328,
+            156
+          ],
+          [
+            288,
+            130
+          ],
+          [
+            275,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            178.0
+          ],
+          [
+            421.0,
+            159.0
+          ],
+          [
+            415.0,
+            156.0
+          ],
+          [
+            299.0,
+            156.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            149,
+            189
+          ],
+          [
+            118,
+            189
+          ],
+          [
+            118,
+            150
+          ],
+          [
+            180,
+            135
+          ],
+          [
+            145,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-e8b25d37472dc34d4cfa": {
+    "id": "ravens-e8b25d37472dc34d4cfa",
+    "team": "ravens",
+    "name": "MTN SLOT FADES",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/mtn-slot-fades/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/mtn-slot-fades.jpg",
+    "image": "data/huddle-art/f094f43201adbdcffa22.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            196.0,
+            140.0
+          ],
+          [
+            170.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328.0,
+            187.0
+          ],
+          [
+            300.0,
+            138.0
+          ],
+          [
+            285.0,
+            139.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433,
+            178
+          ],
+          [
+            408,
+            178
+          ],
+          [
+            350,
+            145
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384.0,
+            187.0
+          ],
+          [
+            385.0,
+            163.0
+          ],
+          [
+            437.0,
+            105.0
+          ],
+          [
+            467.0,
+            34.0
+          ],
+          [
+            476.0,
+            5.0
+          ],
+          [
+            479.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            148,
+            189
+          ],
+          [
+            118,
+            189
+          ],
+          [
+            118,
+            150
+          ],
+          [
+            130,
+            160
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-84fb1860eac95a07fe3a": {
+    "id": "ravens-84fb1860eac95a07fe3a",
+    "team": "ravens",
+    "name": "MTN TRIPLE SLANTS",
+    "group": "Gun",
+    "formation": "Trips X Nasty Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-trips-x-nasty-off-wk/mtn-triple-slants/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-x-nasty-off-wk/mtn-triple-slants.jpg",
+    "image": "data/huddle-art/558e7dcbad06a6d43c63.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          328,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          384,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            178.0
+          ],
+          [
+            432.0,
+            129.0
+          ],
+          [
+            291.0,
+            96.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            328.0,
+            187.0
+          ],
+          [
+            326.0,
+            147.0
+          ],
+          [
+            186.0,
+            115.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            196.0,
+            135.0
+          ],
+          [
+            198.0,
+            133.0
+          ],
+          [
+            206.0,
+            137.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            384.0,
+            187.0
+          ],
+          [
+            384.0,
+            140.0
+          ],
+          [
+            379.0,
+            135.0
+          ],
+          [
+            245.0,
+            104.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            145,
+            189
+          ],
+          [
+            118,
+            189
+          ],
+          [
+            97,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-c6af29e88ba7d94179f5": {
+    "id": "eagles-c6af29e88ba7d94179f5",
+    "team": "eagles",
+    "name": "MTN SMASH SLUGGO",
+    "group": "Gun",
+    "formation": "Bunch X Nasty",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-x-nasty/mtn-smash-sluggo/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/mtn-smash-sluggo.jpg",
+    "image": "data/huddle-art/c3120da42812bb4b1e27.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          335,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            197.0,
+            73.0
+          ],
+          [
+            332.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352.0,
+            187.0
+          ],
+          [
+            409.0,
+            108.0
+          ],
+          [
+            523.0,
+            108.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            335.0,
+            179.0
+          ],
+          [
+            336.0,
+            79.0
+          ],
+          [
+            449.0,
+            7.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            344,
+            183
+          ],
+          [
+            344,
+            128
+          ],
+          [
+            333,
+            138
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            118,
+            187
+          ],
+          [
+            118,
+            156
+          ],
+          [
+            145,
+            151
+          ],
+          [
+            105,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-1f8787b5830415c96173": {
+    "id": "eagles-1f8787b5830415c96173",
+    "team": "eagles",
+    "name": "MTN SPEED DIG UNDER",
+    "group": "Gun",
+    "formation": "Bunch X Nasty",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-bunch-x-nasty/mtn-speed-dig-under/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/mtn-speed-dig-under.jpg",
+    "image": "data/huddle-art/5fe4086456fcfae5b0be.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          335,
+          179
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          353,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            335.0,
+            179.0
+          ],
+          [
+            334.0,
+            160.0
+          ],
+          [
+            310.0,
+            126.0
+          ],
+          [
+            305.0,
+            123.0
+          ],
+          [
+            286.0,
+            93.0
+          ],
+          [
+            212.0,
+            46.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            195.0,
+            91.0
+          ],
+          [
+            26.0,
+            91.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            353,
+            187
+          ],
+          [
+            407,
+            66
+          ],
+          [
+            303,
+            53
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            345,
+            184
+          ],
+          [
+            390,
+            130
+          ],
+          [
+            375,
+            135
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            118,
+            187
+          ],
+          [
+            118,
+            174
+          ],
+          [
+            275,
+            161
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-5596a944605fa28088c3": {
+    "id": "eagles-5596a944605fa28088c3",
+    "team": "eagles",
+    "name": "RETURN BENCH",
+    "group": "Gun",
+    "formation": "Doubles Clamp Stack",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-doubles-clamp-stack/return-bench/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-clamp-stack/return-bench.jpg",
+    "image": "data/huddle-art/01f7494365843f0bb7de.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          158,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            204.0,
+            171.0
+          ],
+          [
+            204.0,
+            89.0
+          ],
+          [
+            300.0,
+            52.0
+          ],
+          [
+            302.0,
+            55.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            352,
+            178
+          ],
+          [
+            352,
+            89
+          ],
+          [
+            485,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            187.0
+          ],
+          [
+            324.0,
+            142.0
+          ],
+          [
+            522.0,
+            142.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            158,
+            187
+          ],
+          [
+            240,
+            219
+          ],
+          [
+            80,
+            213
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-6afdc490c47ed359dfd9": {
+    "id": "eagles-6afdc490c47ed359dfd9",
+    "team": "eagles",
+    "name": "MTN SNAG CURLS",
+    "group": "Gun",
+    "formation": "Normal Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-normal-y-off-close/mtn-snag-curls/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/mtn-snag-curls.jpg",
+    "image": "data/huddle-art/4e4614f6ba5402233937.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            104.0,
+            156.0
+          ],
+          [
+            104.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            201.0,
+            172.0
+          ],
+          [
+            201.0,
+            81.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            371.0,
+            166.0
+          ],
+          [
+            349.0,
+            148.0
+          ],
+          [
+            337.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            187
+          ],
+          [
+            525,
+            155
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            270,
+            223
+          ],
+          [
+            240,
+            225
+          ],
+          [
+            50,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-1a625978c8f74cea24eb": {
+    "id": "ravens-1a625978c8f74cea24eb",
+    "team": "ravens",
+    "name": "MTN SNAG CURLS",
+    "group": "Gun",
+    "formation": "Normal Y Off Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-normal-y-off-close/mtn-snag-curls/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/mtn-snag-curls.jpg",
+    "image": "data/huddle-art/4e4614f6ba5402233937.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            104.0,
+            156.0
+          ],
+          [
+            104.0,
+            73.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            201.0,
+            172.0
+          ],
+          [
+            201.0,
+            81.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            371.0,
+            166.0
+          ],
+          [
+            349.0,
+            148.0
+          ],
+          [
+            337.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            321,
+            187
+          ],
+          [
+            525,
+            155
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            270,
+            223
+          ],
+          [
+            240,
+            225
+          ],
+          [
+            50,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-ac479ecbaadf3bf35f53": {
+    "id": "eagles-ac479ecbaadf3bf35f53",
+    "team": "eagles",
+    "name": "ORBIT Y SAIL",
+    "group": "Gun",
+    "formation": "Spread Flex Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-spread-flex-wk/orbit-y-sail/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/spread-flex-wk/orbit-y-sail.jpg",
+    "image": "data/huddle-art/f0b70824901dbbd494ec.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          170,
+          189
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          376,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          433,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116.0,
+            178.0
+          ],
+          [
+            117.0,
+            99.0
+          ],
+          [
+            247.0,
+            51.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            433.0,
+            187.0
+          ],
+          [
+            444.0,
+            167.0
+          ],
+          [
+            444,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            376.0,
+            178.0
+          ],
+          [
+            370.0,
+            171.0
+          ],
+          [
+            364.0,
+            156.0
+          ],
+          [
+            364.0,
+            97.0
+          ],
+          [
+            367.0,
+            92.0
+          ],
+          [
+            379.0,
+            86.0
+          ],
+          [
+            522.0,
+            71.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            42,
+            162
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            170,
+            189
+          ],
+          [
+            225,
+            219
+          ],
+          [
+            295,
+            219
+          ],
+          [
+            470,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-c60bc62adf02c2764036": {
+    "id": "eagles-c60bc62adf02c2764036",
+    "team": "eagles",
+    "name": "FAKE JET HB SEAM",
+    "group": "Gun",
+    "formation": "Stack Y Off",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-stack-y-off/fake-jet-hb-seam/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/stack-y-off/fake-jet-hb-seam.jpg",
+    "image": "data/huddle-art/e15ec02fb84bd5dc8f21.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          435,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            159.0,
+            120.0
+          ],
+          [
+            130.0,
+            119.0
+          ],
+          [
+            130.0,
+            95.0
+          ],
+          [
+            116.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            435.0,
+            178.0
+          ],
+          [
+            447.0,
+            158.0
+          ],
+          [
+            447.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            189.0
+          ],
+          [
+            322.0,
+            169.0
+          ],
+          [
+            279.0,
+            94.0
+          ],
+          [
+            161.0,
+            58.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            415,
+            145
+          ],
+          [
+            395,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            177,
+            187
+          ],
+          [
+            220,
+            202
+          ],
+          [
+            365,
+            193
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-fc0418a59e6d709adcc3": {
+    "id": "eagles-fc0418a59e6d709adcc3",
+    "team": "eagles",
+    "name": "CHEAT CLEAROUT SEAM",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/cheat-clearout-seam/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/cheat-clearout-seam.jpg",
+    "image": "data/huddle-art/3b04032e54ca25c32f5e.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          196,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            123.0,
+            123.0
+          ],
+          [
+            114.0,
+            94.0
+          ],
+          [
+            114.0,
+            3.0
+          ],
+          [
+            111.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            103.0,
+            124.0
+          ],
+          [
+            107.0,
+            123.0
+          ],
+          [
+            113.0,
+            127.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            323.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            359,
+            160
+          ],
+          [
+            286,
+            125
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            196,
+            187
+          ],
+          [
+            245,
+            199
+          ],
+          [
+            365,
+            202
+          ],
+          [
+            460,
+            167
+          ],
+          [
+            488,
+            115
+          ],
+          [
+            502,
+            5
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-c0309263ade888a6afd1": {
+    "id": "eagles-c0309263ade888a6afd1",
+    "team": "eagles",
+    "name": "MTN FK SCREEN WHEEL",
+    "group": "Gun",
+    "formation": "Trips TE",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te/mtn-fk-screen-wheel/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/mtn-fk-screen-wheel.jpg",
+    "image": "data/huddle-art/fd5ecc767ba799a61ac7.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          197,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          303,
+          211
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          323,
+          181
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104,
+            178
+          ],
+          [
+            104,
+            60
+          ],
+          [
+            190,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            197.0,
+            187.0
+          ],
+          [
+            91.0,
+            148.0
+          ],
+          [
+            82.0,
+            142.0
+          ],
+          [
+            76.0,
+            125.0
+          ],
+          [
+            51.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            337.0,
+            167.0
+          ],
+          [
+            337.0,
+            156.0
+          ],
+          [
+            324.0,
+            131.0
+          ],
+          [
+            316.0,
+            128.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150,
+            187
+          ],
+          [
+            196,
+            76
+          ],
+          [
+            257,
+            35
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            303,
+            211
+          ],
+          [
+            334,
+            211
+          ],
+          [
+            275,
+            225
+          ],
+          [
+            97,
+            211
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-4b962fb8a0eda2ab6dee": {
+    "id": "eagles-4b962fb8a0eda2ab6dee",
+    "team": "eagles",
+    "name": "MTN Y POST",
+    "group": "Gun",
+    "formation": "Trips TE Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-trips-te-flex/mtn-y-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te-flex/mtn-y-post.jpg",
+    "image": "data/huddle-art/41553b54a6ed27c94ab5.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          104,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          150,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          197,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          343,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            104.0,
+            178.0
+          ],
+          [
+            103.0,
+            137.0
+          ],
+          [
+            78.0,
+            3.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            150.0,
+            187.0
+          ],
+          [
+            150.0,
+            162.0
+          ],
+          [
+            143.0,
+            153.0
+          ],
+          [
+            145.0,
+            151.0
+          ],
+          [
+            244.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            343.0,
+            178.0
+          ],
+          [
+            342.0,
+            100.0
+          ],
+          [
+            264.0,
+            76.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            399,
+            147
+          ],
+          [
+            525,
+            138
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            197,
+            187
+          ],
+          [
+            325,
+            192
+          ],
+          [
+            420,
+            170
+          ],
+          [
+            470,
+            1
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-a0fd05ba219769c9a861": {
+    "id": "eagles-a0fd05ba219769c9a861",
+    "team": "eagles",
+    "name": "BOUNCE DASH CROSSER",
+    "group": "Gun",
+    "formation": "Y Off Trio Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/gun-y-off-trio-close/bounce-dash-crosser/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/bounce-dash-crosser.jpg",
+    "image": "data/huddle-art/1cd0825e1ce1e2837c6e.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          362,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          382,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            382.0,
+            187.0
+          ],
+          [
+            385.0,
+            176.0
+          ],
+          [
+            436.0,
+            68.0
+          ],
+          [
+            436.0,
+            56.0
+          ],
+          [
+            420.0,
+            22.0
+          ],
+          [
+            415.0,
+            3.0
+          ],
+          [
+            413.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362,
+            178
+          ],
+          [
+            362,
+            139
+          ],
+          [
+            320,
+            88
+          ],
+          [
+            162,
+            65
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187.0,
+            178.0
+          ],
+          [
+            215.0,
+            125.0
+          ],
+          [
+            221.0,
+            120.0
+          ],
+          [
+            352.0,
+            106.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            254,
+            213
+          ],
+          [
+            273,
+            200
+          ],
+          [
+            320,
+            207
+          ],
+          [
+            485,
+            188
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-04c50ebab4c15cdc2083": {
+    "id": "eagles-04c50ebab4c15cdc2083",
+    "team": "eagles",
+    "name": "MTN SPOT",
+    "group": "Singleback",
+    "formation": "Wing Pair Heavy",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-wing-pair-heavy/mtn-spot/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-pair-heavy/mtn-spot.jpg",
+    "image": "data/huddle-art/bbf5d32c7b9c3ec63f07.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          192
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          183
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          338,
+          187
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          352,
+          193
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            338.0,
+            187.0
+          ],
+          [
+            338.0,
+            97.0
+          ],
+          [
+            521.0,
+            29.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            274.0,
+            220.0
+          ],
+          [
+            467.0,
+            189.0
+          ],
+          [
+            501.0,
+            185.0
+          ],
+          [
+            507.0,
+            185.0
+          ],
+          [
+            506.0,
+            187.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            165.0,
+            154.0
+          ],
+          [
+            164.0,
+            98.0
+          ],
+          [
+            168.0,
+            92.0
+          ],
+          [
+            178.0,
+            86.0
+          ],
+          [
+            312.0,
+            72.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            352,
+            193
+          ],
+          [
+            207,
+            193
+          ],
+          [
+            207,
+            140
+          ],
+          [
+            220,
+            150
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "eagles-f17fb41c9342c5d6fb7b": {
+    "id": "eagles-f17fb41c9342c5d6fb7b",
+    "team": "eagles",
+    "name": "PA JET SWEEP",
+    "group": "Singleback",
+    "formation": "Wing Tight",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/eagles-off/singleback-wing-tight/pa-jet-sweep/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight/pa-jet-sweep.jpg",
+    "image": "data/huddle-art/c90954be4df6a0399daf.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          273,
+          190
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          226,
+          181
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          274,
+          220
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          339,
+          189
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            226.0,
+            181.0
+          ],
+          [
+            225.0,
+            90.0
+          ],
+          [
+            93.0,
+            4.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            339,
+            189
+          ],
+          [
+            339,
+            55
+          ],
+          [
+            293,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            324.0,
+            90.0
+          ],
+          [
+            453.0,
+            7.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            118,
+            187
+          ],
+          [
+            340,
+            205
+          ],
+          [
+            478,
+            199
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            274,
+            220
+          ],
+          [
+            274,
+            190
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-f22bbb7cdb3df181817b": {
+    "id": "ravens-f22bbb7cdb3df181817b",
+    "team": "ravens",
+    "name": "RELOAD SPACING SWITCH",
+    "group": "Gun",
+    "formation": "Bunch Open Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-open-offset/reload-spacing-switch/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/reload-spacing-switch.jpg",
+    "image": "data/huddle-art/fba7b171e1495f662c67.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          119,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          391,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          411,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            178.0
+          ],
+          [
+            177.0,
+            140.0
+          ],
+          [
+            186.0,
+            140.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            411.0,
+            178.0
+          ],
+          [
+            459.0,
+            157.0
+          ],
+          [
+            461.0,
+            131.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            485,
+            128
+          ],
+          [
+            525,
+            127
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            391,
+            187
+          ],
+          [
+            410,
+            170
+          ],
+          [
+            365,
+            135
+          ],
+          [
+            352,
+            140
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            119,
+            187
+          ],
+          [
+            255,
+            213
+          ],
+          [
+            295,
+            213
+          ],
+          [
+            254,
+            155
+          ],
+          [
+            88,
+            155
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-0d30b0d9949cf7c997f2": {
+    "id": "ravens-0d30b0d9949cf7c997f2",
+    "team": "ravens",
+    "name": "MTN DAGGER SIT",
+    "group": "Gun",
+    "formation": "Bunch Y-Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-y--flex/mtn-dagger-sit/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/mtn-dagger-sit.jpg",
+    "image": "data/huddle-art/c9a06295e568c46563c9.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          377,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          396,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            377.0,
+            178.0
+          ],
+          [
+            376,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196,
+            178
+          ],
+          [
+            208,
+            162
+          ],
+          [
+            230,
+            157
+          ],
+          [
+            335,
+            157
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            396.0,
+            187.0
+          ],
+          [
+            435.0,
+            105.0
+          ],
+          [
+            440.0,
+            92.0
+          ],
+          [
+            439.0,
+            87.0
+          ],
+          [
+            338.0,
+            86.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            325,
+            203
+          ],
+          [
+            470,
+            178
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            357,
+            187
+          ],
+          [
+            181,
+            190
+          ],
+          [
+            181,
+            144
+          ],
+          [
+            230,
+            144
+          ],
+          [
+            230,
+            158
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-cdd350492c9cb2a1f471": {
+    "id": "ravens-cdd350492c9cb2a1f471",
+    "team": "ravens",
+    "name": "MTN INSIDE POST",
+    "group": "Gun",
+    "formation": "Bunch Y-Flex",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-bunch-y--flex/mtn-inside-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/mtn-inside-post.jpg",
+    "image": "data/huddle-art/5ab1046ab15cc483055d.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          196,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          357,
+          187
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          377,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          396,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            196.0,
+            178.0
+          ],
+          [
+            145.0,
+            106.0
+          ],
+          [
+            140.0,
+            94.0
+          ],
+          [
+            140.0,
+            2.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            396,
+            187
+          ],
+          [
+            420,
+            143
+          ],
+          [
+            315,
+            143
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            377.0,
+            178.0
+          ],
+          [
+            398.0,
+            101.0
+          ],
+          [
+            398.0,
+            92.0
+          ],
+          [
+            329.0,
+            45.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246,
+            211
+          ],
+          [
+            325,
+            203
+          ],
+          [
+            470,
+            178
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            357,
+            187
+          ],
+          [
+            181,
+            190
+          ],
+          [
+            181,
+            128
+          ],
+          [
+            190,
+            140
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-55b41629ad1603d52fca": {
+    "id": "ravens-55b41629ad1603d52fca",
+    "team": "ravens",
+    "name": "SHUFFLE HB CORNER",
+    "group": "Gun",
+    "formation": "Tight Y Off Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-tight-y-off-wk/shuffle-hb-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/shuffle-hb-corner.jpg",
+    "image": "data/huddle-art/3ad7f84542215a5cf805.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          172,
+          187
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          192,
+          178
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          255,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          321,
+          188
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          372,
+          178
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            192.0,
+            178.0
+          ],
+          [
+            154.0,
+            134.0
+          ],
+          [
+            153.0,
+            55.0
+          ],
+          [
+            162.0,
+            48.0
+          ],
+          [
+            231.0,
+            26.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372.0,
+            178.0
+          ],
+          [
+            371.0,
+            110.0
+          ],
+          [
+            361.0,
+            103.0
+          ],
+          [
+            222.0,
+            101.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            172.0,
+            187.0
+          ],
+          [
+            147.0,
+            175.0
+          ],
+          [
+            126.0,
+            173.0
+          ],
+          [
+            75.0,
+            162.0
+          ],
+          [
+            72.0,
+            159.0
+          ],
+          [
+            26.0,
+            151.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            255,
+            213
+          ],
+          [
+            226,
+            213
+          ],
+          [
+            205,
+            131
+          ],
+          [
+            25,
+            48
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "blue",
+        "kind": "block",
+        "optional": false,
+        "points": [
+          [
+            321,
+            188
+          ],
+          [
+            470,
+            152
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-30f2964842b132f6146c": {
+    "id": "ravens-30f2964842b132f6146c",
+    "team": "ravens",
+    "name": "MTN WR ANGLE POST",
+    "group": "Gun",
+    "formation": "Wing Slot Offset",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-wing-slot-offset/mtn-wr-angle-post/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset/mtn-wr-angle-post.jpg",
+    "image": "data/huddle-art/2068b9548b079cfe426a.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          205
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          116,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          177,
+          187
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          323,
+          181
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          340,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            323.0,
+            181.0
+          ],
+          [
+            324.0,
+            101.0
+          ],
+          [
+            469.0,
+            49.0
+          ],
+          [
+            522.0,
+            27.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            340.0,
+            187.0
+          ],
+          [
+            340.0,
+            142.0
+          ],
+          [
+            522.0,
+            142.0
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            177.0,
+            187.0
+          ],
+          [
+            89.0,
+            148.0
+          ],
+          [
+            81.0,
+            143.0
+          ],
+          [
+            80.0,
+            137.0
+          ],
+          [
+            123.0,
+            106.0
+          ],
+          [
+            187.0,
+            66.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            116,
+            178
+          ],
+          [
+            135,
+            150
+          ],
+          [
+            256,
+            150
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            294,
+            213
+          ],
+          [
+            270,
+            223
+          ],
+          [
+            240,
+            225
+          ],
+          [
+            50,
+            196
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-3e40d279a11e7ef5628d": {
+    "id": "ravens-3e40d279a11e7ef5628d",
+    "team": "ravens",
+    "name": "MTN X-DIG SLOT CORNER",
+    "group": "Gun",
+    "formation": "Y Off Trio Close",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-close/mtn-x--dig-slot-corner/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/mtn-x--dig-slot-corner.jpg",
+    "image": "data/huddle-art/1aeadd24c9ef09f8b203.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          204
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          187,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          294,
+          213
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          362,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          382,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E1",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            187.0,
+            178.0
+          ],
+          [
+            188.0,
+            85.0
+          ],
+          [
+            322.0,
+            85.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            382.0,
+            187.0
+          ],
+          [
+            395.0,
+            132.0
+          ],
+          [
+            385.0,
+            123.0
+          ],
+          [
+            345.0,
+            120.0
+          ]
+        ]
+      },
+      {
+        "owner": "E4",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            362.0,
+            178.0
+          ],
+          [
+            340.0,
+            139.0
+          ],
+          [
+            340.0,
+            44.0
+          ],
+          [
+            443.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "owner": "E3",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            323,
+            189
+          ],
+          [
+            216,
+            190
+          ],
+          [
+            216,
+            155
+          ],
+          [
+            25,
+            155
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  },
+  "ravens-e7dac016716007ed60bd": {
+    "id": "ravens-e7dac016716007ed60bd",
+    "team": "ravens",
+    "name": "MTN PA DEEP OVER",
+    "group": "Gun",
+    "formation": "Y Off Trio Wk",
+    "game": "Madden 27",
+    "sourceUrl": "https://huddle.gg/27/playbooks/ravens-off/gun-y-off-trio-wk/mtn-pa-deep-over/",
+    "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/mtn-pa-deep-over.jpg",
+    "image": "data/huddle-art/31ae73f7861e163db9d9.jpg",
+    "traceVersion": 1,
+    "coordinateSystem": {
+      "width": 554,
+      "height": 256,
+      "lineOfScrimmageY": 174
+    },
+    "method": "source-overlay-reviewed-2026-10-28-continued",
+    "players": [
+      {
+        "label": "LT",
+        "at": [
+          242,
+          181
+        ]
+      },
+      {
+        "label": "LG",
+        "at": [
+          258,
+          179
+        ]
+      },
+      {
+        "label": "C",
+        "at": [
+          274,
+          176
+        ]
+      },
+      {
+        "label": "RG",
+        "at": [
+          290,
+          179
+        ]
+      },
+      {
+        "label": "RT",
+        "at": [
+          307,
+          181
+        ]
+      },
+      {
+        "label": "QB",
+        "at": [
+          274,
+          211
+        ]
+      },
+      {
+        "label": "E1",
+        "at": [
+          118,
+          178
+        ]
+      },
+      {
+        "label": "E2",
+        "at": [
+          246,
+          211
+        ]
+      },
+      {
+        "label": "E3",
+        "at": [
+          323,
+          189
+        ]
+      },
+      {
+        "label": "E4",
+        "at": [
+          372,
+          178
+        ]
+      },
+      {
+        "label": "E5",
+        "at": [
+          430,
+          187
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "owner": "E4",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            372,
+            178
+          ],
+          [
+            386,
+            66
+          ],
+          [
+            329,
+            1
+          ]
+        ]
+      },
+      {
+        "owner": "E2",
+        "ink": "yellow",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            246.0,
+            211.0
+          ],
+          [
+            395.0,
+            194.0
+          ]
+        ]
+      },
+      {
+        "owner": "E1",
+        "ink": "red",
+        "kind": "route",
+        "optional": false,
+        "points": [
+          [
+            118.0,
+            178.0
+          ],
+          [
+            118.0,
+            140.0
+          ],
+          [
+            123.0,
+            133.0
+          ],
+          [
+            205.0,
+            96.0
+          ],
+          [
+            217.0,
+            91.0
+          ],
+          [
+            379.0,
+            62.0
+          ]
+        ]
+      },
+      {
+        "owner": "E5",
+        "ink": "white",
+        "kind": "motion",
+        "optional": false,
+        "points": [
+          [
+            430,
+            187
+          ],
+          [
+            362,
+            188
+          ],
+          [
+            263,
+            95
+          ],
+          [
+            118,
+            15
+          ]
+        ]
+      }
+    ],
+    "reviewNotes": [
+      "逐张以原图与路线叠图对照；E1–E5 为站位标签。仅保留可辨认的路线、分支和移动；原图没有可见路线的球员仍可移动。图外路线、真实时序、接球目标与对抗无法从静态图片确认。"
+    ]
+  }
+};

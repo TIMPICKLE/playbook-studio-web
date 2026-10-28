@@ -3,12 +3,12 @@
     "catalogEntries": 1208,
     "previouslyEditable": 20,
     "attemptedRemaining": 1188,
-    "newlyEditable": 124,
-    "editableTotal": 144,
-    "retainedOriginal": 1064,
+    "newlyEditable": 267,
+    "editableTotal": 287,
+    "retainedOriginal": 921,
     "editableByTeam": {
-      "eagles": 86,
-      "ravens": 58
+      "eagles": 161,
+      "ravens": 126
     },
     "date": "2026-10-28",
     "catalogSha256": "ad14b4544f676a23b9a7468079d9a30e00df48ef9e2e9c6a63c551b0e522ded8"
@@ -185,9 +185,9 @@
       "name": "INSIDE POST",
       "formation": "Gun Bunch Quads",
       "image": "data/huddle-art/c165356d2b047fcdf069.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "c98a953185977da7c8ab4e45e87f5fd0efe40a13abf16baa5ead7f866e15943d"
     },
     {
@@ -460,9 +460,9 @@
       "name": "MTN SPACING",
       "formation": "Gun Bunch TE",
       "image": "data/huddle-art/6f04ce3ad48ccee17f8b.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a6985e069da2f972c44a0a07197692f84478f7bcbbd689ae244899db63f1790b"
     },
     {
@@ -537,9 +537,9 @@
       "name": "CORNER OUT DIG",
       "formation": "Gun Bunch X Nasty",
       "image": "data/huddle-art/d4242ee9d5f65307fbdf.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ab615b9e67a3f093998fd0937cee3a577fb6a80a6132f8d6ae6ace4f8a76756c"
     },
     {
@@ -647,9 +647,9 @@
       "name": "MTN SMASH SLUGGO",
       "formation": "Gun Bunch X Nasty",
       "image": "data/huddle-art/c3120da42812bb4b1e27.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "29111ab14865bb39287fb8d9daf0feededefc764d7d98fb4032c79fab27be9f2"
     },
     {
@@ -658,9 +658,9 @@
       "name": "MTN SPEED DIG UNDER",
       "formation": "Gun Bunch X Nasty",
       "image": "data/huddle-art/5fe4086456fcfae5b0be.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1ad404847f7c8d86e1e86ab304df90cd42becfd0792275a4dfa329ae61e2dc3c"
     },
     {
@@ -669,9 +669,9 @@
       "name": "SMASH RETURN",
       "formation": "Gun Bunch X Nasty",
       "image": "data/huddle-art/25eb2263512c442c0eeb.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a7d5dc7c0ef735f320986c773ddc4f2331938389446696f48aacafce06b4c9a2"
     },
     {
@@ -724,9 +724,9 @@
       "name": "BENCH DIG CURL",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/9eb36b43a5400bbaf543.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9ea7e276b38f5294a9cb24d2edb7f36978df34695d364af8d3ff87470a637643"
     },
     {
@@ -779,9 +779,9 @@
       "name": "MTN WR CORNER",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/4213e55244f8f49d24b0.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0f4565ac315af73dd30aae1df45b4dfe21bd1e74e44ea87c291643fc8e066e5b"
     },
     {
@@ -790,9 +790,9 @@
       "name": "MTN Y CORNER",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/b89fc4ad1d5027af8176.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e03a32c4bad4214b1ea7cbee37bb78cc7233628a2e5872bc7356c88eb2617340"
     },
     {
@@ -801,9 +801,9 @@
       "name": "MTN Y OPTION",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/1a18eb38ca4adfcd6e4c.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "69e36fdee392b68d52c78173d39686f1a50bde2ef031a0b92fb374482333084d"
     },
     {
@@ -1010,9 +1010,9 @@
       "name": "RETURN BENCH",
       "formation": "Gun Doubles Clamp Stack",
       "image": "data/huddle-art/01f7494365843f0bb7de.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "30d2a00622b67c10329e1cd172f84b41b705889087b18f515fa8704e0b9bfd3e"
     },
     {
@@ -1065,9 +1065,9 @@
       "name": "TEXAS SMASH",
       "formation": "Gun Doubles Clamp Stack",
       "image": "data/huddle-art/83823e09f9d392c42fcf.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a8d17d200c31ec9828338f6188644bb727520fba68961f3b2e6d7d7bf8c3ea27"
     },
     {
@@ -1230,9 +1230,9 @@
       "name": "HOSS Y JUKE",
       "formation": "Gun Empty Base Flex",
       "image": "data/huddle-art/ce18a4828db8b035b5c1.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "b42d1bf9eec17a972162af94cfb94fecaa45e6fd90df7310e9cb7812354c3e17"
     },
     {
@@ -1285,9 +1285,9 @@
       "name": "RPO ALERT DRAW STICK",
       "formation": "Gun Empty Base Flex",
       "image": "data/huddle-art/915a046628e82455a3d6.jpg",
-      "status": "retained-original",
-      "reason": "visual-review-rejected",
-      "reasonText": "复核后仍有路线或阻挡归属不确定",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1c8f529e91e4e9789d96cc481c97b0d7ea55ead84d2e18af984745b23acb107a"
     },
     {
@@ -1296,9 +1296,9 @@
       "name": "SHOCKWR OPTION",
       "formation": "Gun Empty Base Flex",
       "image": "data/huddle-art/1986ffcd77f104f2889a.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e20082f166f68423c1945120c3da701ec008179bdc9f14f15bca17742f2c29ab"
     },
     {
@@ -1615,9 +1615,9 @@
       "name": "CHEAT FLAT X POST",
       "formation": "Gun Normal Y Off Close",
       "image": "data/huddle-art/6f79239028caf1a9aaf8.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "3e4a86cd04cf3c6db2fd2b259d189c0f5a816aae8ffe4a5a832db55df890211a"
     },
     {
@@ -1736,9 +1736,9 @@
       "name": "MTN SNAG CURLS",
       "formation": "Gun Normal Y Off Close",
       "image": "data/huddle-art/4e4614f6ba5402233937.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "511fdf995fea56d82c6c5cf36a2fe263d65530e36dce74e4483a8b78581635b1"
     },
     {
@@ -1824,9 +1824,9 @@
       "name": "Y-SAIL",
       "formation": "Gun Normal Y Off Close",
       "image": "data/huddle-art/b66bf8ea4576f2123afe.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9d5b7f38c1a9c309d9f64fde99476a717e637943b0567dd7d8273a97cb4c1bd2"
     },
     {
@@ -2176,9 +2176,9 @@
       "name": "ORBIT STICK N NOD",
       "formation": "Gun Spread Flex Wk",
       "image": "data/huddle-art/eb045c303647bd7e1260.jpg",
-      "status": "retained-original",
-      "reason": "incomplete_assignments",
-      "reasonText": "路线归属未完整恢复",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "8c7e0c46f763453ba49d0f3c82b8b72be1bc50d72e51c024b0def70f5cad4fe3"
     },
     {
@@ -2187,9 +2187,9 @@
       "name": "ORBIT Y SAIL",
       "formation": "Gun Spread Flex Wk",
       "image": "data/huddle-art/f0b70824901dbbd494ec.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "94add09d82e653f1fd1f08f4035cce232c3db4ff0e04171cf97bef4342fcd3fc"
     },
     {
@@ -2198,9 +2198,9 @@
       "name": "ORBIT Y STICK",
       "formation": "Gun Spread Flex Wk",
       "image": "data/huddle-art/c9821392bf6af41c431b.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "3fe000b5dd425cdba9450f9cf6fc8aeffc85efae2f4441ba92a46ed1652d2aa9"
     },
     {
@@ -2297,9 +2297,9 @@
       "name": "FAKE JET HB SEAM",
       "formation": "Gun Stack Y Off",
       "image": "data/huddle-art/e15ec02fb84bd5dc8f21.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1badd50b15d3d8afb73e0dd8ebf0ec7d36f49c8e4ccf7e9bad8113f6d6b9a952"
     },
     {
@@ -2374,9 +2374,9 @@
       "name": "LEVELS",
       "formation": "Gun Stack Y Off",
       "image": "data/huddle-art/2adff64051b07ad1fd94.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "468634370f41c1d4c75395ed8b0c1d37df8f67fb45c9102e5b8b5d6d78548f3a"
     },
     {
@@ -2385,9 +2385,9 @@
       "name": "PA JET SWEEP",
       "formation": "Gun Stack Y Off",
       "image": "data/huddle-art/0712351dc0701c83043b.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "b3ed030f5d365f19f9e40c6a428b10fe9a528686bcacf21ab499c222b1a75af9"
     },
     {
@@ -2396,9 +2396,9 @@
       "name": "SWITCH WR DRAG",
       "formation": "Gun Stack Y Off",
       "image": "data/huddle-art/518308aaf78d18f692ce.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "5b4ddab43aa31d8d91e2c8a7398b377a1b48ebf4cb68246582368273c08ec4c0"
     },
     {
@@ -2451,9 +2451,9 @@
       "name": "CHOICE PIVOT RETURN",
       "formation": "Gun Tight Y Off",
       "image": "data/huddle-art/648b52b5710400ae9977.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "d7f8f8478072275751f7a8ff6f11d94f93f10395a2a5e9c731fad4b541153592"
     },
     {
@@ -2462,9 +2462,9 @@
       "name": "DOUBLE INS STACK OUT",
       "formation": "Gun Tight Y Off",
       "image": "data/huddle-art/93f07e4af6ced8df7e06.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "40fe7fd0eb908a14a828fb88b5865447f497864a266993c904e2e3425ee6af5f"
     },
     {
@@ -2583,9 +2583,9 @@
       "name": "MTN SLASH WHEEL CROSS",
       "formation": "Gun Tight Y Off",
       "image": "data/huddle-art/2f59e860b0d94a9f15cb.jpg",
-      "status": "retained-original",
-      "reason": "incomplete_assignments",
-      "reasonText": "路线归属未完整恢复",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "6c510ba44a89dedad2c18c3aafefdbd931a00f717fcd53e961d7cc7156f94fd1"
     },
     {
@@ -2616,9 +2616,9 @@
       "name": "MTN SPOT Y QUICK",
       "formation": "Gun Tight Y Off",
       "image": "data/huddle-art/7577fe1c7eb0a4ae4b5b.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "af6ef8f9b8ce4d6a3a743f9a9aee15e2f73cf10c5896b38d93a1af5bb7efb560"
     },
     {
@@ -2715,9 +2715,9 @@
       "name": "CURLS",
       "formation": "Gun Tight Y Off Wk",
       "image": "data/huddle-art/465503f7dfcae48314fe.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "3f3721768862c1f7ba037a1a629c171bb30788adff8dc4c07a050e7e0553897e"
     },
     {
@@ -2726,9 +2726,9 @@
       "name": "DIG HB OPTION",
       "formation": "Gun Tight Y Off Wk",
       "image": "data/huddle-art/86747c915e7c12d2aa5c.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "d168043a1f72767f2ed56b2ce930585358a1d9562d055cb8fe44fd243ded08a5"
     },
     {
@@ -2792,9 +2792,9 @@
       "name": "POST WHEEL DRAG",
       "formation": "Gun Tight Y Off Wk",
       "image": "data/huddle-art/9be4c671e66a3f6c70ae.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9a169f3892787f2504364f7236ce2d4267a3444ac774fcf0d9ad11951bd223d7"
     },
     {
@@ -2847,9 +2847,9 @@
       "name": "WR UNDER",
       "formation": "Gun Tight Y Off Wk",
       "image": "data/huddle-art/fc1a65b7e8bcdd6e8770.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "b9e8b4eda8cf22bcc78869c74f2a8450fbb8b59466858426e24745e02a7c9011"
     },
     {
@@ -2924,9 +2924,9 @@
       "name": "H MTN MESH",
       "formation": "Gun Trey Open",
       "image": "data/huddle-art/0424905fd4078bafb63f.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "f4d9a94ea5bae387137d85db709c296176dae712c0b91c3e5c59ff38039dd663"
     },
     {
@@ -2935,9 +2935,9 @@
       "name": "H MTNX SHALLOW CROSS",
       "formation": "Gun Trey Open",
       "image": "data/huddle-art/0f8ba2ea769f802f3bc5.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "3734fbccd2183d36b6026c8a4472551bedf49d37a3582fbba0115a03b8b30712"
     },
     {
@@ -3100,9 +3100,9 @@
       "name": "CHEAT CLEAROUT SEAM",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/3b04032e54ca25c32f5e.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e09db98b672b9c956f61cd10373d95d0c6b70e5786f2df5bcc9c24a9c7d0755f"
     },
     {
@@ -3111,9 +3111,9 @@
       "name": "CHEAT FLOOD DIVIDE",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/11c5cb5e73927f88034b.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "d90d52c1e7a6d091bd48395946742245d752986096a0f045b9c76fafee0828b0"
     },
     {
@@ -3133,9 +3133,9 @@
       "name": "CROSS UNDER",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/41d723572f7437d4bd9b.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "2178325105f640b5024d88c81ef3542818af5612fe5ea70c6bbd38579ea0532d"
     },
     {
@@ -3155,9 +3155,9 @@
       "name": "FLOOD",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/9d9747c8bd834cc9d75e.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "c61340b6f2c95fa6a4d6d37ae0a8ed2c9a0bcaad9df1842cc1e0777e31fe5ef8"
     },
     {
@@ -3199,9 +3199,9 @@
       "name": "MTN FK SCREEN WHEEL",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/fd5ecc767ba799a61ac7.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0a25c71abcbf1983dd774360f31cce25bd747ba80f447bbb9769be59becbd984"
     },
     {
@@ -3221,9 +3221,9 @@
       "name": "MTN LEVELS Y-CORNER",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/03a22e9413cd713671f3.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "c9b6502347bee0e419dc1abd3eb2b70f93ae0e98a02bc0ecc8f6edc30db8dddd"
     },
     {
@@ -3287,9 +3287,9 @@
       "name": "SLOT QUICK FLAT",
       "formation": "Gun Trips TE",
       "image": "data/huddle-art/a24ab5a2f94b8db49d9f.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "4cf5862278080c6f4b5585722ecc7b1ad6f73492f3e9e4dd0c5e7b76bf5c0088"
     },
     {
@@ -3408,9 +3408,9 @@
       "name": "MTN Y POST",
       "formation": "Gun Trips TE Flex",
       "image": "data/huddle-art/41553b54a6ed27c94ab5.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "20c1f6f21cb78ea5ca2f87a9e797d8943de8f833057fbb5d73e25d420cef599d"
     },
     {
@@ -3628,9 +3628,9 @@
       "name": "SLOT 2 BUC",
       "formation": "Gun Wing",
       "image": "data/huddle-art/01c7c5a1537eacd18aef.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9d190ae81b4c1f6e21c16955464e8d332d2d9c913e17b2a7722f4d42be594d6b"
     },
     {
@@ -3650,9 +3650,9 @@
       "name": "SPOT TE SEAM",
       "formation": "Gun Wing",
       "image": "data/huddle-art/a2c396b35ab0635f7458.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0df7477e2d3eae9d5b8b7ffb00f2831cf2c6430ca99607456f65d0fdbc5ddbeb"
     },
     {
@@ -3683,9 +3683,9 @@
       "name": "Y DRIVE CLOWN",
       "formation": "Gun Wing",
       "image": "data/huddle-art/dce0b2a01122c4d3a566.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "487f9bda9b0ec6853436181d8d89051b581ea402327ccf208c966a10027ccb02"
     },
     {
@@ -3848,9 +3848,9 @@
       "name": "MTN PA CROSS",
       "formation": "Gun Wing Slot Offset Wk",
       "image": "data/huddle-art/3122a523681e84c16f8c.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0ec1ef7bdd6350a42c8edff5e36b4d0bda202639314537b5f6c0e09b40e93242"
     },
     {
@@ -3925,9 +3925,9 @@
       "name": "FOUR VERTICALS",
       "formation": "Gun Wing Slot Wk",
       "image": "data/huddle-art/19230766433d10f0ab00.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "976be17fd9474fa9b9610fb4dd8e51632738188586f46a1f65035a7b30fa1a20"
     },
     {
@@ -3991,9 +3991,9 @@
       "name": "MTN PA VERTICALS",
       "formation": "Gun Wing Slot Wk",
       "image": "data/huddle-art/bfb14f4e65a4fb28f4ea.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "fca6df58829d42e5d9cd438c6c199852de41e755f02338854bf0e455d822e9a8"
     },
     {
@@ -4123,9 +4123,9 @@
       "name": "OHIO SPACING",
       "formation": "Gun Wing Stack",
       "image": "data/huddle-art/25c38dc9f629e0bbf1d0.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "b3cae366e038657405dcdfbbe0678eb6bee40ccb0e63d22224bf283d7ec1de66"
     },
     {
@@ -4178,9 +4178,9 @@
       "name": "STICK",
       "formation": "Gun Wing Stack",
       "image": "data/huddle-art/a987e8b623edeb44fbed.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9898a466287750cf737bca5c9f8e1e7dc08105b6ddaa41bd09eb5d7cad9ff8cf"
     },
     {
@@ -4233,9 +4233,9 @@
       "name": "BOUNCE DASH CROSSER",
       "formation": "Gun Y Off Trio Close",
       "image": "data/huddle-art/1cd0825e1ce1e2837c6e.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "2b6d1590bf502f48ec27fc963956b1ca02c1e827176ffb28a61b297fddbbde9b"
     },
     {
@@ -4277,9 +4277,9 @@
       "name": "DASH FLOOD",
       "formation": "Gun Y Off Trio Close",
       "image": "data/huddle-art/39f01b5941f59ccf7d0d.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "cbd030c50a00b2324e8cd15f789f232a0862ddc6a1f8d5f77b17c32b388d1c8c"
     },
     {
@@ -4442,9 +4442,9 @@
       "name": "SMASH RETURN",
       "formation": "Gun Y Off Trio Close",
       "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "d1337527de5c3222dd002f911387a956e394ec1bb95e4ea7f5c40368f8dd957e"
     },
     {
@@ -4673,9 +4673,9 @@
       "name": "PA SCISSORS",
       "formation": "I Form Pro",
       "image": "data/huddle-art/3ab68031a686a704dbbc.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e7d980d84ced60f0c029a2fdf77efd3b94c047ed7f4fe388741872c5eb6c98f7"
     },
     {
@@ -4684,9 +4684,9 @@
       "name": "PA WEAK FLOOD",
       "formation": "I Form Pro",
       "image": "data/huddle-art/062f6537c62f4f7e4b73.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "644972c438238952fe4df3355ee90b13c365fbade8adc23f0d657ca5a3753d69"
     },
     {
@@ -4706,9 +4706,9 @@
       "name": "TEXAS",
       "formation": "I Form Pro",
       "image": "data/huddle-art/35634d2c34002471d244.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "47911fdc22a2f3164c16b1f14e732ca10a46ccb0f5d6cf7aca49dd5dae5574cd"
     },
     {
@@ -4783,9 +4783,9 @@
       "name": "PA TE CORNER",
       "formation": "I Form Tight",
       "image": "data/huddle-art/5ad23e343020dce22edc.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "2b6b094558ce792d95eaabc5066754b3e700fc4c524508eec9de5c736c18846b"
     },
     {
@@ -4959,9 +4959,9 @@
       "name": "DASH FLOOD",
       "formation": "Pistol Bunch",
       "image": "data/huddle-art/7ba1dc7890e621c7f8d9.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "437289e65a5d41f773cccbcbf759a98b4012173104987044f47312eab021198d"
     },
     {
@@ -4970,9 +4970,9 @@
       "name": "DASH SLOT CORNER",
       "formation": "Pistol Bunch",
       "image": "data/huddle-art/6aaa9fb6871f185b1a15.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9f399d5eea450aee3250a4d4a49cc43217363fe60be714f94cd0f186611000a6"
     },
     {
@@ -5168,9 +5168,9 @@
       "name": "SEATTLE",
       "formation": "Pistol Bunch",
       "image": "data/huddle-art/54a9112dd9b301f9b41e.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "736f3c59fd0b1188a6361f83de99fc9d69e59550aaac4c5cdf45970d69bd285d"
     },
     {
@@ -5190,9 +5190,9 @@
       "name": "SPACING",
       "formation": "Pistol Bunch",
       "image": "data/huddle-art/e48b5cae43797287a68d.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "fb99ac85e1ace611978de07f21dcff9d19d4f4f95fc41e0caa630c2c668b3db6"
     },
     {
@@ -5267,9 +5267,9 @@
       "name": "INSIDE CROSS",
       "formation": "Pistol Deuce",
       "image": "data/huddle-art/615c4a8a8f13bbebb2ac.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "593767906a41ec325ef8a775d4fccf9f29023961a12cb1904d09e044c3961588"
     },
     {
@@ -5300,9 +5300,9 @@
       "name": "SHORT POST",
       "formation": "Pistol Deuce",
       "image": "data/huddle-art/91fb0fea6155ad5589bd.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "80c2a48c54fb5637d54d1f8d14ea41faa6a10488c654391bb29f1e25e03dc129"
     },
     {
@@ -5388,9 +5388,9 @@
       "name": "PA Z OVER",
       "formation": "Pistol Deuce Close",
       "image": "data/huddle-art/a311cb1f4c8ed80b1555.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ba2ebaf14067054bf9d69af72876b448cc0f6a0fe1ec17a39d7e47f6ead51a38"
     },
     {
@@ -5597,9 +5597,9 @@
       "name": "Y CROSS",
       "formation": "Pistol Strong Y Off Close",
       "image": "data/huddle-art/1358eec442689cb68f1d.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "2968c41c77cc7247ff3dc143c7f2f07be7f6f36c587b76b3bdb082a6c9fb8c1c"
     },
     {
@@ -5685,9 +5685,9 @@
       "name": "WR UNDER",
       "formation": "Pistol Wing Flex Close",
       "image": "data/huddle-art/b6b6bb42f5061f6ff3af.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1545d8ff8c66e3a2ea80987de25a1af0235eec755b4477e7e172ea22324d4396"
     },
     {
@@ -5993,9 +5993,9 @@
       "name": "DRIVE FLOOD",
       "formation": "Singleback Tight Y Off",
       "image": "data/huddle-art/27331c4a837613553f7a.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "17fde1a268ab25889c5a516824d968c698dba9bc370d56bc0f01409a6e8aabfe"
     },
     {
@@ -6048,9 +6048,9 @@
       "name": "OMAHA",
       "formation": "Singleback Tight Y Off",
       "image": "data/huddle-art/2ecac828cfda1f20b3fb.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9423e2bcffc3c0140cbc10234ab53088010bac16e6ae729f5c2b902de08b1338"
     },
     {
@@ -6158,9 +6158,9 @@
       "name": "CURL COMBO",
       "formation": "Singleback Wing",
       "image": "data/huddle-art/904877d501c45d9221e2.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "b2ce90946f769ab2a5982eb57b194edec46a7e680969b87d641688cdf2da5f3b"
     },
     {
@@ -6169,9 +6169,9 @@
       "name": "DRIVE",
       "formation": "Singleback Wing",
       "image": "data/huddle-art/fe3dc44ef1596014e17b.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "7fa486358bded7fd6178653aaf76e62eb7f02127be35d3196d6963f4da574d98"
     },
     {
@@ -6455,9 +6455,9 @@
       "name": "MTN SPOT",
       "formation": "Singleback Wing Pair Heavy",
       "image": "data/huddle-art/bbf5d32c7b9c3ec63f07.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ae1b6be997386dbf16e7721dc9c2e8c6965d3d521241786f78503608a68ac173"
     },
     {
@@ -6620,9 +6620,9 @@
       "name": "PA JET SWEEP",
       "formation": "Singleback Wing Tight",
       "image": "data/huddle-art/c90954be4df6a0399daf.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "f6b3b3161b2d02f4983f5ef88a526644b8692fe6ab02fdb15dddf31c14a0a3f0"
     },
     {
@@ -6642,9 +6642,9 @@
       "name": "SLUGGO SEAM",
       "formation": "Singleback Wing Tight",
       "image": "data/huddle-art/11a0f9e265220d8e3fd8.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a3c53e11c606363d823cec0ff62b0b39c20d61eea8d833fe50d990edec8c87d5"
     },
     {
@@ -6653,9 +6653,9 @@
       "name": "Y STICK",
       "formation": "Singleback Wing Tight",
       "image": "data/huddle-art/4706faf76937fdd74726.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "824fa1c462b9a810e3b65f4155f38dd138568b00388f8f675ee4875c5aa64801"
     },
     {
@@ -6983,9 +6983,9 @@
       "name": "DIG RETURN",
       "formation": "Gun Bunch Open Offset",
       "image": "data/huddle-art/c2a85cc58ca9041c9cb5.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "931ab054a80f9967281ed621820b69d90948305bbfc726cfbe289affabcc21f3"
     },
     {
@@ -7005,9 +7005,9 @@
       "name": "FAKE SCREEN WHEEL",
       "formation": "Gun Bunch Open Offset",
       "image": "data/huddle-art/64061a3a57c9d1a77c92.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "68edffc241959a8e6549a3da9736aa0dc4672dabdd630494eb481b2a790ad352"
     },
     {
@@ -7060,9 +7060,9 @@
       "name": "RELOAD FLOOD X-CHOICE",
       "formation": "Gun Bunch Open Offset",
       "image": "data/huddle-art/94c46a0ab0879a5f596c.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a70d011eb8fd10668dcfe50b039a2490175bad3151ed79527f01a5f0344509d7"
     },
     {
@@ -7082,9 +7082,9 @@
       "name": "RELOAD SPACING SWITCH",
       "formation": "Gun Bunch Open Offset",
       "image": "data/huddle-art/fba7b171e1495f662c67.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "fb78d98a44a12084450fb47cf3c5aaa63350134667a2326881801a50b56b360a"
     },
     {
@@ -7137,9 +7137,9 @@
       "name": "Y TRAIL",
       "formation": "Gun Bunch Open Offset",
       "image": "data/huddle-art/968d1e158e96e9b3776d.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ef10e7c0aad2990b874a8db386ebde3913d3cea274a561835547909965d84795"
     },
     {
@@ -7170,9 +7170,9 @@
       "name": "DIG RETURN",
       "formation": "Gun Bunch Y-Flex",
       "image": "data/huddle-art/4e4617ed43ed4fdb365a.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e72a1e9664ed9e802e5fd8abab8eed4087bb1f19363e045fce9e7ceea941c969"
     },
     {
@@ -7214,9 +7214,9 @@
       "name": "JET PULL SHALLOW",
       "formation": "Gun Bunch Y-Flex",
       "image": "data/huddle-art/edec03d3091537677797.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1937e30ea2b13d2fc8018ec58467af9bf28af62517964cdbf0a884bb8264828c"
     },
     {
@@ -7247,9 +7247,9 @@
       "name": "MTN DAGGER SIT",
       "formation": "Gun Bunch Y-Flex",
       "image": "data/huddle-art/c9a06295e568c46563c9.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "563e0282430c47a4d695d00512ce90c7971516912f80b252c67003ebb8ba6361"
     },
     {
@@ -7280,9 +7280,9 @@
       "name": "MTN INSIDE POST",
       "formation": "Gun Bunch Y-Flex",
       "image": "data/huddle-art/5ab1046ab15cc483055d.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "fa36145202015d45ea5f728d1959d6414ef28f5658c22a6eb729ee4a2924a5a6"
     },
     {
@@ -7302,9 +7302,9 @@
       "name": "SMASH RETURN",
       "formation": "Gun Bunch Y-Flex",
       "image": "data/huddle-art/003e1ab8ffa41be8ecc5.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9d1e0b116e465b8cb364f5f41330294c87ecd04f515d722523ff860d46e8cf1c"
     },
     {
@@ -7313,9 +7313,9 @@
       "name": "SPACING",
       "formation": "Gun Bunch Y-Flex",
       "image": "data/huddle-art/341833422530dac05da8.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0a1657379efa60e77663af2cabed5d8a0360b13f5f0d48ae5781c8cc112bd816"
     },
     {
@@ -7423,9 +7423,9 @@
       "name": "MTN WR CORNER",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/4213e55244f8f49d24b0.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0f4565ac315af73dd30aae1df45b4dfe21bd1e74e44ea87c291643fc8e066e5b"
     },
     {
@@ -7434,9 +7434,9 @@
       "name": "MTN Y CORNER",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/b89fc4ad1d5027af8176.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e03a32c4bad4214b1ea7cbee37bb78cc7233628a2e5872bc7356c88eb2617340"
     },
     {
@@ -7445,9 +7445,9 @@
       "name": "MTN Y OPTION",
       "formation": "Gun Deuce Close",
       "image": "data/huddle-art/1a18eb38ca4adfcd6e4c.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "69e36fdee392b68d52c78173d39686f1a50bde2ef031a0b92fb374482333084d"
     },
     {
@@ -7522,9 +7522,9 @@
       "name": "BOOMERANG SLOT SWING",
       "formation": "Gun Doubles HB Wk",
       "image": "data/huddle-art/06c9349d2e54c00818f6.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "04064fbfaee38ff346862746621c1f50d52660f39ead7df4c71a2cda08ae2f75"
     },
     {
@@ -7698,9 +7698,9 @@
       "name": "X DAGGER",
       "formation": "Gun Doubles HB Wk",
       "image": "data/huddle-art/6de86c49bb51e8af150d.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "d96b85497d1a5775fd62ab702f03e934a7394d9f77ba6148f278cfb463c3c4a6"
     },
     {
@@ -7907,9 +7907,9 @@
       "name": "HB SCISSORS",
       "formation": "Gun Normal Y Off Close",
       "image": "data/huddle-art/ac432dec4006e26f59a0.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "203d4abcfb0737f1c14d9c4c28891ec29962edc9755c120bcaed08aa355ab53d"
     },
     {
@@ -7962,9 +7962,9 @@
       "name": "MTN SNAG CURLS",
       "formation": "Gun Normal Y Off Close",
       "image": "data/huddle-art/4e4614f6ba5402233937.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "511fdf995fea56d82c6c5cf36a2fe263d65530e36dce74e4483a8b78581635b1"
     },
     {
@@ -8105,9 +8105,9 @@
       "name": "Y-STICK DIG",
       "formation": "Gun Normal Y Off Close",
       "image": "data/huddle-art/50d8276459bc70720ef6.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9bec8f046e36192552530b7b90ccb5b9b0f24e9fd624039beac3f2bd75df7136"
     },
     {
@@ -8479,9 +8479,9 @@
       "name": "DRIVE TRAIL",
       "formation": "Gun Tight Slots",
       "image": "data/huddle-art/9b78dc04389da6b720d7.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "61ef836296d2d4151671424798efaf3c41c78b7db6258b7f1ede459f5b06a9e1"
     },
     {
@@ -8820,9 +8820,9 @@
       "name": "SHUFFLE HB CORNER",
       "formation": "Gun Tight Y Off Wk",
       "image": "data/huddle-art/3ad7f84542215a5cf805.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "3c9ea9d9946432f1bcf94026b2ba5d5b47ca5ffa38f93257d19c2d7e215e372c"
     },
     {
@@ -9194,9 +9194,9 @@
       "name": "DBL INS",
       "formation": "Gun Trey Open Str",
       "image": "data/huddle-art/a798e5581f3121c6eeed.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "689845bcc1c9cd23929ecd88c65a6e0fce5f32a1d6df3afb757294d1eb0f15a3"
     },
     {
@@ -9216,9 +9216,9 @@
       "name": "DRIVE POST",
       "formation": "Gun Trey Open Str",
       "image": "data/huddle-art/5212dd50c474167f30a3.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "42433d3b7bfecdb276b4f6e3074e4e5a5e1650d27e147b7f17defc162db4d817"
     },
     {
@@ -9227,9 +9227,9 @@
       "name": "FADE STOP",
       "formation": "Gun Trey Open Str",
       "image": "data/huddle-art/e80d1ebc3612e2bfc32c.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "baddd634ce7e26432eaf13ba4fe94ae07f6fdef525f2e481a310b2dc72478f0f"
     },
     {
@@ -9238,9 +9238,9 @@
       "name": "FOUR VERTICALS",
       "formation": "Gun Trey Open Str",
       "image": "data/huddle-art/507368cbf21074e79c00.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1eb3271c613add0db4fa484a393551a72cceaaff3610c7bb18abb775f681b207"
     },
     {
@@ -9370,9 +9370,9 @@
       "name": "SLOT FADE",
       "formation": "Gun Trey Open Str",
       "image": "data/huddle-art/deadaf021c01d1d300e3.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ad8702c9791d20ab19dcee15862921b7c2fd6210056b47bd723ad8240bf18952"
     },
     {
@@ -9381,9 +9381,9 @@
       "name": "STICK",
       "formation": "Gun Trey Open Str",
       "image": "data/huddle-art/80c4e038dc581c6cc55c.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "7e4d05c33db48cbe1c235cfcb6a50dc352fa037ecec696dd7a5e902d724f00f3"
     },
     {
@@ -9491,9 +9491,9 @@
       "name": "SCAT",
       "formation": "Gun Trips TE Offset",
       "image": "data/huddle-art/630ab284670c77c7d056.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "886bab562b329a6e837a090be150aa90e7b0e483207e56a2d4167e6313ccefe8"
     },
     {
@@ -9579,9 +9579,9 @@
       "name": "BOUNCE SHALLOW CROSS",
       "formation": "Gun Trips TE Offset Wk",
       "image": "data/huddle-art/bd9b8bf5be4c0af81dc5.jpg",
-      "status": "retained-original",
-      "reason": "incomplete_assignments",
-      "reasonText": "路线归属未完整恢复",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "0dbeae05c40c6cedadfbec334474e28f22d37784cbcb5da68f37acd03c75f1be"
     },
     {
@@ -9667,9 +9667,9 @@
       "name": "PA FLOOD",
       "formation": "Gun Trips TE Offset Wk",
       "image": "data/huddle-art/da0d0df3bde6fc72b66f.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "da4903f0f30313d300e73f3b38e1d8247e107a471643dd69225caf6c5aff5117"
     },
     {
@@ -9766,9 +9766,9 @@
       "name": "SWITCH DAGGER",
       "formation": "Gun Trips TE Offset Wk",
       "image": "data/huddle-art/d42e8b9c235f155a2e45.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "4940b2f22f727a35563a806fb23385520ca8c5bf5db7c4b66ef2612644498e22"
     },
     {
@@ -9777,9 +9777,9 @@
       "name": "VERTICALS",
       "formation": "Gun Trips TE Offset Wk",
       "image": "data/huddle-art/5c550be38f6a46a6210c.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e2b43d76379d545c70b11d697e03a30d29513b902088a9ac206b6c685db69df9"
     },
     {
@@ -9832,9 +9832,9 @@
       "name": "HI LO DIG",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/c69afa014bcd01a650b8.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "6ad66098c4252bdc4f7f1110708725e724a17c9a70104b79a89cb38374efba1d"
     },
     {
@@ -9843,9 +9843,9 @@
       "name": "MTN DRAG SLUGGO",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/500dd1696defa8cc63ff.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "3732b49ec1ffc23d908c16b2c84d0313791a0e38718b0d581b889eff57b09180"
     },
     {
@@ -9854,9 +9854,9 @@
       "name": "MTN SLOT FADES",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/f094f43201adbdcffa22.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "afe842e86f8cffc61d02591f01214a3cd7badca508468345fa1d8d8e2684da78"
     },
     {
@@ -9865,9 +9865,9 @@
       "name": "MTN TRIPLE SLANTS",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/558e7dcbad06a6d43c63.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "fbb17a5303f56f90fa3a7167c5623301caa28957ebc53c02563f3e713c45fe18"
     },
     {
@@ -9887,9 +9887,9 @@
       "name": "QUICK SHORT POST",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/5fd9f0ed6235e9a69a64.jpg",
-      "status": "retained-original",
-      "reason": "incomplete_assignments",
-      "reasonText": "路线归属未完整恢复",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "76a8cdd417679f6bd2070d9490f2ff6000af66ef06cb8fc180f7ad03098396d0"
     },
     {
@@ -9898,9 +9898,9 @@
       "name": "QUICK UNDERS",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/c2bc207a76790d1ad3e4.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "789092396da8b3482e9816159a9645d1e964be2be26c2603b3ad319053b13fac"
     },
     {
@@ -9909,9 +9909,9 @@
       "name": "SNAG SLOT DIGS",
       "formation": "Gun Trips X Nasty Off Wk",
       "image": "data/huddle-art/8796e04694783b1faf22.jpg",
-      "status": "retained-original",
-      "reason": "route_too_short",
-      "reasonText": "路线片段不完整",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "73f3359d336225ffecfb914051966246c788a677d500eafcc07ae626f7ea6008"
     },
     {
@@ -9997,9 +9997,9 @@
       "name": "PA UCORNER FLOOD",
       "formation": "Gun U Off Trips",
       "image": "data/huddle-art/002693cacd6903480a94.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "80e30d753c1a2055c6d1a44bf98c799fbefa492da54ce86a0371ecf917d785e8"
     },
     {
@@ -10041,9 +10041,9 @@
       "name": "SHOCK",
       "formation": "Gun U Off Trips",
       "image": "data/huddle-art/8f62b9afdf6464d77bb5.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a9080b6408d9dac5efd22df79d676224970fd1a695cafcf8f965c15a06d6e0a5"
     },
     {
@@ -10052,9 +10052,9 @@
       "name": "DRAGON SPACING",
       "formation": "Gun Wing Slot Offset",
       "image": "data/huddle-art/d0d6ea470f57811a68f2.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "c6f88facc51aa12524405d4e83b58059339a0dc2972bbe725459fc5737acefe1"
     },
     {
@@ -10162,9 +10162,9 @@
       "name": "MTN WR ANGLE POST",
       "formation": "Gun Wing Slot Offset",
       "image": "data/huddle-art/2068b9548b079cfe426a.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "db29df2f95a6a039250bdbb16b2d05ee149680887d00246eafabf674040939bb"
     },
     {
@@ -10316,9 +10316,9 @@
       "name": "MTN PA VERTICALS",
       "formation": "Gun Wing Slot Wk",
       "image": "data/huddle-art/bfb14f4e65a4fb28f4ea.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "fca6df58829d42e5d9cd438c6c199852de41e755f02338854bf0e455d822e9a8"
     },
     {
@@ -10569,9 +10569,9 @@
       "name": "MTN X-DIG SLOT CORNER",
       "formation": "Gun Y Off Trio Close",
       "image": "data/huddle-art/1aeadd24c9ef09f8b203.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "68919968554208990f4c0c7c7a16bb10bb5aceaa61b0079ceea393e01b85cfd4"
     },
     {
@@ -10635,9 +10635,9 @@
       "name": "SMASH RETURN",
       "formation": "Gun Y Off Trio Close",
       "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "d1337527de5c3222dd002f911387a956e394ec1bb95e4ea7f5c40368f8dd957e"
     },
     {
@@ -10712,9 +10712,9 @@
       "name": "FOUR VERTICALS",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/95636a2a517a934e2cc1.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "5f9d9cb097631fcdf155df179ba60a4318251c29a059774342dacdbb4ffc5e5c"
     },
     {
@@ -10756,9 +10756,9 @@
       "name": "IN GO",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/75a1dffe22556cda5e90.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "df6aaf2834f6570802473c72cf4c3488e14377b677ab3efe935715c366e8d870"
     },
     {
@@ -10789,9 +10789,9 @@
       "name": "MTN PA DEEP OVER",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/31ae73f7861e163db9d9.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "6a3057d4dd10e3f21ed520d941768af0234ff71fa583fae1bffe066483cc3606"
     },
     {
@@ -10844,9 +10844,9 @@
       "name": "QUICK FORK ZIG",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/2e59e599fb5168c9aca7.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "cef7945aef19a4b7e29d7f607fefd4d350183dbc0c87ed01b17b350edc3f2f1c"
     },
     {
@@ -10855,9 +10855,9 @@
       "name": "QUICK SHORT POST",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/755cbb470d0d71dd8b22.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "8f33a1de889e172e2b8352c4958a1c3ed10b13be979d224837b840bc6b91e664"
     },
     {
@@ -10866,9 +10866,9 @@
       "name": "QUICK UNDERS",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/88aa8be7c5d2740f3896.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "65819e20770cf935a9b78300331b02d000ce6e20ee62b4e39d5900085ed23f84"
     },
     {
@@ -10877,9 +10877,9 @@
       "name": "SHOCKH OPTION",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/b57e7cc49499c9437cf2.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "50c5b3ecde953f4f537f43652fbbd6ab74da7080f73dd4d26fdefa1284fe074c"
     },
     {
@@ -10899,9 +10899,9 @@
       "name": "STICK N UP",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/e2dc4310a50ad855ed49.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e92eeb45d00e0721f50ff49f203a93775ffd909c2e40b7f9a76a5c3b592def71"
     },
     {
@@ -11064,9 +11064,9 @@
       "name": "PA SCISSORS",
       "formation": "I Form H Tight",
       "image": "data/huddle-art/8631751853ba0cc091f7.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ea98801d6154c5866d6a56688b98f75ad9c696abc1bcf53ac8499040856c13a6"
     },
     {
@@ -11075,9 +11075,9 @@
       "name": "CURLS",
       "formation": "I Form Wing",
       "image": "data/huddle-art/e5a6f8207434d13bf40d.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "5152dbbf2caee0794ea574f83de6a68d1199f87edff87750620f4aeb7ae2e273"
     },
     {
@@ -11295,9 +11295,9 @@
       "name": "DBL OUTS",
       "formation": "I Form Y Off Close",
       "image": "data/huddle-art/5f3256c5ef16a6301ed7.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ef7912d5d61059b4c842a275f4148f065747b3de70f5b5a3189b1e12db0cf373"
     },
     {
@@ -11691,9 +11691,9 @@
       "name": "ASA F FLAT",
       "formation": "Pistol Strong",
       "image": "data/huddle-art/7fee5574f2f6f96e2801.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "e05592db40ee5b641d9787739883fd44d248d64613b57bebd91a237c9b6b5a6a"
     },
     {
@@ -11922,9 +11922,9 @@
       "name": "DBL POST",
       "formation": "Pistol U Off Trips",
       "image": "data/huddle-art/087c435b549ca180a342.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "b142041e27c6229ba52cabfa12157e2b2010078ffe12717771ef39cc8f57a098"
     },
     {
@@ -12065,9 +12065,9 @@
       "name": "PA SLOT OUT",
       "formation": "Pistol U Off Trips",
       "image": "data/huddle-art/ffdc6c2bf0e9ee122972.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "c44839a5260cc9da533e9e6a181876a6e02b7e641640f95b1ad520f17173c325"
     },
     {
@@ -12098,9 +12098,9 @@
       "name": "SHOCK",
       "formation": "Pistol U Off Trips",
       "image": "data/huddle-art/612fdda3c72eb8a88d84.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "f223ddd0c9eb5d2af6636b710adcca826d0c7383910bb6953fc03f5d619a5abb"
     },
     {
@@ -12186,9 +12186,9 @@
       "name": "BENCH",
       "formation": "Singleback Ace Double Wing",
       "image": "data/huddle-art/9c2650dba4e3526815e9.jpg",
-      "status": "retained-original",
-      "reason": "eligible_count",
-      "reasonText": "球员标记未全部确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "9408940ffb9a581719bfdb932885b49b493477418a9db1eb697ef30cf47a0df0"
     },
     {
@@ -12549,9 +12549,9 @@
       "name": "PA SPRINT HB FLAT",
       "formation": "Singleback Deuce Close",
       "image": "data/huddle-art/c36489b2a577f2145ffd.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ced99c3642dbdc1ab549325bb10686296f692d0601014a8e5bbf4d79f7372196"
     },
     {
@@ -12582,9 +12582,9 @@
       "name": "BINGO CROSS",
       "formation": "Singleback Tight Doubles",
       "image": "data/huddle-art/7f3203b370df4b7a5a02.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "a8ea6f532c9aecee864e9ccf6d958f8b85d27870681ab75e7efc3b182d854d6f"
     },
     {
@@ -12681,9 +12681,9 @@
       "name": "SHALLOW CROSS",
       "formation": "Singleback Tight Doubles",
       "image": "data/huddle-art/046dda570e290a1c4e08.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "6033f28e473bb432af292cb950ff8609df9298dd00efb4344890672eac03f43e"
     },
     {
@@ -12802,9 +12802,9 @@
       "name": "SMASH",
       "formation": "Singleback U Off Stack",
       "image": "data/huddle-art/854cd3ee610cc2d49f2d.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "7530d0e3b6082bc6ecf1e3909b87dbf653bdd27b7bb7b6bd741d8eef17baf4e1"
     },
     {
@@ -12945,9 +12945,9 @@
       "name": "CURL FLAT SEAM",
       "formation": "Singleback Wing Tight Z",
       "image": "data/huddle-art/0006042bf0b5147a1063.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "10a616e3b0c3b035f84e40996b83b21e3a5a27560c05afb1be1dd227bf6fee45"
     },
     {
@@ -13055,9 +13055,9 @@
       "name": "TE ATTACK",
       "formation": "Singleback Wing Tight Z",
       "image": "data/huddle-art/8a177c42a9aea4fce6b6.jpg",
-      "status": "retained-original",
-      "reason": "quarterback_anchor",
-      "reasonText": "持球人起点未可靠确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "1ae5f70d78d6222bf1413e85209b0bd195f2f3979efb19c3020e5a95aaceaede"
     },
     {

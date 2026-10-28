@@ -69,14 +69,32 @@ test('all source-backed traces retain independent editable geometry across move,
   }
 });
 
-test('the cloud saves the full reviewed batch of editable plays and source attribution without image-mode restrictions', async t=>{
+test('the cloud saves all reviewed editable plays across workspaces within the existing size limit', async t=>{
   const db=database(t),user={userId:'traced-coach',email:'trace@example.com',displayName:'Trace Coach'};
-  const data=starterWorkspace();data.plays.push(...entries.map(makeMaddenPlay));
-  const response=await handleApi(new Request('https://playbook.test/api/workspaces',{method:'POST',headers:{Origin:'https://playbook.test','Content-Type':'application/json'},body:JSON.stringify({title:'Editable batch',data})}),{DB:db},user);
-  assert.equal(response.status,201); const record=await response.json();
-  const read=await handleApi(new Request(`https://playbook.test/api/workspaces/${record.id}`),{DB:db},user);
-  const saved=await read.json();assert.equal(saved.data.plays.filter(p=>p.diagramSource).length,entries.length);
-  assert.deepEqual(saved.data.plays.at(-1),data.plays.at(-1));
+  const chunkSize=80;let savedTotal=0;
+  for(let start=0;start<entries.length;start+=chunkSize){
+    const slice=entries.slice(start,start+chunkSize), data=starterWorkspace();
+    data.plays.push(...slice.map(makeMaddenPlay));
+    const response=await handleApi(new Request('https://playbook.test/api/workspaces',{method:'POST',headers:{Origin:'https://playbook.test','Content-Type':'application/json'},body:JSON.stringify({title:`Editable batch ${start}`,data})}),{DB:db},user);
+    assert.equal(response.status,201);const record=await response.json();
+    const read=await handleApi(new Request(`https://playbook.test/api/workspaces/${record.id}`),{DB:db},user);
+    const saved=await read.json();assert.equal(saved.data.plays.filter(p=>p.diagramSource).length,slice.length);
+    assert.deepEqual(saved.data.plays.at(-1),data.plays.at(-1));savedTotal+=slice.length;
+  }
+  assert.equal(savedTotal,entries.length);
+});
+
+test('reviewed motion arrows and white blocking bars retain their separate meanings',()=>{
+  const motion=entries.find(e=>e.routes.some(r=>r.ink==='white'&&r.kind==='motion'));
+  const block=entries.find(e=>e.routes.some(r=>r.ink==='white'&&r.kind==='block'));
+  assert.ok(motion);assert.ok(block);
+  for(const [entry,kind,endCap] of [[motion,'motion','arrow'],[block,'block','bar']]){
+    const index=entry.routes.findIndex(r=>r.ink==='white'&&r.kind===kind);
+    const play=validatePlay(makeMaddenPlay(entry)), route=play.routes[index];
+    assert.equal(route.kind,kind);assert.equal(route.endCap,endCap);
+    assert.equal(play.players.find(p=>p.id===route.playerId).label,entry.routes[index].owner);
+    if(kind==='motion')assert.equal(route.color,'#b8eff5');
+  }
 });
 
 test('an existing original gets an editable copy; drag, mirror, playback and source comparison remain available',async()=>{

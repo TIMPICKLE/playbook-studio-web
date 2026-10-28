@@ -23,9 +23,9 @@ test('both complete team catalogs have unique identities and importable source m
     assert.equal((play.diagramSource || play.reference).sourceUrl, entry.sourceUrl);
     if (hasEditableTrace(entry.id)) {
       assert.equal(play.players.length, 11);
-      // These two originals show only four colored assignments; the remaining
+      // These reviewed originals show only four visible assignments; the remaining
       // player is movable but does not acquire an invented fifth route.
-      const stationaryPlayer = ['eagles-435b4fe699a13e3c036f','ravens-ae97fd6e39071c3ae0e5'].includes(entry.id);
+      const stationaryPlayer = ['eagles-435b4fe699a13e3c036f','ravens-ae97fd6e39071c3ae0e5','ravens-3e40d279a11e7ef5628d','ravens-e7dac016716007ed60bd','eagles-a0fd05ba219769c9a861','eagles-04c50ebab4c15cdc2083','eagles-23b54c7b8a3a7d5c2922','eagles-70a79aa21ebd643e7fa1','ravens-69c8818e1a9a93acefb3','ravens-dce160819cf177f952dd','ravens-518ace0c313870800942','eagles-66c2f2f176cfa7911cdb','eagles-56621ebf973cc126f119','eagles-b00013dc3380c2f5b538','ravens-099d020a044bf7878ca6','ravens-038f3e33d95bffdc7117','eagles-d31f27b2c587abbe115d','eagles-2d1026ef8db01bde4845','ravens-3f10fa0d8eae78615dfe','eagles-5596a944605fa28088c3'].includes(entry.id);
       if (stationaryPlayer) assert.equal(play.routes.length,4);
       else assert.ok(play.routes.length >= 5);
     }
