@@ -9,6 +9,7 @@ import { BATCH_TRACES } from '../web/data/madden-editable-batch.js';
 import { EXPANDED_TRACES } from '../web/data/madden-editable-80.js';
 import { REVIEWED_OCT28_TRACES } from '../web/data/madden-editable-oct28.js';
 import { CONTINUED_TRACES } from '../web/data/madden-editable-continued.js';
+import { FINAL_TRACES } from '../web/data/madden-editable-final.js';
 import { TRACE_SUMMARY, RETAINED_REASONS } from '../web/data/madden-trace-status.js';
 import { hasEditableTrace, makeMaddenPlay, retainedReason } from '../web/madden-model.js';
 const catalogBytes=readFileSync(new URL('../web/data/huddle-catalog.json',import.meta.url));
@@ -18,6 +19,7 @@ const audit=JSON.parse(readFileSync(new URL('../docs/madden-conversion-audit.jso
 const review=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review.json',import.meta.url)));
 const expandedReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-80.json',import.meta.url)));
 const continuedReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-continued.json',import.meta.url)));
+const finalReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-final.json',import.meta.url)));
 const octoberReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-oct28.json',import.meta.url)));
 
 test('the audit covers every catalog entry exactly once, and unsuccessful images stay original',()=>{
@@ -34,7 +36,7 @@ test('the audit covers every catalog entry exactly once, and unsuccessful images
     else {assert.equal(play.reference.image,entry.image);assert.equal(play.players.length,0);assert.equal(play.routes.length,0);assert.equal(retainedReason(entry.id),r.reasonText);}
   }
   assert.equal(Object.keys(RETAINED_REASONS).length,TRACE_SUMMARY.retainedOriginal);
-  assert.equal(Object.keys(BATCH_TRACES).length+Object.keys(EXPANDED_TRACES).length+Object.keys(REVIEWED_OCT28_TRACES).length+Object.keys(CONTINUED_TRACES).length,TRACE_SUMMARY.newlyEditable);
+  assert.equal(Object.keys(BATCH_TRACES).length+Object.keys(EXPANDED_TRACES).length+Object.keys(REVIEWED_OCT28_TRACES).length+Object.keys(CONTINUED_TRACES).length+Object.keys(FINAL_TRACES).length,TRACE_SUMMARY.newlyEditable);
   for(const [id,seed] of Object.entries(SEED_TRACES))assert.deepEqual(EDITABLE_TRACES[id],seed);
 });
 
@@ -46,8 +48,11 @@ test('new traces have explicit visual review and match the exact bundled source 
   assert.equal(new Set(Object.values(REVIEWED_OCT28_TRACES).map(t=>t.image)).size,24);
   assert.deepEqual(Object.keys(continuedReview.approved).sort(),Object.keys(CONTINUED_TRACES).sort());
   assert.equal(new Set(Object.values(CONTINUED_TRACES).map(t=>t.image)).size,137);
-  for(const [id,trace] of Object.entries({...BATCH_TRACES,...EXPANDED_TRACES,...REVIEWED_OCT28_TRACES,...CONTINUED_TRACES})){
-    const approval=review.approved[id]||expandedReview.approved[id]||octoberReview.approved[id]||continuedReview.approved[id];assert.deepEqual(approval.trace,trace);
+  assert.deepEqual(Object.keys(finalReview.approved).sort(),Object.keys(FINAL_TRACES).sort());
+  assert.equal(new Set(Object.values(FINAL_TRACES).map(t=>t.image)).size,139);
+  assert.equal(new Set([...Object.values(REVIEWED_OCT28_TRACES),...Object.values(CONTINUED_TRACES),...Object.values(FINAL_TRACES)].map(t=>t.image)).size,300);
+  for(const [id,trace] of Object.entries({...BATCH_TRACES,...EXPANDED_TRACES,...REVIEWED_OCT28_TRACES,...CONTINUED_TRACES,...FINAL_TRACES})){
+    const approval=review.approved[id]||expandedReview.approved[id]||octoberReview.approved[id]||continuedReview.approved[id]||finalReview.approved[id];assert.deepEqual(approval.trace,trace);
     const bytes=readFileSync(new URL('../web/'+trace.image,import.meta.url));
     const digest=createHash('sha256').update(bytes).digest('hex');
     assert.equal(digest,approval.sourceSha256);assert.equal(digest,manifest.images[trace.image.split('/').at(-1)]);
@@ -79,7 +84,7 @@ test('the expansion covers 80 distinct images and preserves shared-source geomet
 
 test('continued team entries built from the same source share reviewed geometry',()=>{
   const groups=new Map();
-  for(const trace of Object.values(CONTINUED_TRACES)){
+  for(const trace of [...Object.values(CONTINUED_TRACES),...Object.values(FINAL_TRACES)]){
     const group=groups.get(trace.image)||[];group.push(trace);groups.set(trace.image,group);
   }
   for(const group of groups.values())if(group.length>1){

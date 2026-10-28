@@ -59,8 +59,12 @@ test('all source-backed traces retain independent editable geometry across move,
     const owner = play.players.find(p=>p.id===play.routes.find(r=>r.kind==='route'&&!r.optional).playerId);
     assert.notDeepEqual(animatedPlayer(play,owner,2),{x:owner.x,y:owner.y});
     const routes = play.routes.filter(r=>r.playerId===owner.id), before = routes.map(r=>structuredClone(r.points));
-    movePlayer(play, owner.id, owner.x+2,owner.y+1);
-    routes.forEach((r,i)=>r.points.forEach((point,j)=>{assert.ok(Math.abs(point.x-before[i][j].x-2)<.001);assert.ok(Math.abs(point.y-before[i][j].y-1)<.001);}));
+    // Use a direction with room for the entire path: a route at the right edge
+    // correctly prevents a rightward drag from shifting or clipping its shape.
+    const xs=[owner.x,...before.flat().map(point=>point.x)];
+    const dx=Math.max(...xs)<=98 ? 2 : Math.min(...xs)>=2 ? -2 : 0;
+    movePlayer(play, owner.id, owner.x+dx,owner.y+1);
+    routes.forEach((r,i)=>r.points.forEach((point,j)=>{assert.ok(Math.abs(point.x-before[i][j].x-dx)<.001);assert.ok(Math.abs(point.y-before[i][j].y-1)<.001);}));
     validatePlay(play); validatePlay(mirrorPlay(play));
     const data=starterWorkspace();data.plays.push(play);
     assert.deepEqual(decodeWorkspace(encodeWorkspace(data)).plays.at(-1),play);
