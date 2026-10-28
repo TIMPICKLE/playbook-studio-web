@@ -28,10 +28,43 @@ test('graph performs bounded multi-tool reasoning and sends tool results with ma
   const output=await run(matchup);
   assert.equal(output.execution.modelCalls,3);assert.equal(output.execution.toolCalls,4);assert.deepEqual(output.execution.toolsUsed,['get_matchup_context','inspect_player','inspect_route_coverage','read_coverage_rule']);
   assert.deepEqual(requests[0].tool_choice,{type:'function',function:{name:'get_matchup_context'}});
+  assert.deepEqual(requests[0].thinking,{type:'disabled'});
   assert.equal(requests[1].messages[2].reasoning_content,'private-reasoning');
   assert.deepEqual(requests[2].messages.filter(m=>m.role==='tool').map(m=>m.tool_call_id),['ctx','player','route','rules']);
   assert.equal(requests[2].tool_choice,'none');assert.doesNotMatch(JSON.stringify(output),/private-reasoning|fake-test-key/);
   assert.equal(output.status,'complete');
+});
+
+test('Anthropic Messages converts tool results, retains signed thinking and checks evidence',async t=>{
+  const matchup=fixture(), route=matchup.offense.routes.find(r=>r.kind==='route'), requests=[];
+  const json=(content,stop_reason,usage={input_tokens:10,output_tokens:5})=>new Response(JSON.stringify({content,stop_reason,usage}),{headers:{'Content-Type':'application/json'}});
+  const thinking={type:'thinking',thinking:'private-thought',signature:'signed-private'};
+  mock(t,async(url,options)=>{
+    assert.equal(url,'https://api.anthropic.com/v1/messages');assert.equal(options.headers['x-api-key'],'fake-test-key');assert.equal(options.headers['anthropic-version'],'2023-06-01');
+    assert.equal(options.redirect,'manual');const body=JSON.parse(options.body);requests.push(body);
+    if(requests.length===1)return json([thinking,{type:'tool_use',id:'ctx',name:'get_matchup_context',input:{}}],'tool_use');
+    if(requests.length===2)return json([{type:'tool_use',id:'route',name:'inspect_route_coverage',input:{routeId:route.id}},{type:'tool_use',id:'rule',name:'read_coverage_rule',input:{}}],'tool_use');
+    return json([{type:'text',text:result(route.id)}],'end_turn');
+  });
+  const output=await run(matchup,'anthropic');
+  assert.equal(requests[0].tools.length,1);assert.deepEqual(requests[0].tool_choice,{type:'auto'});assert.equal(requests[0].messages[0].role,'user');
+  assert.deepEqual(requests[1].messages[1].content[0],thinking);
+  assert.equal(requests[1].messages[2].content[0].tool_use_id,'ctx');
+  assert.deepEqual(requests[2].messages.at(-1).content.map(block=>block.tool_use_id),['route','rule']);
+  assert.deepEqual(requests[2].tool_choice,{type:'none'});
+  assert.deepEqual(output.execution.usage,{inputTokens:30,outputTokens:15});assert.equal(output.scenarios[0].evidenceIds[0],route.id);
+  assert.doesNotMatch(JSON.stringify(output),/private-thought|signed-private|fake-test-key/);
+});
+
+test('DeepSeek supports Anthropic format without sending OpenAI headers or enabling thinking',async t=>{
+  const matchup=fixture(),requests=[];
+  mock(t,async(url,options)=>{assert.equal(url,'https://api.deepseek.com/anthropic/v1/messages');assert.equal(options.headers['x-api-key'],'fake-test-key');assert.equal(options.headers.Authorization,undefined);
+    const body=JSON.parse(options.body);requests.push(body);assert.deepEqual(body.thinking,{type:'disabled'});
+    const content=requests.length===1?[{type:'tool_use',id:'ctx',name:'get_matchup_context',input:{}}]:[{type:'text',text:result(matchup.evidence[0].id)}];
+    return new Response(JSON.stringify({content,stop_reason:requests.length===1?'tool_use':'end_turn',usage:{input_tokens:1,output_tokens:1}}));
+  });
+  const output=await runMatchupAgent(matchup,{model:{...config,protocol:'anthropic'}}, {},new AbortController().signal);
+  assert.equal(output.execution.modelCalls,2);assert.deepEqual(output.execution.toolsUsed,['get_matchup_context']);
 });
 
 test('OpenRouter reasoning details are passed back only to that provider and never returned',async t=>{
@@ -84,15 +117,19 @@ test('invalid evidence gets one bounded repair and no invented evidence can esca
   const matchup=fixture(),requests=[];
   mock(t,async(_url,options)=>{const body=JSON.parse(options.body);requests.push(body);if(requests.length===1)return response(toolMessage(toolCall('ctx','get_matchup_context')));if(requests.length===2)return response({content:result('offense:route:invented')});return response({content:result(matchup.evidence[0].id)});});
   const output=await run(matchup);assert.equal(output.execution.repaired,true);assert.equal(output.execution.modelCalls,3);assert.equal(requests[2].tool_choice,'none');
+  assert.match(requests[2].messages.at(-1).content,/evidenceIds 都设为 \[\]/);
   assert.ok(output.scenarios.every(s=>s.evidenceIds[0]===matchup.evidence[0].id));
 });
 
 test('tool budgets, duplicate call IDs and malformed calls fail closed',async t=>{
-  const matchup=fixture();let count=0;
-  mock(t,async()=>{count++;if(count===1)return response(toolMessage(toolCall('ctx','get_matchup_context')));return response(toolMessage(...Array.from({length:AGENT_LIMITS.toolCalls},(_,i)=>toolCall(`call_${i}`,'read_coverage_rule'))));});
-  await assert.rejects(run(matchup),/超过限制/);assert.equal(count,2);
+  const matchup=fixture();let count=0,finalRequest;
+  mock(t,async(_url,options)=>{count++;if(count===1)return response(toolMessage(toolCall('ctx','get_matchup_context')));if(count===2)return response(toolMessage(...Array.from({length:AGENT_LIMITS.toolCalls},(_,i)=>toolCall(`call_${i}`,'read_coverage_rule'))));finalRequest=JSON.parse(options.body);return response({content:result(matchup.evidence[0].id)});});
+  const bounded=await run(matchup);assert.equal(bounded.execution.toolCalls,AGENT_LIMITS.toolCalls);assert.equal(count,3);
+  assert.match(JSON.parse(finalRequest.messages.find(m=>m.tool_call_id==='call_5').content).error,/额度已用完/);
   count=0;globalThis.fetch=async()=>{count++;return count===1?response(toolMessage(toolCall('same','get_matchup_context'))):response(toolMessage(toolCall('same','read_coverage_rule')));};
   await assert.rejects(run(matchup),/工具调用 ID/);assert.equal(count,2);
+  count=0;globalThis.fetch=async()=>{count++;return count===1?response(toolMessage(toolCall('ctx','get_matchup_context'))):response(toolMessage(...Array.from({length:AGENT_LIMITS.toolRequestsPerTurn+1},(_,i)=>toolCall(`excess_${i}`,'read_coverage_rule'))));};
+  await assert.rejects(run(matchup),/超过限制/);assert.equal(count,2);
 });
 
 test('model errors and aborts do not cause automatic retries',async t=>{

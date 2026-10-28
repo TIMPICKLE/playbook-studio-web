@@ -4,7 +4,7 @@ import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
 import { starterWorkspace, clone } from '../web/model.js';
 
-test('signed-in players can choose a matchup, consent, view scenarios, and return to the editor', async t => {
+test('signed-in players can choose providers and view scenarios without a consent checkbox', async t => {
   const win=new Window({url:'https://playbook.test/editor/index.html',width:390,height:844});
   win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
   win.setInterval=()=>1;
@@ -33,21 +33,24 @@ test('signed-in players can choose a matchup, consent, view scenarios, and retur
     assert.equal(q('#app').hidden,true);assert.ok(q('[data-cloud-action="enter-editor"]'));assert.ok(q('[data-cloud-action="enter-analysis"]'));
     q('[data-cloud-action="enter-analysis"]').click();await settle();
     assert.equal(q('#ai-matchup-root').hidden,false);assert.ok(q('.ai-board svg'));assert.equal(q('[data-ai-field="coverage"]').value,'unknown');
-    q('[data-ai-action="analyze"]').click();assert.match(q('.ai-error').textContent,/确认/);assert.equal(calls.filter(c=>c.path.endsWith('/matchup-analysis')).length,0);
-    input('model','fake-model');input('apiKey','fake-key');q('[data-ai-field="consent"]').click();q('[data-ai-action="analyze"]').click();await settle();
-    const submitted=calls.find(c=>c.path.endsWith('/matchup-analysis'));assert.equal(submitted.body.model.apiKey,'fake-key');assert.equal(submitted.body.consent,true);
+    assert.equal(q('[data-ai-field="model"]').value,'deepseek-flash');assert.equal(q('[data-ai-field="baseUrl"]'),null);assert.equal(q('[data-ai-field="consent"]'),null);
+    q('[data-ai-action="analyze"]').click();assert.match(q('.ai-error').textContent,/API Key/);assert.equal(calls.filter(c=>c.path.endsWith('/matchup-analysis')).length,0);
+    input('model','fake-model');input('apiKey','fake-key');q('[data-ai-action="analyze"]').click();await settle();
+    const submitted=calls.find(c=>c.path.endsWith('/matchup-analysis'));assert.equal(submitted.body.model.apiKey,'fake-key');assert.equal(submitted.body.model.protocol,'openai');assert.equal(submitted.body.consent,undefined);
     assert.equal(win.localStorage.getItem('fake-key'),null);assert.doesNotMatch(JSON.stringify(win.localStorage),/fake-key/);
     assert.match(q('.ai-scenario').textContent,/<img src=x/);assert.equal(q('.ai-scenario img'),null);
     assert.match(q('.ai-result-badge').textContent,/信息有限/);assert.match(q('.ai-execution').textContent,/2 次模型请求/);
     assert.ok([...q('.ai-board').querySelectorAll('[data-route]')].some(n=>n.dataset.route===routeId&&n.classList.contains('ai-evidence-active')));
     q('[data-ai-scenario="1"]').click();assert.match(q('.ai-scenario').textContent,/短传可能/);assert.equal(q('.ai-board .ai-evidence-active'),null);
-    input('context','pending');assert.equal(q('.ai-scenario'),null);q('[data-ai-field="consent"]').click();q('[data-ai-action="analyze"]').click();await settle();
+    input('context','pending');assert.equal(q('.ai-scenario'),null);q('[data-ai-action="analyze"]').click();await settle();
     assert.equal(typeof finishDelayed,'function');assert.equal(q('[data-ai-action="cancel"]').hidden,false);
     const finishOld=finishDelayed;q('[data-ai-action="cancel"]').click();assert.match(q('.ai-error').textContent,/已取消/);
     q('[data-ai-action="analyze"]').click();await settle();assert.equal(q('[data-ai-action="analyze"]').disabled,true);
     finishOld();await settle();assert.equal(q('[data-ai-action="analyze"]').disabled,true);
     q('[data-cloud-action="home"]').click();await settle();q('[data-cloud-action="enter-analysis"]').click();await settle();
     finishDelayed();await settle();assert.equal(q('.ai-scenario'),null);
+    const provider=q('[data-ai-field="provider"]');provider.value='anthropic';provider.dispatchEvent(new win.Event('change',{bubbles:true}));
+    assert.equal(q('[data-ai-field="model"]').value,'claude-sonnet-4-6');assert.equal(q('[data-ai-field="apiKey"]').value,'');assert.equal(q('[data-ai-field="baseUrl"]'),null);
     q('[data-cloud-action="home"]').click();await settle();assert.equal(q('#ai-matchup-root').hidden,true);
     q('[data-cloud-action="enter-editor"]').click();await settle();assert.equal(q('#app').hidden,false);
     assert.equal(calls.filter(c=>c.method==='PUT').length,0);

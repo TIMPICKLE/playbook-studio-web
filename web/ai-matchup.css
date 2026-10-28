@@ -16,3 +16,16 @@
 @media(max-width:390px){.ai-two-fields{grid-template-columns:1fr}.studio-home-account span{display:none}.ai-result-badge{display:none}}
 @media(prefers-reduced-motion:reduce){.studio-choice{transition:none}.studio-choice:hover,.studio-choice:focus-visible{transform:none}}
 .ai-cancel{width:100%;min-height:38px;margin-top:8px;border:1px solid #d9cce5;border-radius:8px;color:#664780;font-size:11px;font-weight:700}.ai-cancel[hidden]{display:none}.ai-cancel:hover{background:#f4eef8}.ai-evidence a{font-size:10px;background:white;color:#5b3980;border:1px solid #d7c8e5;border-radius:20px;padding:4px 8px;text-decoration:none}.ai-evidence a:hover{text-decoration:underline}.ai-execution{border:1px solid #eae3ef;border-radius:9px;padding:12px 14px;margin-top:16px;font-size:11px;color:#766483;line-height:1.7}.ai-execution summary{cursor:pointer;color:#5c476c;font-weight:700}.ai-execution p{margin-top:8px}.ai-execution ul{padding-left:18px;margin:5px 0 0}
+
+/* The editor has a dark theme, but the matchup workspace is designed as a
+   light, readable surface. Scope these overrides to keep the editor intact. */
+#ai-matchup-root:not([hidden]){min-height:calc(100dvh - var(--cloud-height, 76px));background:#f4f1f7;color:#2c1d3a}
+.ai-page .ai-field input:not([type=checkbox]),.ai-page .ai-field select,.ai-page .ai-field textarea{background:#fff;color:#30213d;border:1px solid #cfc5d8;box-shadow:none}
+.ai-page .ai-field input:not([type=checkbox])::placeholder,.ai-page .ai-field textarea::placeholder{color:#817487;opacity:1}
+.ai-page .ai-field input:not([type=checkbox]):focus,.ai-page .ai-field select:focus,.ai-page .ai-field textarea:focus{border-color:#765295;box-shadow:0 0 0 3px #a487c329}
+.ai-page .ai-field small,.ai-page .ai-submit-hint{color:#71617d}
+.ai-page .ai-section-heading p,.ai-page .ai-board-caption{color:#71617d}
+.ai-page .ai-board{background:#f4effb}
+.ai-page .ai-dot.offense{background:#5b2f91}
+.ai-page .ai-dot.defense{background:#dd8f75}
+.ai-page .ai-board .ai-evidence-active{filter:drop-shadow(0 0 7px #8d5dbb)}
