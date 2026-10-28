@@ -3,12 +3,12 @@
     "catalogEntries": 1208,
     "previouslyEditable": 20,
     "attemptedRemaining": 1188,
-    "newlyEditable": 115,
-    "editableTotal": 135,
-    "retainedOriginal": 1073,
+    "newlyEditable": 124,
+    "editableTotal": 144,
+    "retainedOriginal": 1064,
     "editableByTeam": {
-      "eagles": 83,
-      "ravens": 52
+      "eagles": 86,
+      "ravens": 58
     },
     "date": "2026-10-28",
     "catalogSha256": "ad14b4544f676a23b9a7468079d9a30e00df48ef9e2e9c6a63c551b0e522ded8"
@@ -2825,9 +2825,9 @@
       "name": "SHALLOW CROSS",
       "formation": "Gun Tight Y Off Wk",
       "image": "data/huddle-art/99ac63ff494e26c26eff.jpg",
-      "status": "retained-original",
-      "reason": "uncovered_branch",
-      "reasonText": "存在未确认的分支或线段",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "479636a58879fd50769ce62cc5bbafde926085923eea65efa851f6475c55ab51"
     },
     {
@@ -5146,9 +5146,9 @@
       "name": "PA CROSS",
       "formation": "Pistol Bunch",
       "image": "data/huddle-art/d251cfaa205d99a4f2fb.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "ef6471bba30f61b5e81baa417327c7efe2a884296c30faad69cbafd6c8d7e4cf"
     },
     {
@@ -5256,9 +5256,9 @@
       "name": "HITCH CORNERS",
       "formation": "Pistol Deuce",
       "image": "data/huddle-art/a96e4b0223500a5a9e3a.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "81fd7a52ba7f5c5489eb25702ac9b584f9e1531d4e45aadd66d8c831611c7039"
     },
     {
@@ -8468,9 +8468,9 @@
       "name": "BENCH",
       "formation": "Gun Tight Slots",
       "image": "data/huddle-art/9a813ac0b9ef2a7dd75d.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "af8555b6f6c4c0abd5bef6bcc56606fcaf389cba31f69a88acedbdd3e9b9012d"
     },
     {
@@ -9062,9 +9062,9 @@
       "name": "READ DIG",
       "formation": "Gun Trey Open",
       "image": "data/huddle-art/0884c9ab7dfdffa0e5d2.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "00bbd17216f0c20a79ea0873592a8678dd71e2800f35ffb2ec2c9e7567be2de7"
     },
     {
@@ -9535,9 +9535,9 @@
       "name": "VERTICALS",
       "formation": "Gun Trips TE Offset",
       "image": "data/huddle-art/a9f309f1d4b48013b542.jpg",
-      "status": "retained-original",
-      "reason": "ambiguous_junction",
-      "reasonText": "交叉或分支归属未确认",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "cb475d480c25c1f5671c26914fa804e02cd0c524e21328a1a60caf599ab58ab7"
     },
     {
@@ -9645,9 +9645,9 @@
       "name": "MIDDLE SLANT",
       "formation": "Gun Trips TE Offset Wk",
       "image": "data/huddle-art/570c7d6ad7b3b7b251ed.jpg",
-      "status": "retained-original",
-      "reason": "incomplete_assignments",
-      "reasonText": "路线归属未完整恢复",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "f94342a9e8d9475a2213f0cb156a2bba5eb2d8479a88649cf5e479e086fe0599"
     },
     {
@@ -10217,9 +10217,9 @@
       "name": "SCISSORS SMASH",
       "formation": "Gun Wing Slot Offset",
       "image": "data/huddle-art/c592428b997499e0f21a.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "eccb5982f86ee9c9291dcff0a159c81b916e96592db56a277aff3cd1b53b020e"
     },
     {
@@ -10657,9 +10657,9 @@
       "name": "CROSS",
       "formation": "Gun Y Off Trio Wk",
       "image": "data/huddle-art/29f3a4247b2f275ec7b5.jpg",
-      "status": "retained-original",
-      "reason": "unassigned_route",
-      "reasonText": "可见路线缺少明确起点",
+      "status": "converted",
+      "reason": null,
+      "reasonText": null,
       "sourceSha256": "deacccce77ee04e2caf8c30cbcf6724999ea3ec25413b721755fe0d46000b4c1"
     },
     {

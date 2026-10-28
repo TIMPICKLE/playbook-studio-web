@@ -41,7 +41,7 @@ test('new traces have explicit visual review and match the exact bundled source 
   assert.deepEqual(Object.keys(review.approved).sort(),Object.keys(BATCH_TRACES).sort());
   assert.deepEqual(Object.keys(expandedReview.approved).sort(),Object.keys(EXPANDED_TRACES).sort());
   assert.deepEqual(Object.keys(octoberReview.approved).sort(),Object.keys(REVIEWED_OCT28_TRACES).sort());
-  assert.equal(new Set(Object.values(REVIEWED_OCT28_TRACES).map(t=>t.image)).size,15);
+  assert.equal(new Set(Object.values(REVIEWED_OCT28_TRACES).map(t=>t.image)).size,24);
   for(const [id,trace] of Object.entries({...BATCH_TRACES,...EXPANDED_TRACES,...REVIEWED_OCT28_TRACES})){
     const approval=review.approved[id]||expandedReview.approved[id]||octoberReview.approved[id];assert.deepEqual(approval.trace,trace);
     const bytes=readFileSync(new URL('../web/'+trace.image,import.meta.url));
