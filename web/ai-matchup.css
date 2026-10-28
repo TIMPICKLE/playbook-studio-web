@@ -29,3 +29,29 @@
 .ai-page .ai-dot.offense{background:#5b2f91}
 .ai-page .ai-dot.defense{background:#c16f56}
 .ai-page .ai-board .ai-evidence-active{filter:drop-shadow(0 0 7px #8d5dbb)}
+
+/* Keep the matchup on the visual centerline while the explanation sits next
+   to it. At narrow widths, put the field first and stack the controls. */
+.ai-page{max-width:1920px}
+.ai-layout{grid-template-columns:minmax(240px,280px) minmax(0,1fr) minmax(310px,370px);grid-template-areas:'setup board results';gap:20px}
+.ai-setup{grid-area:setup;padding:20px}
+.ai-board-card{grid-area:board;position:sticky;top:calc(var(--cloud-height, 76px) + 16px);min-width:0}
+#ai-results{grid-area:results;min-width:0}
+.ai-board .pitch-svg{max-height:min(70dvh,720px)}
+#ai-results .ai-result-card{padding:20px}
+#ai-results .ai-scenario-tabs{display:grid;grid-template-columns:1fr;overflow:visible}
+#ai-results .ai-scenario-tabs button{width:100%;max-width:none;overflow-wrap:anywhere}
+#ai-results .ai-scenario-grid{grid-template-columns:1fr;gap:14px}
+#ai-results .ai-result-summary,#ai-results .ai-scenario-grid p{font-size:13px}
+@media(max-width:1150px){
+  .ai-layout{grid-template-columns:260px minmax(0,1fr);grid-template-areas:'setup board' 'setup results'}
+  .ai-board-card{position:static}
+  #ai-results .ai-scenario-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #ai-results .ai-scenario-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .ai-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:'board' 'setup' 'results'}
+  .ai-board .pitch-svg{max-height:none}
+  #ai-results .ai-scenario-grid{grid-template-columns:1fr}
+}
+@media(max-width:390px){#ai-results .ai-scenario-tabs{grid-template-columns:1fr}}
