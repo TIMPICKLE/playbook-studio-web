@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">Hook and Flat against a Cover 3 zone</title>
+  <desc id="desc">A schematic field shows a receiver running a hook route and a running back running to the flat on the same side. A defender may move toward the flat or remain near the hook; neither option guarantees an open pass.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#221332"/><stop offset="1" stop-color="#100b1c"/></linearGradient>
+    <linearGradient id="pitch" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#211b35"/><stop offset="1" stop-color="#141327"/></linearGradient>
+    <marker id="offArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#ffdb53" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="defArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#a7d6ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="1200" height="700" rx="28" fill="url(#background)"/>
+  <text x="44" y="55" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="2.8" fill="#cbb4e9">PLAYBOOK STUDIO  /  MATCHUP EXAMPLE</text>
+  <text x="44" y="94" font-family="Arial,sans-serif" font-size="31" font-weight="800" fill="#fff8eb">HOOK + FLAT  <tspan fill="#ab8bd1">vs</tspan>  COVER 3</text>
+  <text x="44" y="119" font-family="Arial,sans-serif" font-size="14" fill="#bca9cf">A teaching diagram · not a replay or a prediction</text>
+  <rect x="42" y="144" width="748" height="498" rx="18" fill="url(#pitch)" stroke="#8b6da5" stroke-opacity=".48"/>
+  <g stroke="#8f779f" stroke-opacity=".24" stroke-width="1">
+    <path d="M63 230 H769 M63 312 H769 M63 394 H769 M63 476 H769 M63 558 H769"/>
+    <path d="M326 167 V618 M506 167 V618" stroke-dasharray="4 9"/>
+  </g>
+  <g fill="#88bfff" fill-opacity=".08" stroke="#93c9fb" stroke-opacity=".42" stroke-width="1.4" stroke-dasharray="7 6">
+    <rect x="68" y="166" width="215" height="115" rx="13"/><rect x="304" y="166" width="215" height="115" rx="13"/><rect x="540" y="166" width="215" height="115" rx="13"/>
+    <ellipse cx="478" cy="358" rx="126" ry="48"/><ellipse cx="657" cy="383" rx="104" ry="66"/>
+  </g>
+  <g fill="#aac7e9" fill-opacity=".8" font-family="Arial,sans-serif" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1">
+    <text x="175" y="190">DEEP 1/3</text><text x="412" y="190">DEEP 1/3</text><text x="648" y="190">DEEP 1/3</text><text x="473" y="343">HOOK / CURL</text><text x="664" y="367">CURL / FLAT</text>
+  </g>
+  <line x1="63" y1="469" x2="769" y2="469" stroke="#ffdb53" stroke-width="1.6" stroke-dasharray="7 7" stroke-opacity=".75"/>
+  <text x="74" y="459" font-family="Arial,sans-serif" font-size="11" letter-spacing="1.2" fill="#d6c6e5">LINE OF SCRIMMAGE</text>
+  <g fill="#83bbf1" stroke="#d5edff" stroke-width="1.5"><rect x="158" y="205" width="27" height="27" rx="7"/><rect x="399" y="205" width="27" height="27" rx="7"/><rect x="690" y="205" width="27" height="27" rx="7"/><rect x="635" y="394" width="27" height="27" rx="7"/></g>
+  <g fill="#14223a" font-family="Arial,sans-serif" font-weight="800" font-size="9" text-anchor="middle"><text x="171.5" y="222">CB</text><text x="412.5" y="222">FS</text><text x="703.5" y="222">CB</text><text x="648.5" y="411">D</text></g>
+  <path d="M 648 408 Q 672 403 718 399" fill="none" stroke="#a7d6ff" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#defArrow)"/>
+  <path d="M 648 408 Q 636 380 604 347" fill="none" stroke="#a7d6ff" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#defArrow)"/>
+  <g font-family="Arial,sans-serif" font-size="11" font-weight="800"><circle cx="726" cy="388" r="13" fill="#b7ddff"/><text x="726" y="392" text-anchor="middle" fill="#18243b">A</text><circle cx="601" cy="332" r="13" fill="#b7ddff"/><text x="601" y="336" text-anchor="middle" fill="#18243b">B</text></g>
+  <path d="M 611 482 L 611 318 Q 610 306 600 310 L 579 331" fill="none" stroke="#ffdb53" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#offArrow)"/>
+  <path d="M 475 546 Q 508 524 526 497 Q 552 463 603 450 L 743 425" fill="none" stroke="#ffdb53" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#offArrow)"/>
+  <g fill="#ffdb53" stroke="#fff1ac" stroke-width="1.5"><circle cx="611" cy="482" r="15"/><circle cx="475" cy="546" r="15"/><circle cx="412" cy="546" r="15"/><circle cx="365" cy="480" r="11"/><circle cx="389" cy="480" r="11"/><circle cx="412" cy="480" r="11"/><circle cx="435" cy="480" r="11"/><circle cx="459" cy="480" r="11"/></g>
+  <g fill="#261837" font-family="Arial,sans-serif" font-weight="800" font-size="10" text-anchor="middle"><text x="611" y="486">X</text><text x="475" y="550">RB</text><text x="412" y="550">QB</text></g>
+  <g font-family="Arial,sans-serif" font-size="14" font-weight="800" fill="#ffdb53"><text x="625" y="301">HOOK</text><text x="703" y="452">FLAT</text></g>
+  <g transform="translate(819 147)">
+    <rect width="338" height="206" rx="17" fill="#ffffff" fill-opacity=".045" stroke="#caa9f1" stroke-opacity=".24"/>
+    <circle cx="31" cy="35" r="14" fill="#b7ddff"/><text x="31" y="40" text-anchor="middle" fill="#18243b" font-family="Arial,sans-serif" font-size="13" font-weight="800">A</text>
+    <text x="57" y="41" fill="#edf7ff" font-family="Arial,sans-serif" font-size="17" font-weight="800">DEFENDER WIDENS</text>
+    <text x="22" y="82" fill="#ffdb53" font-family="Arial,sans-serif" font-size="15" font-weight="700">Look toward the Hook window</text>
+    <text x="22" y="110" fill="#c6b9d5" font-family="Arial,sans-serif" font-size="13">Other defenders may close it.</text>
+    <line x1="22" y1="135" x2="316" y2="135" stroke="#caa9f1" stroke-opacity=".25"/>
+    <text x="22" y="164" fill="#a9c8ee" font-family="Arial,sans-serif" font-size="12">Condition, not a guaranteed completion</text>
+  </g>
+  <g transform="translate(819 370)">
+    <rect width="338" height="206" rx="17" fill="#ffffff" fill-opacity=".045" stroke="#caa9f1" stroke-opacity=".24"/>
+    <circle cx="31" cy="35" r="14" fill="#b7ddff"/><text x="31" y="40" text-anchor="middle" fill="#18243b" font-family="Arial,sans-serif" font-size="13" font-weight="800">B</text>
+    <text x="57" y="41" fill="#edf7ff" font-family="Arial,sans-serif" font-size="17" font-weight="800">DEFENDER STAYS INSIDE</text>
+    <text x="22" y="82" fill="#ffdb53" font-family="Arial,sans-serif" font-size="15" font-weight="700">Look toward the Flat outlet</text>
+    <text x="22" y="110" fill="#c6b9d5" font-family="Arial,sans-serif" font-size="13">Pursuit and pressure still matter.</text>
+    <line x1="22" y1="135" x2="316" y2="135" stroke="#caa9f1" stroke-opacity=".25"/>
+    <text x="22" y="164" fill="#a9c8ee" font-family="Arial,sans-serif" font-size="12">No timing, probability or outcome assumed</text>
+  </g>
+  <text x="44" y="671" font-family="Arial,sans-serif" font-size="12" fill="#c5b5d3">Yellow: offense  ·  Blue: defense  ·  Dashed arrows: possible responses</text>
+</svg>
