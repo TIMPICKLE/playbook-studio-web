@@ -3,7 +3,8 @@ import { composeDigitalExport, pngExportDescription } from './digital-export.js'
 import { createMaddenLibrary } from './madden.js';
 import { makeMaddenPlay, hasEditableTrace, getEditableEntry, spaceMaddenLine } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
-import { SharedWorkspace, cloudMode, CLOUD_SITE } from './cloud.js';
+import { SharedWorkspace, cloudMode, CLOUD_SITE, request } from './cloud.js';
+import { createMatchupView } from './ai-matchup.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
@@ -686,6 +687,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.se
 
 if (cloudMode()) {
   document.body.classList.add('cloud-enabled');
+  const matchupView = createMatchupView({ root: $('#ai-matchup-root'), request, getCurrent: () => shared?.current, getData: () => state.data, isDirty: () => !!shared?.dirty });
   shared = new SharedWorkspace({
     onData(data) {
       resetAnimation(); selection = null; draft = null; drag = null;
@@ -694,8 +696,10 @@ if (cloudMode()) {
       history.past = []; history.future = []; render();
     },
     onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
+    onAnalysisData(data, record) { matchupView.onData(data, record); },
     onPermissionLost(error) { resetAnimation(); draft = null; drag = null; render(); toast(error.message || '访问权限已变更，请重新登录或联系管理员。', { type: 'error' }); },
     showEditor(show) { if (!show) maddenLibrary.close(); $('#app').hidden = !show; $('.skip-link').hidden = !show; },
+    showAnalysis(show) { matchupView.show(show); },
     isBusy: () => !!drag || !!draft || playing || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
     openModal, closeModal, toast, download
   });

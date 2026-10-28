@@ -33,6 +33,9 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
   const q = selector => win.document.querySelector(selector);
   try {
     await import(`../web/app.js?cloud-test=${Date.now()}`); await settle();
+    assert.ok(q('[data-cloud-action="enter-editor"]')); assert.ok(q('[data-cloud-action="enter-analysis"]'));
+    assert.equal(q('#app').hidden, true);
+    q('[data-cloud-action="enter-editor"]').click(); await settle();
     await t.test('viewer sees shared data and exports but cannot mutate via controls, scripted events or keyboard', async () => {
       assert.equal(q('#app').hidden, false); assert.equal(q('[data-action="add-defense-43"]').disabled, true); assert.equal(q('[data-prop="title"]').disabled, true);
       assert.equal(q('[data-action="export"]').disabled, false); assert.equal(q('[data-cloud-action="members"]'), null);
