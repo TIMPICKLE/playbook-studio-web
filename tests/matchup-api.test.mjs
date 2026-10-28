@@ -24,6 +24,7 @@ async function setup(t) {
 }
 function goodResult(routeId) { return { summary:'观察同侧覆盖。',scenarios:[{title:'情景 A',condition:'如果防守者向外移动',observation:'关注同侧浅层',possibility:'内侧可能出现空间',action:'依球队规则阅读',limitations:'时序未知',evidenceIds:[routeId]}],missingInfo:['防守责任'] }; }
 function modelResponse(data, status=200) { return new Response(JSON.stringify(data), {status,headers:{'Content-Type':'application/json'}}); }
+function contextTool() { return modelResponse({choices:[{message:{content:null,tool_calls:[{id:'call_context',type:'function',function:{name:'get_matchup_context',arguments:'{}'}}]}}]}); }
 function stubFetch(t, fn) { const previous=globalThis.fetch;globalThis.fetch=fn;t.after(()=>{globalThis.fetch=previous;}); }
 
 test('geometry is segment based and does not invent simultaneous arrival',()=>{
@@ -56,23 +57,23 @@ test('analysis uses authorized snapshots, minimizes sent data and rejects stale,
   data.plays[0].players[0].name='SECRET PLAYER NAME';data.plays[0].notes='SECRET PLAY NOTES';
   db.sql.prepare('UPDATE workspaces SET data_json=? WHERE id=?').run(JSON.stringify(data),record.id);
   const routeId=`offense:route:${off.routes[0].id}`;
-  stubFetch(t,async(url,opts)=>{count++;assert.equal(url,'https://api.deepseek.com/chat/completions');assert.equal(opts.redirect,'manual');sent=JSON.parse(opts.body);return modelResponse({choices:[{message:{content:JSON.stringify(goodResult(routeId))}}]});});
+  stubFetch(t,async(url,opts)=>{count++;assert.equal(url,'https://api.deepseek.com/chat/completions');assert.equal(opts.redirect,'manual');sent=JSON.parse(opts.body);if(sent.messages.length===2)return contextTool();return modelResponse({choices:[{message:{content:JSON.stringify(goodResult(routeId))}}]});});
   assert.equal((await call(db,path,outsider,body)).status,404);
   assert.equal((await call(db,path,viewer,{...body,consent:false})).status,400);
   assert.equal((await call(db,path,viewer,{...body,revision:2})).status,409);
   assert.equal(count,0);
   const result=await call(db,path,viewer,body);
-  assert.equal(result.status,200);assert.equal(count,1);assert.equal(result.body.scenarios[0].evidenceIds[0],routeId);
+  assert.equal(result.status,200);assert.equal(count,2);assert.equal(result.body.scenarios[0].evidenceIds[0],routeId);
   assert.ok(result.body.evidence.some(x=>x.id===routeId));assert.match(result.body.warnings.join(' '),/时序/);
-  const payload=sent.messages[1].content;
+  const payload=sent.messages.find(message=>message.role==='tool').content;
   assert.doesNotMatch(payload,/SECRET PLAYER NAME|SECRET PLAY NOTES|fake-test-key|duration/);
   assert.equal(sent.model,'test-model');assert.equal(sent.stream,false);
-  const withNotes=await call(db,path,viewer,{...body,includeNotes:true});assert.equal(withNotes.status,200);assert.match(sent.messages[1].content,/SECRET PLAY NOTES/);
+  const withNotes=await call(db,path,viewer,{...body,includeNotes:true});assert.equal(withNotes.status,200);assert.match(sent.messages.find(message=>message.role==='tool').content,/SECRET PLAY NOTES/);
 });
 
 test('model errors and invented evidence are not leaked as successful output',async t=>{
   const {db,body,path}=await setup(t);let response;
-  stubFetch(t,async()=>response);
+  stubFetch(t,async(_url,opts)=>{const messages=JSON.parse(opts.body).messages;if(response.status!==401&&messages.length===2)return contextTool();return response.clone();});
   response=modelResponse({error:{message:'SECRET raw provider message'}},401);
   let result=await call(db,path,owner,body);assert.equal(result.status,502);assert.doesNotMatch(JSON.stringify(result.body),/SECRET|fake-test-key/);
   response=modelResponse({choices:[{message:{content:JSON.stringify(goodResult('offense:route:invented'))}}]});
@@ -84,16 +85,18 @@ test('model errors and invented evidence are not leaked as successful output',as
 test('permission revocation and revision changes during the model call prevent delivery',async t=>{
   const {db,record,off,body,path}=await setup(t);
   const response=()=>modelResponse({choices:[{message:{content:JSON.stringify(goodResult(`offense:route:${off.routes[0].id}`))}}]});
-  stubFetch(t,async()=>{db.sql.prepare('DELETE FROM members WHERE workspace_id=? AND user_id=?').run(record.id,viewer.userId);return response();});
+  let calls=0;
+  stubFetch(t,async(_url,opts)=>{calls++;const messages=JSON.parse(opts.body).messages;if(messages.length===2){assert.doesNotMatch(JSON.stringify(messages),new RegExp(off.id));db.sql.prepare('DELETE FROM members WHERE workspace_id=? AND user_id=?').run(record.id,viewer.userId);return contextTool();}return response();});
   assert.equal((await call(db,path,viewer,body)).status,404);
-  globalThis.fetch=async()=>{db.sql.prepare('UPDATE workspaces SET revision=revision+1 WHERE id=?').run(record.id);return response();};
+  assert.equal(calls,1,'revoked member data must not be sent to the second model call');
+  globalThis.fetch=async(_url,opts)=>{const messages=JSON.parse(opts.body).messages;if(messages.length===2){db.sql.prepare('UPDATE workspaces SET revision=revision+1 WHERE id=?').run(record.id);return contextTool();}return response();};
   const stale=await call(db,path,owner,body);assert.equal(stale.status,409);assert.equal(stale.body.code,'revision_conflict');
 });
 
 test('analysis calls are bounded per user and do not persist API credentials',async t=>{
   const {db,off,body,path}=await setup(t);let count=0;
-  stubFetch(t,async()=>{count++;return modelResponse({choices:[{message:{content:JSON.stringify(goodResult(`offense:route:${off.routes[0].id}`))}}]});});
+  stubFetch(t,async(_url,opts)=>{count++;if(JSON.parse(opts.body).messages.length===2)return contextTool();return modelResponse({choices:[{message:{content:JSON.stringify(goodResult(`offense:route:${off.routes[0].id}`))}}]});});
   for(let i=0;i<12;i++)assert.equal((await call(db,path,owner,body)).status,200);
-  assert.equal((await call(db,path,owner,body)).status,429);assert.equal(count,12);
+  assert.equal((await call(db,path,owner,body)).status,429);assert.equal(count,24);
   const stored=db.sql.prepare('SELECT key,started_at,attempts FROM auth_throttles').all();assert.doesNotMatch(JSON.stringify(stored),/fake-test-key/);
 });

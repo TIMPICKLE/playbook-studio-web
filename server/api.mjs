@@ -1,7 +1,8 @@
 import { decodeWorkspace, starterWorkspace } from '../web/model.js';
 import { MAX_BODY, ApiError, fail, json, readJson } from './http.mjs';
 import { resolveIdentity, handleAuth, createAccountStatements, resetAccount } from './auth.mjs';
-import { buildMatchup, modelEndpoint, runModel } from './matchup.mjs';
+import { buildMatchup, modelEndpoint } from './matchup.mjs';
+import { runMatchupAgent } from './matchup-agent.mjs';
 export { MAX_BODY } from './http.mjs';
 const ROLES = ['editor', 'viewer'];
 const normalizeEmail = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -41,6 +42,7 @@ async function writeWorkspace(db, workspaceId, user, data, expected, action = 's
 // Identity comes from the server-only ChatGPT helper, never from request JSON.
 export async function handleApi(request, env, user) {
   try {
+    const platformUser = user;
     const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
     if (path[0] === 'health' && request.method === 'GET') { if (!env.DB) return json({ ready: false }, 503); await env.DB.prepare('SELECT id FROM workspaces LIMIT 1').first(); return json({ ready: true, storage: 'cloud', version: '3.1.0' }); }
     if (!['GET', 'HEAD'].includes(request.method) && request.headers.get('origin') !== new URL(request.url).origin) fail(403, '请求来源不正确');
@@ -110,16 +112,21 @@ export async function handleApi(request, env, user) {
       const counter = await db.prepare('INSERT INTO auth_throttles(key,started_at,attempts) VALUES(?,?,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN started_at<? THEN 1 ELSE attempts+1 END,started_at=CASE WHEN started_at<? THEN excluded.started_at ELSE started_at END RETURNING attempts').bind(key, throttleNow, throttleNow - 60000, throttleNow - 60000).first();
       if (counter.attempts > 12) fail(429, '分析请求过于频繁，请稍后重试');
       const matchup = buildMatchup(offense, defense, { coverage: body.coverage, includeNotes: body.includeNotes === true, mirrorDefense: body.mirrorDefense === true });
+      const reauthorize = async () => {
+        const identity = await resolveIdentity(request, env, platformUser);
+        if (!identity?.userId || identity.userId !== user.userId) fail(401, '登录状态已失效，请重新登录');
+        const latest = await access(db, workspaceId, user.userId);
+        if (latest.revision !== record.revision) { const error = new ApiError(409, '分析期间战术本已更新，请重新分析'); error.code = 'revision_conflict'; throw error; }
+      };
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 45000);
+      const timer = setTimeout(() => controller.abort(), 90000);
       const abort = () => controller.abort();
       request.signal.addEventListener('abort', abort, { once: true });
       if (request.signal.aborted) controller.abort();
       let result;
-      try { result = await runModel(matchup, { model: body.model, perspective, context: body.context, mode: body.mode }, env, controller.signal); }
+      try { result = await runMatchupAgent(matchup, { model: body.model, perspective, context: body.context, mode: body.mode, reauthorize }, env, controller.signal); }
       finally { clearTimeout(timer); request.signal.removeEventListener('abort', abort); }
-      const latest = await access(db, workspaceId, user.userId);
-      if (latest.revision !== record.revision) return json({ error: '分析期间战术本已更新，请重新分析', code: 'revision_conflict' }, 409);
+      await reauthorize();
       return json({ ...result, evidence: matchup.evidence, warnings: matchup.warnings, revision: record.revision });
     }
     if (path[2] === 'accounts' && path.length === 3 && request.method === 'POST') {
@@ -165,5 +172,5 @@ export async function handleApi(request, env, user) {
       if (request.method === 'POST' && path[4] === 'restore') { const body = await readJson(request); return await writeWorkspace(db, workspaceId, user, JSON.parse(record.data_json), body.revision, 'restored', true); }
     }
     fail(404, '接口不存在');
-  } catch (error) { if (error instanceof ApiError) return json({ error: error.message }, error.status); console.error('Playbook cloud API error:', error?.message); return json({ error: '云端服务暂时不可用，请稍后重试' }, 500); }
+  } catch (error) { if (error instanceof ApiError) return json({ error: error.message, ...(error.code ? { code: error.code } : {}) }, error.status); console.error('Playbook cloud API error:', error?.message); return json({ error: '云端服务暂时不可用，请稍后重试' }, 500); }
 }
