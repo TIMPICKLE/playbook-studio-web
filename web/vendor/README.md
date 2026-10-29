@@ -15,3 +15,11 @@
 - Source: https://github.com/davidjerleke/embla-carousel/tree/v8.6.0
 - Docs: https://www.embla-carousel.com/docs/v8/
 - License: MIT; see `embla-carousel-8.6.0/LICENSE`.
+
+## Big Shoulders Display 5.3.0 (font)
+
+`big-shoulders-display-5.3.0/` contains the unmodified Latin variable-weight WOFF2 from `@fontsource-variable/big-shoulders-display` 5.3.0. It is the display face of the v5 "Stage" design (play titles, yard numbers, player labels, brand lockups); Chinese text falls back to the system UI font.
+
+- Upstream: https://github.com/xyztype/Big-Shoulders · packaged by https://fontsource.org
+- License: SIL Open Font License 1.1; see `big-shoulders-display-5.3.0/LICENSE`.
+- Self-hosted so the editor stays offline-capable; listed in the service-worker cache.

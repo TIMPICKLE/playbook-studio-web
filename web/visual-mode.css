@@ -1,17 +1,9 @@
 /* Mode is device-local; traditional deliberately has no animated material. */
-html[data-visual-mode=traditional]{--paper:#171020;--surface:#281c39;--surface-soft:#302342;--glass-edge:#59446e;--glass-shadow:none;background:#171020}
+/* Traditional-mode palette and surfaces live in theme.css; this file keeps only mode behaviour. */
 html[data-visual-mode=traditional] *,html[data-visual-mode=traditional] *::before,html[data-visual-mode=traditional] *::after{animation:none!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
-html[data-visual-mode=traditional] .atmosphere{background:#171020}
 html[data-visual-mode=traditional] :is(.stadium-light,#ambient-particles,#action-particles,#liquid-metal-world,.liquid-surface-canvas,.digital-board-surface,.digital-decoration){display:none!important}
-html[data-visual-mode=traditional] :is(.sidebar,.topbar,.cloud-bar,.inspector,.inspector-panel,.playback,.draw-tools,.editor-mode,.field-context,.effects-panel,.account-menu-panel,.modal,.cloud-gate,.login-panel,.entry-demo,.compact-nav,.madden-panel,.add-object-menu>div,.entry-header,.entry-migration){background:#281c39;box-shadow:none;border-color:#574269}
-html[data-visual-mode=traditional] :is(.button.primary,.play-button,.new-play){background:#ffdc42;box-shadow:none;border-color:#ffdc42;color:#251637}
-html[data-visual-mode=traditional] :is(.icon-button,.button.subtle,.effects-menu>summary,.book-card,.workspace-current-card){background:#302342;box-shadow:none;border-color:#604a73;translate:none}
-html[data-visual-mode=traditional] :is(.book-card.is-current,.play-card.active,.tool-indicator,.editor-mode::before){background:#4b3952;border-color:#dfbe49;box-shadow:none}
-html[data-visual-mode=traditional] .field-wrap{box-shadow:none;border-color:#604a73}
 html[data-visual-mode=traditional] :is(.player-symbol,.selection-ring){filter:none!important}
 html[data-visual-mode=traditional] .login-heading h1{background:none;color:#fff6db;-webkit-text-fill-color:currentColor}
-html[data-visual-mode=traditional] :is(.form-field input,.form-field select,.form-field textarea,.login-form-wrap input){box-shadow:none;background:#21162f}
-html[data-visual-mode=traditional] .modal-backdrop{background:#0b0715cc}
 .effects-panel button:disabled{opacity:.45;cursor:not-allowed}
 .effects-panel button:disabled:hover{background:transparent}
 .digital-board-surface{pointer-events:none!important;overflow:visible}
@@ -22,7 +14,7 @@ html[data-visual-mode=traditional] .modal-backdrop{background:#0b0715cc}
 html[data-visual-mode=digital] #field .route-stroke{filter:drop-shadow(0 1px 1px #090612aa)}
 html[data-visual-mode=digital] #field.is-rehearsal .route-stroke{opacity:.65}
 html[data-visual-mode=digital] #pitch-ball{filter:drop-shadow(0 2px 2px #090612aa)}
-html[data-digital-board=loading] .field-tag::after{content:'材质加载中';font-size:10px;color:#d9cce9;margin-left:8px}
+html[data-digital-board=loading] .field-tag::after{content:'材质加载中';font-size:12px;color:#d9cce9;margin-left:8px}
 @media print{.digital-board-surface,.digital-decoration{display:none!important}.digital-ready .player-body{opacity:1}.digital-ready .player-label{stroke:none;fill:#251637}}
 
 /* Perspective stage: the WebGL scene and projected SVG input share one camera. */

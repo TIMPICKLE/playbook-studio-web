@@ -1,0 +1,492 @@
+/* ==========================================================================
+   Playbook Studio 5 · "Stage"
+   --------------------------------------------------------------------------
+   The field is the product. It sits centre stage under a floodlight in
+   STINGERS purple; everything else is a control that floats around it.
+
+   1. One lit object: the turf is the only saturated surface on screen.
+   2. Controls float, content never gets boxed: sidebar, inspector and the
+      tool dock are islands over a dark stage, not cells of a grid.
+   3. Yellow means "this": the primary action, the current selection and
+      the offense. Nothing else is yellow.
+   4. Type with conviction: a condensed athletic face for names and numbers,
+      the system face for everything you read.
+
+   Loaded last; it owns palette, type, shape and surface rules. Earlier
+   sheets keep layout mechanics and behaviour.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Big Shoulders Display';
+  src: url('./vendor/big-shoulders-display-5.3.0/big-shoulders-display-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* Stage: neutral darks with a whisper of violet. */
+  --night-0: #0c0812;   /* the stage */
+  --night-1: #15101d;   /* floating islands */
+  --night-2: #1d1727;   /* fills inside islands */
+  --night-3: #272031;   /* hover */
+  --night-4: #332a40;   /* pressed / neutral selection */
+  --hairline: #ffffff0f;
+  --hairline-strong: #ffffff1c;
+
+  --text-1: #f5f1fa;
+  --text-2: #b8afc6;
+  --text-3: #877d95;
+
+  /* Brand */
+  --stinger: #ffd23f;
+  --stinger-hover: #ffdd6b;
+  --stinger-ink: #1d1407;
+  --stinger-soft: #ffd23f1c;
+  --turf: #21113f;
+  --turf-glow: #6b3fd1;
+  --violet: #a184ff;
+  --violet-soft: #a184ff2b;
+  --danger-1: #ff8e7e;
+  --danger-soft-1: #ff8e7e17;
+
+  /* Type */
+  --font-ui: system-ui, -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', var(--font-ui);
+  --t-xs: 12px; --t-sm: 13px; --t-md: 14px; --t-lg: 16px; --t-xl: 20px; --t-2xl: 28px; --t-3xl: 40px; --t-hero: 60px;
+
+  /* Shape: four radii, chosen by role. Islands are the roundest thing on screen. */
+  --r-inset: 8px; --r-control: 12px; --r-island: 24px; --r-pill: 999px;
+  --ui-radius-panel: var(--r-island); --ui-radius-card: var(--r-control);
+  --ui-radius-control: var(--r-control); --ui-radius-inset: var(--r-inset);
+
+  --island-shadow: 0 1px 0 #ffffff0a inset, 0 24px 48px -24px #000000e6;
+  --dock-shadow: 0 1px 0 #ffffff14 inset, 0 0 0 1px #ffffff12, 0 18px 40px -10px #000000f2;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+
+  /* Legacy names consumed by older sheets, remapped onto the system. */
+  --font: var(--font-ui);
+  --mono: var(--font-ui);
+  --ink: var(--text-1);
+  --muted: var(--text-2);
+  --line: var(--hairline-strong);
+  --accent: var(--stinger);
+  --green: var(--stinger);
+  --green-dark: var(--stinger-hover);
+  --danger: var(--danger-1);
+  --danger-soft: var(--danger-soft-1);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] { font-family: var(--font-ui); }
+html[data-visual-mode] body { font-family: var(--font-ui); font-size: var(--t-md); letter-spacing: 0; font-feature-settings: 'tnum' 1; }
+html[data-visual-mode] :focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+html[data-visual-mode] ::selection { background: var(--violet-soft); color: var(--text-1); }
+html[data-visual-mode] small { font-size: var(--t-xs); }
+html[data-visual-mode] kbd {
+  font-family: var(--font-ui); font-size: 11px; font-weight: 500; line-height: 1;
+  min-width: 18px; height: 18px; padding: 0 5px; display: inline-grid; place-items: center;
+  border-radius: 5px; background: var(--hairline); border: 0; color: var(--text-3);
+}
+
+html[data-visual-mode=traditional] {
+  --paper: var(--night-0); --surface: var(--night-2); --surface-soft: var(--night-3);
+  --glass-edge: var(--hairline-strong); --glass-shadow: none;
+  background: var(--night-0); color-scheme: dark;
+}
+/* A static floodlight over the stage: depth without motion. */
+html[data-visual-mode=traditional] .atmosphere {
+  background:
+    radial-gradient(1100px 520px at 58% -120px, #6b3fd133, transparent 70%),
+    radial-gradient(700px 400px at 100% 100%, #2a165214, transparent 70%),
+    var(--night-0);
+}
+
+/* --------------------------------------------------------------------------
+   Islands (traditional): solid, rounded, one hairline, deep soft shadow.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode=traditional] :is(.sidebar, .inspector-panel, .compact-nav) { background: var(--night-1); box-shadow: none; }
+html[data-visual-mode=traditional] .sidebar { border: 0; border-right: 1px solid var(--hairline); border-radius: 0; }
+html[data-visual-mode=traditional] :is(.topbar, .cloud-bar) { background: transparent; border: 0; box-shadow: none; border-radius: 0; }
+html[data-visual-mode=traditional] .inspector { background: transparent; border: 0; box-shadow: none; border-radius: 0; padding: 4px 4px 24px; }
+html[data-visual-mode=traditional] .playback { background: var(--night-1); border: 1px solid var(--hairline); box-shadow: none; }
+html[data-visual-mode=traditional] :is(.editor-mode, .draw-tools) { background: var(--night-2); border: 0; box-shadow: none; }
+html[data-visual-mode=traditional] :is(.field-context, .effects-panel, .account-menu-panel, .add-object-menu > div, .modal, .cloud-gate, .login-panel, .entry-demo, .madden-panel, .entry-header, .entry-migration) {
+  background: var(--night-2); border-color: var(--hairline-strong); box-shadow: var(--island-shadow);
+}
+html[data-visual-mode=traditional] .modal-backdrop { background: #07040cd9; }
+html[data-visual-mode=traditional] .compact-nav { border-top: 1px solid var(--hairline); }
+
+/* --------------------------------------------------------------------------
+   Sidebar content
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .brand { gap: 12px; margin: 2px 6px 22px; }
+html[data-visual-mode] .brand img { background: none; padding: 0; border-radius: 0; width: 38px; height: 38px; }
+html[data-visual-mode] .brand > span {
+  font-family: var(--font-display); font-size: 24px; font-weight: 800; letter-spacing: .04em; line-height: 1;
+  color: var(--text-1); text-shadow: none; white-space: nowrap;
+}
+html[data-visual-mode] .brand > span > span { font-family: var(--font-ui); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--text-3); margin-top: 5px; white-space: nowrap; }
+html[data-visual-mode] .brand > small { font-family: var(--font-ui); font-size: 11px; color: var(--text-3); border: 1px solid var(--hairline-strong); border-radius: var(--r-pill); padding: 2px 8px; white-space: nowrap; }
+
+html[data-visual-mode=traditional] .team-switch { background: var(--night-2); border: 0; box-shadow: none; border-radius: var(--r-control); padding: 10px; margin-bottom: 22px; }
+html[data-visual-mode=traditional] .team-switch:hover { background: var(--night-3); }
+html[data-visual-mode] .team-avatar { background: var(--night-0); border-radius: 9px; color: var(--text-1); }
+html[data-visual-mode] .team-switch strong { font-size: var(--t-sm); font-weight: 600; color: var(--text-1); letter-spacing: .01em; }
+html[data-visual-mode] .team-switch small { font-size: var(--t-xs); color: var(--text-3); letter-spacing: .02em; }
+
+html[data-visual-mode] .side-label { font-size: var(--t-xs); font-weight: 500; color: var(--text-3); letter-spacing: 0; padding: 0 10px; margin-bottom: 6px; }
+html[data-visual-mode] .side-label span { color: var(--text-3); }
+
+html[data-visual-mode=traditional] .book-nav { gap: 2px; }
+html[data-visual-mode=traditional] .book-nav button { color: var(--text-2); border: 0; background: transparent; border-radius: 10px; min-height: 40px; padding: 8px 10px; font-size: var(--t-md); box-shadow: none; }
+html[data-visual-mode=traditional] .book-nav button:hover { background: var(--night-2); color: var(--text-1); }
+html[data-visual-mode=traditional] .book-nav button.active { background: var(--night-3); color: var(--text-1); font-weight: 600; }
+html[data-visual-mode] .book-nav button.active svg { color: var(--stinger); }
+html[data-visual-mode] .book-nav button em { font-family: var(--font-display); font-size: 16px; font-weight: 700; font-style: normal; color: var(--text-3); opacity: 1; }
+html[data-visual-mode] .book-nav button.active em { color: var(--text-1); }
+
+html[data-visual-mode=traditional] .madden-launch { background: var(--night-2); border: 0; box-shadow: none; border-radius: var(--r-control); color: var(--text-1); }
+html[data-visual-mode=traditional] .madden-launch:hover { background: var(--night-3); }
+html[data-visual-mode] .madden-launch > span { min-width: 0; }
+html[data-visual-mode] .madden-launch strong { font-size: var(--t-sm); font-weight: 600; }
+html[data-visual-mode] .madden-launch small { display: block; font-size: var(--t-xs); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html[data-visual-mode] .madden-launch b { color: var(--text-3); font-weight: 400; }
+
+html[data-visual-mode] .side-divider { background: var(--hairline); margin: 18px 4px; }
+
+html[data-visual-mode=traditional] .search-box { background: var(--night-2); border: 1px solid transparent; border-radius: var(--r-control); }
+html[data-visual-mode=traditional] .search-box:focus-within { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
+html[data-visual-mode] .search-box input { font-size: var(--t-sm); height: 38px; }
+html[data-visual-mode] .search-box svg { color: var(--text-3); }
+html[data-visual-mode=traditional] .filters select { background-color: var(--night-2); border: 1px solid transparent; border-radius: 10px; font-size: var(--t-xs); height: 32px; color: var(--text-2); }
+
+html[data-visual-mode] .play-list-label { font-size: var(--t-xs); color: var(--text-3); margin: 0 6px 6px; }
+html[data-visual-mode] .play-list-label b { font-family: var(--font-ui); font-size: var(--t-xs); font-weight: 500; color: var(--text-3); }
+html[data-visual-mode=traditional] .small-icon:hover { background: var(--night-2); }
+
+/* Play cards: the thumbnail is a little lit field, the text sits quietly beside it. */
+html[data-visual-mode=traditional] .play-list { gap: 2px; }
+html[data-visual-mode=traditional] .play-card { border: 0; border-radius: 14px; min-height: 66px; padding: 8px; background: transparent; box-shadow: none; }
+html[data-visual-mode=traditional] .play-card:hover { background: var(--night-2); }
+html[data-visual-mode=traditional] .play-card.active { background: var(--night-3); box-shadow: none; }
+html[data-visual-mode] .play-card.active::before { background: var(--stinger); width: 3px; height: 22px; left: -8px; border-radius: 0 3px 3px 0; }
+html[data-visual-mode] .play-thumb { border: 0; border-radius: 9px; overflow: hidden; box-shadow: 0 0 0 1px var(--hairline) inset, 0 6px 14px -8px #000; }
+html[data-visual-mode] .play-card-info strong { font-size: var(--t-sm); font-weight: 600; color: var(--text-1); line-height: 1.35; }
+html[data-visual-mode] .play-card-info small { font-size: var(--t-xs); color: var(--text-3); margin-top: 3px; }
+html[data-visual-mode] .favorite-dot { color: var(--stinger); font-size: var(--t-xs); }
+
+html[data-visual-mode=traditional] .new-play { background: transparent; color: var(--text-2); border: 1px dashed var(--hairline-strong); border-radius: var(--r-control); box-shadow: none; text-shadow: none; filter: none; }
+html[data-visual-mode=traditional] .new-play:hover { background: var(--night-2); color: var(--text-1); border-color: var(--text-3); }
+
+html[data-visual-mode] .sidebar-bottom > button { font-size: var(--t-sm); color: var(--text-2); }
+html[data-visual-mode=traditional] .sidebar-bottom > button:hover { background: var(--night-2); color: var(--text-1); }
+html[data-visual-mode] .local-status { font-size: var(--t-xs); color: var(--text-3); }
+html[data-visual-mode] .local-status i { background: #6ee7a8; box-shadow: 0 0 0 3px #6ee7a81f; }
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .breadcrumbs { font-size: var(--t-sm); color: var(--text-2); }
+html[data-visual-mode] .crumb-slash { color: var(--text-3); }
+
+html[data-visual-mode] .button { font-size: var(--t-sm); font-weight: 600; border-radius: var(--r-pill); min-height: 36px; padding: 8px 16px; letter-spacing: .01em; }
+html[data-visual-mode=traditional] :is(.button.primary, .play-button) {
+  background: var(--stinger); color: var(--stinger-ink); border: 1px solid transparent; box-shadow: 0 8px 20px -10px #ffd23f99; text-shadow: none; filter: none;
+}
+html[data-visual-mode=traditional] :is(.button.primary, .play-button):hover:not(:disabled) { background: var(--stinger-hover); color: var(--stinger-ink); }
+html[data-visual-mode=traditional] :is(.button.subtle, .effects-menu > summary) { background: var(--night-1); border: 1px solid var(--hairline-strong); color: var(--text-1); box-shadow: none; }
+html[data-visual-mode=traditional] :is(.button.subtle, .effects-menu > summary):hover:not(:disabled) { background: var(--night-3); border-color: var(--hairline-strong); color: var(--text-1); }
+html[data-visual-mode=traditional] .button.danger { background: var(--danger-soft-1); color: var(--danger-1); }
+html[data-visual-mode=traditional] .button.danger.quiet { background: transparent; }
+html[data-visual-mode=traditional] .button.danger:hover:not(:disabled) { background: #ff8e7e26; color: var(--danger-1); }
+html[data-visual-mode] .effects-menu > summary { border-radius: var(--r-pill); font-size: var(--t-sm); }
+
+html[data-visual-mode=traditional] .icon-button { background: transparent; border: 0; box-shadow: none; color: var(--text-2); border-radius: var(--r-pill); width: 38px; height: 38px; translate: none; }
+html[data-visual-mode=traditional] .icon-button:hover:not(:disabled) { background: var(--night-3); color: var(--text-1); }
+html[data-visual-mode=traditional] .icon-button.enabled { background: var(--night-3); color: var(--stinger); }
+html[data-visual-mode] .icon-button:disabled { opacity: .3; }
+html[data-visual-mode] .vertical-rule { background: var(--hairline-strong); }
+
+/* --------------------------------------------------------------------------
+   Play header — the one place type gets loud.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .play-header .eyebrow { font-size: var(--t-sm); color: var(--text-3); font-weight: 500; letter-spacing: 0; text-shadow: none; }
+html[data-visual-mode] .play-header h1 {
+  font-family: var(--font-display); font-size: var(--t-3xl); font-weight: 800; line-height: .95;
+  letter-spacing: .005em; color: var(--text-1); margin: 10px 0 10px; text-shadow: none;
+}
+html[data-visual-mode] .play-header p { font-size: var(--t-sm); color: var(--text-2); text-shadow: none; }
+html[data-visual-mode] .favorite-button { color: var(--text-3); }
+html[data-visual-mode] .favorite-button.is-favorite { color: var(--stinger); }
+
+/* --------------------------------------------------------------------------
+   Canvas heading: quiet text controls above the field.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .canvas-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+html[data-visual-mode] .canvas-heading .board-size-controls { margin: 0; flex: 1 1 auto; min-width: 0; }
+html[data-visual-mode] .canvas-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+html[data-visual-mode] .board-size-controls { font-size: var(--t-xs); color: var(--text-3); }
+html[data-visual-mode] .board-size-controls output { font-family: var(--font-ui); font-size: var(--t-xs); color: var(--text-2); font-variant-numeric: tabular-nums; }
+html[data-visual-mode=traditional] :is(.board-zoom-controls button, .board-size-actions button, .board-advanced > summary) {
+  background: transparent; border: 0; color: var(--text-2); font-size: var(--t-xs); border-radius: var(--r-pill); box-shadow: none;
+}
+html[data-visual-mode=traditional] :is(.board-zoom-controls button, .board-size-actions button, .board-advanced > summary):hover:not(:disabled) { background: var(--night-2); color: var(--text-1); }
+html[data-visual-mode] input[type=range] { accent-color: var(--stinger); }
+
+html[data-visual-mode] .view-tools .tool-button { color: var(--text-3); border-radius: var(--r-pill); width: 36px; min-width: 36px; height: 36px; }
+html[data-visual-mode=traditional] .view-tools .tool-button:hover { background: var(--night-2); color: var(--text-1); }
+html[data-visual-mode] .view-tools .tool-button.enabled { color: var(--stinger); }
+
+html[data-visual-mode] .add-object-menu > summary { font-size: var(--t-sm); font-weight: 600; border-radius: var(--r-pill); }
+html[data-visual-mode=traditional] .add-object-menu > summary { background: var(--night-1); border: 1px solid var(--hairline-strong); color: var(--text-1); box-shadow: none; }
+html[data-visual-mode=traditional] .add-object-menu > summary:hover { background: var(--night-3); }
+html[data-visual-mode] .add-object-menu > div { border-radius: 16px; }
+html[data-visual-mode] .add-object-menu > div button { font-size: var(--t-sm); border-radius: 10px; }
+html[data-visual-mode] .add-object-menu > div button small { color: var(--text-3); }
+
+/* --------------------------------------------------------------------------
+   The field — the one lit object.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode=traditional] .field-wrap {
+  background: radial-gradient(120% 90% at 50% 40%, #2a175233, transparent 70%), #110b1b;
+  border: 0; border-radius: var(--r-island);
+  box-shadow: 0 0 0 1px var(--hairline) inset, 0 40px 80px -40px #000;
+}
+html[data-visual-mode=traditional] .pitch-viewport { background: none; }
+html[data-visual-mode] .pitch-stage > .pitch-svg { border-radius: 14px; }
+html[data-visual-mode=traditional] .pitch-stage:not(.is-perspective) > .pitch-svg { box-shadow: 0 0 0 1px #ffffff14, 0 0 80px -20px #6b3fd166, 0 30px 60px -30px #000; }
+html[data-visual-mode] .field-tag, html[data-visual-mode] .drag-readout {
+  font-family: var(--font-ui); font-size: var(--t-xs); color: var(--text-2);
+  background: #0c0812cc; border: 0; box-shadow: none; border-radius: var(--r-pill); padding: 4px 10px;
+}
+html[data-visual-mode] .pitch-svg .player-body :is(circle, rect, path) { stroke: #0b0711; stroke-opacity: .6; stroke-width: 2; }
+html[data-visual-mode] .field-context { border-radius: var(--r-pill); padding: 4px; }
+html[data-visual-mode] .field-context button { font-size: var(--t-sm); border-radius: var(--r-pill); }
+html[data-visual-mode=traditional] .field-context { background: #1d1727f2; box-shadow: var(--dock-shadow); border: 0; }
+html[data-visual-mode=traditional] .field-context button.context-primary { background: var(--stinger); color: var(--stinger-ink); box-shadow: none; border: 0; }
+
+html[data-visual-mode] .board-height-resizer { color: var(--text-3); font-size: var(--t-xs); }
+html[data-visual-mode] .canvas-hint { font-size: var(--t-sm); color: var(--text-2); }
+html[data-visual-mode] .hint-dot { background: var(--stinger); box-shadow: 0 0 0 4px var(--stinger-soft); }
+html[data-visual-mode] .text-button { color: var(--text-1); font-size: var(--t-sm); }
+
+/* --------------------------------------------------------------------------
+   Stage dock: mode switch + drawing tools, one floating instrument.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .stage-dock { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; }
+html[data-visual-mode] .stage-dock .toolbar { margin: 0; min-width: 0; }
+
+html[data-visual-mode] .editor-mode { border-radius: var(--r-pill); padding: 4px; }
+html[data-visual-mode] .editor-mode button { font-size: var(--t-sm); border-radius: var(--r-pill); color: var(--text-2); }
+html[data-visual-mode] .editor-mode button.active { color: var(--text-1); font-weight: 600; }
+html[data-visual-mode=traditional] .editor-mode::before { background: var(--night-4); border: 0; box-shadow: none; border-radius: var(--r-pill); }
+
+html[data-visual-mode] .draw-tools { border-radius: var(--r-pill); padding: 4px; min-height: 48px; }
+html[data-visual-mode] .draw-tools .tool-indicator { inset: 4px auto 4px 4px; width: calc((100% - 8px) / 7); border-radius: var(--r-pill); }
+html[data-visual-mode=traditional] .tool-indicator { background: var(--night-4); border: 0; box-shadow: none; }
+html[data-visual-mode] .draw-tools .tool-button { border-radius: var(--r-pill); font-size: var(--t-sm); color: var(--text-2); gap: 7px; height: 40px; }
+html[data-visual-mode] .draw-tools .tool-button:hover { background: transparent; color: var(--text-1); }
+html[data-visual-mode] .draw-tools .tool-button.active { color: var(--text-1) !important; font-weight: 600; text-shadow: none; background: transparent; box-shadow: none; }
+html[data-visual-mode] .draw-tools .tool-button.active svg { color: var(--stinger); }
+html[data-visual-mode] .draw-tools .tool-button kbd { display: none; }
+
+html[data-visual-mode=traditional] .stage-dock :is(.editor-mode, .draw-tools) { background: #1d1727f2; box-shadow: var(--dock-shadow); }
+
+/* --------------------------------------------------------------------------
+   Playback
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .playback { border-radius: var(--r-island); }
+html[data-visual-mode] .playback-title { font-size: var(--t-md); font-weight: 600; color: var(--text-1); }
+html[data-visual-mode] .playback-title small { font-size: var(--t-xs); color: var(--text-3); letter-spacing: 0; }
+html[data-visual-mode] #time-label { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-1); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+html[data-visual-mode] #time-label span { color: var(--text-3); }
+html[data-visual-mode] .speed-label { font-size: var(--t-xs); color: var(--text-3); }
+html[data-visual-mode] .playback .play-button { width: 48px; height: 48px; }
+
+/* --------------------------------------------------------------------------
+   Inspector: a plain column of fields.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .inspector-heading { font-size: var(--t-md); font-weight: 600; color: var(--text-1); margin-bottom: 14px; letter-spacing: 0; }
+html[data-visual-mode] .inspector-heading small { font-size: var(--t-xs); color: var(--text-3); }
+html[data-visual-mode] .tag { font-size: var(--t-xs); font-weight: 600; border-radius: var(--r-pill); padding: 2px 10px; background: var(--stinger-soft); color: var(--stinger); border: 0; }
+html[data-visual-mode] .form-field { margin-bottom: 14px; }
+html[data-visual-mode] .form-field > span, html[data-visual-mode] .form-field > label { font-size: var(--t-xs); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
+html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input:not([type=checkbox]):not([type=radio]):not([type=range]), .modal select, .modal textarea) {
+  background-color: var(--night-2); border: 1px solid transparent; border-radius: var(--r-control); box-shadow: none; color: var(--text-1); font-size: var(--t-md);
+}
+html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input, .modal select, .modal textarea):hover { background-color: var(--night-3); }
+html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input, .modal select, .modal textarea):focus {
+  border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); background-color: var(--night-2);
+}
+html[data-visual-mode] .inspector textarea { line-height: 1.65; }
+html[data-visual-mode] .inspector-divider { background: var(--hairline); margin: 22px 0; }
+html[data-visual-mode] .formation-actions button { font-size: var(--t-sm); color: var(--text-1); }
+html[data-visual-mode] .formation-actions button svg { color: var(--stinger); }
+html[data-visual-mode=traditional] .route-quick button { background: var(--night-2); border: 0; border-radius: var(--r-control); color: var(--text-1); font-size: var(--t-sm); }
+html[data-visual-mode=traditional] .route-quick button:hover { background: var(--night-3); }
+html[data-visual-mode] .check-label { font-size: var(--t-sm); color: var(--text-2); }
+html[data-visual-mode] .inspector-note { font-size: var(--t-xs); color: var(--text-3); }
+html[data-visual-mode] .board-width-resizer span { background: var(--hairline-strong); }
+
+/* --------------------------------------------------------------------------
+   Footer, toast, modal type
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .app-footer { font-size: var(--t-xs); color: var(--text-3); border-top: 0; }
+html[data-visual-mode] .app-footer > span:first-child { font-family: var(--font-display); font-size: var(--t-sm); font-weight: 700; letter-spacing: .08em; color: var(--text-2); }
+html[data-visual-mode] .modal { border-radius: var(--r-island); }
+html[data-visual-mode] .modal h2 { font-size: var(--t-xl); font-weight: 650; letter-spacing: -.01em; }
+html[data-visual-mode=traditional] #toast > * { background: var(--night-3); border: 1px solid var(--hairline-strong); box-shadow: var(--island-shadow); color: var(--text-1); border-radius: 16px; }
+
+/* --------------------------------------------------------------------------
+   Desktop stage layout: floating islands around the field.
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 1181px) {
+  html[data-visual-mode] .workspace:not(.board-expanded) { grid-template-columns: 284px minmax(0, 1fr); max-width: none; }
+
+  html[data-visual-mode] .workspace .sidebar {
+    position: sticky; top: calc(12px + var(--cloud-height, 0px));
+    height: calc(100dvh - 24px - var(--cloud-height, 0px));
+    margin: 12px 0 12px 12px; padding: 20px 14px 14px;
+    border-radius: var(--r-island); border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode=traditional] .workspace .sidebar { background: var(--night-1); box-shadow: var(--island-shadow); border-color: var(--hairline); }
+
+  html[data-visual-mode] .topbar { min-height: 64px; padding: 14px 28px 0 32px; }
+  html[data-visual-mode] .play-header { padding: 14px 28px 26px 32px; align-items: flex-end; }
+  html[data-visual-mode] .play-header h1 { font-size: var(--t-hero); margin: 12px 0 12px; }
+  html[data-visual-mode] .play-actions { padding-bottom: 6px; }
+
+  html[data-visual-mode] .workspace .editor-layout { padding: 0 12px 0 32px; column-gap: 4px; }
+
+  html[data-visual-mode] .workspace .inspector {
+    position: sticky; top: calc(12px + var(--cloud-height, 0px));
+    max-height: calc(100dvh - 24px - var(--cloud-height, 0px)); overflow: auto;
+    padding: 22px 20px 24px; border-radius: var(--r-island);
+  }
+  html[data-visual-mode=traditional] .workspace .inspector { background: var(--night-1); border: 1px solid var(--hairline); box-shadow: var(--island-shadow); }
+
+  /* The dock rides over the bottom edge of the field. */
+  html[data-visual-mode] .workspace:not(.reference-play) .pitch-viewport { padding-bottom: 46px; }
+  html[data-visual-mode] .workspace:not(.reference-play) .stage-dock { position: relative; z-index: 6; margin-top: -32px; }
+  html[data-visual-mode] .workspace:not(.reference-play) .field-wrap .field-tag { bottom: 58px; }
+
+  html[data-visual-mode] .draw-tools { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  html[data-visual-mode] .draw-tools .tool-button { padding: 0 14px; }
+
+  html[data-visual-mode] .app-footer { padding-left: 32px; padding-right: 28px; }
+}
+/* Narrower desktops: the dock keeps its icons and drops its words. */
+@media screen and (min-width: 1181px) and (max-width: 1440px) {
+  html[data-visual-mode] .draw-tools .tool-button { padding: 0 10px; }
+}
+@media screen and (min-width: 1181px) and (max-width: 1320px) {
+  html[data-visual-mode] .draw-tools .tool-name { display: none; }
+  html[data-visual-mode] .draw-tools .tool-button { padding: 0 12px; }
+}
+
+/* --------------------------------------------------------------------------
+   Compact layout (tablet / phone)
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .compact-nav button { font-size: var(--t-sm); border-radius: var(--r-pill); color: var(--text-2); }
+html[data-visual-mode=traditional] .compact-nav button { background: transparent; border: 0; box-shadow: none; }
+html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true]) { color: var(--text-1); background: var(--night-3); }
+html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true]) svg { color: var(--stinger); }
+
+@media screen and (max-width: 1180px) {
+  html[data-visual-mode] .draw-tools .tool-button.active { background: var(--night-4); }
+  html[data-visual-mode] .stage-dock { flex-direction: column; align-items: stretch; margin-top: 12px; }
+  html[data-visual-mode] .stage-dock :is(.editor-mode, .draw-tools) { border-radius: 18px; }
+  html[data-visual-mode] .stage-dock .editor-mode::before, html[data-visual-mode] .stage-dock .editor-mode button { border-radius: 14px; }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button { border-radius: 14px; }
+  html[data-visual-mode] .canvas-heading { flex-wrap: wrap; }
+  html[data-visual-mode] .play-header h1 { font-size: 36px; }
+}
+@media screen and (max-width: 600px) {
+  html[data-visual-mode] .play-header h1 { font-size: 30px; }
+  html[data-visual-mode] .play-header { padding-top: 18px; padding-bottom: 14px; }
+}
+
+@media print {
+  html[data-visual-mode] .play-header h1 { font-family: var(--font-display); }
+  .stage-dock, .canvas-heading { display: none !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Brand lockups on every screen share one treatment.
+   -------------------------------------------------------------------------- */
+:is(.entry-brand, .cloud-brand, .studio-home-brand, .login-brand) > span {
+  font-family: var(--font-display); font-weight: 800; letter-spacing: .04em; text-shadow: none; color: var(--text-1);
+}
+:is(.entry-brand, .cloud-brand, .studio-home-brand, .login-brand) > span small {
+  font-family: var(--font-ui); font-size: 11px; font-weight: 500; letter-spacing: .12em; color: var(--text-3);
+}
+.entry-brand > span { font-size: 26px; }
+
+/* --------------------------------------------------------------------------
+   Landing page
+   -------------------------------------------------------------------------- */
+body.entry-page { font-family: var(--font-ui); }
+.entry-page .entry-copy h1 { font-weight: 800; letter-spacing: -.03em; line-height: 1.04; color: var(--text-1); text-shadow: none; font-size: clamp(48px, 6vw, 92px); }
+.entry-page .entry-copy > p { color: var(--text-2); font-size: var(--t-lg); line-height: 1.75; }
+.entry-page .section-kicker { font-size: var(--t-sm); color: var(--text-2); letter-spacing: 0; }
+.entry-page .entry-permissions b { color: var(--text-1); font-weight: 600; }
+.entry-page .entry-permissions span { color: var(--text-3); font-size: var(--t-sm); }
+.entry-page :is(.entry-header, .entry-footer) { border-color: var(--hairline); }
+.entry-page .entry-footer { color: var(--text-3); font-size: var(--t-xs); }
+.entry-page .entry-demo { border-radius: 28px; }
+.entry-page .demo-heading > span, .entry-page .entry-demo > p { color: var(--text-3); font-size: var(--t-sm); }
+.entry-page .button { border-radius: var(--r-pill); }
+
+html[data-visual-mode=traditional] .entry-page .entry-demo { background: var(--night-1); border: 1px solid var(--hairline); box-shadow: 0 0 120px -30px #6b3fd155, 0 40px 80px -40px #000; }
+html[data-visual-mode=traditional] .entry-page .entry-demo .pitch-svg { border-radius: 14px; }
+html[data-visual-mode=traditional] .entry-page .entry-header { background: transparent; box-shadow: none; border: 0; border-bottom: 1px solid var(--hairline); }
+html[data-visual-mode=traditional] .entry-page .demo-heading [role=group] { background: var(--night-2); border: 0; border-radius: var(--r-pill); padding: 3px; }
+html[data-visual-mode=traditional] .entry-page .demo-heading button { border-radius: var(--r-pill); color: var(--text-2); background: transparent; border: 0; }
+html[data-visual-mode=traditional] .entry-page .demo-heading button.active { background: var(--night-4); color: var(--text-1); }
+
+/* --------------------------------------------------------------------------
+   Madden library
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] .madden-header small { font-size: var(--t-xs); letter-spacing: .02em; color: var(--text-3); text-transform: none; }
+html[data-visual-mode] .madden-header h2 { font-family: var(--font-display); font-size: 36px; font-weight: 800; letter-spacing: .01em; }
+html[data-visual-mode] .madden-card h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: .03em; color: var(--text-1); }
+html[data-visual-mode] .madden-card-body > small { font-size: var(--t-xs); color: var(--text-3); }
+html[data-visual-mode] .madden-panel { border-radius: 28px; }
+html[data-visual-mode=traditional] .madden-panel { background: var(--night-1); }
+html[data-visual-mode=traditional] :is(.madden-filterbar input, .madden-filterbar select) { background-color: var(--night-2); border: 1px solid transparent; border-radius: var(--r-control); }
+html[data-visual-mode=traditional] :is(.madden-filterbar input, .madden-filterbar select):focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
+html[data-visual-mode=traditional] .madden-card { background: var(--night-2); border: 0; box-shadow: none; border-radius: 16px; overflow: hidden; }
+html[data-visual-mode=traditional] .madden-card:hover { background: var(--night-3); }
+html[data-visual-mode=traditional] .madden-team { background: var(--night-2); border: 1px solid transparent; box-shadow: none; border-radius: 16px; }
+html[data-visual-mode=traditional] .madden-team.active { background: var(--night-3); border-color: var(--stinger); }
+html[data-visual-mode=traditional] :is(.madden-card-foot button, .madden-pagination button, .madden-empty button) { background: transparent; border: 1px solid var(--hairline-strong); color: var(--text-1); border-radius: var(--r-pill); box-shadow: none; }
+html[data-visual-mode=traditional] :is(.madden-card-foot button, .madden-pagination button, .madden-empty button):hover:not(:disabled) { background: var(--stinger); border-color: var(--stinger); color: var(--stinger-ink); }
+html[data-visual-mode=traditional] .madden-drop-target { border-color: var(--stinger); background: var(--stinger-soft); color: var(--text-1); }
+
+/* Compact refinements */
+@media screen and (max-width: 1180px) {
+  html[data-visual-mode] .stage-dock .editor-mode { display: grid; grid-template-columns: 1fr 1fr; }
+  html[data-visual-mode] .canvas-actions { margin-left: auto; }
+}
+@media screen and (max-width: 600px) {
+  html[data-visual-mode] .play-header h1 { font-size: 26px; }
+}
+/* In the dock, rehearsal is shown by the mode switch; tools simply dim. */
+html[data-visual-mode] .stage-dock .rehearsal-toolbar::after { display: none; }
+
+/* Desktop: height is set by the handle under the field (keyboard-accessible
+   separator), so the heading keeps only zoom, expand and reset. */
+@media screen and (min-width: 1181px) {
+  html[data-visual-mode] .board-dimensions { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+  html[data-visual-mode] .board-dimensions > label[for=board-height],
+  html[data-visual-mode] #board-height,
+  html[data-visual-mode] #board-size-value { display: none; }
+  html[data-visual-mode] .board-size-controls { flex-wrap: nowrap; gap: 4px; }
+  html[data-visual-mode] .board-size-actions { margin-left: 0; }
+  html[data-visual-mode] .board-advanced > summary { display: none; }
+}
+.entry-page .entry-copy h1 { white-space: nowrap; font-size: clamp(36px, 4vw, 64px); }
