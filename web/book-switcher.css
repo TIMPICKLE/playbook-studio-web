@@ -3,7 +3,7 @@
 .workspace-current-icon { display:grid; place-items:center; width:28px; height:32px; flex:none; color:var(--accent); }
 .workspace-current-icon svg { width:25px; height:25px; }
 .workspace-current-copy { display:grid; gap:1px; flex:1; min-width:0; }
-.workspace-current-copy small { font-size:10px; color:var(--muted); }
+.workspace-current-copy small { font-size:12px; color:var(--muted); }
 .workspace-current-copy strong { display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:12px; font-weight:600; }
 .workspace-current-count { display:flex; align-items:center; gap:5px; font:11px var(--mono); color:var(--accent); }
 .workspace-current-count svg { width:13px; height:13px; }
@@ -21,13 +21,13 @@
 .book-card:hover { border-color:#d7c4ed88; background-color:#ffffff06; color:var(--ink); }
 .book-card.is-current { border-color:#ffdc4288; background:linear-gradient(145deg,#ffdc4215,#ffdc4205); box-shadow:inset 0 0 0 1px #ffdc4220; }
 .book-card[aria-disabled=true] { cursor:wait; opacity:.7; }
-.book-card-top { display:flex; align-items:center; justify-content:space-between; width:100%; gap:12px; color:var(--muted); font-size:10px; }
+.book-card-top { display:flex; align-items:center; justify-content:space-between; width:100%; gap:12px; color:var(--muted); font-size:12px; }
 .book-card-top svg { width:25px; height:25px; color:#c4a9e5; }
 .is-current .book-card-top,.is-current .book-card-top svg { color:var(--accent); }
 .book-card strong { font-size:17px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
-.book-card-role { margin-top:auto; font-size:10px; color:var(--muted); }
+.book-card-role { margin-top:auto; font-size:12px; color:var(--muted); }
 .book-card-role[data-role=viewer] { color:#cfbfee; }
-.book-switcher-help { margin-top:12px; color:var(--muted); font-size:11px; }
+.book-switcher-help { margin-top:12px; color:var(--muted); font-size:12px; }
 .book-switcher-message { min-height:22px; margin-top:8px; color:var(--accent); font-size:12px; }
 .book-switcher-empty { padding:28px 4px; color:var(--muted); font-size:13px; }
 .book-carousel-ready .book-viewport { overflow:hidden; scroll-snap-type:none; }

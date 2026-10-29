@@ -25,18 +25,18 @@
 .board-advanced > summary { display:none; }
 .board-dimensions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 .touch-board-help { display:none; }
-.board-size-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:0 0 10px; color:var(--muted); font-size:11px; }
+.board-size-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:0 0 10px; color:var(--muted); font-size:12px; }
 .board-size-controls label { white-space:nowrap; }
 .board-size-controls input[type=range] { width:110px; min-width:60px; height:28px; padding:0; border:none; background:none; accent-color:var(--accent); cursor:ew-resize; }
-.board-size-controls output { min-width:48px; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:10px; }
+.board-size-controls output { min-width:48px; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:12px; }
 .board-size-actions { display:flex; gap:6px; margin-left:auto; }
-.board-size-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:34px; padding:5px 10px; border:1px solid var(--glass-edge); border-radius:8px; background:#d9c5fa0a; color:var(--ink); font-size:11px; }
+.board-size-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:34px; padding:5px 10px; border:1px solid var(--glass-edge); border-radius:8px; background:#d9c5fa0a; color:var(--ink); font-size:12px; }
 .board-size-actions button:hover { background:#d9c5fa20; border-color:#ffdc4270; }
 .board-size-actions button[aria-pressed=true] { color:var(--accent); border-color:#ffdc4260; }
 .board-size-actions svg { width:15px; height:15px; }
 .board-height-resizer,.board-width-resizer { display:flex; align-items:center; justify-content:center; touch-action:none; user-select:none; border-radius:8px; color:var(--muted); transition:background-color 150ms,color 150ms; }
 .board-height-resizer { min-height:30px; cursor:ns-resize; gap:10px; margin-top:3px; }
-.board-height-resizer small { font-size:10px; }
+.board-height-resizer small { font-size:12px; }
 .board-height-resizer > span { height:3px; width:28px; background:#b797df65; border-radius:4px; }
 .board-width-resizer { align-self:stretch; min-height:240px; position:relative; cursor:ew-resize; }
 .board-width-resizer::before { content:''; position:absolute; inset:0 7px; background:#b797df25; border-radius:4px; }
@@ -55,7 +55,7 @@
   .board-size-controls { gap:6px; }
   .board-size-controls input[type=range] { width:90px; }
   .board-size-actions { gap:4px; }
-  .board-size-actions button { min-height:40px; padding:5px 7px; font-size:10px; }
+  .board-size-actions button { min-height:40px; padding:5px 7px; font-size:12px; }
   .board-height-resizer { min-height:40px; }
   .field-wrap > .pitch-svg { width:min(100%,calc(var(--board-height) * 1.25)); max-height:none; }
 }

@@ -1,5 +1,37 @@
 # Playbook Studio v3 交互与视觉改版
 
+## 2026-10-29 · v5「Stage」：球场即舞台
+
+### 调研结论：问题在系统，不在单个组件
+
+- 12 个样式表依次覆盖（浅色基底 → glass → liquid → visual-mode → layout-polish），`--paper`、`--surface` 等变量在 4 个文件里被重复定义，硬编码颜色约 900 处。
+- 圆角 25+ 种取值、字号 20+ 种；8–11px 的小字约 250 处，是拥挤、廉价感的主要来源。
+- 所有区块都是「紫底 + 描边圆角框」，框中套框，球场和界面同色、没有主角。[Apple HIG · Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 建议 Liquid Glass 只用于浮在内容之上的导航 / 控件层，并且要克制。
+- 黄色同时承担主按钮、选中、球员、路线、滑块，强调色被稀释。
+- 参考 [Linear 的 UI 重设计](https://linear.app/now/how-we-redesigned-the-linear-ui)：少量基础变量生成整套界面色、降低导航与面板的视觉噪音、标题用更有表情的展示字体。
+
+### 设计原则
+
+1. **只有一个被照亮的东西。** 球场是屏幕上唯一高饱和的表面：STINGERS 紫草皮、5 码修剪条纹、泛光晕染；其余界面退到中性暗色。
+2. **控件漂浮，内容不装框。** 侧栏、属性栏是悬浮的圆角岛屿；布阵 / 演练切换与七个绘图工具合成一条浮动 Dock，压在球场下沿。
+3. **黄色只表示「这个」。** 主操作、当前选中、进攻方。其他地方不用黄色。
+4. **字体要有底气。** 自托管 Big Shoulders Display（OFL）用于战术名（桌面 60px）、码数、球员编号、计数和品牌字；可读文字用系统中文字体，最小 12px。
+
+### 实现
+
+| 位置 | 改动 |
+|---|---|
+| `web/theme.css` | 新增，最后加载；一处定义夜色阶、文字三级、发丝线、四档圆角（8 / 12 / 24 / 全圆），旧变量名重新映射；桌面悬浮布局与 Dock |
+| `web/app.js` | 画布结构：顶部一行放缩放 / 展开 / 视图 / 添加对象；新增 `.stage-dock`（模式切换 + 绘图工具）放在球场之后；模式按钮状态同步限定在 Dock 内 |
+| `web/field.js` | 深色球场改为紫草皮 + 条纹 + 泛光；码数和球员编号用窄体；浅色 / 打印球场不变 |
+| `web/visual-mode.css` | 删除传统模式配色覆盖，只保留模式行为 |
+| 其他样式表 | 7–11px 字号提升到 10–12px |
+
+- 桌面（≥1181px）：画板高度由球场下方的拖柄调整（键盘可用的分隔条），顶部不再重复显示高度滑块；1320px 以下 Dock 只显示图标（保留 aria-label 和提示）。
+- 平板 / 手机：Dock 位于球场下方，拇指可达；模式切换与工具分两行。
+- 数字化模式沿用液态玻璃与 Three.js 材质，自动继承新的布局、字体和紫草皮。
+- 未改数据、权限和交互逻辑；186 项自动测试通过；1440 / 1280 桌面、820 平板、390 手机、演练与数字化模式截图检查。
+
 ## 2026-10-24 · 战术本卡片切换器
 
 先调查了 [shadcn Carousel](https://ui.shadcn.com/docs/components/base/carousel)、[Embla 稳定版文档](https://www.embla-carousel.com/docs/v8)、[shadcn skill](https://ui.shadcn.com/docs/skills) 与 [Taste Skill](https://github.com/Leonxlnx/taste-skill/blob/main/skills/taste-skill/SKILL.md)。shadcn 的 Card + Carousel 组合适合战术本选择；项目已经通过 embla-carousel-react 安装 Embla 8.6.0，但实际编辑器使用原生 JavaScript。因此直接自托管该版本的原生 ESM 和 MIT 许可证，避免增加 React 挂载层；没有安装新 skill 或引入整套风格改造。
