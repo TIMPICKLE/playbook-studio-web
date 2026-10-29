@@ -162,7 +162,7 @@ export function boardSizeControls() {
   return `<div class="board-size-controls" aria-label="战术板大小">
     <div class="board-zoom-controls" role="group" aria-label="球场缩放"><button type="button" data-board-action="zoom-out" aria-label="缩小球场">−</button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" data-board-action="zoom-in" aria-label="放大球场">＋</button><button type="button" data-board-action="fit">适应屏幕</button></div>
     <details class="board-advanced"><summary>尺寸</summary><div class="board-dimensions"><label for="board-height">画板高度</label><input id="board-height" type="range" min="280" max="1400" step="1" aria-describedby="board-size-help"><output id="board-size-value" for="board-height"></output>
-    <div class="board-size-actions"><button type="button" data-board-action="expand" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg><span>展开画板</span></button><button type="button" data-board-action="reset" title="恢复默认画板大小和面板布局">恢复默认</button></div>
+    <div class="board-size-actions"><button type="button" data-board-action="expand" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg><span>展开画板</span></button><button type="button" data-board-action="reset" title="恢复默认画板大小和面板布局">重置画板</button></div>
     </div></details>
     <span class="touch-board-help">选择工具：滑动空白处平移，拖动球员布阵。</span><span id="board-size-help" class="sr-only">拖动底部调节高度；电脑上可拖动右侧分隔条调节宽度。设置仅记在当前设备。</span>
   </div>`;

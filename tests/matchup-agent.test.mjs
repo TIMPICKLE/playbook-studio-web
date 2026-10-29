@@ -113,12 +113,34 @@ test('a model that ignores required tool calling cannot fabricate a successful a
   await assert.rejects(run(matchup),/未读取所选对局/);assert.equal(count,1);
 });
 
-test('invalid evidence gets one bounded repair and no invented evidence can escape',async t=>{
-  const matchup=fixture(),requests=[];
-  mock(t,async(_url,options)=>{const body=JSON.parse(options.body);requests.push(body);if(requests.length===1)return response(toolMessage(toolCall('ctx','get_matchup_context')));if(requests.length===2)return response({content:result('offense:route:invented')});return response({content:result(matchup.evidence[0].id)});});
+test('evidence repair keeps valid references and only leaves unsupported scenarios limited',async t=>{
+  const matchup=fixture(),requests=[],validIds=matchup.evidence.slice(0,2).map(item=>item.id);
+  const initial=JSON.parse(result(validIds[0]));
+  initial.scenarios[1].evidenceIds=[validIds[1],'offense:route:invented'];
+  initial.scenarios.push({...initial.scenarios[1],title:'无有效依据',evidenceIds:['defense:zone:invented']});
+  const repaired=structuredClone(initial);
+  repaired.scenarios[1].evidenceIds=[validIds[1]];
+  repaired.scenarios[2].evidenceIds=[];
+  mock(t,async(_url,options)=>{
+    const body=JSON.parse(options.body);requests.push(body);
+    if(requests.length===1)return response(toolMessage(toolCall('ctx','get_matchup_context')));
+    if(requests.length===2)return response({content:JSON.stringify(initial)});
+    const instruction=body.messages.at(-1).content;
+    assert.match(instruction,/保留每个情景中有效的 evidenceIds，只修正或移除无效引用/);
+    assert.ok(instruction.includes(JSON.stringify(matchup.evidence.map(item=>item.id))));
+    assert.doesNotMatch(instruction,/evidenceIds 都设为 \[\]/);
+    return response({content:JSON.stringify(repaired)});
+  });
   const output=await run(matchup);assert.equal(output.execution.repaired,true);assert.equal(output.execution.modelCalls,3);assert.equal(requests[2].tool_choice,'none');
-  assert.match(requests[2].messages.at(-1).content,/evidenceIds 都设为 \[\]/);
-  assert.ok(output.scenarios.every(s=>s.evidenceIds[0]===matchup.evidence[0].id));
+  assert.deepEqual(output.scenarios.map(item=>item.evidenceIds),[[validIds[0]],[validIds[1]],[]]);
+  assert.equal(output.status,'limited');
+});
+
+test('evidence repair is attempted once and a second invalid result is rejected',async t=>{
+  const matchup=fixture();let calls=0;
+  mock(t,async()=>{calls++;return calls===1?response(toolMessage(toolCall('ctx','get_matchup_context'))):response({content:result('offense:route:invented')});});
+  await assert.rejects(run(matchup),/引用了不存在的战术对象/);
+  assert.equal(calls,3);
 });
 
 test('tool budgets, duplicate call IDs and malformed calls fail closed',async t=>{

@@ -1,9 +1,10 @@
-# STINGERS 品牌素材
+# 品牌素材
 
-用户提供的 STINGERS 紫黄参考图是本次品牌更新的来源。
+`brand/` 中是 Playbook Studio 的通用产品品牌，源文件见 `docs/assets/brand/`。
 
-- `stingers-mark.png`：通过图像编辑工具从参考图提取并清理主队标，1254 × 1254，RGBA 透明背景。为基于参考图的重建，并非原始矢量文件。未加入 HYROX、文字、手机界面或其他徽章。
-- `stingers-bolt.svg`、`stingers-star.svg`：依据参考图的紫黄风格制作的代码矢量图形。
-- `../icon.svg`：紫黄闪电备用图标。
+- `playbook-studio-icon.svg` / `-black.svg`：独立球形图标（银白 `#D8DCE2` / 深灰 `#17191C`），用于侧栏、登录与落地页。
+- `playbook-studio-logo.svg` / `-black.svg`：完整字标。
+- `icon-32.png`、`icon-180.png`、`icon-192.png`、`icon-512.png`、`icon-maskable-512.png`：由图标 SVG 在深灰底上渲染，用于 favicon、Apple 触控图标和 PWA。
+- `../icon.svg`：与独立图标相同的备用图标。
 
-品牌素材不包含在仓库代码的 MIT 授权范围内；品牌相关权利属于原权利人。
+球队自己的名称和首字显示在侧栏「球队」卡片中，由用户在「球队与名单」里设置；产品不再内置任何具体球队的队标。

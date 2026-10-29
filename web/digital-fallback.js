@@ -56,7 +56,7 @@ export function createDigitalFallback(doc=document) {
       overlay.style.cssText='position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:3';
       const defs=node(doc,'defs');
       const shadow=node(doc,'radialGradient',{id:'digital-fallback-shadow'});
-      shadow.append(node(doc,'stop',{offset:0,'stop-color':'#08050d','stop-opacity':.6}),node(doc,'stop',{offset:.6,'stop-color':'#08050d','stop-opacity':.3}),node(doc,'stop',{offset:1,'stop-color':'#08050d','stop-opacity':0}));
+      shadow.append(node(doc,'stop',{offset:0,'stop-color':'#090909','stop-opacity':.6}),node(doc,'stop',{offset:.6,'stop-color':'#090909','stop-opacity':.3}),node(doc,'stop',{offset:1,'stop-color':'#090909','stop-opacity':0}));
       defs.append(shadow);overlay.append(defs);
     }
     // Keep the last complete image and pick bounds until draw reconciles state.
@@ -66,17 +66,17 @@ export function createDigitalFallback(doc=document) {
   }
   function makePlayer(p,lightTheme){
     const group=node(doc,'g',{'data-vector-player':p.id});
-    const shadow=node(doc,'path',{fill:'url(#digital-fallback-shadow)'}),ring=node(doc,'path',{fill:'none',stroke:'#e9ce89','stroke-width':1.5,opacity:0});
+    const shadow=node(doc,'path',{fill:'url(#digital-fallback-shadow)'}),ring=node(doc,'path',{fill:'none',stroke:'#b4b8be','stroke-width':1.5,opacity:0});
     group.append(shadow,ring);
-    const body=rgb(lightTheme?'#786487':'#8c739f');
-    const tint=mix(body,rgb(p.color),.18),gold=rgb(p.side==='defense'?'#c4becf':'#d8bd86');
+    const body=rgb(lightTheme?'#737578':'#86888c');
+    const tint=mix(body,rgb(p.color),.18),gold=rgb(p.side==='defense'?'#c5c6c8':'#aaaeb4');
     const faces=fallbackMesh(p.shape).map(face=>{
-      const base=face.material==='metal'?gold:face.material==='foot'?rgb('#46384c'):tint;
+      const base=face.material==='metal'?gold:face.material==='foot'?rgb('#414243'):tint;
       const fill=color(base,face.normal,face.material==='metal');
       const path=node(doc,'path',{fill,stroke:fill,'stroke-width':.4,'stroke-linejoin':'round'});
       group.append(path);return {...face,path};
     });
-    const label=node(doc,'text',{'text-anchor':'middle','dominant-baseline':'central',fill:'#fff7df',stroke:'#24172d','stroke-width':.85,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':700,'letter-spacing':-.3});label.textContent=p.label;group.append(label);overlay.append(group);
+    const label=node(doc,'text',{'text-anchor':'middle','dominant-baseline':'central',fill:'#eeeff0',stroke:'#212223','stroke-width':.85,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':700,'letter-spacing':-.3});label.textContent=p.label;group.append(label);overlay.append(group);
     return {group,shadow,ring,faces,label,key:null,shape:p.shape,color:p.color,labelText:p.label,side:p.side,lightTheme,bounds:null,depth:0};
   }
   function draw({play,settings={},time=0,selected,hoveredId=null,draggingId=null,animated=true}){

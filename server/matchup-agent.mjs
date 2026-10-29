@@ -200,16 +200,15 @@ export async function runMatchupAgent(matchup, options, env, signal) {
       const message = privateRun.pending, calls = message.tool_calls;
       if (!Array.isArray(calls) || !calls.length || state.toolRounds >= AGENT_LIMITS.toolRounds || calls.length > AGENT_LIMITS.toolRequestsPerTurn) fail(502, '模型工具调用超过限制，请重试或更换模型');
       if (!privateRun.hasContext && calls[0]?.function?.name !== 'get_matchup_context') fail(502, '模型未按要求读取对局，请使用支持工具调用的模型');
-      const normalized = calls.map(call => {
-        checkedArguments(call);
+      const validated = calls.map(call => {
+        const args = checkedArguments(call);
         if (typeof call.id !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(call.id) || privateRun.seenCallIds.has(call.id)) fail(502, '模型返回了无效的工具调用 ID');
         privateRun.seenCallIds.add(call.id);
-        return { id: call.id, type: 'function', function: { name: call.function.name, arguments: call.function.arguments } };
+        return { args, call: { id: call.id, type: 'function', function: { name: call.function.name, arguments: call.function.arguments } } };
       });
-      privateRun.messages.push(assistantMessage(message, config.provider, normalized));
+      privateRun.messages.push(assistantMessage(message, config.provider, validated.map(item => item.call)));
       let executed = 0;
-      for (const call of normalized) {
-        const args = checkedArguments(call);
+      for (const { call, args } of validated) {
         let result;
         if (state.toolCalls + executed < AGENT_LIMITS.toolCalls) { executed++; result = tools.run(call.function.name, args); }
         else result = { error: '本次工具额度已用完，请根据已有信息回答。' };
@@ -224,9 +223,7 @@ export async function runMatchupAgent(matchup, options, env, signal) {
       catch (error) {
         if (!(error instanceof ApiError) || error.status !== 502 || state.repaired || state.modelCalls >= AGENT_LIMITS.modelCalls) throw error;
         privateRun.messages.push(assistantMessage(privateRun.pending, config.provider));
-        const evidenceRepair = error.message.includes('引用了不存在的战术对象')
-          ? '为避免再次编造引用，请将每个情景的 evidenceIds 都设为 []；不要填写任何证据 ID。'
-          : '请仅使用已提供的完整证据 ID；无法准确复制时使用空数组。';
+        const evidenceRepair = `保留每个情景中有效的 evidenceIds，只修正或移除无效引用；不要清空其他有效引用。允许的完整证据 ID：${JSON.stringify(matchup.evidence.map(item => item.id))}。只引用与该情景有关的证据；某个情景确实没有有效依据时，仅将该情景的 evidenceIds 设为 []。`;
         privateRun.messages.push({ role: 'user', content: `上一次输出不符合格式或证据要求：${error.message}。${evidenceRepair}请返回完整 JSON。` });
         privateRun.repairNeeded = true;
         return { repaired: true };

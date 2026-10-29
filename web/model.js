@@ -81,7 +81,7 @@ export function starterWorkspace() {
   for (const label of ['DE', 'DT', 'M']) { const p = blitz.players.find(p => p.label === label); addRoute(blitz, label, [[p.x, 75]], 'route', { duration: 3 }); }
   const goal = makePlay({ title: 'Field Goal · 射门保护', formation: 'Field Goal', book: 'special' }); goal.category = '射门'; goal.personnel = 'Field Goal Unit';
   addRoute(goal, 'K', [[53, 80]], 'route', { duration: 2 }); goal.ball.holderId = goal.players.find(p => p.label === 'H').id;
-  return { team: { name: 'TIM FOOTBALL', subtitle: '2026 SEASON', accent: '#46217a' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster: [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }], formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
+  return { team: { name: '我的球队', subtitle: '2026 赛季', accent: '#9aa3ad' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster: [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }], formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
 }
 
 export function mirrorPlay(play) {

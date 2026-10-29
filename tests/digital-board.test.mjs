@@ -48,13 +48,13 @@ test('route light, blocking pulse and zones are deterministic at the playback ti
   assert.equal(svg.querySelector('[data-player]'),player);assert.equal(JSON.stringify(play),before);feedback.destroy();assert.equal(svg.querySelector('.digital-decoration'),null);win.happyDOM.abort();
 });
 
-function fixture(makeEngine){
+function fixture(makeEngine,{notify=()=>{}}={}){
   const win=new Window({width:1440,height:900}),doc=win.document,frames=new Map();let id=0,hidden=false;
   win.CanvasRenderingContext2D=function(){};win.requestAnimationFrame=fn=>{frames.set(++id,fn);return id;};win.cancelAnimationFrame=id=>frames.delete(id);
   Object.defineProperty(doc,'hidden',{get:()=>hidden});
   const data=starterWorkspace(),state={play:data.plays[0],settings:data.settings,time:0,playing:false,rehearsal:false};
   doc.body.innerHTML=`<div id="field">${fieldSVG(state.play)}</div>`;doc.documentElement.dataset.visualMode='traditional';
-  const controller=createDigitalBoard({doc,getState:()=>state,makeEngine});
+  const controller=createDigitalBoard({doc,getState:()=>state,makeEngine,notify});
   return {win,doc,state,controller,frames,step(now){const all=[...frames.values()];frames.clear();all.forEach(fn=>fn(now));},async close(){controller.destroy();await win.happyDOM.abort();},visibility(value){hidden=value;doc.dispatchEvent(new win.Event('visibilitychange'));}};
 }
 test('traditional mode never starts Three; stale digital startup is disposed without replacing the SVG',async()=>{
@@ -70,7 +70,7 @@ test('traditional mode never starts Three; stale digital startup is disposed wit
 });
 test('digital renderer follows playback and survives theme remounts without resetting time or the play',async()=>{
   const draws=[];let mounts=0,destroyed=0;
-  const f=fixture(async()=>({mount(){mounts++;},draw(state){draws.push({...state});},refreshBackground(){},destroy(){destroyed++;}}));
+  const f=fixture(async()=>({status:'ready',mount(){mounts++;},draw(state){draws.push({...state});},refreshBackground(){},destroy(){destroyed++;}}));
   try{
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);f.step(100);
     f.state.rehearsal=true;f.state.time=2.5;f.step(200);const frozen=draws.at(-1).materialTime;f.step(300);assert.equal(draws.at(-1).materialTime,frozen);assert.equal(draws.at(-1).time,2.5);
@@ -82,7 +82,7 @@ test('digital renderer follows playback and survives theme remounts without rese
 });
 test('unavailable WebGL keeps SVG route feedback and accessible players; switching modes can recover',async()=>{
   let starts=0,mounts=0;
-  const f=fixture(async()=>{if(++starts===1)throw new Error('WebGL disabled');return{mount(){mounts++;},draw(){},refreshBackground(){},destroy(){}};});
+  const f=fixture(async()=>{if(++starts===1)throw new Error('WebGL disabled');return{status:'ready',mount(){mounts++;},draw(){},refreshBackground(){},destroy(){}};});
   f.win.console.warn=()=>{};
   try{
     const player=f.doc.querySelector('[data-player]');f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
@@ -92,7 +92,7 @@ test('unavailable WebGL keeps SVG route feedback and accessible players; switchi
 });
 
 test('perspective stage cleans up on mode switch and raised-piece picking reaches the renderer',async()=>{
-  const f=fixture(async()=>({mount(){},draw(){},refreshBackground(){},destroy(){},pick(x,y){return x===71&&y===25?{type:'player',id:'raised'}:null;}}));
+  const f=fixture(async()=>({status:'ready',mount(){},draw(){},refreshBackground(){},destroy(){},pick(x,y){return x===71&&y===25?{type:'player',id:'raised'}:null;}}));
   try{
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
     const stage=f.doc.querySelector('.pitch-stage');assert.ok(stage.classList.contains('is-perspective'));
@@ -107,7 +107,7 @@ test('perspective stage cleans up on mode switch and raised-piece picking reache
 
 test('in-place route edits refresh feedback and paint synchronously without remounting the scene',async()=>{
   let mounts=0,draws=0;
-  const f=fixture(async()=>({mount(){mounts++;},draw(){draws++;},refreshBackground(){},destroy(){}}));
+  const f=fixture(async()=>({status:'ready',mount(){mounts++;},draw(){draws++;},refreshBackground(){},destroy(){}}));
   try{
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
     const svg=f.doc.querySelector('.pitch-svg'),stage=svg.parentElement,previousDraws=draws;
@@ -122,4 +122,33 @@ test('in-place route edits refresh feedback and paint synchronously without remo
     await f.controller.sync({contentChanged:true});assert.equal(svg.querySelector('[data-feedback-route="new-live-route"]'),null);
     assert.equal(mounts,1);
   }finally{await f.close();}
+});
+
+test('background failures report once, export the current SVG and recover when the renderer is ready',async()=>{
+  let status='ready',svg,captures=0;const messages=[];
+  const f=fixture(async()=>({fullScene:true,get status(){return status;},mount(next){svg=next;},
+    draw(){svg.classList.toggle('digital-ready',status==='ready');},refreshBackground(){},destroy(){},
+    capture(){captures++;return 'data:image/png;base64,c2NlbmU=';}}),{notify:message=>messages.push(message)});
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
+    assert.equal(f.controller.capture().fullScene,true);assert.equal(captures,1);
+    status='unavailable';f.step(0);f.step(100);
+    assert.equal(f.doc.documentElement.dataset.digitalBoard,'unavailable');assert.equal(messages.length,1);
+    assert.match(messages[0],/显示最新平面图/);
+    const capture=f.controller.capture();assert.equal(capture.image,null);assert.equal(capture.fullScene,false);assert.ok(capture.decoration);assert.equal(captures,1);
+    status='loading';f.step(200);assert.equal(f.doc.documentElement.dataset.digitalBoard,'loading');assert.equal(f.controller.capture().image,null);
+    status='ready';f.step(300);assert.equal(f.doc.documentElement.dataset.digitalBoard,'ready');assert.equal(f.controller.capture().fullScene,true);assert.equal(captures,2);
+  }finally{await f.close();}
+});
+
+test('route feedback bugs are surfaced without destroying WebGL or claiming a capability failure',async()=>{
+  let destroyed=0;const messages=[];
+  const f=fixture(async()=>({status:'ready',mount(){},draw(){},refreshBackground(){},destroy(){destroyed++;}}),{notify:message=>messages.push(message)});
+  const svg=f.doc.querySelector('.pitch-svg'),querySelector=svg.querySelector;
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
+    svg.querySelector=()=>{throw new TypeError('Route feedback failed');};
+    assert.throws(()=>f.step(0),/Route feedback failed/);
+    assert.equal(destroyed,0);assert.deepEqual(messages,[]);assert.equal(f.frames.size,0);
+  }finally{svg.querySelector=querySelector;await f.close();}
 });
