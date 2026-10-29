@@ -1,93 +1,45 @@
+**简体中文** · [English](README.en.md)
+
 <div align="center">
 
 <img src="docs/assets/brand/playbook-studio-logo-dark.svg" alt="Playbook Studio" width="420">
 
 # Playbook Studio
 
-中文美式橄榄球战术工作台，支持布阵、路线绘制、战术演练、战术本管理和团队共享。
+美式橄榄球战术工作台：布阵、画路线、演练、分析攻防对位，并与球队共享战术本。
 
-[云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) · [本地演示（无需登录）](https://timpickle.github.io/playbook-studio-web/local.html) · [使用指南](#快速开始) · [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md) · [球员 AI 对局分析路线图（规划）](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
+[打开云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [无需登录体验](https://timpickle.github.io/playbook-studio-web/local.html) · [快速开始](#快速开始) · [本地开发](#本地开发)
 
 </div>
 
----
+![Playbook Studio 银灰主题编辑器：战术列表、球场、浮动工具栏与属性面板](docs/assets/readme/editor.jpg)
 
-## 主要功能
+## 能做什么
 
-| 功能 | 说明 |
+| 场景 | 已实现的功能 |
 |---|---|
-| **设计战术** | 添加进攻和防守球员、拖动站位；绘制跑动、阻挡、开球前移动、传球线、覆盖区域和文字 |
-| **战术演练** | 播放、暂停、循环和拖动时间轴；调整路线启动时间、跑动时长和传球时间 |
-| **Madden 战术导入** | 浏览 Eagles / Ravens 战术，筛选、预览，再拖入或点击加入自己的战术本 |
-| **战术管理** | 按进攻、防守、特勤管理；搜索、收藏、复制、镜像、记录教练笔记 |
-| **团队协作** | 云端保存与成员权限，让教练编辑、球员以只读方式查看和演练 |
-| **导出与打印** | 导出 PNG、SVG 或 JSON，打印战术本、腕带卡和 Call Sheet |
+| **设计战术** | 拖动攻防球员，绘制跑动、阻挡、开球前移动、传球线、覆盖区域与文字；支持曲线、选项路线、镜像、撤销和重做 |
+| **讲解与演练** | 播放、暂停、循环、调速和拖动时间轴；设置路线起跑时间、跑动时长、持球人与传接球时机 |
+| **建立战术本** | 按进攻、防守、特勤分类，搜索、收藏、复制，保存阵型模板、球员名单与教练笔记 |
+| **导入 Madden 战术** | 从 Eagles / Ravens 目录筛选、预览和加入战术；437 个条目可直接编辑球员与路线 |
+| **AI 分析攻防对位** | 在云端选择一攻一守，使用自己的模型服务与 API Key，查看条件情景、球员选择、证据和缺失信息 |
+| **团队共享** | 云端自动保存、跨设备访问、战术本级成员权限、冲突处理与最近 20 个保存版本 |
+| **导出与打印** | 导出 PNG、SVG、单个战术或完整战术本 JSON；打印 A4 战术本、9 格腕带卡和 Call Sheet |
 
-## 战术编辑
+当前界面采用银灰与石墨色，绘图与演练控件集中在球场下方的浮动工具栏。云端工作台提供「编辑战术本」和「AI分析战局」两个入口；手机和 iPad 使用传统模式及触摸操作。
 
-![Playbook Studio 战术编辑界面：左侧战术列表、中间球场与绘图工具、右侧战术设置](docs/assets/readme/editor.jpg)
+## 快速开始
 
-*左侧选择战术，中间布阵与画线，右侧调整阵型、战术信息和教练笔记。*
+1. 打开[无需登录的本地演示](https://timpickle.github.io/playbook-studio-web/local.html)，选择内置示例，或点击 **「新建战术」**。
+2. 拖动球员调整站位。在 **「添加对象」** 中可以加入球员，也可以一次加入完整的 **4–3 防守阵型**。
+3. 选中球员，选择 **「跑动」** 或按 `R`，依次点击路线点，按 `Enter` 或点击 **「完成」**。
+4. 切换到 **「战术演练」**，使用工具栏播放、暂停或调整进度；按空格也可播放 / 暂停。
+5. 保存到当前浏览器，或导出 JSON 备份。需要团队共享时，使用[云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/)登录并创建战术本。
 
-### 编辑与 AI 分析
+内置 Mesh、Four Verticals、Flood、Slants、Inside Zone、Cover 3、Nickel Blitz 和 Field Goal 八个教学示例。阵型支持 6、7、8、9、11、12 人制，并可另存自定义模板。
 
-登录后选择「编辑战术本」或「AI分析战局」。分析时从同一本战术本中选择一攻一守，可选观察位置和覆盖类型；选择自己的模型服务，填写模型名称和 API Key 后发起分析。
-
-模型需支持工具调用，一次分析最多 4 次模型请求。API Key 仅保留在当前页面内存，刷新后需重新填写；所选战术数据会发送到用户选择的服务商并可能产生费用。分析用于战术参考，不预测真实比赛结果。支持的服务与技术细节见[实现设计](docs/AI_MATCHUP_IMPLEMENTATION.md)。
-
-### 快速开始
-
-1. 打开[本地演示](https://timpickle.github.io/playbook-studio-web/local.html)，选择内置示例，或点击左侧 **「新建战术」**。
-2. 拖动球员调整站位；也可以在 **「添加对象」** 中一次加入完整的 4–3 防守阵型。
-3. 选中球员，选择 **「跑动」** 或按 `R`，点击球场添加路线点，按 `Enter` 或点击 **「完成」**。
-4. 点击 **「战术演练」** 或按空格播放；需要调整时返回布阵，最后导出或打印。
-
-内置 Mesh、Four Verticals、Flood、Slants、Inside Zone、Cover 3、Nickel Blitz 和 Field Goal 八个教学示例。
-
-## Madden 战术库
-
-![Madden 战术库界面：球队切换、筛选、可编辑战术卡片和加入按钮](docs/assets/readme/madden-library.jpg)
-
-*选择球队和阵型、搜索战术，预览后拖入左侧战术本，或点击「＋ 加入」；手机端可使用加入按钮。*
-
-- **两支球队**：Eagles 和 Ravens，按球队、阵型大类、具体阵型及英文名称筛选。
-- **437 个可编辑战术条目**：可移动球员、编辑可见路线、镜像和演练，也可打开原图对照。导入时会整理锋线间距；之前保存的可编辑战术可使用「整理锋线间距」，并可撤销。
-- **其余 771 个条目保留原图**：可收藏、记笔记、导出和打印，但不能直接移动图片里的球员或播放原版路线。
-- **导入与撤销**：支持去重；加入后可在库内查看结果或撤销最近一次符合条件的加入。
-
-> **识别边界：** 可编辑版本依据图片中的可见站位和路线重建。图外路线、真实时序、接球目标和比赛决策不能仅凭图片确认；演练使用可调整的默认时序，不代表原版比赛模拟。
-
-当前目录快照为 Madden 27：Eagles 620 个、Ravens 588 个，共 **1,208 个球队战术条目**和 **1,121 张去重原图**。[目录数据](web/data/huddle-catalog.json) · [数据说明](docs/MADDEN_BATCH.md) · [识别记录](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)。
-
-## 传统与数字化模式
-
-![桌面数字化模式下的透视战术板、立体棋子与路线](docs/assets/readme/digital-fallback.jpg)
-
-*数字化模式的兼容视图。*
-
-| 模式 | 适合什么场景 |
-|---|---|
-| **传统模式** | 默认开启；平面棋子、简洁路线，关闭装饰动效，适合专注布阵和阅读 |
-| **数字化模式** | 桌面可选；透视战术板、立体棋子、玻璃金属材质，以及跟随演练的路线、跑动、阻挡、传球和区域反馈 |
-
-手机和 iPad 固定使用传统模式，战术演练仍可正常使用。系统启用减少动态效果时，数字化材质保留、装饰运动停止；WebGL 不可用时会切换到可操作的兼容视图。模式偏好只保存在当前设备，不修改共享战术。
-
-画板支持 **100–300% 缩放**、适应屏幕、调整高度；桌面还可调整画板宽度或展开画板。详见 [数字化战术板说明](docs/DIGITAL_BOARD.md)。
-
-## 功能一览
-
-| 功能 | 可以进行的操作 |
-|---|---|
-| **战术本** | 进攻 / 防守 / 特勤分类；搜索、收藏、复制、删除和教练笔记 |
-| **阵型与球员** | 八种内置阵型模板；支持 6、7、8、9、11、12 人制；自定义阵型、球员形状、颜色、位置与名单 |
-| **路线与标注** | 跑动、阻挡、开球前移动、传球线；曲线、选项路线、防守区域、文字与节点编辑 |
-| **编辑辅助** | 移动球员及关联路线、左右镜像、撤销 / 重做；替换阵型前确认 |
-| **战术演练** | 播放 / 暂停、循环、速度、时间轴、路线时序、持球人与传接球 |
-| **导出与打印** | SVG、PNG、完整战术本或单个战术 JSON；A4 战术本、9 格腕带卡、Call Sheet |
-| **云端协作** | 团队账号、战术本成员权限、自动保存、冲突处理和最近 20 个保存版本 |
-| **手机与 iPad** | 战术列表 / 球场 / 属性面板切换、触摸布阵、缩放和平移 |
-
-### 常用快捷键
+<details>
+<summary>常用快捷键</summary>
 
 | 操作 | 快捷键 | 操作 | 快捷键 |
 |---|---|---|---|
@@ -98,89 +50,112 @@
 | 撤销 | `Ctrl / ⌘ + Z` | 重做 | `Ctrl / ⌘ + Shift + Z` |
 | 取消 / 关闭 | `Esc` | 删除选中对象 | `Delete` |
 
-## 云端协作与成员权限
+</details>
 
-云端版以**战术本**为共享单位：
+## Madden 战术库
 
-1. 使用管理员分配的用户名和密码登录，或使用原有 ChatGPT 登录入口。
-2. 创建战术本；创建者成为该战术本的管理员。
-3. 在 **「成员与权限」** 中新建成员账号，或将已有团队账号加入该战术本。邮箱邀请链接需手动复制发送。
-4. 管理员管理成员和恢复历史；编辑者修改战术；只读成员可以查看、演练、导出和打印。
+按球队、阵型大类、具体阵型或英文名称筛选，预览后拖入战术本，或点击 **「＋ 加入」**。手机端可直接使用加入按钮。导入支持去重，并提供最近一次符合条件的加入撤销。
 
-不同战术本的成员权限相互独立。云端修改约 0.9 秒后自动保存，空闲时约每 6 秒检查其他成员的更新；冲突会保留本机草稿并提示处理。定期导出 JSON 仍是必要的额外备份。
+| 当前 Madden 27 目录快照 | 数量 |
+|---|---:|
+| Eagles 战术条目 | 620 |
+| Ravens 战术条目 | 588 |
+| **条目总计** | **1,208** |
+| 可编辑条目 | 437 |
+| 仅原图条目 | 771 |
+| 去重后的原图文件 | 1,121 |
 
-> **多球队多租户仍在规划中。** 当前已有战术本级协作与隔离，独立的球队层级、球队主账号及后续独立服务器部署尚未实现。详细计划见 [多球队多租户路线图](docs/MULTI_TENANCY_ROADMAP.md)。
+**可编辑战术**可以移动球员、修改可见路线、镜像和演练，并打开原图对照。导入时会整理锋线间距；已有可编辑战术也可使用「整理锋线间距」，操作支持撤销。
 
-## 访问入口
+**原图战术**可以收藏、记录笔记、导出和打印；图片中的球员不能直接移动，原版路线不能自动演练。可编辑版本依据图片可见内容重建，图外路线、真实时序和比赛决策无法由图片确定；演练使用可调整的默认时序。
 
-| 入口 | 适合谁 | 数据保存在哪里 |
+[目录数据](web/data/huddle-catalog.json) · [数据说明](docs/MADDEN_BATCH.md) · [识别记录](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)
+
+## AI 攻防对位分析
+
+这项功能已在云端工作台提供，拥有战术本读取权限的成员均可使用：
+
+1. 进入 **「AI分析战局」**，从同一本战术本中选择一套进攻和一套防守。
+2. 可选观察位置与覆盖类型，必要时镜像防守图；这些调整只用于本次分析，不修改原战术。
+3. 选择服务商，填写支持工具调用的模型名称与个人 API Key，再发起分析。
+4. 查看总览与条件情景，切换观察对象，在攻防叠图中查看对应球员、路线和区域。
+
+支持 DeepSeek（OpenAI / Anthropic 两种接口格式）、Anthropic、OpenRouter 和 OpenAI；自定义 HTTPS 服务需要管理员配置允许的主机。后端通过 **LangGraph 组织单个带只读工具的分析 Agent**，检查权限、战术版本、结果格式与证据引用；一次分析最多发起 **4 次模型请求**。
+
+应用不持久化保存 API Key，刷新或退出后需重新填写。调用经鉴权后端转发到所选服务商，会发送所选战术的必要数据，并可能产生费用；默认不发送姓名、名单、图片和笔记，可主动附上笔记。分析区分已保存事实、几何观察和模型假设，不预测胜率或真实比赛结果。原图条目无法提供可编辑坐标，分析信息会相应受限。
+
+[实现说明](docs/AI_MATCHUP_IMPLEMENTATION.md) · [Agent 工作流与工具](docs/AI_MATCHUP_AGENT_DESIGN.md) · [后续分析能力规划](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
+
+## 传统与数字化模式
+
+| 模式 | 体验 |
+|---|---|
+| **传统模式** | 默认开启；平面棋子、清晰路线，关闭装饰动效，适合日常布阵与阅读 |
+| **数字化模式** | 桌面可选；透视战术板、立体棋子、玻璃金属材质，以及随演练变化的路线、跑动、阻挡、传球与区域反馈 |
+
+手机和 iPad 固定使用传统模式，仍可编辑和演练。WebGL 不可用时，数字化模式切换到可操作的兼容视图。系统要求减少动态效果时保留材质、停止装饰运动。
+
+画板支持 **100–300% 缩放**、适应屏幕与调整高度；桌面还可调整宽度或展开画板。显示偏好保存在当前设备，不修改共享战术。详见[数字化战术板说明](docs/DIGITAL_BOARD.md)。
+
+## 云端协作与数据保存
+
+| 入口 | 使用方式 | 数据与能力 |
 |---|---|---|
-| [云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) | 需要团队共享、成员权限与跨设备访问 | 云端数据库；首次登录和加载需要网络 |
-| [本地演示版](https://timpickle.github.io/playbook-studio-web/local.html) | 想立即体验绘图和演练 | 当前浏览器；换设备或清除浏览器数据前请先导出 JSON |
-| [GitHub Pages 入口](https://timpickle.github.io/playbook-studio-web/) | 了解项目，或从旧版导出本地战术 | 提供入口、旧版迁移工具和本地预览，不提供共享数据库 |
+| [云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) | 使用管理员分配的账号密码，或原有 ChatGPT 登录入口 | 云端数据库、成员权限、跨设备访问、历史版本与 AI 分析 |
+| [无需登录演示](https://timpickle.github.io/playbook-studio-web/local.html) | 直接打开编辑器 | 数据保存在当前浏览器；提供绘图、演练与导入导出，不提供云端账号、共享或 AI 分析 |
+| [GitHub Pages 入口](https://timpickle.github.io/playbook-studio-web/) | 项目入口与旧版迁移 | 链接云端版、导出旧浏览器数据并打开本地演示 |
 
-### 把旧版战术迁移到云端
+云端以**战术本**为共享单位，每本的成员权限独立：管理员管理成员与恢复历史，编辑者修改战术，只读成员查看、演练、导出和打印。在「成员与权限」中可以新建成员账号或加入已有账号；邮箱邀请链接需自行复制发送。
 
-1. 在**原设备、原浏览器**打开 [GitHub Pages 入口](https://timpickle.github.io/playbook-studio-web/)，点击「导出这台设备的本地战术」。
-2. 登录云端版，在「新建」或「导入本机」时选择导出的 JSON。
-3. 确认战术后再邀请成员；原浏览器的数据不会被这次导入清除。
+修改自动保存，成员更新通过后台轮询同步。冲突处理会保留本机草稿，并让用户确认无法自动合并的内容；管理员可以从最近 **20 个已保存版本**恢复。断网草稿用于原设备恢复，不保证离线重新登录或冷启动。重要战术建议另存 JSON 备份。
 
-两个域名的浏览器存储相互隔离。新建时上传 JSON 为完整导入；编辑器内的「导入战术本」采用追加方式。云端数据和权限机制详见 [CLOUD.md](docs/CLOUD.md)。
+旧版迁移需在**原设备、原浏览器**打开 GitHub Pages，导出本地战术，再在云端新建或导入时上传 JSON。两个域名的浏览器存储互相隔离；新建时上传为完整导入，编辑器内的「导入战术本」为追加导入。
+
+独立球队层级、球队主账号和完整多租户管理仍在规划中，当前已实现的是战术本级协作。详见[云端技术说明](docs/CLOUD.md)与[多球队路线图](docs/MULTI_TENANCY_ROADMAP.md)。
 
 ## 本地开发
 
-推荐 Node.js 24。仓库中的战术图资源会由脚本从打包文件解出，不需要运行时访问第三方图片站点。
+推荐 **Node.js 24**（仓库声明最低版本为 22.13.0）。
 
-~~~bash
+```bash
 git clone https://github.com/TIMPICKLE/playbook-studio-web.git
 cd playbook-studio-web
 npm ci --ignore-scripts
 
-# 本地静态编辑器：http://localhost:3000/
+# 启动静态编辑器：http://localhost:3000/
 npm run start:local
-~~~
+```
 
-开发及验证：
+战术图资源由脚本从仓库中的打包文件解出，显示时不需要访问第三方图片站点。静态服务适合编辑器开发；云端 API、账号和共享数据依赖 Worker / D1 运行时。
 
-~~~bash
-npm run check
-npm run typecheck
-npm test
-npm run dev
-~~~
+```bash
+npm run check       # JavaScript 语法检查
+npm run typecheck   # TypeScript 检查
+npm test            # 模型、界面、权限和同步测试
+npm run dev         # Vinext 开发环境
+npm run build       # 准备编辑器资源并构建 Worker
+```
 
-云端数据库和 API 当前使用 Sites 的 Vinext + Cloudflare Worker / D1 运行时；GitHub Pages 不提供云端数据库。数据库结构迁移可用 `npm run db:generate` 生成，生产构建使用 `npm run build`。独立服务器的适配尚在规划，详见 [云端技术说明](docs/CLOUD.md) 和 [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md)。
+生产构建先将 `web/` 复制到 `public/editor/`，再输出到 `dist/`。GitHub Pages 提供静态体验；ChatGPT Sites 部署使用 Cloudflare Worker 与 D1。独立服务器适配仍在规划中，不能直接把静态目录当作完整云端服务部署。
 
-<details>
-<summary>维护者：刷新 Madden 数据与工程目录</summary>
+| 组成 | 主要实现 |
+|---|---|
+| 编辑器与演练 | 原生 JavaScript、SVG、CSS；数字化视图使用 Three.js |
+| Web 与 API | Vinext、React、Cloudflare Workers |
+| 云端数据 | Cloudflare D1、Drizzle |
+| AI 分析 | LangGraph、LangChain，支持工具调用的第三方模型 |
+| 验证 | Node.js Test Runner、Happy DOM、TypeScript |
 
-- `npm run import:huddle` 从指定的 Eagles / Ravens 公开页面刷新目录和图片；更新后检查来源、游戏版本和数量，再执行测试与构建。
-- `web/`：编辑器、共享界面、同步与迁移工具。
-- `server/`、`app/`、`db/`、`drizzle/`：认证、API、数据库模型与迁移。
-- `tests/`：模型、DOM、权限、同步和界面测试。
-- `scripts/`、`build/`、`docs/`：构建工具、运行时和验证记录。
+数据库结构迁移使用 `npm run db:generate`；Madden 数据刷新使用 `npm run import:huddle`。部署、迁移与身份接入说明见 [CLOUD.md](docs/CLOUD.md)。
 
-</details>
+## 使用边界与许可
 
-## 使用限制与素材许可
+- 战术演练用于教学图示，不包含自主防守 AI 或真实比赛物理模拟；AI 对位分析也不是比赛预测器。
+- 云端单份战术本请求上限约 **950 KB**。原图条目即使导出 SVG，内部仍是图片，不会自动转换成可编辑矢量路线。实际打印与腕带尺寸需按设备校准。
+- 本地数据属于当前浏览器，清除浏览器数据或更换设备前请先导出；云端保存不替代个人备份。
+- 项目参考公开功能独立实现，不接入 Playmaker X 后端，也未验证其文件格式兼容性。
+- 源代码采用 [MIT License](LICENSE)。Madden / Huddle.gg 原始图片、游戏素材、官方运行时模板及第三方组件保留各自许可；**Madden 原图不适用本项目的 MIT 许可证**。目录来源：[Eagles](https://huddle.gg/playbooks/eagles-off/) / [Ravens](https://huddle.gg/playbooks/ravens-off/)。
 
-- 云端单份战术本请求上限约 **950 KB**；每账号最多创建 50 份战术本。备份校验上限为 5 MB、500 个战术、100 个模板和 200 名名单成员；单个战术最多 40 个球员标记和 100 条路线。
-- 战术演练用于教学图示，不包含防守 AI 或真实比赛物理模拟。实际打印与腕带尺寸需要按设备校准。
-- 项目参考公开功能独立实现，不接入 Playmaker X 后端，也未验证原版文件格式兼容性。
-- Madden / Huddle.gg 原始图片和游戏素材保留来源与水印，**不适用本项目代码的 MIT 许可证**；目录来自 [Eagles](https://huddle.gg/playbooks/eagles-off/) 和 [Ravens](https://huddle.gg/playbooks/ravens-off/) 公开页面。
+## 进一步了解
 
-<details>
-<summary>更多文档</summary>
-
-- [公开脚本调查](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [脱敏摘要](docs/rea-public-summary.json) · [REA 重跑说明](docs/REA_REPRODUCE.md)
-- [交互与组件设计记录](docs/DESIGN.md) · [液态材质说明](docs/LIQUID_MATERIALS.md) · [验证记录](docs/VALIDATION.md)
-
-</details>
-
----
-
-<div align="center">
-
-源代码采用 [MIT License](LICENSE)；官方运行时模板及第三方素材的许可证另行保留。
-
-</div>
+[交互与视觉设计](docs/DESIGN.md) · [液态材质](docs/LIQUID_MATERIALS.md) · [验证记录](docs/VALIDATION.md) · [公开脚本调查](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [调查复现说明](docs/REA_REPRODUCE.md)
