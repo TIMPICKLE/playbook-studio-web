@@ -10,8 +10,6 @@
 
 [进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) · [无需登录，先试用本地演示](https://timpickle.github.io/playbook-studio-web/local.html) · [查看使用指南](#从一张战术开始) · [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md) · [球员 AI 对局分析路线图（规划）](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
 
-<sub>封面为 AI 生成的概念插画，实际软件界面见下方截图。</sub>
-
 </div>
 
 ---
@@ -27,15 +25,17 @@
 | **和球队一起使用** | 云端保存与成员权限，让教练编辑、球员以只读方式查看和演练 |
 | **带去训练** | 导出 PNG、SVG 或 JSON，打印战术本、腕带卡和 Call Sheet |
 
-## 真实界面：打开就能开始画
+## 战术编辑：打开就能开始画
 
 ![Playbook Studio 战术编辑界面：左侧战术列表、中间球场与绘图工具、右侧战术设置](docs/assets/readme/editor.jpg)
 
-*真实本地演示截图：左侧选择战术，中间布阵与画线，右侧调整阵型、战术信息和教练笔记。示例内容仅用于演示。*
+*左侧选择战术，中间布阵与画线，右侧调整阵型、战术信息和教练笔记。*
 
 ### 登录后：编辑或分析
 
-登录后选择「编辑战术本」或「AI分析战局」。分析时从同一本战术本中选择一攻一守，可选观察位置和覆盖类型；选择自己的模型服务，填写模型名称和 API Key 后发起分析。模型需支持工具调用，一次分析最多 4 次模型请求；Key 仅保留在当前页面内存，刷新后需重新填写；所选战术数据会发送到用户选择的服务商并可能产生费用。结果用于观察条件情景，不能替代球队战术要求或预测真实比赛。支持服务、数据边界和开发细节见[实现设计](docs/AI_MATCHUP_IMPLEMENTATION.md)。
+登录后选择「编辑战术本」或「AI分析战局」。分析时从同一本战术本中选择一攻一守，可选观察位置和覆盖类型；选择自己的模型服务，填写模型名称和 API Key 后发起分析。
+
+模型需支持工具调用，一次分析最多 4 次模型请求。API Key 仅保留在当前页面内存，刷新后需重新填写；所选战术数据会发送到用户选择的服务商并可能产生费用。分析用于战术参考，不预测真实比赛结果。支持的服务与技术细节见[实现设计](docs/AI_MATCHUP_IMPLEMENTATION.md)。
 
 ### 从一张战术开始
 
@@ -50,7 +50,7 @@
 
 ![Madden 战术库界面：球队切换、筛选、可编辑战术卡片和加入按钮](docs/assets/readme/madden-library.jpg)
 
-*真实本地演示截图：选择球队和阵型、搜索战术，预览后拖入左侧战术本，或点击「＋ 加入」。图片拍摄于上一批次，数量以当前界面为准；手机端可使用加入按钮。*
+*选择球队和阵型、搜索战术，预览后拖入左侧战术本，或点击「＋ 加入」；手机端可使用加入按钮。*
 
 - **两支球队**：Eagles 和 Ravens，按球队、阵型大类、具体阵型及英文名称筛选。
 - **437 个可编辑战术条目**：可移动球员、编辑可见路线、镜像和演练，也可打开原图对照。导入时会整理锋线间距；之前保存的可编辑战术可使用「整理锋线间距」，并可撤销。
@@ -59,13 +59,13 @@
 
 > **识别边界：** 可编辑版本依据图片中的可见站位和路线重建。图外路线、真实时序、接球目标和比赛决策不能仅凭图片确认；演练使用可调整的默认时序，不代表原版比赛模拟。
 
-当前目录快照为 Madden 27：Eagles 620 个、Ravens 588 个，共 **1,208 个球队战术条目**和 **1,121 张去重原图**。来源、抓取信息和图像校验记录见 [300 张识别记录](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)、[继续识别记录](docs/MADDEN_REVIEW_2026-10-28-CONTINUED.md)、[2026-10-28 增量复核](docs/MADDEN_REVIEW_2026-10-28.md)、[此前 80 张原图的重建记录](docs/MADDEN_REVIEW_80.md)、[Madden 全目录处理说明](docs/MADDEN_BATCH.md)、[首批可编辑战术](docs/MADDEN_EDITABLE.md) 和 [目录数据](web/data/huddle-catalog.json)。
+当前目录快照为 Madden 27：Eagles 620 个、Ravens 588 个，共 **1,208 个球队战术条目**和 **1,121 张去重原图**。[目录数据](web/data/huddle-catalog.json) · [数据说明](docs/MADDEN_BATCH.md) · [识别记录](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)。
 
 ## 平面战术板，或立体数字化战术板
 
 ![桌面数字化模式下的透视战术板、立体棋子与路线](docs/assets/readme/digital-fallback.jpg)
 
-*真实本地演示截图：数字化模式的兼容视图。截图环境未启用 WebGL；它不代表硬件 WebGL 的最终玻璃折射和阴影效果。*
+*数字化模式的兼容视图。*
 
 | 模式 | 适合什么场景 |
 |---|---|
@@ -74,7 +74,7 @@
 
 手机和 iPad 固定使用传统模式，战术演练仍可正常使用。系统启用减少动态效果时，数字化材质保留、装饰运动停止；WebGL 不可用时会切换到可操作的兼容视图。模式偏好只保存在当前设备，不修改共享战术。
 
-画板支持 **100–300% 缩放**、适应屏幕、调整高度；桌面还可调整画板宽度或展开画板。具体实现与验证边界见 [数字化战术板说明](docs/DIGITAL_BOARD.md) 和 [验证记录](docs/VALIDATION.md)。
+画板支持 **100–300% 缩放**、适应屏幕、调整高度；桌面还可调整画板宽度或展开画板。详见 [数字化战术板说明](docs/DIGITAL_BOARD.md)。
 
 ## 功能一览
 
@@ -103,8 +103,8 @@
 ## 给教练，也给每一位球员
 
 <div align="center">
-<img src="docs/assets/readme/team-huddle-concept.jpg" alt="三位紫金色橄榄球小队员围着战术图讨论的 AI 生成概念插画" width="720">
-<br><sub>AI 生成概念插画 · 一张战术图，可以成为球队共同的语言。</sub>
+<img src="docs/assets/readme/team-huddle-concept.jpg" alt="三位紫金色橄榄球小队员围着战术图讨论的概念插画" width="720">
+<br><sub>一张战术图，可以成为球队共同的语言。</sub>
 </div>
 
 云端版以**战术本**为共享单位：
@@ -169,21 +169,18 @@ npm run dev
 
 </details>
 
-## 使用边界与素材说明
+## 使用限制与素材许可
 
 - 云端单份战术本请求上限约 **950 KB**；每账号最多创建 50 份战术本。备份校验上限为 5 MB、500 个战术、100 个模板和 200 名名单成员；单个战术最多 40 个球员标记和 100 条路线。
 - 战术演练用于教学图示，不包含防守 AI 或真实比赛物理模拟。实际打印与腕带尺寸需要按设备校准。
 - 项目参考公开功能独立实现，不接入 Playmaker X 后端，也未验证原版文件格式兼容性。
 - Madden / Huddle.gg 原始图片和游戏素材保留来源与水印，**不适用本项目代码的 MIT 许可证**；目录来自 [Eagles](https://huddle.gg/playbooks/eagles-off/) 和 [Ravens](https://huddle.gg/playbooks/ravens-off/) 公开页面。
-- 浏览器尺寸与自动化验证不等于所有实体设备实测。硬件 WebGL 最终效果、实体 iPhone / iPad、打印等验证边界见 [验证记录](docs/VALIDATION.md) 和 [数字化战术板说明](docs/DIGITAL_BOARD.md)。
 
 <details>
-<summary>公开功能研究与更多文档</summary>
+<summary>更多文档</summary>
 
 - [公开脚本调查](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [脱敏摘要](docs/rea-public-summary.json) · [REA 重跑说明](docs/REA_REPRODUCE.md)
 - [交互与组件设计记录](docs/DESIGN.md) · [液态材质说明](docs/LIQUID_MATERIALS.md) · [验证记录](docs/VALIDATION.md)
-- 项目公开功能研究使用 REA 6.4.0；核心 JavaScript 语义分析受环境限制，另用 Babel AST 补充，覆盖范围分别说明。
-- 仓库不包含 Playmaker X 原产品源码、图片或凭证。Playmaker X 是原产品名称，本项目为独立实现。
 
 </details>
 
