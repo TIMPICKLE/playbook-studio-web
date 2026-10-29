@@ -163,3 +163,13 @@ Use `npm run db:generate` to generate database migrations and `npm run import:hu
 Most technical documentation is currently in Chinese.
 
 [Interaction and visual design](docs/DESIGN.md) · [Liquid materials](docs/LIQUID_MATERIALS.md) · [Validation notes](docs/VALIDATION.md) · [Public script investigation](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [Reproduction guide](docs/REA_REPRODUCE.md)
+
+---
+
+## Sponsors
+
+Individuals, teams, and companies are welcome to support the continued development of Playbook Studio. The spaces below are reserved for future sponsors.
+
+![Three open spaces reserved for future sponsor logos](docs/assets/brand/sponsor-placeholders.svg)
+
+**Interested in sponsoring? [Contact the maintainer through an issue](https://github.com/TIMPICKLE/playbook-studio-web/issues).**

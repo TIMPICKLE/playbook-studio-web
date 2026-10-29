@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="230" viewBox="0 0 960 230" role="img" aria-labelledby="title desc">
+  <title id="title">Open sponsor spaces for Playbook Studio</title>
+  <desc id="desc">Three empty sponsor spaces. Each is a placeholder for a future sponsor logo, not an existing sponsorship.</desc>
+  <rect x="1" y="1" width="958" height="228" rx="16" fill="#141618" stroke="#30353B"/>
+  <g fill="#1B1E22" stroke="#66707B" stroke-width="1.2" stroke-dasharray="5 6">
+    <path d="M42 30H298L310 42V188L298 200H42L30 188V42Z"/>
+    <path d="M352 30H608L620 42V188L608 200H352L340 188V42Z"/>
+    <path d="M662 30H918L930 42V188L918 200H662L650 188V42Z"/>
+  </g>
+  <g fill="none" stroke="#AEB7C2" stroke-width="2">
+    <path d="M157 80H183M170 67V93"/>
+    <path d="M467 80H493M480 67V93"/>
+    <path d="M777 80H803M790 67V93"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+    <g fill="#D8DCE2" font-size="27" font-weight="700" letter-spacing="1.5">
+      <text x="170" y="137">YOUR LOGO</text>
+      <text x="480" y="137">YOUR LOGO</text>
+      <text x="790" y="137">YOUR LOGO</text>
+    </g>
+    <g fill="#9BA5B0" font-size="12" font-weight="400" letter-spacing="2">
+      <text x="170" y="164">OPEN SPONSOR SLOT</text>
+      <text x="480" y="164">OPEN SPONSOR SLOT</text>
+      <text x="790" y="164">OPEN SPONSOR SLOT</text>
+    </g>
+  </g>
+</svg>

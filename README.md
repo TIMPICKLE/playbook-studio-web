@@ -159,3 +159,13 @@ npm run build       # 准备编辑器资源并构建 Worker
 ## 进一步了解
 
 [交互与视觉设计](docs/DESIGN.md) · [液态材质](docs/LIQUID_MATERIALS.md) · [验证记录](docs/VALIDATION.md) · [公开脚本调查](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [调查复现说明](docs/REA_REPRODUCE.md)
+
+---
+
+## 赞助者
+
+欢迎个人、团队和企业支持 Playbook Studio 的持续开发。下方为赞助者预留展示位，期待你的加入。
+
+![三个赞助者预留展示位，等待加入](docs/assets/brand/sponsor-placeholders.svg)
+
+**有意赞助？[通过 Issue 联系维护者](https://github.com/TIMPICKLE/playbook-studio-web/issues)。**
