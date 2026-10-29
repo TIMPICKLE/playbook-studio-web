@@ -9,9 +9,9 @@ test('matchup overlay uses legible side colors without changing saved plays', ()
   const data=starterWorkspace(),off=data.plays.find(p=>p.book==='offense'),def=data.plays.find(p=>p.book==='defense');
   off.players[0].color='#dfffaa';off.routes[0].color='#dfffaa';
   const before=JSON.stringify({off,def}), overlay=composeMatchup(off,def);
-  assert.ok(overlay.players.filter(p=>p.side==='offense').every(p=>p.color==='#5b2f91'));
+  assert.ok(overlay.players.filter(p=>p.side==='offense').every(p=>p.color==='#2b2f36'));
   assert.ok(overlay.players.filter(p=>p.side==='defense').every(p=>p.color==='#c16f56'));
-  assert.ok(overlay.routes.filter(r=>r.id.startsWith('offense:')).every(r=>r.color==='#5b2f91'));
+  assert.ok(overlay.routes.filter(r=>r.id.startsWith('offense:')).every(r=>r.color==='#2b2f36'));
   assert.ok(overlay.routes.filter(r=>r.id.startsWith('defense:')).every(r=>r.color==='#c16f56'));
   assert.equal(JSON.stringify({off,def}),before);
 });

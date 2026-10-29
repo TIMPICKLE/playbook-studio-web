@@ -55,7 +55,7 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       click('favorite');
       assert.equal(query('#toast').dataset.type, 'error'); assert.equal(query('#toast').getAttribute('role'), 'alert');
       assert.ok(query('#toast [data-action="download-json"]'));
-      assert.equal(query('#toast .toast-icon').textContent, '!');
+      assert.ok(query('#toast .toast-icon svg'), 'error toast shows its icon');
       Object.defineProperty(globalThis, 'localStorage', { configurable:true, value:saved }); click('undo');
     });
     await t.test('board resizing preserves the live SVG, drafts and playbook; cancellation, keyboard and reset work', async () => {

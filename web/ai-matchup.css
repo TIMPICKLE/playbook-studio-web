@@ -26,7 +26,7 @@
 .ai-page .ai-field small,.ai-page .ai-submit-hint{color:#6d6f71}
 .ai-page .ai-section-heading p,.ai-page .ai-board-caption{color:#6d6f71}
 .ai-page .ai-board{background:#f4f5f6}
-.ai-page .ai-dot.offense{background:#5a5f66}
+.ai-page .ai-dot.offense{background:#2b2f36;box-shadow:0 0 0 1px #ffffff55}
 .ai-page .ai-dot.defense{background:#c16f56}
 .ai-page .ai-board .ai-evidence-active{filter:drop-shadow(0 0 7px #868b92)}
 

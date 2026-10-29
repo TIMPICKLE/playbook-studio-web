@@ -342,7 +342,6 @@ html[data-visual-mode] .app-footer { font-size: var(--t-xs); color: var(--text-3
 html[data-visual-mode] .app-footer > span:first-child { font-family: var(--font-display); font-size: var(--t-sm); font-weight: 700; letter-spacing: .08em; color: var(--text-2); }
 html[data-visual-mode] .modal { border-radius: var(--r-island); }
 html[data-visual-mode] .modal h2 { font-size: var(--t-xl); font-weight: 650; letter-spacing: -.01em; }
-html[data-visual-mode=traditional] #toast > * { background: var(--night-3); border: 1px solid var(--hairline-strong); box-shadow: var(--island-shadow); color: var(--text-1); border-radius: 16px; }
 
 /* --------------------------------------------------------------------------
    Desktop stage layout: floating islands around the field.
@@ -590,3 +589,149 @@ html[data-visual-mode] .brand > small { cursor: help; }
   html[data-visual-mode] .board-size-controls button, html[data-visual-mode] .board-advanced > summary { white-space: nowrap; padding-left: 6px; padding-right: 6px; min-width: 32px; }
   html[data-visual-mode] .board-zoom-controls output { min-width: 40px; }
 }
+
+
+/* ==========================================================================
+   v5.3 polish: material header, quiet focus, toast, dark studio home
+   ========================================================================== */
+
+/* Frozen header = a real material, never a transparent strip. The traditional
+   mode switches blur off for everything; the header gets it back on purpose. */
+html[data-visual-mode] .cloud-bar {
+  background: color-mix(in srgb, var(--night-0) 78%, transparent);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 10px 30px -18px #000;
+}
+html[data-visual-mode] .cloud-bar,
+html[data-visual-mode=traditional] .cloud-bar {
+  -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+  backdrop-filter: blur(22px) saturate(160%) !important;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-visual-mode] .cloud-bar { background: var(--night-0); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-visual-mode] .cloud-bar { background: var(--night-0); }
+}
+/* One brand per screen: in the cloud the bar carries it. */
+
+html[data-visual-mode] .cloud-enabled .workspace .sidebar .brand { display: none; }
+html[data-visual-mode] .cloud-brand > span { font-size: 18px; letter-spacing: .05em; text-transform: uppercase; display: inline-flex; flex-direction: column; line-height: 1.05; }
+html[data-visual-mode] .cloud-brand > span small { font-family: var(--font-ui); font-size: 11px; text-transform: none; letter-spacing: .02em; color: var(--text-3); margin-top: 3px; }
+html[data-visual-mode] .workspace-current-card { background: var(--night-2) !important; border: 1px solid transparent !important; border-radius: 14px !important; box-shadow: none !important; }
+html[data-visual-mode] .workspace-current-card:hover { background: var(--night-3) !important; }
+html[data-visual-mode] .cloud-role { background: var(--accent-soft); color: var(--text-1); border: 0; border-radius: var(--r-pill); padding: 4px 10px; font-size: var(--t-xs); }
+html[data-visual-mode] .save-now { text-decoration: none; border: 1px solid var(--hairline-strong); border-radius: var(--r-pill); padding: 4px 12px; font-size: var(--t-xs); color: var(--text-1); background: transparent; }
+html[data-visual-mode] .save-now:hover { background: var(--night-2); }
+html[data-visual-mode] .cloud-bar-actions > button { border-radius: var(--r-pill); padding: 6px 10px; color: var(--text-2); font-size: var(--t-sm); }
+html[data-visual-mode] .cloud-bar-actions > button:hover { background: var(--night-2); color: var(--text-1); }
+html[data-visual-mode] .account-avatar { background: var(--accent-sheen); color: var(--on-accent); }
+
+/* Focus: one quiet ring, drawn by the field itself. No browser outline stacked on top. */
+html[data-visual-mode] :is(input, select, textarea):focus-visible { outline: none; }
+html[data-visual-mode=traditional] .search-box:focus-within {
+  border-color: var(--hairline-strong); box-shadow: none; background: var(--night-3);
+}
+html[data-visual-mode] .search-box input:focus, html[data-visual-mode] .search-box input:focus-visible { outline: none; box-shadow: none; border: 0; background: transparent; }
+html[data-visual-mode] .search-box:focus-within svg { color: var(--text-1); }
+html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input, .modal select, .modal textarea, .madden-filterbar input, .madden-filterbar select, .ai-field input, .ai-field select, .ai-field textarea):focus {
+  border-color: #ffffff38; box-shadow: 0 0 0 4px #ffffff0a; background-color: var(--night-3);
+}
+
+/* Toast: a single capsule under the header, with an icon disc and one action. */
+html[data-visual-mode] #toast {
+  top: calc(16px + var(--cloud-height, 0px)); bottom: auto;
+  left: 50%; transform: translate(-50%, -12px);
+  display: flex; align-items: center; gap: 10px;
+  min-width: 0; max-width: min(560px, calc(100vw - 32px));
+  padding: 8px 8px 8px 10px;
+  background: color-mix(in srgb, var(--night-3) 88%, transparent);
+  color: var(--text-1); border: 1px solid var(--hairline-strong); border-radius: 22px;
+  box-shadow: 0 1px 0 #ffffff12 inset, 0 24px 48px -16px #000000d9;
+  font-size: var(--t-sm); line-height: 1.45; letter-spacing: 0;
+}
+html[data-visual-mode] #toast,
+html[data-visual-mode=traditional] #toast {
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  transition: opacity .22s var(--ease-out), transform .32s var(--ease-out), visibility .22s !important;
+}
+html[data-visual-mode] #toast.visible { transform: translate(-50%, 0); }
+html[data-visual-mode] #toast .toast-icon {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent-sheen); color: var(--on-accent); border: 0; box-shadow: none;
+}
+html[data-visual-mode] #toast[data-type=error] .toast-icon { background: var(--danger-1); color: #1b0d0b; }
+html[data-visual-mode] #toast[data-type=warning] .toast-icon { background: #f2c66d; color: #1d1407; }
+html[data-visual-mode] #toast[data-type=error] { border-color: #ff8e7e55; }
+html[data-visual-mode] #toast .toast-message { flex: 1 1 auto; min-width: 0; padding: 2px 4px 2px 0; background: none; border: 0; box-shadow: none; }
+html[data-visual-mode] #toast .toast-actions { display: flex; gap: 6px; flex: none; }
+html[data-visual-mode] #toast :is(.toast-undo, .toast-action) {
+  min-height: 30px; padding: 0 14px; border: 0; border-radius: var(--r-pill);
+  background: var(--accent-sheen); color: var(--on-accent); font-size: var(--t-xs); font-weight: 650; white-space: nowrap; box-shadow: none;
+}
+html[data-visual-mode] #toast :is(.toast-undo, .toast-action):hover { background: var(--accent-strong); }
+html[data-visual-mode] #toast .toast-action + .toast-undo, html[data-visual-mode] #toast .toast-undo + .toast-action { background: transparent; color: var(--text-1); border: 1px solid var(--hairline-strong); }
+html[data-visual-mode] #toast .toast-close {
+  flex: none; width: 30px; height: 30px; min-width: 30px; margin: 0; border-radius: 50%;
+  display: grid; place-items: center; color: var(--text-3); background: transparent; border: 0;
+}
+html[data-visual-mode] #toast .toast-close:hover { color: var(--text-1); background: var(--hairline); }
+html[data-visual-mode] #toast .toast-close svg { width: 14px; height: 14px; }
+@media screen and (max-width: 1180px) {
+  html[data-visual-mode] #toast { top: calc(10px + env(safe-area-inset-top, 0px)); bottom: auto; flex-wrap: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-visual-mode] #toast { transition: opacity .15s !important; transform: translate(-50%, 0) !important; }
+}
+
+/* Studio home (cloud): same graphite stage as the editor. */
+html[data-visual-mode] .studio-home { background: radial-gradient(1000px 480px at 50% -160px, #ffffff0d, transparent 70%), var(--night-0); color: var(--text-1); }
+html[data-visual-mode] .studio-home-header { border-bottom: 1px solid var(--hairline); }
+html[data-visual-mode] .studio-home-brand img { background: none; padding: 0; border-radius: 0; }
+html[data-visual-mode] .studio-home-brand > span { font-size: 22px; color: var(--text-1); }
+html[data-visual-mode] .studio-home-brand > span small { color: var(--text-2); }
+html[data-visual-mode] .studio-home-account { color: var(--text-2); font-size: var(--t-sm); }
+html[data-visual-mode] .studio-home-account button { color: var(--text-1); text-decoration: none; border: 1px solid var(--hairline-strong); border-radius: var(--r-pill); padding: 0 14px; min-height: 34px; font-size: var(--t-sm); }
+html[data-visual-mode] .studio-home-account button:hover { background: var(--night-2); }
+html[data-visual-mode] .studio-home-main { padding-top: 80px; }
+html[data-visual-mode] .studio-home-intro h1 { font-weight: 800; letter-spacing: -.03em; color: var(--text-1); font-size: clamp(34px, 4.4vw, 56px); }
+html[data-visual-mode] .studio-home-intro p { color: var(--text-2); font-size: var(--t-lg); }
+html[data-visual-mode] .studio-choice {
+  background: var(--night-1); border: 1px solid var(--hairline); border-radius: var(--r-island);
+  box-shadow: var(--island-shadow); color: var(--text-1); padding-top: 22px;
+}
+html[data-visual-mode] .studio-choice:hover, html[data-visual-mode] .studio-choice:focus-visible { border-color: var(--hairline-strong); background: var(--night-2); box-shadow: 0 30px 60px -30px #000; }
+html[data-visual-mode] .choice-art { border-radius: 16px; box-shadow: 0 0 0 1px var(--hairline) inset; }
+html[data-visual-mode] .choice-art-editor { background: var(--turf); }
+html[data-visual-mode] .choice-art-ai { background: linear-gradient(135deg, var(--night-2), var(--night-4)); }
+html[data-visual-mode] .choice-node.node-offense { background: var(--accent-sheen); color: var(--on-accent); border-radius: 50%; }
+html[data-visual-mode] .choice-node.node-defense { background: #8fa7c3; color: #0f1216; border-radius: 9px; }
+html[data-visual-mode] .choice-ai-label { letter-spacing: .04em; font-size: var(--t-xs); }
+html[data-visual-mode] .choice-body h2 { font-size: 26px; font-weight: 750; color: var(--text-1); margin-top: 4px; }
+html[data-visual-mode] .choice-body p { color: var(--text-2); font-size: var(--t-sm); }
+html[data-visual-mode] .choice-link { color: var(--text-1); border-top: 1px solid var(--hairline); font-size: var(--t-sm); }
+html[data-visual-mode] .studio-home-foot { color: var(--text-3); }
+
+/* AI matchup page: graphite surfaces. */
+html[data-visual-mode] :is(.ai-page, .ai-empty) { color: var(--text-1); }
+html[data-visual-mode] #ai-matchup-root { background: var(--night-0); }
+html[data-visual-mode] :is(.ai-page-header p, .ai-empty p, .ai-section-heading p, .ai-field small, .ai-book small) { color: var(--text-3); }
+html[data-visual-mode] .ai-link-button { color: var(--text-2); }
+html[data-visual-mode] :is(.ai-panel, .ai-board-card, .ai-result-card, .ai-results-empty) { background: var(--night-1); border: 1px solid var(--hairline); box-shadow: var(--island-shadow); border-radius: var(--r-island); }
+html[data-visual-mode] .ai-step { background: var(--night-3); color: var(--text-1); }
+html[data-visual-mode] .ai-book { background: var(--night-2); }
+html[data-visual-mode] .ai-book button { color: var(--text-2); }
+html[data-visual-mode] .ai-field > span { color: var(--text-2); }
+html[data-visual-mode] :is(.ai-field input, .ai-field select, .ai-field textarea) { background-color: var(--night-2); border: 1px solid transparent; color: var(--text-1); border-radius: var(--r-control); }
+html[data-visual-mode] .studio-eyebrow, html[data-visual-mode] .ai-kicker { color: var(--text-3); letter-spacing: .02em; font-weight: 600; }
+
+/* Login: fields sit on a darker well so they read as inputs on the panel. */
+html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]) { background-color: var(--night-0); border: 1px solid var(--hairline-strong); min-height: 46px; }
+html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]):hover { background-color: var(--night-1); }
+html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]):focus { background-color: var(--night-0); border-color: #ffffff4d; box-shadow: 0 0 0 4px #ffffff0d; }
+html[data-visual-mode] .login-heading h1 { font-weight: 800; letter-spacing: -.03em; }
+html[data-visual-mode] .login-form-wrap h2 { font-weight: 800; letter-spacing: -.02em; }
+
+/* Toast sizes to its content instead of the half-viewport left offset. */
+html[data-visual-mode] #toast { width: max-content; }
