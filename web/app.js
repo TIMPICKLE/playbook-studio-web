@@ -20,13 +20,16 @@ const icons = {
 };
 const icon = name => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.route}</svg>`;
 const btn = (action, name, label, cls = '', attrs = '') => `<button type="button" data-action="${action}" class="${cls}" title="${e(label)}" aria-label="${e(label)}" ${attrs}>${icon(name)}</button>`;
-let loadIssue = '';
-let workspace;
-try { const raw = localStorage.getItem(STORAGE_KEY); workspace = raw ? decodeWorkspace(raw) : starterWorkspace(); }
-catch { workspace = starterWorkspace(); loadIssue = '已有保存文件无法读取，已载入示例。原文件仍保留，请先导出备份后再编辑。'; }
+const recoveryMessage = '本地存档未能读取，编辑与自动保存已暂停。请先导出原始文件或处理存档恢复。';
+function readLocalWorkspace() {
+  let raw = null;
+  try { raw = localStorage.getItem(STORAGE_KEY); return { workspace: raw ? decodeWorkspace(raw) : starterWorkspace(), recovery: null }; }
+  catch (error) { return { workspace: starterWorkspace(), recovery: { raw, error } }; }
+}
+let { workspace, recovery: localRecovery } = cloudMode() ? { workspace: starterWorkspace(), recovery: null } : readLocalWorkspace();
 let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false;
-let saveState = loadIssue ? '恢复提醒' : '本地已保存', frame = null, lastFrame = null, toastTimer = null;
+let saveState = localRecovery ? '存档待恢复 · 自动保存已暂停' : '本地已保存', frame = null, lastFrame = null, toastTimer = null;
 const history = new History();
 let shared = null, digitalBoard = null;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
@@ -34,8 +37,9 @@ const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
 const panels = createWorkspacePanels();
 const viewSettings = () => ({ ...state.data.settings, ...viewOverrides });
-const canEdit = () => !cloudMode() || !!shared?.canEdit;
-const readActions = new Set(['madden-library','compare-source','choose','book','select-route','clear-selection','sidebar','inspector-panel','panel-field','close-panel','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode']);
+const canEdit = () => cloudMode() ? !!shared?.canEdit : !localRecovery;
+const editBlockedMessage = () => localRecovery ? recoveryMessage : shared?.sync?.viewError ? '战术界面更新失败，请重新加载后再编辑。' : '当前为只读权限，无法修改共享战术。';
+const readActions = new Set(['madden-library','compare-source','choose','book','select-route','clear-selection','sidebar','inspector-panel','panel-field','close-panel','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode','local-recovery','download-original','retry-local-load','replace-local-workspace','confirm-replace-local-workspace']);
 function protectReadOnly() {
   if (canEdit()) return;
   document.querySelectorAll('[data-prop],[data-ball],#apply-formation').forEach(n => { n.disabled = true; });
@@ -45,7 +49,7 @@ const current = () => state.data.plays.find(p => p.id === state.selectedId) || s
 const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
 const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
 const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.plays, notify: toast, onImport(entry) {
-  if (!canEdit()) { toast('当前为只读权限。', { type: 'warning' }); return; }
+  if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
   if (!confirmDraft(() => importMadden(entry))) return;
   return importMadden(entry);
 } });
@@ -76,16 +80,19 @@ function toast(message, { type = 'info', action = '', label = '' } = {}) {
   if (type !== 'error') toastTimer = window.setTimeout(() => node.classList.remove('visible'), type === 'warning' ? 8000 : 5200);
 }
 
-function save() {
+function save({ replaceUnreadable = false } = {}) {
   if (cloudMode()) { shared?.schedule(state.data); return; }
-  try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(state.data)); saveState = '本地已保存'; }
+  if (localRecovery && !replaceUnreadable) { toast(recoveryMessage, { type: 'error', action: 'local-recovery', label: '恢复选项' }); return false; }
+  let saved = false;
+  try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(state.data)); saveState = '本地已保存'; saved = true; }
   catch { saveState = '尚未保存'; toast('保存失败：浏览器存储不可用或已满，请导出 JSON 保存战术本。', { type: 'error', action: 'download-json', label: '导出备份' }); }
   $('#save-state')?.replaceChildren(document.createTextNode(saveState));
+  return saved;
 }
 function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { stop(); time = 0; }
 function edit(fn, { redraw = true } = {}) {
-  if (!canEdit()) { toast('当前为只读权限，无法修改共享战术。', { type: 'warning' }); return; }
+  if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
   resetAnimation(); rehearsal = false; draft = null; previewPoint = null; history.record(state); fn(current(), state.data); save(); if (redraw) render(); else refreshMetadata();
 }
 function choose(id) { if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
@@ -121,7 +128,7 @@ function render() {
     <main class="main" id="main-content" tabindex="-1">
       <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', '打开或关闭战术列表', 'mobile-menu', `aria-expanded="${panels.active==='plays'}"`)}<span>${icon('book')} ${BOOKS[p.book]}战术本</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="madden-library" aria-label="打开 Madden 战术库">${icon('ball')}<span>Madden 战术库</span></button>${effectsControl()}<button class="button subtle" data-action="print" aria-label="打印战术本">${icon('print')}<span>打印</span></button><button class="button primary" data-action="export" aria-label="导出战术本">${icon('export')}<span>导出</span></button></div></header>
       <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? '取消收藏' : '收藏战术', `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.diagramSource ? '图片识别可编辑版 · 可拖动、画线与演练；时序可自行调整。' : p.reference ? 'Madden 原始战术图 · 可收藏、记录笔记、导出与打印。' : canEdit() ? '选择球员画路线，或直接拖动调整站位。' : '查看团队战术，播放演练并学习自己的跑位。'}</p></div><div class="play-actions">${p.diagramSource ? '<button class="button subtle" data-action="compare-source">原图对照</button><button class="button subtle" data-action="space-madden-line">整理锋线间距</button>' : ''}${btn('undo', 'undo', '撤销 · Ctrl+Z', 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', '重做 · Ctrl+Shift+Z', 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', '左右镜像', 'icon-button')}${btn('duplicate', 'copy', '复制战术', 'icon-button')}</div></section>
-      ${!canEdit() ? '<div class="readonly-banner"><strong>只读模式</strong><span>你可以查看、演练、导出和打印。需要修改时，请联系管理员调整权限。</span></div>' : ''}<div class="editor-layout"><section class="canvas-section" aria-label="球场与演练">
+      ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? '存档待恢复' : shared?.sync?.viewError ? '界面待恢复' : '只读模式'}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : '你可以查看、演练、导出和打印。需要修改时，请联系管理员调整权限。'}</span>${localRecovery ? '<button class="button subtle" data-action="local-recovery">恢复选项</button>' : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="球场与演练">
         <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="view-tools" role="group" aria-label="球场视图选项">${btn('grid', 'grid', '显示或隐藏码线', 'tool-button')}${btn('theme', 'sun', '切换球场明暗', 'tool-button')}</div><details class="add-object-menu"><summary>＋ 添加对象</summary><div><button data-action="add-player:offense">${icon('plus')}添加进攻球员</button><button data-action="add-player:defense">${icon('plus')}添加防守球员</button><button data-action="add-defense-43" title="4 名锋线 · 3 名线卫 · 4 名后卫">${icon('team')}${p.players.some(v => v.side === 'defense') ? '重设' : '添加'} 4–3 防守阵型（11 人）<small>4 名锋线 · 3 名线卫 · 4 名后卫</small></button><button data-action="tool:zone">${icon('zone')}绘制防守区域</button><button data-action="tool:text">${icon('text')}添加文字标注</button></div></details></div></div>
         <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="可缩放战术板"><div class="pitch-stage">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag">${icon('ball')} <span>${p.players.filter(v => v.side === 'offense').length} O / ${p.players.filter(v => v.side === 'defense').length} D</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
         <div class="stage-dock"><div class="editor-mode" role="group" aria-label="工作模式"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}布阵与画线</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}战术演练</button></div><div class="toolbar" role="toolbar" aria-label="绘图工具"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', '选择 / 移动 · V'], ['route', 'route', '路线 · R'], ['block', 'block', '阻挡 · B'], ['motion', 'motion', '开球前移动 · M'], ['pass', 'pass', '传球线 · P'], ['zone', 'zone', '防守区域 · Z'], ['text', 'text', '文字标注 · T']].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:'选择',route:'跑动',block:'阻挡',motion:'移动',pass:'传球',zone:'区域',text:'文字'})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>战术演练</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">速度 <select id="speed" aria-label="播放速度">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', '循环播放', `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? '暂停战术' : '播放战术', 'play-button')}${btn('reset', 'reset', '重置动画', 'icon-button')}<input type="range" id="timeline" aria-label="动画时间" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div></div>
@@ -239,7 +246,7 @@ function inspector() {
   } else {
     content = `<div class="inspector-heading"><span>战术详情</span><span class="tag">${BOOKS[p.book]}</span></div>${fieldInput('战术名称', 'title', p.title, 'text', 'maxlength="120"')}${fieldInput('分类', 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>阵型模板</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput('人员组', 'personnel', p.personnel, 'text', 'maxlength="80"')}<div class="formation-actions"><button data-action="save-formation">${icon('save')} 保存当前阵型</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? '移除' : '添加'}对方阵型</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>教练笔记</span></div><textarea data-prop="notes" rows="5" aria-label="教练笔记" placeholder="阅读顺序、跑位要点、调整方案…" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><details class="inspector-section ball-section" ${ballSectionOpen ? 'open' : ''}><summary class="inspector-heading"><span>足球移动</span><small>${e(ballSummary(p))}</small></summary><label class="form-field"><span>持球人</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>传给</span><select data-ball="receiverId"><option value="">不传球 / 跑球</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput('出手时间', 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput('到达时间', 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div></details><div class="inspector-divider"></div><label class="check-label"><input id="show-names" type="checkbox" ${viewSettings().showNames ? 'checked' : ''}>显示球员姓名</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}删除此战术</button>`;
   }
-  return `${content}${selection ? '<button class="back-details" data-action="clear-selection">← 返回战术详情</button>' : ''}<div class="inspector-note">${icon('check')}${cloudMode() ? (canEdit() ? '所有修改自动同步到共享战术本' : '当前拥有只读权限') : '所有修改自动保存在此浏览器'}</div>`;
+  return `${content}${selection ? '<button class="back-details" data-action="clear-selection">← 返回战术详情</button>' : ''}<div class="inspector-note">${icon('check')}${localRecovery || shared?.sync?.viewError ? '恢复完成前，编辑与自动保存已暂停' : cloudMode() ? (canEdit() ? '所有修改自动同步到共享战术本' : '当前拥有只读权限') : '所有修改自动保存在此浏览器'}</div>`;
 }
 function renderField() {
   const field=$('#field');if(!field)return;
@@ -377,11 +384,34 @@ function openModal(title, body, footer = '', wide = false) {
   ($('#modal-root').querySelector('.modal-body input:not([readonly]),.modal-body select,.modal-body textarea') || $('#modal-root').querySelector('footer .primary,header button'))?.focus();
 }
 function closeModal() { $('#app').inert = false; document.body.classList.remove('modal-open'); $('#modal-root').innerHTML = ''; $('#print-root').innerHTML = ''; $('#modal-root')._previous?.focus?.(); document.dispatchEvent(new window.Event('playbook:modal-closed')); }
+function localRecoveryModal() {
+  if (!localRecovery) return;
+  openModal('恢复本地战术本', `<p>已有存档未能读取。当前展示的是示例，编辑与自动保存已暂停，原存档未被覆盖。</p><p class="muted">${localRecovery.raw !== null ? '可以原样下载存档，保留其中仍可恢复的战术。下载不会清除原件。' : '浏览器暂时无法读取存档。恢复存储访问后，请重新读取。'}</p><p class="muted small">读取原因：${e(localRecovery.error.message)}</p>`, `<button class="button subtle" data-action="download-original" ${localRecovery.raw === null ? 'disabled' : ''}>下载原始存档</button><button class="button primary" data-action="retry-local-load">重新读取</button><button class="button subtle" data-action="replace-local-workspace">从示例重新开始</button>`);
+}
+function downloadOriginal() {
+  if (!localRecovery) return;
+  if (localRecovery.raw === null) { toast('暂时无法取得原始存档，请恢复浏览器存储访问后重新读取。', { type: 'error', action: 'local-recovery', label: '恢复选项' }); return; }
+  download(localRecovery.raw, 'playbook-original-recovery.json', 'application/json');
+  toast('原始存档已原样导出；编辑与自动保存仍暂停，原件未被覆盖。', { action: 'local-recovery', label: '恢复选项' });
+}
+function retryLocalLoad() {
+  if (!localRecovery) return;
+  const loaded = readLocalWorkspace();
+  if (loaded.recovery) {
+    localRecovery = { ...loaded.recovery, raw: loaded.recovery.raw ?? localRecovery.raw };
+    localRecoveryModal(); feedback(`仍无法读取：${localRecovery.error.message}`, 'error', $('.modal')); return;
+  }
+  resetAnimation(); selection = null; draft = null; drag = null;
+  state = { data: loaded.workspace, selectedId: loaded.workspace.plays[0].id }; book = current().book; query = ''; filter = ''; formationFilter = '';
+  history.past = []; history.future = []; localRecovery = null; saveState = '本地存档已读取';
+  closeModal(); render(); toast('本地存档已恢复，可以继续编辑。', { type: 'success' });
+}
 function newModal() {
   openModal('新建战术', `<p class="muted">选一个阵型，把你的想法画在球场上。</p><label class="form-field"><span>战术名称</span><input id="new-title" value="新战术" maxlength="120"></label><div class="form-row"><label class="form-field"><span>战术本</span><select id="new-book">${Object.entries(BOOKS).map(([v, l]) => option(v, l, book)).join('')}</select></label><label class="form-field"><span>人数 / 每方</span><select id="new-count">${[6, 7, 8, 9, 11, 12].map(v => option(String(v), `${v} 人`, String(state.data.settings.league))).join('')}</select></label></div><label class="form-field"><span>阵型</span><select id="new-formation">${FORMATIONS.map(v => option(v, v, book === 'defense' ? '4–3' : book === 'special' ? 'Field Goal' : 'Gun Trips')).join('')}${state.data.formations.map(f => option(`custom:${f.id}`, `${f.name} · 自定义`, '')).join('')}</select></label>`, '<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="create-play">创建战术</button>');
 }
 function textModal(at) { openModal('添加场上标注', '<label class="form-field"><span>标注内容</span><input id="annotation-text" placeholder="例如：Read 1 · 先读浅交叉" maxlength="200"></label>', `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">放置标注</button>`); }
 function exportModal() {
+  if (localRecovery) { localRecoveryModal(); return; }
   const pngDescription=pngExportDescription({reference:!!current().reference,digital:document.documentElement.dataset.visualMode==='digital',ready:document.documentElement.dataset.digitalBoard==='ready'});
   openModal('导出与备份', `<div class="export-grid"><button data-action="download-svg">${icon('route')}<strong>${current().reference ? '原图战术文件' : '矢量战术图'}</strong><small>${current().reference ? 'SVG · 内嵌原始图片' : 'SVG · 平面矢量，适合课件'}</small></button><button data-action="download-png">${icon('export')}<strong>高清图片</strong><small>PNG · ${pngDescription}</small></button><button data-action="download-json">${icon('book')}<strong>完整战术本</strong><small>JSON · ${state.data.plays.length} 个战术 + 阵型与名单</small></button><button data-action="download-play">${icon('copy')}<strong>当前战术</strong><small>JSON · 可导入继续编辑</small></button></div><p class="muted small">${cloudMode() ? '团队成员会自动读取云端的同一份战术。JSON 用于额外备份或迁移，图片用于分享与课件。' : '本地预览仅保存到当前浏览器。请用 JSON 迁移到云端，图片用于分享与课件。'}</p>`);
 }
@@ -483,6 +513,18 @@ function deleteSelected() {
   }); toast('对象已删除，可撤销恢复。', { type: 'success' });
 }
 const actions = {
+  'local-recovery': localRecoveryModal,
+  'download-original': downloadOriginal,
+  'retry-local-load': retryLocalLoad,
+  'replace-local-workspace': () => {
+    if (!localRecovery) return;
+    openModal('替换无法读取的本地存档？', '<p>确认后将用当前示例替换这台设备上的原存档，并恢复编辑和自动保存。</p><p><strong>尚未下载的原始内容将被覆盖。</strong>建议先返回恢复选项，下载原始存档。</p>', '<button class="button subtle" data-action="local-recovery">保留原件</button><button class="button danger" data-action="confirm-replace-local-workspace">确认替换并开始编辑</button>');
+  },
+  'confirm-replace-local-workspace': () => {
+    if (!localRecovery || !save({ replaceUnreadable: true })) return;
+    localRecovery = null; history.past = []; history.future = []; closeModal(); render();
+    toast('已从示例创建新的本地战术本，可以开始编辑。', { type: 'success' });
+  },
   'convert-reference': () => {
     const entry = getEditableEntry(current().reference?.catalogId);
     if (!entry) return;
@@ -571,7 +613,7 @@ const actions = {
   import: () => $('#import-input').click(),
   'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast('SVG 战术图已生成。', { type: 'success' }); } catch { toast('原始战术图加载失败，请重试。', { type: 'error', action: 'download-svg', label: '重试' }); } },
   'download-png': pngExport,
-  'download-json': () => { download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。', { type: 'success' }); },
+  'download-json': () => { if (localRecovery) { downloadOriginal(); return; } download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast('完整战术本已生成。', { type: 'success' }); },
   'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast('当前战术已生成。', { type: 'success' }); },
   'do-print': () => { if (!$('#print-root').children.length) { toast('没有可打印的战术。', { type: 'warning' }); return; } window.print(); },
   play: togglePlay, reset: () => {resetAnimation();updateAnimation($('#field svg'),current(),0);syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
@@ -583,7 +625,7 @@ document.addEventListener('click', event => {
   const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
   if (current().reference && ['mirror','rehearse-mode','add-player','add-defense-43','opponents','save-formation'].includes(name)) { toast('原始战术图不包含可编辑的球员坐标。', { type: 'info' }); return; }
   if(name==='dismiss-toast'){actions[name]();return;}
-  if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast('当前为只读权限。', { type: 'warning' }); return; }
+  if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast(editBlockedMessage(), { type: 'warning' }); return; }
   if(node.closest('.add-object-menu'))node.closest('details').open=false;
   if (name === 'choose') return choose(value);
   if (['book','new','import','add-player','add-defense-43','opponents','mirror'].includes(name) && !confirmDraft(() => node.click())) return;
@@ -687,7 +729,7 @@ initViewportLayout();
 digitalBoard = createDigitalBoard({getState:()=>({play:current(),settings:viewSettings(),selected:selection,time,playing,rehearsal,draggingId:drag?.type==='player'&&drag.moved?drag.id:null}),notify:message=>toast(message,{type:'warning'})});
 initEffects();
 render();
-if (loadIssue) toast(loadIssue);
+if (localRecovery) { toast(recoveryMessage, { type: 'error', action: 'local-recovery', label: '恢复选项' }); localRecoveryModal(); }
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
 
 if (cloudMode()) {

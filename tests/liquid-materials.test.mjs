@@ -16,11 +16,11 @@ test('material mode races reuse one engine and never leave a frame running while
   const f=fixture(()=>{starts++;return new Promise(r=>{resolve=r;});});
   try{
     const full=f.controller.setMode('full');await Promise.resolve();
-    const lite=f.controller.setMode('lite');await f.controller.setMode('off');
-    resolve({draw:x=>draws.push(x),destroy(){destroyed++;}});await Promise.all([full,lite]);
+    const repeated=f.controller.setMode('full');await f.controller.setMode('off');
+    resolve({draw:x=>draws.push(x),destroy(){destroyed++;}});await Promise.all([full,repeated]);
     assert.equal(starts,1);assert.equal(f.frames.size,0);
     for(let i=0;i<8;i++){
-      await f.controller.setMode('full');await f.controller.setMode('lite');assert.equal(f.frames.size,1);
+      await f.controller.setMode('full');await f.controller.setMode('full');assert.equal(f.frames.size,1);
       f.step(i*100);assert.equal(f.frames.size,1);
       await f.controller.setMode('off');assert.equal(f.frames.size,0);
     }

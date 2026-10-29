@@ -78,14 +78,14 @@ export function createMaterialController({doc=document,makeEngine=createMaterial
   function stop(){if(raf!==null)win.cancelAnimationFrame(raf);raf=null;last=null;}
   function tick(now){
     raf=null;if(!canRun()||!engine)return;
-    if(last!==null)time+=Math.min((now-last)/1000,.1)*(mode==='lite'?.3:1);
+    if(last!==null)time+=Math.min((now-last)/1000,.1);
     last=now;pointer=pointer.map((v,i)=>v+(target[i]-v)*.16);
     try{engine.draw({time,pointer,pulse});}catch(error){win.console.warn('Liquid material rendering stopped:',error);engine.destroy();engine=null;doc.documentElement.dataset.material='fallback';stop();return;}
     raf=win.requestAnimationFrame(tick);
   }
   function start(){if(canRun()&&engine&&raf===null)raf=win.requestAnimationFrame(tick);}
   async function setMode(value){
-    mode=['full','lite'].includes(value)?value:'off';
+    mode=value==='full'?'full':'off';
     if(!canRun()){stop();return;}
     if(engine){start();return;}
     if(!pending){const ticket=++generation;pending=Promise.resolve().then(()=>makeEngine(doc)).then(value=>{if(disposed||ticket!==generation){value.destroy();return;}engine=value;start();}).catch(error=>{if(!disposed){win.console.warn('Liquid material initialization failed:',error);doc.documentElement.dataset.material='fallback';}}).finally(()=>{pending=null;});}
