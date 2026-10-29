@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="434" viewBox="0 0 800 434" role="img" aria-labelledby="title desc">
+  <title id="title">Playbook Studio</title>
+  <desc id="desc">American football and tactical route logo. Self-contained vector paths; outlined lettering; transparent cutouts.</desc>
+  <g id="artwork" fill="#D8DCE2" transform="translate(-368 -183.25)">
+  <g id="symbol">
+    <path id="football-route" fill-rule="evenodd" d="M 418.5 399.5 C 535 278.45 651.5 233.5 768 233.5 C 884.5 233.5 1001 282.14 1117.5 407.5 C 1045 473.95 972.5 530.56 900 553.5 C 866.67 564.05 833.33 567 800 567 H 725 V 455.5 H 1000.5 V 476.5 L 1072 421.5 L 1000.5 373.5 V 422 H 691.5 V 565.5 C 600.5 559.27 509.5 498.22 418.5 407.5 Z M 585 334 H 645 V 307 H 678.5 V 334 H 751 V 307 H 784.5 V 334 H 857 V 307 H 890.5 V 334 H 950 V 367.5 H 890.5 V 394.5 H 857 V 367.5 H 784.5 V 394.5 H 751 V 367.5 H 678.5 V 394.5 H 645 V 367.5 H 585 Z"/>
+  </g>
+  </g>
+</svg>
