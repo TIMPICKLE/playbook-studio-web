@@ -490,3 +490,55 @@ html[data-visual-mode] .stage-dock .rehearsal-toolbar::after { display: none; }
   html[data-visual-mode] .board-advanced > summary { display: none; }
 }
 .entry-page .entry-copy h1 { white-space: nowrap; font-size: clamp(36px, 4vw, 64px); }
+
+/* --------------------------------------------------------------------------
+   Rehearsal lives in the dock: the tools step aside for the transport.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] #field:not(.is-rehearsal) ~ .stage-dock .playback { display: none; }
+html[data-visual-mode] #field.is-rehearsal ~ .stage-dock .toolbar { display: none; }
+html[data-visual-mode] #field.is-rehearsal .field-context { display: none; }
+
+html[data-visual-mode] .stage-dock .playback {
+  display: flex; align-items: center; gap: 12px; margin: 0;
+  min-height: 48px; padding: 4px 14px 4px 4px; border: 0; border-radius: var(--r-pill);
+}
+html[data-visual-mode=traditional] .stage-dock .playback { background: #1d1727f2; box-shadow: var(--dock-shadow); }
+html[data-visual-mode] .stage-dock .transport { order: 1; display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; margin: 0; }
+html[data-visual-mode] .stage-dock .playback-top { order: 2; display: flex; align-items: center; gap: 12px; margin: 0; flex: none; }
+html[data-visual-mode] .stage-dock .playback-title > svg,
+html[data-visual-mode] .stage-dock .playback-title > span { display: none; }
+html[data-visual-mode] .stage-dock .playback-title small { margin: 0; white-space: nowrap; }
+html[data-visual-mode] .stage-dock .playback-options { gap: 6px; }
+html[data-visual-mode] .stage-dock .playback .play-button { width: 40px; height: 40px; flex: none; }
+html[data-visual-mode] .stage-dock .playback .icon-button { width: 34px; height: 34px; flex: none; }
+html[data-visual-mode] .stage-dock #timeline { flex: 1 1 auto; min-width: 140px; width: auto; }
+html[data-visual-mode] .stage-dock #time-label { font-size: 16px; white-space: nowrap; }
+html[data-visual-mode] .stage-dock .speed-label select { min-height: 32px; height: 32px; padding: 0 26px 0 10px; border-radius: var(--r-pill); background-color: var(--night-3); border: 0; font-size: var(--t-xs); }
+
+@media screen and (min-width: 1181px) {
+  html[data-visual-mode] .stage-dock .playback { width: min(640px, calc(100% - 260px)); }
+}
+@media screen and (max-width: 1180px) {
+  html[data-visual-mode] .stage-dock .playback { flex-wrap: wrap; border-radius: 18px; padding: 10px 12px 8px; row-gap: 6px; }
+  html[data-visual-mode] .stage-dock .playback-top { order: 0; width: 100%; justify-content: space-between; }
+  html[data-visual-mode] .stage-dock .transport { width: 100%; }
+}
+
+/* --------------------------------------------------------------------------
+   Inspector sections that fold.
+   -------------------------------------------------------------------------- */
+html[data-visual-mode] details.inspector-section > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 0; }
+html[data-visual-mode] details.inspector-section > summary::-webkit-details-marker { display: none; }
+html[data-visual-mode] details.inspector-section > summary small { margin-left: auto; font-weight: 500; color: var(--text-3); font-family: var(--font-display); font-size: 15px; letter-spacing: .03em; }
+html[data-visual-mode] details.inspector-section > summary::after {
+  content: ''; width: 7px; height: 7px; border-right: 1.5px solid var(--text-3); border-bottom: 1.5px solid var(--text-3);
+  transform: rotate(-45deg); margin: 0 4px 0 2px; flex: none;
+}
+html[data-visual-mode] details.inspector-section[open] > summary { margin-bottom: 14px; }
+html[data-visual-mode] details.inspector-section[open] > summary::after { transform: rotate(45deg); margin-top: -4px; }
+html[data-visual-mode] details.inspector-section > summary:hover::after { border-color: var(--text-1); }
+
+/* One home per feature: on desktop the Madden library lives in the sidebar. */
+@media screen and (min-width: 1181px) {
+  html[data-visual-mode] .workspace:not(.board-expanded) .top-actions [data-action=madden-library] { display: none; }
+}
