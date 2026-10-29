@@ -74,8 +74,9 @@ function protectReference() {
 function toast(message, { type = 'info', action = '', label = '' } = {}) {
   const node = $('#toast'), undoable = /可撤销|撤销恢复/.test(message) && history.past.length && canEdit();
   node.dataset.type = type; node.setAttribute('role', type === 'error' ? 'alert' : 'status');
-  const symbol = type === 'success' ? icon('check') : type === 'error' ? '!' : type === 'warning' ? '⚠' : 'i';
-  node.innerHTML = `<span class="toast-icon" aria-hidden="true">${symbol}</span><span>${e(message)}</span>${undoable ? '<button data-action="undo" class="toast-undo">撤销</button>' : ''}${action ? `<button data-action="${e(action)}" class="toast-action">${e(label)}</button>` : ''}<button class="toast-close" data-action="dismiss-toast" aria-label="关闭提示">${icon('close')}</button>`;
+  const glyph = { success: '<path d="m7.5 12.5 3 3 6-7"/>', error: '<path d="M12 7.5v5.5M12 16.5h.01"/>', warning: '<path d="M12 8v4.5M12 16h.01"/>', info: '<path d="M12 11v5M12 8h.01"/>' }[type] || '<path d="M12 11v5M12 8h.01"/>';
+  const symbol = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${glyph}</svg>`;
+  node.innerHTML = `<span class="toast-icon" aria-hidden="true">${symbol}</span><span class="toast-message">${e(message)}</span>${undoable || action ? `<span class="toast-actions">${undoable ? '<button data-action="undo" class="toast-undo">撤销</button>' : ''}${action ? `<button data-action="${e(action)}" class="toast-action">${e(label)}</button>` : ''}</span>` : ''}<button class="toast-close" data-action="dismiss-toast" aria-label="关闭提示">${icon('close')}</button>`;
   node.classList.add('visible'); window.clearTimeout(toastTimer);
   if (type !== 'error') toastTimer = window.setTimeout(() => node.classList.remove('visible'), type === 'warning' ? 8000 : 5200);
 }
