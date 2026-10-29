@@ -14,7 +14,7 @@ export async function createMaterialEngine(doc=document) {
   let metal,painter,renderer='webgl';
   try {
     metal=new ShaderMount(world,liquidMetalFragmentShader,{
-      u_image:pixel,u_isImage:false,u_shape:0,u_colorBack:[.025,.028,.055,1],u_colorTint:[.78,.72,.94,1],
+      u_image:pixel,u_isImage:false,u_shape:0,u_colorBack:[.03,.032,.036,1],u_colorTint:[.86,.88,.92,1],
       u_contour:.45,u_distortion:.48,u_softness:.11,u_repetition:2.1,u_shiftRed:.20,u_shiftBlue:.32,u_angle:55,
       u_fit:0,u_scale:1.5,u_rotation:0,u_offsetX:0,u_offsetY:0,u_originX:.5,u_originY:.5,u_worldWidth:0,u_worldHeight:0
     },{preserveDrawingBuffer:true,alpha:true,premultipliedAlpha:false},0,9000,Math.max(2,win.devicePixelRatio||1),Infinity);

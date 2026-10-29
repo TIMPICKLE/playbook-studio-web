@@ -1,5 +1,5 @@
 import { clamp, passFlightRoute, animatedBall, animatedPlayer } from './model.js';
-import { project, routePath, motionPath } from './field.js';
+import { project, routePath, motionPath, displayColor } from './field.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const el = (doc, name, attrs = {}) => {
@@ -33,16 +33,16 @@ export function createRouteFeedback(svg, play) {
   for (const route of play.routes) {
     const d=route.kind==='motion'?motionPath(route):routePath(route);
     const group=el(doc,'g',{'data-feedback-route':route.id});
-    const halo=el(doc,'path',{d,fill:'none',stroke:route.color,'stroke-width':route.kind==='block'?7:5,opacity:route.optional?.08:.18,filter:'url(#digital-route-glow)','stroke-linecap':'round'});
+    const halo=el(doc,'path',{d,fill:'none',stroke:displayColor(route.color),'stroke-width':route.kind==='block'?7:5,opacity:route.optional?.08:.18,filter:'url(#digital-route-glow)','stroke-linecap':'round'});
     if(route.optional||route.kind==='pass')halo.setAttribute('stroke-dasharray',route.kind==='pass'?'4 7':'9 6');
-    const tracer=el(doc,'path',{d,fill:'none',stroke:route.kind==='pass'?'#fff0bd':'#ffffff','stroke-width':route.kind==='block'?4:3,pathLength:1,'stroke-dasharray':route.kind==='motion'?'.04 .96':'.08 .92','stroke-linecap':'round',filter:'url(#digital-route-glow)',opacity:0});
-    const end=project(route.points.at(-1)), impact=el(doc,'circle',{cx:end.x,cy:end.y,r:12,fill:'none',stroke:route.color,'stroke-width':2,opacity:0});
+    const tracer=el(doc,'path',{d,fill:'none',stroke:route.kind==='pass'?'#dcdee0':'#ffffff','stroke-width':route.kind==='block'?4:3,pathLength:1,'stroke-dasharray':route.kind==='motion'?'.04 .96':'.08 .92','stroke-linecap':'round',filter:'url(#digital-route-glow)',opacity:0});
+    const end=project(route.points.at(-1)), impact=el(doc,'circle',{cx:end.x,cy:end.y,r:12,fill:'none',stroke:displayColor(route.color),'stroke-width':2,opacity:0});
     group.append(halo,tracer,impact);routes.set(route.id,{group,halo,tracer,impact});layer.append(group);
   }
   const trails=new Map();
-  for(const p of play.players){const trail=el(doc,'path',{fill:'none',stroke:p.color,'stroke-width':4,'stroke-linecap':'round',opacity:0,filter:'url(#digital-route-glow)'});layer.append(trail);trails.set(p.id,trail);}
-  const catchRing=el(doc,'circle',{r:15,fill:'none',stroke:'#ffe69c','stroke-width':2,opacity:0,filter:'url(#digital-route-glow)'});
-  const ballTrail=el(doc,'path',{fill:'none',stroke:'#ffe7b1','stroke-width':3,'stroke-linecap':'round',opacity:0,filter:'url(#digital-route-glow)'});
+  for(const p of play.players){const trail=el(doc,'path',{fill:'none',stroke:displayColor(p.color),'stroke-width':4,'stroke-linecap':'round',opacity:0,filter:'url(#digital-route-glow)'});layer.append(trail);trails.set(p.id,trail);}
+  const catchRing=el(doc,'circle',{r:15,fill:'none',stroke:'#cacdd1','stroke-width':2,opacity:0,filter:'url(#digital-route-glow)'});
+  const ballTrail=el(doc,'path',{fill:'none',stroke:'#d5d7db','stroke-width':3,'stroke-linecap':'round',opacity:0,filter:'url(#digital-route-glow)'});
   layer.append(ballTrail,catchRing);
   svg.insertBefore(layer,svg.querySelector('#pitch-players'));
   return {

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/readme/hero-concept.jpg" alt="紫金色美式橄榄球战术棋盘概念插画" width="100%">
+<img src="docs/assets/brand/playbook-studio-logo-dark.svg" alt="Playbook Studio" width="420">
 
 # Playbook Studio
 
@@ -99,10 +99,6 @@
 | 取消 / 关闭 | `Esc` | 删除选中对象 | `Delete` |
 
 ## 云端协作与成员权限
-
-<div align="center">
-<img src="docs/assets/readme/team-huddle-concept.jpg" alt="三位紫金色橄榄球小队员围着战术图讨论的概念插画" width="720">
-</div>
 
 云端版以**战术本**为共享单位：
 

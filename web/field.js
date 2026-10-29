@@ -1,4 +1,4 @@
-import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute, COLORS } from './model.js';
+import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute } from './model.js';
 export const project = p => ({ x: 18 + p.x * 9.64, y: 20 + p.y * 7.6 });
 const n = x => Number(x).toFixed(2);
 const xy = p => { const v = project(p); return `${n(v.x)},${n(v.y)}`; };
@@ -28,12 +28,17 @@ function symbol(p, color) {
   if (p.shape === 'triangle') return `<path d="M0 -20 L21 15 L-21 15 Z" fill="${color}"/>`;
   return `<circle r="17" fill="${color}"/>`;
 }
+// Built-in default colours render through the product palette; custom colours pass through unchanged.
+const DARK_DISPLAY = { '#ffdc42': '#eef0f3', '#c4a5f5': '#8fa7c3', '#ffd166': '#b7c0cc' };
+const LIGHT_DISPLAY = { '#ffdc42': '#2b2f36', '#c4a5f5': '#5d7491', '#ffd166': '#6b7380' };
+const inkOn = color => { const h = String(color).replace('#', ''); const v = h.length === 3 ? h.split('').map(c => c + c).join('') : h.slice(0, 6); const [r, g, b] = [0, 2, 4].map(i => parseInt(v.slice(i, i + 2), 16) / 255); return Number.isNaN(r) || .2126 * r + .7152 * g + .0722 * b > .55 ? '#111214' : '#ffffff'; };
+export const displayColor = (color, light = false) => (light ? LIGHT_DISPLAY : DARK_DISPLAY)[String(color).toLowerCase()] || color;
 export function fieldSVG(play, settings = {}, options = {}) {
   if (play.reference) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" class="pitch-svg reference-svg" role="img" aria-label="${e(play.title)} · Huddle.gg 原始战术图"><rect width="1000" height="560" fill="#080808"/><image href="./${e(play.reference.image)}" width="1000" height="560" preserveAspectRatio="xMidYMid meet"/></svg>`;
   const { thumbnail = false, selected = null, time = 0, drawing = null, print = false, prefix = 'pitch' } = options;
   const light = settings.fieldTheme === 'light' || print;
-  // STINGERS turf: saturated purple with mowing bands under a floodlight; chalk lines stay quiet so routes read first.
-  const bg = light ? '#f4effb' : '#21113f', band = light ? '#efe8f8' : '#25144a', line = light ? '#d1c4de' : '#3f2c63', major = light ? '#c3b3d4' : '#5a4785', ink = light ? '#6c5188' : '#e4d9f7';
+  // Graphite turf with mowing bands under a soft floodlight; chalk lines stay quiet so routes read first.
+  const bg = light ? '#f4f5f7' : '#1a1c20', band = light ? '#eceef1' : '#1e2025', line = light ? '#d3d7dd' : '#33363d', major = light ? '#bfc4cc' : '#464a53', ink = light ? '#4a4f57' : '#dfe2e7';
   const lines = [];
   for (let i = 0; i <= 10; i++) {
     const y = 20 + i * 76;
@@ -48,7 +53,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
     }
   }
   const los = project({ x: 0, y: 67 }).y;
-  lines.push(`<line x1="18" y1="${los}" x2="982" y2="${los}" stroke="${light ? '#987b1a' : '#ffdc42'}" stroke-width="1.6" stroke-dasharray="8 8" opacity=".65"/>`);
+  lines.push(`<line x1="18" y1="${los}" x2="982" y2="${los}" stroke="${light ? '#6b7079' : '#e6e8eb'}" stroke-width="1.6" stroke-dasharray="8 8" opacity=".65"/>`);
   if (!thumbnail) lines.push(`<text x="949" y="${los - 9}" fill="${ink}" font-size="12" opacity=".6" text-anchor="end" letter-spacing="1">争球线</text>`);
   const zones = play.zones.map(z => {
     const p = project(z), active = selected?.type === 'zone' && selected.id === z.id;
@@ -56,7 +61,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
   }).join('');
   let defs = '';
   const routes = play.routes.map((r, i) => {
-    const active = selected?.type === 'route' && selected.id === r.id, markerId = `${prefix}-r${i}`, stroke = light && r.color === COLORS.offense ? '#5b2f91' : light && r.color === '#ffd166' ? '#bd8610' : r.color;
+    const active = selected?.type === 'route' && selected.id === r.id, markerId = `${prefix}-r${i}`, stroke = displayColor(r.color, light);
     defs += marker(markerId, stroke);
     const d = r.kind === 'motion' ? motionPath(r) : routePath(r);
     const dash = r.kind === 'pass' ? '4 7' : r.optional ? '9 6' : '';
@@ -65,18 +70,18 @@ export function fieldSVG(play, settings = {}, options = {}) {
     return path;
   }).join('');
   if (drawing?.points?.length) {
-    defs += marker(`${prefix}-draft`, '#ffd166');
+    defs += marker(`${prefix}-draft`, '#ffffff');
   }
-  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffd166" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffd166" stroke="#24163b" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffd166" stroke="#24163b" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffd166" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
+  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffffff" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffffff" stroke="#111214" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffffff" stroke="#111214" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffffff" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
   const players = play.players.map(p => {
     const v = project(animatedPlayer(play, p, time)), active = selected?.type === 'player' && selected.id === p.id;
-    const fill = light && p.color === COLORS.offense ? '#5b2f91' : p.color;
-    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? '<circle class="selection-ring" r="25" fill="none" stroke="#ffd166" stroke-width="2"/>' : ''}<circle class="player-hit" r="27" fill="transparent"/><g class="player-body">${symbol(p, fill)}</g><text class="player-label" y="6" text-anchor="middle" font-family="'Big Shoulders Display','Arial Narrow',Arial,sans-serif" font-size="${p.label.length > 3 ? 13 : 17}" font-weight="800" fill="${light && fill === '#5b2f91' ? '#ffffff' : '#251637'}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
+    const fill = displayColor(p.color, light);
+    return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? `<circle class="selection-ring" r="25" fill="none" stroke="${light ? '#17191c' : '#ffffff'}" stroke-width="2"/>` : ''}<circle class="player-hit" r="27" fill="transparent"/><g class="player-body">${symbol(p, fill)}</g><text class="player-label" y="6" text-anchor="middle" font-family="'Big Shoulders Display','Arial Narrow',Arial,sans-serif" font-size="${p.label.length > 3 ? 13 : 17}" font-weight="800" fill="${inkOn(fill)}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
   }).join('');
-  const annotations = play.annotations.map(a => { const p = project(a), active = selected?.type === 'annotation' && selected.id === a.id; return `<g data-annotation="${e(a.id)}" role="button" aria-label="标注 ${e(a.text)}" tabindex="0"><text x="${n(p.x)}" y="${n(p.y)}" fill="${active ? '#ffd166' : ink}" font-size="18" font-weight="600" paint-order="stroke" stroke="${bg}" stroke-width="5" stroke-linejoin="round">${e(a.text)}</text></g>`; }).join('');
+  const annotations = play.annotations.map(a => { const p = project(a), active = selected?.type === 'annotation' && selected.id === a.id; return `<g data-annotation="${e(a.id)}" role="button" aria-label="标注 ${e(a.text)}" tabindex="0"><text x="${n(p.x)}" y="${n(p.y)}" fill="${active ? (light ? '#17191c' : '#ffffff') : ink}" font-size="18" font-weight="600" paint-order="stroke" stroke="${bg}" stroke-width="5" stroke-linejoin="round">${e(a.text)}</text></g>`; }).join('');
   const b = animatedBall(play, time), bv = b ? project(b) : null;
   const ball = bv ? `<g id="${prefix}-ball" transform="translate(${n(bv.x + 23)} ${n(bv.y - 11)})" pointer-events="none"><ellipse rx="9" ry="5.5" fill="#b77439" stroke="#f3d1a0" stroke-width="1.5" transform="rotate(-35)"/><path d="M-4 0 H4 M-2 -2 V2 M1 -2 V2" stroke="#ffffff" stroke-width="1" transform="rotate(-35)"/></g>` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800" class="pitch-svg" ${thumbnail || print ? 'aria-hidden="true"' : 'role="application" aria-label="战术绘图区" tabindex="0"'}><defs>${defs}</defs><rect width="1000" height="800" rx="${print ? 0 : 12}" fill="${bg}"/>${light || thumbnail ? '' : `<radialGradient id="${prefix}-flood" cx="50%" cy="58%" r="62%"><stop offset="0" stop-color="#b48cff" stop-opacity=".10"/><stop offset=".55" stop-color="#b48cff" stop-opacity="0"/><stop offset="1" stop-color="#05020c" stop-opacity=".38"/></radialGradient>`}<rect x="18" y="20" width="964" height="760" fill="none" stroke="${line}" stroke-width="2"/><g class="yard-lines">${lines.join('')}</g>${light || thumbnail ? '' : `<rect x="18" y="20" width="964" height="760" fill="url(#${prefix}-flood)" pointer-events="none"/>`}${!thumbnail && !print ? `<text x="500" y="62" text-anchor="middle" fill="${ink}" opacity=".4" font-size="12" letter-spacing="2">进攻方向 ↑</text>` : ''}${zones}${routes}${draft}<g id="${prefix}-players">${players}</g>${annotations}${ball}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800" class="pitch-svg" ${thumbnail || print ? 'aria-hidden="true"' : 'role="application" aria-label="战术绘图区" tabindex="0"'}><defs>${defs}</defs><rect width="1000" height="800" rx="${print ? 0 : 12}" fill="${bg}"/>${light || thumbnail ? '' : `<radialGradient id="${prefix}-flood" cx="50%" cy="50%" r="72%"><stop offset=".62" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".26"/></radialGradient>`}<rect x="18" y="20" width="964" height="760" fill="none" stroke="${line}" stroke-width="2"/><g class="yard-lines">${lines.join('')}</g>${light || thumbnail ? '' : `<rect x="18" y="20" width="964" height="760" fill="url(#${prefix}-flood)" pointer-events="none"/>`}${!thumbnail && !print ? `<text x="500" y="62" text-anchor="middle" fill="${ink}" opacity=".4" font-size="12" letter-spacing="2">进攻方向 ↑</text>` : ''}${zones}${routes}${draft}<g id="${prefix}-players">${players}</g>${annotations}${ball}</svg>`;
 }
 
 export function updateAnimation(svg, play, time, prefix = 'pitch') {

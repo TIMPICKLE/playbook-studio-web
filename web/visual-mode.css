@@ -3,28 +3,28 @@
 html[data-visual-mode=traditional] *,html[data-visual-mode=traditional] *::before,html[data-visual-mode=traditional] *::after{animation:none!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
 html[data-visual-mode=traditional] :is(.stadium-light,#ambient-particles,#action-particles,#liquid-metal-world,.liquid-surface-canvas,.digital-board-surface,.digital-decoration){display:none!important}
 html[data-visual-mode=traditional] :is(.player-symbol,.selection-ring){filter:none!important}
-html[data-visual-mode=traditional] .login-heading h1{background:none;color:#fff6db;-webkit-text-fill-color:currentColor}
+html[data-visual-mode=traditional] .login-heading h1{background:none;color:#ecedee;-webkit-text-fill-color:currentColor}
 .effects-panel button:disabled{opacity:.45;cursor:not-allowed}
 .effects-panel button:disabled:hover{background:transparent}
 .digital-board-surface{pointer-events:none!important;overflow:visible}
 .digital-ready .player-body{opacity:0;pointer-events:none}
-.digital-ready .player-label{fill:#fff9ec;stroke:#201427;stroke-width:1.5px;paint-order:stroke;stroke-linejoin:round}
+.digital-ready .player-label{fill:#f5f5f6;stroke:#1c1d1f;stroke-width:1.5px;paint-order:stroke;stroke-linejoin:round}
 .digital-ready .player-symbol{filter:none!important}
-.digital-ready .selection-ring{stroke:#ffe58e;stroke-width:2;filter:drop-shadow(0 0 3px #ffdc42)}
-html[data-visual-mode=digital] #field .route-stroke{filter:drop-shadow(0 1px 1px #090612aa)}
+.digital-ready .selection-ring{stroke:#c3c6ca;stroke-width:2;filter:drop-shadow(0 0 3px #9a9fa7)}
+html[data-visual-mode=digital] #field .route-stroke{filter:drop-shadow(0 1px 1px #0b0c0daa)}
 html[data-visual-mode=digital] #field.is-rehearsal .route-stroke{opacity:.65}
-html[data-visual-mode=digital] #pitch-ball{filter:drop-shadow(0 2px 2px #090612aa)}
-html[data-digital-board=loading] .field-tag::after{content:'材质加载中';font-size:12px;color:#d9cce9;margin-left:8px}
-@media print{.digital-board-surface,.digital-decoration{display:none!important}.digital-ready .player-body{opacity:1}.digital-ready .player-label{stroke:none;fill:#251637}}
+html[data-visual-mode=digital] #pitch-ball{filter:drop-shadow(0 2px 2px #0b0c0daa)}
+html[data-digital-board=loading] .field-tag::after{content:'材质加载中';font-size:12px;color:#d9dadc;margin-left:8px}
+@media print{.digital-board-surface,.digital-decoration{display:none!important}.digital-ready .player-body{opacity:1}.digital-ready .player-label{stroke:none;fill:#252628}}
 
 /* Perspective stage: the WebGL scene and projected SVG input share one camera. */
 @media screen {
   html[data-visual-mode=digital] .workspace:not(.reference-play) .field-wrap {
-    isolation:isolate;background:radial-gradient(ellipse at 50% 35%,#352c44,#18131f 75%);
-    border:1px solid #b9a1ce30;box-shadow:inset 0 1px #ede3ff12,0 16px 36px #0d071526;
+    isolation:isolate;background:radial-gradient(ellipse at 50% 35%,#373839,#18191a 75%);
+    border:1px solid #b5b7ba30;box-shadow:inset 0 1px #f0f1f212,0 16px 36px #0d0e0f26;
   }
   html[data-visual-mode=digital] .workspace:not(.reference-play) .pitch-viewport {padding:12px;box-sizing:border-box}
-  .pitch-stage.is-perspective > .pitch-svg {transform:var(--board-projection);transform-origin:0 0;transform-box:border-box;overflow:visible;box-shadow:0 7px #493b54,0 14px #241b2e,0 22px 25px #09050e80;border-radius:12px;background:#24163b}
+  .pitch-stage.is-perspective > .pitch-svg {transform:var(--board-projection);transform-origin:0 0;transform-box:border-box;overflow:visible;box-shadow:0 7px #464749,0 14px #232426,0 22px 25px #09090a80;border-radius:12px;background:#26282b}
   .pitch-stage.is-three > .pitch-svg {box-shadow:none;background:none}
   .pitch-stage.is-three > .pitch-svg.digital-ready > :not(defs):not(.draft-layer):not(.point-handle) {opacity:0}
   .pitch-stage.is-three > .pitch-svg {z-index:2}
@@ -32,6 +32,6 @@ html[data-digital-board=loading] .field-tag::after{content:'材质加载中';fon
   .pitch-stage.is-fallback .player-symbol {filter:none!important}
   .pitch-stage .digital-scene-canvas,.pitch-stage .digital-token-overlay {position:absolute;inset:0;width:100%;height:100%;pointer-events:none!important;z-index:1}
   .pitch-stage.is-perspective .player-label {transform:none}
-  html[data-visual-mode=digital] #field .route-stroke {filter:drop-shadow(0 1px .5px #08051080)}
+  html[data-visual-mode=digital] #field .route-stroke {filter:drop-shadow(0 1px .5px #0a0a0b80)}
 }
 @media print{.digital-scene-canvas,.digital-token-overlay{display:none!important}.pitch-stage>.pitch-svg{transform:none!important}}

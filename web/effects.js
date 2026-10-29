@@ -18,7 +18,7 @@ function modeNote() {
 }
 export function effectsControl() {
   const selected = visualMode(), restricted = deviceIsTraditional();
-  return `<details class="effects-menu"><summary aria-label="视觉效果设置"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg><span>视觉效果</span></summary><div class="effects-panel"><strong>战术板模式</strong><div role="group" aria-label="战术板模式">${[['traditional','传统模式','平面棋子 · 关闭装饰动效'],['digital','数字化模式','玻璃金属棋子 · 路线光效']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}" ${restricted && value==='digital'?'disabled aria-describedby="visual-mode-note"':''}><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note" id="visual-mode-note">${modeNote()}</p></div></details>`;
+  return `<details class="effects-menu"><summary aria-label="显示模式设置" title="切换平面编辑或立体演示"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg><span>显示模式</span></summary><div class="effects-panel"><strong>战术板模式</strong><div role="group" aria-label="战术板模式">${[['traditional','传统模式','平面棋子 · 编辑最清晰'],['digital','数字化模式','立体棋子 · 适合投屏讲解']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}" ${restricted && value==='digital'?'disabled aria-describedby="visual-mode-note"':''}><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note" id="visual-mode-note">${modeNote()}</p></div></details>`;
 }
 export function particleOptions(compact = false) {
   return {
@@ -27,10 +27,10 @@ export function particleOptions(compact = false) {
     interactivity: { detectsOn: 'window', events: { onHover: { enable: !compact, mode: 'repulse' }, resize: { enable: true } }, modes: { repulse: { distance: 115, duration: .8, speed: .35 } } },
     particles: {
       number: { value: compact ? 42 : 90, density: { enable: false } },
-      color: { value: ['#c2a1f4', '#ffdc42', '#9a70dc'] },
+      color: { value: ['#c7cace', '#9a9fa7', '#a0a5ac'] },
       shape: { type: 'circle' }, size: { value: { min: 1, max: compact ? 2.2 : 3.4 } },
       opacity: { value: { min: .16, max: .7 }, animation: { enable: true, speed: .45, sync: false } },
-      links: { enable: !compact, distance: 125, color: '#b68be9', opacity: .13, width: .6 },
+      links: { enable: !compact, distance: 125, color: '#b5b9bf', opacity: .13, width: .6 },
       move: { enable: true, direction: 'top-right', speed: { min: .22, max: .75 }, random: true, straight: false, outModes: { default: 'out' } }
     }
   };
