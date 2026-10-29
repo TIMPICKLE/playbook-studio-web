@@ -4,49 +4,47 @@
 
 # Playbook Studio
 
-**把脑海里的战术，变成球队看得懂、练得起来的一张图。**
+中文美式橄榄球战术工作台，支持布阵、路线绘制、战术演练、战术本管理和团队共享。
 
-一个中文美式橄榄球战术工作台：布阵、画路线、播放演练、整理战术本，与教练和球员共享。
-
-[进入云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) · [无需登录，先试用本地演示](https://timpickle.github.io/playbook-studio-web/local.html) · [查看使用指南](#从一张战术开始) · [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md) · [球员 AI 对局分析路线图（规划）](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
+[云端共享版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/index.html) · [本地演示（无需登录）](https://timpickle.github.io/playbook-studio-web/local.html) · [使用指南](#快速开始) · [多球队路线图](docs/MULTI_TENANCY_ROADMAP.md) · [球员 AI 对局分析路线图（规划）](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
 
 </div>
 
 ---
 
-## 先看一眼，你可以做什么
+## 主要功能
 
-| 从想法到比赛 | 在 Playbook Studio 里 |
+| 功能 | 说明 |
 |---|---|
 | **设计战术** | 添加进攻和防守球员、拖动站位；绘制跑动、阻挡、开球前移动、传球线、覆盖区域和文字 |
-| **把路线动起来** | 播放、暂停、循环和拖动时间轴；调整路线启动时间、跑动时长和传球时间 |
-| **借鉴 Madden 战术** | 浏览 Eagles / Ravens 战术，筛选、预览，再拖入或点击加入自己的战术本 |
-| **整理球队战术** | 按进攻、防守、特勤管理；搜索、收藏、复制、镜像、记录教练笔记 |
-| **和球队一起使用** | 云端保存与成员权限，让教练编辑、球员以只读方式查看和演练 |
-| **带去训练** | 导出 PNG、SVG 或 JSON，打印战术本、腕带卡和 Call Sheet |
+| **战术演练** | 播放、暂停、循环和拖动时间轴；调整路线启动时间、跑动时长和传球时间 |
+| **Madden 战术导入** | 浏览 Eagles / Ravens 战术，筛选、预览，再拖入或点击加入自己的战术本 |
+| **战术管理** | 按进攻、防守、特勤管理；搜索、收藏、复制、镜像、记录教练笔记 |
+| **团队协作** | 云端保存与成员权限，让教练编辑、球员以只读方式查看和演练 |
+| **导出与打印** | 导出 PNG、SVG 或 JSON，打印战术本、腕带卡和 Call Sheet |
 
-## 战术编辑：打开就能开始画
+## 战术编辑
 
 ![Playbook Studio 战术编辑界面：左侧战术列表、中间球场与绘图工具、右侧战术设置](docs/assets/readme/editor.jpg)
 
 *左侧选择战术，中间布阵与画线，右侧调整阵型、战术信息和教练笔记。*
 
-### 登录后：编辑或分析
+### 编辑与 AI 分析
 
 登录后选择「编辑战术本」或「AI分析战局」。分析时从同一本战术本中选择一攻一守，可选观察位置和覆盖类型；选择自己的模型服务，填写模型名称和 API Key 后发起分析。
 
 模型需支持工具调用，一次分析最多 4 次模型请求。API Key 仅保留在当前页面内存，刷新后需重新填写；所选战术数据会发送到用户选择的服务商并可能产生费用。分析用于战术参考，不预测真实比赛结果。支持的服务与技术细节见[实现设计](docs/AI_MATCHUP_IMPLEMENTATION.md)。
 
-### 从一张战术开始
+### 快速开始
 
 1. 打开[本地演示](https://timpickle.github.io/playbook-studio-web/local.html)，选择内置示例，或点击左侧 **「新建战术」**。
 2. 拖动球员调整站位；也可以在 **「添加对象」** 中一次加入完整的 4–3 防守阵型。
 3. 选中球员，选择 **「跑动」** 或按 `R`，点击球场添加路线点，按 `Enter` 或点击 **「完成」**。
 4. 点击 **「战术演练」** 或按空格播放；需要调整时返回布阵，最后导出或打印。
 
-不想从零开始？项目内置 Mesh、Four Verticals、Flood、Slants、Inside Zone、Cover 3、Nickel Blitz 和 Field Goal 八个教学示例。
+内置 Mesh、Four Verticals、Flood、Slants、Inside Zone、Cover 3、Nickel Blitz 和 Field Goal 八个教学示例。
 
-## Madden 战术库：先找到，再变成自己的战术
+## Madden 战术库
 
 ![Madden 战术库界面：球队切换、筛选、可编辑战术卡片和加入按钮](docs/assets/readme/madden-library.jpg)
 
@@ -55,13 +53,13 @@
 - **两支球队**：Eagles 和 Ravens，按球队、阵型大类、具体阵型及英文名称筛选。
 - **437 个可编辑战术条目**：可移动球员、编辑可见路线、镜像和演练，也可打开原图对照。导入时会整理锋线间距；之前保存的可编辑战术可使用「整理锋线间距」，并可撤销。
 - **其余 771 个条目保留原图**：可收藏、记笔记、导出和打印，但不能直接移动图片里的球员或播放原版路线。
-- **导入有反馈**：支持去重；加入后可在库内查看结果或撤销最近一次符合条件的加入。
+- **导入与撤销**：支持去重；加入后可在库内查看结果或撤销最近一次符合条件的加入。
 
 > **识别边界：** 可编辑版本依据图片中的可见站位和路线重建。图外路线、真实时序、接球目标和比赛决策不能仅凭图片确认；演练使用可调整的默认时序，不代表原版比赛模拟。
 
 当前目录快照为 Madden 27：Eagles 620 个、Ravens 588 个，共 **1,208 个球队战术条目**和 **1,121 张去重原图**。[目录数据](web/data/huddle-catalog.json) · [数据说明](docs/MADDEN_BATCH.md) · [识别记录](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)。
 
-## 平面战术板，或立体数字化战术板
+## 传统与数字化模式
 
 ![桌面数字化模式下的透视战术板、立体棋子与路线](docs/assets/readme/digital-fallback.jpg)
 
@@ -100,11 +98,10 @@
 | 撤销 | `Ctrl / ⌘ + Z` | 重做 | `Ctrl / ⌘ + Shift + Z` |
 | 取消 / 关闭 | `Esc` | 删除选中对象 | `Delete` |
 
-## 给教练，也给每一位球员
+## 云端协作与成员权限
 
 <div align="center">
 <img src="docs/assets/readme/team-huddle-concept.jpg" alt="三位紫金色橄榄球小队员围着战术图讨论的概念插画" width="720">
-<br><sub>一张战术图，可以成为球队共同的语言。</sub>
 </div>
 
 云端版以**战术本**为共享单位：
@@ -118,7 +115,7 @@
 
 > **多球队多租户仍在规划中。** 当前已有战术本级协作与隔离，独立的球队层级、球队主账号及后续独立服务器部署尚未实现。详细计划见 [多球队多租户路线图](docs/MULTI_TENANCY_ROADMAP.md)。
 
-## 从哪里进入？
+## 访问入口
 
 | 入口 | 适合谁 | 数据保存在哪里 |
 |---|---|---|
@@ -187,8 +184,6 @@ npm run dev
 ---
 
 <div align="center">
-
-**画清路线，读懂比赛。**
 
 源代码采用 [MIT License](LICENSE)；官方运行时模板及第三方素材的许可证另行保留。
 
