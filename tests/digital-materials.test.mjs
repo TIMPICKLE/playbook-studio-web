@@ -100,7 +100,7 @@ test('same-play full rerenders retain the ready frame and ignore cancelled image
     const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
     f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();draw();
     const texture=f.fieldTexture(),completeCanvas=texture.image,version=texture.version,canvas=f.renderer.canvas;
-    const oldPending=f.images.shift(),oldCompletion=oldPending.onload;
+    const oldPending=f.images.shift(),oldCompletion=oldPending.onload,oldFailure=oldPending.onerror;
     f.doc.body.innerHTML=`<div class="pitch-stage">${fieldSVG(f.play,f.settings)}</div>`;
     const next=f.doc.querySelector('svg'),nextStage=f.doc.querySelector('.pitch-stage');f.engine.mount(next,f.play,f.settings);
     assert.equal(next.classList.contains('digital-ready'),true,'same-play remount transfers readiness synchronously');
@@ -110,11 +110,12 @@ test('same-play full rerenders retain the ready frame and ignore cancelled image
     draw();assert.equal(texture.image,completeCanvas,'frames while decoding retain yard lines and routes');
     const latest=f.images.shift();latest.onload();const replacementCanvas=texture.image;assert.notEqual(replacementCanvas,completeCanvas);
     oldCompletion();assert.equal(texture.image,replacementCanvas,'a cancelled older decode cannot overwrite the new route image');
+    oldFailure();assert.equal(f.engine.status,'ready','a cancelled older decode cannot invalidate the newer field');
     assert.equal(f.contexts.get(replacementCanvas).image,latest);assert.equal(next.classList.contains('digital-ready'),true);
   }finally{await f.close();}
 });
 
-test('fast texture edits coalesce to the latest SVG and decode failures preserve the complete board',async()=>{
+test('fast texture edits coalesce to the latest SVG without clearing the complete board',async()=>{
   const f=await sceneFixture();
   try{
     const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
@@ -124,11 +125,37 @@ test('fast texture edits coalesce to the latest SVG and decode failures preserve
     f.svg.setAttribute('data-edit','latest');f.engine.refreshBackground();assert.equal(f.images.length,0,'only one decode is in flight');
     first.onload();assert.equal(f.images.length,1,'the newest edit begins decoding without waiting for another animation frame');
     const latest=f.images.shift();assert.match(await (await fetch(latest.url)).text(),/data-edit="latest"/);latest.onload();
-    const texture=f.fieldTexture(),completeCanvas=texture.image,version=texture.version;
-    f.engine.refreshBackground();f.images.shift().onerror();assert.equal(texture.image,completeCanvas);assert.equal(texture.version,version);
-    f.engine.refreshBackground();const broken=f.images.shift();broken.failRasterize=true;broken.onload();
-    assert.equal(texture.image,completeCanvas);assert.equal(texture.version,version,'failed rasterization never publishes a cleared staging canvas');
     assert.equal(f.svg.classList.contains('digital-ready'),true);
+  }finally{await f.close();}
+});
+
+for(const failure of ['decode','rasterization'])test(`same-play ${failure} failure reveals current SVG, blocks stale capture and recovers after a successful refresh`,async()=>{
+  const f=await sceneFixture();f.win.console.warn=()=>{};
+  try{
+    const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();draw();
+    while(f.images.length)f.images.shift().onload?.();
+    const texture=f.fieldTexture(),completeCanvas=texture.image,version=texture.version;
+    const route=f.play.routes[0];route.color='#ff0088';
+    const next=f.doc.createElement('div');next.innerHTML=fieldSVG(f.play,f.settings);f.svg.innerHTML=next.firstElementChild.innerHTML;
+    f.engine.refreshBackground();const broken=f.images.shift();
+    assert.equal(f.svg.classList.contains('digital-ready'),true,'a pending replacement keeps the last complete frame');
+    if(failure==='decode')broken.onerror();else{broken.failRasterize=true;broken.onload();}
+    assert.equal(texture.image,completeCanvas);assert.equal(texture.version,version,'failed work must not publish the cleared staging canvas');
+    assert.equal(f.svg.classList.contains('digital-ready'),false,'the current SVG must be visible after an explicit failure');
+    assert.ok(f.svg.querySelector(`[data-route="${route.id}"]`).outerHTML.includes('#ff0088'));
+    assert.equal(f.renderer.canvas.style.visibility,'hidden');assert.equal(f.engine.status,'unavailable');
+    assert.equal(f.engine.capture(),null,'old routes cannot be exported as the current 3D scene');
+    assert.equal(f.engine.pick(100,100),null,'hidden raised pieces must not intercept SVG editing');
+    for(let i=1;i<=3;i++)f.engine.draw({play:f.play,settings:f.settings,time:i,materialTime:i,animated:true});
+    assert.equal(f.images.length,0,'animation ticks do not repeatedly retry a failed texture');
+    assert.equal(f.engine.status,'unavailable');assert.equal(f.engine.capture(),null);
+    f.engine.refreshBackground();const recovery=f.images.shift();
+    assert.match(await (await fetch(recovery.url)).text(),/#ff0088/);recovery.onload();
+    assert.equal(f.engine.capture(),null,'decoded recovery must be presented before capture');
+    draw();assert.equal(f.engine.status,'ready');assert.equal(f.svg.classList.contains('digital-ready'),true);
+    assert.equal(f.renderer.canvas.style.visibility,'visible');assert.notEqual(texture.image,completeCanvas);
+    assert.equal(f.engine.capture(),'data:image/png;base64,c2NlbmU=');
   }finally{await f.close();}
 });
 

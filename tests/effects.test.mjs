@@ -44,8 +44,8 @@ test('visual preferences stay local and obsolete asynchronous particle startups 
     });
     await t.test('turning off during startup cancels the stale instance and skips queued intermediate choices',async()=>{
       win.localStorage.setItem('playbook-visual-mode','digital');fx.initEffects();await settle();assert.equal(typeof resolveFirst,'function');
-      const lite=fx.setEffectsMode('digital');await fx.setEffectsMode('traditional');
-      resolveFirst();await lite;await settle();
+      const repeated=fx.setEffectsMode('digital');await fx.setEffectsMode('traditional');
+      resolveFirst();await repeated;await settle();
       assert.equal(live.size,0);assert.equal(win.document.querySelectorAll('canvas').length,0);
       assert.equal(win.document.documentElement.dataset.effects,'off');
       assert.equal(win.localStorage.getItem('playbook-shared-sentinel'),'unchanged');

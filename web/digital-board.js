@@ -33,9 +33,15 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async()=>{
   }
   function paint(state,animated=doc.documentElement.dataset.effects!=='off'){
     const view={...state,materialTime,animated,hoveredId,pointer};
-    try{feedback?.update(view);(engine||fallback)?.draw(view);}
+    feedback?.update(view);
+    if(!engine){fallback?.draw(view);return;}
+    try{engine.draw(view);}
     catch(error){failed=true;engine?.destroy();engine=null;engineSvg=null;ensureFallback(state);fallback.draw(view);doc.documentElement.dataset.digitalBoard='unavailable';notify('WebGL 不可用，已切换到立体棋子兼容视图。');win.console.warn('Digital board stopped:',error);}
-    if(engine)doc.documentElement.dataset.digitalBoard='ready';
+    if(engine){
+      const status=engine.status;
+      if(status==='unavailable'&&doc.documentElement.dataset.digitalBoard!==status)notify('战术场地更新失败，已显示最新平面图。可继续编辑，或切换模式重试。');
+      doc.documentElement.dataset.digitalBoard=status;
+    }
   }
   function mount(current,state){feedback?.destroy();svg=current;projectStage();feedback=createRouteFeedback(svg,state.play);feedback.update({...state,materialTime,animated:doc.documentElement.dataset.effects!=='off'});if(engine){fallback?.destroy();fallback=null;}else if(fallback)fallback.mount(svg,state.play,state.settings);else ensureFallback(state);engine?.mount(svg,state.play,state.settings);engineSvg=engine?svg:null;paint(state);}
   async function sync({retry=false,contentChanged=false}={}){

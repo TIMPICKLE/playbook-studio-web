@@ -55,8 +55,9 @@ export function createDigitalMaterials(doc=document) {
   const white=new THREE.MeshStandardMaterial({color:'#eee7d9',roughness:.7});
   for(const x of [-5.3,5.3]){const band=new THREE.Mesh(new THREE.TorusGeometry(4.3,.55,8,32),white);band.rotation.y=Math.PI/2;band.position.x=x;ball.add(band);}board.add(ball);
   const raycaster=new THREE.Raycaster(),pointerNdc=new THREE.Vector2();
-  let svg=null,stage=null,disposed=false,lost=false,snapshotGeneration=0,pendingImage=null,backgroundDirty=false,lastTextureTime=-1,lastTextureMaterial=-1,lastTheme=null,mountedPlayId=null,texturePlayId=null,presentedPlayId=null;
+  let svg=null,stage=null,disposed=false,lost=false,snapshotGeneration=0,pendingImage=null,backgroundDirty=false,backgroundError=null,lastTextureTime=-1,lastTextureMaterial=-1,lastTheme=null,mountedPlayId=null,texturePlayId=null,presentedPlayId=null;
   const lose=event=>{event.preventDefault();lost=true;};canvas.addEventListener('webglcontextlost',lose);
+  const ready=()=>!disposed&&!lost&&!!svg?.classList.contains('digital-ready');
 
   function geometries(shape){if(!sharedGeometry.has(shape))sharedGeometry.set(shape,createPieceGeometries(shape));return sharedGeometry.get(shape);}
   function labelTexture(label,dark){
@@ -118,6 +119,14 @@ export function createDigitalMaterials(doc=document) {
       // when animation is paused or the next frame has not arrived yet.
       if(backgroundDirty&&!disposed)refreshBackground();
     };
+    const fail=error=>{
+      if(disposed||pendingImage!==job||generation!==snapshotGeneration)return;
+      // Preserve the complete texture for recovery, but never present/export old
+      // routes as the current edit after decoding has explicitly failed.
+      backgroundError=error;texturePlayId=null;
+      svg.classList.remove('digital-ready');canvas.style.visibility='hidden';
+      win.console.warn('3D field texture update failed:',error);
+    };
     image.onload=()=>{
       try{
         if(!disposed&&pendingImage===job&&generation===snapshotGeneration){
@@ -125,12 +134,12 @@ export function createDigitalMaterials(doc=document) {
           // GPU texture untouched; a complete image is swapped in atomically.
           stagingContext.clearRect(0,0,2000,1600);stagingContext.drawImage(image,0,0,2000,1600);
           [textureCanvas,stagingCanvas]=[stagingCanvas,textureCanvas];[textureContext,stagingContext]=[stagingContext,textureContext];
-          fieldTexture.image=textureCanvas;fieldTexture.needsUpdate=true;texturePlayId=playId;
+          fieldTexture.image=textureCanvas;fieldTexture.needsUpdate=true;texturePlayId=playId;backgroundError=null;
         }
-      }catch{/* Keep the last complete field when an image cannot be rasterized. */}
+      }catch(error){fail(error);}
       finally{finish();}
     };
-    image.onerror=finish;image.src=url;
+    image.onerror=()=>{fail(new Error('The 3D field image could not be decoded'));finish();};image.src=url;
   }
   function draw({play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true}){
     if(disposed||lost)throw new Error('The 3D context is unavailable');
@@ -148,16 +157,18 @@ export function createDigitalMaterials(doc=document) {
     }
     const ballPoint=animatedBall(play,time);ball.visible=!!ballPoint;
     if(ballPoint){const at=project(ballPoint),flight=play.ball?.receiverId&&time>=play.ball.passAt&&time<=play.ball.arriveAt,progress=flight?(time-play.ball.passAt)/Math.max(.01,play.ball.arriveAt-play.ball.passAt):0;ball.position.set(at.x+14,800-at.y-8,flight?24+Math.sin(progress*Math.PI)*55:23);ball.rotation.set(0,flight?progress*Math.PI*7:0,-.35);}
-    if(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animated&&materialTime-lastTextureMaterial>.12){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
+    // A failed background waits for an explicit edit/remount/mode retry instead
+    // of starting another failed decode on every animation tick.
+    if(!backgroundError&&(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animated&&materialTime-lastTextureMaterial>.12)){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
     // Refraction samples the actual 3D field and opaque chess-piece silhouettes.
     for(const item of players.values()){item.head.visible=false;item.label.visible=false;}
     renderer.setRenderTarget(target);renderer.clear();renderer.render(scene,camera);
     for(const item of players.values()){item.head.visible=true;item.label.visible=true;}
     renderer.setRenderTarget(null);renderer.clear();renderer.render(scene,camera);
-    presentedPlayId=play.id;svg?.classList.toggle('digital-ready',texturePlayId===play.id);stage?.classList.add('is-three');canvas.dataset.renderer='three-perspective';
+    presentedPlayId=play.id;svg?.classList.toggle('digital-ready',texturePlayId===play.id);canvas.style.visibility=ready()?'visible':'hidden';stage?.classList.add('is-three');canvas.dataset.renderer='three-perspective';
   }
-  return {fullScene:true,mount,refreshBackground,draw,capture:()=>canvas.toDataURL('image/png'),
-    pick(clientX,clientY){if(!stage||disposed||lost)return null;const rect=stage.getBoundingClientRect();if(!rect.width||!rect.height)return null;pointerNdc.set((clientX-rect.left)/rect.width*2-1,1-(clientY-rect.top)/rect.height*2);camera.updateMatrixWorld();scene.updateMatrixWorld(true);raycaster.setFromCamera(pointerNdc,camera);const hit=raycaster.intersectObjects(pickMeshes,false)[0];return hit?{type:'player',id:hit.object.userData.playerId}:null;},
+  return {fullScene:true,mount,refreshBackground,draw,get status(){return backgroundError?'unavailable':ready()?'ready':'loading';},capture:()=>ready()?canvas.toDataURL('image/png'):null,
+    pick(clientX,clientY){if(!ready())return null;const rect=stage.getBoundingClientRect();if(!rect.width||!rect.height)return null;pointerNdc.set((clientX-rect.left)/rect.width*2-1,1-(clientY-rect.top)/rect.height*2);camera.updateMatrixWorld();scene.updateMatrixWorld(true);raycaster.setFromCamera(pointerNdc,camera);const hit=raycaster.intersectObjects(pickMeshes,false)[0];return hit?{type:'player',id:hit.object.userData.playerId}:null;},
     destroy(){if(disposed)return;disposed=true;snapshotGeneration++;svg?.classList.remove('digital-ready');stage?.classList.remove('is-three');canvas.remove();canvas.removeEventListener('webglcontextlost',lose);if(pendingImage){pendingImage.image.onload=null;pendingImage.image.onerror=null;URL.revokeObjectURL(pendingImage.url);pendingImage=null;}
       for(const item of players.values())removePlayer(item);players.clear();for(const pieces of sharedGeometry.values())for(const g of Object.values(pieces))g.dispose();sharedGeometry.clear();
       for(const mesh of [surface,plinth,frame,ground]){mesh.geometry.dispose();mesh.material.dispose();}ball.traverse(n=>n.geometry?.dispose());ballLeather.dispose();white.dispose();fieldTexture.dispose();shadowTexture.dispose();target.dispose();environmentTarget.dispose();key.shadow.map?.dispose();renderer.dispose();renderer.forceContextLoss();

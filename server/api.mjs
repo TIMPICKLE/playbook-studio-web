@@ -51,7 +51,6 @@ export async function handleApi(request, env, user) {
     if (path[0] === 'session' && request.method === 'GET') return json({ user: user ? { id: user.userId, email: user.email, name: user.displayName, username: user.username, authMode: user.authMode } : null });
     if (!user?.userId || !user.email) fail(401, '请先登录');
     if (!env.DB) fail(503, '云端数据库暂不可用');
-    if (!['GET', 'HEAD'].includes(request.method) && request.headers.get('origin') !== new URL(request.url).origin) fail(403, '请求来源不正确');
     const db = env.DB, now = timestamp();
     await db.prepare('INSERT INTO users(id,email,name,created_at) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET email=excluded.email,name=excluded.name').bind(user.userId, normalizeEmail(user.email), user.displayName || user.email, now).run();
     if (path[0] === 'workspaces' && path.length === 1) {

@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { clone, encodeWorkspace, starterWorkspace, STORAGE_KEY } from '../web/model.js';
 import { makeMaddenPlay } from '../web/madden-model.js';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
+import { SharedWorkspace } from '../web/cloud.js';
 
 test('cloud editor restricts readers, saves editor changes, imports legacy JSON and manages owner invitations', async t => {
   const win = new Window({ url: 'https://playbook.test/editor/index.html', width: 1440, height: 1000 });
@@ -76,4 +77,42 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
       const invite = calls.find(c => c.path.endsWith('/invites')); assert.equal(invite.body.role, 'viewer'); assert.equal(invite.body.email, 'assistant@example.com'); assert.ok(q('[aria-label="邀请链接"]'));
     });
   } finally { await win.happyDOM.abort(); for (const name of names) { if (previous[name]) Object.defineProperty(globalThis, name, previous[name]); else delete globalThis[name]; } }
+});
+
+test('sync details distinguish in-memory edits, persisted drafts and render failures', async () => {
+  const dialogs = [], shared = new SharedWorkspace({ openModal: (...args) => dialogs.push(args), toast: () => assert.fail('Expected an actionable dialog') });
+  shared.sync = { pending: starterWorkspace(), draftSaved: false, viewError: null, conflict: null };
+  shared.status = '网络离线 · 更改仅保留在当前页面';
+  await shared.handleAction({ dataset: { cloudAction: 'sync-status' } });
+  assert.match(dialogs.at(-1)[1], /更改仅保留在当前页面，请先下载备份/); assert.doesNotMatch(dialogs.at(-1)[1], /草稿已保留/);
+  shared.sync.draftSaved = true;
+  await shared.handleAction({ dataset: { cloudAction: 'sync-status' } }); assert.match(dialogs.at(-1)[1], /本机草稿已保留/);
+  shared.sync.viewError = new Error('Failed <renderer>');
+  await shared.handleAction({ dataset: { cloudAction: 'sync-status' } });
+  assert.equal(dialogs.at(-1)[0], '战术界面更新失败'); assert.match(dialogs.at(-1)[1], /Failed &lt;renderer&gt;/);
+  assert.match(dialogs.at(-1)[2], /reload-cloud/); assert.match(dialogs.at(-1)[2], /export-conflict/);
+  await assert.rejects(shared.handleAction({ dataset: { cloudAction: 'save-now' } }), error => error === shared.sync.viewError);
+});
+
+test('a workspace rendering hook failure is surfaced during startup instead of reporting a merge or successful load', async t => {
+  const win = new Window({ url: 'https://playbook.test/editor/index.html' });
+  win.document.body.innerHTML = '<div id="cloud-root"></div>';
+  const names = ['window', 'document', 'localStorage', 'location', 'history'];
+  const previous = Object.fromEntries(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
+  for (const name of names) Object.defineProperty(globalThis, name, { configurable: true, value: win[name] });
+  const failure = new Error('Editor render failed'), statuses = [], logged = t.mock.method(console, 'error', () => {});
+  const record = { id: 'book', title: 'Team', role: 'editor', revision: 1, data: starterWorkspace() };
+  t.mock.method(globalThis, 'fetch', async path => Response.json(path === '/api/session' ? { user: { id: 'coach' } } : path === '/api/workspaces' ? { workspaces: [record] } : record));
+  const shared = new SharedWorkspace({ showEditor: () => {}, onStatus: value => statuses.push(value), onData: () => { throw failure; } });
+  shared.renderBar = () => {};
+  try {
+    await shared.init();
+    assert.equal(shared.sync.viewError, failure); assert.equal(logged.mock.calls.at(-1).arguments[1], failure);
+    assert.match(win.document.querySelector('.cloud-gate').textContent, /无法加载团队战术.*Editor render failed/);
+    assert.match(statuses.at(-1), /界面更新失败/); assert.doesNotMatch(statuses.at(-1), /已同步|网络离线|人工合并/);
+    assert.equal(shared.pollTimer, null);
+  } finally {
+    shared.sync?.dispose(); await win.happyDOM.abort();
+    for (const name of names) { if (previous[name]) Object.defineProperty(globalThis, name, previous[name]); else delete globalThis[name]; }
+  }
 });
