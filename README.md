@@ -277,8 +277,14 @@ npm run build       # 准备编辑器资源并构建 Worker
 
 ## 赞助者
 
-欢迎个人、团队和企业支持 Playbook Studio 的持续开发。下方为赞助者预留展示位，期待你的加入。
+欢迎个人、团队和企业支持 Playbook Studio 的持续开发。**[提交赞助合作意向](https://github.com/TIMPICKLE/playbook-studio-web/issues/new?template=sponsorship.yml)**，由维护者 [@TIMPICKLE](https://github.com/TIMPICKLE) 在 Issue 中回复。
 
-![三个赞助者预留展示位，等待加入](docs/assets/brand/sponsor-placeholders.svg)
+目前未公布经确认可用的 GitHub Sponsors 或其他收款渠道；此入口仅用于洽谈合作，不接受付款。请勿在公开 Issue 中提交支付信息、证件、合同或其他敏感资料。
 
-**有意赞助？[通过 Issue 联系维护者](https://github.com/TIMPICKLE/playbook-studio-web/issues)。**
+1. 提交支持方式、合作目标和期望展示方式；金额与私人联系方式可暂不提供。
+2. 维护者回复后，双方先确认适合的私下联系渠道，再沟通金额、周期和具体条款。任何付款均需另行确认正式渠道。
+3. 合作确认且支持实际落实后，经赞助者同意，再通过 PR 更新中英文 README 的展示信息；提交意向不会自动获得展示位。
+
+![三个赞助者预留展示位，并非已有赞助者](docs/assets/brand/sponsor-placeholders.svg)
+
+**展示规则：**可选择署名、名称 / Logo 与一个官网链接，或保持匿名；内容、顺序及展示期限由双方事先确认，不按未经约定的金额排名。展示不代表产品背书，也不附带代码合并、功能排期或独家权益承诺。名称、链接或期限变更以及退出展示，可在原 Issue 中联系维护者。
