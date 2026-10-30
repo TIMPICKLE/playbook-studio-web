@@ -185,3 +185,12 @@ test('global tracing settings fail closed before model calls or graph execution'
   await assert.rejects(runMatchupAgent(matchup,{model:config},{LANGCHAIN_TRACING:'false'},new AbortController().signal),/关闭服务端的 LangSmith 跟踪/);
   assert.equal(calls,0);
 });
+
+
+test('English locale instructs the model to return English while preserving JSON keys', async t => {
+  const matchup=fixture(), requests=[];
+  mock(t,async(_url,options)=>{ const body=JSON.parse(options.body); requests.push(body); return requests.length === 1 ? response(toolMessage(toolCall('ctx','get_matchup_context'))) : response({content:result(matchup.evidence[0].id)}); });
+  await runMatchupAgent(matchup,{model:config,locale:'en'}, {},new AbortController().signal);
+  assert.match(requests[0].messages[0].content,/所有面向用户的文本值必须使用英文/);
+  assert.match(requests[0].messages[0].content,/JSON 键名和证据 ID 保持原样/);
+});

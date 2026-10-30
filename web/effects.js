@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { initLiquidMaterials } from './liquid-materials.js';
 import { VISUAL_MODE_KEY as KEY, deviceIsTraditional, resolveVisualMode } from './visual-mode.js';
 const modes = new Set(['traditional', 'digital']);
@@ -12,13 +13,13 @@ export function effectiveMode(value = visualMode(), reduced = !!mq('(prefers-red
   return value === 'digital' && !reduced && !deviceIsTraditional() ? 'full' : 'off';
 }
 function modeNote() {
-  if (deviceIsTraditional()) return '手机和 iPad 固定使用传统模式，战术演练仍可正常播放。';
-  if (visualMode() === 'digital' && effectiveMode() === 'off') return '已跟随系统减少动态效果；保留立体材质和战术演练。';
-  return '只影响这台设备，不修改共享战术。';
+  if (deviceIsTraditional()) return t("controls.phones_and_ipads_use_traditional_mode_rehearsal_remains_");
+  if (visualMode() === 'digital' && effectiveMode() === 'off') return t("controls.reduced_motion_is_enabled_3d_materials_and_rehearsal_rem");
+  return t("controls.only_affects_this_device_shared_plays_are_unchanged");
 }
 export function effectsControl() {
   const selected = visualMode(), restricted = deviceIsTraditional();
-  return `<details class="effects-menu"><summary aria-label="显示模式设置" title="切换平面编辑或立体演示"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg><span>显示模式</span></summary><div class="effects-panel"><strong>战术板模式</strong><div role="group" aria-label="战术板模式">${[['traditional','传统模式','平面棋子 · 编辑最清晰'],['digital','数字化模式','立体棋子 · 适合投屏讲解']].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}" ${restricted && value==='digital'?'disabled aria-describedby="visual-mode-note"':''}><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note" id="visual-mode-note">${modeNote()}</p></div></details>`;
+  return `<details class="effects-menu"><summary aria-label="${t("controls.display_mode_settings")}" title="${t("controls.switch_between_flat_editing_and_3d_presentation")}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg><span>${t("controls.display_mode")}</span></summary><div class="effects-panel"><strong>${t("controls.board_mode")}</strong><div role="group" aria-label="${t("controls.board_mode")}">${[['traditional',t("controls.traditional"),t("controls.flat_pieces_best_for_editing")],['digital',t("controls.digital"),t("controls.3d_pieces_best_for_presenting")]].map(([value,label,desc])=>`<button type="button" data-effects-mode="${value}" aria-pressed="${value===selected}" ${restricted && value==='digital'?'disabled aria-describedby="visual-mode-note"':''}><span class="effect-radio" aria-hidden="true"></span><span>${label}<small>${desc}</small></span></button>`).join('')}</div><p class="effects-note" id="visual-mode-note">${modeNote()}</p></div></details>`;
 }
 export function particleOptions(compact = false) {
   return {

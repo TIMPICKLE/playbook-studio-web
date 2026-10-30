@@ -1,9 +1,10 @@
+import { t } from './i18n.js';
 const SVG_NS='http://www.w3.org/2000/svg';
 
 export function pngExportDescription({reference=false,digital=false,ready=false}={}) {
-  if(reference)return '2000 × 1120 · 原图分辨率';
-  if(digital&&!ready)return '2000 × 1600 · 兼容视图导出平面图';
-  return `2000 × 1600 · ${digital?'当前 3D 视图':'平面战术图'}`;
+  if(reference)return t('export.source_resolution');
+  if(digital&&!ready)return t('export.fallback_flat');
+  return `2000 × 1600 · ${t(digital ? 'export.current_3d' : 'export.flat_board')}`;
 }
 
 // A full-scene capture already includes the camera, field, routes, pieces and

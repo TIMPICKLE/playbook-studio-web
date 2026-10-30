@@ -12,7 +12,7 @@ An American football playbook workspace for drawing plays, rehearsing routes, an
 
 </div>
 
-The application interface is currently in Chinese. This page is the English project guide; key control names are included in Chinese where useful.
+The interface supports English and Simplified Chinese. Choose a language from the language menu; play names and notes you create remain unchanged. See the [localization guide](docs/I18N.md) for adding languages.
 
 ![The current silver and graphite workspace: playbook on the left, field in the center, floating toolbar below, and properties on the right](docs/assets/readme/editor-silver.jpg)
 

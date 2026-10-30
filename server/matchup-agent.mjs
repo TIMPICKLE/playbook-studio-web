@@ -182,7 +182,8 @@ export async function runMatchupAgent(matchup, options, env, signal) {
   const tools = makeToolRunner(matchup, perspective, mode, context);
   // Sensitive input, model messages, credentials and results are scoped to this invocation.
   // LangGraph state below contains only counts and booleans, including when verbose logging is enabled.
-  const privateRun = { messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: '请先读取所选对局，再根据球员视角分析可能情景。' }], pending: null, result: null, hasContext: false, seenCallIds: new Set(), repairNeeded: false, usage: { inputTokens: 0, outputTokens: 0 }, usageComplete: true };
+  const systemPrompt = options.locale === 'en' ? SYSTEM.replace('最终只输出中文 JSON', '最终只输出英文 JSON（所有面向用户的文本值必须使用英文，JSON 键名和证据 ID 保持原样）') : SYSTEM;
+  const privateRun = { messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: '请先读取所选对局，再根据球员视角分析可能情景。' }], pending: null, result: null, hasContext: false, seenCallIds: new Set(), repairNeeded: false, usage: { inputTokens: 0, outputTokens: 0 }, usageComplete: true };
 
   const graph = new StateGraph(AgentState)
     .addNode('model', async state => {

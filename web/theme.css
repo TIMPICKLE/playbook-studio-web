@@ -735,3 +735,12 @@ html[data-visual-mode] .login-form-wrap h2 { font-weight: 800; letter-spacing: -
 
 /* Toast sizes to its content instead of the half-viewport left offset. */
 html[data-visual-mode] #toast { width: max-content; }
+
+.locale-control { position: fixed; z-index: 120; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid #ffffff35; border-radius: 9px; background: #16181ded; color: #f3f4f6; font-size: 12px; box-shadow: 0 4px 16px #0006; }
+.locale-control select { max-width: 110px; border: 0; color: inherit; background: #292c31; font: inherit; padding: 4px; border-radius: 5px; }
+@media print { .locale-control { display: none; } }
+
+/* Language selection on the public project landing page. */
+.entry-language select { color: var(--text-1); background: var(--night-2); border: 1px solid var(--hairline); border-radius: 999px; padding: 8px 10px; font: inherit; font-size: 12px; }
+html[lang="en"] .entry-page .entry-copy h1 { white-space: normal; font-size: clamp(36px, 4vw, 64px); }
+@media (max-width: 720px) { .entry-header { flex-wrap: wrap; } .entry-header-actions { flex-wrap: wrap; } }

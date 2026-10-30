@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { createRouteFeedback } from './digital-routes.js';
 import { boardCSSMatrix } from './digital-projection.js';
 import { createDigitalFallback } from './digital-fallback.js';
@@ -36,10 +37,10 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async()=>{
     feedback?.update(view);
     if(!engine){fallback?.draw(view);return;}
     try{engine.draw(view);}
-    catch(error){failed=true;engine?.destroy();engine=null;engineSvg=null;ensureFallback(state);fallback.draw(view);doc.documentElement.dataset.digitalBoard='unavailable';notify('WebGL 不可用，已切换到立体棋子兼容视图。');win.console.warn('Digital board stopped:',error);}
+    catch(error){failed=true;engine?.destroy();engine=null;engineSvg=null;ensureFallback(state);fallback.draw(view);doc.documentElement.dataset.digitalBoard='unavailable';notify(t('support.fallback'));win.console.warn('Digital board stopped:',error);}
     if(engine){
       const status=engine.status;
-      if(status==='unavailable'&&doc.documentElement.dataset.digitalBoard!==status)notify('战术场地更新失败，已显示最新平面图。可继续编辑，或切换模式重试。');
+      if(status==='unavailable'&&doc.documentElement.dataset.digitalBoard!==status)notify(t('support.fallback_update'));
       doc.documentElement.dataset.digitalBoard=status;
     }
   }
@@ -52,7 +53,7 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async()=>{
     if(!engine&&!pending&&!failed){const ticket=++generation;doc.documentElement.dataset.digitalBoard='loading';
       pending=Promise.resolve().then(makeEngine).then(value=>{
         if(disposed||ticket!==generation||!allowed()){value.destroy();return;}engine=value;
-      }).catch(error=>{if(!disposed&&ticket===generation){failed=true;doc.documentElement.dataset.digitalBoard='unavailable';notify('WebGL 不可用，已切换到立体棋子兼容视图。');win.console.warn('Digital board initialization failed:',error);}}).finally(()=>{pending=null;});
+      }).catch(error=>{if(!disposed&&ticket===generation){failed=true;doc.documentElement.dataset.digitalBoard='unavailable';notify(t('support.fallback'));win.console.warn('Digital board initialization failed:',error);}}).finally(()=>{pending=null;});
     }
     if(pending)await pending;
     if(!allowed())return;

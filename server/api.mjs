@@ -3,6 +3,7 @@ import { MAX_BODY, ApiError, fail, json, readJson } from './http.mjs';
 import { resolveIdentity, handleAuth, createAccountStatements, resetAccount } from './auth.mjs';
 import { buildMatchup, modelEndpoint } from './matchup.mjs';
 import { runMatchupAgent } from './matchup-agent.mjs';
+import { localizeMatchupAnnotations } from './matchup-locale.mjs';
 export { MAX_BODY } from './http.mjs';
 const ROLES = ['editor', 'viewer'];
 const normalizeEmail = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -122,10 +123,10 @@ export async function handleApi(request, env, user) {
       request.signal.addEventListener('abort', abort, { once: true });
       if (request.signal.aborted) controller.abort();
       let result;
-      try { result = await runMatchupAgent(matchup, { model: body.model, perspective, context: body.context, mode: body.mode, reauthorize }, env, controller.signal); }
+      try { result = await runMatchupAgent(matchup, { model: body.model, perspective, context: body.context, mode: body.mode, locale: body.locale, reauthorize }, env, controller.signal); }
       finally { clearTimeout(timer); request.signal.removeEventListener('abort', abort); }
       await reauthorize();
-      return json({ ...result, evidence: matchup.evidence, warnings: matchup.warnings, revision: record.revision });
+      return json({ ...result, ...localizeMatchupAnnotations(matchup.evidence, matchup.warnings, body.locale), revision: record.revision });
     }
     if (path[2] === 'accounts' && path.length === 3 && request.method === 'POST') {
       await access(db, workspaceId, user.userId, 'owner');

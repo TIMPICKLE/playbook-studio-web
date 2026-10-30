@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // Device-local layout preferences. This module never edits the shared playbook.
 export const BOARD_LAYOUT_KEY = 'playbook-studio-board-layout-v1';
 const bound = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)));
@@ -27,7 +28,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
   const inspector = () => bound(prefs.inspector ?? 250, 220, maxInspector());
   function persist() {
     try { localStorage.setItem(BOARD_LAYOUT_KEY, JSON.stringify(prefs)); }
-    catch { notify('尺寸已调整；浏览器未允许记住设置，刷新后会恢复默认。'); }
+    catch { notify(t("controls.size_adjusted_but_browser_storage_is_unavailable_default")); }
   }
   function apply() {
     const workspace = q('.workspace');
@@ -58,8 +59,8 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     const toggle = q('[data-board-action="expand"]');
     if (toggle) {
       toggle.setAttribute('aria-pressed', String(expanded));
-      toggle.querySelector('span').textContent = expanded ? '退出展开' : '展开画板';
-      toggle.title = expanded ? '退出展开 · Esc' : '展开画板，收起两侧面板';
+      toggle.querySelector('span').textContent = expanded ? t("controls.exit_expanded_view") : t("controls.expand_board");
+      toggle.title = expanded ? t("controls.exit_expanded_view_esc") : t("controls.expand_board_and_collapse_side_panels");
     }
   }
   function flush() {
@@ -129,7 +130,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     if (action === 'zoom-in') zoom = Math.min(3, zoom + .25);
     if (action === 'zoom-out') zoom = Math.max(1, zoom - .25);
     if (action === 'fit' || action === 'reset') { zoom = 1; q('.pitch-viewport')?.scrollTo?.(0, 0); }
-    if (action === 'reset') { prefs = {}; expanded = false; persist(); notify('已恢复默认画板大小和两侧面板。'); }
+    if (action === 'reset') { prefs = {}; expanded = false; persist(); notify(t("controls.restored_default_board_size_and_side_panels")); }
     apply();
   });
   document.addEventListener('keydown', event => {
@@ -159,14 +160,14 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
 }
 
 export function boardSizeControls() {
-  return `<div class="board-size-controls" aria-label="战术板大小">
-    <div class="board-zoom-controls" role="group" aria-label="球场缩放"><button type="button" data-board-action="zoom-out" aria-label="缩小球场">−</button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" data-board-action="zoom-in" aria-label="放大球场">＋</button><button type="button" data-board-action="fit">适应屏幕</button></div>
-    <details class="board-advanced"><summary>尺寸</summary><div class="board-dimensions"><label for="board-height">画板高度</label><input id="board-height" type="range" min="280" max="1400" step="1" aria-describedby="board-size-help"><output id="board-size-value" for="board-height"></output>
-    <div class="board-size-actions"><button type="button" data-board-action="expand" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg><span>展开画板</span></button><button type="button" data-board-action="reset" title="恢复默认画板大小和面板布局">重置画板</button></div>
+  return `<div class="board-size-controls" aria-label="${t("controls.board_size")}">
+    <div class="board-zoom-controls" role="group" aria-label="${t("controls.field_zoom")}"><button type="button" data-board-action="zoom-out" aria-label="${t("controls.zoom_out")}">−</button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" data-board-action="zoom-in" aria-label="${t("controls.zoom_in")}">＋</button><button type="button" data-board-action="fit">${t("controls.fit_to_screen")}</button></div>
+    <details class="board-advanced"><summary>${t("controls.size")}</summary><div class="board-dimensions"><label for="board-height">${t("controls.board_height")}</label><input id="board-height" type="range" min="280" max="1400" step="1" aria-describedby="board-size-help"><output id="board-size-value" for="board-height"></output>
+    <div class="board-size-actions"><button type="button" data-board-action="expand" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg><span>${t("controls.expand_board")}</span></button><button type="button" data-board-action="reset" title="${t("controls.restore_default_board_size_and_layout")}">${t("controls.reset_board")}</button></div>
     </div></details>
-    <span class="touch-board-help">选择工具：滑动空白处平移，拖动球员布阵。</span><span id="board-size-help" class="sr-only">拖动底部调节高度；电脑上可拖动右侧分隔条调节宽度。设置仅记在当前设备。</span>
+    <span class="touch-board-help">${t("controls.with_select_drag_empty_space_to_pan_and_drag_players_to_")}</span><span id="board-size-help" class="sr-only">${t("controls.drag_the_bottom_edge_to_resize_height_on_desktop_drag_th")}</span>
   </div>`;
 }
 
-export const boardHeightHandle = `<div class="board-height-resizer" data-board-resize="height" role="separator" tabindex="0" aria-label="调整战术板高度" aria-orientation="horizontal" aria-controls="field" aria-valuemin="280" aria-valuemax="1400" title="上下拖动调整高度；方向键微调，Shift 加速"><span aria-hidden="true"></span><small>拖动调节高度</small><span aria-hidden="true"></span></div>`;
-export const boardWidthHandle = `<div class="board-width-resizer" data-board-resize="width" role="separator" tabindex="0" aria-label="调整战术板与属性栏宽度" aria-orientation="vertical" aria-controls="field" aria-valuemin="220" aria-valuemax="480" title="左右拖动调整画板宽度；方向键微调"><span aria-hidden="true"></span></div>`;
+export const boardHeightHandle = `<div class="board-height-resizer" data-board-resize="height" role="separator" tabindex="0" aria-label="${t("controls.adjust_board_height")}" aria-orientation="horizontal" aria-controls="field" aria-valuemin="280" aria-valuemax="1400" title="${t("controls.drag_vertically_to_resize_use_arrow_keys_for_precision_a")}"><span aria-hidden="true"></span><small>${t("controls.drag_to_adjust_height")}</small><span aria-hidden="true"></span></div>`;
+export const boardWidthHandle = `<div class="board-width-resizer" data-board-resize="width" role="separator" tabindex="0" aria-label="${t("controls.adjust_board_and_inspector_width")}" aria-orientation="vertical" aria-controls="field" aria-valuemin="220" aria-valuemax="480" title="${t("controls.drag_horizontally_to_resize_use_arrow_keys_for_precision")}"><span aria-hidden="true"></span></div>`;
