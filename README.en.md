@@ -8,13 +8,15 @@
 
 An American football playbook workspace for drawing plays, rehearsing routes, analyzing matchups, and sharing a playbook with your team.
 
-[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Try without signing in](https://timpickle.github.io/playbook-studio-web/local.html) · [Quick start](#quick-start) · [Local development](#local-development)
+[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Try without signing in](https://timpickle.github.io/playbook-studio-web/local.html) · [Visual walkthrough](#visual-walkthrough) · [Local development](#local-development)
 
 </div>
 
 The application interface is currently in Chinese. This page is the English project guide; key control names are included in Chinese where useful.
 
-![Playbook Studio's silver and graphite editor, with the play list, field, floating toolbar, and properties panel](docs/assets/readme/editor.jpg)
+![The current silver and graphite workspace: playbook on the left, field in the center, floating toolbar below, and properties on the right](docs/assets/readme/editor-silver.jpg)
+
+Choose a play on the left, arrange players and draw routes in the center, and adjust properties on the right. Below the field, switch between **布阵与画线** (Edit) and **战术演练** (Rehearse). All screenshots below were captured from the current local demo using built-in examples and Madden catalog plays.
 
 ## What you can do
 
@@ -54,9 +56,46 @@ Eight teaching examples are included: Mesh, Four Verticals, Flood, Slants, Insid
 
 </details>
 
+## Visual walkthrough
+
+### 1. Select a route and adjust its points and timing
+
+Open **Mesh · 浅交叉** from the play list and click a route on the field. Drag its solid control points to change the path. The right panel switches from play details to **路线设置** (Route settings).
+
+![The selected Y route exposes draggable control points; the right panel shows line styles, curves, and animation timing](docs/assets/readme/route-editing-silver.jpg)
+
+| Task | Control |
+|---|---|
+| Change a route's direction or depth | Drag the solid points on the selected route |
+| Draw a new route | Select a player → choose **跑动** or press `R` → click turning points → press `Enter` |
+| Change line appearance | Set the line type, color, end marker, or **平滑曲线** (Smooth curve) in the right panel |
+| Adjust departure and arrival timing | Set **启动延迟** (Start delay) and **跑动时长** (Duration), in seconds, under **动画时序** |
+| Undo a change | Use the undo button next to the title or press `Ctrl / ⌘ + Z` |
+
+### 2. Scrub the timeline to inspect crossings and passes
+
+Select **战术演练** (Rehearse) below the field, then press play or the space bar. Drag the timeline to inspect player positions at a specific moment. The toolbar also provides speed, loop, and reset controls.
+
+![Mesh paused at 2.6 seconds during a pass, with playback, timeline, speed, and loop controls below the field](docs/assets/readme/rehearsal-silver.jpg)
+
+This example is paused at **2.6 seconds**, showing the crossing routes and the ball in flight. Switch back to **布阵与画线** (Edit) to make changes. Set the passer, receiver, and pass timing under **足球移动** (Ball movement) in the right panel.
+
 ## Madden play library
 
 Filter by team, formation group, specific formation, or English play name. Preview a play, then drag it into your playbook or select **＋ 加入** (Add); the button also works on mobile. Importing detects duplicates and supports undoing the most recent eligible addition.
+
+### 3. Filter and import an editable play
+
+1. Open **Madden NFL 战术库** on the left and choose **Eagles** or **Ravens**.
+2. Enable **仅看可编辑** (Editable only), then choose a formation. The example below uses **Gun → Gun Bunch TE**.
+3. Click an image to preview it. Select **＋ 加入可编辑版** (Add editable version), or drag the card into the dashed target on the left.
+4. Close the library and continue editing. Next to the play title, **原图对照** (Original image) opens the source image, and **整理锋线间距** (Normalize line spacing) spreads crowded positions.
+
+![Eagles Gun Bunch TE results with the editable-only filter, play cards, add buttons, and drag target on the left](docs/assets/readme/madden-library-silver.jpg)
+
+**MESH after importing:** the visible source routes are now selectable, editable objects. Continue adjusting player positions, route points, and rehearsal timing.
+
+![Imported Madden MESH with editable players, colored routes, original-image comparison, and line-spacing controls](docs/assets/readme/madden-editable-silver.jpg)
 
 | Current Madden 27 catalog snapshot | Count |
 |---|---:|
@@ -94,6 +133,10 @@ The application does not persist your API key; refresh or sign out and you must 
 |---|---|
 | **Traditional** | Enabled by default. Flat player markers, clear routes, and no decorative motion for everyday editing and reading |
 | **Digital** | Optional on desktop. A perspective board, raised pieces, glass and metal materials, and route, movement, blocking, passing, and zone feedback during rehearsal |
+
+Switch views through **显示模式** (Display mode) in the upper right. The screenshot below shows the silver glass interface and raised pieces in the **compatibility view**. WebGL was unavailable in the capture environment, so this is not a screenshot of the full WebGL 3D renderer.
+
+![Digital mode's compatibility view with silver glass controls, a perspective board, and raised player pieces](docs/assets/readme/digital-compatible-silver.jpg)
 
 Phones and iPads use the traditional view while retaining editing and rehearsal. When WebGL is unavailable, digital mode uses an interactive compatibility view. Reduced-motion preferences retain materials while stopping decorative movement.
 
