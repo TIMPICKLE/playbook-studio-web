@@ -280,8 +280,14 @@ Most technical documentation is currently in Chinese.
 
 ## Sponsors
 
-Individuals, teams, and companies are welcome to support the continued development of Playbook Studio. The spaces below are reserved for future sponsors.
+Individuals, teams, and companies are welcome to support Playbook Studio. **[Submit a sponsorship inquiry](https://github.com/TIMPICKLE/playbook-studio-web/issues/new?template=sponsorship.yml)**; the maintainer [@TIMPICKLE](https://github.com/TIMPICKLE) will respond in the issue.
 
-![Three open spaces reserved for future sponsor logos](docs/assets/brand/sponsor-placeholders.svg)
+No verified GitHub Sponsors or other payment channel is currently published. This form is for discussing cooperation and does not accept payments. Do not post payment details, identity documents, contracts, or other sensitive information in public issues.
 
-**Interested in sponsoring? [Contact the maintainer through an issue](https://github.com/TIMPICKLE/playbook-studio-web/issues).**
+1. Describe your proposed support, goals, and preferred recognition. Amounts and private contact details may be omitted initially.
+2. After the maintainer responds, agree on a suitable private contact channel before discussing amounts, duration, and terms. Any payment requires separate confirmation of an official channel.
+3. Once cooperation is confirmed and support has been delivered, recognition is added to both READMEs through a PR with the sponsor's consent. An inquiry does not automatically reserve a placement.
+
+![Three reserved placements, not existing sponsors](docs/assets/brand/sponsor-placeholders.svg)
+
+**Recognition policy:** choose a credit, name / logo with one official website link, or anonymity. Content, order, and display duration are agreed in advance; there is no unagreed ranking by contribution amount. Recognition does not imply product endorsement or promises of code merges, feature priority, or exclusivity. Contact the maintainer in the original issue to change a name, link, or duration, or request removal.
