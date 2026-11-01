@@ -65,6 +65,12 @@ test('the cloud API persists imported diagrams and rejects invalid image metadat
 });
 test('Madden UI supports import by click and drag, duplicate prevention, undo, notes, printing, and reload', async t => {
   const win = new Window({ url: 'http://localhost:3000/', width: 1440, height: 1000 });
+  // happy-dom has no layout engine, so explicitly report thumbnails as visible.
+  win.IntersectionObserver = class {
+    constructor(callback) { this.callback = callback; }
+    observe(node) { if (node.hasAttribute('data-thumbnail-index')) this.callback([{ target: node, isIntersecting: true }]); }
+    disconnect() {}
+  };
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
   const names = ['window','document','navigator','localStorage','location','Image','Blob','requestAnimationFrame','cancelAnimationFrame','fetch'];
   const previous = Object.fromEntries(names.map(n => [n, Object.getOwnPropertyDescriptor(globalThis,n)]));

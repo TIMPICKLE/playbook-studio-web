@@ -48,8 +48,9 @@ test('route light, blocking pulse and zones are deterministic at the playback ti
   assert.equal(svg.querySelector('[data-player]'),player);assert.equal(JSON.stringify(play),before);feedback.destroy();assert.equal(svg.querySelector('.digital-decoration'),null);win.happyDOM.abort();
 });
 
-function fixture(makeEngine,{notify=()=>{}}={}){
+function fixture(makeEngine,{notify=()=>{},IntersectionObserver}={}){
   const win=new Window({width:1440,height:900}),doc=win.document,frames=new Map();let id=0,hidden=false;
+  if(IntersectionObserver)win.IntersectionObserver=IntersectionObserver;
   win.CanvasRenderingContext2D=function(){};win.requestAnimationFrame=fn=>{frames.set(++id,fn);return id;};win.cancelAnimationFrame=id=>frames.delete(id);
   Object.defineProperty(doc,'hidden',{get:()=>hidden});
   const data=starterWorkspace(),state={play:data.plays[0],settings:data.settings,time:0,playing:false,rehearsal:false};
@@ -57,6 +58,22 @@ function fixture(makeEngine,{notify=()=>{}}={}){
   const controller=createDigitalBoard({doc,getState:()=>state,makeEngine,notify});
   return {win,doc,state,controller,frames,step(now){const all=[...frames.values()];frames.clear();all.forEach(fn=>fn(now));},async close(){controller.destroy();await win.happyDOM.abort();},visibility(value){hidden=value;doc.dispatchEvent(new win.Event('visibilitychange'));}};
 }
+test('digital drawing pauses offscreen, resumes on return, and ignores pointer movement outside the board',async()=>{
+  let observer,picks=0,draws=0;
+  class Observer{constructor(callback){this.callback=callback;observer=this;}observe(node){this.node=node;}disconnect(){this.disconnected=true;}}
+  const f=fixture(async()=>({status:'ready',mount(){},draw(){draws++;},refreshBackground(){},destroy(){},pick(){picks++;return null;}}),{IntersectionObserver:Observer});
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
+    const stage=f.doc.querySelector('.pitch-stage');stage.getBoundingClientRect=()=>({left:100,top:100,width:500,height:400});
+    f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:25,clientY:25,bubbles:true}));assert.equal(picks,0);
+    f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:200,clientY:200,bubbles:true}));assert.equal(picks,1);
+    observer.callback([{target:observer.node,isIntersecting:false}]);
+    assert.equal(f.frames.size,0);const before=draws;f.step(100);assert.equal(draws,before);
+    f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:200,clientY:200,bubbles:true}));assert.equal(picks,1);
+    observer.callback([{target:observer.node,isIntersecting:true}]);await Promise.resolve();
+    assert.equal(f.frames.size,1);f.step(200);assert.ok(draws>before);
+  }finally{await f.close();assert.equal(observer.disconnected,true);}
+});
 test('traditional mode never starts Three; stale digital startup is disposed without replacing the SVG',async()=>{
   let resolve,started=0,destroyed=0;
   const f=fixture(()=>{started++;return new Promise(r=>resolve=r);});

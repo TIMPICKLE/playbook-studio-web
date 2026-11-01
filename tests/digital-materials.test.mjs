@@ -11,7 +11,7 @@ import {projectBoardPoint} from '../web/digital-projection.js';
 // and ray casting. Only GPU submission / environment baking and canvas I/O are
 // replaced; this is deliberately not a claim that WebGL pixels were verified.
 async function sceneFixture(){
-  const win=new Window(),doc=win.document,renders=[],images=[],contexts=new Map();
+  const win=new Window(),doc=win.document,renders=[],images=[],captures=[],contexts=new Map();
   const gradient={addColorStop(){}};
   const context={fillRect(){},clearRect(){},fillText(){},drawImage(){},createLinearGradient(){return gradient;},createRadialGradient(){return gradient;}};
   win.HTMLCanvasElement.prototype.getContext=function(type){
@@ -19,10 +19,10 @@ async function sceneFixture(){
     if(!contexts.has(this))contexts.set(this,{...context,operations:[],fillRect(){this.operations.push('fill');},clearRect(){this.operations.push('clear');},drawImage(image){if(image.failRasterize)throw new Error('Rasterization failed');this.image=image;this.operations.push('image');}});
     return contexts.get(this);
   };
-  win.HTMLCanvasElement.prototype.toDataURL=()=> 'data:image/png;base64,c2NlbmU=';
+  win.HTMLCanvasElement.prototype.toDataURL=()=>{captures.push(renderer.ratio);return 'data:image/png;base64,c2NlbmU=';};
   win.Image=class{set src(url){this.url=url;images.push(this);}};
   const renderer={shadowMap:{},debug:{},capabilities:{getMaxAnisotropy:()=>16},
-    setPixelRatio(){},setSize(){},setClearColor(){},setRenderTarget(target){this.target=target;},clear(){},
+    setPixelRatio(value){this.ratio=value;},setSize(width,height){this.size=[width,height];},setClearColor(){},setRenderTarget(target){this.target=target;},clear(){},
     render(scene,camera){
       assert.ok(scene.isScene);assert.ok(camera.isPerspectiveCamera);scene.updateMatrixWorld(true);camera.updateMatrixWorld();
       const sprites=[],heads=[];scene.traverse(n=>{if(n.isSprite)sprites.push(n);if(n.material?.isMeshPhysicalMaterial&&n.material.uniforms)heads.push(n);});
@@ -42,10 +42,57 @@ async function sceneFixture(){
   const svg=doc.querySelector('svg'),stage=doc.querySelector('.pitch-stage');
   stage.getBoundingClientRect=()=>({left:70,top:110,width:500,height:400});
   const engine=createDigitalMaterials(doc);
-  return {win,doc,engine,svg,stage,play,settings,renderer,renders,images,environment,contexts,
+  return {win,doc,engine,svg,stage,play,settings,renderer,renders,images,captures,environment,contexts,
     fieldTexture(){let texture;renders.at(-1)?.scene.traverse(n=>{if(n.geometry?.parameters?.width===1000&&n.geometry?.parameters?.height===800)texture=n.material.map;});return texture;},
     close(){engine.destroy();delete globalThis[key];return win.happyDOM.abort();}};
 }
+
+test('3D buffers follow the displayed board size and remain capped on high-density screens',async()=>{
+  const f=await sceneFixture();
+  try{
+    let width=700;Object.defineProperty(f.stage,'clientWidth',{get:()=>width});
+    Object.defineProperty(f.win,'devicePixelRatio',{configurable:true,value:2});
+    f.engine.mount(f.svg,f.play,f.settings);f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    assert.equal(f.renderer.ratio,1.4);assert.equal(f.renders[0].target.width,1400);assert.equal(f.renders[0].target.height,1120);
+    width=1500;f.win.dispatchEvent(new f.win.Event('resize'));
+    assert.equal(f.renderer.ratio,1.4,'resize waits for the frame that will redraw the cleared canvas');
+    f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    assert.equal(f.renderer.ratio,2);assert.equal(f.renders[0].target.width,2000);assert.equal(f.renders[0].target.height,1600);
+    width=450;f.win.dispatchEvent(new f.win.Event('resize'));
+    f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    assert.equal(f.renderer.ratio,1);assert.equal(f.renders[0].target.width,1000);assert.equal(f.renders[0].target.height,800);
+  }finally{await f.close();}
+});
+
+test('digital export renders at 2000 × 1600 before returning to the smaller interactive buffer',async()=>{
+  const f=await sceneFixture();
+  try{
+    Object.defineProperty(f.stage,'clientWidth',{get:()=>600});
+    f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();
+    f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    assert.equal(f.renderer.ratio,1);assert.equal(f.svg.classList.contains('digital-ready'),true);
+    assert.equal(f.engine.capture(),'data:image/png;base64,c2NlbmU=');
+    assert.deepEqual(f.captures,[2],'the image is captured at full export resolution');
+    assert.equal(f.renderer.ratio,1,'the interactive buffer returns to its economical size');
+    assert.equal(f.renders.at(-1).target,null,'the restored board is rendered before returning');
+  }finally{await f.close();}
+});
+
+test('static fields do not repeatedly regenerate textures but playback and pulsing zones still update',async()=>{
+  const f=await sceneFixture();
+  try{
+    f.play.zones=[];f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();
+    const draw=(time,materialTime,rehearsal=false)=>f.engine.draw({play:f.play,settings:f.settings,time,materialTime,rehearsal,animated:true});
+    draw(0,0);while(f.images.length)f.images.shift().onload();
+    for(let i=1;i<=20;i++)draw(0,i/10);
+    assert.equal(f.images.length,0,'idle scenes without pulsing zones keep their existing field texture');
+    draw(.5,2.1,true);assert.equal(f.images.length,1,'scrubbing or playback updates the field');f.images.shift().onload();
+    f.play.zones.push({id:'zone',x:50,y:40,rx:10,ry:10,color:'#888888',label:'Zone'});
+    draw(.5,2.3);assert.equal(f.images.length,1,'animated zones still refresh their texture');f.images.shift().onload();
+    for(let i=24;i<=30;i++)draw(.5,i/10,true);
+    assert.equal(f.images.length,0,'a paused rehearsal does not animate a zone from wall-clock time');
+  }finally{await f.close();}
+});
 
 test('complete Three scene mounts, renders refraction and labels, picks a raised head, captures and releases resources',async()=>{
   const f=await sceneFixture(),before=JSON.stringify(f.play);
