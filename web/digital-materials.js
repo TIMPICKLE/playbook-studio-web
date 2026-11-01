@@ -12,7 +12,7 @@ export function createDigitalMaterials(doc=document) {
   canvas.className='digital-scene-canvas';canvas.setAttribute('aria-hidden','true');
   canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none';
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,preserveDrawingBuffer:true});
-  renderer.setPixelRatio(Math.max(2,win.devicePixelRatio||1));renderer.setSize(1000,800,false);
+  renderer.setPixelRatio(1);renderer.setSize(1000,800,false);
   renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
@@ -45,7 +45,7 @@ export function createDigitalMaterials(doc=document) {
   const frameShape=roundedRectangle(-9,-9,1018,818,20);frameShape.holes.push(roundedRectangle(-.5,-.5,1001,801,12));
   const frame=new THREE.Mesh(new THREE.ExtrudeGeometry(frameShape,{depth:1.5,bevelEnabled:true,bevelSize:.65,bevelThickness:.65,bevelSegments:3,steps:1,curveSegments:20}),new THREE.MeshStandardMaterial({color:'#8d9094',metalness:.8,roughness:.36,envMapIntensity:.8}));frame.position.z=-1;frame.receiveShadow=true;board.add(frame);
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(1900,1600),new THREE.ShadowMaterial({color:'#050506',opacity:.33}));ground.position.set(500,400,-34);ground.receiveShadow=true;scene.add(ground);
-  const target=new THREE.WebGLRenderTarget(2000,1600,{type:THREE.HalfFloatType,depthBuffer:true});
+  const target=new THREE.WebGLRenderTarget(1000,800,{type:THREE.HalfFloatType,depthBuffer:true});
   const sharedGeometry=new Map(),players=new Map(),pickMeshes=[];
   const shadowCanvas=doc.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=128;const sc=shadowCanvas.getContext('2d');
   const sg=sc.createRadialGradient(64,64,13,64,64,62);sg.addColorStop(0,'#0009');sg.addColorStop(.45,'#0005');sg.addColorStop(1,'#0000');sc.fillStyle=sg;sc.fillRect(0,0,128,128);
@@ -56,6 +56,25 @@ export function createDigitalMaterials(doc=document) {
   for(const x of [-5.3,5.3]){const band=new THREE.Mesh(new THREE.TorusGeometry(4.3,.55,8,32),white);band.rotation.y=Math.PI/2;band.position.x=x;ball.add(band);}board.add(ball);
   const raycaster=new THREE.Raycaster(),pointerNdc=new THREE.Vector2();
   let svg=null,stage=null,disposed=false,lost=false,snapshotGeneration=0,pendingImage=null,backgroundDirty=false,backgroundError=null,lastTextureTime=-1,lastTextureMaterial=-1,lastTheme=null,mountedPlayId=null,texturePlayId=null,presentedPlayId=null;
+  let resolution=1,resolutionDirty=true,lastDrawView=null;
+  const markResolutionDirty=()=>{resolutionDirty=true;};
+  function setResolution(next){
+    resolution=next;renderer.setPixelRatio(next);renderer.setSize(1000,800,false);
+    target.setSize(Math.round(1000*next),Math.round(800*next));
+  }
+  function resizeRenderer(){
+    if(!stage||disposed||!resolutionDirty)return;
+    resolutionDirty=false;
+    // At least 1000px wide for crisp labels; avoid rendering more pixels than
+    // the displayed board needs, with a 2x cap on high-density screens.
+    const next=Math.min(2,Math.max(1,(stage.clientWidth||1000)*(win.devicePixelRatio||1)/1000));
+    if(Math.abs(next-resolution)<.01)return;
+    setResolution(next);
+  }
+  // Resize during draw so clearing the canvas and presenting the next complete
+  // frame happen together, rather than flashing a blank board between frames.
+  const resizeObserver=typeof win.ResizeObserver==='function'?new win.ResizeObserver(markResolutionDirty):null;
+  win.addEventListener('resize',markResolutionDirty);
   const lose=event=>{event.preventDefault();lost=true;};canvas.addEventListener('webglcontextlost',lose);
   const ready=()=>!disposed&&!lost&&!!svg?.classList.contains('digital-ready');
 
@@ -94,8 +113,9 @@ export function createDigitalMaterials(doc=document) {
   function mount(next,play,settings){
     const nextStage=next.closest('.pitch-stage');if(!nextStage)throw new Error('3D board stage is unavailable');
     if(svg!==next)svg?.classList.remove('digital-ready');
-    if(stage!==nextStage)stage?.classList.remove('is-three');
+    if(stage!==nextStage){resizeObserver?.disconnect();stage?.classList.remove('is-three');}
     svg=next;stage=nextStage;mountedPlayId=play.id;
+    markResolutionDirty();resizeObserver?.observe(stage);
     if(canvas.parentElement!==stage)stage.prepend(canvas);
     stage.classList.add('is-three');
     // A remount must retain the complete last frame until its replacement is
@@ -141,8 +161,11 @@ export function createDigitalMaterials(doc=document) {
     };
     image.onerror=()=>{fail(new Error('The 3D field image could not be decoded'));finish();};image.src=url;
   }
-  function draw({play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true}){
+  function draw(view){
     if(disposed||lost)throw new Error('The 3D context is unavailable');
+    lastDrawView=view;
+    const {play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true,rehearsal=false}=view;
+    resizeRenderer();
     const live=new Set(play.players.map(p=>p.id));for(const [id,item]of players)if(!live.has(id)){removePlayer(item);players.delete(id);}
     for(const p of play.players){
       let item=players.get(p.id);if(item&&(item.shape!==p.shape||item.color!==p.color||item.side!==p.side||item.labelText!==p.label||item.name!==p.name)){removePlayer(item);players.delete(p.id);item=null;}
@@ -159,7 +182,8 @@ export function createDigitalMaterials(doc=document) {
     if(ballPoint){const at=project(ballPoint),flight=play.ball?.receiverId&&time>=play.ball.passAt&&time<=play.ball.arriveAt,progress=flight?(time-play.ball.passAt)/Math.max(.01,play.ball.arriveAt-play.ball.passAt):0;ball.position.set(at.x+14,800-at.y-8,flight?24+Math.sin(progress*Math.PI)*55:23);ball.rotation.set(0,flight?progress*Math.PI*7:0,-.35);}
     // A failed background waits for an explicit edit/remount/mode retry instead
     // of starting another failed decode on every animation tick.
-    if(!backgroundError&&(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animated&&materialTime-lastTextureMaterial>.12)){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
+    const animatedZones=animated&&!rehearsal&&play.zones.length>0;
+    if(!backgroundError&&(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animatedZones&&materialTime-lastTextureMaterial>.12)){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
     // Refraction samples the actual 3D field and opaque chess-piece silhouettes.
     for(const item of players.values()){item.head.visible=false;item.label.visible=false;}
     renderer.setRenderTarget(target);renderer.clear();renderer.render(scene,camera);
@@ -167,9 +191,17 @@ export function createDigitalMaterials(doc=document) {
     renderer.setRenderTarget(null);renderer.clear();renderer.render(scene,camera);
     presentedPlayId=play.id;svg?.classList.toggle('digital-ready',texturePlayId===play.id);canvas.style.visibility=ready()?'visible':'hidden';stage?.classList.add('is-three');canvas.dataset.renderer='three-perspective';
   }
-  return {fullScene:true,mount,refreshBackground,draw,get status(){return backgroundError?'unavailable':ready()?'ready':'loading';},capture:()=>ready()?canvas.toDataURL('image/png'):null,
+  function capture(){
+    if(!ready())return null;
+    if(resolution>=2||!lastDrawView)return canvas.toDataURL('image/png');
+    const previous=resolution,view=lastDrawView,pendingResize=resolutionDirty;
+    resolutionDirty=false;setResolution(2);
+    try{draw(view);return canvas.toDataURL('image/png');}
+    finally{setResolution(previous);draw(view);resolutionDirty=pendingResize;}
+  }
+  return {fullScene:true,mount,refreshBackground,draw,get status(){return backgroundError?'unavailable':ready()?'ready':'loading';},capture,
     pick(clientX,clientY){if(!ready())return null;const rect=stage.getBoundingClientRect();if(!rect.width||!rect.height)return null;pointerNdc.set((clientX-rect.left)/rect.width*2-1,1-(clientY-rect.top)/rect.height*2);camera.updateMatrixWorld();scene.updateMatrixWorld(true);raycaster.setFromCamera(pointerNdc,camera);const hit=raycaster.intersectObjects(pickMeshes,false)[0];return hit?{type:'player',id:hit.object.userData.playerId}:null;},
-    destroy(){if(disposed)return;disposed=true;snapshotGeneration++;svg?.classList.remove('digital-ready');stage?.classList.remove('is-three');canvas.remove();canvas.removeEventListener('webglcontextlost',lose);if(pendingImage){pendingImage.image.onload=null;pendingImage.image.onerror=null;URL.revokeObjectURL(pendingImage.url);pendingImage=null;}
+    destroy(){if(disposed)return;disposed=true;snapshotGeneration++;resizeObserver?.disconnect();win.removeEventListener('resize',markResolutionDirty);svg?.classList.remove('digital-ready');stage?.classList.remove('is-three');canvas.remove();canvas.removeEventListener('webglcontextlost',lose);if(pendingImage){pendingImage.image.onload=null;pendingImage.image.onerror=null;URL.revokeObjectURL(pendingImage.url);pendingImage=null;}
       for(const item of players.values())removePlayer(item);players.clear();for(const pieces of sharedGeometry.values())for(const g of Object.values(pieces))g.dispose();sharedGeometry.clear();
       for(const mesh of [surface,plinth,frame,ground]){mesh.geometry.dispose();mesh.material.dispose();}ball.traverse(n=>n.geometry?.dispose());ballLeather.dispose();white.dispose();fieldTexture.dispose();shadowTexture.dispose();target.dispose();environmentTarget.dispose();key.shadow.map?.dispose();renderer.dispose();renderer.forceContextLoss();
     }};

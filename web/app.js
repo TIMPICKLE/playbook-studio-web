@@ -14,6 +14,7 @@ import { effectsControl, initEffects, burstAt } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
 import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
 import { createWorkspacePanels } from './workspace-panels.js';
+import { createPlayThumbnails } from './play-thumbnails.js';
 
 const $ = selector => document.querySelector(selector);
 const icons = {
@@ -48,6 +49,7 @@ let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gesture
 const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
 const panels = createWorkspacePanels();
+const thumbnails = createPlayThumbnails();
 const viewSettings = () => ({ ...state.data.settings, ...viewOverrides });
 const canEdit = () => cloudMode() ? !!shared?.canEdit : !localRecovery;
 const editBlockedMessage = () => localRecovery ? recoveryMessage : shared?.sync?.viewError ? t("feedback.the_play_view_could_not_update_reload_before_editing") : t("feedback.you_have_read_only_access_and_cannot_edit_this_shared_p");
@@ -111,6 +113,10 @@ function edit(fn, { redraw = true } = {}) {
 function choose(id) { if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
 function restore(next) { if (!next || !canEdit()) return; resetAnimation(); rehearsal=false; state = next; book = current().book; selection = null; draft = null; save(); render(); $('#toast').classList.remove('visible'); }
 
+function playCards(plays, selectedPlay) {
+  return plays.length ? plays.map((play, i) => `<button data-action="choose:${e(play.id)}" class="play-card ${selectedPlay.id === play.id ? 'active' : ''}" aria-label="${t("editorExtra.open")}${e(play.title)}" aria-pressed="${selectedPlay.id === play.id}"><div class="play-thumb" data-thumbnail-index="${i}"></div><span class="play-card-info"><strong>${e(play.title)}</strong><small>${e(play.formation)} · ${e(play.category)}</small></span>${play.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : `<div class="empty-list">${t("editorExtra.no_matching_plays_found")}<br>${t("editorExtra.try_another_search_or_clear_the_filters")}<button class="text-button" data-action="clear-filters">${t("editorExtra.clear_all_filters")}</button></div>`;
+}
+
 function render() {
   const p = current(); if (!p) return;
   const previousPlay=renderedPlayId, existingIds=new Set([...document.querySelectorAll('#field [data-player]')].map(n=>n.dataset.player));
@@ -134,7 +140,7 @@ function render() {
       <label class="search-box">${icon('search')}<input type="search" id="search" placeholder="${t("editor.search_plays")}" aria-label="${t("editor.search_plays_2")}" value="${e(query)}"></label>
       <div class="filters"><select aria-label="${t("editor.play_category")}" id="category-filter"><option value="">${t("editor.all_categories")}</option><option value="favorite" ${filter === 'favorite' ? 'selected' : ''}>${t("editor.favorites")}</option>${categories.map(c => `<option value="${e(c)}" ${c === filter ? 'selected' : ''}>${e(c)}</option>`).join('')}</select><select aria-label="${t("editor.formation_filter")}" id="formation-filter"><option value="">${t("editor.all_formations")}</option>${formations.map(f => `<option value="${e(f)}" ${formationFilter === f ? 'selected' : ''}>${e(f)}</option>`).join('')}</select></div>
       <div class="play-list-label"><span>${filter === 'favorite' ? t("editor.favorite_plays") : t("editor.my_plays")} <b>${plays.length}</b></span>${btn('new', 'plus', t("editor.new_play"), 'small-icon')}</div>
-      <div class="play-list">${plays.length ? plays.map((v, i) => `<button data-action="choose:${e(v.id)}" class="play-card ${p.id === v.id ? 'active' : ''}" aria-label="${t("editorExtra.open")}${e(v.title)}" aria-pressed="${p.id === v.id}"><div class="play-thumb">${fieldSVG(v, { showGrid: false }, { thumbnail: true, prefix: `thumb-${i}` })}</div><span class="play-card-info"><strong>${e(v.title)}</strong><small>${e(v.formation)} · ${e(v.category)}</small></span>${v.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : `<div class="empty-list">${t("editorExtra.no_matching_plays_found")}<br>${t("editorExtra.try_another_search_or_clear_the_filters")}<button class="text-button" data-action="clear-filters">${t("editorExtra.clear_all_filters")}</button></div>`}</div>
+      <div class="play-list">${playCards(plays, p)}</div>
       <button class="new-play" data-action="new">${icon('plus')}${t("editorExtra.new_play")}</button>
       <div class="sidebar-bottom"><button data-action="team">${icon('team')}${t("editorExtra.team_and_roster")}</button><button data-action="import">${icon('folder')}${t("editorExtra.import_playbook")}</button><button data-action="help">${icon('help')}${t("editorExtra.guide")}<kbd>?</kbd></button><span class="local-status"><i></i><span id="save-state">${e(saveState)}</span></span></div>
     </aside>
@@ -153,6 +159,7 @@ function render() {
   // Keep the live renderer and its SVG root through edits to the same play.
   // Reconnecting them synchronously avoids a blank canvas between UI commits.
   if(retainedStage){$('#field .pitch-stage').replaceWith(retainedStage);renderField();}
+  thumbnails.mount($('.play-list'), plays);
   bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh();
   restoreScroll();
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
@@ -289,6 +296,7 @@ function refreshMetadata() {
     card.querySelector('strong').textContent=play.title;card.querySelector('small').textContent=`${play.formation} · ${play.category}`;
     card.setAttribute('aria-label',`${t("editorExtra.open")}${play.title}`);
   }
+  thumbnails.refresh(play);
   $('.eyebrow').innerHTML=`${e(play.personnel)} <span>·</span> ${e(play.category)}`;
   $('[data-action="undo"]').disabled=!history.past.length;$('[data-action="redo"]').disabled=!history.future.length;
   renderField();syncEditorChrome();protectReadOnly();
@@ -651,8 +659,9 @@ document.addEventListener('click', event => {
 });
 function refreshPlayList() {
   const p = current(), plays = filtered();
-  $('.play-list').innerHTML = plays.length ? plays.map((v, i) => `<button data-action="choose:${e(v.id)}" class="play-card ${p.id === v.id ? 'active' : ''}" aria-label="${t("editorExtra.open")}${e(v.title)}" aria-pressed="${p.id === v.id}"><div class="play-thumb">${fieldSVG(v, { showGrid: false }, { thumbnail: true, prefix: `thumb-${i}` })}</div><span class="play-card-info"><strong>${e(v.title)}</strong><small>${e(v.formation)} · ${e(v.category)}</small></span>${v.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : `<div class="empty-list">${t("editorExtra.no_matching_plays_found")}<br>${t("editorExtra.try_another_search_or_clear_the_filters")}<button class="text-button" data-action="clear-filters">${t("editorExtra.clear_all_filters")}</button></div>`;
+  $('.play-list').innerHTML = playCards(plays, p);
   $('.play-list-label b').textContent = plays.length;
+  thumbnails.mount($('.play-list'), plays);
 }
 let composingSearch = false;
 function searchInput(input) { query = input.value; refreshPlayList(); }
