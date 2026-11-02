@@ -127,6 +127,8 @@ The application does not persist your API key; refresh or sign out and you must 
 
 [Implementation guide](docs/AI_MATCHUP_IMPLEMENTATION.md) · [Agent workflow and tools](docs/AI_MATCHUP_AGENT_DESIGN.md) · [Future analysis roadmap](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
 
+**No-sign-in demo:** Open the [local preview](https://timpickle.github.io/playbook-studio-web/local.html), select “Try AI analysis”, and provide an OpenRouter or OpenAI model ID and API key. Your browser sends the sample diagrams and entered context directly to the chosen provider; charges may apply. The key stays in page memory and is cleared on exit or refresh. Network or provider CORS restrictions may prevent a connection. This is a single model request, without the cloud LangGraph tool workflow or verified evidence.
+
 ## Traditional and digital views
 
 | View | Experience |
@@ -147,7 +149,7 @@ The board supports **100–300% zoom**, fit-to-screen, and adjustable height. De
 | Entry point | Access | Data and capabilities |
 |---|---|---|
 | [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) | An administrator-provided username and password, or the existing ChatGPT sign-in option | Cloud database, member permissions, access across devices, version history, and AI analysis |
-| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/local.html) | Open the editor directly | Stores data in the current browser. Drawing, rehearsal, and import/export are available; cloud accounts, sharing, and AI analysis are not |
+| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/local.html) | Open the editor directly | Stores data in the current browser. Drawing, rehearsal, import/export and sample AI matchup demo are available; cloud accounts and sharing are not |
 | [GitHub Pages landing page](https://timpickle.github.io/playbook-studio-web/) | Project links and migration tools | Opens the cloud app or local demo and exports data from the earlier browser-only version |
 
 Sharing is scoped to a **playbook**, with independent membership for each one. Owners manage members and restore history; editors change plays; viewers can inspect, rehearse, export, and print. Under **成员与权限** (Members and permissions), an owner can create a member account or add an existing one. Email invitation links must be copied and sent manually.
@@ -164,7 +166,7 @@ Give this section to an AI coding agent that can inspect files and run commands.
 
 | Target | Current support | Storage and capabilities |
 |---|---|---|
-| Local demo | Node.js static editor | Browser-local storage, editing, rehearsal and import/export; no accounts, cloud sharing or AI analysis |
+| Local demo | Node.js static editor | Browser-local storage, editing, rehearsal, import/export and sample AI demo; no accounts or cloud sharing |
 | GitHub Pages / static hosting | Included build script and Pages workflow | Same static capabilities; each visitor's data stays in their browser |
 | Cloud collaboration | Current implementation uses ChatGPT Sites + Worker + D1 | Accounts, shared playbooks and AI analysis require your own Site, database and platform access |
 
@@ -214,7 +216,7 @@ Verify that the page and Madden images load, player movement and route drawing w
 
    `index.html` is the landing page and `local.html` is the editor. Include the generated image assets. See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-Verify the deployed root and `local.html`, language switching, editing, refresh persistence, Madden images, JSON export and workflow status. Static storage does not sync across users or devices and does not provide cloud accounts or AI analysis. Browser data and language preferences are separate across origins.
+Verify the deployed root and `local.html`, language switching, editing, refresh persistence, Madden images, JSON export and workflow status. Static storage does not sync across users or devices and does not provide cloud accounts or sharing; verify the AI demo entry, sample matchup overlay and missing-key message. Browser data and language preferences are separate across origins.
 
 ### Path C: your own cloud collaboration Site
 
