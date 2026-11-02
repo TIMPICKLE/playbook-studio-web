@@ -64,7 +64,7 @@ test('the cloud API persists imported diagrams and rejects invalid image metadat
   assert.equal((await call(`/workspaces/${workspace.id}`, 'PUT', { data, revision: 1 })).status, 400);
 });
 test('Madden UI supports import by click and drag, duplicate prevention, undo, notes, printing, and reload', async t => {
-  const win = new Window({ url: 'http://localhost:3000/', width: 1440, height: 1000 });
+  const win = new Window({ url: 'http://localhost:3000/local.html', width: 1440, height: 1000 });
   // happy-dom has no layout engine, so explicitly report thumbnails as visible.
   win.IntersectionObserver = class {
     constructor(callback) { this.callback = callback; }

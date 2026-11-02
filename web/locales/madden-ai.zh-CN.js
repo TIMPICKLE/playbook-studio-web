@@ -115,6 +115,8 @@ export default {
   "extra.readPlaysAndDiagramFacts": "读取攻防战术和图形事实",
   "extra.enterYourApiKey": "输入你的 API Key",
   "extra.output": "输出 ",
+  "extra.demoIntro": "已选好示例攻防战术。填写自己的 API Key 即可运行分析。",
+  "extra.demoRequestHint": "浏览器会将所选战术图和补充信息直接发送给所选服务商，发起一次模型请求，按该服务商的用量计费。API Key 仅保留在当前页面。服务商需允许浏览器跨域请求。",
   "extra.backToWorkspace": "返回工作台",
   "extra.backToPlayLibrary": "返回战术库",
   "extra.stillToConfirm": "还需要确认",

@@ -5,8 +5,8 @@ import { Window } from 'happy-dom';
 import { STORAGE_KEY, starterWorkspace, encodeWorkspace, decodeWorkspace } from '../web/model.js';
 
 let fixtureId = 0;
-async function editor(t, raw, { readFails = false } = {}) {
-  const win = new Window({ url: 'http://localhost:3000/', width: 1440, height: 1000 });
+async function editor(t, raw, { readFails = false, path = '/local.html' } = {}) {
+  const win = new Window({ url: new URL(path, 'http://localhost:3000').href, width: 1440, height: 1000 });
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
   win.localStorage.setItem(STORAGE_KEY, raw);
   const failure = { read: readFails, write: false };
@@ -99,5 +99,21 @@ test('temporary storage read denial cannot replace the original with examples', 
   f.failure.read = false; f.click('retry-local-load');
   assert.match(f.query('h1').textContent, /Existing local play/);
   assert.equal(f.query('[data-action="favorite"]').disabled, false);
+  assert.equal(f.saved(), raw);
+});
+
+test('recovering a local playbook while viewing its roster refreshes the roster in place', async t => {
+  const original = starterWorkspace();
+  original.roster[0].name = 'Recovered captain';
+  const raw = encodeWorkspace(original), f = await editor(t, raw, { readFails: true, path: '/#roster' });
+  assert.equal(f.query('#roster-root').hidden, false);
+  assert.equal(f.query('[data-roster="add"]').hidden, true);
+  f.failure.read = false;
+  f.click('retry-local-load');
+  assert.equal(f.query('.modal'), null);
+  assert.match(f.query('#roster-root tbody').textContent, /Recovered captain/);
+  assert.equal(f.query('[data-roster="add"]').hidden, false);
+  assert.equal(f.query('#app').hidden, true);
+  assert.equal(f.query('#field'), null);
   assert.equal(f.saved(), raw);
 });
