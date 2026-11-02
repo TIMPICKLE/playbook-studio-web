@@ -125,6 +125,8 @@
 
 应用不持久化保存 API Key，刷新或退出后需重新填写。调用经鉴权后端转发到所选服务商，会发送所选战术的必要数据，并可能产生费用；默认不发送姓名、名单、图片和笔记，可主动附上笔记。分析区分已保存事实、几何观察和模型假设，不预测胜率或真实比赛结果。原图条目无法提供可编辑坐标，分析信息会相应受限。
 
+**无需登录的演示：**打开 [本地预览](https://timpickle.github.io/playbook-studio-web/local.html)，选择「体验 AI 分析」，使用预设的进攻和防守战术，填写 OpenRouter 或 OpenAI 的模型 ID 和 API Key。浏览器会直接向所选服务商发送示例战术数据和填写的补充信息，可能产生费用；密钥仅保留在页面内存中，离开演示或刷新后需重新填写。服务商的网络和浏览器跨域（CORS）策略可能阻止连接。该演示为单次模型调用，不使用云端 LangGraph 多工具分析，也不提供已验证的证据。
+
 [实现说明](docs/AI_MATCHUP_IMPLEMENTATION.md) · [Agent 工作流与工具](docs/AI_MATCHUP_AGENT_DESIGN.md) · [后续分析能力规划](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
 
 ## 传统与数字化模式
@@ -147,7 +149,7 @@
 | 入口 | 使用方式 | 数据与能力 |
 |---|---|---|
 | [云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) | 使用管理员分配的账号密码，或原有 ChatGPT 登录入口 | 云端数据库、成员权限、跨设备访问、历史版本与 AI 分析 |
-| [无需登录演示](https://timpickle.github.io/playbook-studio-web/local.html) | 直接打开编辑器 | 数据保存在当前浏览器；提供绘图、演练与导入导出，不提供云端账号、共享或 AI 分析 |
+| [无需登录演示](https://timpickle.github.io/playbook-studio-web/local.html) | 直接打开编辑器 | 数据保存在当前浏览器；提供绘图、演练、导入导出与预设战术的 AI 分析演示，不提供云端账号和共享 |
 | [GitHub Pages 入口](https://timpickle.github.io/playbook-studio-web/) | 项目入口与旧版迁移 | 链接云端版、导出旧浏览器数据并打开本地演示 |
 
 云端以**战术本**为共享单位，每本的成员权限独立：管理员管理成员与恢复历史，编辑者修改战术，只读成员查看、演练、导出和打印。在「成员与权限」中可以新建成员账号或加入已有账号；邮箱邀请链接需自行复制发送。
@@ -164,7 +166,7 @@
 
 | 目标 | 当前支持 | 数据和功能 |
 |---|---|---|
-| 本机体验 | Node.js 静态编辑器 | 浏览器本地保存；支持画图、演练和导入导出，不提供账号、云端共享或 AI 分析 |
+| 本机体验 | Node.js 静态编辑器 | 浏览器本地保存；支持画图、演练、导入导出与 AI 分析演示，不提供账号或云端共享 |
 | GitHub Pages / 静态托管 | 仓库已有构建脚本与 Pages 工作流 | 与本机静态版相同，数据属于访问者自己的浏览器 |
 | 云端协作 | 当前实现运行在 ChatGPT Sites + Worker + D1 | 支持账号、战术本共享及 AI 对位分析；部署者需要自己的站点、数据库和平台授权 |
 
@@ -213,7 +215,7 @@ npm run start:local
 
    产物的 `index.html` 是入口，`local.html` 是编辑器。不要只复制 `web/` 或漏掉生成的图片资源。Pages 的具体仓库权限与设置见 [GitHub 官方说明](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
 
-**Agent 验收：**打开实际 Pages 根地址及其下的 `local.html`，验证中英文、战术编辑、刷新保存、Madden 图片和 JSON 导出；查看 Actions 是否成功。说明浏览器数据不会自动同步到其他用户或设备，也没有云端账号和 AI 分析。语言与数据在不同域名之间互不共享。
+**Agent 验收：**打开实际 Pages 根地址及其下的 `local.html`，验证中英文、战术编辑、刷新保存、Madden 图片和 JSON 导出；查看 Actions 是否成功。说明浏览器数据不会自动同步到其他用户或设备，也没有云端账号和云端共享；验证 AI 演示入口、默认攻防叠图与空 Key 的提示。语言与数据在不同域名之间互不共享。
 
 ### 路径 C：自己的云端协作站点
 

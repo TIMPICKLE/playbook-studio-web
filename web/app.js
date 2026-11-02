@@ -6,6 +6,7 @@ import { makeMaddenPlay, hasEditableTrace, getEditableEntry, spaceMaddenLine } f
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, CLOUD_SITE, request } from './cloud.js';
 import { createMatchupView } from './ai-matchup.js';
+import { createDemoRequest } from './ai-demo.js';
 import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
@@ -774,8 +775,21 @@ if (cloudMode()) {
     openModal, closeModal, toast, download
   });
   shared.init();
-} else if (location.hostname !== 'localhost') {
-  $('#cloud-root').innerHTML = `<div class="cloud-local-entry"><span>${t("editor.local_offline_preview_changes_stay_in_this_browser")}</span><a class="button primary" href="${CLOUD_SITE}/editor/index.html" target="_top">${t("editor.open_cloud_app")}</a></div>`;
+} else {
+  const demoData = localizedStarterWorkspace();
+  const demoRecord = { id: 'demo', revision: 0, title: getLocale() === 'en' ? 'Sample matchup' : '示例战术本' };
+  const demoView = createMatchupView({ root: $('#ai-matchup-root'), request: createDemoRequest(() => demoData), getCurrent: () => demoRecord, getData: () => demoData, isDirty: () => false, demo: true });
+  const en = getLocale() === 'en';
+  $('#cloud-root').innerHTML = `<div class="cloud-local-entry"><span>${t("editor.local_offline_preview_changes_stay_in_this_browser")}</span><button class="button primary" type="button" data-demo-action="open">${en ? 'Try AI analysis' : '体验 AI 分析'}</button><a class="button subtle" href="${CLOUD_SITE}/editor/index.html" target="_top">${t("editor.open_cloud_app")}</a></div>`;
+  $('#cloud-root').addEventListener('click', event => {
+    if (!event.target.closest('[data-demo-action="open"]')) return;
+    maddenLibrary.close(); $('#app').hidden = true; $('.skip-link').hidden = true;
+    $('#cloud-root').hidden = true; demoView.show(true); window.scrollTo(0, 0);
+  });
+  $('#ai-matchup-root').addEventListener('click', event => {
+    if (!event.target.closest('[data-cloud-action="home"]')) return;
+    demoView.show(false); $('#cloud-root').hidden = false; $('#app').hidden = false; $('.skip-link').hidden = false; window.scrollTo(0, 0);
+  });
 }
 
 // This control is independent of the editor so it also works on sign-in and home.

@@ -35,9 +35,10 @@ export function composeMatchup(offense, defense, mirrorDefense = false) {
   return { title: '对局叠图', players, routes, zones, annotations: [], ball: { holderId, receiverId: '', passAt: 2, arriveAt: 3 } };
 }
 
-export function createMatchupView({ root, request, getCurrent, getData, isDirty }) {
+export function createMatchupView({ root, request, getCurrent, getData, isDirty, demo = false }) {
   let active = false, result = null, activeScenario = 0, controller = null, generation = 0;
   const state = { offense: '', defense: '', perspective: '', coverage: 'unknown', mode: 'real_football', context: '', mirrorDefense: false, includeNotes: false, provider: 'deepseek', protocol: 'openai', model: modelDefaults.deepseek, apiKey: '', baseUrl: '' };
+  if (demo) { state.provider = 'openrouter'; state.model = 'openai/gpt-4o-mini'; }
   let lastWorkspace = '', lastRevision = 0;
   const currentPlay = (book, id) => getData()?.plays.find(p => p.book === book && p.id === id);
   const plays = book => (getData()?.plays || []).filter(p => p.book === book);
@@ -62,7 +63,7 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty 
   }
   function show(showing) {
     active = showing; root.hidden = !showing;
-    if (!showing) { if (controller) { generation++; controller.abort(); controller = null; } return; }
+    if (!showing) { if (controller) { generation++; controller.abort(); controller = null; } if (demo) { state.apiKey = ''; result = null; root.replaceChildren(); } return; }
     render();
   }
   function onData(_data, record) {
@@ -85,6 +86,19 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty 
     const board = offense && defense ? fieldSVG(composeMatchup(offense, defense, state.mirrorDefense), { showGrid: true, fieldTheme: 'light' }, { prefix: 'matchup', thumbnail: false }).replace('role="application" aria-label="战术绘图区" tabindex="0"', 'role="img" aria-label="攻防战术叠图"').replaceAll('role="button"', '').replaceAll('tabindex="0"', '').replaceAll('aria-pressed="false"', '') : '';
     const referenceNotice = offense?.reference || defense?.reference ? ("<p class=\"ai-inline-note\">" + t("extra.onePlayIsImageOnlyAndHas") + "</p>") : '';
     root.innerHTML = `<main class="ai-page"><header class="ai-page-header"><div><span class="ai-kicker">${t("extra.playerScenarioAnalysis")}</span><h1>${t("extra.exploreThePossibilities")}</h1><p>${t("extra.chooseAnOffensiveAndDefensivePlayTo")}</p></div><button class="ai-link-button" data-cloud-action="home">← ${t("extra.backToWorkspace")}</button></header><div class="ai-layout"><section class="ai-panel ai-setup"><div class="ai-section-heading"><span class="ai-step">01</span><div><h2>${t("extra.chooseMatchup")}</h2><p>${t("extra.chooseFromTheSamePlaybook")}</p></div></div><div class="ai-book"><div><small>${t("extra.currentPlaybook")}</small><strong>${e(record.title)}</strong></div><button type="button" data-cloud-action="books">${t("extra.switch")}</button></div><label class="ai-field"><span>${t("extra.offensivePlay")}</span><select data-ai-field="offense" ${plays('offense').length ? '' : 'disabled'}>${plays('offense').length ? plays('offense').map(p => option(p.id, p.title, state.offense)).join('') : ("<option>" + t("extra.noOffensivePlays") + "</option>")}</select></label><label class="ai-field"><span>${t("extra.defensivePlay")}</span><select data-ai-field="defense" ${plays('defense').length ? '' : 'disabled'}>${plays('defense').length ? plays('defense').map(p => option(p.id, p.title, state.defense)).join('') : ("<option>" + t("extra.noDefensivePlays") + "</option>")}</select></label><label class="ai-check"><input type="checkbox" data-ai-field="mirrorDefense" ${state.mirrorDefense ? 'checked' : ''}><span>${t("extra.mirrorDefenseHorizontallyDoesNotChangeThe")}</span></label>${!offense || !defense ? ("<p class=\"ai-inline-note\">" + t("extra.firstAddOffensiveAndDefensivePlaysTo") + "</p>") : ''}<label class="ai-field"><span>${t("extra.perspective")} <small>${t("extra.optional")}</small></span><select data-ai-field="perspective"><option value="">${t("extra.overallPerspective")}</option>${sideOptions}</select></label><div class="ai-two-fields"><label class="ai-field"><span>${t("extra.defensiveCoverage")} <small>${t("extra.optional")}</small></span><select data-ai-field="coverage">${Object.entries(coverageLabels).map(([v,l]) => option(v,l,state.coverage)).join('')}</select></label><label class="ai-field"><span>${t("extra.analysisContext")}</span><select data-ai-field="mode">${option('real_football',(t("extra.realFootball")),state.mode)}${option('madden',("Madden " + t("extra.diagram")),state.mode)}</select></label></div><label class="ai-field"><span>${t("extra.additionalGameContext")} <small>${t("extra.optional")}</small></span><textarea data-ai-field="context" maxlength="800" rows="3" placeholder="${t("extra.exampleThirdAnd6ConfirmedCoverageResponsibilities")}">${e(state.context)}</textarea></label><div class="ai-section-divider"></div><div class="ai-section-heading"><span class="ai-step">02</span><div><h2>${t("extra.connectModel")}</h2><p>${t("extra.useYourOwnProviderAndCredits")}</p></div></div><label class="ai-field"><span>${t("extra.modelProvider")}</span><select data-ai-field="provider">${option('deepseek','DeepSeek',state.provider)}${option('anthropic','Anthropic / Claude',state.provider)}${option('openrouter','OpenRouter',state.provider)}${option('openai','OpenAI',state.provider)}${option('custom',(t("extra.otherCompatibleServiceAdministratorConfigurationRequired")),state.provider)}</select></label>${['deepseek','custom'].includes(state.provider) ? `<label class="ai-field"><span>API ${t("extra.format")}</span><select data-ai-field="protocol">${option('openai',("OpenAI " + t("extra.format")),state.protocol)}${option('anthropic',("Anthropic " + t("extra.format")),state.protocol)}</select></label>` : ''}${state.provider === 'custom' ? `<label class="ai-field"><span>API Base URL</span><input data-ai-field="baseUrl" type="url" maxlength="400" placeholder="https://api.example.com/v1" value="${e(state.baseUrl)}"><small>${t("extra.anAdministratorMustAllowTheServiceHost")}</small></label>` : ''}<label class="ai-field"><span>${t("extra.modelNameId")}</span><input data-ai-field="model" type="text" maxlength="160" autocomplete="off" placeholder="${t("extra.forExampleDeepseekFlashOrAProvider")}" value="${e(state.model)}"></label><label class="ai-field"><span>API Key</span><input data-ai-field="apiKey" type="password" maxlength="512" autocomplete="off" placeholder="${t("extra.enterYourApiKey")}"><small>${t("extra.keptOnlyOnThisPageReEnter")}</small></label><label class="ai-check"><input type="checkbox" data-ai-field="includeNotes" ${state.includeNotes ? 'checked' : ''}><span>${t("extra.alsoSendTheSelectedCoachingNotesUp")}</span></label><button class="ai-submit" type="button" data-ai-action="analyze" ${offense && defense ? '' : 'disabled'}>${t("extra.analyzeMatchup2")} <span>✳</span></button><button class="ai-cancel" type="button" data-ai-action="cancel" hidden>${t("extra.stopAnalysis")}</button><p class="ai-submit-hint">${t("extra.chooseAModelThatSupportsToolCalls")}</p><div class="ai-error" role="alert" hidden></div></section><section class="ai-board-card" aria-label="${t("extra.matchupOverlay")}"><div class="ai-board-heading"><div><h2>${t("extra.matchupOverlay")}</h2></div><div class="ai-board-legend"><span><i class="ai-dot offense"></i>${t("extra.offense")}</span><span><i class="ai-dot defense"></i>${t("extra.defense")}</span></div></div><div class="ai-board">${board || ("<div class=\"ai-board-placeholder\">" + t("extra.chooseOffensiveAndDefensivePlaysToView") + "</div>")}</div>${referenceNotice}<p class="ai-board-caption">${t("extra.diagramOverlayActualAssignmentsAndTimingDepend")}</p></section><section id="ai-results" aria-label="${t("extra.matchupAnalysis")}">${resultHTML()}</section></div></main>`;
+    if (demo) {
+      const en = getLocale() === 'en';
+      const provider = root.querySelector('[data-ai-field="provider"]');
+      for (const option of [...provider.options]) if (!['openrouter', 'openai'].includes(option.value)) option.remove();
+      provider.value = state.provider;
+      root.querySelector('[data-cloud-action="books"]')?.remove();
+      const hint = root.querySelector('.ai-submit-hint');
+      hint.textContent = en ? 'Demo uses one direct browser request, not the cloud agent workflow. The selected diagrams and context are sent to your chosen provider and may incur charges. Your key stays in this page only. Provider CORS restrictions may prevent access.' : '演示通过浏览器直接调用一次模型，不包含云端 Agent 工作流。所选战术图和补充信息会发送至你选择的服务商，可能产生费用。密钥仅保留在当前页面。服务商的跨域限制可能导致连接失败。';
+      const heading = root.querySelector('.ai-page-header p');
+      heading.textContent = en ? 'Try a sample matchup with your own API key.' : '使用预设攻防战术和你自己的 API Key 体验分析。';
+      const back = root.querySelector('[data-cloud-action="home"]');
+      back.textContent = en ? '← Back to editor' : '← 返回编辑器';
+    }
     const key = root.querySelector('[data-ai-field="apiKey"]'); if (key) key.value = state.apiKey;
     paintEvidence();
   }
@@ -109,7 +123,7 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty 
     if (!field || !Object.hasOwn(state, field)) return;
     state[field] = node.type === 'checkbox' ? node.checked : node.value;
     if (field === 'provider') {
-      state.model = modelDefaults[state.provider] || '';
+      state.model = demo && state.provider === 'openrouter' ? 'openai/gpt-4o-mini' : modelDefaults[state.provider] || '';
       state.protocol = state.provider === 'anthropic' ? 'anthropic' : 'openai';
       state.apiKey = '';
     }
