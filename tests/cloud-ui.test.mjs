@@ -36,6 +36,22 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
     await import(`../web/app.js?cloud-test=${Date.now()}`); await settle();
     assert.ok(q('[data-cloud-action="enter-editor"]')); assert.ok(q('[data-cloud-action="enter-analysis"]'));
     assert.equal(q('#app').hidden, true);
+    await t.test('a viewer can browse the cloud roster but cannot change it', async () => {
+      q('[data-cloud-action="enter-roster"]').click(); await settle();
+      const root = q('#roster-root');
+      assert.equal(root.hidden, false);
+      assert.equal(q('#app').hidden, true);
+      assert.match(root.querySelector('tbody').textContent, new RegExp(record.data.roster[0].name));
+      assert.equal(root.querySelector('.roster-readonly').hidden, false);
+      assert.equal(root.querySelector('[data-roster="edit"]'), null);
+      const add = root.querySelector('[data-roster="add"]');
+      assert.equal(add.hidden, true);
+      add.click(); // A scripted activation must also respect the role.
+      assert.equal(root.querySelector('dialog[open]'), null);
+      assert.equal(calls.some(call => call.method === 'PUT'), false);
+      root.querySelector('[data-cloud-action="home"]').click(); await settle();
+      assert.equal(root.hidden, true);
+    });
     q('[data-cloud-action="enter-editor"]').click(); await settle();
     await t.test('viewer sees shared data and exports but cannot mutate via controls, scripted events or keyboard', async () => {
       assert.equal(q('#app').hidden, false); assert.equal(q('[data-action="add-defense-43"]').disabled, true); assert.equal(q('[data-prop="title"]').disabled, true);
@@ -65,6 +81,23 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
       await new Promise(resolve => setTimeout(resolve, 1000)); await settle();
       assert.equal(record.data.plays[0].title, 'Cloud Mesh'); assert.equal(calls.filter(c => c.method === 'PUT').length, 1);
       assert.match(q('#cloud-status').textContent, /已同步/); assert.equal(win.localStorage.getItem(STORAGE_KEY), legacy);
+    });
+    await t.test('a roster edit saves to the selected cloud playbook and never overwrites a local demo', async () => {
+      q('[data-cloud-action="home"]').click(); await settle();
+      q('[data-cloud-action="enter-roster"]').click(); await settle();
+      const root = q('#roster-root'), original = clone(record.data), player = original.roster[0];
+      root.querySelector(`[data-roster="edit"][data-id="${player.id}"]`).click();
+      root.querySelector('input[name="name"]').value = 'Cloud player';
+      root.querySelector('[type="submit"]').click();
+      q('[data-cloud-action="save-now"]').click(); await settle();
+      const writes = calls.filter(call => call.method === 'PUT');
+      assert.equal(writes.length, 2);
+      assert.equal(writes.at(-1).path, '/api/workspaces/book');
+      assert.equal(record.data.roster.find(item => item.id === player.id).name, 'Cloud player');
+      assert.deepEqual(record.data.plays, original.plays);
+      assert.equal(win.localStorage.getItem(STORAGE_KEY), legacy);
+      root.querySelector('[data-cloud-action="home"]').click(); await settle();
+      q('[data-cloud-action="enter-editor"]').click(); await settle();
     });
     await t.test('creating from a JSON file uploads the complete validated backup and exposes owner member tools', async () => {
       q('[data-cloud-action="new"]').click(); const incoming = starterWorkspace(); incoming.plays[0].title = 'Migrated';

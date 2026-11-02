@@ -30,7 +30,7 @@ test('scroll restoration is instant and atomic even when the digital theme enabl
 });
 
 test('zoomed editor retains the viewport through deletion and history operations', async t => {
-  const win=new Window({url:'http://localhost:3000/',width:1440,height:1000});
+  const win=new Window({url:'http://localhost:3000/local.html',width:1440,height:1000});
   const doc=win.document;
   doc.head.innerHTML=`<style>${readFileSync(new URL('../web/board-layout.css',import.meta.url),'utf8')}</style>`;
   doc.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];

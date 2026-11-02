@@ -1,4 +1,5 @@
 import { t } from './i18n.js';
+import { studioHome } from './studio-home.js';
 import { effectsControl } from './effects.js';
 import { starterWorkspace, decodeWorkspace, escapeHTML as e, encodeWorkspace, STORAGE_KEY } from './model.js';
 import { CloudSync } from './sync.js';
@@ -31,6 +32,7 @@ export class SharedWorkspace {
   get canEdit() { return !!this.sync?.canEdit; }
   get current() { return this.sync?.current; }
   get dirty() { return !!this.sync?.dirty; }
+  get rosterFormOpen() { return this.mode === 'roster' && this.hooks.canLeaveRoster?.() === false; }
   setStatus(value) { this.status = value; this.hooks.onStatus(displayStatus(value)); const node = document.querySelector('#cloud-status'); if (node) { node.innerHTML = `<i></i><span>${e(displayStatus(value))}</span>`; node.dataset.state = this.statusState(); } queueMicrotask(() => this.updateBookCards()); }
   renderBar() {
     const root = document.querySelector('#cloud-root');
@@ -38,19 +40,22 @@ export class SharedWorkspace {
     if (this.mode === 'home') { this.renderHome(); return; }
     reconcileHTML(root, `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="40" height="22" alt=""><span>Playbook Studio<small>${t('cloud.teamPlays')}</small></span></a>${currentBookCard(this.books, this.current)}<div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="${t('cloud.syncDetails')}" data-state="${this.statusState()}"><i></i><span>${e(displayStatus(this.status))}</span></button>${this.current && this.canEdit ? `<button class="save-now" data-cloud-action="save-now">${t('cloud.saveNow')}</button>` : ''}</div><nav class="cloud-bar-actions" aria-label="${t('cloud.collaborationAndAccount')}"><button data-cloud-action="home">${t('cloud.workspaceBack')}</button><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? `<button data-cloud-action="members">${t('cloud.membersPermissions')}</button>` : ''}${this.current ? `<button data-cloud-action="history">${t('cloud.versionHistory')}</button>` : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? `<button data-cloud-action="password">${t('cloud.changePassword')}</button>` : ''}<button data-cloud-action="new">${t('cloud.newBook')}</button><button data-cloud-action="migrate">${t('cloud.importBackup')}</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? t('cloud.logoutSwitch') : t('cloud.switchTeamAccount')}</button></div></details></nav></header>`);
     this.updateBookCards();
-    if (!this.books.length && this.mode === 'editor') root.insertAdjacentHTML('beforeend', `<section class="cloud-empty"><div class="empty-illustration">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'empty' })}</div><div><span class="section-kicker">${t('cloud.startBook')}</span><h1>${t('cloud.shareIdeas')}</h1><p>${t('cloud.inviteDescription')}</p><div class="empty-actions"><button class="button primary" data-cloud-action="new">${t('cloud.newTeamBook')} ${arrowIcon}</button><button class="button subtle" data-cloud-action="migrate">${t('cloud.importExisting')}</button></div><small>${this.user.authMode === 'password' ? t('cloud.missingTeam') : t('cloud.chatgptTeam')}</small>${this.user.authMode !== 'password' ? `<button class="text-button" data-cloud-action="logout">${t('cloud.switchTeamAccount')} →</button>` : ''}</div></section>`);
+    if (!this.books.length && (this.mode === 'editor' || this.mode === 'roster')) root.insertAdjacentHTML('beforeend', `<section class="cloud-empty"><div class="empty-illustration">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'empty' })}</div><div><span class="section-kicker">${t('cloud.startBook')}</span><h1>${t(this.mode === 'roster' ? 'roster.title' : 'cloud.shareIdeas')}</h1><p>${t(this.mode === 'roster' ? 'cloud.rosterNeedsBook' : 'cloud.inviteDescription')}</p><div class="empty-actions"><button class="button primary" data-cloud-action="new">${t('cloud.newTeamBook')} ${arrowIcon}</button><button class="button subtle" data-cloud-action="migrate">${t('cloud.importExisting')}</button></div><small>${this.user.authMode === 'password' ? t('cloud.missingTeam') : t('cloud.chatgptTeam')}</small>${this.user.authMode !== 'password' ? `<button class="text-button" data-cloud-action="logout">${t('cloud.switchTeamAccount')} →</button>` : ''}</div></section>`);
   }
   renderHome() {
-    const name = this.user.name || this.user.username || t('cloud.player');
     document.title = t('cloud.workspaceTitle');
-    document.querySelector('#cloud-root').innerHTML = `<div class="studio-home"><header class="studio-home-header"><div class="studio-home-brand"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" alt="" width="48" height="26"><span>Playbook<small>Studio</small></span></div><div class="studio-home-account"><span>${t('cloud.hello')}${e(name)}</span><button data-cloud-action="logout">${this.user.authMode === 'password' ? t('cloud.signOut') : t('cloud.switchAccount')}</button></div></header><main class="studio-home-main"><div class="studio-home-intro"><h1>${t('cloud.homeTitle')}</h1><p>${t('cloud.homeDescription')}</p></div><div class="studio-home-cards"><button class="studio-choice studio-choice-editor" data-cloud-action="enter-editor"><div class="choice-art choice-art-editor">${fieldSVG(starterWorkspace().plays[0], { showGrid:false }, { thumbnail:true, prefix:'home-editor' })}</div><div class="choice-body"><h2>${t('cloud.editBook')}</h2><p>${t('cloud.editDescription')}</p><span class="choice-link">${t('cloud.enterBook')} <b aria-hidden="true">→</b></span></div></button><button class="studio-choice studio-choice-ai" data-cloud-action="enter-analysis"><div class="choice-art choice-art-ai"><div class="choice-orbit orbit-one"></div><div class="choice-orbit orbit-two"></div><div class="choice-node node-offense">O</div><div class="choice-node node-defense">D</div><div class="choice-ai-label">${t('cloud.ifThen')}</div></div><div class="choice-body"><h2>${t('cloud.aiAnalysis')}</h2><p>${t('cloud.aiDescription')}</p><span class="choice-link">${t('cloud.startAnalysis')} <b aria-hidden="true">→</b></span></div></button></div><div class="studio-home-foot"><span>${this.books.length ? t('cloud.homeBookCount', { count: this.books.length }) : t('cloud.noBooksIntro')}</span></div></main></div>`;
+    document.querySelector('#cloud-root').innerHTML = studioHome({ user: this.user, bookCount: this.books.length });
   }
   setMode(mode) {
     if (this.dirty) throw new Error(t('cloud.unsyncedChanges'));
+    if (this.rosterFormOpen) return;
+    const previous = this.mode;
     this.mode = mode;
     this.hooks.showEditor(mode === 'editor' && !!this.current);
     this.hooks.showAnalysis?.(mode === 'analysis');
+    this.hooks.showRoster?.(mode === 'roster' && !!this.current && !this.accessError);
     this.renderBar();
+    if (mode === 'home') document.querySelector(`[data-cloud-action="enter-${previous}"]`)?.focus({ preventScroll: true });
     window.scrollTo?.(0, 0);
   }
   statusState() { return /冲突|失败|失效|不可用|尚未|未保存|变更/.test(this.status) ? 'error' : /离线|等待|正在|恢复/.test(this.status) ? 'pending' : 'saved'; }
@@ -82,8 +87,8 @@ export class SharedWorkspace {
     document.querySelector('#cloud-root').innerHTML = `<div class="loading-workspace" aria-busy="true"><div></div><div></div><p>${t('cloud.loadingTeam')}</p></div>`;
     try {
       this.user = (await request('/api/session')).user; this.renderBar(); if (!this.user) return;
-      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { this.hooks.onData(data, record); this.hooks.onAnalysisData?.(data, record); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); }, onConflict: (remote, local, reason) => this.conflictModal(remote, local, reason), onAccessLost: error => this.accessLost(error) });
-      window.addEventListener('beforeunload', event => { if (this.dirty) { event.preventDefault(); event.returnValue = ''; } });
+      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { this.hooks.onData(data, record); this.hooks.onAnalysisData?.(data, record); if (this.mode === 'roster') this.hooks.showRoster?.(true); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); }, onConflict: (remote, local, reason) => this.conflictModal(remote, local, reason), onAccessLost: error => this.accessLost(error) });
+      window.addEventListener('beforeunload', event => { if (this.dirty || this.rosterFormOpen) { event.preventDefault(); event.returnValue = ''; } });
       await this.refreshBooks();
       const invite = new URLSearchParams(location.search).get('invite');
       if (invite) {
@@ -104,7 +109,7 @@ export class SharedWorkspace {
   }
   showBooks() {
     if (this.cardPicker) return;
-    this.hooks.openModal(t('cloud.switchBook'), '<div id="book-card-picker"></div>', `<button class="button subtle" data-action="close-modal">${t('cloud.returnEdit')}</button><button class="button primary" data-cloud-action="new">＋ ${t('cloud.newBook')}</button>`, true);
+    this.hooks.openModal(t('cloud.switchBook'), '<div id="book-card-picker"></div>', `<button class="button subtle" data-action="close-modal">${t(this.mode === 'editor' ? 'cloud.returnEdit' : 'cloud.cancel')}</button><button class="button primary" data-cloud-action="new">＋ ${t('cloud.newBook')}</button>`, true);
     document.querySelector('#book-card-picker').closest('.modal').classList.add('book-switcher-modal');
     document.querySelector('#book-card-picker').closest('.modal-backdrop').classList.add('book-picker-backdrop');
     this.cardPicker = createBookSwitcher(document.querySelector('#book-card-picker'), {
@@ -117,6 +122,7 @@ export class SharedWorkspace {
     if (!workspaceId || this.switching) return false;
     if (this.current?.id === workspaceId) return true;
     if (this.dirty) { this.updateBookCards(); this.hooks.toast(t('cloud.bookUnsynced')); return false; }
+    if (this.rosterFormOpen) return false;
     this.switching = workspaceId; this.renderBar();
     try {
       const record = await request(`/api/workspaces/${encodeURIComponent(workspaceId)}`); this.loadRecord(record);
@@ -127,6 +133,7 @@ export class SharedWorkspace {
   schedule(data) { this.sync?.schedule(data); }
   showCreate(data = null, label = t('cloud.newCloudBook')) {
     if (this.dirty) { this.hooks.toast(t('cloud.syncBefore')); return; }
+    if (this.rosterFormOpen) return;
     if (this.cardPicker) this.hooks.closeModal();
     this.createData = data;
     this.hooks.openModal(label, `<label class="form-field"><span>${t('cloud.bookTitle')}</span><input id="cloud-new-title" value="${e(data ? data.team.name : t('cloud.myTeamBook'))}" maxlength="80"></label>${data ? '' : `<label class="form-field"><span>${t('cloud.migrateOptional')}</span><input id="cloud-new-file" type="file" accept=".json,application/json"></label>`}<p class="muted small">${t('cloud.newBookDescription')}${data ? `${t('cloud.uploadCount', { count: data.plays.length })}` : t('cloud.newBookNoFile')}</p>`, `<button class="button primary" data-cloud-action="create">${t('cloud.saveCloud')}</button>`);
@@ -166,11 +173,12 @@ export class SharedWorkspace {
   accessLost(error) {
     this.accessError = error;
     this.sync.current.role = error.status === 403 ? 'viewer' : 'removed';
-    this.sync.dispose(); this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.renderBar();
+    this.sync.dispose(); this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.hooks.showRoster?.(false); this.renderBar();
     this.hooks.openModal(t('cloud.accessChanged'), `<p>${e(error.message)}</p><p class="muted small">${this.sync.draftSaved ? t('cloud.draftRetained') : this.sync.pending ? t('cloud.backendDraftError') : t('cloud.reloadPermissions')}</p>`, `${this.sync.pending ? `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraft')}</button>` : ''}${error.status === 403 ? `<button class="button primary" data-cloud-action="reload-cloud">${t('cloud.readonlyReload')}</button>` : `<a class="button primary" href="/editor/index.html" target="_top">${t('cloud.openBookAgain')}</a>`}`, true);
   }
   async handleAction(node) {
     const action = node.dataset.cloudAction;
+    if (action === 'enter-roster') { if (this.accessError) return this.accessLost(this.accessError); return this.setMode('roster'); }
     if (action === 'enter-editor') return this.setMode('editor');
     if (action === 'enter-analysis') return this.setMode('analysis');
     if (action === 'home') return this.setMode('home');
@@ -181,7 +189,7 @@ export class SharedWorkspace {
       if (!input.value.trim() || !pass.value) { (input.value.trim() ? pass : input).setAttribute('aria-invalid','true'); (input.value.trim() ? pass : input).focus(); throw new Error(t('cloud.selectAccountPassword')); }
       await request('/api/auth/login', { method: 'POST', body: { username: input.value.trim(), password: pass.value } }); pass.value = ''; location.reload(); return;
     }
-    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
+    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen) return; if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
     if (action === 'toggle-password') { const input = document.getElementById(node.dataset.target); input.type = input.type === 'password' ? 'text' : 'password'; node.textContent = t(input.type === 'password' ? 'cloud.show' : 'cloud.hide'); node.setAttribute('aria-pressed',String(input.type === 'text')); node.setAttribute('aria-label', t(input.type === 'text' ? 'cloud.hidePassword' : 'cloud.showPassword')); return; }
     if (action === 'privacy') return this.hooks.openModal(t('cloud.privacyTitle'), `<p>${t('cloud.privacyStorage')}</p><p>${t('cloud.privacyPermissions')}</p><p>${t('cloud.privacySecurity')}</p>`, `<button class="button primary" data-action="close-modal">${t('cloud.close')}</button>`);
     if (action === 'save-now') { if (this.sync?.viewError) throw this.sync.viewError; if (!this.sync?.pending) return this.hooks.toast(t('cloud.savedCloud')); await this.sync.flush(); if (!this.sync.dirty) this.hooks.toast(t('cloud.savedShared')); return; }

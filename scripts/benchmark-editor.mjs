@@ -4,7 +4,7 @@ import { performance } from 'node:perf_hooks';
 import { Window } from 'happy-dom';
 import { starterWorkspace, STORAGE_KEY, encodeWorkspace } from '../web/model.js';
 
-const win = new Window({ url: 'http://localhost:3000/', width: 1440, height: 900 });
+const win = new Window({ url: 'http://localhost:3000/local.html', width: 1440, height: 900 });
 const doc = win.document;
 // happy-dom has no layout engine: model the first 10 thumbnails as visible.
 win.IntersectionObserver = class {

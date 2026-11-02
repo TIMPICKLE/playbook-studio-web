@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { STORAGE_KEY, decodeWorkspace } from '../web/model.js';
 
 test('touch workspace panels, zoom and orientation preserve editable play data', async t => {
-  const win = new Window({ url:'http://localhost:3000/', width:390, height:844 });
+  const win = new Window({ url:'http://localhost:3000/local.html', width:390, height:844 });
   win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
   const names=['window','document','navigator','localStorage','location','Image','Blob','requestAnimationFrame','cancelAnimationFrame'];
   const previous=Object.fromEntries(names.map(n=>[n,Object.getOwnPropertyDescriptor(globalThis,n)]));

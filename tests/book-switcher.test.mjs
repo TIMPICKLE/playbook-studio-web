@@ -110,6 +110,25 @@ test('card switching loads the right workspace, guards pending changes and survi
       click('[data-book-id="c"]');await settle();assert.equal(q('#book-card-picker'),null);
       assert.match(q('h1').textContent,/未同步修改/);
     });
+    await t.test('roster follows the selected playbook and applies its role when switching', async () => {
+      records.a.data.roster[0].name = 'A Team Captain';
+      records.b.data.roster[0].name = 'B Team Captain';
+      click('[data-cloud-action="home"]'); await settle();
+      click('[data-cloud-action="enter-roster"]'); await settle();
+      click('[data-cloud-action="books"]'); click('[data-book-id="a"]'); await settle();
+      const root = q('#roster-root');
+      assert.equal(root.hidden, false);
+      assert.match(root.querySelector('tbody').textContent, /A Team Captain/);
+      assert.equal(root.querySelector('[data-roster="add"]').hidden, false);
+      click('[data-cloud-action="books"]'); click('[data-book-id="b"]'); await settle();
+      finishB(); await settle();
+      assert.match(root.querySelector('tbody').textContent, /B Team Captain/);
+      assert.doesNotMatch(root.querySelector('tbody').textContent, /A Team Captain/);
+      assert.equal(root.querySelector('.roster-readonly').hidden, false);
+      assert.equal(root.querySelector('[data-roster="edit"]'), null);
+      root.querySelector('[data-cloud-action="home"]').click(); await settle();
+      click('[data-cloud-action="enter-editor"]'); await settle();
+    });
     await t.test('new book uses the existing create flow and Escape returns focus to the current card',async()=>{
       click('[data-cloud-action="books"]');click('#modal-root [data-cloud-action="new"]');
       assert.equal(q('#book-card-picker'),null);assert.ok(q('#cloud-new-title'));

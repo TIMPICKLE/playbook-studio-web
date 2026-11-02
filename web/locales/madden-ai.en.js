@@ -115,6 +115,8 @@ export default {
   "extra.readPlaysAndDiagramFacts": "Read plays and diagram facts",
   "extra.enterYourApiKey": "Enter your API key",
   "extra.output": "output: ",
+  "extra.demoIntro": "Start with the sample offensive and defensive plays. Enter your API key to run the analysis.",
+  "extra.demoRequestHint": "Your browser sends the selected diagrams and context directly to your provider in one model request. Provider charges apply. Your API key stays on this page. The provider must allow cross-origin browser requests.",
   "extra.backToWorkspace": "Back to workspace",
   "extra.backToPlayLibrary": "Back to play library",
   "extra.stillToConfirm": "Still to confirm",

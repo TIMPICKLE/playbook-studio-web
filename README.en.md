@@ -8,7 +8,7 @@
 
 An American football playbook workspace for drawing plays, rehearsing routes, analyzing matchups, and sharing a playbook with your team.
 
-[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Try without signing in](https://timpickle.github.io/playbook-studio-web/local.html) · [Visual walkthrough](#visual-walkthrough) · [AI deployment](#ai-agent-deployment-guide) · [Local development](#local-development)
+[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Live demo · no sign-in](https://timpickle.github.io/playbook-studio-web/) · [Visual walkthrough](#visual-walkthrough) · [AI deployment](#ai-agent-deployment-guide) · [Local development](#local-development)
 
 </div>
 
@@ -24,17 +24,18 @@ Choose a play on the left, arrange players and draw routes in the center, and ad
 |---|---|
 | **Design plays** | Move offensive and defensive players; draw routes, blocks, pre-snap motion, passes, coverage zones, and text. Use curves, option routes, mirroring, undo, and redo |
 | **Explain and rehearse** | Play, pause, loop, change speed, and scrub the timeline. Set route start times, durations, ball carriers, and pass timing |
-| **Build a playbook** | Organize offense, defense, and special teams; search, favorite, duplicate, and save formation templates, rosters, and coaching notes |
+| **Build a playbook** | Organize offense, defense, and special teams; search, favorite, duplicate, and save formation templates and coaching notes |
+| **Manage players** | Open the current playbook’s roster from the workspace. Search by name, jersey number or position, and add, edit or remove players |
 | **Import Madden plays** | Filter, preview, and add Eagles / Ravens plays. Edit players and routes in 437 reconstructed entries |
 | **Analyze matchups with AI** | Select an offensive and a defensive play in the cloud app, use your own model service and API key, and review conditional scenarios, player choices, evidence, and missing information |
 | **Share with your team** | Cloud autosave, access across devices, per-playbook permissions, conflict handling, and the latest 20 saved versions |
 | **Export and print** | Export PNG, SVG, an individual play, or a full playbook as JSON. Print A4 playbooks, nine-panel wristband cards, and call sheets |
 
-The current interface uses a silver and graphite palette. Drawing and rehearsal controls share a floating toolbar below the field. The cloud home screen offers separate playbook editing and AI matchup analysis views; phones and iPads use the traditional view with touch controls.
+The current interface uses a silver and graphite palette. Drawing and rehearsal controls share a floating toolbar below the field. The cloud and demo workspaces both offer three cards for playbook editing, player management and AI matchup analysis; phones and iPads use the traditional view with touch controls.
 
 ## Quick start
 
-1. Open the [demo without signing in](https://timpickle.github.io/playbook-studio-web/local.html). Choose a sample or select **新建战术** (New play).
+1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/). Select **Edit playbook**, then choose a sample or select **新建战术** (New play).
 2. Drag players into position. Use **添加对象** (Add objects) to add individual players or a complete **4–3 defensive formation**.
 3. Select a player, choose **跑动** (Route) or press `R`, then click to place route points. Press `Enter` or select **完成** (Finish).
 4. Switch to **战术演练** (Rehearsal) to play, pause, or scrub the timeline. The space bar also toggles playback.
@@ -127,7 +128,7 @@ The application does not persist your API key; refresh or sign out and you must 
 
 [Implementation guide](docs/AI_MATCHUP_IMPLEMENTATION.md) · [Agent workflow and tools](docs/AI_MATCHUP_AGENT_DESIGN.md) · [Future analysis roadmap](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
 
-**No-sign-in demo:** Open the [local preview](https://timpickle.github.io/playbook-studio-web/local.html), select “Try AI analysis”, and provide an OpenRouter or OpenAI model ID and API key. Your browser sends the sample diagrams and entered context directly to the chosen provider; charges may apply. The key stays in page memory and is cleared on exit or refresh. Network or provider CORS restrictions may prevent a connection. This is a single model request, without the cloud LangGraph tool workflow or verified evidence.
+**No-sign-in demo:** Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/), choose the AI matchup analysis card, and provide an OpenRouter or OpenAI model ID and API key. Your browser sends the sample diagrams and entered context directly to the chosen provider; charges may apply. The key stays in page memory and is cleared on exit or refresh. Network or provider CORS restrictions may prevent a connection. This is a single model request, without the cloud LangGraph tool workflow or verified evidence.
 
 ## Traditional and digital views
 
@@ -149,14 +150,14 @@ The board supports **100–300% zoom**, fit-to-screen, and adjustable height. De
 | Entry point | Access | Data and capabilities |
 |---|---|---|
 | [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) | An administrator-provided username and password, or the existing ChatGPT sign-in option | Cloud database, member permissions, access across devices, version history, and AI analysis |
-| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/local.html) | Open the editor directly | Stores data in the current browser. Drawing, rehearsal, import/export and sample AI matchup demo are available; cloud accounts and sharing are not |
-| [GitHub Pages landing page](https://timpickle.github.io/playbook-studio-web/) | Project links and migration tools | Opens the cloud app or local demo and exports data from the earlier browser-only version |
+| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/) | Choose one of three workspace cards | The browser stores plays and rosters locally. The AI demo uses a sample matchup and your own API key |
+| [Migration guide](https://timpickle.github.io/playbook-studio-web/landing.html) | Project links and migration tools | Opens the cloud app or local demo and exports data from the earlier browser-only version |
 
-Sharing is scoped to a **playbook**, with independent membership for each one. Owners manage members and restore history; editors change plays; viewers can inspect, rehearse, export, and print. Under **成员与权限** (Members and permissions), an owner can create a member account or add an existing one. Email invitation links must be copied and sent manually.
+Sharing is scoped to a **playbook**, with independent membership for each one. Owners manage members and restore history; owners and editors can maintain the roster. Viewers can browse and search the roster, as well as inspect, rehearse, export and print plays. Under **成员与权限** (Members and permissions), an owner can create a member account or add an existing one. Email invitation links must be copied and sent manually.
 
 Changes save automatically, and background polling retrieves other members' updates. Conflict handling retains the local draft and asks users to resolve changes that cannot be merged automatically. Owners can restore from the latest **20 saved versions**. Unsynced drafts support recovery on the original device; they do not guarantee offline sign-in or a cold start. Keep JSON backups of important playbooks.
 
-To migrate from the earlier version, open GitHub Pages on the **original device and browser**, export the local plays, then upload the JSON when creating or importing a cloud playbook. Browser storage is separate for the two domains. Uploading during playbook creation imports the full backup; **导入战术本** (Import playbook) inside the editor appends plays.
+To migrate from the earlier version, open the [migration guide](https://timpickle.github.io/playbook-studio-web/landing.html) on the **original device and browser**, export the local plays, then upload the JSON when creating or importing a cloud playbook. Browser storage is separate for the two domains. Uploading during playbook creation imports the full backup; **导入战术本** (Import playbook) inside the editor appends plays.
 
 A separate team hierarchy, team owner accounts, and full multi-tenant team management remain planned. Current collaboration is implemented at the playbook level. See the [cloud architecture guide](docs/CLOUD.md) and [multi-team roadmap](docs/MULTI_TENANCY_ROADMAP.md).
 
@@ -166,7 +167,7 @@ Give this section to an AI coding agent that can inspect files and run commands.
 
 | Target | Current support | Storage and capabilities |
 |---|---|---|
-| Local demo | Node.js static editor | Browser-local storage, editing, rehearsal, import/export and sample AI demo; no accounts or cloud sharing |
+| Local demo | Node.js static workspace | Browser-local storage, roster management, editing, rehearsal, import/export and sample AI demo; no accounts or cloud sharing |
 | GitHub Pages / static hosting | Included build script and Pages workflow | Same static capabilities; each visitor's data stays in their browser |
 | Cloud collaboration | Current implementation uses ChatGPT Sites + Worker + D1 | Accounts, shared playbooks and AI analysis require your own Site, database and platform access |
 
@@ -214,9 +215,9 @@ Verify that the page and Madden images load, player movement and route drawing w
    node scripts/prepare-pages.mjs
    ```
 
-   `index.html` is the landing page and `local.html` is the editor. Include the generated image assets. See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+   `index.html` opens the card workspace, `local.html` opens the editor directly, and `landing.html` retains the migration guide. Include the generated image assets. See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-Verify the deployed root and `local.html`, language switching, editing, refresh persistence, Madden images, JSON export and workflow status. Static storage does not sync across users or devices and does not provide cloud accounts or sharing; verify the AI demo entry, sample matchup overlay and missing-key message. Browser data and language preferences are separate across origins.
+Open all three cards from the deployed root without signing in. Add a player, refresh, search for that player, and return to the workspace. Verify the `local.html` editor shortcut, language switching, editing, refresh persistence, Madden images, JSON export and workflow status. Static storage does not sync across users or devices and does not provide cloud accounts or sharing; verify the AI demo entry, sample matchup overlay and missing-key message. Browser data and language preferences are separate across origins.
 
 ### Path C: your own cloud collaboration Site
 

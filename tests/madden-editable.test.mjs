@@ -102,7 +102,7 @@ test('reviewed motion arrows and white blocking bars retain their separate meani
 });
 
 test('an existing original gets an editable copy; drag, mirror, playback and source comparison remain available',async()=>{
-  const win=new Window({url:'http://localhost:3000/',width:1440,height:1000});
+  const win=new Window({url:'http://localhost:3000/local.html',width:1440,height:1000});
   win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
   const source=entries[0], data=starterWorkspace();
   const original=makeMaddenPlay(catalog.plays[0]);
@@ -143,7 +143,7 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
 });
 
 test('saved Madden line is changed only when requested and the change can be undone',async()=>{
-  const win=new Window({url:'http://localhost:3000/',width:1440,height:1000});
+  const win=new Window({url:'http://localhost:3000/local.html',width:1440,height:1000});
   win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
   const data=starterWorkspace(),old=legacyPlay(entries[0]);data.plays.unshift(old);win.localStorage.setItem(STORAGE_KEY,encodeWorkspace(data));
   const names=['window','document','navigator','localStorage','location','Image','Blob','requestAnimationFrame','cancelAnimationFrame','fetch'];

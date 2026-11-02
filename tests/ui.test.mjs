@@ -7,7 +7,7 @@ import { STORAGE_KEY, decodeWorkspace, encodeWorkspace } from '../web/model.js';
 test('DOM integration: edit, route drawing, undo, formation, playback, import UI and print layouts', async t => {
   const win = new Window({ url: 'http://localhost:3000/', width: 1440, height: 1000 });
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
-  const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame'];
+  const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'history', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame'];
   const previous = Object.fromEntries(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
   for (const name of names) Object.defineProperty(globalThis, name, { configurable: true, value: typeof win[name] === 'function' && ['requestAnimationFrame', 'cancelAnimationFrame'].includes(name) ? win[name].bind(win) : win[name] });
   await import(`../web/app.js?test=${Date.now()}`);
@@ -16,6 +16,42 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
   const pointer = (node, type, x = 700, y = 400) => node.dispatchEvent(new win.PointerEvent(type, { bubbles: true, button: 0, clientX: x, clientY: y, pointerId: 1 }));
   const geometry = () => { const svg = query('#field svg'); svg.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, right: 1000, bottom: 800, width: 1000, height: 800 }); };
   try {
+    await t.test('guest home opens the local roster and the editor can assign its players', () => {
+      const nav = action => query(`[data-cloud-action="${action}"]`).click();
+      for (const action of ['enter-editor', 'enter-roster', 'enter-analysis']) assert.ok(query(`[data-cloud-action="${action}"]`));
+      assert.equal(query('#app').hidden, true);
+      assert.equal(query('#account-login'), null);
+      nav('enter-roster');
+      const root = query('#roster-root');
+      assert.equal(root.hidden, false);
+      root.querySelector('[data-roster="team"]').click();
+      root.querySelector('input[name="name"]').value = 'Practice squad';
+      root.querySelector('[type="submit"]').click();
+      root.querySelector('[data-roster="add"]').click();
+      for (const [key, value] of Object.entries({ name: 'New Player', number: '88', position: 'TE' })) {
+        root.querySelector(`input[name="${key}"]`).value = value;
+      }
+      root.querySelector('[type="submit"]').click();
+      const saved = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
+      const added = saved.roster.find(player => player.name === 'New Player');
+      assert.equal(added.position, 'TE');
+      assert.equal(added.number, '88');
+      assert.equal(saved.team.name, 'Practice squad');
+      assert.match(root.querySelector('tbody').textContent, /New Player/);
+      root.querySelector('[data-cloud-action="home"]').click();
+      assert.equal(root.hidden, true);
+      nav('enter-editor');
+      assert.equal(query('#app').hidden, false);
+      assert.equal(query('#app [data-action="team"]'), null);
+      const marker = query('#field [data-player]');
+      marker.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      const selector = query('[data-prop="roster"]');
+      assert.match(selector.textContent, /New Player/);
+      change('[data-prop="roster"]', added.id);
+      const assigned = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].players.find(player => player.id === marker.dataset.player);
+      assert.equal(assigned.name, added.name);
+      click('clear-selection');
+    });
     await t.test('seed UI renders actual starter plays and an editable pitch', () => { assert.match(query('h1').textContent, /Mesh/); assert.equal(doc.querySelectorAll('.play-card').length, 5); assert.equal(doc.querySelectorAll('#field [data-player]').length, 11); assert.ok(query('#field svg[role="application"]')); });
     await t.test('repeated field themes preserve yard lines, the independent grid choice, focus and panel state', () => {
       const sidebar=query('.sidebar'), inspector=query('.inspector'), search=query('#search'), theme=query('[data-action="theme"]'), grid=query('[data-action="grid"]');
@@ -93,7 +129,11 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
     await t.test('custom formation can be saved and applied without carrying routes', () => { click('save-formation'); query('#formation-name').value = 'My 7 Man'; click('confirm-formation'); assert.ok(query('#apply-formation').textContent.includes('My 7 Man')); change('#apply-formation', 'builtin:Gun Doubles'); assert.equal(doc.querySelectorAll('#field [data-player]').length, 7); assert.equal(doc.querySelectorAll('#field [data-route]').length, 0); });
     await t.test('playback controls toggle, timeline scrubbing moves real player nodes', () => { click('book:offense'); const first = query('.play-card'); first.click(); const before = query('#field [data-player]').getAttribute('transform'); click('play'); assert.ok(query('[aria-label="暂停战术"]')); click('play'); query('#timeline').value = '4'; query('#timeline').dispatchEvent(new win.Event('input', { bubbles: true })); assert.equal(query('#timeline').value, '4'); assert.match(query('#time-label').textContent, /4.0/); assert.notEqual(query('#field [data-player]').getAttribute('transform'), before); click('reset'); assert.match(query('#time-label').textContent, /0.0/); assert.equal(query('#field [data-player]').getAttribute('transform'), before); });
     await t.test('print previews provide playbook, wristband and call-sheet content', () => { click('print'); assert.ok(query('.print-preview .print-card')); change('#print-scope', 'all'); change('#print-layout', 'wristband'); assert.equal(doc.querySelectorAll('#print-root .print-card').length, 9); assert.equal(doc.querySelectorAll('#print-root .print-page').length, 1); change('#print-layout', 'callsheet'); assert.equal(doc.querySelectorAll('#print-root tbody tr').length, 9); click('close-modal'); });
-    await t.test('roster and team edits persist, exports expose all actual options', () => { click('team'); query('#team-name').value = 'Test Team'; click('roster-add'); const row = query('#roster-rows').lastElementChild; row.querySelector('[data-roster-field="name"]').value = 'New Player'; row.querySelector('[data-roster-field="number"]').value = '88'; row.querySelector('[data-roster-field="position"]').value = 'TE'; click('save-team'); const data = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)); assert.equal(data.team.name, 'Test Team'); assert.equal(data.roster.at(-1).name, 'New Player'); click('export'); for (const a of ['download-svg', 'download-png', 'download-json', 'download-play']) assert.ok(query(`[data-action="${a}"]`)); click('close-modal'); });
+    await t.test('editor exports include diagrams and playbook backups', () => {
+      click('export');
+      for (const action of ['download-svg', 'download-png', 'download-json', 'download-play']) assert.ok(query(`[data-action="${action}"]`));
+      click('close-modal');
+    });
     await t.test('deleting an entire play is recoverable through undo', () => { const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length; click('delete-play'); click('confirm-delete'); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length, before - 1); click('undo'); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length, before); });
     await t.test('validated JSON import appends without discarding prior plays and undo restores all data', async () => {
       const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
