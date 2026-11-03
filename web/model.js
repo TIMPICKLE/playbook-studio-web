@@ -1,9 +1,12 @@
+import { array, choice, fail, id, text, uid, unique } from './model-values.js';
+import { appendDepthGroups, defaultDepthChart, validateDepthChart } from './depth-model.js';
+export { uid };
+
 export const VERSION = 1;
 export const STORAGE_KEY = 'playbook-studio:v1';
 export const BOOKS = { offense: '进攻', defense: '防守', special: '特勤' };
 export const COLORS = { offense: '#ffdc42', defense: '#c4a5f5', route: '#ffdc42', pass: '#ffd166', zone: '#88bfff' };
 export const clone = value => JSON.parse(JSON.stringify(value));
-export const uid = () => globalThis.crypto?.randomUUID?.() || `id-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 export const clamp = (n, min = 0, max = 100) => Math.max(min, Math.min(max, n));
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const colorOK = value => /^#[0-9a-f]{6}$/i.test(value);
@@ -45,7 +48,7 @@ export function addRoute(play, label, waypoints, kind = 'route', options = {}) {
   play.routes.push({ id: uid(), playerId: p.id, points: [{ x: p.x, y: p.y }, ...waypoints.map(([x, y]) => ({ x, y }))], kind, color: kind === 'pass' ? COLORS.pass : p.color, smooth: false, endCap: kind === 'block' ? 'bar' : 'arrow', delay: 0, duration: kind === 'block' ? 2 : 4, optional: false, ...options });
 }
 
-export function starterWorkspace() {
+export function starterWorkspace({ demoDepth = false } = {}) {
   const mesh = makePlay({ title: 'Mesh · 浅交叉', formation: 'Gun Trips' });
   mesh.notes = 'Y 与 H 在防守前方交叉，保持 4–6 码深度，避免相撞。\nQB：先读 Y，再看 RB 的外摆；X 拉深牵制安全卫。\n这是一组教学示例，需根据球队能力调整时序。';
   mesh.favorite = true;
@@ -81,7 +84,17 @@ export function starterWorkspace() {
   for (const label of ['DE', 'DT', 'M']) { const p = blitz.players.find(p => p.label === label); addRoute(blitz, label, [[p.x, 75]], 'route', { duration: 3 }); }
   const goal = makePlay({ title: 'Field Goal · 射门保护', formation: 'Field Goal', book: 'special' }); goal.category = '射门'; goal.personnel = 'Field Goal Unit';
   addRoute(goal, 'K', [[53, 80]], 'route', { duration: 2 }); goal.ball.holderId = goal.players.find(p => p.label === 'H').id;
-  return { team: { name: '我的球队', subtitle: '2026 赛季', accent: '#9aa3ad' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster: [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }], formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
+  const roster = [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }];
+  const depthChart = defaultDepthChart();
+  if (demoDepth) {
+    const backup = { id: uid(), name: 'Casey', number: '8', position: 'QB' };
+    roster.push(backup);
+    const slots = depthChart.groups.find(group => group.id === 'spread').slots;
+    slots.find(slot => slot.label === 'QB').playerIds = [roster[0].id, backup.id];
+    slots.find(slot => slot.label === 'X').playerIds = [roster[1].id];
+    slots.find(slot => slot.label === 'H').playerIds = [roster[2].id];
+  }
+  return { team: { name: '我的球队', subtitle: '2026 赛季', accent: '#9aa3ad' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster, depthChart, formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
 }
 
 export function mirrorPlay(play) {
@@ -175,16 +188,10 @@ export function animatedBall(play, time) {
 export const animationLength = play => Math.max(6, play.ball.arriveAt, ...play.routes.filter(r => !r.optional).map(r => r.delay + r.duration));
 
 export function encodeWorkspace(data) { return JSON.stringify({ format: 'playbook-studio', version: VERSION, exportedAt: new Date().toISOString(), data }, null, 2); }
-const fail = message => { throw new Error(message); };
-const text = (v, max, name) => typeof v === 'string' && v.length <= max ? v : fail(`${name}格式不正确`);
-const array = (v, max, name) => Array.isArray(v) && v.length <= max ? v : fail(`${name}数量或格式不正确`);
 const num = (v, min, max, name) => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : fail(`${name}超出范围`);
-const id = v => text(v, 100, 'ID');
 const col = v => colorOK(v) ? v : fail('颜色格式不正确');
-const choice = (v, choices, name) => choices.includes(v) ? v : fail(`${name}无效`);
-function unique(items, name) { if (new Set(items.map(x => x.id)).size !== items.length) fail(`${name}包含重复 ID`); return items; }
 export function validatePlayers(value) {
-  return unique(array(value, 40, '球员').map(p => ({ id: id(p.id), label: text(p.label, 10, '位置名称'), name: text(p.name ?? '', 80, '姓名'), x: num(p.x, 0, 100, '横坐标'), y: num(p.y, 0, 100, '纵坐标'), side: choice(p.side, ['offense', 'defense'], '球队'), color: col(p.color), shape: choice(p.shape, ['circle', 'square', 'triangle'], '图形') })), '球员');
+  return unique(array(value, 40, '球员').map(p => ({ id: id(p.id), label: text(p.label, 10, '位置名称'), ...(p.rosterId == null || p.rosterId === '' ? {} : { rosterId: id(p.rosterId) }), name: text(p.name ?? '', 80, '姓名'), x: num(p.x, 0, 100, '横坐标'), y: num(p.y, 0, 100, '纵坐标'), side: choice(p.side, ['offense', 'defense'], '球队'), color: col(p.color), shape: choice(p.shape, ['circle', 'square', 'triangle'], '图形') })), '球员');
 }
 export function validatePlay(p) {
   const diagramSource = p.diagramSource == null ? null : { ...validateReference(p.diagramSource), traceVersion: choice(p.diagramSource.traceVersion, [1], '识别版本') };
@@ -232,7 +239,42 @@ export function decodeWorkspace(raw) {
     return { id: id(f.id), name: text(f.name, 100, '模板名称'), book: choice(f.book, Object.keys(BOOKS), '模板类型'), players };
   }), '模板');
   const settings = { league: choice(d.settings.league, [6, 7, 8, 9, 11, 12], '人数'), fieldTheme: choice(d.settings.fieldTheme, ['dark', 'light'], '球场主题'), showGrid: !!d.settings.showGrid, showNames: !!d.settings.showNames };
-  return { team, plays, roster, formations, settings };
+  const rosterById = new Map(roster.map(player => [player.id, player]));
+  const depthChart = validateDepthChart(d.depthChart, rosterById);
+  // Earlier books stored only the name chosen from the player selector.
+  const legacyNames = new Map();
+  if (d.depthChart === undefined) {
+    for (const player of roster) {
+      if (player.name) legacyNames.set(player.name, legacyNames.has(player.name) ? null : player);
+    }
+  }
+  for (const item of [...plays, ...formations]) {
+    for (const marker of item.players) {
+      const linked = marker.rosterId ? rosterById.get(marker.rosterId) : legacyNames.get(marker.name);
+      if (linked) { marker.rosterId = linked.id; marker.name = linked.name; }
+      else if (marker.rosterId) delete marker.rosterId;
+    }
+  }
+  return { team, plays, roster, depthChart, formations, settings };
+}
+
+// Imported roster IDs must be remapped together with every lineup and diagram that uses them.
+export function prepareWorkspaceAppend(current, imported) {
+  const ids = new Map(imported.roster.map(player => [player.id, uid()]));
+  const depthChart = appendDepthGroups(current.depthChart, imported.depthChart, ids);
+  if (!depthChart) return null;
+  const copyDiagram = item => {
+    const copy = clone(item);
+    copy.id = uid();
+    for (const marker of copy.players) {
+      if (marker.rosterId) marker.rosterId = ids.get(marker.rosterId);
+    }
+    return copy;
+  };
+  return {
+    depthChart, plays: imported.plays.map(copyDiagram), formations: imported.formations.map(copyDiagram),
+    roster: imported.roster.map(player => ({ ...player, id: ids.get(player.id) })),
+  };
 }
 
 export class History {

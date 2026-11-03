@@ -1,0 +1,133 @@
+.personnel-controls {
+  display: grid;
+  gap: 14px;
+}
+.personnel-units {
+  display: flex;
+  gap: 3px;
+  justify-self: start;
+  max-width: 100%;
+  padding: 3px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--night-0);
+}
+.personnel-units button {
+  min-height: 40px;
+  min-width: 0;
+  padding: 7px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font: 600 13px/1.25 var(--font-ui, inherit);
+}
+.personnel-units button[aria-pressed=true] {
+  border-color: var(--hairline-strong);
+  background: var(--night-3);
+  color: var(--text-1);
+}
+.personnel-toolbar, .personnel-actions {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.personnel-toolbar { justify-content: space-between; }
+.personnel-picker {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  flex: 1 1 180px;
+  max-width: 350px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.personnel-picker select, .personnel-dialog textarea {
+  min-height: 42px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 9px;
+  color: var(--text-1);
+  background: var(--night-2);
+  font: inherit;
+}
+.personnel-picker select { font-weight: 650; }
+.personnel-actions :is(button, summary) { min-height: 42px; }
+.personnel-more { position: relative; }
+.personnel-more summary {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 10px;
+  color: var(--text-2);
+  list-style: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.personnel-more summary::-webkit-details-marker { display: none; }
+.personnel-more summary::after { content: '▾'; }
+.personnel-more[open] summary::after { transform: rotate(180deg); }
+.personnel-more > div {
+  position: absolute;
+  z-index: 4;
+  inset-inline-end: 0;
+  top: calc(100% + 4px);
+  display: grid;
+  width: max-content;
+  max-width: 200px;
+  padding: 4px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 11px;
+  background: var(--night-2);
+  box-shadow: var(--island-shadow);
+}
+.personnel-more button {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--text-1);
+  background: transparent;
+  text-align: start;
+  font-size: 13px;
+}
+.personnel-more button:hover, .personnel-more button:focus-visible { background: var(--night-3); }
+.personnel-more [data-personnel-action=remove] { color: var(--danger-1); }
+.personnel-actions button:disabled { opacity: .5; }
+.personnel-note, .personnel-empty, .personnel-hint, .personnel-notice {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.personnel-note {
+  padding-inline-start: 10px;
+  border-inline-start: 2px solid var(--hairline-strong);
+  white-space: pre-line;
+}
+.personnel-note strong { color: var(--text-1); margin-inline-end: 5px; }
+.personnel-notice:not(:empty) { padding-top: 8px; }
+.personnel-dialog textarea { width: 100%; resize: vertical; }
+.personnel-danger {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid var(--danger-1);
+  border-radius: 9px;
+  color: var(--danger-1);
+  background: var(--night-2);
+  font-size: 13px;
+  font-weight: 650;
+}
+@media (max-width: 640px) {
+  .personnel-units { justify-self: stretch; }
+  .personnel-units button { flex: 1 1 0; padding-inline: 7px; }
+  .personnel-picker { max-width: none; }
+  .personnel-picker select, .personnel-dialog textarea { font-size: 16px; }
+}

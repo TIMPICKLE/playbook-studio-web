@@ -107,11 +107,12 @@ test('recovering a local playbook while viewing its roster refreshes the roster 
   original.roster[0].name = 'Recovered captain';
   const raw = encodeWorkspace(original), f = await editor(t, raw, { readFails: true, path: '/#roster' });
   assert.equal(f.query('#roster-root').hidden, false);
+  f.query('[data-roster-tab="directory"]').click();
   assert.equal(f.query('[data-roster="add"]').hidden, true);
   f.failure.read = false;
   f.click('retry-local-load');
   assert.equal(f.query('.modal'), null);
-  assert.match(f.query('#roster-root tbody').textContent, /Recovered captain/);
+  assert.match(f.query('.roster-results tbody').textContent, /Recovered captain/);
   assert.equal(f.query('[data-roster="add"]').hidden, false);
   assert.equal(f.query('#app').hidden, true);
   assert.equal(f.query('#field'), null);

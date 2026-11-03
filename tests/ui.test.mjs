@@ -24,20 +24,21 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       nav('enter-roster');
       const root = query('#roster-root');
       assert.equal(root.hidden, false);
+      root.querySelector('[data-roster-tab="directory"]').click();
       root.querySelector('[data-roster="team"]').click();
-      root.querySelector('input[name="name"]').value = 'Practice squad';
-      root.querySelector('[type="submit"]').click();
+      root.querySelector('.roster-page > .roster-dialog input[name="name"]').value = 'Practice squad';
+      root.querySelector('.roster-page > .roster-dialog [type="submit"]').click();
       root.querySelector('[data-roster="add"]').click();
       for (const [key, value] of Object.entries({ name: 'New Player', number: '88', position: 'TE' })) {
-        root.querySelector(`input[name="${key}"]`).value = value;
+        root.querySelector(`.roster-page > .roster-dialog input[name="${key}"]`).value = value;
       }
-      root.querySelector('[type="submit"]').click();
+      root.querySelector('.roster-page > .roster-dialog [type="submit"]').click();
       const saved = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
       const added = saved.roster.find(player => player.name === 'New Player');
       assert.equal(added.position, 'TE');
       assert.equal(added.number, '88');
       assert.equal(saved.team.name, 'Practice squad');
-      assert.match(root.querySelector('tbody').textContent, /New Player/);
+      assert.match(root.querySelector('.roster-results tbody').textContent, /New Player/);
       root.querySelector('[data-cloud-action="home"]').click();
       assert.equal(root.hidden, true);
       nav('enter-editor');
@@ -137,7 +138,7 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
     await t.test('deleting an entire play is recoverable through undo', () => { const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length; click('delete-play'); click('confirm-delete'); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length, before - 1); click('undo'); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length, before); });
     await t.test('validated JSON import appends without discarding prior plays and undo restores all data', async () => {
       const before = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
-      const incoming = { ...before, plays: [before.plays[0]], formations: [], roster: [] }, raw = encodeWorkspace(incoming), input = query('#import-input');
+      const incoming = { ...before, plays: [before.plays[0]], formations: [], roster: [], depthChart: { groups: [] } }, raw = encodeWorkspace(incoming), input = query('#import-input');
       Object.defineProperty(input, 'files', { configurable: true, value: [{ size: raw.length, text: async () => raw }] }); input.dispatchEvent(new win.Event('change', { bubbles: true })); await Promise.resolve(); await Promise.resolve();
       assert.ok(query('[data-action="confirm-import"]')); click('confirm-import');
       const after = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)); assert.equal(after.plays.length, before.plays.length + 1); assert.deepEqual(after.plays.slice(0, before.plays.length), before.plays); assert.notEqual(after.plays.at(-1).id, before.plays[0].id); click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), before);

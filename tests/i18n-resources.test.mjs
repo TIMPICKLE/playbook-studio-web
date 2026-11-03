@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-for (const prefix of ['', 'cloud.', 'roster.', 'madden-ai.', 'support.', 'landing.']) {
+for (const prefix of ['', 'cloud.', 'roster.', 'depth-chart.', 'personnel-groups.', 'madden-ai.', 'support.', 'landing.']) {
   test(`${prefix || 'editor'} language dictionaries have matching keys`, async () => {
     const zh = (await import(`../web/locales/${prefix}zh-CN.js`)).default;
     const en = (await import(`../web/locales/${prefix}en.js`)).default;

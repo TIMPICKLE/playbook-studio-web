@@ -28,7 +28,14 @@ const document = row => ({ id: row.id, title: row.title, role: row.role, revisio
 async function event(db, workspaceId, actor, action, detail = '') { return db.prepare('INSERT INTO audit_events(id,workspace_id,actor_id,action,detail,created_at) VALUES(?,?,?,?,?,?)').bind(id(), workspaceId, actor, action, detail, timestamp()).run(); }
 async function writeWorkspace(db, workspaceId, user, data, expected, action = 'saved', ownerOnly = false) {
   const record = await access(db, workspaceId, user.userId, ownerOnly ? 'owner' : 'write');
-  const encoded = JSON.stringify(checkedData(data)); if (new TextEncoder().encode(encoded).length > MAX_BODY - 1000) fail(413, '战术本过大，请拆分或先导出备份');
+  // An already-open older editor strips unknown fields when reading a cloud book.
+  const legacyWrite = action === 'saved' && data && data.depthChart === undefined;
+  if (legacyWrite && JSON.parse(record.data_json).depthChart) {
+    fail(422, '请刷新页面加载新版球员管理，再同步本机草稿。');
+  }
+  const validated = checkedData(data);
+  if (legacyWrite) delete validated.depthChart;
+  const encoded = JSON.stringify(validated); if (new TextEncoder().encode(encoded).length > MAX_BODY - 1000) fail(413, '战术本过大，请拆分或先导出备份');
   const requestId = id(), now = timestamp(), next = revision(expected) + 1;
   const allowed = ownerOnly ? "m.role='owner'" : "m.role IN ('owner','editor')";
   const result = await db.batch([

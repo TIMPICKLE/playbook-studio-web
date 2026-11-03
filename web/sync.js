@@ -85,7 +85,7 @@ export class CloudSync {
       draftSaved = !!draft?.data;
     }
     if (draft?.data && editable) {
-      const local = validateData(draft.data), merged = mergeDraft(draft.base, local, data);
+      const local = validateData(draft.data), merged = mergeDraft(validateData(draft.base), local, data);
       pending = merged.data; conflictReason = merged.reason || draft.conflict || '';
       if (!conflictReason && equal(pending, data)) pending = null;
     }
