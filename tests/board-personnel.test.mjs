@@ -52,7 +52,7 @@ test('applying a group is one undoable edit; roster links follow renames and pre
   const board = () => data().plays[0];
   await import('../web/app.js?board-personnel');
   change('#personnel-group', 'spread');
-  assert.match(q('#personnel-preview').textContent, /3 \/ 3/);
+  assert.match(q('#personnel-preview').textContent, /10 \/ 11/);
   click('[data-action=apply-personnel]');
   const assigned = board();
   assert.equal(assigned.players.find(p => p.label === 'QB').rosterId, quarterback.id);

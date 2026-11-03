@@ -149,3 +149,25 @@ test('legacy books accept older saves until someone writes depth chart data', as
   assert.equal((await write(record.data, 3)).status, 200);
   assert.equal((await write(legacy, 4)).status, 422);
 });
+
+test('a cached table-only editor preserves a copied formation and renamed role bindings', async t => {
+  const db = database(t), record = await create(db);
+  const data = record.data;
+  const group = data.depthChart.groups.find(item => item.id === 'bunch');
+  group.id = 'game-week'; group.name = 'First down';
+  group.slots[0].id = 'signal-caller'; group.slots[0].label = 'Passer';
+  const put = (revision, data) => call(db, `/workspaces/${record.id}`, owner, 'PUT', { revision, data });
+  assert.equal((await put(1, data)).status, 200);
+  const old = clone(data);
+  for (const entry of old.depthChart.groups) {
+    delete entry.templateId;
+    for (const slot of entry.slots) delete slot.templateRole;
+  }
+  const fromOld = old.depthChart.groups.find(item => item.id === group.id);
+  fromOld.slots[0].playerIds = [old.roster[0].id];
+  assert.equal((await put(2, old)).status, 200);
+  const after = (await call(db, `/workspaces/${record.id}`)).body.data.depthChart.groups.find(item => item.id === group.id);
+  assert.equal(after.templateId, 'bunch');
+  assert.equal(after.slots[0].templateRole, 'QB');
+  assert.deepEqual(after.slots[0].playerIds, fromOld.slots[0].playerIds);
+});

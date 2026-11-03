@@ -38,8 +38,13 @@ test('depth chart opens first and tabs support keyboard navigation for read-only
   };
   assertActive(depth, directory);
   assert.ok(q('[data-personnel-group]'));
+  const marker = id => q(`button[data-depth-chart="inspect"][data-slot="${id}"]`);
+  const slotId = (groupId, label) => state.data.depthChart.groups.find(group => group.id === groupId).slots.find(slot => slot.label === label).id;
+  assert.ok(marker(slotId('spread', 'QB')));
   q('[data-personnel-unit="special"]').click();
   assert.ok([...q('[data-personnel-group]').options].some(option => option.textContent === 'Punt'));
+  assert.ok(marker(slotId('kickoff', 'K')));
+  assert.equal(marker(slotId('spread', 'QB')), null);
   assert.equal(q('[data-personnel-action="new"]'), null);
   assert.equal(q('[data-depth-chart="edit"]'), null);
 

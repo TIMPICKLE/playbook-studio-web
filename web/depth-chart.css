@@ -4,7 +4,7 @@
   background: var(--night-1);
   overflow: hidden;
 }
-.depth-heading, .depth-heading > div { display: flex; align-items: center; gap: 10px; }
+.depth-heading, .depth-heading-title { display: flex; align-items: center; gap: 10px; }
 .depth-heading { justify-content: space-between; padding: 16px 20px; }
 .depth-heading h3 { margin: 0; font-size: 18px; }
 .depth-heading p {
@@ -75,7 +75,7 @@
 .depth-rank-tools button:disabled { opacity: .45; }
 @media (max-width: 640px) {
   .depth-heading { padding: 14px; }
-  .depth-heading > div { display: block; }
+  .depth-heading-title { display: block; }
   .depth-heading p { margin-top: 4px; }
   .depth-panel table, .depth-panel tbody { display: block; }
   .depth-panel thead { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
@@ -96,7 +96,29 @@
   .depth-rank-tools button { min-height: 42px; min-width: 42px; }
 }
 .depth-heading { flex-wrap: wrap; gap: 10px; }
-.depth-heading .depth-heading-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.depth-view-picker {
+  display: inline-flex;
+  margin-inline-start: auto;
+  padding: 3px;
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  background: var(--night-0);
+}
+.depth-view-picker button {
+  min-height: 40px;
+  padding: 5px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 650;
+}
+.depth-view-picker button[aria-pressed=true] {
+  border-color: var(--hairline-strong);
+  color: var(--text-1);
+  background: var(--night-3);
+}
 .depth-lineup {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(144px, 100%), 1fr));
@@ -124,6 +146,7 @@
 .depth-lineup li > button:hover { background: var(--night-3); border-color: var(--hairline-strong); }
 .depth-lineup li strong { color: var(--text-2); font: 650 12px/1.3 var(--font-display); }
 @media (max-width: 640px) {
-  .depth-heading .depth-heading-actions button { padding-inline: 9px; }
+  .depth-view-picker { order: 2; flex-basis: 100%; }
+  .depth-view-picker button { flex: 1 1 0; padding-inline: 5px; }
   .depth-lineup { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 10px 10px; }
 }

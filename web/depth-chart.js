@@ -1,7 +1,13 @@
 import { t } from './i18n.js';
 import { escapeHTML as e } from './model.js';
-import { createDepthSlot, DEPTH_LIMITS } from './depth-model.js';
+import { bindDepthTemplate, createDepthSlot, DEPTH_LIMITS } from './depth-model.js';
+import { renderDepthFormation } from './depth-formation.js';
 
+const views = {
+  field: ['depth.viewFormation', 'depth.formationTitle'],
+  table: ['depth.viewRanks', 'depth.positions'],
+  starters: ['depth.viewStarters', 'depth.lineup'],
+};
 const rankLabel = index => index ? t('depth.backup', { rank: index }) : t('depth.starter');
 const playerLabel = player => [player.number && `#${player.number}`, player.name, player.position].filter(Boolean).join(' · ');
 
@@ -32,9 +38,15 @@ function starterList(slots, players, editable) {
   }).join('')}</ul>`;
 }
 
+function depthTable(slots, players, editable) {
+  return `<table aria-labelledby="depth-heading"><thead><tr><th scope="col">${t('modal.position')}</th>
+    <th scope="col">${t('depth.starter')}</th><th scope="col">${t('depth.backups')}</th>${editable ? `<th scope="col">${t('roster.actions')}</th>` : ''}</tr></thead>
+    <tbody>${slots.map(slot => slotRow(slot, players, editable)).join('')}</tbody></table>`;
+}
+
 export function createDepthChartView({ root, getData, getWorkspaceId, getSelectedId, canEdit, commit, onChange }) {
   let draft = null;
-  let startersOnly = false;
+  let mode = 'field', selectedSlotId = null, playerId = '', previousGroup, workspace = getWorkspaceId();
   root.innerHTML = `<div class="depth-sheet"></div><p class="depth-status" role="status"></p>
     <dialog class="roster-dialog depth-dialog" aria-labelledby="depth-editor-title"></dialog>`;
   const sheet = root.querySelector('.depth-sheet');
@@ -63,19 +75,35 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       dialog.querySelector('[type="submit"]').disabled = Boolean(error);
       if (error) alert(error);
     }
-    if (!current) { sheet.replaceChildren(); notice.textContent = ''; return; }
+    if (workspace !== getWorkspaceId()) {
+      workspace = getWorkspaceId();
+      selectedSlotId = null;
+      playerId = '';
+      mode = 'field';
+    }
+    if (!current) { previousGroup = null; sheet.replaceChildren(); notice.textContent = ''; return; }
     const slots = current.slots;
+    if (!players.has(playerId)) playerId = '';
+    if (current.id !== previousGroup || !slots.some(slot => slot.id === selectedSlotId)) {
+      selectedSlotId = (slots.find(slot => playerId && slot.playerIds.includes(playerId)) || slots[0])?.id;
+    }
+    previousGroup = current.id;
+    let body;
+    if (!slots.length) body = `<p class="depth-empty">${t('depth.noSlots')}</p>`;
+    else if (mode === 'field') body = renderDepthFormation(current, players, selectedSlotId, editable, playerId);
+    else if (mode === 'table') body = depthTable(slots, players, editable);
+    else body = starterList(slots, players, editable);
     sheet.innerHTML = `<section class="depth-panel" aria-labelledby="depth-heading">
-      <div class="depth-heading"><div><h3 id="depth-heading">${t(startersOnly ? 'depth.lineup' : 'depth.positions')}</h3>
+      <div class="depth-heading"><div class="depth-heading-title"><h3 id="depth-heading">${t(views[mode][1])}</h3>
         <p>${t('depth.filled', { filled: slots.filter(slot => players.has(slot.playerIds[0])).length, total: slots.length })}</p></div>
-        <div class="depth-heading-actions">${slots.length ? `<button type="button" class="roster-secondary" aria-controls="depth-assignments" data-depth-chart="view">${t(startersOnly ? 'depth.showRanks' : 'depth.showStarters')}</button>` : ''}
-          ${editable ? `<button type="button" class="roster-secondary" data-depth-chart="add" ${slots.length >= DEPTH_LIMITS.slots ? 'disabled' : ''}>${t('depth.add')}</button>` : ''}</div></div>
+        ${slots.length ? `<div class="depth-view-picker" role="group" aria-label="${t('depth.viewLabel')}">
+        ${Object.entries(views).map(([key, labels]) => `<button type="button" data-depth-chart="mode" data-mode="${key}" aria-controls="depth-assignments" aria-pressed="${key === mode}">${t(labels[0])}</button>`).join('')}</div>` : ''}
+        ${editable ? `<button type="button" class="roster-secondary" data-depth-chart="add" ${slots.length >= DEPTH_LIMITS.slots ? 'disabled' : ''}>${t('depth.add')}</button>` : ''}</div>
       ${!roster.length ? `<p class="depth-hint">${t('depth.noRoster')}</p>` : ''}
-      <div id="depth-assignments">${slots.length && startersOnly ? starterList(slots, players, editable) : slots.length ? `<table aria-labelledby="depth-heading"><thead><tr><th scope="col">${t('modal.position')}</th>
-        <th scope="col">${t('depth.starter')}</th><th scope="col">${t('depth.backups')}</th>${editable ? `<th scope="col">${t('roster.actions')}</th>` : ''}</tr></thead>
-        <tbody>${slots.map(slot => slotRow(slot, players, editable)).join('')}</tbody></table>`
-        : `<p class="depth-empty">${t('depth.noSlots')}</p>`}</div>
+      <div id="depth-assignments">${body}</div>
       </section>`;
+    const picker = sheet.querySelector('[data-formation-player]');
+    if (picker) picker.value = playerId;
   }
 
   function rankEditor() {
@@ -125,6 +153,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
 
   function close(slotId) {
     draft = null;
+    if (slotId) selectedSlotId = slotId;
     dialog.close();
     dialog.replaceChildren();
     refresh();
@@ -167,6 +196,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       if (remove) target.slots = target.slots.filter(item => item.id !== slot.id);
       else if (before) Object.assign(target.slots.find(item => item.id === slot.id), { label, playerIds });
       else target.slots.push({ ...slot, label, playerIds });
+      if (!remove && target.templateId && (!before || label !== before.label)) bindDepthTemplate(target, target.templateId);
     });
     if (ok === false) { alert(t('roster.saveFailed')); return; }
     onChange?.();
@@ -178,10 +208,20 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     const button = event.target.closest('[data-depth-chart]');
     if (!button || button.disabled) return;
     const action = button.dataset.depthChart;
-    if (action === 'view') {
-      startersOnly = !startersOnly;
+    if (action === 'mode' && Object.hasOwn(views, button.dataset.mode)) {
+      mode = button.dataset.mode;
       refresh();
-      sheet.querySelector('[data-depth-chart="view"]')?.focus();
+      sheet.querySelector(`[data-mode="${mode}"]`)?.focus({ preventScroll: true });
+      return;
+    }
+    if (action === 'inspect') {
+      selectedSlotId = button.dataset.slot;
+      refresh();
+      [...sheet.querySelectorAll('[data-depth-chart="inspect"]')].find(el => el.dataset.slot === selectedSlotId)?.focus({ preventScroll: true });
+      const win = root.ownerDocument.defaultView, detail = sheet.querySelector('#depth-formation-detail');
+      if (detail && win.matchMedia?.('(max-width: 640px)').matches && detail.getBoundingClientRect().top > win.innerHeight - 80) {
+        detail.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
+      }
       return;
     }
     if (action === 'add' || action === 'edit') { open(button.dataset.slot); return; }
@@ -218,6 +258,13 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
   }
 
   function change(event) {
+    if (event.target.matches('[data-formation-player]')) {
+      playerId = event.target.value;
+      selectedSlotId = group()?.slots.find(slot => playerId && slot.playerIds.includes(playerId))?.id;
+      refresh();
+      sheet.querySelector('[data-formation-player]')?.focus({ preventScroll: true });
+      return;
+    }
     const select = event.target.closest('[data-rank]');
     if (!select || !draft) return;
     const blocked = errorForDraft();

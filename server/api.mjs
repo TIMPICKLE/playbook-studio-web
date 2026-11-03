@@ -26,6 +26,21 @@ async function access(db, workspaceId, userId, needed = 'read') {
 }
 const document = row => ({ id: row.id, title: row.title, role: row.role, revision: row.revision, updatedAt: row.updated_at, updatedBy: row.updated_by, data: JSON.parse(row.data_json) });
 async function event(db, workspaceId, actor, action, detail = '') { return db.prepare('INSERT INTO audit_events(id,workspace_id,actor_id,action,detail,created_at) VALUES(?,?,?,?,?,?)').bind(id(), workspaceId, actor, action, detail, timestamp()).run(); }
+// The previous editor wrote the whole roster on every save, without diagram fields.
+function preserveStoredLayouts(groups, storedJSON) {
+  if (!Array.isArray(groups) || !groups.some(group => group && group.templateId === undefined)) return;
+  const saved = JSON.parse(storedJSON).depthChart?.groups ?? [];
+  const byId = new Map(saved.map(group => [group.id, group]));
+  for (const group of groups) {
+    const previous = byId.get(group?.id);
+    if (!previous || previous.templateId === undefined || group.templateId !== undefined || !Array.isArray(group.slots)) continue;
+    group.templateId = previous.templateId;
+    const roles = new Map(previous.slots.map(slot => [slot.id, slot.templateRole]));
+    for (const slot of group.slots) {
+      if (slot && typeof slot === 'object' && slot.templateRole === undefined) slot.templateRole = roles.get(slot.id) ?? null;
+    }
+  }
+}
 async function writeWorkspace(db, workspaceId, user, data, expected, action = 'saved', ownerOnly = false) {
   const record = await access(db, workspaceId, user.userId, ownerOnly ? 'owner' : 'write');
   // An already-open older editor strips unknown fields when reading a cloud book.
@@ -33,6 +48,7 @@ async function writeWorkspace(db, workspaceId, user, data, expected, action = 's
   if (legacyWrite && JSON.parse(record.data_json).depthChart) {
     fail(422, '请刷新页面加载新版球员管理，再同步本机草稿。');
   }
+  if (action === 'saved') preserveStoredLayouts(data?.depthChart?.groups, record.data_json);
   const validated = checkedData(data);
   if (legacyWrite) delete validated.depthChart;
   const encoded = JSON.stringify(validated); if (new TextEncoder().encode(encoded).length > MAX_BODY - 1000) fail(413, '战术本过大，请拆分或先导出备份');

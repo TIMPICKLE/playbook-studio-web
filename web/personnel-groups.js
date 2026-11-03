@@ -1,6 +1,6 @@
 import { t } from './i18n.js';
 import { clone, escapeHTML as e } from './model.js';
-import { DEPTH_LIMITS, DEPTH_TEMPLATES, createDepthGroup, copyDepthGroup } from './depth-model.js';
+import { DEPTH_LIMITS, DEPTH_TEMPLATES, bindDepthTemplate, createDepthGroup, copyDepthGroup } from './depth-model.js';
 
 const units = ['offense', 'defense', 'special'];
 const unitName = unit => t(`personnel.${unit}`);
@@ -57,15 +57,16 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
     if ((action === 'new' || action === 'copy') && groups().length >= DEPTH_LIMITS.groups) return;
     draft = { action, book: workspace, unit, before: current && action !== 'new' ? clone(current) : null };
     const name = action === 'copy' ? t('personnel.copyName', { name: current.name }).slice(0, DEPTH_LIMITS.name) : current?.name;
-    const options = DEPTH_TEMPLATES.filter(template => template.unit === unit);
+    const options = action === 'edit' ? DEPTH_TEMPLATES : DEPTH_TEMPLATES.filter(template => template.unit === unit);
     const isRemoval = action === 'remove';
     dialog.innerHTML = `<form><h2 id="personnel-form-title">${t(`personnel.${action}`)}</h2>
       ${isRemoval ? `<p>${e(t('personnel.removePrompt', { name: current.name }))}</p>` : `
       <div class="roster-fields">
         <label>${t('personnel.name')}<input name="name" value="${e(action === 'new' ? '' : name)}" maxlength="${DEPTH_LIMITS.name}" required></label>
-        ${action === 'new' ? `<label>${t('personnel.layout')}<select name="template">
-          ${options.map(template => `<option value="${e(template.id)}">${e(template.name)}</option>`).join('')}
-          <option value="">${t('personnel.blank')}</option></select></label>` : ''}
+        ${action === 'new' || action === 'edit' ? `<label>${t(action === 'edit' ? 'personnel.currentLayout' : 'personnel.layout')}<select name="template">
+          ${options.map(template => `<option value="${e(template.id)}" ${action === 'edit' && current.templateId === template.id ? 'selected' : ''}>${e(template.name)}</option>`).join('')}
+          <option value="" ${action === 'edit' && !current.templateId ? 'selected' : ''}>${t(action === 'edit' ? 'personnel.noLayout' : 'personnel.blank')}</option></select></label>` : ''}
+        ${action === 'edit' ? `<p class="personnel-hint">${t('personnel.layoutMatchHint')}</p>` : ''}
         ${action === 'copy' ? `<label>${t('personnel.destination')}<select name="unit">${units.map(key =>
           `<option value="${key}" ${key === unit ? 'selected' : ''}>${unitName(key)}</option>`).join('')}</select></label>
           <p class="personnel-hint">${e(t('personnel.copyHint', { name: current.name }))}</p>` : ''}
@@ -98,7 +99,8 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
     const { action, before } = draft;
     const current = before && groups().find(group => group.id === before.id);
     const name = q('[name=name]')?.value.trim(), notes = q('[name=notes]')?.value.trim();
-    const template = q('[name=template]')?.value;
+    const template = q('[name=template]')?.value || null;
+    const changeLayout = action === 'edit' && template !== before.templateId;
     const targetUnit = q('[name=unit]')?.value || draft.unit;
     const creating = action === 'new' || action === 'copy';
     if (creating && groups().length >= DEPTH_LIMITS.groups) { error.textContent = t('personnel.limit', { count: DEPTH_LIMITS.groups }); return; }
@@ -111,7 +113,9 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
     }
     // Keep edits to other fields/positions that arrived while this form was open.
     if ((action === 'remove' && JSON.stringify(before) !== JSON.stringify(current))
-        || (action === 'edit' && ((name !== before.name && current.name !== before.name) || (notes !== before.notes && current.notes !== before.notes)))) {
+        || (action === 'edit' && ((name !== before.name && current.name !== before.name)
+          || (notes !== before.notes && current.notes !== before.notes)
+          || (changeLayout && current.templateId !== before.templateId)))) {
       error.textContent = t('roster.conflict'); return;
     }
     let nextId = current?.id;
@@ -129,6 +133,7 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
         const group = entries.find(entry => entry.id === current.id);
         if (name !== before.name) group.name = name;
         if (notes !== before.notes) group.notes = notes;
+        if (changeLayout) bindDepthTemplate(group, template);
       }
     });
     if (saved === false) { error.textContent = t('roster.saveFailed'); return; }

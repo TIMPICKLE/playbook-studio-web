@@ -1,9 +1,14 @@
 export default {
+  'depth.viewLabel': 'View',
+  'depth.viewFormation': 'Formation',
+  'depth.viewRanks': 'Depth order',
+  'depth.viewStarters': 'Starters only',
+  'depth.formationTitle': 'Formation',
   'depth.lineup': 'Starting lineup',
   'depth.showStarters': 'Starters only',
   'depth.showRanks': 'Show full depth',
   'depth.quickEdit': 'Adjust {label}, starter {player}',
-  'depth.positions': 'Position depth',
+  'depth.positions': 'Starters and backups',
   'depth.filled': '{filled} of {total} starters assigned',
   'depth.add': 'Add position',
   'depth.starter': 'Starter',
@@ -33,5 +38,5 @@ export default {
   'depth.duplicate': 'A player can appear only once at this position.',
   'depth.playerGone': 'A selected player left the roster. Reopen the position to update it.',
   'depth.limit': 'This group has reached its position limit.',
-  'depth.updated': 'Depth chart updated.'
+  'depth.updated': 'DEPTH CHART updated.'
 };
