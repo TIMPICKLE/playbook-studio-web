@@ -1,6 +1,79 @@
-# 战术板助手的 Agent Harness
+# 战术板 AI 助手的 Agent 架构
 
-教练可以在画布上输入或口述改图要求，也可以描述想找的 Madden 进攻战术。编辑器为一次指令提供当前画布的工作副本。模型选择工具和参数，工具返回能够核对的球员或战术目录条目。编辑器负责把通过校验的路线提交为一次可撤销的编辑，或把搜索结果呈现为可加入战术本的卡片。
+悬浮窗后面只有一个教练助手 Agent。它读取教练的指令，选择需要的工具，再根据工具结果决定下一步。改路线和找 Madden 战术共用这个循环。两者都围绕当前战术展开，也都需要在交付结果前核对对象 ID，因此可以共用一次运行的上下文和校验规则。独立入口「AI 分析战局」有自己的 Agent，分析两套已保存的攻防战术。浮窗不会把任务转交给它。[对位分析 Agent 设计](AI_MATCHUP_AGENT_DESIGN.md)
+
+## 三个节点如何协作
+
+一次发送启动一个 LangGraph `StateGraph`。图中只有 `model` 节点调用大模型。`tools` 执行注册的只读函数，`validate` 用代码校验最终结果。浮窗上的「画阻挡路线」和「找 Madden 战术」会填入可修改的示例指令。教练也可以直接描述需求，由同一个模型选择工具。[状态图与退出条件](../web/assistant-harness.js) · [浮窗入口](../web/board-assistant.js)
+
+```mermaid
+flowchart TD
+    Start["教练发送指令"] --> M["model · 决定下一步"]
+    M -->|"请求工具"| T["tools · 校验参数并执行"]
+    T -->|"工具结果回到同一段对话"| M
+    M -->|"提交最终结果"| V["validate · 校验格式和对象 ID"]
+    V -->|"首次不合格且仍有预算"| M
+    V -->|"通过"| R{"结果类型"}
+    V -->|"再次不合格或预算耗尽"| F["结束并报告错误"]
+    R -->|"edit"| E["编辑器复核并写入"]
+    R -->|"search"| S["显示候选，等待教练选择"]
+    R -->|"clarify"| Q["向教练提问，本次运行结束"]
+```
+
+| 谁负责 | 可以决定什么 | 代码入口 |
+|---|---|---|
+| 浮窗与编辑器 | 将听写或键入内容和当前工作副本交给 Agent。写入、保存、撤销均由编辑器执行 | [浮窗](../web/board-assistant.js) · [编辑器接入](../web/app.js) |
+| 模型与传输层 | 模型选择工具、查询条件及下一步。传输层负责服务商协议、超时和取消 | [模型适配器](../web/assistant-provider.js) |
+| 工具注册表 | `read_board` 读取快照。`resolve_player` 找场上球员，唯一匹配才登记 ID。`search_madden` 查询目录并登记本次返回的候选 ID | [注册表与参数契约](../web/assistant-tools.js) |
+| 结果校验与领域代码 | 校验操作中引用的球员、目录条目及坐标，计算阻挡接触点，按目录 ID 还原卡片 | [结果校验](../web/assistant-harness.js) · [路线生成](../web/assistant-edit.js) · [目录检索](../web/assistant-search.js) |
+
+`edit` 当前接受两种操作。有序阻挡使用 `block(playerId, targetIds)`，目标为 1–6 名已经定位的对手。普通跑动使用 `route(playerId, points)`，接受 1–32 个新的路点，坐标范围为 0–100，起点由编辑器取自球员当前位置。`read_board` 中的路线按所属球员、类型、是否可选和路点传递。区域、独立路线 ID 和演练时间参数仍由编辑器管理。[快照字段](../web/assistant-provider.js) · [操作契约](../web/assistant-harness.js)
+
+## 状态保存在哪里
+
+| 生命周期 | 保存的内容 | 用途 |
+|---|---|---|
+| LangGraph 单次运行 | `next`、`modelCalls`、`repaired` | 选择下一节点、限制模型调用次数、记录是否已尝试修正 |
+| 同一次请求的内存 | 画布快照、模型与工具消息、已唯一定位的球员 ID 集合、历次检索候选 ID 的并集 | 让后续步骤引用早先找到的对象。首条用户消息只含指令、语言和选中的球员 ID，模型按需调用工具获取更多信息 |
+| 浮窗与编辑器 | 待澄清的问题、当前工作区与战术、编辑撤销历史 | 教练补充信息时，浮窗将原指令、问题和补充答案组成新请求。新运行基于当时的画布重新收集证据。被接受的编辑进入战术本的正常保存流程 |
+
+图按请求创建，运行结束后释放，没有持久化检查点或跨会话记忆。每条模型消息最多可提出 5 次工具调用，工具节点按消息中的顺序逐个执行。单次指令最多调用模型 6 次、工具 10 次，最后一次模型调用关闭工具。每次模型回复上限为 1,800 tokens，调用前检查对话记录是否超过 120,000 字节。模型运行设有 90 秒超时并接收浮窗的取消信号。校验失败最多允许修正一次。成功的结果附带 `toolsUsed` 和 `modelCalls`，可在测试中区分模型轮数和工具次数。[运行预算](../web/assistant-harness.js) · [请求生命周期](../web/assistant-provider.js)
+
+## 两条指令的执行过程
+
+### C 先挡面前的 DT，再去找叫 Avery 的 LB
+
+下面沿用仓库测试里的三个球员 ID。该测试使用脚本化的模型回复，任何人都能重放这条路径。真实模型可以选择不同的调用顺序。[可重放的工具调用测试](../tests/assistant-provider.test.mjs)
+
+| 模型轮次 | 模型提出的操作 | 程序核对与执行 |
+|---|---|---|
+| 1 | 找 `role=C`，再找 `role=LB, name=Avery` | 两项可放在同一条消息，分别唯一匹配场上的 `c` 和 `l` |
+| 2 | 找 `role=DT, relation=in_front, relativeToId=c` | 工具先确认 `c` 已登记，再沿 C 的前进方向筛选 DT，按球场距离取最近者，得到 `d`。同距会返回多个候选 |
+| 3 | 返回下面的有序阻挡操作 | 校验器确认执行者已定位、两个目标均来自对方且各不相同。编辑器随后计算接触点 |
+
+```json
+{"kind":"edit","operation":{"kind":"block","playerId":"c","targetIds":["d","l"]}}
+```
+
+编辑器把操作写成 C 的一条 `stagedBlock` 路线，包含起点、DT 旁的接触点和 LB 旁的接触点。演练先在第一处停留，再走第二段。接触点取自改图时的站位，后续移动防守人不会使路线自动追踪。整条路线作为一次编辑提交。若名字没有匹配到场上棋子，或仍有两个同样符合条件的目标，模型可以返回 `clarify` 请教练补充姓名或球衣号。[球员定位与接触点](../web/assistant-edit.js) · [演练时序](../web/model.js) · [路线回归测试](../tests/assistant-edit.test.mjs)
+
+### 找几套能打 Cover 3 的 Madden 进攻战术
+
+1. 模型把防守问题转成可查的英文战术概念，例如调用 `search_madden({"concepts":["flood","sail","curl flat","vertical"]})`。工具在目录名称中匹配这些概念，也支持阵型、球队及可编辑状态筛选。模型可以看完首轮候选后调整条件再查。
+2. 这组条件可返回 Eagles 的 Gun Trips TE **FLOOD** 和 Ravens 的 Gun Tight Slot Flip **SAIL**。FLOOD 有可编辑重建数据，工具可以提供主要跑动路线的起终点与开球线位置。SAIL 只有原图，模型得到的是名称和阵型等元数据。教练能在候选卡看到原图。每次查询最多返回 12 项。
+3. 模型从本次已检索到的 ID 中选出 0–4 项，为每项写一句推荐依据。例如，面对三深区域时，Flood 的同侧多层路线可让四分卫根据外侧浅区防守人的落位选择传球层次。校验器能核实条目来源、排除重复 ID、检查理由是否非空。对具体 Cover 3 变体是否适用，仍是战术判断。
+4. 编辑器用目录 ID 读取真实名称、阵型和图片。到这里战术本尚未更改。教练点击「加入战术本」后，现有导入流程才创建所选战术，分别保留可编辑路线或原图参考。[目录检索与证据](../web/assistant-search.js) · [真实目录回归测试](../tests/assistant-search.test.mjs) · [导入入口](../web/app.js)
+
+## 两种宿主与写入边界
+
+| | GitHub Pages 免登录版 | 云端工作台 |
+|---|---|---|
+| 谁运行图 | 浏览器按需加载已打包的 LangGraph | Worker 使用项目依赖中的 LangGraph |
+| 图可以读取什么 | 编辑器当前快照，浏览器加载的 Madden 目录 | 客户端提交的编辑快照，服务端随版本打包的 Madden 目录。客户端传入的候选列表不作为目录证据 |
+| 模型请求怎样发送 | 当前页面使用本次填写的 Key 调用所选服务商 | 请求经过 `POST /api/workspaces/:id/board-assistant`，Worker 使用该次请求的凭据调用服务商 |
+| 何时检查权限与版本 | 编辑器在应用结果时检查战术和编辑状态 | 入口、每次模型调用前、返回结果前均复核身份、成员权限与工作区版本。返回改图要求 owner 或 editor，viewer 可以检索或澄清 |
+
+两种宿主都使用同一份图、工具注册表和结果校验。云端助手接口只返回操作或候选。应用改图前，编辑器还要确认当前工作区和战术与发起请求时一致、当前战术内容未变、用户有编辑权且没有正在进行的拖动或绘图。若教练在模型运行时已手动改图，过期操作会被拒绝。浮窗的「撤销改图」仅能撤销仍位于历史栈顶的那笔编辑。[客户端接入](../web/app.js) · [云端接入与版本复核](../server/api.mjs) · [服务端目录](../server/board-assistant-catalog.mjs)
 
 ## 框架选型
 
@@ -14,50 +87,16 @@
 
 框架资料来自 [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-typescript)、[Claude 浏览器 SDK 更新记录](https://github.com/anthropics/claude-agent-sdk-typescript/blob/main/CHANGELOG.md)、[Pi agent-core 文档](https://github.com/earendil-works/pi/tree/main/packages/agent) 和 [LangGraph.js](https://github.com/langchain-ai/langgraphjs)。
 
-## 一次指令的生命周期
-
-`web/assistant-provider.js` 将当前指令和编辑器快照准备为本次运行的输入。静态页按需加载本地 [LangGraph 浏览器包](../web/vendor/README.md)。云端的 `POST /api/workspaces/:id/board-assistant` 调用项目已安装的 LangGraph 并使用服务端目录。两种入口调用同一份 [状态图](../web/assistant-harness.js)。API Key 仅用于模型传输，模型运行期间的消息与工具证据保存在该次调用的内存中。
-
-```mermaid
-flowchart TD
-    M["调用模型"] --> D{"工具调用或最终结果"}
-    D -->|工具调用| T["校验参数并执行工具"]
-    T --> M
-    D -->|最终结果| V{"校验类型与对象 ID"}
-    V -->|通过| E["返回改图、推荐或澄清"]
-    V -->|首次失败且有预算| M
-    V -->|再次失败| F["返回错误"]
-```
-
-| 注册工具 | 输入及结果 |
-|---|---|
-| `read_board` | 读取本次战术的棋子、位置、已选对象和已有路线。 |
-| `resolve_player` | 按位置、名字、球衣号、攻防侧或相对方位查找。相对方位可以引用本次已找到的棋子。唯一匹配时登记 ID，零个或多个候选时返回相应状态。 |
-| `search_madden` | 按模型选定的概念、阵型、球队和可编辑状态查询目录。只登记本次实际返回的条目，供最终推荐引用。 |
-
-[运行预算](../web/assistant-harness.js)限制每次指令最多进行 6 次模型调用和 10 次工具调用，每条模型消息至多包含 5 个工具调用。每次模型调用的输出上限为 1,800 tokens，发起下一次调用前检查消息记录大小，最多 120,000 字节。90 秒超时、主动取消、超出预算均会停止请求。最终结果格式或证据校验失败时允许修正一次，仍受同一预算限制。对工具调用次数和模型调用次数的计数可用于回归排查。
-
-## 模型与编辑器如何分工
-
-- **连续阻挡**。例如“C 先挡面前的 DT，再去找叫 Alex 的 LB”。模型需要从当前球场找到进攻球员及两个对手。名字、位置和相对方位由实际棋子和已关联名单核对。确认目标后，领域代码生成按顺序经过两处接触点的路线。演练按该路线移动并在中间接触点短暂停留。目标不明确时，教练可以补充名字或球衣号。
-- **寻找对付 Cover 3 的进攻战术**。模型选择适合检索的战术概念或阵型，根据目录结果调整查询。每张推荐卡对应真实目录 ID，展示球队、阵型、可编辑状态和简短战术依据。球员路线来自可编辑条目的图上重建。只有原图的条目用目录名称和阵型作为依据。推荐说明应保留成立条件，例如对手采用的具体 Cover 3 变体。
-- **写入**。改图经现有编辑器提交、保存，并进入撤销历史。搜索本身只读，教练点击卡片的加入操作后才调用现有 Madden 导入逻辑。一次生成期间如果切换战术、修改当前画布或撤销操作，提交前应重新核对当前上下文。
-
-云端在请求开始时核对身份、工作区读取权限和 revision，在模型返回后再核对身份、权限与 revision。返回改图操作需要写权限。
-
 ## 维护与回归
 
-添加诸如“查看当前球员已分配的路线”这样的能力时，先定义一个返回稳定对象 ID 的只读工具。在 [assistant-tools.js](../web/assistant-tools.js) 的 `createBoardTools` 中登记其名称、用途、输入结构和执行器。普通模块负责读取、过滤、排序或产生可校验的操作，模型负责决定何时调用。若新能力会修改战术，扩展最终结果的操作类型、领域校验和编辑器事务，并验证旧战术文件仍可回读。运行判断在 `validateBoardReply`，领域实现分别位于 [assistant-edit.js](../web/assistant-edit.js) 与 [assistant-search.js](../web/assistant-search.js)。
+| 下次要加什么 | 从哪里改起 | 要验证什么 |
+|---|---|---|
+| 新的只读能力，如查询某名球员当前的路线 | 在 [`createBoardTools`](../web/assistant-tools.js) 注册工具描述、参数 schema 和执行器，领域函数返回稳定 ID 或可核对的数据 | 正常调用、非法参数、空结果。已有请求能继续选用其他工具 |
+| 新的画布操作，如移动球员 | 在[状态图](../web/assistant-harness.js)扩充模型可返回的操作及校验，在[领域层](../web/assistant-edit.js)实现，再接入[编辑器事务](../web/app.js) | 伪造 ID、歧义、只读、过期响应均无法写入。成功时可以保存、撤销、重载 |
+| 更换模型服务商或升级 LangGraph | 服务商协议放在[模型适配器](../web/assistant-provider.js)。升级依赖后运行 `node scripts/bundle-board-agent.mjs`，一起提交静态版 ESM 与署名文件 | 静态与云端两种入口都能完成工具循环，并能在取消、超时或达到预算时退出 |
 
-依赖升级后运行 `node scripts/bundle-board-agent.mjs`，将更新后的浏览器 ESM 和署名文件一起提交。GitHub Pages 构建会直接复制这些资源。
-
-在仓库根目录执行以下检查。测试使用脚本化的模型响应时，无需外部服务或 API Key。
+以下命令从仓库根目录运行。测试使用脚本化模型，无需 API Key，覆盖连续阻挡、多轮检索、伪造 ID、预算耗尽、读写权限、过期响应和浮窗交互。
 
 ```sh
-node --test tests/assistant-provider.test.mjs tests/assistant-search.test.mjs tests/assistant-edit.test.mjs tests/board-assistant-ui.test.mjs
-npm run check
-npm run typecheck
-npm test
+node --test tests/assistant-provider.test.mjs tests/assistant-edit.test.mjs tests/assistant-search.test.mjs tests/board-assistant-ui.test.mjs
 ```
-
-变更工具或提示词时，至少回放一次“检索返回后再检索”和“球员同名需要澄清”。变更写入或演练时，覆盖连续阻挡顺序、撤销恢复，以及请求等待期间切换战术的情况。变更模型传输时，分别验证静态入口和云端入口对取消、权限变化及超出运行预算的处理。
