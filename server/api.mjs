@@ -137,18 +137,41 @@ export async function handleApi(request, env, user) {
         const latest = await access(db, workspaceId, user.userId, needed);
         if (latest.revision !== record.revision) fail(409, '战术本已更新，请重试');
       };
-      let reply;
-      try {
-        reply = await invokeBoardModel(config, input, {
-          runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize,
-          signal: request.signal, readResponse: limitedResponse,
-        });
-      } catch (error) {
-        if (error instanceof ApiError) throw error;
-        fail(502, error.message);
-      }
-      await reauthorize(reply.kind === 'edit' ? 'write' : 'read');
-      return json(reply);
+      const execute = async (onTool, signal = request.signal) => {
+        let reply;
+        try {
+          reply = await invokeBoardModel(config, input, {
+            runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize, onTool,
+            signal, readResponse: limitedResponse,
+          });
+        } catch (error) {
+          if (error instanceof ApiError) throw error;
+          fail(502, error.message);
+        }
+        await reauthorize(reply.kind === 'edit' ? 'write' : 'read');
+        return reply;
+      };
+      if (!body.stream) return json(await execute());
+      const encoder = new TextEncoder();
+      let cancelled = false;
+      const streamAbort = new AbortController();
+      const abortStream = () => streamAbort.abort();
+      request.signal.addEventListener('abort', abortStream, {once:true});
+      if (request.signal.aborted) abortStream();
+      const stream = new ReadableStream({
+        cancel() { cancelled = true; abortStream(); },
+        async start(controller) {
+          const send = event => { if (!cancelled) controller.enqueue(encoder.encode(JSON.stringify(event) + '\n')); };
+          try {
+            const result = await execute((name, args) => send({type:'tool', name, args}), streamAbort.signal);
+            send({type:'result', result});
+          } catch (error) {
+            send({type:'error', error:error.message, status:error.status || 502});
+          } finally { request.signal.removeEventListener('abort', abortStream); if (!cancelled) controller.close(); }
+        },
+      });
+      return new Response(stream, {headers: {'Content-Type':'application/x-ndjson; charset=utf-8', 'Cache-Control':'no-store, private', 'X-Content-Type-Options':'nosniff'}});
+
     }
     if (path[2] === 'matchup-analysis' && path.length === 3 && request.method === 'POST') {
       const record = await access(db, workspaceId, user.userId);

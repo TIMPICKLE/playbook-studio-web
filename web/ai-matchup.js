@@ -162,5 +162,11 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
     }
     if (event.target.closest('[data-ai-action="analyze"]')) analyze();
   });
-  return { show, onData };
+  function selectPlay(play) {
+    if (!play || !['offense', 'defense'].includes(play.book)) return;
+    state[play.book] = play.id;
+    clearResult();
+    if (active) render();
+  }
+  return { show, onData, selectPlay };
 }

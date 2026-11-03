@@ -1,7 +1,7 @@
-const CACHE = 'playbook-studio-v5.8-board-assistant';
+const CACHE = 'playbook-studio-v5.9-board-assistant';
 // The graph runtime is fetched and cached on first use.
 const FILES = [
-  './board-assistant.js', './board-assistant.css', './assistant-edit.js', './assistant-search.js', './madden-catalog.js',
+  './board-assistant.js', './board-assistant.css', './assistant-edit.js', './assistant-operations.js', './assistant-search.js', './madden-catalog.js', './madden-concepts.js', './data/madden-search-tags.js',
   './assistant-provider.js', './assistant-harness.js', './assistant-tools.js', './locales/assistant-edit.js',
   './locales/assistant-provider.js', './locales/board-assistant.en.js', './locales/board-assistant.zh-CN.js',
   './depth-formation.js', './depth-formation-layout.js', './depth-formation.css', './locales/depth-formation.zh-CN.js', './locales/depth-formation.en.js',

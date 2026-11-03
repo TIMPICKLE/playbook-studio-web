@@ -110,3 +110,15 @@
 @media print { .board-ai { display:none!important; } }
 
 @media (min-width: 1181px) { .workspace:not(.reference-play) .board-ai { bottom: 36px; } }
+.board-ai .ba-mode { margin: 2px 0 5px; }
+.board-ai .ba-output > .ba-pill { margin: 5px 6px 0 0; }
+.board-ai .ba-output ul { padding-left: 20px; }
+.board-ai .ba-expand { display: none; }
+@media (max-width: 600px) {
+  .board-ai .ba-panel { top: auto!important; bottom: 6px; max-height: min(52vh, calc(100% - 12px)); border-radius: 14px 14px 8px 8px; }
+  .board-ai .ba-panel.ba-collapsed { max-height: 54px; }
+  .board-ai .ba-panel.ba-collapsed .ba-heading,
+  .board-ai .ba-panel.ba-collapsed .ba-content,
+  .board-ai .ba-panel.ba-collapsed .ba-footer { display: none; }
+  .board-ai .ba-panel.ba-collapsed .ba-expand { display: inline-flex; flex: 1; }
+}

@@ -127,8 +127,8 @@ Filter by team, formation group, specific formation, or English play name. Previ
 
 Open the editor, click **AI** on the field, and enter your provider, model and API key in settings. Type an instruction or dictate it with the microphone, review the text, and send.
 
-- **Edit a play.** Try “Have C block the DT in front of him, then block the LB named Alex.” Place the defenders on the board first and name or link the intended linebacker. The assistant resolves markers and draws an editable staged blocking path. Rehearse the contact sequence or undo the edit.
-- **Find a play.** Try “Find Madden passing concepts against Cover 3.” Results come from the Eagles and Ravens catalog. Each card shows the diagram, formation, editability and a short rationale. Select **Add** to import a play.
+- **Edit a play.** Try “Have C block the DT in front of him, then block the LB named Alex.” Place the defenders on the board first and name or link the intended linebacker. The assistant resolves markers and previews the proposed changes. Rehearse the preview, apply it, or discard it. Applied groups can be undone together. The assistant also supports route concepts, multiple players, motion, alignment, passing timing, zones, and annotations.
+- **Find a play.** Try “Find Madden passing concepts against Cover 3.” Results come from the Eagles and Ravens catalog, including similarity search based on route features. Each card shows the diagram, formation, editability and a short rationale. Select **Add** to import a play.
 
 The cloud and static editors run the same coaching agent in LangGraph. The model chooses read-only tools, and the editor validates and commits edits. The static editor calls the selected provider directly and keeps the key in page memory. Dictation requires browser speech recognition and microphone permission. [Agent architecture, example tool calls, and maintenance guide (Chinese)](docs/BOARD_ASSISTANT.md)
 

@@ -1,4 +1,6 @@
 export default {
+  clearMode: '清除模式', apply: '应用', discard: '放弃', rehearse: '预览演练', discarded: '已放弃预览。', expand: '展开预览', handoff: '前往战局分析',
+  toolProgress: {read_board:'正在读取战术板…', resolve_player:'正在定位球员…', resolve_players:'正在定位球员组…', search_madden:'正在检索 Madden 战术…'},
   title: '战术板助手', open: '打开 AI 战术板助手', close: '收起助手', settings: '模型设置', move: '移动浮窗',
   guide: '想怎么改这套战术？', edit: '画阻挡路线', search: '找 Madden 战术', editExample: '让 C 先阻挡正前方的 DT，再去阻挡 MLB。',
   searchExample: '帮我找适合进攻 Cover 3 的 Madden 战术。', prompt: '输入改图指令，或描述想找的战术…', send: '发送', cancel: '取消生成',
