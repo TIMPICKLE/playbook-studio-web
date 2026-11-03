@@ -23,6 +23,8 @@ test('position groups include all offensive linemen and safeties but avoid confu
   assert.equal(resolveBoardPlayer(players, { role: 'OL', side: 'offense' }).candidates.length, 5);
   assert.deepEqual(resolveBoardPlayer(players, { role: '安全卫' }).candidates.map(p => p.id), ['one', 'two']);
   assert.deepEqual(resolveBoardPlayer(players, { role: 'LB' }).candidates.map(p => p.id), ['mike']);
+  const withTightEnd = [...players, {id:'tight', label:'T', position:'Tight End', side:'offense', x:60, y:50}];
+  assert.equal(resolveBoardPlayer(withTightEnd, {role:'TE'}).candidates[0].id, 'tight');
 });
 
 test('inside and outside compare players on the same side of the center axis', () => {

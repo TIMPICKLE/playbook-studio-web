@@ -53,3 +53,49 @@ test('pass, annotation and zones use existing editable play model', () => {
   assert.equal(edited.zones.length,1);
   assert.equal(edited.annotations[0].text,'first read');
 });
+
+test('motion types produce distinct paths and keep post-motion routes anchored', () => {
+  const input = play(), z = pick(input, 'Z');
+  const paths = ['jet', 'orbit', 'across', 'shift'].map(type => {
+    const result = buildAssistantEdit(input, [], [
+      {kind:'motion', playerId:z.id, type, toward:'left'},
+      {kind:'route', playerId:z.id, concept:'post', depthYards:12},
+    ]);
+    const motion = result.play.routes.find(r => r.playerId === z.id && r.kind === 'motion');
+    const route = result.play.routes.find(r => r.playerId === z.id && r.kind === 'route');
+    assert.deepEqual(route.points[0], motion.points.at(-1));
+    assert.ok(route.delay >= motion.delay + motion.duration);
+    return JSON.stringify(motion.points);
+  });
+  assert.equal(new Set(paths).size, 4);
+});
+
+test('blocking schemes choose distinct geometric assignments and return every changed route', () => {
+  const input = play(), c = pick(input, 'C');
+  input.players.push(
+    {id:'left-d',label:'DL',name:'',x:c.x - 5,y:c.y - 5,side:'defense',shape:'circle',color:'#c4a5f5'},
+    {id:'right-d',label:'DL',name:'',x:c.x + 5,y:c.y - 5,side:'defense',shape:'circle',color:'#c4a5f5'},
+    {id:'front-d',label:'DL',name:'',x:c.x,y:c.y - 5,side:'defense',shape:'circle',color:'#c4a5f5'},
+  );
+  const result = scheme => buildAssistantEdit(input, [], [{kind:'block',playerIds:[c.id],scheme,direction:'left'}]);
+  const targets = ['zone','gap','pass_pro'].map(scheme => {
+    const change = result(scheme);
+    assert.equal(change.routeIds.length, 1);
+    return change.play.routes.find(r => r.id === change.routeIds[0]).blockTargets[0];
+  });
+  assert.deepEqual(targets, ['left-d','right-d','front-d']);
+  const ids = ['LT','LG','C','RG','RT'].map(label => pick(input,label).id);
+  assert.equal(buildAssistantEdit(input, [], [{kind:'block',playerIds:ids,scheme:'zone',direction:'left'}]).routeIds.length, 5);
+});
+
+test('explicit route IDs target only the named player and preserve the requested route', () => {
+  const input = play(), x = pick(input, 'X'), z = pick(input, 'Z');
+  const first = buildAssistantEdit(input, [], [{kind:'route',playerId:x.id,concept:'go',depthYards:10}]);
+  const routeId = first.routeId;
+  const change = buildAssistantEdit(first.play, [], [{kind:'route',playerId:x.id,routeId,concept:'dig',depthYards:12}]);
+  assert.equal(change.routeId, routeId);
+  assert.deepEqual(change.routeIds, [routeId]);
+  assert.equal(change.play.routes.find(r => r.id === routeId).points[1].y, 43);
+  assert.throws(() => buildAssistantEdit(first.play, [], [{kind:'route',playerId:z.id,routeId,concept:'go',depthYards:12}]));
+  assert.throws(() => buildAssistantEdit(first.play, [], [{kind:'timing',playerId:z.id,routeId,delay:1,duration:2}]));
+});

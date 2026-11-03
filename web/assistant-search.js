@@ -60,13 +60,18 @@ export function searchMaddenCatalog(catalog, { concepts = [], tags = [], formati
     if (similarToCurrent && !trace) continue;
     const sameFormation = similarToCurrent && searchable(board.formation) === searchable(entry.group + ' ' + entry.formation);
     const commonTags = currentTags.filter(tag => conceptTags.includes(tag)).length;
+    if (similarToCurrent && !sameFormation && !commonTags) continue;
     const score = Number(hits.includes(name)) * 8 + hits.length * 2 + tagHits.length * 3 + Number(!!trace) + Number(sameFormation) * 4 + commonTags * 3;
-    ranked.push({ entry, trace, hits, score });
+    ranked.push({ entry, trace, hits, score, sameFormation, sharedTags: currentTags.filter(tag => conceptTags.includes(tag)) });
   }
   ranked.sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id));
 
   // Include the best result per requested concept, then distinct play names.
-  if (similarToCurrent) return ranked.slice(0, Math.min(limit, 12)).map(({ entry, trace }) => asCandidate(entry, trace));
+  if (similarToCurrent) return ranked.slice(0, Math.min(limit, 12)).map(({ entry, trace, sameFormation, sharedTags }) => {
+    const candidate = asCandidate(entry, trace);
+    candidate.evidence += ` Similarity evidence: ${[sameFormation && 'same formation', sharedTags.length && `shared approximate tags: ${sharedTags.join(', ')}`].filter(Boolean).join('; ')}.`;
+    return candidate;
+  });
   const representatives = phrases.map(phrase => ranked.find(row => row.hits.includes(phrase))).filter(Boolean);
   const uniqueNames = new Map();
   for (const row of ranked) if (!uniqueNames.has(row.entry.name)) uniqueNames.set(row.entry.name, row);

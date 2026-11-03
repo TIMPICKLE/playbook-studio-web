@@ -123,6 +123,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     if (show) key.focus();
   }
   function close({clear = false} = {}) {
+    if (reply?.kind === 'preview') { clearPreview(); reply = null; outputView(); }
     cancel(); panel.hidden = true; button('open').hidden = false;
     button('open').setAttribute('aria-expanded', 'false'); config.hidden = true;
     if (clear) { key.value = ''; reset(); }
@@ -164,11 +165,19 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     pending = control;
     const instruction = text;
     clearPreview(); requestInstruction = instruction;
+    const progress = [];
     config.hidden = true; reply = null; outputView(); updateButtons(); announce(lang.loading);
     try {
       const result = await onRequest({prompt:instruction, mode:selectedMode, provider:provider.value, model:model.value.trim(),
         apiKey:key.value.trim(), signal:control.signal, locale:getLocale(), previous:previous.slice(),
-        onTool(name) { if (pending === control && !control.signal.aborted) announce(lang.toolProgress[name] || lang.loading); }});
+        onTool(name, args) {
+          if (pending !== control || control.signal.aborted) return;
+          const selectors = name === 'resolve_players' ? args?.selectors : name === 'resolve_player' ? [args] : [];
+          const subjects = (Array.isArray(selectors) ? selectors : []).map(item => [item?.role, item?.name, item?.number && '#' + item.number].filter(Boolean).join(' ')).filter(Boolean);
+          const label = (lang.toolProgress[name] || lang.loading).replace(/[…\s]+$/, '');
+          progress.push(subjects.length ? `${label} ${subjects.join(', ').slice(0, 160)}` : label);
+          announce(progress.slice(-10).join(' → '));
+        }});
       if (pending !== control || destroyed || requestScope !== getContext().scope) return;
       reply = result;
       clarification = result.kind === 'clarify' ? result.message : '';

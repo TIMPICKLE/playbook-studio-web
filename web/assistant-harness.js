@@ -2,7 +2,7 @@ import { createBoardTools } from './assistant-tools.js';
 import { providerMessages } from './locales/assistant-provider.js';
 
 export const BOARD_AGENT_LIMITS = Object.freeze({ modelCalls: 6, toolCalls: 10, parallelCalls: 5, replyTokens: 1800, transcriptBytes: 120000 });
-const instructions = `You are a football coaching assistant. Use read-only tools to inspect the board and find real player IDs before making proposals. Use resolve_players with selectMany for explicit groups such as the OL. Do not guess when a target is missing or ambiguous. Search Madden by concepts, tags or similarToCurrent. Explain recommendations briefly and conditionally.
+const instructions = `You are a football coaching assistant. Use read-only tools to inspect the board and find real player IDs before making proposals. Before answering a question about the current play, call read_board and ground the answer in its contents. Distinguish visible facts from tactical suggestions. If the diagram does not specify a read order, explicitly say it is unknown rather than claiming a first read. Use resolve_players with selectMany for explicit groups such as the OL. Do not guess when a target is missing or ambiguous. Search Madden by concepts, tags or similarToCurrent. Explain recommendations briefly and conditionally.
 Return JSON in the user's language:
 {"kind":"edit","summary":"brief changes","operations":[{"kind":"route","playerId":"resolved ID","concept":"dig","depthYards":12,"breakTo":"inside"}]}.
 Operations may be block with playerId and targetIds, or playerIds, scheme and direction; route with concept, depthYards and breakTo (or points); motion with playerId,type,toward; move_player with playerId,dxYards,dyYards or alignment; pass with receiverId,throwAt,arriveAt; zone with preset,side and optional playerId; timing with playerId,delay,duration; remove_route with playerId; annotate with text,nearId.
@@ -23,9 +23,14 @@ export function validateBoardReply(value, input, tools) {
       if (!m || !allowed.delete(m.id) || !line(m.reason, 450)) invalid();
       return { id: m.id, reason: line(m.reason, 450) };
     });
+    const similarRanks = tools.getSimilarRanks();
+    if (similarRanks) {
+      if (matches.some(match => !similarRanks.has(match.id))) invalid();
+      matches.sort((a, b) => similarRanks.get(a.id) - similarRanks.get(b.id));
+    }
     return { kind: 'search', matches };
   }
-  if (value?.kind === 'answer' && line(value.message, 1500)) {
+  if (value?.kind === 'answer' && line(value.message, 1500) && tools.didReadBoard()) {
     const highlights = value.highlights || [];
     if (!Array.isArray(highlights) || highlights.length > 32 || !highlights.every(id => tools.resolved.has(id) || tools.routeIds.has(id))) invalid();
     return { kind: 'answer', message: line(value.message, 1500), highlights };
@@ -42,7 +47,8 @@ export function validateBoardReply(value, input, tools) {
     if (!op || typeof op !== 'object' || !kinds.includes(op.kind)) invalid();
     const ids = [op.playerId, op.receiverId, op.nearId, ...(Array.isArray(op.playerIds) ? op.playerIds : []), ...(Array.isArray(op.targetIds) ? op.targetIds : [])].filter(id => id != null);
     if (!ids.every(id => typeof id === 'string' && tools.resolved.has(id))) invalid();
-    if (op.routeId && !tools.routeIds.has(op.routeId)) invalid();
+    if (op.routeId && (!tools.routeIds.has(op.routeId) || !op.playerId ||
+      !input.board.routes.some(route => route.id === op.routeId && route.playerId === op.playerId))) invalid();
     if (['route','motion','move_player','timing','remove_route'].includes(op.kind) && !op.playerId) invalid();
     if (op.kind === 'block') {
       const actors = op.playerIds || [op.playerId];

@@ -35,6 +35,7 @@ function roleMatches(player, role) {
   if (norm(player.label) === role) return true;
   const aliases = { '安全卫': 's', '进攻锋线': 'ol', '防守锋线': 'dl', '线卫': 'lb', '角卫': 'cb', '跑卫': 'rb', '外接手': 'wr', '近端锋': 'te' };
   role = aliases[role] || role;
+  if (positionGroups.get(role)?.includes(norm(player.position))) return true;
   const positions = norm([player.position, player.label].filter(Boolean).join('/')).split(/[/,\s]+/);
   return positions.some(position => position === role || positionGroups.get(role)?.includes(position));
 }

@@ -94,20 +94,67 @@ function importMadden(entry) {
 let boardAssistant = null;
 let assistantPreview = null;
 let assistantPreviewFrame = null;
+function describeAssistantChange(operation, play, locale) {
+  const english = locale === 'en';
+  const players = assistantPlayers(play, state.data.roster);
+  const player = id => { const item = players.find(p => p.id === id); return item ? [item.label, item.name].filter(Boolean).join(' · ') : id || ''; };
+  const actors = (operation.playerIds || [operation.playerId || operation.nearId || operation.receiverId]).filter(Boolean).map(player).join(', ');
+  const labels = english
+    ? {route:'Route', block:'Block', motion:'Motion', move_player:'Move', pass:'Pass', zone:'Zone', timing:'Timing', remove_route:'Remove route', annotate:'Annotation'}
+    : {route:'跑动路线', block:'阻挡', motion:'预动', move_player:'调整站位', pass:'传球', zone:'防守区域', timing:'时序', remove_route:'删除路线', annotate:'标注'};
+  const details = [operation.concept, operation.scheme, operation.type, operation.preset, operation.alignment];
+  if (operation.depthYards != null) details.push(`${operation.depthYards} ${english ? 'yd' : '码'}`);
+  if (operation.breakTo) details.push(operation.breakTo);
+  if (operation.direction || operation.toward || operation.side) details.push(operation.direction || operation.toward || operation.side);
+  if (operation.targetIds?.length) details.push((english ? 'targets ' : '目标 ') + operation.targetIds.map(player).join(' → '));
+  if (operation.dxYards != null || operation.dyYards != null) details.push(`${operation.dxYards || 0}, ${operation.dyYards || 0} ${english ? 'yd' : '码'}`);
+  if (operation.throwAt != null) details.push(`${english ? 'throw' : '出手'} ${operation.throwAt}s`);
+  if (operation.arriveAt != null) details.push(`${english ? 'arrive' : '到达'} ${operation.arriveAt}s`);
+  if (operation.delay != null) details.push(`${english ? 'delay' : '延迟'} ${operation.delay}s`);
+  if (operation.duration != null) details.push(`${english ? 'duration' : '时长'} ${operation.duration}s`);
+  if (operation.text) details.push(operation.text);
+  return [actors, labels[operation.kind] || operation.kind, ...details.filter(Boolean)].filter(Boolean).join(' · ');
+}
 function clearAssistantPreview() {
   if (assistantPreviewFrame) cancelAnimationFrame(assistantPreviewFrame);
   assistantPreviewFrame = null;
   assistantPreview = null;
   document.querySelector('#field .assistant-preview')?.remove();
 }
-function showAssistantPreview(play) {
+function showAssistantPreview(play, original) {
   clearAssistantPreview();
   const stage = document.querySelector('#field .pitch-stage');
   if (!stage) return;
   const template = document.createElement('template');
   template.innerHTML = fieldSVG(play, viewSettings(), { prefix: 'assistant-preview' });
   const svg = template.content.firstElementChild;
-  svg.querySelectorAll(':scope > rect, :scope > .yard-lines').forEach(node => node.remove());
+  svg.querySelectorAll(':scope > rect, :scope > .yard-lines, :scope > text').forEach(node => node.remove());
+  const changed = (type, value) => {
+    const prior = original[type].find(item => item.id === value.id);
+    return !prior || JSON.stringify(prior) !== JSON.stringify(value);
+  };
+  const changedRoutes = play.routes.filter(route => changed('routes', route));
+  const changedRouteIds = new Set(changedRoutes.map(route => route.id));
+  const movingPlayerIds = new Set(changedRoutes.map(route => route.playerId));
+  const changedPlayerIds = new Set(play.players.filter(player => changed('players', player)).map(player => player.id));
+  svg.querySelectorAll('[data-route]').forEach(node => { if (!changedRouteIds.has(node.dataset.route)) node.remove(); });
+  svg.querySelectorAll('[data-player]').forEach(node => { if (!changedPlayerIds.has(node.dataset.player) && !movingPlayerIds.has(node.dataset.player)) node.remove(); });
+  for (const [type, attribute] of [['zones', 'zone'], ['annotations', 'annotation']]) {
+    const ids = new Set(play[type].filter(value => changed(type, value)).map(value => value.id));
+    svg.querySelectorAll(`[data-${attribute}]`).forEach(node => { if (!ids.has(node.dataset[attribute])) node.remove(); });
+  }
+  if (JSON.stringify(play.ball) === JSON.stringify(original.ball) && !movingPlayerIds.has(play.ball.holderId)) svg.querySelector('#assistant-preview-ball')?.remove();
+  const removedRoutes = original.routes.filter(route => !play.routes.some(item => item.id === route.id));
+  if (removedRoutes.length) {
+    const old = document.createElement('template');
+    old.innerHTML = fieldSVG(original, viewSettings(), { prefix: 'assistant-preview-removed' });
+    for (const route of removedRoutes) {
+      const node = [...old.content.querySelectorAll('[data-route]')].find(item => item.dataset.route === route.id);
+      if (!node) continue;
+      node.querySelectorAll('path, line').forEach(shape => { shape.setAttribute('stroke', '#ff7777'); shape.setAttribute('stroke-dasharray', '8 6'); shape.removeAttribute('marker-end'); });
+      svg.append(node);
+    }
+  }
   svg.classList.add('assistant-preview');
   Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', opacity: '.6', pointerEvents: 'none', zIndex: '4' });
   stage.append(svg);
@@ -163,9 +210,10 @@ function mountBoardAssistant() {
         if (JSON.stringify(current()) !== before) throw Error(t('assistant.boardChanged'));
         if (draft || drag) throw Error(t('assistant.finishDrawing'));
         const operations = result.operations || [result.operation];
+        onTool?.('build_preview');
         const change = buildAssistantEdit(current(), state.data.roster, operations, locale);
-        showAssistantPreview(change.play);
-        return {kind: 'preview', message: change.summary, changes: operations.map(op => `${op.kind} · ${op.concept || op.scheme || op.type || op.playerId || (op.playerIds || []).join(', ')}`),
+        showAssistantPreview(change.play, play);
+        return {kind: 'preview', message: result.summary || change.summary, changes: operations.map(op => describeAssistantChange(op, play, locale)),
           discard: clearAssistantPreview, rehearse: rehearseAssistantPreview,
           apply() {
             checkScope();
@@ -176,7 +224,7 @@ function mountBoardAssistant() {
             tool = 'select';
             edit(p => Object.assign(p, change.play));
             const checkpoint = history.past.at(-1);
-            return {kind: 'edit', message: change.summary, summary: change.summary, operations, routeIds: change.routeId ? [change.routeId] : [], playerIds: [...new Set(operations.flatMap(op => [op.playerId, ...(op.playerIds || [])].filter(Boolean)))], undo() {
+            return {kind: 'edit', message: result.summary || change.summary, summary: result.summary || change.summary, operations, routeIds: change.routeIds || (change.routeId ? [change.routeId] : []), playerIds: [...new Set(operations.flatMap(op => [op.playerId, ...(op.playerIds || [])].filter(Boolean)))], undo() {
               if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
               restore(history.undo(state));
               return true;

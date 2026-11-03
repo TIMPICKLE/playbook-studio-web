@@ -3,8 +3,7 @@ export const MADDEN_CONCEPT_TAGS = {
   "eagles-124a123dd24974935bb1": [
     "out",
     "in",
-    "flat",
-    "flood"
+    "flat"
   ],
   "eagles-e5410a0e511936345df5": [
     "vertical",
@@ -31,7 +30,8 @@ export const MADDEN_CONCEPT_TAGS = {
   ],
   "eagles-8e51f55f7deb304a2227": [
     "out",
-    "flat"
+    "flat",
+    "flood"
   ],
   "eagles-0b5edd04ecdfdd78596a": [
     "out",
@@ -55,7 +55,8 @@ export const MADDEN_CONCEPT_TAGS = {
   ],
   "eagles-22cb97715e4fdaeb457c": [
     "out",
-    "in"
+    "in",
+    "flood"
   ],
   "eagles-872efbe3c3b72e1400d5": [
     "out",
@@ -148,7 +149,8 @@ export const MADDEN_CONCEPT_TAGS = {
   "eagles-33bb20b6ec6e23689aef": [
     "in",
     "out",
-    "vertical"
+    "vertical",
+    "flood"
   ],
   "eagles-5e8f471e0d2b78ec89ff": [
     "vertical",
@@ -435,7 +437,8 @@ export const MADDEN_CONCEPT_TAGS = {
   "eagles-aa6c77ece46298eb02fd": [
     "flat",
     "in",
-    "out"
+    "out",
+    "flood"
   ],
   "eagles-c73a53961b7fa3b5fc89": [
     "vertical",
@@ -578,6 +581,7 @@ export const MADDEN_CONCEPT_TAGS = {
     "in",
     "vertical",
     "out",
+    "flood",
     "smash"
   ],
   "eagles-c0309263ade888a6afd1": [
@@ -752,7 +756,6 @@ export const MADDEN_CONCEPT_TAGS = {
     "out",
     "in",
     "flat",
-    "flood",
     "mesh"
   ],
   "eagles-eb9a32953a50b39ce8d6": [
@@ -1139,7 +1142,8 @@ export const MADDEN_CONCEPT_TAGS = {
     "in",
     "flat",
     "out",
-    "vertical"
+    "vertical",
+    "flood"
   ],
   "ravens-432054255cbfe0da5763": [
     "vertical",
@@ -1248,15 +1252,13 @@ export const MADDEN_CONCEPT_TAGS = {
     "out",
     "flat",
     "in",
-    "vertical",
-    "flood"
+    "vertical"
   ],
   "ravens-5f24121158b683a7d40d": [
     "vertical",
     "flat",
     "in",
-    "out",
-    "flood"
+    "out"
   ],
   "ravens-47411aef1f7cc23c1845": [
     "in",
@@ -1355,7 +1357,6 @@ export const MADDEN_CONCEPT_TAGS = {
     "out",
     "flat",
     "in",
-    "flood",
     "mesh"
   ],
   "ravens-f029e73228983a8cce08": [
@@ -1384,7 +1385,8 @@ export const MADDEN_CONCEPT_TAGS = {
   ],
   "ravens-2d0aeaa000934c2d51e6": [
     "in",
-    "out"
+    "out",
+    "flood"
   ],
   "ravens-9c166328e4c19262fd09": [
     "out",
@@ -1706,7 +1708,6 @@ export const MADDEN_CONCEPT_TAGS = {
     "out",
     "in",
     "flat",
-    "flood",
     "mesh"
   ],
   "ravens-f2166f60357f1ed691f2": [
@@ -1779,7 +1780,6 @@ export const MADDEN_CONCEPT_TAGS = {
   "ravens-b58657162d219ebad949": [
     "out",
     "vertical",
-    "flood",
     "smash"
   ],
   "ravens-0c1113ff4ce658cc48bc": [
@@ -1871,7 +1871,8 @@ export const MADDEN_CONCEPT_TAGS = {
   ],
   "ravens-518ace0c313870800942": [
     "vertical",
-    "out"
+    "out",
+    "flood"
   ],
   "ravens-7231afcbbe5242504c2c": [
     "out",

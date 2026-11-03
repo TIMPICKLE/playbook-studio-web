@@ -1,6 +1,6 @@
 export default {
   clearMode: 'Clear mode', apply: 'Apply', discard: 'Discard', rehearse: 'Preview rehearsal', discarded: 'Preview discarded.', expand: 'Show preview', handoff: 'Analyze matchup',
-  toolProgress: {read_board:'Reading the board…', resolve_player:'Finding player…', resolve_players:'Finding players…', search_madden:'Searching the Madden library…'},
+  toolProgress: {read_board:'Reading the board…', resolve_player:'Finding', resolve_players:'Finding players', search_madden:'Searching the Madden library…', build_preview:'Preparing the preview…'},
   title: 'Board assistant', open: 'Open AI board assistant', close: 'Collapse assistant', settings: 'Model settings', move: 'Move panel',
   guide: 'What would you like to change?', edit: 'Draw a block', search: 'Find a Madden play', editExample: 'Have C block the DT directly ahead, then climb to the MLB.',
   searchExample: 'Find Madden offensive plays to attack Cover 3.', prompt: 'Describe a play edit or a Madden play to find…', send: 'Send', cancel: 'Cancel request',

@@ -19,9 +19,15 @@ function features(routes, centerX, lineY) {
   if (paths.filter(p => p.depth >= 16 && Math.abs(p.last.x - p.first.x) < 12).length >= 4) tags.push('four verts');
   for (const side of ['left', 'right']) {
     const sidePaths = paths.filter(p => p.side === side);
-    const depths = sidePaths.map(p => p.depth);
     const outside = p => side === 'left' ? p.last.x < p.first.x - 4 : p.last.x > p.first.x + 4;
-    if (depths.some(d => d <= 6) && depths.some(d => d >= 10 && d < 25) && sidePaths.some(p => p.depth >= 25 && outside(p))) tags.push('flood');
+    // A flood can use a vertical clear-out with the intermediate route
+    // breaking outside, or a deep corner with a separate intermediate route.
+    // Require three distinct routes at short, intermediate and deep levels.
+    const shallow = sidePaths.filter(p => p.depth >= -4 && p.depth <= 8);
+    const middle = sidePaths.filter(p => p.depth >= 10 && p.depth < 25);
+    const deep = sidePaths.filter(p => p.depth >= 25);
+    if (shallow.length && middle.length && deep.length &&
+      (middle.some(outside) || deep.some(outside)) && shallow.some(outside)) tags.push('flood');
     if (sidePaths.some(p => p.depth >= 0 && p.depth <= 8 && Math.abs(p.last.x - p.first.x) <= 12) &&
         sidePaths.some(p => p.depth >= 15 && outside(p))) tags.push('smash');
   }
@@ -40,6 +46,9 @@ export function traceConceptTags(trace) {
 }
 
 export function boardConceptTags(board) {
-  const center = board.players?.find(p => p.label === 'C')?.x ?? 50;
-  return features((board.routes || []).filter(r => r.kind === 'route' && !r.optional), center, board.losY ?? 67);
+  const players = board.players || [];
+  const center = players.find(p => p.label === 'C' && p.side === 'offense')?.x ?? 50;
+  const offense = new Set(players.filter(p => p.side === 'offense').map(p => p.id));
+  const routes = (board.routes || []).filter(r => r.kind === 'route' && !r.optional && offense.has(r.playerId));
+  return features(routes, center, board.geometry?.losY ?? board.losY ?? 67);
 }

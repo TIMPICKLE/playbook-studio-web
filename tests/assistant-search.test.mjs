@@ -64,6 +64,16 @@ test('geometry tags come only from editable traces and remain separate from imag
   assert.equal(MADDEN_CONCEPT_TAGS[image.id], undefined);
 });
 
+test('a flood with a vertical clear-out and outside intermediate route receives an approximate tag', async () => {
+  const { traceConceptTags } = await import('../web/madden-concepts.js');
+  const { getEditableEntry } = await import('../web/madden-model.js');
+  const trace = getEditableEntry('eagles-ce5ad6b2e9a857ad496e');
+  assert.equal(trace.name, 'FLOOD');
+  assert.ok(traceConceptTags(trace).includes('flood'));
+  const matches = searchMaddenCatalog(catalog, { tags: ['flood'] });
+  assert.ok(matches.some(play => play.id === trace.id));
+});
+
 test('similar searches use current formation and geometry with server parity', () => {
   const selected = catalog.plays.find(p => hasEditableTrace(p.id));
   const board = { book: 'offense', formation: selected.group + ' ' + selected.formation, players: [], routes: [] };
@@ -82,4 +92,27 @@ test('metadata filters require recorded evidence and do not invent image attribu
   }
   const recorded = { plays: [{ ...catalog.plays[0], personnel: '11', playType: 'pass', situations: ['red_zone'] }] };
   assert.equal(searchMaddenCatalog(recorded, { personnel: '11', playType: 'pass', situation: 'red_zone' }).length, 1);
+});
+
+test('similar search requires shared formation or route evidence', () => {
+  const unrelated = { book: 'offense', formation: 'Unrecognized custom formation', players: [], routes: [] };
+  assert.deepEqual(searchMaddenCatalog(catalog, { similarToCurrent: true }, { board: unrelated }), []);
+  const entry = catalog.plays.find(play => hasEditableTrace(play.id));
+  const sameFormation = { ...unrelated, formation: entry.group + ' ' + entry.formation };
+  const choices = searchMaddenCatalog(catalog, { similarToCurrent: true }, { board: sameFormation });
+  assert.ok(choices.length);
+  assert.ok(choices.every(choice => choice.formation === sameFormation.formation && choice.evidence.includes('same formation')));
+});
+
+test('similarity features do not treat an opponent route as an offensive concept', async () => {
+  const { boardConceptTags } = await import('../web/madden-concepts.js');
+  const board = { players: [
+    { id: 'c', label: 'C', side: 'offense', x: 50, y: 67 },
+    { id: 'x', label: 'X', side: 'offense', x: 20, y: 67 },
+    { id: 'db', label: 'CB', side: 'defense', x: 80, y: 67 },
+  ], routes: [
+    { playerId: 'x', kind: 'route', points: [{ x: 20, y: 67 }, { x: 20, y: 40 }] },
+    { playerId: 'db', kind: 'route', points: [{ x: 80, y: 67 }, { x: 60, y: 50 }] },
+  ] };
+  assert.deepEqual(boardConceptTags(board), ['vertical']);
 });
