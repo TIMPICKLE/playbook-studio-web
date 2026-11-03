@@ -1,4 +1,4 @@
-const CACHE = 'playbook-studio-v5.7.1-visual-depth-chart';
+const CACHE = 'playbook-studio-v5.7.2-stable-roster-selection';
 const FILES = [
   './depth-formation.js', './depth-formation-layout.js', './depth-formation.css', './locales/depth-formation.zh-CN.js', './locales/depth-formation.en.js',
   './depth-model.js', './model-values.js', './board-personnel.js', './depth-chart.js', './depth-chart.css',

@@ -218,10 +218,6 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       selectedSlotId = button.dataset.slot;
       refresh();
       [...sheet.querySelectorAll('[data-depth-chart="inspect"]')].find(el => el.dataset.slot === selectedSlotId)?.focus({ preventScroll: true });
-      const win = root.ownerDocument.defaultView, detail = sheet.querySelector('#depth-formation-detail');
-      if (detail && win.matchMedia?.('(max-width: 640px)').matches && detail.getBoundingClientRect().top > win.innerHeight - 80) {
-        detail.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
-      }
       return;
     }
     if (action === 'add' || action === 'edit') { open(button.dataset.slot); return; }
