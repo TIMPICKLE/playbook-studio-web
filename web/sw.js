@@ -1,4 +1,4 @@
-const CACHE = 'playbook-studio-v5.8-prerelease-training';
+const CACHE = 'playbook-studio-v5.8.1-prerelease-stable-roster-selection';
 const FILES = [
   './training-author.css', './training-author.js', './training-demo.js', './training-field-pov.js', './training-field-projected.js', './training-field.js', './training-i18n.js', './training-model.js', './training-progress.js', './training.css', './training.js', './locales/training-author.js', './locales/training-demo.en.js', './locales/training-demo.zh-CN.js', './locales/training-field.js',
   './depth-formation.js', './depth-formation-layout.js', './depth-formation.css', './locales/depth-formation.zh-CN.js', './locales/depth-formation.en.js',

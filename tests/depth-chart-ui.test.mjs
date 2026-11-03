@@ -280,3 +280,42 @@ test('a player can find all of their assignments and retain their selection acro
   assert.equal(win.document.querySelectorAll('button[data-depth-chart="inspect"]').length, slots.length);
   assert.equal(state.writes, 0);
 });
+
+test('finding a player preserves every marker row and inspecting a mobile role does not scroll the field away', t => {
+  const { win, view, q, click, slots } = setup(t);
+  const qb = slots.find(slot => slot.label === 'QB');
+  qb.playerIds = ['p0', 'p2'];
+  view.refresh();
+  const markers = () => [...q('.df-pitch').querySelectorAll('.df-node')];
+  const badges = () => markers().map(marker => marker.querySelector('.df-found-rank'));
+  const expectReservedBadges = () => {
+    assert.ok(badges().every(Boolean), 'every field marker reserves its rank row');
+    assert.equal(badges().length, slots.length);
+    for (const badge of badges().filter(badge => !badge.closest('[data-formation-rank]'))) {
+      assert.equal(badge.getAttribute('aria-hidden'), 'true');
+      assert.equal(badge.textContent.trim(), '', 'unmatched rank placeholders do not announce a rank');
+    }
+  };
+  const findPlayer = id => {
+    const picker = q('[data-formation-player]');
+    picker.value = id;
+    picker.dispatchEvent(new win.Event('change', { bubbles: true }));
+  };
+  expectReservedBadges();
+  findPlayer('p2');
+  expectReservedBadges();
+  assert.match(q(`[data-slot="${qb.id}"] .df-found-rank`).textContent, /替补/);
+  findPlayer('');
+  expectReservedBadges();
+  assert.equal(q('[data-formation-rank]'), null);
+
+  const scroll = t.mock.method(win.Element.prototype, 'scrollIntoView', () => {});
+  t.mock.method(win, 'matchMedia', () => ({ matches: true }));
+  const rect = win.Element.prototype.getBoundingClientRect;
+  t.mock.method(win.Element.prototype, 'getBoundingClientRect', function () {
+    return this.id === 'depth-formation-detail' ? { ...rect.call(this), top: 2000, bottom: 2100 } : rect.call(this);
+  });
+  click('inspect', `[data-slot="${qb.id}"]`);
+  assert.equal(scroll.mock.callCount(), 0, 'inspecting a role keeps the current field viewport');
+  assert.equal(q(`[data-slot="${qb.id}"]`).getAttribute('aria-pressed'), 'true');
+});
