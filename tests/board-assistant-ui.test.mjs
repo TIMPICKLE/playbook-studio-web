@@ -50,7 +50,9 @@ test('a clarification retains its original command and the applied edit has one 
   f.type('[data-ba-prompt]','Block DT then LB'); f.click('send'); await flush();
   assert.match(f.q('.ba-output').textContent,/Which LB/);
   f.type('[data-ba-prompt]','Sam'); f.click('send'); await flush();
-  assert.match(requests[1].prompt,/Block DT then LB[\s\S]+Which LB[\s\S]+Sam/);
+  assert.equal(requests[1].prompt,'Sam');
+  assert.equal(requests[1].previous[0].instruction,'Block DT then LB');
+  assert.equal(requests[1].previous[0].message,'Which LB?');
   f.click('undo');
   assert.equal(undone, 1); assert.equal(f.q('[data-ba=undo]'),null);
   f.assistant.destroy(); await f.win.happyDOM.abort();
@@ -86,5 +88,25 @@ test('dictation produces editable text, without sending until the coach submits'
   f.click('mic'); recognition.onerror({error:'not-allowed'}); recognition.onend();
   assert.match(f.q('.ba-status').textContent,/麦克风/);
   f.click('send'); await flush(); assert.equal(sent,1);
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+
+test('mode persists across typing and edit proposals require an explicit apply', async () => {
+  let applied = 0, discarded = 0; const requests = [];
+  const f = fixture(request => {
+    requests.push(request); request.onTool('resolve_player');
+    return {kind:'preview',message:'Route preview',changes:['X dig 12'],operations:[{kind:'route',playerId:'x'}],
+      apply:() => {applied++; return {kind:'edit',message:'Applied',operations:[{kind:'route',playerId:'x'}],routeIds:['r1']};},
+      discard:() => {discarded++;}};
+  });
+  f.click('edit'); f.type('[data-ba-prompt]', 'X dig 12'); f.click('send');
+  assert.match(f.q('.ba-status').textContent,/定位/); await flush();
+  assert.equal(requests[0].mode,'edit'); assert.equal(applied,0); assert.match(f.q('.ba-output').textContent,/X dig 12/);
+  f.click('apply'); await flush(); assert.equal(applied,1);
+  f.type('[data-ba-prompt]', 'two yards deeper'); f.click('send'); await flush();
+  assert.deepEqual(requests[1].previous[0].routeIds,['r1']);
+  f.click('discard'); assert.equal(discarded,1);
+  f.click('clear-mode'); f.type('[data-ba-prompt]','find'); f.click('send'); await flush(); assert.equal(requests[2].mode,'auto');
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });

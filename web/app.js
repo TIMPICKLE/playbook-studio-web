@@ -53,7 +53,7 @@ let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false;
 let saveState = localRecovery ? t("editorExtra.recovery_required_autosave_paused") : t('editor.saved_locally'), frame = null, lastFrame = null, toastTimer = null;
 const history = new History();
-let shared = null, digitalBoard = null;
+let shared = null, digitalBoard = null, analysisView = null, demoAnalysisData = null;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
 const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
@@ -92,6 +92,39 @@ function importMadden(entry) {
 // The agent returns proposals only. The editor owns the active play, edit rights,
 // autosave and the undo checkpoint. A late response cannot modify another play.
 let boardAssistant = null;
+let assistantPreview = null;
+let assistantPreviewFrame = null;
+function clearAssistantPreview() {
+  if (assistantPreviewFrame) cancelAnimationFrame(assistantPreviewFrame);
+  assistantPreviewFrame = null;
+  assistantPreview = null;
+  document.querySelector('#field .assistant-preview')?.remove();
+}
+function showAssistantPreview(play) {
+  clearAssistantPreview();
+  const stage = document.querySelector('#field .pitch-stage');
+  if (!stage) return;
+  const template = document.createElement('template');
+  template.innerHTML = fieldSVG(play, viewSettings(), { prefix: 'assistant-preview' });
+  const svg = template.content.firstElementChild;
+  svg.querySelectorAll(':scope > rect, :scope > .yard-lines').forEach(node => node.remove());
+  svg.classList.add('assistant-preview');
+  Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', opacity: '.6', pointerEvents: 'none', zIndex: '4' });
+  stage.append(svg);
+  assistantPreview = { play, svg };
+}
+function rehearseAssistantPreview() {
+  if (!assistantPreview) return;
+  if (assistantPreviewFrame) cancelAnimationFrame(assistantPreviewFrame);
+  const started = performance.now(), preview = assistantPreview;
+  const step = now => {
+    if (assistantPreview !== preview || !preview.svg.isConnected) return;
+    const elapsed = (now - started) / 1000;
+    updateAnimation(preview.svg, preview.play, Math.min(elapsed, animationLength(preview.play)), 'assistant-preview');
+    if (elapsed < animationLength(preview.play)) assistantPreviewFrame = requestAnimationFrame(step);
+  };
+  assistantPreviewFrame = requestAnimationFrame(step);
+}
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
 function mountBoardAssistant() {
   const host = $('#field');
@@ -100,15 +133,16 @@ function mountBoardAssistant() {
     boardAssistant = createBoardAssistant({
       host,
       getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit()}),
-      async onRequest({prompt, provider, model, apiKey, signal, locale}) {
+      async onRequest({prompt, mode, previous, onTool, provider, model, apiKey, signal, locale}) {
+        clearAssistantPreview();
         const play = current(), scope = assistantScope(), before = JSON.stringify(play);
         const workspace = cloudMode() ? shared?.current : null;
         if (cloudMode() && !workspace) throw Error(editBlockedMessage());
         const result = await requestBoardAssistant({
-          instruction: prompt, locale, signal, model: {provider, model, apiKey},
-          board: {playId: play.id, title: play.title, players: assistantPlayers(play, state.data.roster),
+          instruction: prompt, mode, previous, onTool, locale, signal, model: {provider, model, apiKey},
+          board: {...play, playId: play.id, players: assistantPlayers(play, state.data.roster),
             selectedPlayerId: selection?.type === 'player' ? selection.id : null,
-            routes: play.routes.map(({playerId,kind,optional,points}) => ({playerId,kind,optional,points}))},
+            routes: play.routes},
           workspace: workspace ? {id: workspace.id, revision: workspace.revision} : undefined, request,
         });
         const checkScope = () => {
@@ -124,20 +158,47 @@ function mountBoardAssistant() {
           const added = new Set(state.data.plays.map(p => p.diagramSource?.catalogId || (p.reference && !hasEditableTrace(p.reference.catalogId) ? p.reference.catalogId : null)));
           return {kind: 'search', items: cards.map(card => ({...card, title: card.name, added: added.has(card.id)}))};
         }
-        if (result.kind === 'clarify') return result;
+        if (['clarify', 'answer', 'handoff'].includes(result.kind)) return result;
         if (!canEdit()) throw Error(editBlockedMessage());
         if (JSON.stringify(current()) !== before) throw Error(t('assistant.boardChanged'));
         if (draft || drag) throw Error(t('assistant.finishDrawing'));
-        const change = buildAssistantEdit(current(), state.data.roster, result.operation, locale);
-        selection = {type: 'route', id: change.routeId};
-        tool = 'select';
-        edit(p => { p.routes = change.play.routes; });
-        const checkpoint = history.past.at(-1);
-        return {kind: 'edit', message: change.summary, undo() {
-          if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
-          restore(history.undo(state));
-          return true;
-        }};
+        const operations = result.operations || [result.operation];
+        const change = buildAssistantEdit(current(), state.data.roster, operations, locale);
+        showAssistantPreview(change.play);
+        return {kind: 'preview', message: change.summary, changes: operations.map(op => `${op.kind} · ${op.concept || op.scheme || op.type || op.playerId || (op.playerIds || []).join(', ')}`),
+          discard: clearAssistantPreview, rehearse: rehearseAssistantPreview,
+          apply() {
+            checkScope();
+            if (!canEdit()) throw Error(editBlockedMessage());
+            if (JSON.stringify(current()) !== before || draft || drag) throw Error(t('assistant.boardChanged'));
+            clearAssistantPreview();
+            selection = change.routeId ? {type: 'route', id: change.routeId} : null;
+            tool = 'select';
+            edit(p => Object.assign(p, change.play));
+            const checkpoint = history.past.at(-1);
+            return {kind: 'edit', message: change.summary, summary: change.summary, operations, routeIds: change.routeId ? [change.routeId] : [], playerIds: [...new Set(operations.flatMap(op => [op.playerId, ...(op.playerIds || [])].filter(Boolean)))], undo() {
+              if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
+              restore(history.undo(state));
+              return true;
+            }};
+          }};
+      },
+      onHighlight(ids) {
+        document.querySelectorAll('#field [data-assistant-highlight]').forEach(node => { node.removeAttribute('data-assistant-highlight'); node.style.filter = ''; });
+        for (const id of ids || []) {
+          const node = [...document.querySelectorAll('#field [data-player], #field [data-route]')].find(item => item.dataset.player === id || item.dataset.route === id);
+          if (node) { node.setAttribute('data-assistant-highlight', ''); node.style.filter = 'drop-shadow(0 0 12px #ffdb42)'; }
+        }
+      },
+      onHandoff() {
+        const play = current();
+        if (demoAnalysisData) {
+          demoAnalysisData.plays = demoAnalysisData.plays.filter(item => item.id !== play.id);
+          demoAnalysisData.plays.push(clone(play));
+        }
+        analysisView?.selectPlay(play);
+        if (cloudMode()) shared?.setMode('analysis');
+        else window.location.hash = 'analysis';
       },
       onAdd(id) {
         const card = offered.get(id);
@@ -179,6 +240,7 @@ function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame
 function resetAnimation() { stop(); time = 0; }
 function edit(fn, { redraw = true } = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
+  clearAssistantPreview();
   resetAnimation(); rehearsal = false; draft = null; previewPoint = null; history.record(state); fn(current(), state.data); save(); if (redraw) render(); else refreshMetadata();
 }
 function choose(id) { if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
@@ -458,7 +520,7 @@ function bindField() {
       const player=p.players.find(v=>v.id===drag.id);player.x=original.x;player.y=original.y;
       for(const route of p.routes)if(route.playerId===drag.id)route.points=clone(initial.routes.find(r=>r.id===route.id).points);
       movePlayer(p,drag.id,original.x+at.x-drag.start.x,original.y+at.y-drag.start.y);
-    } else if(drag.type==='point') p.routes.find(r=>r.id===drag.routeId).points[drag.index]=at;
+    } else if(drag.type==='point') { const route = p.routes.find(r=>r.id===drag.routeId); route.points[drag.index]=at; delete route.blockTargets; }
     else if(drag.type==='new-zone') {
       let zone=p.zones.find(v=>v.id===drag.zoneId);
       if(!zone){zone={id:drag.zoneId,x:50,y:40,rx:1,ry:1,color:COLORS.zone,label:'ZONE'};p.zones.push(zone);selection={type:'zone',id:zone.id};renderField();}
@@ -629,7 +691,9 @@ function deleteSelected() {
   if (s.type === 'player' && current().players.length <= 1) { toast(t("modal.keep_at_least_one_player"), { type: 'warning' }); return; }
   selection = null;
   edit(p => {
+    const removedRoute = s.type === 'route' ? p.routes.find(route => route.id === s.id) : null;
     const key = { player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]; p[key] = p[key].filter(x => x.id !== s.id);
+    if (removedRoute?.kind === 'motion') { const player = p.players.find(item => item.id === removedRoute.playerId); if (player) p.routes.filter(route => route.playerId === player.id && route.kind !== 'motion').forEach(route => { route.points[0] = {x: player.x, y: player.y}; }); }
     if (s.type === 'player') { p.routes = p.routes.filter(r => r.playerId !== s.id); if (p.ball.holderId === s.id) p.ball.holderId = p.players[0].id; if (p.ball.receiverId === s.id) p.ball.receiverId = ''; }
   }); toast(t("modal.object_deleted_undo_to_restore_it"), { type: 'success' });
 }
@@ -910,6 +974,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.se
 if (cloudMode()) {
   document.body.classList.add('cloud-enabled');
   const matchupView = createMatchupView({ root: $('#ai-matchup-root'), request, getCurrent: () => shared?.current, getData: () => state.data, isDirty: () => !!shared?.dirty });
+  analysisView = matchupView;
   shared = new SharedWorkspace({
     onData(data) {
       resetAnimation(); selection = null; draft = null; drag = null;
@@ -930,8 +995,10 @@ if (cloudMode()) {
   shared.init();
 } else {
   const demoData = localizedStarterWorkspace();
+  demoAnalysisData = demoData;
   const demoRecord = { id: 'demo', revision: 0, title: getLocale() === 'en' ? 'Sample matchup' : '示例战术本' };
   const demoView = createMatchupView({ root: $('#ai-matchup-root'), request: createDemoRequest(() => demoData), getCurrent: () => demoRecord, getData: () => demoData, isDirty: () => false, demo: true });
+  analysisView = demoView;
   startGuestWorkspace({
     showEditor,
     showRoster: visible => rosterView.show(visible),

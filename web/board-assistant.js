@@ -13,13 +13,13 @@ const symbols = {
 const glyph = name => '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + symbols[name] + '</svg>';
 const copy = () => getLocale() === 'en' ? en : zh;
 
-export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
+export function createBoardAssistant({host, getContext, onRequest, onAdd, onHighlight, onHandoff}) {
   const doc = host.ownerDocument, win = doc.defaultView;
   const root = doc.createElement('div');
   root.className = 'board-ai';
   root.innerHTML = `<button type="button" class="ba-fab" data-ba="open" aria-expanded="false" aria-controls="board-ai-panel">${glyph('spark')}<b>AI</b></button>
     <section class="ba-panel" id="board-ai-panel" role="dialog" aria-modal="false" aria-labelledby="board-ai-heading" hidden>
-      <header class="ba-header"><div class="ba-heading" data-ba-drag>${glyph('spark')}<div><h2 id="board-ai-heading" data-text="title"></h2><small class="ba-scope"></small></div></div>
+      <header class="ba-header"><button type="button" class="ba-expand ba-pill" data-ba="expand" data-text="expand"></button><div class="ba-heading" data-ba-drag>${glyph('spark')}<div><h2 id="board-ai-heading" data-text="title"></h2><small class="ba-scope"></small></div></div>
         <button type="button" class="ba-icon" data-ba="settings">${glyph('settings')}</button><button type="button" class="ba-icon" data-ba="close">${glyph('close')}</button></header>
       <div class="ba-content"><div class="ba-config" hidden><label><span data-text="provider"></span><select data-ba-provider><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option></select></label>
         <label><span data-text="model"></span><input data-ba-model value="gpt-6.1-terra" maxlength="150" autocomplete="off" spellcheck="false"></label>
@@ -28,7 +28,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
         <div class="ba-output" hidden></div><div class="ba-welcome"><strong data-ba-guide></strong><div class="ba-examples">
         <button class="ba-pill" type="button" data-ba="edit" data-text="edit"></button>
         <button class="ba-pill" type="button" data-ba="search" data-text="search"></button></div></div></div>
-      <footer class="ba-footer"><div class="ba-status" role="status" aria-live="polite"></div>
+      <footer class="ba-footer"><button type="button" class="ba-mode ba-pill" data-ba="clear-mode" hidden></button><div class="ba-status" role="status" aria-live="polite"></div>
         <div class="ba-compose"><textarea rows="2" maxlength="1600" data-ba-prompt></textarea>
         <div class="ba-controls"><button type="button" class="ba-icon" data-ba="mic">${glyph('mic')}</button>
         <button type="button" class="ba-icon ba-send" data-ba="send">${glyph('send')}</button></div></div></footer></section>`;
@@ -38,6 +38,9 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
   const status = q('.ba-status'), key = q('[data-ba-key]'), model = q('[data-ba-model]'), provider = q('[data-ba-provider]');
   const Speech = win.SpeechRecognition || win.webkitSpeechRecognition;
   let scope, locale, pending, recognition, reply, clarification = '', selectedMode = 'auto', destroyed = false;
+  let previous = [], requestInstruction = '';
+  const remember = record => { previous = [...previous, record].slice(-5); };
+  function clearPreview() { if (reply?.kind === 'preview') reply.discard?.(); }
 
   function announce(message = '', error = false, spokenOnly = false) {
     status.textContent = message;
@@ -50,6 +53,9 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
   }
   function updateButtons() {
     const lang = copy(), running = !!pending;
+    const mode = button('clear-mode'); mode.hidden = selectedMode === 'auto';
+    mode.textContent = selectedMode === 'auto' ? '' : lang[selectedMode] + ' ×';
+    mode.setAttribute('aria-label', lang.clearMode);
     label(button('send'), running ? lang.cancel : lang.send);
     button('send').innerHTML = glyph(running ? 'stop' : 'send');
     button('send').disabled = !running && (!prompt.value.trim() || !!recognition);
@@ -70,6 +76,11 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
       const message = doc.createElement('p');
       message.textContent = reply.message || lang.change;
       output.append(message);
+      if (reply.kind === 'preview') {
+        if (Array.isArray(reply.changes)) { const list = doc.createElement('ul'); for (const change of reply.changes) { const li = doc.createElement('li'); li.textContent = String(change); list.append(li); } output.append(list); }
+        for (const action of ['apply','discard','rehearse']) { if (action === 'rehearse' && !reply.rehearse) continue; const control = doc.createElement('button'); control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = action; control.textContent = lang[action]; output.append(control); }
+      }
+      if (reply.kind === 'handoff' && onHandoff) { const go = doc.createElement('button'); go.type = 'button'; go.className = 'ba-pill'; go.dataset.ba = 'handoff'; go.textContent = lang.handoff; output.append(go); }
       if (reply.undo) {
         const undo = doc.createElement('button');
         undo.type = 'button'; undo.className = 'ba-pill'; undo.dataset.ba = 'undo';
@@ -103,7 +114,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
     stopSpeech(); updateButtons(); announce();
   }
   function reset() {
-    cancel(); clarification = ''; selectedMode = 'auto'; reply = null;
+    cancel(); clearPreview(); clarification = ''; selectedMode = 'auto'; reply = null; previous = [];
     prompt.value = ''; prompt.placeholder = copy().prompt;
     outputView(); updateButtons();
   }
@@ -151,15 +162,20 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
     const requestScope = getContext().scope;
     const control = new AbortController();
     pending = control;
-    const instruction = clarification ? clarification + '\n' + lang.answer + ' · ' + text : text;
+    const instruction = text;
+    clearPreview(); requestInstruction = instruction;
     config.hidden = true; reply = null; outputView(); updateButtons(); announce(lang.loading);
     try {
       const result = await onRequest({prompt:instruction, mode:selectedMode, provider:provider.value, model:model.value.trim(),
-        apiKey:key.value.trim(), signal:control.signal, locale:getLocale()});
+        apiKey:key.value.trim(), signal:control.signal, locale:getLocale(), previous:previous.slice(),
+        onTool(name) { if (pending === control && !control.signal.aborted) announce(lang.toolProgress[name] || lang.loading); }});
       if (pending !== control || destroyed || requestScope !== getContext().scope) return;
       reply = result;
-      clarification = result.kind === 'clarify' ? lang.original + ' · ' + instruction + '\n' + lang.followup + ' · ' + result.message : '';
-      prompt.value = ''; selectedMode = result.kind === 'clarify' ? selectedMode : 'auto';
+      clarification = result.kind === 'clarify' ? result.message : '';
+      if (result.kind !== 'preview') remember({instruction, kind:result.kind, summary:result.summary || result.message || '', message:result.message, operations:result.operations});
+      if (result.kind === 'answer' && result.highlights) onHighlight?.(result.highlights);
+      if (result.kind === 'preview' && win.matchMedia?.('(max-width: 600px)').matches) panel.classList.add('ba-collapsed');
+      prompt.value = '';
       prompt.placeholder = clarification ? lang.clarified : lang.prompt;
       outputView(); q('.ba-content').scrollTop = 0;
       announce(result.kind === 'search' ? lang.matches + ' · ' + result.items.length : result.message || lang.change, false, true);
@@ -209,13 +225,27 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd}) {
     else if (action === 'send') void send();
     else if (action === 'mic') dictate();
     else if (action === 'add') void add(Number(b.dataset.index), b);
+    else if (action === 'clear-mode') { selectedMode = 'auto'; updateButtons(); }
+    else if (action === 'expand') panel.classList.remove('ba-collapsed');
+    else if (action === 'handoff') onHandoff?.(reply);
+    else if (action === 'discard' && reply?.kind === 'preview') { clearPreview(); reply = null; panel.classList.remove('ba-collapsed'); outputView(); announce(copy().discarded); }
+    else if (action === 'rehearse' && reply?.kind === 'preview') reply.rehearse?.();
+    else if (action === 'apply' && reply?.kind === 'preview') {
+      const preview = reply; b.disabled = true;
+      Promise.resolve().then(() => preview.apply()).then(result => {
+        if (reply !== preview) return;
+        reply = result; panel.classList.remove('ba-collapsed');
+        remember({instruction:requestInstruction, kind:'edit', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], playerIds:result.playerIds || []});
+        outputView(); announce(result.message || copy().change);
+      }).catch(error => { if (reply === preview) { b.disabled = false; announce(error?.message || copy().error, true); } });
+    }
     else if (action === 'undo' && reply?.undo) {
       const applied = reply.undo(); reply = null; outputView(); announce(applied === false ? copy().undoExpired : copy().undone);
     } else if (action === 'edit' || action === 'search') {
       selectedMode = action; clarification = ''; prompt.value = copy()[action + 'Example']; updateButtons(); prompt.focus(); prompt.select();
     }
   });
-  prompt.addEventListener('input', () => { selectedMode = 'auto'; updateButtons(); });
+  prompt.addEventListener('input', updateButtons);
   provider.addEventListener('change', () => { key.value = ''; model.value = provider.value === 'openrouter' ? 'openai/gpt-6.1-terra' : 'gpt-6.1-terra'; key.focus(); });
   root.addEventListener('keydown', event => {
     event.stopPropagation();

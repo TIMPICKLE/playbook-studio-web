@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { searchMaddenCatalog, resolveMaddenResults } from '../web/assistant-search.js';
 import { searchServerMadden } from '../server/board-assistant-catalog.mjs';
-import { hasEditableTrace, makeMaddenPlay } from '../web/madden-model.js';
+import { editableTraceCount, hasEditableTrace, makeMaddenPlay } from '../web/madden-model.js';
 
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
 const byId = new Map(catalog.plays.map(entry => [entry.id, entry]));
@@ -48,4 +48,38 @@ test('recommendation cards import canonical plays and never use model-proposed n
   const imported = makeMaddenPlay(results[0].entry);
   assert.equal(imported.diagramSource.catalogId, chosen.id);
   assert.ok(imported.routes.length);
+});
+
+test('geometry tags come only from editable traces and remain separate from image metadata', async () => {
+  const { MADDEN_CONCEPT_TAGS } = await import('../web/data/madden-search-tags.js');
+  const { traceConceptTags } = await import('../web/madden-concepts.js');
+  const { getEditableEntry } = await import('../web/madden-model.js');
+  assert.equal(Object.keys(MADDEN_CONCEPT_TAGS).length, editableTraceCount);
+  const tagged = Object.entries(MADDEN_CONCEPT_TAGS).find(([, tags]) => tags.includes('flood'));
+  assert.deepEqual(MADDEN_CONCEPT_TAGS[tagged[0]], traceConceptTags(getEditableEntry(tagged[0])));
+  const choices = searchMaddenCatalog(catalog, { tags: ['flood'] });
+  assert.ok(choices.length);
+  assert.ok(choices.every(p => p.editable && p.tags.includes('flood') && p.evidence.includes('approximate')));
+  const image = catalog.plays.find(p => !hasEditableTrace(p.id));
+  assert.equal(MADDEN_CONCEPT_TAGS[image.id], undefined);
+});
+
+test('similar searches use current formation and geometry with server parity', () => {
+  const selected = catalog.plays.find(p => hasEditableTrace(p.id));
+  const board = { book: 'offense', formation: selected.group + ' ' + selected.formation, players: [], routes: [] };
+  const options = { board };
+  const candidates = searchMaddenCatalog(catalog, { similarToCurrent: true }, options);
+  assert.ok(candidates.length);
+  assert.equal(candidates[0].formation, board.formation);
+  assert.ok(candidates.every(p => p.editable));
+  assert.deepEqual(searchServerMadden({ similarToCurrent: true }, options), candidates);
+  assert.deepEqual(searchMaddenCatalog(catalog, { similarToCurrent: true }, { board: { ...board, book: 'defense' } }), []);
+});
+
+test('metadata filters require recorded evidence and do not invent image attributes', () => {
+  for (const filter of [{ personnel: '11' }, { playType: 'pass' }, { situation: 'red_zone' }]) {
+    assert.deepEqual(searchMaddenCatalog(catalog, filter), []);
+  }
+  const recorded = { plays: [{ ...catalog.plays[0], personnel: '11', playType: 'pass', situations: ['red_zone'] }] };
+  assert.equal(searchMaddenCatalog(recorded, { personnel: '11', playType: 'pass', situation: 'red_zone' }).length, 1);
 });

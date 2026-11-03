@@ -182,12 +182,34 @@ export function blockContact(route, time) {
   return { index, fraction, impact };
 }
 
-export function animatedPlayer(play, player, time) {
+// Resolve contacts against the defender's current position while retaining the
+// stored waypoints as a fallback for old plays or a removed target.
+export function dynamicBlockRoute(play, route, time, visiting = new Set()) {
+  if (route.kind !== 'block' || !route.blockTargets?.length) return route;
+  const points = [route.points[0]];
+  for (let i = 0; i < route.points.length - 1; i++) {
+    const target = play.players.find(p => p.id === route.blockTargets[i]);
+    if (!target || visiting.has(target.id)) { points.push(route.points[i + 1]); continue; }
+    const defender = animatedPlayer(play, target, time, visiting);
+    const from = points.at(-1);
+    const dx = (from.x - defender.x) * 9.64, dy = (from.y - defender.y) * 7.6;
+    const distance = Math.hypot(dx, dy);
+    const offset = distance ? Math.min(28 / distance, .5) : 0;
+    points.push({ x: defender.x + (from.x - defender.x) * offset, y: defender.y + (from.y - defender.y) * offset });
+  }
+  return { ...route, points };
+}
+
+export function animatedPlayer(play, player, time, visiting = new Set()) {
+  if (visiting.has(player.id)) return { x: player.x, y: player.y };
+  const next = new Set(visiting);
+  next.add(player.id);
   const routes = play.routes.filter(r => r.playerId === player.id && !r.optional && r.kind !== 'pass');
   const route = routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind === 'route') || routes.find(r => r.kind === 'block') || routes[0];
   if (!route) return { x: player.x, y: player.y };
-  const contact = blockContact(route, time);
-  const samples = sampledRoute(route);
+  const currentRoute = dynamicBlockRoute(play, route, time, next);
+  const contact = blockContact(currentRoute, time);
+  const samples = sampledRoute(currentRoute);
   if (contact) {
     const segments = (samples.length - 1) / (route.points.length - 1);
     const start = contact.index * segments;
@@ -242,8 +264,17 @@ export function validatePlay(p) {
     const points = array(r.points, 200, '路线节点').map(v => ({ x: num(v.x, 0, 100, '节点横坐标'), y: num(v.y, 0, 100, '节点纵坐标') }));
     if (points.length < 2) fail('路线至少需要两个节点');
     const owner = players.find(p => p.id === r.playerId);
-    if (Math.hypot(points[0].x - owner.x, points[0].y - owner.y) > .01) fail('路线起点与球员位置不一致');
-    return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional, ...(r.kind === 'block' && r.stagedBlock === true ? { stagedBlock: true } : {}) };
+    const startsAtOwner = Math.hypot(points[0].x - owner.x, points[0].y - owner.y) <= .01;
+    const motion = p.routes.find(m => m.playerId === r.playerId && m.kind === 'motion' && !m.optional && Array.isArray(m.points) && m.points.length > 1);
+    const motionEnd = motion?.points.at(-1);
+    const startsAfterMotion = r.kind !== 'motion' && motionEnd && r.delay >= motion.delay + motion.duration && Math.hypot(points[0].x - motionEnd.x, points[0].y - motionEnd.y) <= .01;
+    if (!startsAtOwner && !startsAfterMotion) fail('路线起点与球员位置不一致');
+    let blockTargets;
+    if (r.kind === 'block' && r.blockTargets != null) {
+      blockTargets = array(r.blockTargets, 199, '阻挡目标').map(id);
+      if (blockTargets.length !== points.length - 1 || blockTargets.includes(r.playerId)) fail('阻挡目标与路线不匹配');
+    }
+    return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional, ...(r.kind === 'block' && r.stagedBlock === true ? { stagedBlock: true } : {}), ...(blockTargets ? { blockTargets } : {}) };
   }), '路线');
   const zones = unique(array(p.zones, 60, '区域').map(z => ({ id: id(z.id), x: num(z.x, 0, 100, '区域横坐标'), y: num(z.y, 0, 100, '区域纵坐标'), rx: num(z.rx, 1, 50, '区域半径'), ry: num(z.ry, 1, 50, '区域半径'), color: col(z.color), label: text(z.label, 80, '区域名称') })), '区域');
   const annotations = unique(array(p.annotations, 100, '标注').map(a => ({ id: id(a.id), x: num(a.x, 0, 100, '标注横坐标'), y: num(a.y, 0, 100, '标注纵坐标'), text: text(a.text, 200, '标注内容') })), '标注');

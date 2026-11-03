@@ -37,7 +37,7 @@ test('static browser LangGraph resolves a relative and named opponent through na
       count++;
       assert.equal(url, 'https://api.openai.com/v1/chat/completions');
       assert.equal(opts.headers.Authorization, 'Bearer unit-test-key');
-      assert.doesNotMatch(opts.body, /Coach Example|unit-test-key/);
+      assert.doesNotMatch(opts.body, /unit-test-key/);
       const payload = JSON.parse(opts.body);
       assert.equal(payload.model, 'gpt-6.1-terra');
       assert.equal(payload.reasoning_effort, 'none');
@@ -110,6 +110,11 @@ test('worker enforces membership/revision and searches the packaged catalog inde
   assert.equal(count, 0);
   db.sql.prepare('INSERT INTO members(workspace_id,user_id,role,joined_at) VALUES(?,?,?,?)').run(book.id, viewer.userId, 'viewer', Date.now());
   assert.equal((await (await post(path, viewer, body)).json()).kind, 'search');
+  const streamed = await post(path, viewer, {...body, stream:true});
+  assert.match(streamed.headers.get('content-type'), /ndjson/);
+  const events = (await streamed.text()).trim().split('\n').map(line => JSON.parse(line));
+  assert.ok(events.some(event => event.type === 'tool' && event.name === 'search_madden'));
+  assert.equal(events.at(-1).result.kind, 'search');
   isEdit = true;
   body.instruction = 'C blocks DT then Avery';
   assert.equal((await post(path, viewer, body)).status, 403);

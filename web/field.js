@@ -1,5 +1,5 @@
 import { t } from './i18n.js';
-import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute } from './model.js';
+import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute, dynamicBlockRoute } from './model.js';
 export const project = p => ({ x: 18 + p.x * 9.64, y: 20 + p.y * 7.6 });
 const n = x => Number(x).toFixed(2);
 const xy = p => { const v = project(p); return `${n(v.x)},${n(v.y)}`; };
@@ -64,10 +64,11 @@ export function fieldSVG(play, settings = {}, options = {}) {
   const routes = play.routes.map((r, i) => {
     const active = selected?.type === 'route' && selected.id === r.id, markerId = `${prefix}-r${i}`, stroke = displayColor(r.color, light);
     defs += marker(markerId, stroke);
-    const d = r.kind === 'motion' ? motionPath(r) : routePath(r);
+    const displayRoute = dynamicBlockRoute(play, r, time);
+    const d = r.kind === 'motion' ? motionPath(r) : routePath(displayRoute);
     const dash = r.kind === 'pass' ? '4 7' : r.optional ? '9 6' : '';
     let path = `<g data-route="${e(r.id)}" role="button" aria-label="${e(t(r.optional ? 'support.option_route' : 'support.route', { label: play.players.find(p => p.id === r.playerId)?.label ?? '' }))}" tabindex="0"><path d="${d}" fill="none" stroke="transparent" stroke-width="20" class="route-hit"/><path class="route-stroke" ${dash ? '' : 'pathLength="1"'} d="${d}" fill="none" stroke="${stroke}" stroke-width="${active ? 4 : thumbnail ? 4 : 2.8}" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''} opacity="${r.optional ? .65 : 1}" ${r.stagedBlock && r.kind === 'block' ? `marker-mid="url(#${markerId}-bar)"` : ''} marker-end="url(#${markerId}-${r.endCap})" pointer-events="none"/></g>`;
-    if (active && !thumbnail && !print && time === 0) path += r.points.slice(1).map((p, j) => { const v = project(p); return `<circle data-point="${j + 1}" data-route-id="${e(r.id)}" cx="${n(v.x)}" cy="${n(v.y)}" r="6" fill="${stroke}" stroke="${bg}" stroke-width="2" class="point-handle"/>`; }).join('');
+    if (active && !thumbnail && !print && time === 0) path += displayRoute.points.slice(1).map((p, j) => { const v = project(p); return `<circle data-point="${j + 1}" data-route-id="${e(r.id)}" cx="${n(v.x)}" cy="${n(v.y)}" r="6" fill="${stroke}" stroke="${bg}" stroke-width="2" class="point-handle"/>`; }).join('');
     return path;
   }).join('');
   if (drawing?.points?.length) {
@@ -96,7 +97,10 @@ export function updateAnimation(svg, play, time, prefix = 'pitch') {
   const flight = time > 0 ? passFlightRoute(play) : null;
   for (const node of svg.querySelectorAll('[data-route]')) {
     const route = play.routes.find(r => r.id === node.dataset.route);
-    if (route?.kind === 'pass') for (const path of node.querySelectorAll('path')) path.setAttribute('d', routePath(flight?.id === route.id ? flight : route));
+    if (route?.kind === 'pass' || route?.blockTargets) {
+      const displayRoute = flight?.id === route.id ? flight : dynamicBlockRoute(play, route, time);
+      for (const path of node.querySelectorAll('path')) path.setAttribute('d', routePath(displayRoute));
+    }
   }
   const b = animatedBall(play, time), v = b ? project(b) : null;
   if (v) svg.querySelector(`#${prefix}-ball`)?.setAttribute('transform', `translate(${n(v.x + 23)} ${n(v.y - 11)})`);
@@ -108,11 +112,12 @@ export function updateGeometry(svg, play) {
   const routes = new Map(play.routes.map(route => [route.id,route]));
   for (const node of svg.querySelectorAll('[data-route]')) {
     const route = routes.get(node.dataset.route); if (!route) continue;
-    const d = route.kind === 'motion' ? motionPath(route) : routePath(route);
+    const d = route.kind === 'motion' ? motionPath(route) : routePath(dynamicBlockRoute(play, route, 0));
     for (const path of node.querySelectorAll('path')) path.setAttribute('d', d);
   }
   for (const node of svg.querySelectorAll('[data-point]')) {
-    const point = routes.get(node.dataset.routeId)?.points[Number(node.dataset.point)];
+    const route = routes.get(node.dataset.routeId);
+    const point = route && dynamicBlockRoute(play, route, 0).points[Number(node.dataset.point)];
     if (point) { const v=project(point); node.setAttribute('cx',n(v.x)); node.setAttribute('cy',n(v.y)); }
   }
   for (const node of svg.querySelectorAll('[data-zone]')) {

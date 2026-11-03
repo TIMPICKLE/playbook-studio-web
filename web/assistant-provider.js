@@ -10,25 +10,25 @@ const words = locale => providerMessages[locale === 'en' ? 'en' : 'zh-CN'];
 const text = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
 const validPoint = point => point && [point.x, point.y].every(n => Number.isFinite(n) && n >= 0 && n <= 100);
 
-export function boardAssistantInput({ instruction, board, locale }) {
+export function boardAssistantInput({ instruction, board, locale, mode, previous }) {
   if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
     throw new Error(words(locale).instruction);
-  const namesInCommand = instruction.toLowerCase();
   const players = (Array.isArray(board?.players) ? board.players : []).slice(0, 48)
     .filter(p => validPoint(p) && typeof p.id === 'string')
     .map(p => {
       const name = text(p.name, 100);
       return { id: p.id, label: text(p.label, 80), position: text(p.position, 40), side: p.side, x: p.x, y: p.y,
         ...(p.number != null ? { number: text(String(p.number), 12) } : {}),
-        ...(name && namesInCommand.includes(name.toLowerCase()) ? { name } : {}) };
+        ...(name ? { name } : {}) };
     });
   const selected = board?.selectedPlayerId;
   const routes = (Array.isArray(board?.routes) ? board.routes : []).slice(0, 100)
     .filter(r => players.some(p => p.id === r?.playerId) && Array.isArray(r.points))
-    .map(r => ({ playerId: r.playerId, kind: text(r.kind, 16), optional: !!r.optional,
+    .map(r => ({ id: text(r.id, 100), playerId: r.playerId, kind: text(r.kind, 16), optional: !!r.optional, delay: r.delay, duration: r.duration, blockTargets: r.blockTargets,
       points: r.points.filter(validPoint).slice(0, 32).map(({ x, y }) => ({ x, y })) }));
-  return { instruction: instruction.trim(), locale: locale === 'en' ? 'en' : 'zh-CN',
-    board: { playId: text(board?.playId ?? board?.id, 100), title: text(board?.title, 120), players, routes,
+  return { instruction: instruction.trim(), locale: locale === 'en' ? 'en' : 'zh-CN', mode: ['edit', 'search'].includes(mode) ? mode : 'auto',
+    previous: Array.isArray(previous) ? previous.slice(-5) : [],
+    board: { playId: text(board?.playId ?? board?.id, 100), title: text(board?.title, 120), book: board?.book, formation: board?.formation, ball: board?.ball, zones: board?.zones || [], annotations: board?.annotations || [], geometry: { losY: 67, xUnitsPerYard: 1.875, yUnitsPerYard: 2, offenseDirection: 'decreasing_y' }, players, routes,
       ...(players.some(p => p.id === selected) ? { selectedPlayerId: selected } : {}) } };
 }
 
@@ -102,16 +102,40 @@ export async function invokeBoardModel(config, input, { signal, fetchImpl = fetc
   }
 }
 
-export async function requestBoardAssistant({ instruction, board, locale, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool }) {
-  const input = boardAssistantInput({ instruction, board, locale });
+export async function requestBoardAssistant({ instruction, board, locale, mode, previous, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool }) {
+  const input = boardAssistantInput({ instruction, board, locale, mode, previous });
   const provider = model?.provider || 'openai';
   const modelId = model?.model?.trim() || (provider === 'openai' ? DEFAULT_BOARD_MODEL : '');
   const apiKey = model?.apiKey?.trim();
   if (!modelId || modelId.length > 160 || !apiKey || apiKey.length > 512 || /[^\x21-\x7e]/.test(apiKey)) throw new Error(words(locale).settings);
   const config = { ...model, provider, model: modelId, apiKey };
-  if (workspace) return request('/api/workspaces/' + encodeURIComponent(workspace.id) + '/board-assistant', {
-    method: 'POST', body: { ...input, model: config, revision: workspace.revision }, signal,
-  });
+  if (workspace) {
+    const path = '/api/workspaces/' + encodeURIComponent(workspace.id) + '/board-assistant';
+    if (!onTool) return request(path, {method:'POST', body:{...input, model:config, revision:workspace.revision}, signal});
+    const response = await (fetchImpl || fetch)(path, {method:'POST', credentials:'same-origin', cache:'no-store',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify({...input, model:config, revision:workspace.revision, stream:true}), signal});
+    if (!response.ok) {
+      let payload; try { payload = await response.json(); } catch { payload = {}; }
+      throw Object.assign(new Error(payload.error || words(locale).failed), {status:response.status});
+    }
+    const reader = response.body.getReader(), decoder = new TextDecoder();
+    let pending = '', result;
+    while (true) {
+      const {value, done} = await reader.read();
+      pending += decoder.decode(value || new Uint8Array(), {stream:!done});
+      const lines = pending.split('\n'); pending = lines.pop();
+      for (const line of lines) {
+        if (!line) continue;
+        const event = JSON.parse(line);
+        if (event.type === 'tool') onTool(event.name, event.args);
+        if (event.type === 'result') result = event.result;
+        if (event.type === 'error') throw Object.assign(new Error(event.error), {status:event.status});
+      }
+      if (done) break;
+    }
+    if (!result) throw new Error(words(locale).invalid);
+    return result;
+  }
   const endpoint = endpoints.get(provider);
   if (!endpoint) throw new Error(words(locale).unsupported);
   const searchCatalog = async(args, options) => {
