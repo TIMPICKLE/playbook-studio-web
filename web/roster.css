@@ -102,6 +102,26 @@
 .roster-error { margin: 12px 0 0; color: var(--danger-1); font-size: 13px; }
 .roster-dialog-actions { justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
 .roster-remove { margin-inline-end: auto; color: var(--danger-1); }
+.roster-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 22px 0 16px;
+  border-bottom: 1px solid var(--hairline-strong);
+}
+.roster-tabs button {
+  padding: 10px 12px;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 650;
+}
+.roster-tabs button[aria-selected="true"] { border-color: var(--text-1); color: var(--text-1); }
+.roster-tabs button:hover { color: var(--text-1); }
+#roster-directory-pane { margin-top: 0; }
+.roster-chart-root:not(:empty) { margin-top: 16px; }
 @media (max-width: 640px) {
   .roster-page { padding-top: 12px; }
   .roster-team { padding: 16px; gap: 10px; }

@@ -25,7 +25,7 @@ Choose a play on the left, arrange players and draw routes in the center, and ad
 | **Design plays** | Move offensive and defensive players; draw routes, blocks, pre-snap motion, passes, coverage zones, and text. Use curves, option routes, mirroring, undo, and redo |
 | **Explain and rehearse** | Play, pause, loop, change speed, and scrub the timeline. Set route start times, durations, ball carriers, and pass timing |
 | **Build a playbook** | Organize offense, defense, and special teams; search, favorite, duplicate, and save formation templates and coaching notes |
-| **Manage players** | Open the current playbook’s roster from the workspace. Search by name, jersey number or position, and add, edit or remove players |
+| **Manage players** | Set starters and rank backups for offensive, defensive and special teams groups. Search the player roster by name, number or position |
 | **Import Madden plays** | Filter, preview, and add Eagles / Ravens plays. Edit players and routes in 437 reconstructed entries |
 | **Analyze matchups with AI** | Select an offensive and a defensive play in the cloud app, use your own model service and API key, and review conditional scenarios, player choices, evidence, and missing information |
 | **Share with your team** | Cloud autosave, access across devices, per-playbook permissions, conflict handling, and the latest 20 saved versions |
@@ -56,6 +56,13 @@ Eight teaching examples are included: Mesh, Four Verticals, Flood, Slants, Insid
 | Cancel / close | `Esc` | Delete selection | `Delete` |
 
 </details>
+
+## Game-day depth chart
+
+1. Open **Player management** from the workspace. The **Depth chart** opens for the current playbook. Choose offense, defense or special teams, then a personnel group. Templates include Spread and Bunch on offense, 4-2-5 on defense, and five special teams units covering kickoff, kickoff return, punt, punt return and field goal.
+2. Select **Adjust** on a position, choose a starter and add backups in order. To make a substitution, select **Start** beside a backup and save to swap that player with the starter. Choose **Starters only** for a quick sideline lineup. Use the **Player roster** tab to add players to the pool.
+3. Copy a group for an upcoming opponent to keep its lineup and change just the positions you need. For example, select a returner for this week’s Punt Return group and add game-day instructions about when to make the substitution.
+4. To use a lineup on the field, open **Edit playbook** from the workspace. In the details of an editable play, choose a personnel group from the same unit. Review the position matches and select **Apply matching starters**. For example, the depth chart’s QB matches a single QB marker on the play. Field positions, routes and rehearsal timing stay intact.
 
 ## Visual walkthrough
 
@@ -150,10 +157,10 @@ The board supports **100–300% zoom**, fit-to-screen, and adjustable height. De
 | Entry point | Access | Data and capabilities |
 |---|---|---|
 | [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) | An administrator-provided username and password, or the existing ChatGPT sign-in option | Cloud database, member permissions, access across devices, version history, and AI analysis |
-| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/) | Choose one of three workspace cards | The browser stores plays and rosters locally. The AI demo uses a sample matchup and your own API key |
+| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/) | Choose one of three workspace cards | The browser stores plays, rosters and group depth charts locally. The AI demo uses a sample matchup and your own API key |
 | [Migration guide](https://timpickle.github.io/playbook-studio-web/landing.html) | Project links and migration tools | Opens the cloud app or local demo and exports data from the earlier browser-only version |
 
-Sharing is scoped to a **playbook**, with independent membership for each one. Owners manage members and restore history; owners and editors can maintain the roster. Viewers can browse and search the roster, as well as inspect, rehearse, export and print plays. Under **成员与权限** (Members and permissions), an owner can create a member account or add an existing one. Email invitation links must be copied and sent manually.
+Sharing is scoped to a **playbook**, with independent membership for each one. Owners manage members and restore history; owners and editors can maintain the roster, personnel groups and depth charts. Viewers can inspect starters and backups and search the roster, as well as inspect, rehearse, export and print plays. Under **成员与权限** (Members and permissions), an owner can create a member account or add an existing one. Email invitation links must be copied and sent manually.
 
 Changes save automatically, and background polling retrieves other members' updates. Conflict handling retains the local draft and asks users to resolve changes that cannot be merged automatically. Owners can restore from the latest **20 saved versions**. Unsynced drafts support recovery on the original device; they do not guarantee offline sign-in or a cold start. Keep JSON backups of important playbooks.
 

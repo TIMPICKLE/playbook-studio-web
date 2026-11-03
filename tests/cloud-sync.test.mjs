@@ -165,3 +165,18 @@ test('adopting the remote version cannot reread a rejected draft when storage cl
   assert.equal(events.data.at(-1).data.plays[0].title, 'Use remote'); assert.deepEqual(sync.base, remote);
   assert.ok(sync.storageError); assert.match(events.statuses.at(-1), /本机草稿存储不可用/);
 });
+
+test('a draft from before depth charts resumes alongside remote lineup edits', t => {
+  const legacy = starterWorkspace();
+  delete legacy.depthChart;
+  const local = clone(legacy);
+  local.team.name = 'Offline team';
+  const remote = decodeWorkspace(encodeWorkspace(legacy));
+  remote.depthChart.groups[0].slots[0].playerIds = [remote.roster[0].id];
+  const saved = storage();
+  saved.setItem('playbook-cloud-draft:v1:coach:book', JSON.stringify({ revision: 1, base: legacy, data: local }));
+  const { sync } = harness(t, async () => {}, saved, remote);
+  assert.equal(sync.conflict, null);
+  assert.equal(sync.pending.team.name, 'Offline team');
+  assert.deepEqual(sync.pending.depthChart, remote.depthChart);
+});

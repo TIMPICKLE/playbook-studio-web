@@ -41,7 +41,8 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
       const root = q('#roster-root');
       assert.equal(root.hidden, false);
       assert.equal(q('#app').hidden, true);
-      assert.match(root.querySelector('tbody').textContent, new RegExp(record.data.roster[0].name));
+      root.querySelector('[data-roster-tab="directory"]').click();
+      assert.match(root.querySelector('.roster-results tbody').textContent, new RegExp(record.data.roster[0].name));
       assert.equal(root.querySelector('.roster-readonly').hidden, false);
       assert.equal(root.querySelector('[data-roster="edit"]'), null);
       const add = root.querySelector('[data-roster="add"]');
@@ -86,9 +87,10 @@ test('cloud editor restricts readers, saves editor changes, imports legacy JSON 
       q('[data-cloud-action="home"]').click(); await settle();
       q('[data-cloud-action="enter-roster"]').click(); await settle();
       const root = q('#roster-root'), original = clone(record.data), player = original.roster[0];
+      root.querySelector('[data-roster-tab="directory"]').click();
       root.querySelector(`[data-roster="edit"][data-id="${player.id}"]`).click();
-      root.querySelector('input[name="name"]').value = 'Cloud player';
-      root.querySelector('[type="submit"]').click();
+      root.querySelector('.roster-page > .roster-dialog input[name="name"]').value = 'Cloud player';
+      root.querySelector('.roster-page > .roster-dialog [type="submit"]').click();
       q('[data-cloud-action="save-now"]').click(); await settle();
       const writes = calls.filter(call => call.method === 'PUT');
       assert.equal(writes.length, 2);

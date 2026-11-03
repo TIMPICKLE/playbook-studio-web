@@ -7,9 +7,11 @@ import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, request } from './cloud.js';
 import { startGuestWorkspace } from './guest-workspace.js';
 import { createRosterView } from './roster.js';
+import { clearDepthPlayer } from './depth-model.js';
+import { linkRosterPlayer, personnelMatches, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
-import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
+import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, prepareWorkspaceAppend, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
@@ -28,7 +30,7 @@ const btn = (action, name, label, cls = '', attrs = '') => `<button type="button
 const recoveryMessage = t("feedback.local_data_could_not_be_read_editing_and_autosave_are_p");
 // Only translate a newly created example. Never rewrite an existing workspace.
 function localizedStarterWorkspace() {
-  const data = starterWorkspace();
+  const data = starterWorkspace({ demoDepth: true });
   if (getLocale() !== 'en') return data;
   data.team.name = t('editor.demo_team'); data.team.subtitle = t('editor.demo_season');
   const titles = ['editor.demo_mesh','editor.demo_verticals','editor.demo_flood','editor.demo_slants','editor.demo_inside_zone','editor.demo_cover3','editor.demo_blitz','editor.demo_field_goal'];
@@ -251,12 +253,41 @@ function ballSummary(play) {
   const label = id => play.players.find(v => v.id === id)?.label || '—';
   return play.ball.receiverId ? `${label(play.ball.holderId)} → ${label(play.ball.receiverId)}` : `${label(play.ball.holderId)}${t("editorExtra.run")}`;
 }
+function personnelPicker(play) {
+  if (!canEdit()) return '';
+  const groups = state.data.depthChart.groups.filter(group => group.unit === play.book);
+  const choices = groups.filter(group => group.slots.some(slot => slot.playerIds[0]));
+  return `<details class="inspector-section"><summary class="inspector-heading"><span>${t('editor.chart_starters')}</span></summary>
+    ${choices.length ? `<label class="form-field"><span>${t('editor.chart_group')}</span><select id="personnel-group">
+      <option value="">${t('editor.chart_choose')}</option>${choices.map(group => option(group.id, group.name, '')).join('')}</select></label>
+      <p class="muted small" id="personnel-preview" role="status">${t('editor.chart_hint')}</p>
+      <button class="button subtle full" data-action="apply-personnel" disabled>${t('editor.chart_apply')}</button>` :
+      `<p class="muted small">${t('editor.chart_empty')}</p>`}
+    </details>`;
+}
+function chosenPersonnel() {
+  const group = state.data.depthChart.groups.find(item => item.id === $('#personnel-group')?.value);
+  const matches = personnelMatches(current(), group, state.data.roster);
+  return { group, matches, changes: matches.filter(({ marker, player }) => marker.rosterId !== player.id || marker.name !== player.name) };
+}
+function previewPersonnel() {
+  const { group, matches, changes } = chosenPersonnel();
+  const preview = $('#personnel-preview');
+  if (!group) preview.textContent = t('editor.chart_hint');
+  else {
+    const total = group.slots.filter(slot => slot.playerIds[0]).length;
+    const labels = matches.map(({ marker, player }) => `${marker.label} · ${player.name}`).join(' / ');
+    preview.textContent = [t('editor.chart_match_count', { count: matches.length, total }), labels,
+      matches.length < total ? t('editor.chart_skipped') : '', matches.length && !changes.length ? t('editor.chart_current') : ''].filter(Boolean).join(' ');
+  }
+  $('[data-action="apply-personnel"]').disabled = !canEdit() || !changes.length;
+}
 function inspector() {
   const p = current(), obj = selectedObject();
   let content;
   if (p.reference) return `${hasEditableTrace(p.reference.catalogId) ? `<button class="button primary full" data-action="convert-reference">${t("editorExtra.create_editable_copy")}</button>` : ''}<div class="madden-source-box"><strong>${e(p.reference.game)} · ${p.reference.team === 'eagles' ? 'Eagles' : 'Ravens'}</strong><p>${e(p.formation)}</p><p>${t("editorExtra.the_original_diagram_retains_its_routes_and_w")}</p><a href="${e(p.reference.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("editorExtra.view_source_on_huddle_gg")}</a></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}<div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="8" aria-label="${t("editor.coach_notes")}" placeholder="${t("editorExtra.situations_reads_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button><div class="inspector-note">${icon('check')}${cloudMode() ? t("editor.uses_this_playbook_s_save_and_membership_permissions") : t("editor.autosaved_in_this_browser")}</div>`;
   if (selection?.type === 'player' && obj) {
-    const assigned = state.data.roster.find(r => r.name === obj.name)?.id || '';
+    const assigned = obj.rosterId || '';
     content = `<div class="inspector-heading"><span>${t("editor.player_settings")}</span><span class="tag">${obj.side === 'offense' ? t("editor.offense") : t("editor.defense")}</span></div><div class="player-preview"><span style="background:${displayColor(obj.color, viewSettings().fieldTheme === 'light')};color:${displayColor(obj.color, viewSettings().fieldTheme === 'light') === '#eef0f3' ? '#111214' : ''}">${e(obj.label)}</span><div><strong>${e(obj.name || t("editor.unassigned"))}</strong><small>${t("editor.drag_the_marker_to_change_position")}</small></div></div>${fieldInput(t("editor.position_label"), 'label', obj.label, 'text', 'maxlength="10"')}<label class="form-field"><span>${t("editor.assign_roster_player")}</span><select data-prop="roster"><option value="">${t("editor.no_player_assigned")}</option>${state.data.roster.map(r => option(r.id, `#${r.number} ${r.name} · ${r.position}`, assigned)).join('')}</select></label>${fieldInput(t("editor.display_name"), 'name', obj.name, 'text', 'maxlength="80"')}<div class="form-row">${fieldInput(t("editor.marker_color"), 'color', displayColor(obj.color, viewSettings().fieldTheme === 'light'), 'color')}<label class="form-field"><span>${t("editor.shape")}</span><select data-prop="shape">${[['circle', t("editor.circle")], ['square', t("editor.square")], ['triangle', t("editor.triangle")]].map(([v, l]) => option(v, l, obj.shape)).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>${t("editor.draw_a_route")}</span></div><div class="route-quick">${[['route', t("editor.route")], ['block', t("editor.block")], ['motion', t("editor.motion")], ['pass', t("editor.pass")]].map(([v, l]) => `<button data-action="tool:${v}" class="${tool === v ? 'active' : ''}">${icon(v)}${l}</button>`).join('')}</div><div class="route-list">${p.routes.filter(r => r.playerId === obj.id).map(r => `<button data-action="select-route:${e(r.id)}">${icon(r.kind)}<span>${r.optional ? t("editor.optional") : ''}${({ route: t("editor.route_2"), block: t("editor.block_2"), motion: t("editor.motion_2"), pass: t("editor.pass_2") })[r.kind]}</span>${icon('chevron')}</button>`).join('')}</div><button class="button danger full" data-action="delete-selection">${icon('trash')}${t("editor.remove_player")}</button>`;
   } else if (selection?.type === 'route' && obj) {
     const owner = p.players.find(v => v.id === obj.playerId);
@@ -266,7 +297,7 @@ function inspector() {
   } else if (selection?.type === 'annotation' && obj) {
     content = `<div class="inspector-heading"><span>${t("editor.text_annotation")}</span></div>${fieldInput(t("editor.annotation_text"), 'text', obj.text, 'text', 'maxlength="200"')}<p class="muted small">${t("editor.drag_the_text_to_reposition_it")}</p><button class="button danger full" data-action="delete-selection">${icon('trash')}${t("editor.delete_annotation")}</button>`;
   } else {
-    content = `<div class="inspector-heading"><span>${t("editor.play_details")}</span><span class="tag">${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')}</span></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>${t("editor.formation_template")}</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput(t("editor.personnel"), 'personnel', p.personnel, 'text', 'maxlength="80"')}<div class="formation-actions"><button data-action="save-formation">${icon('save')}${t("editorExtra.save_formation")}</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? t("editorExtra.remove") : t("editorExtra.add")}${t("editorExtra.opposing_formation")}</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="5" aria-label="${t("editor.coach_notes")}" placeholder="${t("editor.reads_routes_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><details class="inspector-section ball-section" ${ballSectionOpen ? 'open' : ''}><summary class="inspector-heading"><span>${t("editor.ball_movement")}</span><small>${e(ballSummary(p))}</small></summary><label class="form-field"><span>${t("editor.ball_carrier")}</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>${t("editor.pass_to")}</span><select data-ball="receiverId"><option value="">${t("editor.no_pass_run")}</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput(t("editor.release_time"), 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput(t("editor.arrival_time"), 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div></details><div class="inspector-divider"></div><label class="check-label"><input id="show-names" type="checkbox" ${viewSettings().showNames ? 'checked' : ''}>${t("editor.show_player_names")}</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button>`;
+    content = `<div class="inspector-heading"><span>${t("editor.play_details")}</span><span class="tag">${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')}</span></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>${t("editor.formation_template")}</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${FORMATIONS.map(f => `<option value="builtin:${e(f)}">${e(f)}</option>`).join('')}${state.data.formations.filter(f => f.book === p.book).map(f => `<option value="custom:${e(f.id)}">${e(f.name)} · 自定义</option>`).join('')}</select></label>${fieldInput(t("editor.personnel"), 'personnel', p.personnel, 'text', 'maxlength="80"')}${personnelPicker(p)}<div class="formation-actions"><button data-action="save-formation">${icon('save')}${t("editorExtra.save_formation")}</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? t("editorExtra.remove") : t("editorExtra.add")}${t("editorExtra.opposing_formation")}</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="5" aria-label="${t("editor.coach_notes")}" placeholder="${t("editor.reads_routes_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><details class="inspector-section ball-section" ${ballSectionOpen ? 'open' : ''}><summary class="inspector-heading"><span>${t("editor.ball_movement")}</span><small>${e(ballSummary(p))}</small></summary><label class="form-field"><span>${t("editor.ball_carrier")}</span><select data-ball="holderId">${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>${t("editor.pass_to")}</span><select data-ball="receiverId"><option value="">${t("editor.no_pass_run")}</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput(t("editor.release_time"), 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput(t("editor.arrival_time"), 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div></details><div class="inspector-divider"></div><label class="check-label"><input id="show-names" type="checkbox" ${viewSettings().showNames ? 'checked' : ''}>${t("editor.show_player_names")}</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button>`;
   }
   return `${content}${selection ? `<button class="back-details" data-action="clear-selection">${t("editorExtra.back_to_play_details")}</button>` : ''}<div class="inspector-note">${icon('check')}${localRecovery || shared?.sync?.viewError ? t("editor.editing_and_autosave_are_paused_until_recovery_complete") : cloudMode() ? (canEdit() ? t("editor.all_changes_sync_to_the_shared_playbook") : t("editor.you_have_read_only_access")) : t("editor.all_changes_are_saved_in_this_browser")}</div>`;
 }
@@ -537,6 +568,12 @@ function deleteSelected() {
   }); toast(t("modal.object_deleted_undo_to_restore_it"), { type: 'success' });
 }
 const actions = {
+  'apply-personnel': () => {
+    const { group, changes } = chosenPersonnel();
+    if (!changes.length) return;
+    edit(() => { for (const { marker, player } of changes) linkRosterPlayer(marker, player); });
+    toast(t('editor.chart_applied', { count: changes.length, name: group.name }), { type: 'success' });
+  },
   'local-recovery': localRecoveryModal,
   'download-original': downloadOriginal,
   'retry-local-load': retryLocalLoad,
@@ -677,6 +714,7 @@ document.addEventListener('change', event => {
   if (!canEdit() && (input.dataset.prop || input.dataset.ball || input.id === 'apply-formation')) return;
   if (input.id === 'category-filter') { filter = input.value; render(); }
   else if (input.id === 'formation-filter') { formationFilter = input.value; render(); }
+  else if (input.id === 'personnel-group') previewPersonnel();
   else if(input.id==='draft-mode' && draft)draft.mode=input.value;
   else if (input.id === 'speed') speed = Number(input.value);
   else if (input.id === 'show-names') { viewOverrides.showNames = input.checked; render(); }
@@ -706,8 +744,13 @@ document.addEventListener('change', event => {
       edit(p => { p.ball[name] = value; }, {redraw:false});
     } else {
       const selected = !!selection, s = selection;
-      edit((p, d) => { const obj = selected ? p[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]].find(v => v.id === s.id) : p; if (!obj) return; if (key === 'roster') obj.name = d.roster.find(r => r.id === value)?.name || ''; else { obj[key] = value; if (key === 'kind' && value === 'block') obj.endCap = 'bar'; if (s?.type === 'route' && ((key === 'optional' && value === false) || key === 'kind') && !obj.optional && ['route', 'motion'].includes(obj.kind)) p.routes.filter(r => r.id !== obj.id && r.playerId === obj.playerId && ['route', 'motion'].includes(r.kind)).forEach(r => { r.optional = true; }); } }, {redraw:false});
-      if(key==='roster' && $('[data-prop="name"]'))$('[data-prop="name"]').value=selectedObject().name;
+      edit((p, d) => { const obj = selected ? p[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]].find(v => v.id === s.id) : p; if (!obj) return; if (key === 'roster') linkRosterPlayer(obj, d.roster.find(r => r.id === value)); else { if (key === 'name' && obj.name !== value) delete obj.rosterId; obj[key] = value; if (key === 'kind' && value === 'block') obj.endCap = 'bar'; if (s?.type === 'route' && ((key === 'optional' && value === false) || key === 'kind') && !obj.optional && ['route', 'motion'].includes(obj.kind)) p.routes.filter(r => r.id !== obj.id && r.playerId === obj.playerId && ['route', 'motion'].includes(r.kind)).forEach(r => { r.optional = true; }); } }, {redraw:false});
+      if (key === 'roster' || key === 'name') {
+        const marker = selectedObject();
+        $('[data-prop="roster"]').value = marker.rosterId || '';
+        $('[data-prop="name"]').value = marker.name;
+        $('.player-preview strong').textContent = marker.name || t('editor.unassigned');
+      }
       if(key==='kind' && $('[data-prop="endCap"]'))$('[data-prop="endCap"]').value=selectedObject().endCap;
     }
   }
@@ -721,8 +764,10 @@ $('#import-input').addEventListener('change', async event => {
     openModal(t("editorExtra.import_playbook_2"), `<p>${t("editorExtra.the_validated_file_contains")}<strong>${imported.plays.length}${t("editorExtra.plays_2")}</strong>、${imported.formations.length}${t("editorExtra.custom_formations_and")}${imported.roster.length}${t("editorExtra.roster_members")}</p><p class="muted small">${t("editorExtra.import_appends_plays_formations_and_roster_me")}</p>`, `<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-import">${t("editorExtra.append_import")}</button>`);
     actions['confirm-import'] = () => {
       if (state.data.formations.length + imported.formations.length > 100 || state.data.roster.length + imported.roster.length > 200) { toast(t("editorExtra.import_would_exceed_the_formation_or_roster_l"), { type: 'info' }); return; }
-      const plays = imported.plays.map(p => ({ ...p, id: uid() })), forms = imported.formations.map(f => ({ ...f, id: uid() })), roster = imported.roster.map(r => ({ ...r, id: uid() }));
-      closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); state.selectedId = plays[0].id; }); toast(`${t("editorExtra.imported")}${plays.length}${t("editorExtra.plays_3")}`); delete actions['confirm-import'];
+      const batch = prepareWorkspaceAppend(state.data, imported);
+      if (!batch) { toast(t('editor.chart_import_limit'), { type: 'warning' }); return; }
+      const { plays, formations: forms, roster, depthChart } = batch;
+      closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); d.depthChart = depthChart; state.selectedId = plays[0].id; }); toast(`${t("editorExtra.imported")}${plays.length}${t("editorExtra.plays_3")}`); delete actions['confirm-import'];
     };
   } catch (error) { toast(`${t("editorExtra.import_failed")}${error.message}`, { type: 'error' }); }
   event.target.value = '';
@@ -777,9 +822,13 @@ const rosterView = createRosterView({
   canEdit,
   commit(mutate) {
     if (!canEdit()) return false;
-    const { team, settings, roster } = state.data;
-    const data = { ...state.data, team: { ...team }, settings: { ...settings }, roster: roster.map(player => ({ ...player })) };
+    const data = clone(state.data);
     mutate(data);
+    const rosterIds = new Set(data.roster.map(player => player.id));
+    for (const player of state.data.roster) {
+      if (!rosterIds.has(player.id)) clearDepthPlayer(data.depthChart, player.id);
+    }
+    refreshRosterBindings(data, state.data.roster);
     if (save({ data }) === false) return false;
     state.data = data;
     // Older editor snapshots contain the roster from before this change.

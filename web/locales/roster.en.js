@@ -1,7 +1,8 @@
 export default {
   'roster.title': 'Player management',
-  'roster.cardDescription': 'Manage jersey numbers, names and positions in this playbook.',
-  'roster.open': 'Open roster',
+  'roster.cardDescription': 'Set starters and backups for each personnel group and manage the team roster.',
+  'roster.open': 'Open depth chart',
+  'roster.depthTab': 'Depth chart',
   'roster.teamSettings': 'Team settings',
   'roster.league': '{count} players per side',
   'roster.directory': 'Player roster',

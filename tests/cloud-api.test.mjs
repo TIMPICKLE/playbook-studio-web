@@ -119,3 +119,33 @@ test('CSRF, invalid roles, malformed JSON, body limits and unsupported backups f
   assert.equal((await call(db, `/workspaces/${record.id}`, owner, 'PUT', { revision: 0, data: record.data })).status, 400);
   assert.equal((await call(db, '/workspaces')).body.workspaces.length, 1);
 });
+
+test('cloud lineups survive a cached older client, and reject conflicting starters', async t => {
+  const db = database(t), record = await create(db);
+  const data = record.data, group = data.depthChart.groups[0], playerId = data.roster[0].id;
+  group.slots[0].playerIds = [playerId];
+  const write = (revision, changed) => call(db, `/workspaces/${record.id}`, owner, 'PUT', { revision, data: changed });
+  assert.equal((await write(1, data)).status, 200);
+  const outdated = clone(data);
+  delete outdated.depthChart;
+  assert.equal((await write(2, outdated)).status, 422);
+  group.slots[1].playerIds = [playerId];
+  assert.equal((await write(2, data)).status, 400);
+  const saved = (await call(db, `/workspaces/${record.id}`)).body;
+  assert.equal(saved.revision, 2);
+  assert.deepEqual(saved.data.depthChart.groups[0].slots[0].playerIds, [playerId]);
+});
+
+test('legacy books accept older saves until someone writes depth chart data', async t => {
+  const db = database(t), record = await create(db);
+  const legacy = clone(record.data);
+  delete legacy.depthChart;
+  db.sql.prepare('UPDATE workspaces SET data_json=? WHERE id=?').run(JSON.stringify(legacy), record.id);
+  const write = (data, revision) => call(db, `/workspaces/${record.id}`, owner, 'PUT', { revision, data });
+  assert.equal((await write(legacy, 1)).status, 200);
+  assert.equal((await write(legacy, 2)).status, 200);
+  const saved = (await call(db, `/workspaces/${record.id}`)).body;
+  assert.equal(saved.data.depthChart, undefined);
+  assert.equal((await write(record.data, 3)).status, 200);
+  assert.equal((await write(legacy, 4)).status, 422);
+});

@@ -1,7 +1,8 @@
 export default {
   'roster.title': '球员管理',
-  'roster.cardDescription': '维护当前战术本的球员号码、姓名和位置。',
-  'roster.open': '查看名单',
+  'roster.cardDescription': '按进攻、防守和特勤人员组安排首发与替补，维护球队名单。',
+  'roster.open': '查看阵容',
+  'roster.depthTab': '阵容深度表',
   'roster.teamSettings': '球队设置',
   'roster.league': '{count} 人制',
   'roster.directory': '球员名单',

@@ -118,12 +118,14 @@ test('card switching loads the right workspace, guards pending changes and survi
       click('[data-cloud-action="books"]'); click('[data-book-id="a"]'); await settle();
       const root = q('#roster-root');
       assert.equal(root.hidden, false);
-      assert.match(root.querySelector('tbody').textContent, /A Team Captain/);
+      root.querySelector('[data-roster-tab="directory"]').click();
+      assert.match(root.querySelector('.roster-results tbody').textContent, /A Team Captain/);
       assert.equal(root.querySelector('[data-roster="add"]').hidden, false);
       click('[data-cloud-action="books"]'); click('[data-book-id="b"]'); await settle();
       finishB(); await settle();
-      assert.match(root.querySelector('tbody').textContent, /B Team Captain/);
-      assert.doesNotMatch(root.querySelector('tbody').textContent, /A Team Captain/);
+      root.querySelector('[data-roster-tab="directory"]').click();
+      assert.match(root.querySelector('.roster-results tbody').textContent, /B Team Captain/);
+      assert.doesNotMatch(root.querySelector('.roster-results tbody').textContent, /A Team Captain/);
       assert.equal(root.querySelector('.roster-readonly').hidden, false);
       assert.equal(root.querySelector('[data-roster="edit"]'), null);
       root.querySelector('[data-cloud-action="home"]').click(); await settle();
