@@ -18,7 +18,7 @@ function roleButton(slot, players, selected, playerId, style = '') {
     ${match >= 0 ? `data-formation-rank="${match}"` : ''} data-filled="${Boolean(starter)}" aria-pressed="${selected}" aria-controls="depth-formation-detail"
     aria-label="${e(description)}" title="${e(description)}" ${style}>
     <span class="df-role">${e(slot.label)}</span><span class="df-name">${e(visibleName)}</span>
-    ${match < 0 ? '' : `<span class="df-found-rank">${matchLabel}</span>`}</button>`;
+    <span class="df-found-rank"${match < 0 ? ' aria-hidden="true"' : ''}>${match < 0 ? '' : matchLabel}</span></button>`;
 }
 
 function pitchMarker(marker, markers, players, selected, playerId) {
