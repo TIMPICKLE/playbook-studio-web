@@ -45,6 +45,8 @@ export function studioHome({ user, bookCount = 0, cloudUrl } = {}) {
       <div class="studio-home-cards">
         ${choice('editor', 'enter-editor', 'cloud.editBook', 'cloud.editDescription', 'cloud.enterBook', editorPreview)}
         ${choice('roster', 'enter-roster', 'roster.title', 'roster.cardDescription', 'roster.open', rosterArt())}
+        ${choice('training', 'enter-training', 'trainingNav.title', 'trainingNav.description', 'trainingNav.open',
+          '<svg viewBox="0 0 240 150" focusable="false" aria-hidden="true"><g stroke="currentColor" fill="none"><path opacity=".5" d="M0 137l95-75m145 75l-95-75M17 110h206M50 85h140M77 69h86"/><path stroke-width="2" d="M120 64V42m-22-19v19h44V23"/><path opacity=".9" d="M47 40v-8h14m132 8v-8h-14M47 111v8h14m132-8v8h-14"/></g><g fill="currentColor"><circle cx="100" cy="83" r="5"/><circle cx="140" cy="83" r="5"/></g><circle cx="120" cy="113" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>')}
         ${choice('ai', 'enter-analysis', 'cloud.aiAnalysis', user ? 'cloud.aiDescription' : 'cloud.demoAiDescription', 'cloud.startAnalysis',
           `<div class="choice-orbit orbit-one"></div><div class="choice-orbit orbit-two"></div><div class="choice-node node-offense">O</div><div class="choice-node node-defense">D</div><div class="choice-ai-label">${t('cloud.ifThen')}</div>`)}
       </div>

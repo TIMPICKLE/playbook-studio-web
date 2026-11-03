@@ -48,7 +48,11 @@ async function writeWorkspace(db, workspaceId, user, data, expected, action = 's
   if (legacyWrite && JSON.parse(record.data_json).depthChart) {
     fail(422, '请刷新页面加载新版球员管理，再同步本机草稿。');
   }
-  if (action === 'saved') preserveStoredLayouts(data?.depthChart?.groups, record.data_json);
+  if (action === 'saved') {
+    preserveStoredLayouts(data?.depthChart?.groups, record.data_json);
+    // Editors opened before training shipped strip drills on their next full-book PUT.
+    if (data && typeof data === 'object' && data.drills === undefined) data.drills = JSON.parse(record.data_json).drills;
+  }
   const validated = checkedData(data);
   if (legacyWrite) delete validated.depthChart;
   const encoded = JSON.stringify(validated); if (new TextEncoder().encode(encoded).length > MAX_BODY - 1000) fail(413, '战术本过大，请拆分或先导出备份');

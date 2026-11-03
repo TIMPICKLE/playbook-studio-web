@@ -6,6 +6,9 @@ import { makeMaddenPlay, hasEditableTrace, getEditableEntry, spaceMaddenLine } f
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, request } from './cloud.js';
 import { startGuestWorkspace } from './guest-workspace.js';
+import { createTrainingView } from './training.js';
+import { createTrainingAuthor } from './training-author.js';
+import { MAX_DRILLS } from './training-model.js';
 import { createRosterView } from './roster.js';
 import { clearDepthPlayer } from './depth-model.js';
 import { linkRosterPlayer, personnelMatches, refreshRosterBindings } from './board-personnel.js';
@@ -49,7 +52,7 @@ let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false;
 let saveState = localRecovery ? t("editorExtra.recovery_required_autosave_paused") : t('editor.saved_locally'), frame = null, lastFrame = null, toastTimer = null;
 const history = new History();
-let shared = null, digitalBoard = null;
+let shared = null, digitalBoard = null, navigateGuest;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
 const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
@@ -150,7 +153,7 @@ function render() {
     </aside>
     <main class="main" id="main-content" tabindex="-1">
       <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', t("editor.toggle_play_list"), 'mobile-menu', `aria-expanded="${panels.active==='plays'}"`)}<span>${icon('book')} ${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')} ${t("editor.playbook")}</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="madden-library" aria-label="${t("editor.open_madden_play_library")}">${icon('ball')}<span>${t("editor.madden_library")}</span></button>${effectsControl()}<button class="button subtle" data-action="print" aria-label="${t("editor.print_playbook")}">${icon('print')}<span>${t("editor.print")}</span></button><button class="button primary" data-action="export" aria-label="${t("editor.export_playbook")}">${icon('export')}<span>${t("editor.export")}</span></button></div></header>
-      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', t("editor.undo_ctrl_z"), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', t("editor.redo_ctrl_shift_z"), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
+      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${canEdit() && !p.reference ? `<button class="button subtle" data-action="author-training">${icon('play')}<span>${t('trainingNav.author')}</span></button>` : ''}${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', t("editor.undo_ctrl_z"), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', t("editor.redo_ctrl_shift_z"), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
       ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? t("editor.recovery_required") : shared?.sync?.viewError ? t("editor.view_recovery_required") : t("editor.read_only")}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : t("editor.you_can_view_rehearse_export_and_print_ask_an_administr")}</span>${localRecovery ? `<button class="button subtle" data-action="local-recovery">${t("editor.recovery_options")}</button>` : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="${t("editor.field_and_rehearsal")}">
         <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button><button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button><button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
         <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
@@ -568,6 +571,7 @@ function deleteSelected() {
   }); toast(t("modal.object_deleted_undo_to_restore_it"), { type: 'success' });
 }
 const actions = {
+  'author-training': () => navigateModule('training', { playId: current().id }),
   'apply-personnel': () => {
     const { group, changes } = chosenPersonnel();
     if (!changes.length) return;
@@ -673,7 +677,7 @@ const actions = {
   'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast(t("feedback.svg_diagram_created"), { type: 'success' }); } catch { toast(t("feedback.could_not_load_the_source_diagram_try_again"), { type: 'error', action: 'download-svg', label: t("feedback.retry") }); } },
   'download-png': pngExport,
   'download-json': () => { if (localRecovery) { downloadOriginal(); return; } download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast(t("feedback.full_playbook_exported"), { type: 'success' }); },
-  'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast(t("feedback.current_play_exported"), { type: 'success' }); },
+  'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()], drills: (state.data.drills || []).filter(drill => drill.playId === current().id && !drill.defensePlayId) }), `${safeName(current().title)}.json`, 'application/json'); toast(t("feedback.current_play_exported"), { type: 'success' }); },
   'do-print': () => { if (!$('#print-root').children.length) { toast(t("feedback.no_plays_to_print"), { type: 'warning' }); return; } window.print(); },
   play: togglePlay, reset: () => {resetAnimation();updateAnimation($('#field svg'),current(),0);syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
 };
@@ -687,7 +691,7 @@ document.addEventListener('click', event => {
   if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast(editBlockedMessage(), { type: 'warning' }); return; }
   if(node.closest('.add-object-menu'))node.closest('details').open=false;
   if (name === 'choose') return choose(value);
-  if (['book','new','import','add-player','add-defense-43','opponents','mirror'].includes(name) && !confirmDraft(() => node.click())) return;
+  if (['book','new','import','add-player','add-defense-43','opponents','mirror','author-training'].includes(name) && !confirmDraft(() => node.click())) return;
   if (name === 'book') { resetAnimation(); draft = null; selection = null; book = value; filter = ''; formationFilter = ''; query = ''; panels.close({focus:false}); const p = filtered()[0]; if (p) state.selectedId = p.id; render(); return; }
   if (name === 'tool') { setTool(value); return; }
   if (name === 'select-route') { selection = { type: 'route', id: value }; tool = 'select'; draft = null; refreshSelection(); return; }
@@ -764,10 +768,11 @@ $('#import-input').addEventListener('change', async event => {
     openModal(t("editorExtra.import_playbook_2"), `<p>${t("editorExtra.the_validated_file_contains")}<strong>${imported.plays.length}${t("editorExtra.plays_2")}</strong>、${imported.formations.length}${t("editorExtra.custom_formations_and")}${imported.roster.length}${t("editorExtra.roster_members")}</p><p class="muted small">${t("editorExtra.import_appends_plays_formations_and_roster_me")}</p>`, `<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-import">${t("editorExtra.append_import")}</button>`);
     actions['confirm-import'] = () => {
       if (state.data.formations.length + imported.formations.length > 100 || state.data.roster.length + imported.roster.length > 200) { toast(t("editorExtra.import_would_exceed_the_formation_or_roster_l"), { type: 'info' }); return; }
+      if ((state.data.drills?.length || 0) + (imported.drills?.length || 0) > MAX_DRILLS) { toast(t('trainingNav.full'), { type: 'warning' }); return; }
       const batch = prepareWorkspaceAppend(state.data, imported);
       if (!batch) { toast(t('editor.chart_import_limit'), { type: 'warning' }); return; }
       const { plays, formations: forms, roster, depthChart } = batch;
-      closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); d.depthChart = depthChart; state.selectedId = plays[0].id; }); toast(`${t("editorExtra.imported")}${plays.length}${t("editorExtra.plays_3")}`); delete actions['confirm-import'];
+      closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); d.depthChart = depthChart; d.drills = [...(d.drills || []), ...batch.drills]; state.selectedId = plays[0].id; }); toast(`${t("editorExtra.imported")}${plays.length}${t("editorExtra.plays_3")}`); delete actions['confirm-import'];
     };
   } catch (error) { toast(`${t("editorExtra.import_failed")}${error.message}`, { type: 'error' }); }
   event.target.value = '';
@@ -815,6 +820,61 @@ function showEditor(show) {
     renderedPlayId = null;
   }
 }
+async function navigateModule(mode, options = {}) {
+  if (!shared) return navigateGuest?.(mode, options);
+  try {
+    if (shared.dirty) await shared.sync.flush();
+    shared.setMode(mode, options);
+  } catch (error) { toast(error.message, { type: 'warning' }); }
+}
+
+let trainingScope = null;
+const workspaceId = () => shared?.current?.id || 'demo';
+const progressScope = () => JSON.stringify([shared?.user?.id || 'guest', workspaceId()]);
+const trainingView = createTrainingView({
+  root: $('#training-root'), getData: () => state.data, getUserScope: progressScope, canEdit,
+  onAuthor: options => openTrainingAuthor(options),
+  onBack: () => navigateModule('home'),
+});
+const trainingAuthor = createTrainingAuthor({
+  root: $('#training-author-root'), getData: () => state.data, getWorkspaceId: workspaceId, canEdit,
+  onBack() { trainingAuthor.close(); trainingView.open(); },
+  onSave(drill) {
+    if (!canEdit() || trainingScope !== progressScope()) throw new Error(editBlockedMessage());
+    const drills = [...(state.data.drills || [])];
+    const index = drills.findIndex(item => item.id === drill.id);
+    if (index >= 0) drills[index] = drill;
+    else {
+      if (drills.length >= MAX_DRILLS) throw new Error(t('trainingNav.full'));
+      drills.push(drill);
+    }
+    const data = { ...state.data, drills };
+    if (save({ data }) === false) return false;
+    state.data = data;
+    history.past = []; history.future = [];
+    return true;
+  },
+});
+function openTrainingAuthor(options = {}) {
+  if (!canEdit()) return;
+  trainingView.close();
+  trainingAuthor.open(options);
+}
+function showTraining(visible, options = {}) {
+  trainingAuthor.close();
+  trainingView.close();
+  trainingScope = visible ? progressScope() : null;
+  if (!visible) return;
+  if (options.playId && canEdit()) openTrainingAuthor({ playId: options.playId });
+  else trainingView.open({ role: options.role });
+}
+function refreshTraining() {
+  if (trainingScope !== progressScope()) showTraining(true);
+  else if (!$('#training-root').hidden) trainingView.refresh();
+}
+function canLeaveTraining() {
+  return !trainingAuthor.isDirty() || window.confirm(t('trainingNav.discard'));
+}
 const rosterView = createRosterView({
   root: $('#roster-root'),
   getData: () => state.data,
@@ -855,21 +915,24 @@ if (cloudMode()) {
     onPermissionLost(error) { resetAnimation(); draft = null; drag = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
     showEditor,
     showRoster: visible => rosterView.show(visible),
+    showTraining,
+    refreshTraining, canLeaveTraining, trainingDirty: () => trainingAuthor.isDirty(),
     canLeaveRoster: () => !rosterView.isEditing(),
     showAnalysis(show) { matchupView.show(show); },
-    isBusy: () => rosterView.isEditing() || !!drag || !!draft || playing || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
+    isBusy: () => trainingAuthor.isDirty() || rosterView.isEditing() || !!drag || !!draft || playing || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
     openModal, closeModal, toast, download
   });
-  shared.init();
+  shared.ready = shared.init();
 } else {
   const demoData = localizedStarterWorkspace();
   const demoRecord = { id: 'demo', revision: 0, title: getLocale() === 'en' ? 'Sample matchup' : '示例战术本' };
   const demoView = createMatchupView({ root: $('#ai-matchup-root'), request: createDemoRequest(() => demoData), getCurrent: () => demoRecord, getData: () => demoData, isDirty: () => false, demo: true });
-  startGuestWorkspace({
+  navigateGuest = startGuestWorkspace({
     showEditor,
     showRoster: visible => rosterView.show(visible),
+    showTraining,
     showAnalysis: visible => demoView.show(visible),
-    canLeave: () => !rosterView.isEditing() && !$('.modal') && (!draft || window.confirm(t('modal.switching_will_discard_the_route_points_being_draw'))),
+    canLeave: () => canLeaveTraining() && !rosterView.isEditing() && !$('.modal') && (!draft || window.confirm(t('modal.switching_will_discard_the_route_points_being_draw'))),
     onLeaveEditor() { draft = null; drag = null; tool = 'select'; },
     onEnter(mode) {
       if (localRecovery && (mode === 'editor' || mode === 'roster')) localRecoveryModal();
@@ -891,7 +954,7 @@ localeSelect.addEventListener('change', () => {
   if (shared?.sync?.dirty || saveState === t("feedback.not_saved") || localRecovery || drag) {
     alert(t('editor.language_unsaved')); localeSelect.value = getLocale(); return;
   }
-  if ((draft || rosterView.isEditing() || document.querySelector('.modal') || document.querySelector('#ai-matchup-root:not([hidden])') || [...document.querySelectorAll('#cloud-root input')].some(input => input.value)) && !confirm(t('editor.language_discard_draft'))) { localeSelect.value = getLocale(); return; }
+  if ((draft || trainingAuthor.isDirty() || rosterView.isEditing() || document.querySelector('.modal') || document.querySelector('#ai-matchup-root:not([hidden])') || [...document.querySelectorAll('#cloud-root input')].some(input => input.value)) && !confirm(t('editor.language_discard_draft'))) { localeSelect.value = getLocale(); return; }
   try { setLocale(next); location.reload(); }
   catch { alert(t('editor.language_storage_error')); localeSelect.value = getLocale(); }
 });

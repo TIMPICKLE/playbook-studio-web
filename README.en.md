@@ -8,9 +8,17 @@
 
 An American football playbook workspace for drawing plays, rehearsing routes, analyzing matchups, and sharing a playbook with your team.
 
-[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Live demo · no sign-in](https://timpickle.github.io/playbook-studio-web/) · [Visual walkthrough](#visual-walkthrough) · [AI deployment](#ai-agent-deployment-guide) · [Local development](#local-development)
+[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Prerelease preview](https://playbook-studio-prerelease.kind-wolf-6204.chatgpt.site/) · [Stable public demo](https://timpickle.github.io/playbook-studio-web/) · [Visual walkthrough](#visual-walkthrough) · [AI deployment](#ai-agent-deployment-guide) · [Local development](#local-development)
 
 </div>
+
+## Testing the prerelease branch
+
+Open the [prerelease workspace](https://playbook-studio-prerelease.kind-wolf-6204.chatgpt.site/) and choose **Player Training → QB → Double A-gap read**. Both reps start from the same pre-snap look. Select the two potential rushers, then play the coach’s replay to compare one linebacker rushing with both dropping. Use the QB view on desktop or the overhead field on a phone.
+
+![The QB view after selecting the two inside threats, with the coach’s review and replay.](docs/assets/readme/prerelease-qb-training.jpg)
+
+The preview is manually deployed from a specific commit on `prerelease`. Redeploy after pushing a change to test that revision online.
 
 The interface supports English and Simplified Chinese. Choose a language from the language menu; play names and notes you create remain unchanged. See the [localization guide](docs/I18N.md) for adding languages.
 

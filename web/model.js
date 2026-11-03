@@ -1,4 +1,5 @@
 import { array, choice, fail, id, text, uid, unique } from './model-values.js';
+import { MAX_DRILLS, validateDrills } from './training-model.js';
 import { appendDepthGroups, defaultDepthChart, validateDepthChart } from './depth-model.js';
 export { uid };
 
@@ -109,7 +110,7 @@ export function starterWorkspace({ demoDepth = false } = {}) {
       }
     }
   }
-  return { team: { name: '我的球队', subtitle: '2026 赛季', accent: '#9aa3ad' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster, depthChart, formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
+  return { team: { name: '我的球队', subtitle: '2026 赛季', accent: '#9aa3ad' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], drills: [], roster, depthChart, formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
 }
 
 export function mirrorPlay(play) {
@@ -270,11 +271,12 @@ export function decodeWorkspace(raw) {
       else if (marker.rosterId) delete marker.rosterId;
     }
   }
-  return { team, plays, roster, depthChart, formations, settings };
+  return { team, plays, drills: validateDrills(d.drills, plays), roster, depthChart, formations, settings };
 }
 
 // Imported roster IDs must be remapped together with every lineup and diagram that uses them.
 export function prepareWorkspaceAppend(current, imported) {
+  if ((current.drills?.length ?? 0) + (imported.drills?.length ?? 0) > MAX_DRILLS) return null;
   const ids = new Map(imported.roster.map(player => [player.id, uid()]));
   const depthChart = appendDepthGroups(current.depthChart, imported.depthChart, ids);
   if (!depthChart) return null;
@@ -286,8 +288,13 @@ export function prepareWorkspaceAppend(current, imported) {
     }
     return copy;
   };
+  const plays = imported.plays.map(copyDiagram);
+  const playIds = new Map(imported.plays.map((play, index) => [play.id, plays[index].id]));
+  const drills = (imported.drills ?? []).map(drill => ({
+    ...clone(drill), id: uid(), playId: playIds.get(drill.playId) ?? '', defensePlayId: playIds.get(drill.defensePlayId) ?? '',
+  }));
   return {
-    depthChart, plays: imported.plays.map(copyDiagram), formations: imported.formations.map(copyDiagram),
+    depthChart, plays, drills, formations: imported.formations.map(copyDiagram),
     roster: imported.roster.map(player => ({ ...player, id: ids.get(player.id) })),
   };
 }

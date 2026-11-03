@@ -1,5 +1,13 @@
 // Cloud workspace and account UI messages.
 export default {
+  "trainingNav.discard": "放弃尚未保存的出题修改？",
+  "trainingNav.title": "球员训练",
+  "trainingNav.description": "站在球员的位置观察防守，作答后通过回放复盘。",
+  "trainingNav.open": "进入训练",
+  "trainingNav.author": "用此战术出题",
+  "trainingNav.practiceRole": "练习 {role} 位置",
+  "trainingNav.full": "战术本的练习题数量已达上限。",
+
   "cloud.roleOwner": "管理员",
   "cloud.roleEditor": "编辑者",
   "cloud.roleViewer": "只读成员",
@@ -30,7 +38,7 @@ export default {
   "cloud.signOut": "退出登录",
   "cloud.switchAccount": "切换账号",
   "cloud.homeTitle": "准备好，迎接下一次开球。",
-  "cloud.homeDescription": "选择战术本，维护球员名单，或推演一组攻防对位。",
+  "cloud.homeDescription": "编辑战术、管理球员、练习读防守，或分析攻防对位。",
   "cloud.demoTeamSignIn": "球队账号登录",
   "cloud.demoTitle": "体验战术工作台",
   "cloud.demoBadge": "免登录演示",

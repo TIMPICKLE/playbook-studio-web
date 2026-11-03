@@ -1,5 +1,13 @@
 // Cloud workspace and account UI messages.
 export default {
+  "trainingNav.discard": "Discard your unsaved drill changes?",
+  "trainingNav.title": "Player training",
+  "trainingNav.description": "Read the defense from your position, then compare your answer with the replay.",
+  "trainingNav.open": "Enter training",
+  "trainingNav.author": "Build a drill from this play",
+  "trainingNav.practiceRole": "Practice {role}",
+  "trainingNav.full": "You have reached the drill limit for this playbook.",
+
   "cloud.roleOwner": "Owner",
   "cloud.roleEditor": "Editor",
   "cloud.roleViewer": "Viewer",
@@ -30,7 +38,7 @@ export default {
   "cloud.signOut": "Sign out",
   "cloud.switchAccount": "Switch account",
   "cloud.homeTitle": "Get ready for the next snap.",
-  "cloud.homeDescription": "Choose a playbook, manage its players, or study an offensive and defensive matchup.",
+  "cloud.homeDescription": "Edit plays, manage your roster, practice a read or study a matchup.",
   "cloud.demoTeamSignIn": "Team sign-in",
   "cloud.demoTitle": "Try the workspace",
   "cloud.demoBadge": "Interactive demo",

@@ -46,14 +46,15 @@ export class SharedWorkspace {
     document.title = t('cloud.workspaceTitle');
     document.querySelector('#cloud-root').innerHTML = studioHome({ user: this.user, bookCount: this.books.length });
   }
-  setMode(mode) {
+  setMode(mode, options = {}) {
     if (this.dirty) throw new Error(t('cloud.unsyncedChanges'));
-    if (this.rosterFormOpen) return;
+    if (this.rosterFormOpen || (this.mode === 'training' && this.hooks.canLeaveTraining?.() === false)) return;
     const previous = this.mode;
     this.mode = mode;
     this.hooks.showEditor(mode === 'editor' && !!this.current);
     this.hooks.showAnalysis?.(mode === 'analysis');
     this.hooks.showRoster?.(mode === 'roster' && !!this.current && !this.accessError);
+    this.hooks.showTraining?.(mode === 'training' && !this.accessError, options);
     this.renderBar();
     if (mode === 'home') document.querySelector(`[data-cloud-action="enter-${previous}"]`)?.focus({ preventScroll: true });
     window.scrollTo?.(0, 0);
@@ -87,8 +88,8 @@ export class SharedWorkspace {
     document.querySelector('#cloud-root').innerHTML = `<div class="loading-workspace" aria-busy="true"><div></div><div></div><p>${t('cloud.loadingTeam')}</p></div>`;
     try {
       this.user = (await request('/api/session')).user; this.renderBar(); if (!this.user) return;
-      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { this.hooks.onData(data, record); this.hooks.onAnalysisData?.(data, record); if (this.mode === 'roster') this.hooks.showRoster?.(true); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); }, onConflict: (remote, local, reason) => this.conflictModal(remote, local, reason), onAccessLost: error => this.accessLost(error) });
-      window.addEventListener('beforeunload', event => { if (this.dirty || this.rosterFormOpen) { event.preventDefault(); event.returnValue = ''; } });
+      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { this.hooks.onData(data, record); this.hooks.onAnalysisData?.(data, record); if (this.mode === 'roster') this.hooks.showRoster?.(true); if (this.mode === 'training') this.hooks.refreshTraining?.(); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); }, onConflict: (remote, local, reason) => this.conflictModal(remote, local, reason), onAccessLost: error => this.accessLost(error) });
+      window.addEventListener('beforeunload', event => { if (this.dirty || this.rosterFormOpen || this.hooks.trainingDirty?.()) { event.preventDefault(); event.returnValue = ''; } });
       await this.refreshBooks();
       const invite = new URLSearchParams(location.search).get('invite');
       if (invite) {
@@ -122,7 +123,7 @@ export class SharedWorkspace {
     if (!workspaceId || this.switching) return false;
     if (this.current?.id === workspaceId) return true;
     if (this.dirty) { this.updateBookCards(); this.hooks.toast(t('cloud.bookUnsynced')); return false; }
-    if (this.rosterFormOpen) return false;
+    if (this.rosterFormOpen || (this.mode === 'training' && this.hooks.canLeaveTraining?.() === false)) return false;
     this.switching = workspaceId; this.renderBar();
     try {
       const record = await request(`/api/workspaces/${encodeURIComponent(workspaceId)}`); this.loadRecord(record);
@@ -173,11 +174,12 @@ export class SharedWorkspace {
   accessLost(error) {
     this.accessError = error;
     this.sync.current.role = error.status === 403 ? 'viewer' : 'removed';
-    this.sync.dispose(); this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.hooks.showRoster?.(false); this.renderBar();
+    this.sync.dispose(); this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.hooks.showRoster?.(false); this.hooks.showTraining?.(false); this.renderBar();
     this.hooks.openModal(t('cloud.accessChanged'), `<p>${e(error.message)}</p><p class="muted small">${this.sync.draftSaved ? t('cloud.draftRetained') : this.sync.pending ? t('cloud.backendDraftError') : t('cloud.reloadPermissions')}</p>`, `${this.sync.pending ? `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraft')}</button>` : ''}${error.status === 403 ? `<button class="button primary" data-cloud-action="reload-cloud">${t('cloud.readonlyReload')}</button>` : `<a class="button primary" href="/editor/index.html" target="_top">${t('cloud.openBookAgain')}</a>`}`, true);
   }
   async handleAction(node) {
     const action = node.dataset.cloudAction;
+    if (action === 'enter-training') { await this.ready; if (this.accessError) return this.accessLost(this.accessError); return this.setMode('training', { role: node.dataset.trainingRole }); }
     if (action === 'enter-roster') { if (this.accessError) return this.accessLost(this.accessError); return this.setMode('roster'); }
     if (action === 'enter-editor') return this.setMode('editor');
     if (action === 'enter-analysis') return this.setMode('analysis');
@@ -189,7 +191,7 @@ export class SharedWorkspace {
       if (!input.value.trim() || !pass.value) { (input.value.trim() ? pass : input).setAttribute('aria-invalid','true'); (input.value.trim() ? pass : input).focus(); throw new Error(t('cloud.selectAccountPassword')); }
       await request('/api/auth/login', { method: 'POST', body: { username: input.value.trim(), password: pass.value } }); pass.value = ''; location.reload(); return;
     }
-    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen) return; if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
+    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen || (this.mode === 'training' && this.hooks.canLeaveTraining?.() === false)) return; if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
     if (action === 'toggle-password') { const input = document.getElementById(node.dataset.target); input.type = input.type === 'password' ? 'text' : 'password'; node.textContent = t(input.type === 'password' ? 'cloud.show' : 'cloud.hide'); node.setAttribute('aria-pressed',String(input.type === 'text')); node.setAttribute('aria-label', t(input.type === 'text' ? 'cloud.hidePassword' : 'cloud.showPassword')); return; }
     if (action === 'privacy') return this.hooks.openModal(t('cloud.privacyTitle'), `<p>${t('cloud.privacyStorage')}</p><p>${t('cloud.privacyPermissions')}</p><p>${t('cloud.privacySecurity')}</p>`, `<button class="button primary" data-action="close-modal">${t('cloud.close')}</button>`);
     if (action === 'save-now') { if (this.sync?.viewError) throw this.sync.viewError; if (!this.sync?.pending) return this.hooks.toast(t('cloud.savedCloud')); await this.sync.flush(); if (!this.sync.dirty) this.hooks.toast(t('cloud.savedShared')); return; }

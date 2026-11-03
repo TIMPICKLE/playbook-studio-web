@@ -8,9 +8,17 @@
 
 美式橄榄球战术工作台：布阵、画路线、演练、分析攻防对位，并与球队共享战术本。
 
-[打开云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [在线预览 · 无需登录](https://timpickle.github.io/playbook-studio-web/) · [图解教程](#图解教程) · [AI 部署](#ai-agent-部署手册) · [本地开发](#本地开发)
+[打开云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [预发布在线验收](https://playbook-studio-prerelease.kind-wolf-6204.chatgpt.site/) · [稳定版公开演示](https://timpickle.github.io/playbook-studio-web/) · [图解教程](#图解教程) · [AI 部署](#ai-agent-部署手册) · [本地开发](#本地开发)
 
 </div>
+
+## prerelease 分支验收
+
+打开[预发布工作台](https://playbook-studio-prerelease.kind-wolf-6204.chatgpt.site/)，选择 **球员训练 → QB → 双 A gap 识读**。两题使用相同的开球前站位。选出可能冲传的两名防守人，再播放教练回放，对比一人冲传和两人都回撤的结果。桌面可用 QB 视角，手机可用俯视图。
+
+![四分卫视角下选择两名线卫，提交后查看球队的解析和跑动回放。](docs/assets/readme/prerelease-qb-training.jpg)
+
+验收站点按 `prerelease` 分支的指定提交手动部署。推送新提交后，需要重新部署才能在线验收该版本。
 
 ![新版银灰工作台：左侧战术本、中央球场、下方浮动工具栏与右侧属性面板](docs/assets/readme/editor-silver.jpg)
 

@@ -171,3 +171,17 @@ test('a cached table-only editor preserves a copied formation and renamed role b
   assert.equal(after.slots[0].templateRole, 'QB');
   assert.deepEqual(after.slots[0].playerIds, fromOld.slots[0].playerIds);
 });
+
+test('legacy full-book writes retain published training and a removed source requires coach review', async t => {
+  const { trainingDemo } = await import('../web/training-demo.js');
+  const db = database(t), record = await create(db);
+  const data = { ...record.data, ...trainingDemo() };
+  assert.equal((await call(db, '/workspaces/' + record.id, owner, 'PUT', { revision: 1, data })).status, 200);
+  delete data.drills;
+  data.plays.shift();
+  assert.equal((await call(db, '/workspaces/' + record.id, owner, 'PUT', { revision: 2, data })).status, 200);
+  const current = (await call(db, '/workspaces/' + record.id)).body;
+  assert.deepEqual(current.data.drills.map(d => d.status), ['needsReview', 'published']);
+  await join(db, current, viewer, 'viewer');
+  assert.equal((await call(db, '/workspaces/' + record.id, viewer, 'PUT', { revision: 3, data })).status, 403);
+});

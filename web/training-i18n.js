@@ -1,0 +1,55 @@
+import { getLocale } from './i18n.js';
+const messages = {
+  'zh-CN': {
+    pickNumber: '按场上编号选择', validRead: '一种有效读法', title: '球员训练', back: '返回工作台', library: '训练目录', subtitle: '从自己的位置观察开球前站位，做出判断，再用教练的回放核对。',
+    start: '开始练习', retry: '再做一次', next: '下一题', finish: '查看本轮结果',
+    role: '训练位置', allRoles: '全部位置', coachDrills: '球队练习', demoDrills: '示范练习',
+    completed: '已完成',
+    never: '未练习', reps: '{n} 道题', libraryNotes: '进度保存在此浏览器，首答按视图分别记录。',
+    empty: '这个位置还没有已发布的练习。', allAgain: '查看全部位置',
+    editDrills: '管理球队练习', author: '创建练习', edit: '编辑', draft: '草稿', published: '已发布', needsReview: '需复核',
+    pre: '开球前观察', read: '球员视角', field: '俯视', mixed: '球员视角及俯视',
+    target: '选择 {n} 名球员', counter: '已选 {n} / {total}', clear: '清空', reset: '视角回正', giveHint: '教练提示',
+    submit: '提交选择', questionN: '第 {n} 题 / 共 {total} 题', backLibrary: '返回目录',
+    povHelp: '点击场景中的球员。拖动或用左右方向键观察。', fieldHelp: '点击场上的标记，或用 Tab 聚焦、Enter 选择。',
+    fieldOnly: '此设备使用俯视训练。', pickLimit: '已选够人数，先取消一个选择即可更换。', unavailable: '原战术已变更，请返回目录选择其他练习。',
+    report: '教练复盘', right: '观察正确', wrong: '再看一次这个站位', replay: '播放回放', pause: '暂停', again: '重新播放',
+    answer: '教练标注', yourPicks: '你的选择', missing: '漏选', extra: '多选', none: '无', pickMark: '球员',
+    reviewHelp: '切换视角或拖动时间轴，回看你作出判断的瞬间。', atSnap: '开球', scrub: '回放时间',
+    resultTitle: '本轮训练结果', resultIntro: '按本轮作答查看哪些观察已经掌握、哪些还需要重练。', reviewAgain: '重练需要巩固的题',
+    saved: '已记录到本机', storageOff: '本次进度暂存在当前页面，刷新后可能丢失。', attempted: '尝试 {n} 次', viewHist: '首答记录',
+    roundNote: '本轮作答', correctHinted: '提示后答对', wrongResult: '需要重练', okResult: '独立答对',
+    view: '观察视角', scene: '训练场地', team: '本队',
+    viewIn: '作答视图',
+    cleanup: '清空本题选择', sceneLegend: '阵营', offense: '进攻', defense: '防守',
+    neutralName: '位置练习', startGroup: '练习全部 {n} 题',
+  },
+  en: {
+    pickNumber: 'Select by field number', validRead: 'An accepted read', title: 'Player Training', back: 'Back to workspace', library: 'Drill library', subtitle: 'Read the formation from your position, commit to an answer, then check the coach’s replay.',
+    start: 'Start drill', retry: 'Try again', next: 'Next drill', finish: 'Round results',
+    role: 'Training position', allRoles: 'All positions', coachDrills: 'Team drills', demoDrills: 'Sample drills',
+    completed: 'Completed',
+    never: 'Not started', reps: '{n} drills', libraryNotes: 'Progress stays in this browser. First attempts are tracked by view.',
+    empty: 'No published drills for this position yet.', allAgain: 'Show all positions',
+    editDrills: 'Manage team drills', author: 'Create drill', edit: 'Edit', draft: 'Draft', published: 'Published', needsReview: 'Needs review',
+    pre: 'Pre-snap read', read: 'Player view', field: 'Overhead', mixed: 'Player + overhead',
+    target: 'Select {n} players', counter: '{n} / {total} selected', clear: 'Clear', reset: 'Recenter', giveHint: 'Coach hint',
+    submit: 'Submit answer', questionN: 'Drill {n} of {total}', backLibrary: 'Drill library',
+    povHelp: 'Select a player in the scene. Drag or use the arrow keys to look around.', fieldHelp: 'Select a marker, or use Tab to focus and Enter to choose.',
+    fieldOnly: 'This device uses the overhead view.', pickLimit: 'Deselect a player before choosing another.', unavailable: 'The source play changed. Return to the library to pick a different drill.',
+    report: 'Coach review', right: 'You read it correctly', wrong: 'Take another look', replay: 'Play replay', pause: 'Pause', again: 'Replay again',
+    answer: 'Coach’s read', yourPicks: 'Your selection', missing: 'Missed', extra: 'Extra', none: 'None', pickMark: 'Player',
+    reviewHelp: 'Switch views or scrub the replay to revisit the moment you made your read.', atSnap: 'Snap', scrub: 'Replay timeline',
+    resultTitle: 'Round results', resultIntro: 'Review the reads you made and choose what to practice next.', reviewAgain: 'Retry drills to revisit',
+    saved: 'Saved on this device', storageOff: 'Progress is only available on this page and may be lost when you refresh.', attempted: '{n} attempts', viewHist: 'First attempts',
+    roundNote: 'This round', correctHinted: 'Correct with hint', wrongResult: 'To revisit', okResult: 'Unassisted',
+    view: 'View', scene: 'Practice field', team: 'Team',
+    viewIn: 'Answered in',
+    cleanup: 'Clear this selection', sceneLegend: 'Sides', offense: 'Offense', defense: 'Defense',
+    neutralName: 'Position read', startGroup: 'Practice all {n} drills',
+  }
+};
+export function tt(key, params = {}) {
+  const message = messages[getLocale()]?.[key] ?? messages['zh-CN'][key] ?? key;
+  return message.replace(/\{(\w+)\}/g, (_, prop) => String(params[prop] ?? ''));
+}

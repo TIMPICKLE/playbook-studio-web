@@ -36,6 +36,7 @@ function selectedRole(slot, players, editable) {
     <div class="df-detail-head"><h4>${e(slot.label)}</h4>
       ${editable ? `<button type="button" class="roster-text" data-depth-chart="edit" data-slot="${e(slot.id)}"
          aria-label="${e(t('depth.editLabel', { label: slot.label }))}">${t('depth.edit')}</button>` : ''}</div>
+    <button type="button" class="roster-text df-train-role" data-cloud-action="enter-training" data-training-role="${e(slot.templateRole || slot.label)}">${e(t('trainingNav.practiceRole', { role: slot.label }))} →</button>
     <dl class="df-ranks">${ids.map((id, rank) => `<div><dt>${rank ? t('depth.backup', { rank }) : t('depth.starter')}</dt>
       <dd>${e(playerName(players.get(id)))}</dd></div>`).join('')}</dl>
     ${ids.length === 1 ? `<p class="df-no-backups">${t('depth.noBackups')}</p>` : ''}</section>`;
