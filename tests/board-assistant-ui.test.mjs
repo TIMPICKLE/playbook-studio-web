@@ -4,13 +4,13 @@ import { Window } from 'happy-dom';
 import { createBoardAssistant } from '../web/board-assistant.js';
 
 const flush = () => new Promise(resolve => setImmediate(resolve));
-function fixture(onRequest, onAdd = () => true, Speech) {
+function fixture(onRequest, onAdd = () => true, Speech, handlers = {}) {
   const win = new Window({url:'https://playbook.test/local.html'});
   const host = win.document.createElement('div');
   win.document.body.append(host);
   if (Speech) win.SpeechRecognition = Speech;
   const context = {scope:'book/a',title:'Mesh',readOnly:false};
-  const assistant = createBoardAssistant({host, getContext:() => context, onRequest, onAdd});
+  const assistant = createBoardAssistant({host, getContext:() => context, onRequest, onAdd, ...handlers});
   const q = selector => win.document.querySelector(selector);
   const click = action => q('[data-ba="' + action + '"]').click();
   const type = (selector, value) => {
@@ -95,18 +95,42 @@ test('dictation produces editable text, without sending until the coach submits'
 test('mode persists across typing and edit proposals require an explicit apply', async () => {
   let applied = 0, discarded = 0; const requests = [];
   const f = fixture(request => {
-    requests.push(request); request.onTool('resolve_player');
+    requests.push(request); request.onTool('resolve_player', {role:'C'}); request.onTool('resolve_player', {name:'Avery'}); request.onTool('build_preview');
     return {kind:'preview',message:'Route preview',changes:['X dig 12'],operations:[{kind:'route',playerId:'x'}],
-      apply:() => {applied++; return {kind:'edit',message:'Applied',operations:[{kind:'route',playerId:'x'}],routeIds:['r1']};},
+      apply:() => {applied++; return {kind:'edit',message:'Applied',operations:[{kind:'route',playerId:'x'}],routeIds:['r1','r2'],zoneIds:['z1','z2']};},
       discard:() => {discarded++;}};
   });
   f.click('edit'); f.type('[data-ba-prompt]', 'X dig 12'); f.click('send');
-  assert.match(f.q('.ba-status').textContent,/定位/); await flush();
+  assert.match(f.q('.ba-status').textContent,/定位 C.*定位 Avery.*生成改图预览/); await flush();
   assert.equal(requests[0].mode,'edit'); assert.equal(applied,0); assert.match(f.q('.ba-output').textContent,/X dig 12/);
   f.click('apply'); await flush(); assert.equal(applied,1);
   f.type('[data-ba-prompt]', 'two yards deeper'); f.click('send'); await flush();
-  assert.deepEqual(requests[1].previous[0].routeIds,['r1']);
+  assert.deepEqual(requests[1].previous[0].routeIds,['r1','r2']);
+  assert.deepEqual(requests[1].previous[0].zoneIds,['z1','z2']);
   f.click('discard'); assert.equal(discarded,1);
   f.click('clear-mode'); f.type('[data-ba-prompt]','find'); f.click('send'); await flush(); assert.equal(requests[2].mode,'auto');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('closing a pending preview discards it without applying', async () => {
+  let applied = 0, discarded = 0;
+  const f = fixture(() => ({kind:'preview', message:'Route', changes:['X dig 12'],
+    apply:() => { applied++; }, discard:() => { discarded++; }}));
+  f.type('[data-ba-prompt]', 'X dig 12'); f.click('send'); await flush();
+  f.click('close');
+  assert.equal(discarded, 1); assert.equal(applied, 0);
+  f.click('open'); assert.equal(f.q('[data-ba=apply]'), null);
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('answer highlights board IDs and handoff acts only after the coach clicks', async () => {
+  let calls = 0, highlighted, handed;
+  const f = fixture(() => ++calls === 1 ? {kind:'answer',message:'Read X',highlights:['x']} :
+    {kind:'handoff',message:'Analyze both plays',playId:'play-1'}, undefined, undefined,
+  {onHighlight: ids => {highlighted = ids;}, onHandoff: result => {handed = result;}});
+  f.type('[data-ba-prompt]', 'who is the first read'); f.click('send'); await flush();
+  assert.deepEqual(highlighted, ['x']); assert.equal(handed, undefined);
+  f.type('[data-ba-prompt]', 'analyze matchup'); f.click('send'); await flush();
+  assert.equal(handed, undefined); f.click('handoff'); assert.equal(handed.playId, 'play-1');
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });

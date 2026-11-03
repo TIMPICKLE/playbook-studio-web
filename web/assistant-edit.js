@@ -35,13 +35,15 @@ function roleMatches(player, role) {
   if (norm(player.label) === role) return true;
   const aliases = { '安全卫': 's', '进攻锋线': 'ol', '防守锋线': 'dl', '线卫': 'lb', '角卫': 'cb', '跑卫': 'rb', '外接手': 'wr', '近端锋': 'te' };
   role = aliases[role] || role;
+  if (positionGroups.get(role)?.includes(norm(player.position))) return true;
   const positions = norm([player.position, player.label].filter(Boolean).join('/')).split(/[/,\s]+/);
   return positions.some(position => position === role || positionGroups.get(role)?.includes(position));
 }
 function nameMatches(value, query) {
   const tokens = norm(value).match(/[\p{L}\p{N}]+/gu) || [];
   const requested = norm(query).match(/[\p{L}\p{N}]+/gu) || [];
-  return requested.length > 0 && requested.every(token => tokens.includes(token));
+  return requested.length > 0 && requested.every(token => tokens.some(candidate =>
+    candidate === token || (/^\p{Script=Han}+$/u.test(token) && candidate.includes(token))));
 }
 const normalizedNumber = value => norm(value).replace(/^#\s*/, '').replace(/\s*号$/, '').trim();
 

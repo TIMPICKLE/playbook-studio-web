@@ -29,6 +29,7 @@ html[data-digital-board=loading] .field-tag::after{content:'材质加载中';fon
   .pitch-stage.is-three > .pitch-svg.digital-ready > :not(defs):not(.draft-layer):not(.point-handle) {opacity:0}
   .pitch-stage.is-three > .pitch-svg {z-index:2}
   .pitch-stage.is-fallback .player-body,.pitch-stage.is-fallback .player-label {opacity:0}
+  .pitch-stage.is-fallback :is(.assistant-preview,.assistant-highlights) :is(.player-body,.player-label) {opacity:1}
   .pitch-stage.is-fallback .player-symbol {filter:none!important}
   .pitch-stage .digital-scene-canvas,.pitch-stage .digital-token-overlay {position:absolute;inset:0;width:100%;height:100%;pointer-events:none!important;z-index:1}
   .pitch-stage.is-perspective .player-label {transform:none}
