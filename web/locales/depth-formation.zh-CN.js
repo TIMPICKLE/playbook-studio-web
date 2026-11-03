@@ -7,6 +7,7 @@ export default {
   'formationDetail.assigned': '已排首发',
   'formationDetail.roleRanks': '{role} 上场顺位',
   'formationDetail.selectRole': '点选位置，查看首发和各顺位替补。',
+  'formationDetail.filterHint': '高亮位置显示所选球员和顺位，其余位置显示首发。点选位置可查看完整名单。',
   'formationDetail.rotated': '竖屏场地顺时针旋转了 90°。',
   'formationDetail.returnNote': '此模板沿用首发防守阵容，由回攻手替换深区安全卫。',
   'formationDetail.unplaced': '未标注站位的位置',
