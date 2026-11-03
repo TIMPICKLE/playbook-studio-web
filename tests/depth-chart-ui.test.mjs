@@ -261,6 +261,9 @@ test('a player can find all of their assignments and retain their selection acro
   };
   findPlayer('p2');
   assert.deepEqual([rankAt(qb), rankAt(h), rankAt(x)], ['2', '0', '1']);
+  const shownAt = slot => q(`[data-depth-chart="inspect"][data-slot="${slot.id}"] .df-name`).textContent;
+  assert.ok([qb, h, x].every(slot => shownAt(slot).includes('Parker')));
+  assert.match(q('#depth-formation-detail').textContent, /Robin[\s\S]*Parker/);
   assert.equal(win.document.querySelectorAll('[data-formation-rank]').length, 3);
   assert.match(q('[data-formation-results]').textContent, /Parker.*3/);
   state.id = '4-2-5';
@@ -272,6 +275,7 @@ test('a player can find all of their assignments and retain their selection acro
   view.refresh();
   assert.equal(rankAt(qb), '2');
   findPlayer('');
+  assert.match(shownAt(qb), /Robin/);
   assert.equal(q('[data-formation-rank]'), null);
   assert.equal(win.document.querySelectorAll('button[data-depth-chart="inspect"]').length, slots.length);
   assert.equal(state.writes, 0);

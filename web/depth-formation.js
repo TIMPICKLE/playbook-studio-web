@@ -13,10 +13,11 @@ function roleButton(slot, players, selected, playerId, style = '') {
   const description = [slot.label, `${t('depth.starter')} ${name}`, ...ranks].join(' · ');
   const match = playerId ? slot.playerIds.indexOf(playerId) : -1;
   const matchLabel = match > 0 ? t('depth.backup', { rank: match }) : t('depth.starter');
+  const visibleName = match >= 0 ? playerName(players.get(playerId)) : name;
   return `<button type="button" class="df-node" data-depth-chart="inspect" data-slot="${e(slot.id)}"
     ${match >= 0 ? `data-formation-rank="${match}"` : ''} data-filled="${Boolean(starter)}" aria-pressed="${selected}" aria-controls="depth-formation-detail"
     aria-label="${e(description)}" title="${e(description)}" ${style}>
-    <span class="df-role">${e(slot.label)}</span><span class="df-name">${e(name)}</span>
+    <span class="df-role">${e(slot.label)}</span><span class="df-name">${e(visibleName)}</span>
     ${match < 0 ? '' : `<span class="df-found-rank">${matchLabel}</span>`}</button>`;
 }
 
@@ -48,8 +49,8 @@ export function renderDepthFormation(group, players, selectedSlotId, editable, p
   const player = players.get(playerId);
   const matches = player ? group.slots.filter(slot => slot.playerIds.includes(playerId)).length : 0;
   return `<div class="df-formation">
-    ${players.size ? `<div class="df-find"><label>${t('formationDetail.find')}
-      <select data-formation-player><option value="">${t('formationDetail.allPlayers')}</option>${[...players.values()].map(p =>
+    ${players.size ? `<div class="df-find"><label><span>${t('formationDetail.find')}</span>
+      <select data-formation-player aria-label="${t('formationDetail.find')}"><option value="">${t('formationDetail.allPlayers')}</option>${[...players.values()].map(p =>
         `<option value="${e(p.id)}" ${p.id === playerId ? 'selected' : ''}>${e(playerName(p))}${p.position ? ' · ' + e(p.position) : ''}</option>`
       ).join('')}</select></label>
       <p data-formation-results role="status">${player ? e(t(matches ? 'formationDetail.matches' : 'formationDetail.noMatch', { name: playerName(player), count: matches })) : ''}</p></div>` : ''}
@@ -62,7 +63,7 @@ export function renderDepthFormation(group, players, selectedSlotId, editable, p
         <div class="df-hashes" aria-hidden="true"></div>
         ${markers.map(marker => pitchMarker(marker, markers, players, selected.id, playerId)).join('')}
       </div>
-      <p class="df-instruction">${t('formationDetail.selectRole')} <span class="df-portrait-hint">${t('formationDetail.rotated')}</span></p>
+      <p class="df-instruction">${t(player && matches ? 'formationDetail.filterHint' : 'formationDetail.selectRole')} <span class="df-portrait-hint">${t('formationDetail.rotated')}</span></p>
       ${templateId === 'punt-return' ? `<p class="df-note">${t('formationDetail.returnNote')}</p>` : ''}
     </figure>` : `<p class="df-unplaced-hint">${t('formationDetail.noLayout')}</p>`}
     ${unmapped.length ? `<section class="df-extra"><h4>${t('formationDetail.unplaced')}</h4><div class="df-extra-roles">

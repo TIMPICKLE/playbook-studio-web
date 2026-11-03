@@ -5,6 +5,7 @@
 }
 .df-find { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin-bottom: 12px; }
 .df-find label { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--text-2); }
+.df-find label > span { white-space: nowrap; }
 .df-find select {
   max-width: 100%;
   min-height: 40px;
