@@ -1,4 +1,5 @@
 import { t } from './i18n.js';
+import { loadMaddenCatalog } from './madden-catalog.js';
 import { reconcileHTML } from './reconcile.js';
 import { escapeHTML as e } from './model.js';
 import { filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace, editableTraceCount, retainedReason } from './madden-model.js';
@@ -79,7 +80,7 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
   }
   async function load() {
     failure = ''; render();
-    if (!loading) loading = fetch(new URL('./data/huddle-catalog.json', import.meta.url)).then(r => { if (!r.ok) throw new Error('load'); return r.json(); }).then(data => { if (data.schemaVersion !== 1 || !data.plays?.length || data.teams?.length !== 2) throw new Error('invalid'); catalog = data; }).catch(() => { failure = (t("extra.couldNotLoadTheCatalogPleaseTry")); loading = null; }).finally(render);
+    if (!loading) loading = loadMaddenCatalog().then(data => { catalog = data; }).catch(() => { failure = (t("extra.couldNotLoadTheCatalogPleaseTry")); loading = null; }).finally(render);
     await loading;
   }
   function renderResults() {

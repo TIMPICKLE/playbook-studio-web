@@ -23,7 +23,7 @@ const SYSTEM = `你是美式橄榄球战术学习助手，帮助球员观察两�
 const byteLength = value => new TextEncoder().encode(value).byteLength;
 const short = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 
-function assertPrivateRuntime(env) {
+export function assertPrivateRuntime(env) {
   // LangGraph may create nested tracers even inside a tracing-disabled wrapper
   // when global tracing is enabled. Fail closed rather than mutate process.env
   // (which would affect concurrent requests in the same isolate).

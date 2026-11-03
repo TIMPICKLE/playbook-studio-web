@@ -1,4 +1,4 @@
-import { clamp, passFlightRoute, animatedBall, animatedPlayer } from './model.js';
+import { blockContact, clamp, passFlightRoute, animatedBall, animatedPlayer } from './model.js';
 import { project, routePath, motionPath, displayColor } from './field.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -54,10 +54,13 @@ export function createRouteFeedback(svg, play) {
         const d=route.kind==='motion'?motionPath(route):routePath(flight?.id===route.id?flight:route);
         item.halo.setAttribute('d',d);item.tracer.setAttribute('d',d);
         const f=feedbackProgress(play,route,time);
-        item.tracer.setAttribute('opacity',animated&&f.active&&time>0?'.9':'0');
+        const contact=blockContact(route,time);
+        // The marker trail follows staged stops; a uniform tracer would run ahead.
+        item.tracer.setAttribute('opacity',animated&&!contact&&f.active&&time>0?'.9':'0');
         item.tracer.setAttribute('stroke-dashoffset',String(-f.progress));
-        const end=project(route.points.at(-1));item.impact.setAttribute('cx',end.x);item.impact.setAttribute('cy',end.y);
-        item.impact.setAttribute('r',String(10+(1-f.impact)*20));item.impact.setAttribute('opacity',animated?String(f.impact*.75):'0');
+        const end=project(contact ? route.points[contact.index+1] : route.points.at(-1));item.impact.setAttribute('cx',end.x);item.impact.setAttribute('cy',end.y);
+        const pulse=contact ? (route.optional ? 0 : contact.impact) : f.impact;
+        item.impact.setAttribute('r',String(10+(1-pulse)*20));item.impact.setAttribute('opacity',animated?String(pulse*.75):'0');
       }
       for (const zone of play.zones) {
         const item=zones.get(zone.id);if(!item)continue;

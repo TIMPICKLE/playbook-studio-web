@@ -1,4 +1,6 @@
 export default {
+  "assistant.boardChanged": "战术已变更，请对当前战术重新发送指令。",
+  "assistant.finishDrawing": "请先完成当前画线或拖动，再执行改图。",
   "editor.chart_starters": "从 DEPTH CHART 应用首发",
   "editor.chart_group": "人员组",
   "editor.chart_choose": "选择人员组",

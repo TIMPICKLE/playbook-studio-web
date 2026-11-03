@@ -1,8 +1,11 @@
 import { decodeWorkspace, starterWorkspace } from '../web/model.js';
 import { MAX_BODY, ApiError, fail, json, readJson } from './http.mjs';
 import { resolveIdentity, handleAuth, createAccountStatements, resetAccount } from './auth.mjs';
-import { buildMatchup, modelEndpoint } from './matchup.mjs';
-import { runMatchupAgent } from './matchup-agent.mjs';
+import { buildMatchup, limitedResponse, modelEndpoint } from './matchup.mjs';
+import { boardAssistantInput, invokeBoardModel } from '../web/assistant-provider.js';
+import * as boardGraph from '@langchain/langgraph';
+import { searchServerMadden } from './board-assistant-catalog.mjs';
+import { runMatchupAgent, assertPrivateRuntime } from './matchup-agent.mjs';
 import { localizeMatchupAnnotations } from './matchup-locale.mjs';
 export { MAX_BODY } from './http.mjs';
 const ROLES = ['editor', 'viewer'];
@@ -17,6 +20,11 @@ function title(value) { if (typeof value !== 'string' || !value.trim() || value.
 function email(value) { const v = normalizeEmail(value); if (v.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) fail(400, '邮箱格式不正确'); return v; }
 async function hash(value) { return [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(v => v.toString(16).padStart(2, '0')).join(''); }
 function token() { return btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+async function checkModelBudget(db, userId) {
+  const throttleNow = Date.now(), key = await hash(`matchup:${userId}`);
+  const counter = await db.prepare('INSERT INTO auth_throttles(key,started_at,attempts) VALUES(?,?,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN started_at<? THEN 1 ELSE attempts+1 END,started_at=CASE WHEN started_at<? THEN excluded.started_at ELSE started_at END RETURNING attempts').bind(key, throttleNow, throttleNow - 60000, throttleNow - 60000).first();
+  if (counter.attempts > 12) fail(429, '分析请求过于频繁，请稍后重试');
+}
 async function access(db, workspaceId, userId, needed = 'read') {
   const row = await db.prepare('SELECT w.*,m.role FROM workspaces w JOIN members m ON m.workspace_id=w.id WHERE w.id=? AND m.user_id=?').bind(workspaceId, userId).first();
   if (!row) fail(404, '战术本不存在或你没有访问权限');
@@ -112,6 +120,36 @@ export async function handleApi(request, env, user) {
       if (request.method === 'GET') { const record = await access(db, workspaceId, user.userId); const after = Number(new URL(request.url).searchParams.get('after')); return json(after === record.revision ? { unchanged: true, revision: record.revision, role: record.role } : document(record)); }
       if (request.method === 'PUT') { const body = await readJson(request); return await writeWorkspace(db, workspaceId, user, body.data, body.revision); }
     }
+    if (path[2] === 'board-assistant' && path.length === 3 && request.method === 'POST') {
+      const record = await access(db, workspaceId, user.userId);
+      const body = await readJson(request, 180000);
+      if (revision(body.revision) !== record.revision) fail(409, '战术本已更新，请重试');
+      const config = modelEndpoint(body.model, env);
+      let input;
+      try { input = boardAssistantInput(body); }
+      catch (error) { fail(400, error.message); }
+      assertPrivateRuntime(env);
+      await checkModelBudget(db, user.userId);
+      // The board is the editor's working copy. Model tools only read this snapshot.
+      const reauthorize = async (needed = 'read') => {
+        const identity = await resolveIdentity(request, env, platformUser);
+        if (identity?.userId !== user.userId) fail(401, '登录状态已失效，请重新登录');
+        const latest = await access(db, workspaceId, user.userId, needed);
+        if (latest.revision !== record.revision) fail(409, '战术本已更新，请重试');
+      };
+      let reply;
+      try {
+        reply = await invokeBoardModel(config, input, {
+          runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize,
+          signal: request.signal, readResponse: limitedResponse,
+        });
+      } catch (error) {
+        if (error instanceof ApiError) throw error;
+        fail(502, error.message);
+      }
+      await reauthorize(reply.kind === 'edit' ? 'write' : 'read');
+      return json(reply);
+    }
     if (path[2] === 'matchup-analysis' && path.length === 3 && request.method === 'POST') {
       const record = await access(db, workspaceId, user.userId);
       const body = await readJson(request, 12000);
@@ -130,9 +168,7 @@ export async function handleApi(request, env, user) {
         perspective = { side, playerId: `${side}:player:${player.id}`, label: player.label };
       }
       modelEndpoint(body.model, env);
-      const throttleNow = Date.now(), key = await hash(`matchup:${user.userId}`);
-      const counter = await db.prepare('INSERT INTO auth_throttles(key,started_at,attempts) VALUES(?,?,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN started_at<? THEN 1 ELSE attempts+1 END,started_at=CASE WHEN started_at<? THEN excluded.started_at ELSE started_at END RETURNING attempts').bind(key, throttleNow, throttleNow - 60000, throttleNow - 60000).first();
-      if (counter.attempts > 12) fail(429, '分析请求过于频繁，请稍后重试');
+      await checkModelBudget(db, user.userId);
       const matchup = buildMatchup(offense, defense, { coverage: body.coverage, includeNotes: body.includeNotes === true, mirrorDefense: body.mirrorDefense === true });
       const reauthorize = async () => {
         const identity = await resolveIdentity(request, env, platformUser);
