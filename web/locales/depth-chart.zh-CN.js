@@ -1,9 +1,14 @@
 export default {
+  'depth.viewLabel': '显示方式',
+  'depth.viewFormation': '阵型图',
+  'depth.viewRanks': '顺位表',
+  'depth.viewStarters': '只看首发',
+  'depth.formationTitle': '阵型图',
   'depth.lineup': '首发阵容',
   'depth.showStarters': '只看首发',
   'depth.showRanks': '查看完整顺位',
   'depth.quickEdit': '调整 {label}，首发 {player}',
-  'depth.positions': '位置深度表',
+  'depth.positions': '首发与替补顺位',
   'depth.filled': '已排首发 {filled} / {total}',
   'depth.add': '添加位置',
   'depth.starter': '首发',
@@ -33,5 +38,5 @@ export default {
   'depth.duplicate': '同一球员不能重复占用这个位置的顺位。',
   'depth.playerGone': '所选球员已从名单中移除。请重新打开该位置再调整。',
   'depth.limit': '本组的位置数已达上限。',
-  'depth.updated': '位置深度表已更新。'
+  'depth.updated': 'DEPTH CHART 已更新。'
 };

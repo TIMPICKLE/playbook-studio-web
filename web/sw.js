@@ -1,5 +1,6 @@
-const CACHE = 'playbook-studio-v5.6.0-depth-chart';
+const CACHE = 'playbook-studio-v5.7.0-visual-depth-chart';
 const FILES = [
+  './depth-formation.js', './depth-formation-layout.js', './depth-formation.css', './locales/depth-formation.zh-CN.js', './locales/depth-formation.en.js',
   './depth-model.js', './model-values.js', './board-personnel.js', './depth-chart.js', './depth-chart.css',
   './personnel-groups.js', './personnel-groups.css', './locales/depth-chart.zh-CN.js', './locales/depth-chart.en.js',
   './locales/personnel-groups.zh-CN.js', './locales/personnel-groups.en.js',

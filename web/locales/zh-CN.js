@@ -1,5 +1,5 @@
 export default {
-  "editor.chart_starters": "从深度表应用首发",
+  "editor.chart_starters": "从 DEPTH CHART 应用首发",
   "editor.chart_group": "人员组",
   "editor.chart_choose": "选择人员组",
   "editor.chart_hint": "选择人员组后，预览本战术中位置标签匹配的首发球员。",

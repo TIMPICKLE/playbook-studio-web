@@ -14,11 +14,28 @@ export const DEPTH_TEMPLATES = [
   { id: 'field-goal', unit: 'special', name: 'Field Goal', labels: ['LW', 'LE', 'LT', 'LG', 'C', 'RG', 'RT', 'RE', 'RW', 'Holder', 'Kicker'] },
 ];
 
-export const createDepthSlot = label => ({ id: uid(), label, playerIds: [] });
+const findTemplate = id => DEPTH_TEMPLATES.find(template => template.id === id);
+export const createDepthSlot = (label, templateRole = null) => ({ id: uid(), label, templateRole, playerIds: [] });
 
 export function createDepthGroup(templateId, name, unit = 'offense') {
-  const template = DEPTH_TEMPLATES.find(item => item.id === templateId);
-  return { id: uid(), name: name ?? template?.name ?? '', unit: template?.unit ?? unit, notes: '', slots: (template?.labels ?? []).map(createDepthSlot) };
+  const template = findTemplate(templateId);
+  return { id: uid(), name: name ?? template?.name ?? '', unit: template?.unit ?? unit, templateId: template?.id ?? null, notes: '', slots: (template?.labels ?? []).map(label => createDepthSlot(label, label)) };
+}
+
+// When a coach chooses a diagram, keep existing role bindings when possible,
+// then place remaining positions by exact label. Lineups never change here.
+export function bindDepthTemplate(group, templateId) {
+  const template = findTemplate(templateId);
+  const available = new Set(template?.labels);
+  group.templateId = template?.id ?? null;
+  for (const slot of group.slots) {
+    if (!available.delete(slot.templateRole)) slot.templateRole = null;
+  }
+  for (const slot of group.slots) {
+    if (slot.templateRole) continue;
+    const match = [...available].find(role => normalizedName(role) === normalizedName(slot.label));
+    if (match) { slot.templateRole = match; available.delete(match); }
+  }
 }
 
 export function copyDepthGroup(group, name) {
@@ -28,8 +45,8 @@ export function copyDepthGroup(group, name) {
 // Deterministic IDs let independent clients migrate and merge the same legacy book.
 export function defaultDepthChart() {
   const groups = DEPTH_TEMPLATES.map(template => ({
-    id: template.id, name: template.name, unit: template.unit, notes: '',
-    slots: template.labels.map((label, index) => ({ id: `${template.id}-${index + 1}`, label, playerIds: [] })),
+    id: template.id, name: template.name, unit: template.unit, templateId: template.id, notes: '',
+    slots: template.labels.map((label, index) => ({ id: `${template.id}-${index + 1}`, label, templateRole: label, playerIds: [] })),
   }));
   return { groups };
 }
@@ -43,6 +60,12 @@ function ensureDistinct(values, field) {
 export function validateDepthChart(chart, rosterIds) {
   if (chart === undefined) return defaultDepthChart();
   const groups = unique(array(chart?.groups, DEPTH_LIMITS.groups, '人员组').map(group => {
+    // v1 charts used these deterministic IDs for presets. Older custom copies
+    // only have random IDs, and Spread and Bunch share the same role labels.
+    const template = findTemplate(group.templateId === undefined ? group.id : group.templateId);
+    if (group.templateId != null && !template) fail('阵型图模板无效');
+    const legacyRoles = new Map(group.templateId === undefined && template
+      ? template.labels.map((label, index) => [`${template.id}-${index + 1}`, label]) : []);
     const starters = [];
     const slots = unique(array(group.slots, DEPTH_LIMITS.slots, '位置').map(slot => {
       const playerIds = array(slot.playerIds, DEPTH_LIMITS.ranks, '位置深度').map(playerId => {
@@ -52,14 +75,21 @@ export function validateDepthChart(chart, rosterIds) {
       });
       ensureDistinct(playerIds.filter(Boolean), '同一位置的球员');
       if (playerIds[0]) starters.push(playerIds[0]);
-      return { id: requiredText(slot.id, 100, '位置 ID'), label: requiredText(slot.label, DEPTH_LIMITS.label, '位置名称'), playerIds };
+      const templateRole = slot.templateRole === undefined ? legacyRoles.get(slot.id) ?? null : slot.templateRole;
+      if (templateRole !== null && !template?.labels.includes(templateRole)) fail('阵型图位置无效');
+      return { id: requiredText(slot.id, 100, '位置 ID'), label: requiredText(slot.label, DEPTH_LIMITS.label, '位置名称'), templateRole, playerIds };
     }), '位置');
     ensureDistinct(starters, '同组首发球员');
     ensureDistinct(slots.map(slot => normalizedName(slot.label)), '位置名称');
-    return {
+    ensureDistinct(slots.map(slot => slot.templateRole).filter(Boolean), '阵型图位置');
+    const validated = {
       id: requiredText(group.id, 100, '人员组 ID'), name: requiredText(group.name, DEPTH_LIMITS.name, '人员组名称'),
-      unit: choice(group.unit, ['offense', 'defense', 'special'], '分组'), notes: text(group.notes ?? '', DEPTH_LIMITS.notes, '人员组备注'), slots,
+      unit: choice(group.unit, ['offense', 'defense', 'special'], '分组'), templateId: template?.id ?? null, notes: text(group.notes ?? '', DEPTH_LIMITS.notes, '人员组备注'), slots,
     };
+    // An old append retained the preset group ID but regenerated its position
+    // IDs. The scheme is known, so any remaining exact role labels can be placed.
+    if (group.templateId === undefined && template) bindDepthTemplate(validated, template.id);
+    return validated;
   }), '人员组');
   ensureDistinct(groups.map(group => `${group.unit}/${normalizedName(group.name)}`), '同组名称');
   return { groups };
@@ -75,9 +105,9 @@ export function clearDepthPlayer(chart, playerId) {
 
 function isUnusedTemplate(group) {
   const template = DEPTH_TEMPLATES.find(t => t.id === group.id);
-  return template && group.unit === template.unit && group.name === template.name && !group.notes
+  return template && group.templateId === template.id && group.unit === template.unit && group.name === template.name && !group.notes
     && group.slots.length === template.labels.length
-    && group.slots.every((slot, i) => slot.label === template.labels[i] && !slot.playerIds.some(Boolean));
+    && group.slots.every((slot, i) => slot.label === template.labels[i] && slot.templateRole === template.labels[i] && !slot.playerIds.some(Boolean));
 }
 
 export function appendDepthGroups(current, imported, rosterIds) {

@@ -87,12 +87,27 @@ export function starterWorkspace({ demoDepth = false } = {}) {
   const roster = [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }];
   const depthChart = defaultDepthChart();
   if (demoDepth) {
-    const backup = { id: uid(), name: 'Casey', number: '8', position: 'QB' };
-    roster.push(backup);
-    const slots = depthChart.groups.find(group => group.id === 'spread').slots;
-    slots.find(slot => slot.label === 'QB').playerIds = [roster[0].id, backup.id];
-    slots.find(slot => slot.label === 'X').playerIds = [roster[1].id];
-    slots.find(slot => slot.label === 'H').playerIds = [roster[2].id];
+    for (const [number, name, position] of [
+      ['8', 'Casey', 'QB'], ['85', 'Morgan', 'TE'], ['16', 'Drew', 'WR/K'], ['11', 'Jules', 'WR'],
+      ['72', 'Lane', 'LT'], ['66', 'Reese', 'LG'], ['53', 'Robin', 'C'], ['64', 'Blair', 'RG'], ['77', 'Quinn', 'RT']
+    ]) roster.push({ id: uid(), number, name, position });
+    const spread = {
+      QB: ['12', '8'], X: ['10'], H: ['22'], Y: ['85'], F: ['16'], Z: ['11'],
+      LT: ['72'], LG: ['66'], C: ['53'], RG: ['64'], RT: ['77']
+    };
+    const lineups = {
+      spread,
+      bunch: { ...spread, F: ['85'], Y: ['16'] },
+      kickoff: { L1: ['10'], 'L2 Contain': ['22'], K: ['16'], 'R2 Contain': ['85'], R1: ['11'] }
+    };
+    const ids = new Map(roster.map(player => [player.number, player.id]));
+    for (const group of depthChart.groups) {
+      const lineup = lineups[group.id];
+      if (!lineup) continue;
+      for (const slot of group.slots) {
+        slot.playerIds = (lineup[slot.label] || []).map(number => ids.get(number));
+      }
+    }
   }
   return { team: { name: '我的球队', subtitle: '2026 赛季', accent: '#9aa3ad' }, plays: [mesh, verticals, flood, slants, zone, cover3, blitz, goal], roster, depthChart, formations: [], settings: { league: 11, fieldTheme: 'dark', showGrid: true, showNames: false } };
 }

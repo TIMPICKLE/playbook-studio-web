@@ -107,3 +107,24 @@ test('changing playbooks keeps an open group draft from touching the new roster'
   view.destroy();
   assert.equal(q('dialog'), null);
 });
+
+test('editing the field template preserves concurrent rank changes and prevents stale layout overwrites', t => {
+  const { state, view, q, action, save } = setup(t);
+  const group = state.data.depthChart.groups.find(item => item.id === 'spread');
+  action('edit');
+  assert.equal(q('[name=template]').value, 'spread');
+  q('[name=template]').value = 'bunch';
+  const ranks = [null, state.data.roster[0].id];
+  group.slots[0].playerIds = ranks;
+  save();
+  assert.equal(group.templateId, 'bunch');
+  assert.equal(group.slots[0].templateRole, 'QB');
+  assert.deepEqual(group.slots[0].playerIds, ranks);
+  action('edit');
+  q('[name=template]').value = '';
+  group.templateId = 'spread';
+  save();
+  assert.equal(group.templateId, 'spread');
+  assert.equal(state.writes, 1);
+  assert.equal(view.isEditing(), true);
+});

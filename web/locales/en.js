@@ -1,5 +1,5 @@
 export default {
-  "editor.chart_starters": "Use starters from the depth chart",
+  "editor.chart_starters": "Use starters from the DEPTH CHART",
   "editor.chart_group": "Personnel group",
   "editor.chart_choose": "Choose a group",
   "editor.chart_hint": "Preview the starters with matching position labels on this play.",

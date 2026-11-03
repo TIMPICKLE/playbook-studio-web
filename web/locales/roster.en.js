@@ -1,8 +1,8 @@
 export default {
   'roster.title': 'Player management',
-  'roster.cardDescription': 'Set starters and backups for each personnel group and manage the team roster.',
-  'roster.open': 'Open depth chart',
-  'roster.depthTab': 'Depth chart',
+  'roster.cardDescription': 'View starters and backups on the field and manage the team roster.',
+  'roster.open': 'Open DEPTH CHART',
+  'roster.depthTab': 'DEPTH CHART',
   'roster.teamSettings': 'Team settings',
   'roster.league': '{count} players per side',
   'roster.directory': 'Player roster',

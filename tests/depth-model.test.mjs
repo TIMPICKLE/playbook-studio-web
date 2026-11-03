@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { clone, decodeWorkspace, encodeWorkspace, prepareWorkspaceAppend, starterWorkspace } from '../web/model.js';
-import { clearDepthPlayer, copyDepthGroup, createDepthGroup, createDepthSlot, defaultDepthChart, DEPTH_LIMITS } from '../web/depth-model.js';
+import { bindDepthTemplate, clearDepthPlayer, copyDepthGroup, createDepthGroup, createDepthSlot, defaultDepthChart, DEPTH_LIMITS } from '../web/depth-model.js';
 import { mergeWorkspaces } from '../web/sync.js';
 
 const roundtrip = data => decodeWorkspace(encodeWorkspace(data));
@@ -24,6 +24,11 @@ test('old books get stable blank templates, and deleted groups stay deleted', ()
   const lineup = demo.depthChart.groups[0];
   const [starter, backup] = lineup.slots[0].playerIds;
   assert.ok(starter && backup && !lineup.slots.some(slot => slot.playerIds[0] === backup));
+  for (const group of demo.depthChart.groups.filter(group => group.unit === 'offense')) {
+    const starters = group.slots.map(slot => slot.playerIds[0]);
+    assert.equal(new Set(starters).size, 11);
+    assert.ok(starters.every(id => demo.roster.some(player => player.id === id)));
+  }
 });
 
 test('open starting spots, cross-training and cloned personnel packages retain rank and stable IDs', () => {
@@ -86,8 +91,7 @@ test('append remaps roster links on plays, formations and lineup ranks, and keep
   const combined = { ...target, depthChart: chart, plays: [...target.plays, ...added.plays], formations: added.formations, roster: [...target.roster, ...added.roster] };
   assert.deepEqual(roundtrip(combined), combined);
   const more = prepareWorkspaceAppend(combined, imported);
-  assert.equal(more.depthChart.groups.length, chart.groups.length + 1);
-  assert.equal(more.depthChart.groups.at(-1).name, 'Spread (2)');
+  assert.deepEqual(more.depthChart.groups.slice(chart.groups.length).map(group => group.name), ['Spread (2)', 'Bunch (2)', 'Kickoff (2)']);
   assert.deepEqual(more.depthChart.groups[0], chart.groups[0]);
 });
 
@@ -149,4 +153,55 @@ test('legacy name-only selections migrate only when a roster name matches exactl
   assert.equal(orphanSnapshot.rosterId, undefined);
   delete linked.rosterId;
   assert.equal(roundtrip(migrated).plays[0].players[0].rosterId, undefined);
+});
+
+test('field bindings survive renames, cross-unit copies, exports and append', () => {
+  const data = starterWorkspace();
+  const group = createDepthGroup('bunch', 'Short yardage');
+  group.slots[0].label = 'Passer';
+  group.slots[0].playerIds = [data.roster[0].id];
+  const copy = copyDepthGroup(group, 'Fake punt');
+  copy.unit = 'special';
+  data.depthChart = { groups: [copy] };
+  const restored = roundtrip(data).depthChart.groups[0];
+  assert.equal(restored.templateId, 'bunch');
+  assert.equal(restored.slots[0].templateRole, 'QB');
+  assert.equal(restored.slots[0].label, 'Passer');
+  assert.deepEqual(restored.slots[0].playerIds, copy.slots[0].playerIds);
+  const appended = prepareWorkspaceAppend(starterWorkspace(), data).depthChart.groups.at(-1);
+  assert.equal(appended.templateId, 'bunch');
+  assert.equal(appended.slots[0].templateRole, 'QB');
+});
+
+test('legacy layout migration uses stable IDs; a coach can bind unknown groups without losing ranks', () => {
+  const data = starterWorkspace();
+  const original = data.depthChart.groups.find(group => group.id === 'bunch');
+  const oldCopy = copyDepthGroup(original, 'Spread');
+  original.name = 'Game week';
+  original.slots[0].label = 'Passer';
+  original.slots[1].id = 'legacy-appended-position'; // Old append regenerated position IDs.
+  const customSlot = createDepthSlot('Safety valve');
+  original.slots.push(customSlot);
+  data.depthChart.groups = [original, oldCopy];
+  for (const group of data.depthChart.groups) {
+    delete group.templateId;
+    for (const slot of group.slots) delete slot.templateRole;
+  }
+  const [known, unknown] = roundtrip(data).depthChart.groups;
+  assert.equal(known.templateId, 'bunch');
+  assert.equal(known.slots[0].templateRole, 'QB');
+  assert.equal(known.slots[1].templateRole, 'H');
+  assert.equal(known.slots.at(-1).templateRole, null);
+  assert.equal(unknown.templateId, null);
+  assert.ok(unknown.slots.every(slot => slot.templateRole === null));
+  unknown.slots[0].label = 'qb';
+  unknown.slots[0].playerIds = [null, data.roster[0].id];
+  bindDepthTemplate(unknown, 'spread');
+  assert.equal(unknown.slots[0].templateRole, 'QB');
+  unknown.slots[0].label = 'Signal caller';
+  bindDepthTemplate(unknown, 'bunch');
+  assert.equal(unknown.slots[0].templateRole, 'QB');
+  bindDepthTemplate(unknown, null);
+  assert.equal(unknown.templateId, null);
+  assert.deepEqual(unknown.slots[0].playerIds, [null, data.roster[0].id]);
 });
