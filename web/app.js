@@ -151,7 +151,8 @@ function showAssistantPreview(play, original) {
     for (const route of removedRoutes) {
       const node = [...old.content.querySelectorAll('[data-route]')].find(item => item.dataset.route === route.id);
       if (!node) continue;
-      node.querySelectorAll('path, line').forEach(shape => { shape.setAttribute('stroke', '#ff7777'); shape.setAttribute('stroke-dasharray', '8 6'); shape.removeAttribute('marker-end'); });
+      node.querySelectorAll('.route-hit').forEach(shape => shape.remove());
+      node.querySelectorAll('path, line').forEach(shape => { shape.setAttribute('stroke', '#ff7777'); shape.setAttribute('stroke-dasharray', '8 6'); shape.removeAttribute('marker-end'); shape.removeAttribute('marker-mid'); });
       svg.append(node);
     }
   }
