@@ -1,4 +1,6 @@
 export default {
+  "assistant.boardChanged": "The play changed. Send your request again for the current play.",
+  "assistant.finishDrawing": "Finish the active drawing or drag before changing the play.",
   "editor.chart_starters": "Use starters from the DEPTH CHART",
   "editor.chart_group": "Personnel group",
   "editor.chart_choose": "Choose a group",

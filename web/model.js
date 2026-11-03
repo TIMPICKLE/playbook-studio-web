@@ -167,11 +167,33 @@ export function pointAlong(points, ratio) {
   }
   return { ...points.at(-1) };
 }
+// A climb block uses each editable waypoint as a contact, with a short hold
+// before releasing to the next defender. Ordinary block routes keep their timing.
+export function blockContact(route, time) {
+  if (!route.stagedBlock || route.kind !== 'block') return null;
+  const count = route.points.length - 1;
+  const elapsed = (time - route.delay) / route.duration;
+  const phase = clamp(elapsed, 0, 1) * count;
+  const index = Math.min(count - 1, Math.floor(phase));
+  const travel = .72;
+  const fraction = clamp((phase - index) / travel, 0, 1);
+  const contactAge = (elapsed * count - index - travel) * route.duration / count;
+  const impact = contactAge < 0 ? 0 : Math.max(0, 1 - contactAge / .55);
+  return { index, fraction, impact };
+}
+
 export function animatedPlayer(play, player, time) {
   const routes = play.routes.filter(r => r.playerId === player.id && !r.optional && r.kind !== 'pass');
   const route = routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind === 'route') || routes.find(r => r.kind === 'block') || routes[0];
   if (!route) return { x: player.x, y: player.y };
-  return pointAlong(sampledRoute(route), (time - route.delay) / route.duration);
+  const contact = blockContact(route, time);
+  const samples = sampledRoute(route);
+  if (contact) {
+    const segments = (samples.length - 1) / (route.points.length - 1);
+    const start = contact.index * segments;
+    return pointAlong(samples.slice(start, start + segments + 1), contact.fraction);
+  }
+  return pointAlong(samples, (time - route.delay) / route.duration);
 }
 // Keep the drawn pass's bends while anchoring release/catch to the actual players.
 // Shared by the flight animation and the rehearsal path in both visual modes.
@@ -221,7 +243,7 @@ export function validatePlay(p) {
     if (points.length < 2) fail('路线至少需要两个节点');
     const owner = players.find(p => p.id === r.playerId);
     if (Math.hypot(points[0].x - owner.x, points[0].y - owner.y) > .01) fail('路线起点与球员位置不一致');
-    return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional };
+    return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional, ...(r.kind === 'block' && r.stagedBlock === true ? { stagedBlock: true } : {}) };
   }), '路线');
   const zones = unique(array(p.zones, 60, '区域').map(z => ({ id: id(z.id), x: num(z.x, 0, 100, '区域横坐标'), y: num(z.y, 0, 100, '区域纵坐标'), rx: num(z.rx, 1, 50, '区域半径'), ry: num(z.ry, 1, 50, '区域半径'), color: col(z.color), label: text(z.label, 80, '区域名称') })), '区域');
   const annotations = unique(array(p.annotations, 100, '标注').map(a => ({ id: id(a.id), x: num(a.x, 0, 100, '标注横坐标'), y: num(a.y, 0, 100, '标注纵坐标'), text: text(a.text, 200, '标注内容') })), '标注');

@@ -23,3 +23,7 @@
 - Upstream: https://github.com/xyztype/Big-Shoulders · packaged by https://fontsource.org
 - License: SIL Open Font License 1.1; see `big-shoulders-display-5.3.0/LICENSE`.
 - Self-hosted so the editor stays offline-capable; listed in the service-worker cache.
+
+## LangGraph 1.5.3 browser runtime
+
+The static board assistant lazy-loads the ESM browser graph from `assistant-langgraph.js`. Run `node scripts/bundle-board-agent.mjs` after installing the locked dependencies to regenerate it and its license notices. The Worker imports LangGraph from npm.

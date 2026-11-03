@@ -1,0 +1,112 @@
+.board-ai {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  font: 14px/1.45 system-ui, sans-serif;
+  letter-spacing: normal;
+  text-align: start;
+  color: #ecedef;
+}
+.board-ai [hidden] { display: none !important; }
+.board-ai :is(button,input,select,textarea) { font: inherit; }
+.board-ai :is(button,input,select,textarea):focus-visible { outline: 2px solid #a1ceff; outline-offset: 2px; }
+.board-ai button { cursor: pointer; }
+.board-ai button:disabled { opacity: .52; cursor: default; }
+.board-ai .ba-fab {
+  pointer-events: auto;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 38px;
+  min-width: 59px;
+  padding: 0 12px;
+  border: 1px solid #e8f1ff85;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #edf3ff, #a5afc2);
+  color: #182437;
+  box-shadow: inset 0 1px 1px #fff, 0 4px 12px #0005;
+  font-size: 14px;
+}
+.board-ai .ba-fab:hover { background: #e0eaf7; }
+.board-ai .ba-panel {
+  pointer-events: auto;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: min(365px, calc(100% - 20px));
+  max-height: calc(100% - 20px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 17px;
+  border: 1px solid #8d9aaf80;
+  background: linear-gradient(150deg, #313843f7, #191d23fa 45%);
+  color-scheme: dark;
+  box-shadow: 0 12px 35px #05080f66, inset 0 1px 0 #ffffff26;
+  animation: ba-in .18s ease-out;
+}
+@keyframes ba-in { from { opacity: 0; transform: translateY(-4px); } }
+.board-ai .ba-header { flex: none; display: flex; align-items: center; gap: 3px; padding: 8px 9px 8px 13px; border-bottom: 1px solid #ffffff22; }
+.board-ai .ba-heading { display: flex; flex: 1; min-width: 0; align-items: center; gap: 9px; cursor: move; user-select: none; touch-action: none; }
+.board-ai .ba-heading > svg { flex: none; color: #bdcde8; width: 20px; height: 20px; }
+.board-ai .ba-heading > div { min-width: 0; }
+.board-ai .ba-heading h2 { margin: 0; color: #fafafa; font: 650 15px/1.3 system-ui,sans-serif; letter-spacing: normal; }
+.board-ai .ba-scope { display: block; color: #b9c1ce; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.board-ai .ba-icon {
+  flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px;
+  padding: 0; color: #d5dce7; background: transparent; border: 1px solid transparent; border-radius: 10px;
+}
+.board-ai .ba-icon:hover:not(:disabled) { background: #ffffff18; }
+.board-ai .ba-content { overflow: auto; overscroll-behavior: contain; min-height: 0; touch-action: pan-y; scrollbar-width: thin; }
+.board-ai .ba-welcome, .board-ai .ba-output, .board-ai .ba-config { padding: 12px 14px; }
+.board-ai .ba-welcome strong { font-size: 14px; font-weight: 550; }
+.board-ai .ba-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.board-ai .ba-pill { display:inline-flex; justify-content:center; align-items:center; padding:5px 10px; min-height: 30px; border:1px solid #a8bdd754; border-radius: 18px; color:#e9eef8; background:#b9cce915; font-size: 12px; }
+.board-ai .ba-pill:hover:not(:disabled) { background: #bacdee30; }
+.board-ai .ba-output { overflow-wrap: anywhere; }
+.board-ai .ba-output > p { margin: 0 0 7px; font-size: 13px; }
+.board-ai .ba-results-title { color: #bfcddd; font-weight: 650; }
+.board-ai .ba-card { padding: 11px 0; border-top: 1px solid #ffffff20; }
+.board-ai .ba-card:last-child { padding-bottom: 0; }
+.board-ai .ba-card-top { display: flex; gap: 10px; align-items: center; }
+.board-ai .ba-card-top > div { min-width: 0; flex: 1; }
+.board-ai .ba-card-top .ba-pill { flex: none; max-width: 90px; font-size: 11px; }
+.board-ai .ba-card-top img { width: 74px; height: 45px; object-fit: contain; border-radius: 7px; background: #181c1f; }
+.board-ai .ba-card-top small { display: block; color:#b5c0ce; font-size:11px; }
+.board-ai .ba-card-top strong { font-size:14px; font-weight: 650; }
+.board-ai .ba-why { font-weight: 600; color: #bbcde7; }
+.board-ai .ba-card p { font-size: 13px; color: #e0e6f0; margin: 7px 0; }
+.board-ai .ba-config { display:grid; gap: 9px; }
+.board-ai .ba-config label { display:grid; grid-template-columns:75px minmax(0,1fr); gap:8px; align-items:center; font-size:12px; color:#dce1e9; }
+.board-ai .ba-config :is(input,select) { min-width:0; padding:6px 8px; color: #f5f6f9; background:#181c23; border:1px solid #ffffff38; border-radius:7px; }
+.board-ai .ba-config small { color:#b9c5d7; font-size:12px; }
+.board-ai .ba-config .ba-pill { justify-self:end; }
+.board-ai .ba-footer { flex: none; padding: 0 9px 9px; }
+.board-ai .ba-status { padding: 4px; color: #cbd6e8; font-size: 12px; overflow-wrap: anywhere; }
+.board-ai .ba-status:empty { display:none; }
+.board-ai .ba-spoken-only { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.board-ai .ba-status.ba-error { color:#ffcba8; }
+.board-ai .ba-compose { display:flex; gap:3px; align-items:flex-end; padding:6px; border:1px solid #aab7c14d; border-radius:12px; background:#0b0f16a6; }
+.board-ai .ba-compose:focus-within { border-color:#b1c5e6a1; }
+.board-ai textarea { flex:1; width:0; resize:none; padding:4px; border:0; border-radius:5px; background:transparent; color:#f3f5fa; font-size:14px; line-height:1.35; outline:none; box-shadow:none; }
+.board-ai textarea::placeholder { color:#aab6c5; }
+.board-ai .ba-controls { display:flex; align-items:center; gap:2px; }
+.board-ai .ba-send { background:#d4e3f8; color:#182335; border-radius:50%; }
+.board-ai .ba-send:hover:not(:disabled) { background:#f0f5ff; }
+.board-ai [data-ba=mic][aria-pressed=true] { background:#723b39; color:#fff; }
+@media (max-width: 600px) {
+  .board-ai .ba-panel { left: 6px!important; right: 6px!important; top: 6px!important; width: auto; max-height: calc(100% - 12px); border-radius: 14px; }
+  .board-ai .ba-fab { right: 8px; top: 8px; }
+  .board-ai .ba-heading { cursor: default; }
+  .board-ai .ba-config input,.board-ai textarea { font-size:16px; }
+}
+@media (prefers-reduced-motion: reduce) { .board-ai .ba-panel { animation:none; } }
+@media print { .board-ai { display:none!important; } }
+
+@media (min-width: 1181px) { .workspace:not(.reference-play) .board-ai { bottom: 36px; } }

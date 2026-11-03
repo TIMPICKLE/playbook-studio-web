@@ -122,6 +122,16 @@ Filter by team, formation group, specific formation, or English play name. Previ
 
 [Catalog data](web/data/huddle-catalog.json) · [Data notes](docs/MADDEN_BATCH.md) · [Reconstruction records](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)
 
+
+## AI assistant on the field
+
+Open the editor, click **AI** on the field, and enter your provider, model and API key in settings. Type an instruction or dictate it with the microphone, review the text, and send.
+
+- **Edit a play.** Try “Have C block the DT in front of him, then block the LB named Alex.” Place the defenders on the board first and name or link the intended linebacker. The assistant resolves markers and draws an editable staged blocking path. Rehearse the contact sequence or undo the edit.
+- **Find a play.** Try “Find Madden passing concepts against Cover 3.” Results come from the Eagles and Ravens catalog. Each card shows the diagram, formation, editability and a short rationale. Select **Add** to import a play.
+
+The cloud and static editors share a LangGraph tool loop. The static editor calls the selected provider directly and keeps the key in page memory. Dictation requires browser speech recognition and microphone permission. [Architecture and maintenance guide (Chinese)](docs/BOARD_ASSISTANT.md)
+
 ## AI matchup analysis
 
 AI analysis is available from the cloud home screen to any member with read access to the selected playbook:

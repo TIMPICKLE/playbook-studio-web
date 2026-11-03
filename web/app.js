@@ -2,6 +2,10 @@ import { t, getLocale, setLocale } from './i18n.js';
 import { createDigitalBoard } from './digital-board.js';
 import { composeDigitalExport, pngExportDescription } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
+import { createBoardAssistant } from './board-assistant.js';
+import { assistantPlayers, buildAssistantEdit } from './assistant-edit.js';
+import { requestBoardAssistant } from './assistant-provider.js';
+import { loadAssistantCatalog, resolveMaddenResults } from './assistant-search.js';
 import { makeMaddenPlay, hasEditableTrace, getEditableEntry, spaceMaddenLine } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, request } from './cloud.js';
@@ -85,6 +89,68 @@ function importMadden(entry) {
     view: () => { choose(play.id); const card = document.querySelector(`[data-action="choose:${play.id}"]`); card?.scrollIntoView?.({ block: 'nearest' }); $('#main-content')?.focus(); }
   };
 }
+// The agent returns proposals only. The editor owns the active play, edit rights,
+// autosave and the undo checkpoint. A late response cannot modify another play.
+let boardAssistant = null;
+const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
+function mountBoardAssistant() {
+  const host = $('#field');
+  if (!boardAssistant) {
+    let offered = new Map();
+    boardAssistant = createBoardAssistant({
+      host,
+      getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit()}),
+      async onRequest({prompt, provider, model, apiKey, signal, locale}) {
+        const play = current(), scope = assistantScope(), before = JSON.stringify(play);
+        const workspace = cloudMode() ? shared?.current : null;
+        if (cloudMode() && !workspace) throw Error(editBlockedMessage());
+        const result = await requestBoardAssistant({
+          instruction: prompt, locale, signal, model: {provider, model, apiKey},
+          board: {playId: play.id, title: play.title, players: assistantPlayers(play, state.data.roster),
+            selectedPlayerId: selection?.type === 'player' ? selection.id : null,
+            routes: play.routes.map(({playerId,kind,optional,points}) => ({playerId,kind,optional,points}))},
+          workspace: workspace ? {id: workspace.id, revision: workspace.revision} : undefined, request,
+        });
+        const checkScope = () => {
+          signal.throwIfAborted();
+          if ($('#app').hidden || assistantScope() !== scope) throw Error(t('assistant.boardChanged'));
+        };
+        checkScope();
+        if (result.kind === 'search') {
+          const catalog = await loadAssistantCatalog();
+          checkScope();
+          const cards = resolveMaddenResults(catalog, result.matches);
+          offered = new Map(cards.map(card => [card.id, {scope, entry: card.entry}]));
+          const added = new Set(state.data.plays.map(p => p.diagramSource?.catalogId || (p.reference && !hasEditableTrace(p.reference.catalogId) ? p.reference.catalogId : null)));
+          return {kind: 'search', items: cards.map(card => ({...card, title: card.name, added: added.has(card.id)}))};
+        }
+        if (result.kind === 'clarify') return result;
+        if (!canEdit()) throw Error(editBlockedMessage());
+        if (JSON.stringify(current()) !== before) throw Error(t('assistant.boardChanged'));
+        if (draft || drag) throw Error(t('assistant.finishDrawing'));
+        const change = buildAssistantEdit(current(), state.data.roster, result.operation, locale);
+        selection = {type: 'route', id: change.routeId};
+        tool = 'select';
+        edit(p => { p.routes = change.play.routes; });
+        const checkpoint = history.past.at(-1);
+        return {kind: 'edit', message: change.summary, undo() {
+          if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
+          restore(history.undo(state));
+          return true;
+        }};
+      },
+      onAdd(id) {
+        const card = offered.get(id);
+        if (!card || card.scope !== assistantScope() || !canEdit()) return false;
+        if (draft || drag) throw Error(t('assistant.finishDrawing'));
+        const result = importMadden(card.entry);
+        if (result?.message) throw Error(result.message);
+        return result?.ok === true;
+      },
+    });
+  } else boardAssistant.mount(host);
+}
+
 function protectReference() {
   if (!current().reference) return;
   document.querySelectorAll('[data-action="mirror"],[data-action="rehearse-mode"],[data-action="play"]').forEach(n => { n.disabled = true; n.title = t("feedback.the_original_diagram_has_no_editable_or_playable_coordi"); });
@@ -164,7 +230,7 @@ function render() {
   // Reconnecting them synchronously avoids a blank canvas between UI commits.
   if(retainedStage){$('#field .pitch-stage').replaceWith(retainedStage);renderField();}
   thumbnails.mount($('.play-list'), plays);
-  bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh();
+  bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh(); mountBoardAssistant();
   restoreScroll();
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
@@ -806,6 +872,7 @@ function showEditor(show) {
     render();
   } else {
     resetAnimation();
+    boardAssistant?.destroy(); boardAssistant = null;
     if (maddenLibrary.isOpen) maddenLibrary.close();
     panels.close({ focus: false });
     thumbnails.destroy();
@@ -852,7 +919,7 @@ if (cloudMode()) {
     },
     onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
     onAnalysisData(data, record) { matchupView.onData(data, record); },
-    onPermissionLost(error) { resetAnimation(); draft = null; drag = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
+    onPermissionLost(error) { boardAssistant?.close({clear:true}); resetAnimation(); draft = null; drag = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
     showEditor,
     showRoster: visible => rosterView.show(visible),
     canLeaveRoster: () => !rosterView.isEditing(),

@@ -1,5 +1,9 @@
-const CACHE = 'playbook-studio-v5.7.2-stable-roster-selection';
+const CACHE = 'playbook-studio-v5.8-board-assistant';
+// The graph runtime is fetched and cached on first use.
 const FILES = [
+  './board-assistant.js', './board-assistant.css', './assistant-edit.js', './assistant-search.js', './madden-catalog.js',
+  './assistant-provider.js', './assistant-harness.js', './assistant-tools.js', './locales/assistant-edit.js',
+  './locales/assistant-provider.js', './locales/board-assistant.en.js', './locales/board-assistant.zh-CN.js',
   './depth-formation.js', './depth-formation-layout.js', './depth-formation.css', './locales/depth-formation.zh-CN.js', './locales/depth-formation.en.js',
   './depth-model.js', './model-values.js', './board-personnel.js', './depth-chart.js', './depth-chart.css',
   './personnel-groups.js', './personnel-groups.css', './locales/depth-chart.zh-CN.js', './locales/depth-chart.en.js',
