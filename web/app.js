@@ -121,6 +121,24 @@ function clearAssistantPreview() {
   assistantPreview = null;
   document.querySelector('#field .assistant-preview')?.remove();
 }
+function showAssistantHighlights(ids) {
+  document.querySelector('#field .assistant-highlights')?.remove();
+  const selected = new Set(Array.isArray(ids) ? ids : []);
+  if (!selected.size) return;
+  const stage = document.querySelector('#field .pitch-stage');
+  if (!stage) return;
+  const template = document.createElement('template');
+  template.innerHTML = fieldSVG(current(), viewSettings(), { prefix: 'assistant-highlight' });
+  const svg = template.content.firstElementChild;
+  svg.querySelectorAll(':scope > rect, :scope > .yard-lines, :scope > text, [data-zone], [data-annotation], #assistant-highlight-ball').forEach(node => node.remove());
+  svg.querySelectorAll('[data-player], [data-route]').forEach(node => {
+    if (!selected.has(node.dataset.player || node.dataset.route)) node.remove();
+    else node.style.filter = 'drop-shadow(0 0 12px #ffdb42)';
+  });
+  svg.classList.add('assistant-highlights');
+  Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '4' });
+  stage.append(svg);
+}
 function showAssistantPreview(play, original) {
   clearAssistantPreview();
   const stage = document.querySelector('#field .pitch-stage');
@@ -183,6 +201,7 @@ function mountBoardAssistant() {
       getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit()}),
       async onRequest({prompt, mode, previous, onTool, provider, model, apiKey, signal, locale}) {
         clearAssistantPreview();
+        document.querySelector('#field .assistant-highlights')?.remove();
         const play = current(), scope = assistantScope(), before = JSON.stringify(play);
         const workspace = cloudMode() ? shared?.current : null;
         if (cloudMode() && !workspace) throw Error(editBlockedMessage());
@@ -213,6 +232,10 @@ function mountBoardAssistant() {
         const operations = result.operations || [result.operation];
         onTool?.('build_preview');
         const change = buildAssistantEdit(current(), state.data.roster, operations, locale);
+        const zoneIds = change.play.zones.filter(zone => {
+          const original = play.zones.find(item => item.id === zone.id);
+          return !original || JSON.stringify(original) !== JSON.stringify(zone);
+        }).map(zone => zone.id);
         showAssistantPreview(change.play, play);
         return {kind: 'preview', message: result.summary || change.summary, changes: operations.map(op => describeAssistantChange(op, play, locale)),
           discard: clearAssistantPreview, rehearse: rehearseAssistantPreview,
@@ -225,20 +248,14 @@ function mountBoardAssistant() {
             tool = 'select';
             edit(p => Object.assign(p, change.play));
             const checkpoint = history.past.at(-1);
-            return {kind: 'edit', message: result.summary || change.summary, summary: result.summary || change.summary, operations, routeIds: change.routeIds || (change.routeId ? [change.routeId] : []), playerIds: [...new Set(operations.flatMap(op => [op.playerId, ...(op.playerIds || [])].filter(Boolean)))], undo() {
+            return {kind: 'edit', message: result.summary || change.summary, summary: result.summary || change.summary, operations, routeIds: change.routeIds || (change.routeId ? [change.routeId] : []), zoneIds, playerIds: [...new Set(operations.flatMap(op => [op.playerId, ...(op.playerIds || [])].filter(Boolean)))], undo() {
               if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
               restore(history.undo(state));
               return true;
             }};
           }};
       },
-      onHighlight(ids) {
-        document.querySelectorAll('#field [data-assistant-highlight]').forEach(node => { node.removeAttribute('data-assistant-highlight'); node.style.filter = ''; });
-        for (const id of ids || []) {
-          const node = [...document.querySelectorAll('#field [data-player], #field [data-route]')].find(item => item.dataset.player === id || item.dataset.route === id);
-          if (node) { node.setAttribute('data-assistant-highlight', ''); node.style.filter = 'drop-shadow(0 0 12px #ffdb42)'; }
-        }
-      },
+      onHighlight: showAssistantHighlights,
       onHandoff() {
         const play = current();
         if (demoAnalysisData) {
@@ -738,11 +755,29 @@ function deleteSelected() {
   if (!selection || !selectedObject()) return;
   const s = selection;
   if (s.type === 'player' && current().players.length <= 1) { toast(t("modal.keep_at_least_one_player"), { type: 'warning' }); return; }
+  const selectedRoute = s.type === 'route' ? current().routes.find(route => route.id === s.id) : null;
+  const player = selectedRoute?.kind === 'motion' ? current().players.find(item => item.id === selectedRoute.playerId) : null;
+  const motionEnd = selectedRoute?.points.at(-1);
+  const affected = player ? current().routes.filter(route => route.playerId === player.id && route.id !== selectedRoute.id &&
+    route.kind !== 'motion' && Math.hypot(route.points[0].x - motionEnd.x, route.points[0].y - motionEnd.y) <= .01) : [];
+  const wouldLeaveField = affected.some(route => route.points.some(point => {
+    const x = point.x + player.x - route.points[0].x, y = point.y + player.y - route.points[0].y;
+    return x < 0 || x > 100 || y < 0 || y > 100;
+  }));
+  if (wouldLeaveField) { toast(getLocale() === 'en' ? 'Removing this motion would move a route outside the field.' : '删除此预动会使路线超出球场，请先调整路线。', { type: 'warning' }); return; }
   selection = null;
   edit(p => {
     const removedRoute = s.type === 'route' ? p.routes.find(route => route.id === s.id) : null;
     const key = { player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]; p[key] = p[key].filter(x => x.id !== s.id);
-    if (removedRoute?.kind === 'motion') { const player = p.players.find(item => item.id === removedRoute.playerId); if (player) p.routes.filter(route => route.playerId === player.id && route.kind !== 'motion').forEach(route => { route.points[0] = {x: player.x, y: player.y}; }); }
+    if (removedRoute?.kind === 'motion') {
+      const player = p.players.find(item => item.id === removedRoute.playerId);
+      const end = removedRoute.points.at(-1);
+      if (player) p.routes.filter(route => route.playerId === player.id && route.kind !== 'motion' && Math.hypot(route.points[0].x - end.x, route.points[0].y - end.y) <= .01).forEach(route => {
+        const dx = player.x - route.points[0].x, dy = player.y - route.points[0].y;
+        route.points = route.points.map(point => ({x: point.x + dx, y: point.y + dy}));
+        route.delay = Math.max(0, route.delay - removedRoute.delay - removedRoute.duration);
+      });
+    }
     if (s.type === 'player') { p.routes = p.routes.filter(r => r.playerId !== s.id); if (p.ball.holderId === s.id) p.ball.holderId = p.players[0].id; if (p.ball.receiverId === s.id) p.ball.receiverId = ''; }
   }); toast(t("modal.object_deleted_undo_to_restore_it"), { type: 'success' });
 }

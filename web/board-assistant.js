@@ -244,7 +244,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       Promise.resolve().then(() => preview.apply()).then(result => {
         if (reply !== preview) return;
         reply = result; panel.classList.remove('ba-collapsed');
-        remember({instruction:requestInstruction, kind:'edit', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], playerIds:result.playerIds || []});
+        remember({instruction:requestInstruction, kind:'edit', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], zoneIds:result.zoneIds || [], playerIds:result.playerIds || []});
         outputView(); announce(result.message || copy().change);
       }).catch(error => { if (reply === preview) { b.disabled = false; announce(error?.message || copy().error, true); } });
     }

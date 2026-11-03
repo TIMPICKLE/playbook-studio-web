@@ -271,7 +271,7 @@ export function validatePlay(p) {
     if (!startsAtOwner && !startsAfterMotion) fail('路线起点与球员位置不一致');
     let blockTargets;
     if (r.kind === 'block' && r.blockTargets != null) {
-      blockTargets = array(r.blockTargets, 199, '阻挡目标').map(id);
+      blockTargets = array(r.blockTargets, 199, '阻挡目标').map(target => target === null ? null : id(target));
       if (blockTargets.length !== points.length - 1 || blockTargets.includes(r.playerId)) fail('阻挡目标与路线不匹配');
     }
     return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional, ...(r.kind === 'block' && r.stagedBlock === true ? { stagedBlock: true } : {}), ...(blockTargets ? { blockTargets } : {}) };

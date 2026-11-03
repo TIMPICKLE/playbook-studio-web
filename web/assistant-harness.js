@@ -1,5 +1,6 @@
 import { createBoardTools } from './assistant-tools.js';
 import { providerMessages } from './locales/assistant-provider.js';
+import { buildOperations } from './assistant-operations.js';
 
 export const BOARD_AGENT_LIMITS = Object.freeze({ modelCalls: 6, toolCalls: 10, parallelCalls: 5, replyTokens: 1800, transcriptBytes: 120000 });
 const instructions = `You are a football coaching assistant. Use read-only tools to inspect the board and find real player IDs before making proposals. Before answering a question about the current play, call read_board and ground the answer in its contents. Distinguish visible facts from tactical suggestions. If the diagram does not specify a read order, explicitly say it is unknown rather than claiming a first read. Use resolve_players with selectMany for explicit groups such as the OL. Do not guess when a target is missing or ambiguous. Search Madden by concepts, tags or similarToCurrent. Explain recommendations briefly and conditionally.
@@ -13,7 +14,7 @@ Operations may be block with playerId and targetIds, or playerIds, scheme and di
 Previous entries describe earlier work in the same editor; use current tools to confirm referenced IDs. Progress is determined by tools, never claim an edit is already applied.`;
 
 export function validateBoardReply(value, input, tools) {
-  const invalid = () => { throw new Error(providerMessages[input.locale].invalid); };
+  const invalid = (reason) => { throw new Error(reason || providerMessages[input.locale].invalid); };
   if ((input.mode === 'search' && value?.kind === 'edit') || ((input.mode === 'edit' || input.board.book === 'defense') && value?.kind === 'search')) invalid();
   const line = (s, max) => typeof s === 'string' ? s.trim().slice(0, max) : '';
   if (value?.kind === 'clarify' && line(value.message, 420)) return { kind: 'clarify', message: line(value.message, 420) };
@@ -40,29 +41,31 @@ export function validateBoardReply(value, input, tools) {
   if (value?.kind !== 'edit') invalid();
   const legacy = !value.operations && value.operation;
   const operations = legacy ? [value.operation] : value.operations;
-  if (!Array.isArray(operations) || !operations.length || operations.length > 32) invalid();
+  if (!Array.isArray(operations) || !operations.length || operations.length > 20) invalid('Expected 1–20 operations.');
   const kinds = ['block', 'route', 'motion', 'move_player', 'pass', 'zone', 'timing', 'remove_route', 'annotate'];
   const coordinate = n => Number.isFinite(n) && n >= 0 && n <= 100;
   for (const op of operations) {
     if (!op || typeof op !== 'object' || !kinds.includes(op.kind)) invalid();
     const ids = [op.playerId, op.receiverId, op.nearId, ...(Array.isArray(op.playerIds) ? op.playerIds : []), ...(Array.isArray(op.targetIds) ? op.targetIds : [])].filter(id => id != null);
     if (!ids.every(id => typeof id === 'string' && tools.resolved.has(id))) invalid();
-    if (op.routeId && (!tools.routeIds.has(op.routeId) || !op.playerId ||
-      !input.board.routes.some(route => route.id === op.routeId && route.playerId === op.playerId))) invalid();
+    const routeOwnerId = op.kind === 'pass' ? input.board.ball?.holderId : op.playerId;
+    if (op.routeId && (!tools.routeIds.has(op.routeId) || !routeOwnerId ||
+      !input.board.routes.some(route => route.id === op.routeId && route.playerId === routeOwnerId))) invalid();
     if (['route','motion','move_player','timing','remove_route'].includes(op.kind) && !op.playerId) invalid();
     if (op.kind === 'block') {
       const actors = op.playerIds || [op.playerId];
-      if (!actors.length || actors.length > 20 || actors.some(id => !id)) invalid();
+      if (!actors.length || actors.length > 11 || actors.some(id => !id)) invalid('A group block requires 1–11 players.');
       if (op.targetIds) {
         if (!Array.isArray(op.targetIds) || !op.targetIds.length || op.targetIds.length > 6 || new Set(op.targetIds).size !== op.targetIds.length) invalid();
         if (actors.some(id => op.targetIds.some(target => input.board.players.find(p => p.id === id)?.side === input.board.players.find(p => p.id === target)?.side))) invalid();
       } else if (!['zone','gap','pass_pro'].includes(op.scheme)) invalid();
     }
-    if (op.kind === 'route' && op.points && (!Array.isArray(op.points) || !op.points.length || op.points.length > 32 || !op.points.every(p => p && coordinate(p.x) && coordinate(p.y)))) invalid();
-    if (op.kind === 'route' && !op.points && (!['slant','out','in','dig','curl','comeback','hitch','post','corner','go','fade','seam','flat','wheel','drag','screen'].includes(op.concept) || !Number.isFinite(op.depthYards) || op.depthYards <= 0 || op.depthYards > 40 || (op.breakTo && !['inside','outside'].includes(op.breakTo)))) invalid();
+    if (op.kind === 'route' && op.points && (!Array.isArray(op.points) || !op.points.length || op.points.length > 32 || !op.points.every(p => p && coordinate(p.x) && coordinate(p.y)))) invalid('Invalid route waypoints.');
+    if (op.kind === 'route' && !op.points && (!['slant','out','in','dig','curl','comeback','hitch','post','corner','go','fade','seam','flat','wheel','drag','screen'].includes(op.concept) || !Number.isFinite(op.depthYards) || op.depthYards <= 0 || op.depthYards > 40 || (op.breakTo && !['inside','outside'].includes(op.breakTo)))) invalid('Invalid route concept or depth.');
     if (op.kind === 'pass' && !op.receiverId) invalid();
     if (op.kind === 'annotate' && (!op.nearId || !line(op.text, 300))) invalid();
   }
+  buildOperations({ ...input.board, ball: input.board.ball || {}, zones: input.board.zones || [], annotations: input.board.annotations || [] }, operations, {dryRun:true});
   if (legacy) return {kind:'edit', operation:operations[0]};
   return {kind:'edit', summary:line(value.summary, 500), operations};
 
@@ -119,10 +122,14 @@ export async function runBoardAssistant({ runtime, input, callModel, searchCatal
       try {
         if (typeof raw !== 'string' || raw.length > 32000) throw new Error(msg.invalid);
         result = validateBoardReply(JSON.parse(raw.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')), input, tools);
-      } catch {
-        if (state.repaired || state.modelCalls >= limits.modelCalls) throw new Error(msg.invalid);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : '';
+        if (state.repaired || state.modelCalls >= limits.modelCalls) {
+          const localized = msg.operationErrors?.[detail] || (input.locale === 'en' && providerMessages['zh-CN'].operationErrors[detail] ? detail : msg.invalid);
+          throw new Error(localized);
+        }
         conversation.push({ role: 'assistant', content: typeof raw === 'string' ? raw.slice(0, 3000) : '' },
-          { role: 'user', content: 'Invalid or ungrounded JSON. Inspect the required tools and retry with their exact IDs, or ask for clarification.' });
+          { role: 'user', content: 'Invalid or ungrounded JSON. ' + detail.slice(0, 200) + ' Inspect the required tools and retry with their exact IDs, or ask for clarification.' });
         return { next: 'model', repaired: true };
       }
       return { next: END };

@@ -19,6 +19,23 @@ test('partial names and decorated numbers retain ambiguity until a unique marker
   assert.equal(resolveBoardPlayer(players, { number: '12号' }).candidates[0].id, 'one');
 });
 
+test('Chinese name fragments find matches without guessing among shared names', () => {
+  const roster = [
+    { id: 'li', label: 'LB', name: '李小明', number: '12', side: 'defense' },
+    { id: 'zhang', label: 'LB', name: '张小明', number: '21', side: 'defense' },
+    { id: 'wang', label: 'WR', name: '王大伟', number: '8', side: 'offense' },
+    { id: 'english', label: 'LB', name: 'Avery Smith', number: '22', side: 'defense' },
+  ];
+  assert.equal(resolveBoardPlayer(roster, { name: '李小明' }).candidates[0].id, 'li');
+  assert.equal(resolveBoardPlayer(roster, { name: '大伟' }).candidates[0].id, 'wang');
+  assert.equal(resolveBoardPlayer(roster, { name: '李' }).candidates[0].id, 'li');
+  assert.equal(resolveBoardPlayer(roster, { name: '小明' }).status, 'ambiguous');
+  assert.equal(resolveBoardPlayer(roster, { name: '小明', selectMany: true }).status, 'ambiguous');
+  assert.equal(resolveBoardPlayer(roster, { name: '小明', number: '#21' }).candidates[0].id, 'zhang');
+  assert.equal(resolveBoardPlayer(roster, { name: 'Aver' }).status, 'missing');
+  assert.equal(resolveBoardPlayer(roster, { name: 'Smith' }).candidates[0].id, 'english');
+});
+
 test('position groups include all offensive linemen and safeties but avoid confusing safety with linebacker', () => {
   assert.equal(resolveBoardPlayer(players, { role: 'OL', side: 'offense' }).candidates.length, 5);
   assert.deepEqual(resolveBoardPlayer(players, { role: '安全卫' }).candidates.map(p => p.id), ['one', 'two']);

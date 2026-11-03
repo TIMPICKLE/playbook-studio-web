@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { makePlay } from '../web/model.js';
+import { dynamicBlockRoute, makePlay, validatePlay } from '../web/model.js';
 import { buildAssistantEdit } from '../web/assistant-edit.js';
 
 const play = () => makePlay({formation:'Gun Trips'});
@@ -81,11 +81,55 @@ test('blocking schemes choose distinct geometric assignments and return every ch
   const targets = ['zone','gap','pass_pro'].map(scheme => {
     const change = result(scheme);
     assert.equal(change.routeIds.length, 1);
-    return change.play.routes.find(r => r.id === change.routeIds[0]).blockTargets[0];
+    return change.play.routes.find(r => r.id === change.routeIds[0]).blockTargets.at(-1);
   });
   assert.deepEqual(targets, ['left-d','right-d','front-d']);
   const ids = ['LT','LG','C','RG','RT'].map(label => pick(input,label).id);
   assert.equal(buildAssistantEdit(input, [], [{kind:'block',playerIds:ids,scheme:'zone',direction:'left'}]).routeIds.length, 5);
+});
+
+test('pass protection takes a fixed setback before tracking a moving defender', () => {
+  const input = play(), c = pick(input, 'C');
+  const d = {id:'front-d',label:'DT',name:'',x:c.x,y:c.y - 8,side:'defense',shape:'circle',color:'#c4a5f5'};
+  input.players.push(d);
+  input.routes.push({id:'defender-route', playerId:d.id, kind:'route', color:d.color,
+    points:[{x:d.x,y:d.y},{x:d.x+10,y:d.y}],delay:0,duration:4,smooth:false,endCap:'arrow',optional:false});
+  const {play: edited} = buildAssistantEdit(input, [], [{kind:'block',playerIds:[c.id],scheme:'pass_pro',direction:'left'}]);
+  const reloaded = validatePlay(JSON.parse(JSON.stringify(edited)));
+  const block = reloaded.routes.find(r => r.playerId === c.id && r.kind === 'block');
+  assert.deepEqual(block.blockTargets, [null, d.id]);
+  assert.ok(block.points[1].y > block.points[0].y);
+  assert.ok(!block.stagedBlock);
+  const before = dynamicBlockRoute(reloaded, block, 0), after = dynamicBlockRoute(reloaded, block, 4);
+  assert.deepEqual(before.points[1], after.points[1]);
+  assert.notDeepEqual(before.points[2], after.points[2]);
+});
+
+test('adding, replacing and removing motion translates all following route points', () => {
+  const input = play(), c = pick(input, 'C');
+  const route = buildAssistantEdit(input, [], [{kind:'route',playerId:c.id,points:[{x:c.x+5,y:c.y-4},{x:c.x+9,y:c.y-8}]}]);
+  const original = route.play.routes.find(r => r.id === route.routeId);
+  const added = buildAssistantEdit(route.play, [], [{kind:'motion',playerId:c.id,type:'shift',toward:'left'}]);
+  const motion = added.play.routes.find(r => r.playerId === c.id && r.kind === 'motion');
+  const after = added.play.routes.find(r => r.id === route.routeId);
+  const dx = motion.points.at(-1).x - c.x, dy = motion.points.at(-1).y - c.y;
+  for (let i = 0; i < original.points.length; i++) {
+    assert.equal(after.points[i].x, original.points[i].x + dx);
+    assert.equal(after.points[i].y, original.points[i].y + dy);
+  }
+  assert.equal(after.delay, original.delay + motion.duration);
+  const replaced = buildAssistantEdit(added.play, [], [{kind:'motion',playerId:c.id,type:'shift',toward:'right'}]);
+  const replacement = replaced.play.routes.find(r => r.id === motion.id);
+  const newRoute = replaced.play.routes.find(r => r.id === route.routeId);
+  assert.deepEqual(newRoute.points[0], replacement.points.at(-1));
+  assert.ok(Math.abs((newRoute.points[2].x - newRoute.points[0].x) - (original.points[2].x - original.points[0].x)) < 1e-9);
+  const removed = buildAssistantEdit(replaced.play, [], [{kind:'remove_route',playerId:c.id,routeId:motion.id}]);
+  const finalRoute = removed.play.routes.find(r => r.id === route.routeId);
+  for (let i = 0; i < original.points.length; i++) {
+    assert.ok(Math.abs(finalRoute.points[i].x - original.points[i].x) < 1e-9);
+    assert.ok(Math.abs(finalRoute.points[i].y - original.points[i].y) < 1e-9);
+  }
+  assert.equal(finalRoute.delay, original.delay);
 });
 
 test('explicit route IDs target only the named player and preserve the requested route', () => {

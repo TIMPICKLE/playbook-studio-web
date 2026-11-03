@@ -108,6 +108,77 @@ test('invalid semantic route depth is returned to the model for repair', async (
   assert.equal(result.operations[0].depthYards,12);
 });
 
+test('domain-invalid motion is repaired before reaching the editor', async () => {
+  const input=boardAssistantInput({instruction:'C motion right',board,mode:'edit'});
+  let count=0;
+  const result=await runBoardAssistant({runtime,input,callModel:async()=>{
+    count++;
+    if(count===1)return call('resolve_player',{role:'C'});
+    if(count===2)return final({kind:'edit',operations:[{kind:'motion',playerId:'c',type:'jet',toward:'up'}]});
+    return final({kind:'edit',operations:[{kind:'motion',playerId:'c',type:'jet',toward:'right'}]});
+  }});
+  assert.equal(count,3);
+  assert.equal(result.operations[0].toward,'right');
+});
+
+test('domain validation retries invalid zone, timing, move, pass, motion and block parameters', async () => {
+  const cases=[
+    [{kind:'zone',preset:'wrong',side:'left'}, {kind:'zone',preset:'flat',side:'left'}, 'Invalid zone.'],
+    [{kind:'timing',playerId:'c',delay:-1,duration:2}, {kind:'timing',playerId:'c',delay:1,duration:2}, 'Invalid timing.'],
+    [{kind:'move_player',playerId:'c',dxYards:3}, {kind:'move_player',playerId:'c',dxYards:3,dyYards:0}, 'Invalid movement.'],
+    [{kind:'pass',receiverId:'c',throwAt:3,arriveAt:2}, {kind:'pass',receiverId:'c',throwAt:2,arriveAt:3}, 'Invalid pass timing.'],
+    [{kind:'motion',playerId:'c',type:'jet',toward:'up'}, {kind:'motion',playerId:'c',type:'jet',toward:'right'}, 'Invalid motion.'],
+    [{kind:'block',playerIds:['c'],scheme:'zone',direction:'up'}, {kind:'block',playerIds:['c'],scheme:'zone',direction:'left'}, 'Invalid blocking scheme.'],
+  ];
+  const source={...board,ball:{holderId:'lt',receiverId:'',passAt:1,arriveAt:2},routes:[{id:'route-c',playerId:'c',kind:'route',points:[{x:50,y:67},{x:50,y:50}],delay:0,duration:3}]};
+  for (const [invalid, valid, reason] of cases) {
+    const input=boardAssistantInput({instruction:'modify play',board:source,mode:'edit'});
+    let count=0;
+    const result=await runBoardAssistant({runtime,input,callModel:async messages=>{
+      count++;
+      if(count===1)return call('resolve_player',{role:'C'});
+      if(count===2)return final({kind:'edit',operations:[invalid]});
+      assert.match(messages.at(-1).content,new RegExp(reason.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+      return final({kind:'edit',operations:[valid]});
+    }});
+    assert.equal(count,3,reason);
+    assert.equal(result.operations[0].kind,valid.kind);
+  }
+});
+
+test('repeated invalid domain parameters produce a localized error', async () => {
+  const input=boardAssistantInput({instruction:'make a zone',board,mode:'edit',locale:'zh-CN'});
+  await assert.rejects(runBoardAssistant({runtime,input,callModel:async()=>final({kind:'edit',operations:[{kind:'zone',preset:'wrong',side:'left'}]})}),/防守区域类型或方向无效/);
+});
+
+test('too many group blockers are rejected before applying operations', async () => {
+  const line=Array.from({length:12},(_,i)=>({id:`ol${i}`,label:'LT',side:'offense',x:10+i*3,y:67}));
+  const input=boardAssistantInput({instruction:'OL blocks',board:{...board,players:line},mode:'edit'});
+  let count=0;
+  await assert.rejects(runBoardAssistant({runtime,input,callModel:async()=>{
+    count++;
+    if(count===1)return call('resolve_players',{selectors:[{role:'OL',selectMany:true}]});
+    return final({kind:'edit',operations:[{kind:'block',playerIds:line.map(p=>p.id),scheme:'zone',direction:'left'}]});
+  }}));
+});
+
+test('too many operations are rejected with localized limits', async () => {
+  const input=boardAssistantInput({instruction:'many zones',board,mode:'edit',locale:'zh-CN'});
+  const operations=Array.from({length:21},()=>({kind:'zone',preset:'flat',side:'left'}));
+  await assert.rejects(runBoardAssistant({runtime,input,callModel:async()=>final({kind:'edit',operations})}),/1 至 20 个操作/);
+});
+
+test('unavailable catalog metadata filters are absent from the model tool contract', async () => {
+  const input=boardAssistantInput({instruction:'find red zone plays',board,mode:'search'});
+  await runBoardAssistant({runtime,input,searchCatalog:async()=>[],callModel:async(_messages,tools)=>{
+    const properties=tools.find(tool=>tool.function.name==='search_madden').function.parameters.properties;
+    assert.equal('personnel' in properties,false);
+    assert.equal('playType' in properties,false);
+    assert.equal('situation' in properties,false);
+    return final({kind:'clarify',message:'The catalog has no situation metadata.'});
+  }});
+});
+
 test('similar results follow catalog ranking even when the model reverses them', async () => {
   const input=boardAssistantInput({instruction:'find similar plays',board});
   let count=0;

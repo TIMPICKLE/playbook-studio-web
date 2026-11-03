@@ -42,7 +42,8 @@ function roleMatches(player, role) {
 function nameMatches(value, query) {
   const tokens = norm(value).match(/[\p{L}\p{N}]+/gu) || [];
   const requested = norm(query).match(/[\p{L}\p{N}]+/gu) || [];
-  return requested.length > 0 && requested.every(token => tokens.includes(token));
+  return requested.length > 0 && requested.every(token => tokens.some(candidate =>
+    candidate === token || (/^\p{Script=Han}+$/u.test(token) && candidate.includes(token))));
 }
 const normalizedNumber = value => norm(value).replace(/^#\s*/, '').replace(/\s*号$/, '').trim();
 

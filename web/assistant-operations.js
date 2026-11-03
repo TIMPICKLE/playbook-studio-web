@@ -10,6 +10,12 @@ const fail = reason => { throw new Error(reason); };
 const actorFor = (play, id) => play.players.find(p => p.id === id) || fail('Player not found on this play.');
 const active = (play, id, kind) => play.routes.find(r => r.playerId === id && r.kind === kind && !r.optional);
 const primary = (play, id) => play.routes.find(r => r.playerId === id && ['route', 'block'].includes(r.kind) && !r.optional);
+function translateRouteTo(route, anchor) {
+  const dx = anchor.x - route.points[0].x, dy = anchor.y - route.points[0].y;
+  const translated = route.points.map(p => ({x: p.x + dx, y: p.y + dy}));
+  if (translated.some(p => p.x < 0 || p.x > 100 || p.y < 0 || p.y > 100)) fail('Moving the route would put a waypoint outside the field.');
+  route.points = translated;
+}
 function selectedRoute(play, op, kinds = ['route', 'block']) {
   if (!op.routeId) return primary(play, op.playerId);
   const route = play.routes.find(item => item.id === op.routeId);
@@ -78,7 +84,14 @@ function run(play, op) {
       const target = defenders[0];
       if (target) {
         assigned.add(target.id);
-        run(play, { kind: 'block', playerId:id, targetIds:[target.id] });
+        if (op.scheme === 'pass_pro') {
+          const old = primary(play, id), motion = active(play, id, 'motion');
+          const start = motion ? position(motion.points.at(-1)) : position(p);
+          const setback = point(start.x, start.y + 2 * YARDS_Y);
+          const route = baseRoute(p, old, 'block', [start, setback, contact(setback, target)], motion);
+          route.blockTargets = [null, target.id];
+          upsert(play, route, old);
+        } else run(play, { kind: 'block', playerId:id, targetIds:[target.id] });
       } else {
         const old = primary(play, id), motion = active(play, id, 'motion');
         const start = motion ? position(motion.points.at(-1)) : position(p);
@@ -125,7 +138,11 @@ function run(play, op) {
     const route = baseRoute(actor, old, 'motion', points); route.delay = 0; route.duration = op.type === 'shift' ? 1 : 2;
     upsert(play, route, old);
     const next = primary(play, actor.id);
-    if (next) { next.points[0] = position(points.at(-1)); next.delay = Math.max(next.delay, route.delay + route.duration); }
+    if (next) {
+      translateRouteTo(next, points.at(-1));
+      const previousMotionEnd = old ? old.delay + old.duration : 0;
+      next.delay = Math.max(0, next.delay - previousMotionEnd) + route.delay + route.duration;
+    }
     return route.id;
   }
   if (op.kind === 'move_player') {
@@ -149,7 +166,14 @@ function run(play, op) {
     const r = selectedRoute(play, op, ['route', 'block', 'motion']);
     if (!r) fail('No active route.');
     play.routes.splice(play.routes.indexOf(r), 1);
-    if (r.kind === 'motion') for (const route of play.routes.filter(item => item.playerId === actor.id && item.kind !== 'motion')) route.points[0] = position(actor);
+    if (r.kind === 'motion') {
+      const motionEnd = r.points.at(-1);
+      for (const route of play.routes.filter(item => item.playerId === actor.id && item.kind !== 'motion')) {
+        if (Math.hypot(route.points[0].x - motionEnd.x, route.points[0].y - motionEnd.y) > .01) continue;
+        translateRouteTo(route, actor);
+        route.delay = Math.max(0, route.delay - r.delay - r.duration);
+      }
+    }
     return;
   }
   if (op.kind === 'annotate') { if (typeof op.text !== 'string' || !op.text.trim() || op.text.length > 200) fail('Invalid annotation.'); play.annotations.push({id:uid(),x:field(actor.x + 3),y:field(actor.y - 3),text:op.text.trim()}); return; }
@@ -171,7 +195,7 @@ function run(play, op) {
   }
   fail('Unsupported operation.');
 }
-export function buildOperations(play, operations) {
+export function buildOperations(play, operations, {dryRun = false} = {}) {
   if (!Array.isArray(operations) || !operations.length || operations.length > 20) fail('Expected 1–20 operations.');
   const copy = structuredClone(play), changed = new Set(); let routeId;
   for (const op of operations) {
@@ -179,5 +203,5 @@ export function buildOperations(play, operations) {
     routeId = run(copy,op) || routeId;
     for (const route of copy.routes) if (before.get(route.id) !== JSON.stringify(route)) changed.add(route.id);
   }
-  return {play:validatePlay(copy),routeId,routeIds:[...changed],summary:operations.map(op => `${op.kind} · ${op.playerId || op.nearId || (op.playerIds || []).join(', ') || op.receiverId || ''}`).join('；')};
+  return {play:dryRun ? copy : validatePlay(copy),routeId,routeIds:[...changed],summary:operations.map(op => `${op.kind} · ${op.playerId || op.nearId || (op.playerIds || []).join(', ') || op.receiverId || ''}`).join('；')};
 }

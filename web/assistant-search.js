@@ -1,5 +1,5 @@
 import { getEditableEntry } from './madden-model.js';
-import { MADDEN_CONCEPT_TAGS } from './data/madden-search-tags.js';
+import { MADDEN_CONCEPT_TAGS, MADDEN_NAME_TAGS } from './data/madden-search-tags.js';
 import { boardConceptTags } from './madden-concepts.js';
 export { loadMaddenCatalog as loadAssistantCatalog } from './madden-catalog.js';
 
@@ -22,10 +22,18 @@ function traceEvidence(trace) {
   return `Editable trace: primary route start→finish (source px; right +x, downfield −y, LOS y=${trace.coordinateSystem.lineOfScrimmageY}): ${endpoints.join('; ')}.`;
 }
 
+const traceTags = Object.values(MADDEN_CONCEPT_TAGS);
+const tagFrequency = new Map();
+for (const tags of traceTags) for (const tag of new Set(tags)) tagFrequency.set(tag, (tagFrequency.get(tag) || 0) + 1);
+const tagWeight = tag => Math.log((traceTags.length + 1) / ((tagFrequency.get(tag) || 0) + 1));
+
 const asCandidate = (entry, trace) => ({
   id: entry.id, name: entry.name, team: entry.team, formation: entry.group + ' ' + entry.formation,
-  editable: !!trace, tags: MADDEN_CONCEPT_TAGS[entry.id] || [],
-  evidence: traceEvidence(trace) + (trace && MADDEN_CONCEPT_TAGS[entry.id]?.length ? ` Geometry-derived approximate tags: ${MADDEN_CONCEPT_TAGS[entry.id].join(', ')}.` : ''),
+  editable: !!trace,
+  tags: [...new Set([...(MADDEN_CONCEPT_TAGS[entry.id] || []), ...(MADDEN_NAME_TAGS[entry.id] || [])])],
+  geometryTags: MADDEN_CONCEPT_TAGS[entry.id] || [], nameTags: MADDEN_NAME_TAGS[entry.id] || [],
+  evidence: traceEvidence(trace) + (trace && MADDEN_CONCEPT_TAGS[entry.id]?.length ? ` Geometry-derived approximate tags: ${MADDEN_CONCEPT_TAGS[entry.id].join(', ')}.` : '') +
+    (trace && MADDEN_NAME_TAGS[entry.id]?.length ? ` Name-derived weak labels (not route confirmation): ${MADDEN_NAME_TAGS[entry.id].join(', ')}.` : ''),
 });
 
 // Catalog terms are supplied by the model's tool call, not inferred from the
@@ -51,7 +59,9 @@ export function searchMaddenCatalog(catalog, { concepts = [], tags = [], formati
     const name = searchable(entry.name);
     const hits = phrases.filter(phrase => containsPhrase(name, phrase));
     const conceptTags = MADDEN_CONCEPT_TAGS[entry.id] || [];
-    const tagHits = requestedTags.filter(tag => conceptTags.some(value => searchable(value) === tag));
+    const nameTags = MADDEN_NAME_TAGS[entry.id] || [];
+    const tagHits = requestedTags.filter(tag => [...conceptTags, ...nameTags].some(value => searchable(value) === tag));
+    const namedTagHits = requestedTags.filter(tag => nameTags.some(value => searchable(value) === tag));
     if ((phrases.length || requestedTags.length) && !hits.length && !tagHits.length) continue;
     const trace = getEditableEntry(entry.id);
     if (editableOnly && !trace) continue;
@@ -59,9 +69,11 @@ export function searchMaddenCatalog(catalog, { concepts = [], tags = [], formati
     // geometry to compare, so they cannot be ranked as similar on route evidence.
     if (similarToCurrent && !trace) continue;
     const sameFormation = similarToCurrent && searchable(board.formation) === searchable(entry.group + ' ' + entry.formation);
-    const commonTags = currentTags.filter(tag => conceptTags.includes(tag)).length;
-    if (similarToCurrent && !sameFormation && !commonTags) continue;
-    const score = Number(hits.includes(name)) * 8 + hits.length * 2 + tagHits.length * 3 + Number(!!trace) + Number(sameFormation) * 4 + commonTags * 3;
+    const commonTags = currentTags.filter(tag => conceptTags.includes(tag));
+    if (similarToCurrent && !sameFormation && !commonTags.length) continue;
+    // A common in/out route carries less evidence than a rare combination such
+    // as four verts. Name-derived weak labels do not contribute to similarity.
+    const score = Number(hits.includes(name)) * 8 + hits.length * 2 + tagHits.length * 3 + namedTagHits.length + Number(!!trace) + Number(sameFormation) * 4 + commonTags.reduce((sum, tag) => sum + tagWeight(tag), 0);
     ranked.push({ entry, trace, hits, score, sameFormation, sharedTags: currentTags.filter(tag => conceptTags.includes(tag)) });
   }
   ranked.sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id));

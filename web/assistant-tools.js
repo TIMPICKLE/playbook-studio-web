@@ -10,7 +10,7 @@ const fields = object({
   relation: { type: 'string', enum: ['in_front', 'nearest', 'left_of', 'right_of', 'outside_of', 'inside_of', 'over', 'strong_side', 'weak_side', 'receiver_number'] },
 });
 const filters = object({ concepts: { type: 'array', items: string, maxItems: 8 },
-  formation: string, tags: { type: 'array', items: string, maxItems: 8 }, personnel: string, playType: string, situation: string, similarToCurrent: {type:'boolean'}, team: { type: 'string', enum: ['eagles', 'ravens'] }, editableOnly: { type: 'boolean' } });
+  formation: string, tags: { type: 'array', items: string, maxItems: 8 }, similarToCurrent: {type:'boolean'}, team: { type: 'string', enum: ['eagles', 'ravens'] }, editableOnly: { type: 'boolean' } });
 
 function validValue(schema, value) {
   if (schema.type === 'object') return value && typeof value === 'object' && !Array.isArray(value) &&
