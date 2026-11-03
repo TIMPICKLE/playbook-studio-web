@@ -1,0 +1,53 @@
+name: "赞助合作 / Sponsorship"
+description: "向维护者提交个人、团队或企业赞助合作意向 / Discuss sponsorship with the maintainer."
+title: "[Sponsorship] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        此表单是公开的合作意向入口，不是付款入口。维护者 @TIMPICKLE 将在 Issue 中回复；随后双方确认私下联系渠道及条款。请勿填写支付信息、证件、合同或其他敏感资料。
+        This is a public inquiry, not a payment form. Maintainer @TIMPICKLE will respond here; agree on a private contact channel and terms afterward. Do not include payment details, identity documents, contracts, or other sensitive information.
+        展示需合作确认、支持落实及本人同意；可匿名，无自动展示或功能承诺。详见 README「赞助者」/ “Sponsors”。
+        Recognition requires confirmed cooperation, delivered support, and consent. Anonymity is available; no automatic placement or feature commitments. See the README Sponsors section.
+  - type: input
+    id: sponsor
+    attributes:
+      label: "个人 / 团队 / 企业名称 · Name"
+      description: "可使用公开名称或 GitHub 用户名 / A public name or GitHub handle is sufficient."
+    validations:
+      required: true
+  - type: dropdown
+    id: support
+    attributes:
+      label: "支持方式 · Type of support"
+      options:
+        - "资金赞助（需另行确认渠道）/ Financial (channel to be agreed)"
+        - "资源或服务支持 / Resources or services"
+        - "其他合作 / Other cooperation"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "合作意向 · Proposal"
+      description: "说明支持内容、合作目标及大致周期；可暂不提供金额。/ Describe support, goals, and approximate duration; amounts may be omitted."
+    validations:
+      required: true
+  - type: dropdown
+    id: recognition
+    attributes:
+      label: "期望展示方式 · Preferred recognition"
+      options:
+        - "稍后商议 / Discuss later"
+        - "署名 / Name credit"
+        - "名称或 Logo 与官网链接 / Name or logo with official website"
+        - "匿名 / Anonymous"
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgement
+    attributes:
+      label: "公开信息与合作流程 · Public information and process"
+      options:
+        - label: "我了解 Issue 为公开内容，意向提交不等于合作确认、付款或展示承诺。/ I understand this issue is public and an inquiry does not confirm cooperation, payment, or recognition."
+          required: true
