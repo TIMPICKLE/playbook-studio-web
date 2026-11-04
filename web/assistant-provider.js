@@ -1,5 +1,7 @@
 import { runBoardAssistant, BOARD_AGENT_LIMITS } from './assistant-harness.js';
 import { providerMessages } from './locales/assistant-provider.js';
+import { validatePlay, COLORS } from './model.js';
+import { submitResultTool } from './assistant-schema.js';
 
 export const DEFAULT_BOARD_MODEL = 'gpt-6.1-terra';
 const endpoints = new Map([
@@ -13,23 +15,25 @@ const validPoint = point => point && [point.x, point.y].every(n => Number.isFini
 export function boardAssistantInput({ instruction, board, locale, mode, previous }) {
   if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
     throw new Error(words(locale).instruction);
-  const players = (Array.isArray(board?.players) ? board.players : []).slice(0, 48)
-    .filter(p => validPoint(p) && typeof p.id === 'string')
-    .map(p => {
-      const name = text(p.name, 100);
-      return { id: p.id, label: text(p.label, 80), position: text(p.position, 40), side: p.side, x: p.x, y: p.y,
-        ...(p.number != null ? { number: text(String(p.number), 12) } : {}),
-        ...(name ? { name } : {}) };
-    });
+  const source = board?.play || board || {};
+  const rawPlayers = Array.isArray(source.players) ? source.players : [];
+  const players = rawPlayers.map(p => ({...p, name:p.name || '', color:p.color || COLORS[p.side] || COLORS.offense, shape:p.shape || (p.side === 'defense' ? 'square' : 'circle')}));
+  const routes = (source.routes || []).map(r => ({...r, color:r.color || players.find(p => p.id === r.playerId)?.color || COLORS.route,
+    delay:r.delay ?? 0, duration:r.duration ?? 4, endCap:r.endCap || (r.kind === 'block' ? 'bar' : 'arrow')}));
+  const play = validatePlay({...source, id:source.id || board?.playId || 'assistant-play', title:source.title || 'Current play', book:source.book || 'offense',
+    formation:source.formation || 'Custom', category:source.category || 'Custom', personnel:source.personnel || 'Custom', notes:source.notes || '', createdAt:source.createdAt || '',
+    players, routes, zones:source.zones || [], annotations:source.annotations || [],
+    ball:source.ball || {holderId:players[0]?.id || '',receiverId:'',passAt:2,arriveAt:3}});
+  const compactPlayers = play.players.map(p => {
+    const original = (board?.players || rawPlayers).find(item => item.id === p.id) || p;
+    return {...p, name:text(original.name || p.name,100), position:text(original.position || p.label,40), ...(original.number != null ? {number:text(String(original.number),12)} : {})};
+  });
   const selected = board?.selectedPlayerId;
-  const routes = (Array.isArray(board?.routes) ? board.routes : []).slice(0, 100)
-    .filter(r => players.some(p => p.id === r?.playerId) && Array.isArray(r.points))
-    .map(r => ({ id: text(r.id, 100), playerId: r.playerId, kind: text(r.kind, 16), optional: !!r.optional, delay: r.delay, duration: r.duration, blockTargets: r.blockTargets,
-      points: r.points.filter(validPoint).slice(0, 32).map(({ x, y }) => ({ x, y })) }));
-  return { instruction: instruction.trim(), locale: locale === 'en' ? 'en' : 'zh-CN', mode: ['edit', 'search'].includes(mode) ? mode : 'auto',
-    previous: Array.isArray(previous) ? previous.slice(-5) : [],
-    board: { playId: text(board?.playId ?? board?.id, 100), title: text(board?.title, 120), book: board?.book, formation: board?.formation, ball: board?.ball, zones: board?.zones || [], annotations: board?.annotations || [], geometry: { losY: 67, xUnitsPerYard: 1.875, yUnitsPerYard: 2, offenseDirection: 'decreasing_y' }, players, routes,
-      ...(players.some(p => p.id === selected) ? { selectedPlayerId: selected } : {}) } };
+  return {instruction:instruction.trim(),locale:locale === 'en' ? 'en' : 'zh-CN',mode:['edit','search'].includes(mode) ? mode : 'auto',
+    previous:Array.isArray(previous) ? previous.slice(-5) : [],
+    board:{...play, playId:play.id, players:compactPlayers, play,
+      geometry:{losY:67,xUnitsPerYard:1.875,yUnitsPerYard:2,offenseDirection:'decreasing_y'},
+      ...(play.players.some(p => p.id === selected) ? {selectedPlayerId:selected} : {})}};
 }
 
 function anthropicMessages(messages) {
@@ -45,10 +49,10 @@ function anthropicMessages(messages) {
   return out;
 }
 
-function transport(config, locale, fetchImpl, readResponse, signal) {
+function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {
   const anthropic = config.protocol === 'anthropic';
   const max = BOARD_AGENT_LIMITS.replyTokens;
-  return async (messages, definitions, allowTools) => {
+  return async (messages, definitions, allowTools, {forceSubmit = false} = {}) => {
     const headers = { 'Content-Type': 'application/json' };
     let payload;
     if (anthropic) {
@@ -56,53 +60,69 @@ function transport(config, locale, fetchImpl, readResponse, signal) {
       headers['anthropic-version'] = '2023-06-01';
       payload = { model: config.model, system: messages[0].content, messages: anthropicMessages(messages), max_tokens: max,
         tools: definitions.map(({ function: f }) => ({ name: f.name, description: f.description, input_schema: f.parameters })),
-        tool_choice: { type: allowTools ? 'auto' : 'none' } };
+        tool_choice: forceSubmit ? {type:'tool',name:'submit_result'} : {type:'auto'} };
     } else {
       headers.Authorization = 'Bearer ' + config.apiKey;
-      payload = { model: config.model, messages, tools: definitions, tool_choice: allowTools ? 'auto' : 'none',
+      payload = { model: config.model, messages, tools: definitions, tool_choice: forceSubmit ? {type:'function',function:{name:'submit_result'}} : 'auto',
         ...(config.provider === 'openai' ? { max_completion_tokens: max } : { max_tokens: max }) };
     }
     // Terra's Chat Completions endpoint accepts function tools with reasoning disabled.
     if (config.provider === 'openai' && config.model === 'gpt-6.1-terra') payload.reasoning_effort = 'none';
     if (config.provider === 'deepseek') payload.thinking = { type: 'disabled' };
-    let response;
-    try { response = await fetchImpl(config.endpoint, { method: 'POST', headers, credentials: 'omit', redirect: 'error', body: JSON.stringify(payload), signal }); }
-    catch { throw new Error(signal.aborted ? words(locale).timeout : words(locale).network); }
-    if (!response.ok) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
-    let data;
+    const send = async body => {
+      try { onRequest?.(); return await fetchImpl(config.endpoint, {method:'POST',headers,credentials:'omit',redirect:'error',body:JSON.stringify(body),signal}); }
+      catch { throw new Error(signal.aborted ? words(locale).timeout : words(locale).network); }
+    };
+    let response = await send(payload);
+    let data, textFallback = false;
+    if (!response.ok) {
+      let errorPayload;
+      try { errorPayload = await readResponse(response); } catch { errorPayload = {}; }
+      const detail = String(errorPayload?.error?.message || errorPayload?.message || '');
+      const unsupportedChoice = forceSubmit && [400,422].includes(response.status) &&
+        /tool[_ -]?choice|forced? tool|function selection/i.test(detail) && /not supported|unsupported|does not support|not allowed/i.test(detail);
+      if (!unsupportedChoice) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
+      textFallback = true;
+      const {tools,tool_choice,...fallback} = payload;
+      fallback.messages = [...payload.messages,{role:'user',content:'This provider cannot force a tool. Return only the inner result object as JSON according to this generated contract: '+JSON.stringify(submitResultTool.function.parameters.properties.result)}];
+      response = await send(fallback);
+      if (!response.ok) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
+    }
     try { data = await readResponse(response); } catch { throw new Error(words(locale).invalid); }
     if (anthropic && Array.isArray(data?.content)) {
       const calls = data.content.filter(b => b.type === 'tool_use').map(b => ({ id: b.id, type: 'function', function: { name: b.name, arguments: JSON.stringify(b.input) } }));
-      return { role: 'assistant', anthropicContent: data.content, content: data.content.filter(b => b.type === 'text').map(b => b.text).join(''), tool_calls: calls };
+      return { role: 'assistant', textFallback, anthropicContent: data.content, content: data.content.filter(b => b.type === 'text').map(b => b.text).join(''), tool_calls: calls };
     }
     const m = data?.choices?.[0]?.message;
     if (!m || (m.tool_calls != null && !Array.isArray(m.tool_calls))) throw new Error(words(locale).invalid);
-    return { role: 'assistant', content: typeof m.content === 'string' ? m.content : null,
+    return { role: 'assistant', textFallback, content: typeof m.content === 'string' ? m.content : null,
       ...(Array.isArray(m.tool_calls) && m.tool_calls.length ? { tool_calls: m.tool_calls } : {}),
       ...(typeof m.reasoning_content === 'string' ? { reasoning_content: m.reasoning_content } : {}) };
   };
 }
 
-export async function invokeBoardModel(config, input, { signal, fetchImpl = fetch, readResponse = r => r.json(), runtime, searchCatalog, onTool, reauthorize } = {}) {
+export async function invokeBoardModel(config, input, { signal, fetchImpl = fetch, readResponse = r => r.json(), runtime, searchCatalog, onTool, onEvent, reauthorize } = {}) {
   const run = new AbortController();
   const abort = () => run.abort();
   signal?.addEventListener('abort', abort, { once: true });
   if (signal?.aborted) abort();
   const timer = setTimeout(abort, 90000);
   try {
-    const send = transport(config, input.locale, fetchImpl, readResponse, run.signal);
-    return await runBoardAssistant({ input, runtime, searchCatalog, signal: run.signal, onTool,
-      async callModel(messages, tools, allowTools) {
+    let providerCalls = 0;
+    const send = transport(config, input.locale, fetchImpl, readResponse, run.signal, () => providerCalls++);
+    const result = await runBoardAssistant({ input, runtime, searchCatalog, signal: run.signal, onTool, onEvent,
+      async callModel(messages, tools, allowTools, options) {
         if (reauthorize) await reauthorize();
-        return send(messages, tools, allowTools);
+        return send(messages, tools, allowTools, options);
       } });
+    return {...result,providerCalls};
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener('abort', abort);
   }
 }
 
-export async function requestBoardAssistant({ instruction, board, locale, mode, previous, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool }) {
+export async function requestBoardAssistant({ instruction, board, locale, mode, previous, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool, onEvent }) {
   const input = boardAssistantInput({ instruction, board, locale, mode, previous });
   const provider = model?.provider || 'openai';
   const modelId = model?.model?.trim() || (provider === 'openai' ? DEFAULT_BOARD_MODEL : '');
@@ -111,7 +131,7 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
   const config = { ...model, provider, model: modelId, apiKey };
   if (workspace) {
     const path = '/api/workspaces/' + encodeURIComponent(workspace.id) + '/board-assistant';
-    if (!onTool) return request(path, {method:'POST', body:{...input, model:config, revision:workspace.revision}, signal});
+    if (!onTool && !onEvent) return request(path, {method:'POST', body:{...input, model:config, revision:workspace.revision}, signal});
     const response = await (fetchImpl || fetch)(path, {method:'POST', credentials:'same-origin', cache:'no-store',
       headers:{'Content-Type':'application/json'}, body:JSON.stringify({...input, model:config, revision:workspace.revision, stream:true}), signal});
     if (!response.ok) {
@@ -127,7 +147,8 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
       for (const line of lines) {
         if (!line) continue;
         const event = JSON.parse(line);
-        if (event.type === 'tool') onTool(event.name, event.args);
+        if (event.type === 'tool') onTool?.(event.name,event.args);
+        if (event.type === 'trace') onEvent?.(event.event);
         if (event.type === 'result') result = event.result;
         if (event.type === 'error') throw Object.assign(new Error(event.error), {status:event.status});
       }
@@ -143,6 +164,6 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
     return searchMaddenCatalog(await (loadCatalog || loadAssistantCatalog)(), args, options);
   };
   return invokeBoardModel({ ...config, protocol: 'openai', endpoint }, input, {
-    runtime: runtime || await import('./vendor/assistant-langgraph.js'), signal, fetchImpl, searchCatalog, onTool,
+    runtime: runtime || await import('./vendor/assistant-langgraph.js'), signal, fetchImpl, searchCatalog, onTool, onEvent,
   });
 }

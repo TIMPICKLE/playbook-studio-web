@@ -12,7 +12,7 @@ const board = {playId:'p',players:[
   {id:'l',label:'LB',name:'Avery Smith',side:'defense',x:48,y:40},
 ],routes:[],book:'offense'};
 const call = (name,args) => ({role:'assistant',content:null,tool_calls:[{id:'a',type:'function',function:{name,arguments:JSON.stringify(args)}}]});
-const final = data => ({role:'assistant',content:JSON.stringify(data)});
+const final = result => call('submit_result', {result});
 test('mode scopes tools and keeps full names, context and previous followups', async () => {
   const input = boardAssistantInput({instruction:'find Avery',board,mode:'search',previous:[{instruction:'prior',summary:'done'}]});
   assert.equal(input.board.players.find(p=>p.id==='l').name,'Avery Smith');
@@ -22,7 +22,7 @@ test('mode scopes tools and keeps full names, context and previous followups', a
     assert.equal(JSON.parse(messages[1].content).previous[0].instruction,'prior');
     return final({kind:'clarify',message:'which one?'});
   }});
-  assert.deepEqual(definitions,['search_madden']);
+  assert.deepEqual(definitions,['search_madden','submit_result']);
   assert.equal(result.kind,'clarify');
 });
 test('group resolution grounds an entire atomic operations array', async () => {
@@ -31,7 +31,9 @@ test('group resolution grounds an entire atomic operations array', async () => {
   const result=await runBoardAssistant({runtime,input,callModel:async()=>{
     count++;
     if(count===1)return call('resolve_players',{selectors:[{role:'OL',side:'offense',selectMany:true}]});
-    return final({kind:'edit',summary:'line left',operations:[{kind:'block',playerIds:['c','lt'],scheme:'zone',direction:'left'}]});
+    const operations=[{kind:'block',playerIds:['c','lt'],scheme:'zone',direction:'left'}];
+    if(count===2)return call('preview_edit',{operations});
+    return final({kind:'edit',summary:'line left',operations});
   }});
   assert.deepEqual(result.operations[0].playerIds,['c','lt']);
 });
@@ -43,7 +45,7 @@ test('static provider reports each tool event before final result', async () => 
   const progress=[];let count=0;
   const result=await requestBoardAssistant({instruction:'identify Avery',board,mode:'edit',model:{provider:'openai',apiKey:'test'},onTool:name=>progress.push(name),runtime,
     fetchImpl:async()=>Response.json({choices:[{message:++count===1?call('resolve_player',{name:'Avery',role:'LB'}):count===2?call('read_board',{}):final({kind:'answer',message:'Avery',highlights:['l']})}]})});
-  assert.deepEqual(progress,['resolve_player','read_board']);
+  assert.deepEqual(progress,['resolve_player','read_board','submit_result']);
   assert.equal(result.kind,'answer');
 });
 test('a board answer must inspect the board before it can be returned', async () => {
@@ -102,9 +104,11 @@ test('invalid semantic route depth is returned to the model for repair', async (
     count++;
     if(count===1)return call('resolve_player',{role:'C'});
     if(count===2)return final({kind:'edit',operations:[{kind:'route',playerId:'c',concept:'dig'}]});
-    return final({kind:'edit',operations:[{kind:'route',playerId:'c',concept:'dig',depthYards:12}]});
+    const operations=[{kind:'route',playerId:'c',concept:'dig',depthYards:12}];
+    if(count===3)return call('preview_edit',{operations});
+    return final({kind:'edit',operations});
   }});
-  assert.equal(count,3);
+  assert.equal(count,4);
   assert.equal(result.operations[0].depthYards,12);
 });
 
@@ -115,9 +119,11 @@ test('domain-invalid motion is repaired before reaching the editor', async () =>
     count++;
     if(count===1)return call('resolve_player',{role:'C'});
     if(count===2)return final({kind:'edit',operations:[{kind:'motion',playerId:'c',type:'jet',toward:'up'}]});
-    return final({kind:'edit',operations:[{kind:'motion',playerId:'c',type:'jet',toward:'right'}]});
+    const operations=[{kind:'motion',playerId:'c',type:'jet',toward:'right'}];
+    if(count===3)return call('preview_edit',{operations});
+    return final({kind:'edit',operations});
   }});
-  assert.equal(count,3);
+  assert.equal(count,4);
   assert.equal(result.operations[0].toward,'right');
 });
 
@@ -125,7 +131,7 @@ test('domain validation retries invalid zone, timing, move, pass, motion and blo
   const cases=[
     [{kind:'zone',preset:'wrong',side:'left'}, {kind:'zone',preset:'flat',side:'left'}, 'Invalid zone.'],
     [{kind:'timing',playerId:'c',delay:-1,duration:2}, {kind:'timing',playerId:'c',delay:1,duration:2}, 'Invalid timing.'],
-    [{kind:'move_player',playerId:'c',dxYards:3}, {kind:'move_player',playerId:'c',dxYards:3,dyYards:0}, 'Invalid movement.'],
+    [{kind:'move_player',playerId:'c',dxYards:'three'}, {kind:'move_player',playerId:'c',dxYards:3,dyYards:0}, 'Invalid movement.'],
     [{kind:'pass',receiverId:'c',throwAt:3,arriveAt:2}, {kind:'pass',receiverId:'c',throwAt:2,arriveAt:3}, 'Invalid pass timing.'],
     [{kind:'motion',playerId:'c',type:'jet',toward:'up'}, {kind:'motion',playerId:'c',type:'jet',toward:'right'}, 'Invalid motion.'],
     [{kind:'block',playerIds:['c'],scheme:'zone',direction:'up'}, {kind:'block',playerIds:['c'],scheme:'zone',direction:'left'}, 'Invalid blocking scheme.'],
@@ -138,10 +144,13 @@ test('domain validation retries invalid zone, timing, move, pass, motion and blo
       count++;
       if(count===1)return call('resolve_player',{role:'C'});
       if(count===2)return final({kind:'edit',operations:[invalid]});
-      assert.match(messages.at(-1).content,new RegExp(reason.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+      if(count===3) {
+        assert.match(messages.at(-1).content,new RegExp(reason.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+        return call('preview_edit',{operations:[valid]});
+      }
       return final({kind:'edit',operations:[valid]});
     }});
-    assert.equal(count,3,reason);
+    assert.equal(count,4,reason);
     assert.equal(result.operations[0].kind,valid.kind);
   }
 });
@@ -200,7 +209,9 @@ test('a follow-up sees the previous edit and the current route and deepens the s
   const first=await runBoardAssistant({runtime,input:firstInput,callModel:async()=>{
     step++;
     if(step===1)return call('resolve_player',{role:'X'});
-    return final({kind:'edit',summary:'10 yard dig',operations:[{kind:'route',playerId:actor.id,concept:'dig',depthYards:10,breakTo:'inside'}]});
+    const operations=[{kind:'route',playerId:actor.id,concept:'dig',depthYards:10,breakTo:'inside'}];
+    if(step===2)return call('preview_edit',{operations});
+    return final({kind:'edit',summary:'10 yard dig',operations});
   }});
   const applied=buildAssistantEdit(play,[],first.operations);
   const previous=[{instruction:'X runs a 10 yard dig',kind:'edit',summary:first.summary,operations:first.operations,routeIds:[applied.routeId],playerIds:[actor.id]}];
@@ -217,7 +228,9 @@ test('a follow-up sees the previous edit and the current route and deepens the s
       assert.ok(current.routes.some(route=>route.id===recorded.routeIds[0] && route.playerId===actor.id));
       return call('resolve_player',{role:'X'});
     }
-    return final({kind:'edit',summary:'12 yard dig',operations:[{kind:'route',playerId:actor.id,routeId:recorded.routeIds[0],concept:'dig',depthYards:recorded.operations[0].depthYards+2,breakTo:'inside'}]});
+    const operations=[{kind:'route',playerId:actor.id,routeId:recorded.routeIds[0],concept:'dig',depthYards:recorded.operations[0].depthYards+2,breakTo:'inside'}];
+    if(step===3)return call('preview_edit',{operations});
+    return final({kind:'edit',summary:'12 yard dig',operations});
   }});
   const deeper=buildAssistantEdit(applied.play,[],second.operations);
   assert.equal(deeper.routeId,applied.routeId);

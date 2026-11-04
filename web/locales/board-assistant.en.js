@@ -1,4 +1,5 @@
 export default {
+  viewProcess: 'View process', traceTool: 'Tool', traceValidation: 'Validation repair', traceResult: 'Result',
   clearMode: 'Clear mode', apply: 'Apply', discard: 'Discard', rehearse: 'Preview rehearsal', discarded: 'Preview discarded.', expand: 'Show preview', handoff: 'Analyze matchup',
   toolProgress: {read_board:'Reading the board…', resolve_player:'Finding', resolve_players:'Finding players', search_madden:'Searching the Madden library…', build_preview:'Preparing the preview…'},
   title: 'Board assistant', open: 'Open AI board assistant', close: 'Collapse assistant', settings: 'Model settings', move: 'Move panel',

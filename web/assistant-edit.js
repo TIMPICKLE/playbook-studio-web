@@ -1,5 +1,4 @@
-import { buildOperations } from './assistant-operations.js';
-import { editMessages } from './locales/assistant-edit.js';
+import { proposeEdit } from './assistant-proposal.js';
 
 const norm = value => String(value ?? '').normalize('NFKC').trim().toLowerCase();
 const positionGroups = new Map([
@@ -16,12 +15,6 @@ const positionGroups = new Map([
   ['edge', ['de', 'le', 're', 'olb', 'edge']]
 ]);
 
-function message(locale, key, values = {}) {
-  const template = editMessages[locale === 'en' ? 'en' : 'zh-CN'][key];
-  return template.replace(/\{(\w+)\}/g, (_, field) => values[field] ?? '');
-}
-function reject(locale, key, values) { throw new Error(message(locale, key, values)); }
-
 export function assistantPlayers(play, roster = []) {
   const byId = new Map(roster.map(person => [person.id, person]));
   return play.players.map(({ id, label, name, side, x, y, rosterId }) => {
@@ -30,7 +23,6 @@ export function assistantPlayers(play, roster = []) {
   });
 }
 
-const display = player => [player.label, player.name, player.number && '#' + player.number].filter(Boolean).join(' ');
 function roleMatches(player, role) {
   if (norm(player.label) === role) return true;
   const aliases = { '安全卫': 's', '进攻锋线': 'ol', '防守锋线': 'dl', '线卫': 'lb', '角卫': 'cb', '跑卫': 'rb', '外接手': 'wr', '近端锋': 'te' };
@@ -122,16 +114,7 @@ export function resolveBoardPlayer(players, selector) {
   return { status: candidates.length === 1 || (selectMany && !name && !number) ? 'found' : 'ambiguous', candidates };
 }
 
-// Build changes on a copy and validate only after the entire group succeeds.
+// Legacy callers share the same fully validated proposal engine.
 export function buildAssistantEdit(play, roster, operation, locale = 'zh-CN') {
-  if (play.reference) reject(locale, 'reference');
-  const ops = Array.isArray(operation) ? operation : [operation];
-  const result = buildOperations(play, ops);
-  const players = assistantPlayers(play, roster);
-  const displayId = id => display(players.find(player => player.id === id) || {label: id});
-  result.summary = ops.map(op => op.kind === 'block' && Array.isArray(op.targetIds)
-    ? message(locale, 'block', {actor: displayId(op.playerId), targets: op.targetIds.map(displayId).join(' → ')})
-    : op.kind === 'route' ? message(locale, 'route', {actor: displayId(op.playerId), count: op.points?.length || 1})
-      : `${op.kind} · ${(op.playerIds || [op.playerId || op.nearId || op.receiverId]).filter(Boolean).map(displayId).join(', ')}`).join('；');
-  return result;
+  return proposeEdit(play, Array.isArray(operation) ? operation : [operation], { roster, locale });
 }

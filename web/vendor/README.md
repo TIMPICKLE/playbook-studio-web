@@ -27,3 +27,7 @@
 ## LangGraph 1.5.3 browser runtime
 
 The static board assistant lazy-loads the ESM browser graph from `assistant-langgraph.js`. Run `node scripts/bundle-board-agent.mjs` after installing the locked dependencies to regenerate it and its license notices. The Worker imports LangGraph from npm.
+
+## Zod board contracts
+
+`assistant-zod.js` bundles the locked Zod dependency for the shared board result schemas and JSON schema generation. Regenerate it with `node scripts/bundle-board-schema.mjs`. The MIT license is in `assistant-zod.NOTICES.txt`.
