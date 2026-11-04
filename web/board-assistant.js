@@ -27,7 +27,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
         <button type="button" class="ba-pill" data-ba="done" data-text="done"></button></div>
         <div class="ba-output" hidden></div><div class="ba-welcome"><strong data-ba-guide></strong><div class="ba-examples">
         <button class="ba-pill" type="button" data-ba="edit" data-text="edit"></button>
-        <button class="ba-pill" type="button" data-ba="search" data-text="search"></button></div></div></div>
+        <button class="ba-pill" type="button" data-ba="search" data-text="search"></button></div></div>
+        <details class="ba-trace" hidden><summary data-ba-trace-title></summary><ol class="ba-trace-list"></ol></details></div>
       <footer class="ba-footer"><button type="button" class="ba-mode ba-pill" data-ba="clear-mode" hidden></button><div class="ba-status" role="status" aria-live="polite"></div>
         <div class="ba-compose"><textarea rows="2" maxlength="1600" data-ba-prompt></textarea>
         <div class="ba-controls"><button type="button" class="ba-icon" data-ba="mic">${glyph('mic')}</button>
@@ -38,9 +39,54 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   const status = q('.ba-status'), key = q('[data-ba-key]'), model = q('[data-ba-model]'), provider = q('[data-ba-provider]');
   const Speech = win.SpeechRecognition || win.webkitSpeechRecognition;
   let scope, locale, pending, recognition, reply, clarification = '', selectedMode = 'auto', destroyed = false;
-  let previous = [], requestInstruction = '';
+  let previous = [], requestInstruction = '', trace = [], runNumber = 0;
   const remember = record => { previous = [...previous, record].slice(-5); };
-  function clearPreview() { if (reply?.kind === 'preview') reply.discard?.(); }
+  function clearPreview(keepRecord = true) {
+    if (reply?.kind !== 'preview') return;
+    if (keepRecord) remember({instruction:requestInstruction, kind:'edit', status:'discarded',
+      summary:reply.summary || reply.message || '', operations:reply.operations || [],
+      routeIds:reply.routeIds || [], zoneIds:reply.zoneIds || [], playerIds:reply.playerIds || []});
+    reply.discard?.();
+  }
+  function safeTraceValue(value, depth = 0) {
+    if (depth > 5) return '…';
+    if (typeof value === 'string') {
+      const credential = key.value.trim();
+      return (credential ? value.split(credential).join('[redacted]') : value).slice(0, 2400);
+    }
+    if (Array.isArray(value)) return value.slice(0, 32).map(item => safeTraceValue(item, depth + 1));
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).slice(0, 40)
+      .filter(([name]) => !/api.?key|authorization|password|secret|token|reasoning|thinking/i.test(name))
+      .map(([name, item]) => [name, safeTraceValue(item, depth + 1)]));
+    return ['number','boolean'].includes(typeof value) || value === null ? value : undefined;
+  }
+  function traceView() {
+    const details = q('.ba-trace'), list = q('.ba-trace-list'), lang = copy();
+    details.hidden = !trace.length || !config.hidden;
+    q('[data-ba-trace-title]').textContent = `${lang.viewProcess} · ${trace.length}`;
+    list.replaceChildren();
+    for (const entry of trace) {
+      const item = doc.createElement('li'), title = doc.createElement('strong');
+      const label = entry.type === 'tool' ? lang.traceTool : entry.type === 'validation_error' ? lang.traceValidation : lang.traceResult;
+      title.textContent = `${entry.run} · ${label}${entry.name ? ' · ' + entry.name : entry.kind ? ' · ' + entry.kind : ''}`;
+      item.append(title);
+      if (entry.args !== undefined) { const params = doc.createElement('pre'); params.textContent = JSON.stringify(entry.args, null, 2).slice(0, 6000); item.append(params); }
+      if (entry.summary || entry.error) { const text = doc.createElement('p'); text.textContent = entry.error || entry.summary; item.append(text); }
+      if (entry.type === 'validation_error') item.classList.add('ba-trace-error');
+      list.append(item);
+    }
+  }
+  function recordEvent(event) {
+    if (!event || !['tool','validation_error','result'].includes(event.type)) return;
+    const entry = {type:event.type, run:runNumber};
+    if (typeof event.name === 'string') entry.name = safeTraceValue(event.name);
+    if (event.type === 'tool' && event.args !== undefined) entry.args = safeTraceValue(event.args);
+    if (typeof event.kind === 'string') entry.kind = safeTraceValue(event.kind);
+    if (typeof event.summary === 'string') entry.summary = safeTraceValue(event.summary);
+    if (typeof event.error === 'string') entry.error = safeTraceValue(event.error);
+    trace = [...trace, entry].filter(item => item.run > runNumber - 5).slice(-100);
+    traceView();
+  }
 
   function announce(message = '', error = false, spokenOnly = false) {
     status.textContent = message;
@@ -68,6 +114,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   }
   function outputView() {
     const lang = copy();
+    traceView();
     output.replaceChildren();
     output.hidden = !reply || !config.hidden;
     q('.ba-welcome').hidden = !!reply || !config.hidden;
@@ -114,7 +161,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     stopSpeech(); updateButtons(); announce();
   }
   function reset() {
-    cancel(); clearPreview(); clarification = ''; selectedMode = 'auto'; reply = null; previous = [];
+    cancel(); clearPreview(false); clarification = ''; selectedMode = 'auto'; reply = null; previous = []; trace = []; runNumber = 0;
+    q('.ba-trace').open = false;
     prompt.value = ''; prompt.placeholder = copy().prompt;
     outputView(); updateButtons();
   }
@@ -165,11 +213,13 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     pending = control;
     const instruction = text;
     clearPreview(); requestInstruction = instruction;
+    runNumber++;
     const progress = [];
     config.hidden = true; reply = null; outputView(); updateButtons(); announce(lang.loading);
     try {
       const result = await onRequest({prompt:instruction, mode:selectedMode, provider:provider.value, model:model.value.trim(),
         apiKey:key.value.trim(), signal:control.signal, locale:getLocale(), previous:previous.slice(),
+        onEvent(event) { if (pending === control && !control.signal.aborted && requestScope === getContext().scope) recordEvent(event); },
         onTool(name, args) {
           if (pending !== control || control.signal.aborted) return;
           const selectors = name === 'resolve_players' ? args?.selectors : name === 'resolve_player' ? [args] : [];
@@ -244,7 +294,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       Promise.resolve().then(() => preview.apply()).then(result => {
         if (reply !== preview) return;
         reply = result; panel.classList.remove('ba-collapsed');
-        remember({instruction:requestInstruction, kind:'edit', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], zoneIds:result.zoneIds || [], playerIds:result.playerIds || []});
+        if (result.kind !== 'preview') remember({instruction:requestInstruction, kind:'edit', status:'applied', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], zoneIds:result.zoneIds || [], playerIds:result.playerIds || []});
         outputView(); announce(result.message || copy().change);
       }).catch(error => { if (reply === preview) { b.disabled = false; announce(error?.message || copy().error, true); } });
     }

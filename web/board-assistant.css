@@ -113,6 +113,14 @@
 .board-ai .ba-mode { margin: 2px 0 5px; }
 .board-ai .ba-output > .ba-pill { margin: 5px 6px 0 0; }
 .board-ai .ba-output ul { padding-left: 20px; }
+.board-ai .ba-trace { margin: 0 14px 12px; padding: 9px 0 0; border-top: 1px solid #ffffff22; font-size: 12px; }
+.board-ai .ba-trace summary { cursor: pointer; color: #c2d2e9; }
+.board-ai .ba-trace-list { padding-left: 19px; margin: 10px 0 0; }
+.board-ai .ba-trace-list li { margin: 0 0 12px; overflow-wrap: anywhere; }
+.board-ai .ba-trace-list strong { font-weight: 600; color: #dbe5f4; }
+.board-ai .ba-trace-list pre { margin: 5px 0; padding: 7px; max-height: 150px; overflow: auto; white-space: pre-wrap; background: #0b0f1680; border-radius: 6px; font: 11px/1.4 ui-monospace, monospace; }
+.board-ai .ba-trace-list p { margin: 4px 0; color: #c3ccd9; }
+.board-ai .ba-trace-error p { color: #ffcba8; }
 .board-ai .ba-expand { display: none; }
 @media (max-width: 600px) {
   .board-ai .ba-panel { top: auto!important; bottom: 6px; max-height: min(52vh, calc(100% - 12px)); border-radius: 14px 14px 8px 8px; }

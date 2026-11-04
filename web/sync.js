@@ -47,6 +47,7 @@ export class CloudSync {
     Object.assign(this, { request, onData, onStatus, onConflict, onAccessLost, storage, userId, isBusy, delay });
     this.current = null; this.base = null; this.pending = null; this.saving = false; this.conflict = null; this.conflictReason = ''; this.timer = null; this.generation = 0;
     this.storageError = null; this.draftSaved = false; this.viewError = null;
+    this.savePromise = null; this.refreshPromise = null;
   }
   get canEdit() { return !this.viewError && ['owner', 'editor'].includes(this.current?.role); }
   get dirty() { return !!this.pending || this.saving || !!this.conflict; }
@@ -103,9 +104,16 @@ export class CloudSync {
     if (this.viewError) { this.status('战术界面更新失败，请刷新后重试'); return; }
     if (!this.canEdit) { this.status('只读 · 更改无法同步'); return; }
     this.pending = clone(data); this.generation++; this.persist(); this.status('等待同步');
-    clearTimeout(this.timer); if (!this.conflict && !this.saving) this.timer = setTimeout(() => this.flush(), this.delay);
+    clearTimeout(this.timer); if (!this.conflict && !this.saving && !this.refreshPromise) this.timer = setTimeout(() => this.flush(), this.delay);
   }
-  async flush() {
+  flush() {
+    if (this.refreshPromise) return this.refreshPromise.catch(() => {}).then(() => this.flush());
+    if (this.savePromise) return this.savePromise;
+    const task = this.flushPending();
+    this.savePromise = task.finally(() => { this.savePromise = null; });
+    return this.savePromise;
+  }
+  async flushPending() {
     clearTimeout(this.timer); if (!this.current || !this.pending || this.saving || this.conflict || !this.canEdit) return;
     if (equal(this.pending, this.base)) { this.pending = null; this.persist(); this.status('云端已同步'); return; }
     if (this.storageError) this.persist();
@@ -139,8 +147,39 @@ export class CloudSync {
       if (retry && this.pending && !this.conflict && this.canEdit) this.timer = setTimeout(() => this.flush(), 3000);
     }
   }
+  refreshForProposal() {
+    if (this.refreshPromise) return this.refreshPromise;
+    const task = this.readLatestForProposal();
+    this.refreshPromise = task.finally(() => {
+      this.refreshPromise = null;
+      clearTimeout(this.timer);
+      if (this.pending && !this.conflict && this.canEdit) this.timer = setTimeout(() => this.flush(), this.delay);
+    });
+    return this.refreshPromise;
+  }
+  async readLatestForProposal() {
+    const documentId = this.current?.id;
+    if (!documentId) throw new Error('战术本尚未加载');
+    if (this.savePromise) await this.savePromise;
+    clearTimeout(this.timer);
+    let record;
+    try { record = await this.request(`/api/workspaces/${documentId}`); }
+    catch (error) { if ([401,403,404].includes(error.status)) this.onAccessLost?.(error); throw error; }
+    if (this.current?.id !== documentId) throw new Error('已切换战术本');
+    if (record.revision < this.current.revision) return this.current;
+    if (!['owner', 'editor'].includes(record.role)) {
+      this.current.role = record.role;
+      const error = Object.assign(new Error('你只有查看权限'), {status:403});
+      this.onAccessLost?.(error);
+      throw error;
+    }
+    if (record.revision !== this.current.revision || record.role !== this.current.role) this.load(record, {restoreDraft:true});
+    if (this.conflict) throw new Error(this.conflictReason);
+    if (this.viewError) throw this.viewError;
+    return this.current;
+  }
   async poll() {
-    if (!this.current || this.current.role === 'removed' || this.dirty || this.isBusy()) return;
+    if (!this.current || this.current.role === 'removed' || this.dirty || this.isBusy() || this.refreshPromise) return;
     const documentId = this.current.id;
     let record;
     try { record = await this.request(`/api/workspaces/${documentId}?after=${this.current.revision}`); }

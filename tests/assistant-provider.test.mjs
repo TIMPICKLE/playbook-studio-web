@@ -12,11 +12,11 @@ const board = { playId: 'p1', players: [
   { id: 'l', label: 'LB', name: 'Avery', side: 'defense', x: 48, y: 25 },
 ] };
 const model = { provider: 'openai', apiKey: 'unit-test-key' };
-const edit = { kind: 'edit', operation: { kind: 'block', playerId: 'c', targetIds: ['d', 'l'] } };
+const edit = { kind: 'edit', operations: [{ kind: 'block', playerId: 'c', targetIds: ['d', 'l'] }] };
 const invoke = (name, args, id = name) => ({ id, type: 'function', function: { name, arguments: JSON.stringify(args) } });
 const resolve = (args, id) => invoke('resolve_player', args, id);
 const calls = (...tool_calls) => ({ role: 'assistant', content: null, tool_calls });
-const final = obj => ({ role: 'assistant', content: JSON.stringify(obj) });
+const final = result => calls(invoke('submit_result', { result }));
 const response = m => Response.json({ choices: [{ message: m }] });
 const messageAfter = (messages, callId) => JSON.parse(messages.find(m => m.tool_call_id === callId).content);
 
@@ -27,6 +27,8 @@ function editModel(messages) {
     const center = messageAfter(messages, 'center').candidates[0];
     return calls(resolve({ role: 'DT', relation: 'in_front', relativeToId: center.id }, 'tackle'));
   }
+  if (results.length === 3) return calls(invoke('preview_edit', { operations: edit.operations }, 'preview'));
+  assert.ok(messageAfter(messages, 'preview').effects.length);
   return final(edit);
 }
 
@@ -44,9 +46,9 @@ test('static browser LangGraph resolves a relative and named opponent through na
       assert.ok(payload.tools.some(t => t.function.name === 'resolve_player'));
       return response(editModel(payload.messages));
     } });
-  assert.deepEqual(result.operation, edit.operation);
-  assert.deepEqual(result.toolsUsed, ['resolve_player', 'resolve_player', 'resolve_player']);
-  assert.equal(count, 3);
+  assert.deepEqual(result.operations, edit.operations);
+  assert.deepEqual(result.toolsUsed, ['resolve_player', 'resolve_player', 'resolve_player', 'preview_edit', 'submit_result']);
+  assert.equal(count, 4);
 });
 
 test('the Terra compatibility setting is specific to the OpenAI model and endpoint', async () => {
@@ -86,13 +88,16 @@ test('a model can refine a zero-result catalog search before selecting a returne
   assert.equal(result.modelCalls, 3);
 });
 
-test('worker enforces membership/revision and searches the packaged catalog independently of client candidates', async t => {
+test('worker enforces membership and valid revisions and searches its own packaged catalog', async t => {
   const db = database(t), owner = { userId: 'coach', email: 'coach@example.com' }, viewer = { userId: 'player', email: 'player@example.com' };
   const post = async(path, user, body) => handleApi(new Request('https://test.local/api' + path, { method: 'POST',
     headers: { origin: 'https://test.local', 'content-type': 'application/json' }, body: JSON.stringify(body) }), { DB: db }, user);
   const book = await (await post('/workspaces', owner, { title: 'Board' })).json();
   const path = '/workspaces/' + book.id + '/board-assistant';
-  const body = { board, instruction: 'find plays vs Cover 3', model: { ...model, model: 'test' }, revision: book.revision,
+  const fullBoard = boardAssistantInput({ instruction: 'working copy', board }).board.play;
+  book.data.plays = [fullBoard];
+  db.sql.prepare('UPDATE workspaces SET data_json=? WHERE id=?').run(JSON.stringify(book.data), book.id);
+  const body = { board: {...fullBoard, playId:fullBoard.id}, instruction: 'find plays vs Cover 3', model: { ...model, model: 'test' }, revision: book.revision,
     candidates: [{ id: 'client-fake' }] };
   let count = 0, isEdit = false;
   t.mock.method(globalThis, 'fetch', async(_url, opts) => {
@@ -106,7 +111,7 @@ test('worker enforces membership/revision and searches the packaged catalog inde
     return response(final({ kind: 'search', matches: [{ id: row.id, reason: 'Sideline levels against a three-deep shell.' }] }));
   });
   assert.equal((await post(path, viewer, body)).status, 404);
-  assert.equal((await post(path, owner, { ...body, revision: book.revision + 1 })).status, 409);
+  assert.equal((await post(path, owner, { ...body, revision: 0 })).status, 400);
   assert.equal(count, 0);
   db.sql.prepare('INSERT INTO members(workspace_id,user_id,role,joined_at) VALUES(?,?,?,?)').run(book.id, viewer.userId, 'viewer', Date.now());
   assert.equal((await (await post(path, viewer, body)).json()).kind, 'search');
@@ -118,5 +123,37 @@ test('worker enforces membership/revision and searches the packaged catalog inde
   isEdit = true;
   body.instruction = 'C blocks DT then Avery';
   assert.equal((await post(path, viewer, body)).status, 403);
-  assert.deepEqual((await (await post(path, owner, body)).json()).operation, edit.operation);
+  assert.deepEqual((await (await post(path, owner, body)).json()).operations, edit.operations);
+});
+
+
+test('worker accepts unrelated concurrent edits and rejects changes to involved players', async t => {
+  const db = database(t), owner = { userId:'coach', email:'coach@example.com' };
+  const post = async (path, body) => handleApi(new Request('https://test.local/api' + path, {
+    method:'POST', headers:{origin:'https://test.local','content-type':'application/json'}, body:JSON.stringify(body),
+  }), {DB:db}, owner);
+  const book = await (await post('/workspaces', {title:'Concurrent board'})).json();
+  const play = boardAssistantInput({instruction:'working copy',board}).board.play;
+  const data = {...book.data,plays:[play]};
+  const path = '/workspaces/' + book.id + '/board-assistant';
+  let changePlayer = false, changed = false;
+  t.mock.method(globalThis,'fetch',async (_url, options) => {
+    if (!changed) {
+      changed = true;
+      const latest = structuredClone(data);
+      if (changePlayer) latest.plays[0].players.find(player=>player.id==='c').x+=1;
+      else latest.plays[0].title='A concurrent title';
+      db.sql.prepare('UPDATE workspaces SET data_json=?,revision=? WHERE id=?').run(JSON.stringify(latest),book.revision+1,book.id);
+    }
+    return response(editModel(JSON.parse(options.body).messages));
+  });
+  for (const expected of [200,409]) {
+    changed = false;
+    db.sql.prepare('UPDATE workspaces SET data_json=?,revision=? WHERE id=?').run(JSON.stringify(data),book.revision,book.id);
+    const result = await post(path,{board:{...play,playId:play.id},instruction:'C blocks DT then Avery',model:{...model,model:'test'},revision:book.revision});
+    assert.equal(result.status,expected);
+    if (expected===200) assert.deepEqual((await result.json()).operations,edit.operations);
+    else assert.match((await result.json()).error,/对象已改变/);
+    changePlayer=true;
+  }
 });

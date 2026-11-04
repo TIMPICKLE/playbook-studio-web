@@ -129,7 +129,10 @@ export function movePlayer(play, id, x, y) {
   dx = clamp(dx, -Math.min(...all.map(v => v.x)), 100 - Math.max(...all.map(v => v.x)));
   dy = clamp(dy, -Math.min(...all.map(v => v.y)), 100 - Math.max(...all.map(v => v.y)));
   p.x += dx; p.y += dy;
-  play.routes.filter(r => r.playerId === id).forEach(r => r.points.forEach(v => { v.x += dx; v.y += dy; }));
+  play.routes.filter(r => r.playerId === id).forEach(r => {
+    r.points.forEach(v => { v.x += dx; v.y += dy; });
+    if (dx || dy) delete r.intent;
+  });
 }
 
 // Both drawing and animation use the same Catmull–Rom cubic segments.
@@ -274,7 +277,13 @@ export function validatePlay(p) {
       blockTargets = array(r.blockTargets, 199, '阻挡目标').map(target => target === null ? null : id(target));
       if (blockTargets.length !== points.length - 1 || blockTargets.includes(r.playerId)) fail('阻挡目标与路线不匹配');
     }
-    return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional, ...(r.kind === 'block' && r.stagedBlock === true ? { stagedBlock: true } : {}), ...(blockTargets ? { blockTargets } : {}) };
+    let intent;
+    if (r.intent != null) {
+      if (r.kind !== 'route') fail('只有跑动路线可以保存路线意图');
+      intent = { concept: choice(r.intent.concept, ['slant','out','in','dig','curl','comeback','hitch','post','corner','go','fade','seam','flat','wheel','drag','screen'], '路线概念'), depthYards: num(r.intent.depthYards, .01, 40, '路线深度') };
+      if (r.intent.breakTo != null) intent.breakTo = choice(r.intent.breakTo, ['inside', 'outside'], '路线折向');
+    }
+    return { id: id(r.id), playerId: r.playerId, points, kind: choice(r.kind, ['route', 'block', 'motion', 'pass'], '路线类型'), color: col(r.color), smooth: !!r.smooth, endCap: choice(r.endCap, ['arrow', 'bar', 'dot'], '路线终点'), delay: num(r.delay, 0, 10, '启动延迟'), duration: num(r.duration, .2, 10, '路线时长'), optional: !!r.optional, ...(r.kind === 'block' && r.stagedBlock === true ? { stagedBlock: true } : {}), ...(blockTargets ? { blockTargets } : {}), ...(intent ? { intent } : {}) };
   }), '路线');
   const zones = unique(array(p.zones, 60, '区域').map(z => ({ id: id(z.id), x: num(z.x, 0, 100, '区域横坐标'), y: num(z.y, 0, 100, '区域纵坐标'), rx: num(z.rx, 1, 50, '区域半径'), ry: num(z.ry, 1, 50, '区域半径'), color: col(z.color), label: text(z.label, 80, '区域名称') })), '区域');
   const annotations = unique(array(p.annotations, 100, '标注').map(a => ({ id: id(a.id), x: num(a.x, 0, 100, '标注横坐标'), y: num(a.y, 0, 100, '标注纵坐标'), text: text(a.text, 200, '标注内容') })), '标注');

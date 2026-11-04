@@ -1,144 +1,150 @@
 import { createBoardTools } from './assistant-tools.js';
 import { providerMessages } from './locales/assistant-provider.js';
-import { buildOperations } from './assistant-operations.js';
+import { proposeEdit } from './assistant-proposal.js';
+import { parseBoardResult, SubmitResultSchema, submitResultTool } from './assistant-schema.js';
 
 export const BOARD_AGENT_LIMITS = Object.freeze({ modelCalls: 6, toolCalls: 10, parallelCalls: 5, replyTokens: 1800, transcriptBytes: 120000 });
-const instructions = `You are a football coaching assistant. Use read-only tools to inspect the board and find real player IDs before making proposals. Before answering a question about the current play, call read_board and ground the answer in its contents. Distinguish visible facts from tactical suggestions. If the diagram does not specify a read order, explicitly say it is unknown rather than claiming a first read. Use resolve_players with selectMany for explicit groups such as the OL. Do not guess when a target is missing or ambiguous. Search Madden by concepts, tags or similarToCurrent. Explain recommendations briefly and conditionally.
-Return JSON in the user's language:
-{"kind":"edit","summary":"brief changes","operations":[{"kind":"route","playerId":"resolved ID","concept":"dig","depthYards":12,"breakTo":"inside"}]}.
-Operations may be block with playerId and targetIds, or playerIds, scheme and direction; route with concept, depthYards and breakTo (or points); motion with playerId,type,toward; move_player with playerId,dxYards,dyYards or alignment; pass with receiverId,throwAt,arriveAt; zone with preset,side and optional playerId; timing with playerId,delay,duration; remove_route with playerId; annotate with text,nearId.
-{"kind":"search","matches":[{"id":"actual catalog ID","reason":"brief evidence"}]}
-{"kind":"answer","message":"answer grounded in board","highlights":["resolved player or inspected route ID"]}
-{"kind":"handoff","message":"why matchup analysis is appropriate","playId":"current play ID"}
-{"kind":"clarify","message":"question"}.
-Previous entries describe earlier work in the same editor; use current tools to confirm referenced IDs. Progress is determined by tools, never claim an edit is already applied.`;
+const instructions = `You are a football coaching assistant. Use read-only tools to inspect the current diagram and resolve real IDs. Do not guess missing or ambiguous players. Use resolve_players for explicit groups such as OL. Before answering about the current play, read_board and distinguish diagram facts from tactical suggestions. If read order is not recorded, say it is unknown.
+Choose operations by intent: route for a measured route-tree concept, block for ordered contacts or a blocking scheme, motion for pre-snap movement, move_player for alignment, pass for ball timing, zone for coverage, timing for an existing route, remove_route to remove an assignment, and annotate for coach notes. Coordinates and geometry are the domain layer's responsibility. Prefer semantic route concepts with depth in yards. Inspect stored route intent when following up.
+Before submitting any edit, call preview_edit with the entire operation group. Inspect the returned measured effects, breaks and target order. Correct a mismatch before submitting the same group through submit_result. An edit is a proposal until the coach accepts it.
+Search Madden by concepts, tags or similarity, inspect catalog evidence, and explain recommendations briefly and conditionally. Use answer for grounded board questions, clarify for missing information, and handoff when the coach needs the separate offense-versus-defense analysis. Keep the original instruction and any named coverage or defense in handoff context.
+Previous entries are structured context from this same play, including accepted or discarded proposals. Confirm current IDs through tools. Use submit_result to finish in the user's language. Only if the provider requires text fallback, return an object conforming to that tool's result schema as plain JSON.`;
 
-export function validateBoardReply(value, input, tools) {
-  const invalid = (reason) => { throw new Error(reason || providerMessages[input.locale].invalid); };
-  if ((input.mode === 'search' && value?.kind === 'edit') || ((input.mode === 'edit' || input.board.book === 'defense') && value?.kind === 'search')) invalid();
-  const line = (s, max) => typeof s === 'string' ? s.trim().slice(0, max) : '';
-  if (value?.kind === 'clarify' && line(value.message, 420)) return { kind: 'clarify', message: line(value.message, 420) };
-  if (value?.kind === 'search' && tools.didSearch() && Array.isArray(value.matches) && value.matches.length <= 4) {
+export function validateBoardReply(value, input, tools, {requirePreview = false} = {}) {
+  const msg = providerMessages[input.locale];
+  const invalid = reason => { throw new Error(reason || msg.invalid); };
+  const legacy = value?.kind === 'edit' && !value.operations && value.operation;
+  const result = parseBoardResult(value);
+  if ((input.mode === 'search' && result.kind === 'edit') || ((input.mode === 'edit' || input.board.book === 'defense') && result.kind === 'search')) invalid();
+  if (result.kind === 'clarify') return result;
+  if (result.kind === 'search') {
+    if (!tools.didSearch()) invalid();
     const allowed = new Set(tools.candidates.keys());
-    const matches = value.matches.map(m => {
-      if (!m || !allowed.delete(m.id) || !line(m.reason, 450)) invalid();
-      return { id: m.id, reason: line(m.reason, 450) };
-    });
-    const similarRanks = tools.getSimilarRanks();
-    if (similarRanks) {
-      if (matches.some(match => !similarRanks.has(match.id))) invalid();
-      matches.sort((a, b) => similarRanks.get(a.id) - similarRanks.get(b.id));
+    for (const match of result.matches) if (!allowed.delete(match.id)) invalid();
+    const ranks = tools.getSimilarRanks();
+    if (ranks) {
+      if (result.matches.some(match => !ranks.has(match.id))) invalid();
+      result.matches.sort((a,b) => ranks.get(a.id) - ranks.get(b.id));
     }
-    return { kind: 'search', matches };
+    return result;
   }
-  if (value?.kind === 'answer' && line(value.message, 1500) && tools.didReadBoard()) {
-    const highlights = value.highlights || [];
-    if (!Array.isArray(highlights) || highlights.length > 32 || !highlights.every(id => tools.resolved.has(id) || tools.routeIds.has(id))) invalid();
-    return { kind: 'answer', message: line(value.message, 1500), highlights };
+  if (result.kind === 'answer') {
+    if (!tools.didReadBoard() || !(result.highlights || []).every(id => tools.resolved.has(id) || tools.routeIds.has(id))) invalid();
+    return {...result, highlights:result.highlights || []};
   }
-  if (value?.kind === 'handoff' && line(value.message, 420) && value.playId === input.board.playId)
-    return {kind:'handoff', message:line(value.message, 420), playId:value.playId};
-  if (value?.kind !== 'edit') invalid();
-  const legacy = !value.operations && value.operation;
-  const operations = legacy ? [value.operation] : value.operations;
-  if (!Array.isArray(operations) || !operations.length || operations.length > 20) invalid('Expected 1–20 operations.');
-  const kinds = ['block', 'route', 'motion', 'move_player', 'pass', 'zone', 'timing', 'remove_route', 'annotate'];
-  const coordinate = n => Number.isFinite(n) && n >= 0 && n <= 100;
-  for (const op of operations) {
-    if (!op || typeof op !== 'object' || !kinds.includes(op.kind)) invalid();
-    const ids = [op.playerId, op.receiverId, op.nearId, ...(Array.isArray(op.playerIds) ? op.playerIds : []), ...(Array.isArray(op.targetIds) ? op.targetIds : [])].filter(id => id != null);
-    if (!ids.every(id => typeof id === 'string' && tools.resolved.has(id))) invalid();
-    const routeOwnerId = op.kind === 'pass' ? input.board.ball?.holderId : op.playerId;
-    if (op.routeId && (!tools.routeIds.has(op.routeId) || !routeOwnerId ||
-      !input.board.routes.some(route => route.id === op.routeId && route.playerId === routeOwnerId))) invalid();
-    if (['route','motion','move_player','timing','remove_route'].includes(op.kind) && !op.playerId) invalid();
-    if (op.kind === 'block') {
-      const actors = op.playerIds || [op.playerId];
-      if (!actors.length || actors.length > 11 || actors.some(id => !id)) invalid('A group block requires 1–11 players.');
-      if (op.targetIds) {
-        if (!Array.isArray(op.targetIds) || !op.targetIds.length || op.targetIds.length > 6 || new Set(op.targetIds).size !== op.targetIds.length) invalid();
-        if (actors.some(id => op.targetIds.some(target => input.board.players.find(p => p.id === id)?.side === input.board.players.find(p => p.id === target)?.side))) invalid();
-      } else if (!['zone','gap','pass_pro'].includes(op.scheme)) invalid();
-    }
-    if (op.kind === 'route' && op.points && (!Array.isArray(op.points) || !op.points.length || op.points.length > 32 || !op.points.every(p => p && coordinate(p.x) && coordinate(p.y)))) invalid('Invalid route waypoints.');
-    if (op.kind === 'route' && !op.points && (!['slant','out','in','dig','curl','comeback','hitch','post','corner','go','fade','seam','flat','wheel','drag','screen'].includes(op.concept) || !Number.isFinite(op.depthYards) || op.depthYards <= 0 || op.depthYards > 40 || (op.breakTo && !['inside','outside'].includes(op.breakTo)))) invalid('Invalid route concept or depth.');
-    if (op.kind === 'pass' && !op.receiverId) invalid();
-    if (op.kind === 'annotate' && (!op.nearId || !line(op.text, 300))) invalid();
+  if (result.kind === 'handoff') {
+    if (result.playId !== input.board.playId) invalid();
+    return {...result, context:{...result.context, instruction:result.context?.instruction || input.instruction}};
   }
-  buildOperations({ ...input.board, ball: input.board.ball || {}, zones: input.board.zones || [], annotations: input.board.annotations || [] }, operations, {dryRun:true});
-  if (legacy) return {kind:'edit', operation:operations[0]};
-  return {kind:'edit', summary:line(value.summary, 500), operations};
-
+  tools.assertReferences(result.operations);
+  proposeEdit(input.board.play || input.board, result.operations, {locale:input.locale});
+  if (requirePreview && !tools.getPreview(result.operations)) invalid('Call preview_edit with this complete operation group and inspect its effects before submitting.');
+  return legacy ? {kind:'edit',operation:result.operations[0]} : result;
 }
 
-// Each invocation owns its transcript and tool evidence. Credentials stay in the transport closure.
-export async function runBoardAssistant({ runtime, input, callModel, searchCatalog, signal, onTool }) {
+export async function runBoardAssistant({ runtime, input, callModel, searchCatalog, signal, onTool, onEvent }) {
   if (input.board.book === 'defense' && input.mode === 'search') return {
     kind:'clarify', message: input.locale === 'en' ? 'The Madden catalog contains offense plays. Switch to an offense playbook to search.' : 'Madden 战术库目前为进攻战术，请切换到进攻战术本后搜索。',
-    toolsUsed:[], modelCalls:0,
+    toolsUsed:[], modelCalls:0, repairs:0, submission:'none',
   };
   const { Annotation, StateGraph, START, END } = runtime;
-  const limits = BOARD_AGENT_LIMITS;
-  const msg = providerMessages[input.locale];
-  const tools = createBoardTools(input, searchCatalog);
-  const used = [];
-  const conversation = [{ role: 'system', content: instructions }, { role: 'user',
-    content: JSON.stringify({ instruction: input.instruction, locale: input.locale, selectedPlayerId: input.board.selectedPlayerId, mode: input.mode, previous: input.previous }) }];
-  let pending, result;
+  const limits = BOARD_AGENT_LIMITS, msg = providerMessages[input.locale];
+  const tools = createBoardTools(input, searchCatalog), used = [];
+  const conversation = [{role:'system',content:instructions}, {role:'user',content:JSON.stringify({instruction:input.instruction,locale:input.locale,selectedPlayerId:input.board.selectedPlayerId,mode:input.mode,previous:input.previous})}];
+  let pending, result, submitted, submission = 'text', repairs = 0;
   const checked = () => { if (signal?.aborted) throw new Error(msg.timeout); };
-  const state = Annotation.Root({ next: Annotation(), modelCalls: Annotation(), repaired: Annotation() });
+  const emit = event => onEvent?.(event);
+  const summary = output => JSON.stringify(output).slice(0,1800);
+  const localized = detail => msg.operationErrors?.[detail] || (input.locale === 'en' ? detail || msg.invalid : msg.invalid);
+  const state = Annotation.Root({next:Annotation(),modelCalls:Annotation(),repaired:Annotation()});
   const graph = new StateGraph(state)
     .addNode('model', async state => {
       checked();
       if (state.modelCalls >= limits.modelCalls || new TextEncoder().encode(JSON.stringify(conversation)).length > limits.transcriptBytes) throw new Error(msg.limit);
       const modelCalls = state.modelCalls + 1;
-      const allowTools = modelCalls < limits.modelCalls && used.length < limits.toolCalls;
-      pending = await callModel(conversation, tools.definitions, allowTools);
+      const lookupAllowed = modelCalls < limits.modelCalls && used.length < limits.toolCalls - 1;
+      emit({type:'model_step',count:modelCalls});
+      pending = await callModel(conversation, [...(lookupAllowed ? tools.definitions : []),submitResultTool], lookupAllowed, {forceSubmit:!lookupAllowed});
       checked();
+      submitted = null;
       const calls = pending.tool_calls || [];
-      if (calls.length && (!allowTools || calls.length > limits.parallelCalls || used.length + calls.length > limits.toolCalls)) throw new Error(msg.limit);
-      return { modelCalls, next: calls.length ? 'tools' : 'validate' };
+      if (calls.length > limits.parallelCalls || used.length + calls.length > limits.toolCalls) throw new Error(msg.limit);
+      if (!lookupAllowed && calls.some(call => call?.function?.name !== 'submit_result')) throw new Error(msg.limit);
+      return {modelCalls,next:calls.length ? 'tools' : 'validate'};
     })
     .addNode('tools', async () => {
-      conversation.push(pending);
+      const {textFallback, ...modelMessage} = pending;
+      conversation.push(modelMessage);
       const ids = new Set();
+      let previewFailed = false;
+      if (pending.tool_calls.length > 1 && pending.tool_calls.some(call => call?.function?.name === 'submit_result')) {
+        const error = 'Preview the proposal, inspect the returned effects, then call submit_result alone in a later message.';
+        for (const call of pending.tool_calls) {
+          if (typeof call?.id !== 'string' || !call.id || ids.has(call.id)) throw new Error(msg.invalid);
+          ids.add(call.id); used.push(call.function?.name || 'unknown');
+          conversation.push({role:'tool',tool_call_id:call.id,content:JSON.stringify({error})});
+        }
+        submitted = {protocolError:error,alreadyResponded:true};
+        return {next:'validate'};
+      }
       for (const call of pending.tool_calls) {
         checked();
         const fn = call?.function;
-        if (call?.type !== 'function' || typeof call.id !== 'string' || !call.id || ids.has(call.id) ||
-          typeof fn?.name !== 'string' || typeof fn.arguments !== 'string' || fn.arguments.length > 2000) throw new Error(msg.invalid);
-        ids.add(call.id);
+        if (call?.type !== 'function' || typeof call.id !== 'string' || !call.id || ids.has(call.id) || typeof fn?.name !== 'string' || typeof fn.arguments !== 'string' || fn.arguments.length > (['preview_edit','submit_result'].includes(fn.name) ? 24000 : 2000)) throw new Error(msg.invalid);
+        ids.add(call.id); used.push(fn.name);
         let args;
         try { args = JSON.parse(fn.arguments); } catch { args = null; }
-        used.push(fn.name);
-        onTool?.(fn.name, args);
-        const output = await tools.run(fn.name, args);
-        conversation.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(output) });
+        onTool?.(fn.name,args);
+        if (fn.name === 'submit_result') {
+          if (pending.tool_calls.length !== 1) throw new Error('Submit the final result separately from read-only tools.');
+          submitted = {callId:call.id,args}; submission = 'tool';
+          emit({type:'tool',name:fn.name,args,summary:'Final result submitted for validation.'});
+          return {next:'validate'};
+        }
+        const output = await tools.run(fn.name,args);
+        emit({type:'tool',name:fn.name,args,summary:summary(output)});
+        if (fn.name === 'preview_edit' && output.error) {
+          emit({type:'validation_error',error:String(output.error).slice(0,700)});
+          if (repairs >= 1) throw new Error(localized(output.error));
+          repairs++; previewFailed = true;
+        }
+        conversation.push({role:'tool',tool_call_id:call.id,content:JSON.stringify(output)});
       }
-      return { next: 'model' };
+      return {next:'model',...(previewFailed ? {repaired:true} : {})};
     })
     .addNode('validate', state => {
       const raw = pending.content;
       try {
-        if (typeof raw !== 'string' || raw.length > 32000) throw new Error(msg.invalid);
-        result = validateBoardReply(JSON.parse(raw.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')), input, tools);
+        let value;
+        if (submitted?.protocolError) throw new Error(submitted.protocolError);
+        if (submitted) {
+          value = parseBoardResult(submitted.args?.result);
+          SubmitResultSchema.parse(submitted.args);
+        }
+        else {
+          if (!pending.textFallback) throw new Error('Finish by calling submit_result rather than returning a text result.');
+          if (typeof raw !== 'string' || raw.length > 32000) throw new Error(msg.invalid);
+          value = JSON.parse(raw.replace(/^\s*```(?:json)?\s*/i,'').replace(/\s*```\s*$/,''));
+        }
+        result = validateBoardReply(value,input,tools,{requirePreview:true});
       } catch (error) {
         const detail = error instanceof Error ? error.message : '';
-        if (state.repaired || state.modelCalls >= limits.modelCalls) {
-          const localized = msg.operationErrors?.[detail] || (input.locale === 'en' && providerMessages['zh-CN'].operationErrors[detail] ? detail : msg.invalid);
-          throw new Error(localized);
-        }
-        conversation.push({ role: 'assistant', content: typeof raw === 'string' ? raw.slice(0, 3000) : '' },
-          { role: 'user', content: 'Invalid or ungrounded JSON. ' + detail.slice(0, 200) + ' Inspect the required tools and retry with their exact IDs, or ask for clarification.' });
-        return { next: 'model', repaired: true };
+        emit({type:'validation_error',error:detail.slice(0,700)});
+        if (state.repaired || state.modelCalls >= limits.modelCalls) throw new Error(localized(detail));
+        repairs++;
+        if (submitted && !submitted.alreadyResponded) conversation.push({role:'tool',tool_call_id:submitted.callId,content:JSON.stringify({error:detail})});
+        else if (!submitted) conversation.push({role:'assistant',content:typeof raw === 'string' ? raw.slice(0,3000) : ''});
+        conversation.push({role:'user',content:'The result was rejected: ' + detail.slice(0,700) + '. Recheck tools and preview the complete edit before resubmitting, or ask for clarification.'});
+        return {next:'model',repaired:true};
       }
-      return { next: END };
+      emit({type:'result',kind:result.kind,summary:result.summary || result.message || (result.matches ? `${result.matches.length} catalog matches` : '')});
+      return {next:END};
     })
-    .addEdge(START, 'model')
-    .addConditionalEdges('model', s => s.next, ['tools', 'validate'])
-    .addEdge('tools', 'model')
-    .addConditionalEdges('validate', s => s.next, ['model', END]).compile();
-  const finalState = await graph.invoke({ next: 'model', modelCalls: 0, repaired: false }, { recursionLimit: 20, signal });
+    .addEdge(START,'model')
+    .addConditionalEdges('model',s=>s.next,['tools','validate'])
+    .addConditionalEdges('tools',s=>s.next,['model','validate'])
+    .addConditionalEdges('validate',s=>s.next,['model',END]).compile();
+  const finalState = await graph.invoke({next:'model',modelCalls:0,repaired:false},{recursionLimit:20,signal});
   checked();
-  return { ...result, toolsUsed: used, modelCalls: finalState.modelCalls };
+  return {...result,toolsUsed:used,modelCalls:finalState.modelCalls,repairs,submission};
 }

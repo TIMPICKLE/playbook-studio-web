@@ -134,3 +134,57 @@ test('answer highlights board IDs and handoff acts only after the coach clicks',
   assert.equal(handed, undefined); f.click('handoff'); assert.equal(handed.playId, 'play-1');
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });
+
+test('discarded proposals remain structured context for the next instruction', async () => {
+  const requests = [], operations = [{kind:'route',playerId:'x',concept:'dig',depthYards:12}];
+  const f = fixture(request => {
+    requests.push(request);
+    return {kind:'preview',message:'X dig 12 yards',operations,routeIds:['r-x'],zoneIds:['z-left'],playerIds:['x'],discard() {}};
+  });
+  f.type('[data-ba-prompt]', 'X dig 12'); f.click('send'); await flush();
+  f.click('discard');
+  f.type('[data-ba-prompt]', 'change that to a post'); f.click('send'); await flush();
+  assert.deepEqual(requests[1].previous[0], {
+    instruction:'X dig 12',kind:'edit',status:'discarded',summary:'X dig 12 yards',
+    operations,routeIds:['r-x'],zoneIds:['z-left'],playerIds:['x']
+  });
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('a rebase refresh keeps the proposal uncommitted until the coach confirms again', async () => {
+  const requests = []; let saved = 0;
+  const refreshed = {kind:'preview',message:'Recomputed',operations:[{kind:'route',playerId:'x'}],discard() {},
+    apply() {saved++; return {kind:'edit',message:'Applied',routeIds:['r-x']};}};
+  const f = fixture(request => {requests.push(request); return {kind:'preview',message:'Initial',discard() {},apply:() => refreshed};});
+  f.type('[data-ba-prompt]', 'X dig'); f.click('send'); await flush();
+  f.click('apply'); await flush();
+  assert.equal(saved,0); assert.match(f.q('.ba-output').textContent,/Recomputed/);
+  f.click('apply'); await flush(); assert.equal(saved,1);
+  f.type('[data-ba-prompt]', 'deeper'); f.click('send'); await flush();
+  assert.equal(requests[1].previous.length,1);
+  assert.equal(requests[1].previous[0].status,'applied');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('the local process log shows only bounded tool evidence and clears with the play scope', async () => {
+  const f = fixture(request => {
+    request.onEvent({type:'tool',name:'resolve_player',args:{name:'Avery',apiKey:'test-opaque-value',thinking:'private text'},summary:'Found l1'});
+    request.onEvent({type:'validation_error',error:'Invalid depth: test-opaque-value'});
+    request.onEvent({type:'result',kind:'clarify',summary:'Which LB?'});
+    request.onEvent({type:'model_step',reasoning:'hidden reasoning'});
+    return {kind:'clarify',message:'Which LB?'};
+  });
+  f.type('[data-ba-prompt]', 'Find Avery'); f.click('send'); await flush();
+  assert.equal(f.q('.ba-trace').hidden,false);
+  assert.equal(f.q('.ba-trace-list').children.length,3);
+  assert.match(f.q('.ba-trace').textContent,/resolve_player[\s\S]*Avery[\s\S]*Found l1[\s\S]*Invalid depth/);
+  assert.doesNotMatch(f.q('.ba-trace').textContent,/test-opaque-value|private text|hidden reasoning|apiKey/);
+  assert.match(f.q('.ba-trace').textContent,/\[redacted\]/);
+  f.q('.ba-trace').open = true; f.click('close'); f.click('open');
+  assert.equal(f.q('.ba-trace-list').children.length,3);
+  f.context.scope = 'book/b'; f.assistant.refresh();
+  assert.equal(f.q('.ba-trace').hidden,true); assert.equal(f.q('.ba-trace').open,false);
+  assert.equal(f.q('.ba-trace-list').children.length,0);
+  assert.equal(f.win.localStorage.length,0); assert.equal(f.win.sessionStorage.length,0);
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});

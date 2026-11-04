@@ -19,6 +19,62 @@ test('three-way merging combines separate plays and object additions but reports
   remote.plays[0].title = 'Competing edit'; merged = mergeWorkspaces(base, local, remote); assert.ok(merged.conflicts.some(p => p.endsWith('.title')));
   remote.plays.shift(); assert.ok(mergeWorkspaces(base, local, remote).conflicts.length);
 });
+
+test('proposal refresh fetches remote changes while retaining and merging an unsaved local draft', async t => {
+  let latest;
+  const {sync,events,data}=harness(t,async(path,options={}) => {
+    assert.equal(path,'/api/workspaces/book'); assert.equal(options.method,undefined);
+    return latest;
+  });
+  const local=clone(data),remote=clone(data);
+  local.plays[0].notes='Unsent coaching note'; remote.plays[0].title='Remote title';
+  latest={...sync.current,revision:2,data:remote}; sync.schedule(local);
+  await sync.refreshForProposal();
+  assert.equal(sync.current.revision,2);
+  assert.equal(sync.pending.plays[0].notes,'Unsent coaching note');
+  assert.equal(sync.pending.plays[0].title,'Remote title');
+  assert.equal(events.data.at(-1).data.plays[0].title,'Remote title');
+  assert.equal(events.data.at(-1).data.plays[0].notes,'Unsent coaching note');
+  assert.equal(sync.conflict,null);
+});
+
+test('proposal refresh waits for an active save and merges edits made while the refresh is pending', async t => {
+  let finishSave,finishRead;
+  const {sync,data}=harness(t,async(path,options={}) => options.method==='PUT'
+    ? new Promise(resolve => {finishSave=()=>resolve({revision:2});})
+    : new Promise(resolve => {finishRead=resolve;}));
+  const sent=clone(data); sent.plays[0].title='Saved first'; sync.schedule(sent);
+  const saving=sync.flush(),refresh=sync.refreshForProposal();
+  assert.equal(finishRead,undefined);
+  finishSave(); await saving; await new Promise(resolve=>setImmediate(resolve));
+  const local=clone(sent),remote=clone(sent);
+  local.plays[0].notes='Typed during refresh'; remote.plays[1].title='Remote second play'; sync.schedule(local);
+  finishRead({...sync.current,revision:3,data:remote}); await refresh;
+  assert.equal(sync.current.revision,3);
+  assert.equal(sync.pending.plays[0].notes,'Typed during refresh');
+  assert.equal(sync.pending.plays[1].title,'Remote second play');
+});
+
+test('proposal refresh keeps conflicting drafts and rejects before a proposal can apply', async t => {
+  let latest;
+  const {sync,data}=harness(t,async()=>latest),local=clone(data),remote=clone(data);
+  local.plays[0].title='Mine'; remote.plays[0].title='Theirs';
+  latest={...sync.current,revision:2,data:remote}; sync.schedule(local);
+  await assert.rejects(sync.refreshForProposal(),/同一处/);
+  assert.equal(sync.pending.plays[0].title,'Mine');
+  assert.ok(sync.conflict);
+});
+
+test('proposal refresh preserves drafts when edit access is revoked', async t => {
+  let latest;
+  const {sync,data,events}=harness(t,async()=>latest),local=clone(data);
+  local.plays[0].notes='Keep this local note'; sync.schedule(local);
+  latest={...sync.current,role:'viewer',revision:2};
+  await assert.rejects(sync.refreshForProposal(),/查看权限/);
+  assert.equal(sync.pending.plays[0].notes,'Keep this local note');
+  assert.equal(sync.canEdit,false);
+  assert.equal(events.access.length,1);
+});
 test('successful cloud saves advance the revision and remove the local draft', async t => {
   const { sync, data, storage, events } = harness(t, async (path, options) => { assert.equal(options.body.revision, 1); assert.equal(path, '/api/workspaces/book'); return { revision: 2 }; });
   data.plays[0].title = 'Saved'; sync.schedule(data); assert.ok(storage.getItem(sync.key())); await sync.flush();

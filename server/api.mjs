@@ -5,6 +5,8 @@ import { buildMatchup, limitedResponse, modelEndpoint } from './matchup.mjs';
 import { boardAssistantInput, invokeBoardModel } from '../web/assistant-provider.js';
 import * as boardGraph from '@langchain/langgraph';
 import { searchServerMadden } from './board-assistant-catalog.mjs';
+import { proposeEdit } from '../web/assistant-proposal.js';
+import { proposalConflicts } from '../web/assistant-conflicts.js';
 import { runMatchupAgent, assertPrivateRuntime } from './matchup-agent.mjs';
 import { localizeMatchupAnnotations } from './matchup-locale.mjs';
 export { MAX_BODY } from './http.mjs';
@@ -122,8 +124,8 @@ export async function handleApi(request, env, user) {
     }
     if (path[2] === 'board-assistant' && path.length === 3 && request.method === 'POST') {
       const record = await access(db, workspaceId, user.userId);
-      const body = await readJson(request, 180000);
-      if (revision(body.revision) !== record.revision) fail(409, '战术本已更新，请重试');
+      const body = await readJson(request);
+      const requestedRevision = revision(body.revision);
       const config = modelEndpoint(body.model, env);
       let input;
       try { input = boardAssistantInput(body); }
@@ -135,21 +137,28 @@ export async function handleApi(request, env, user) {
         const identity = await resolveIdentity(request, env, platformUser);
         if (identity?.userId !== user.userId) fail(401, '登录状态已失效，请重新登录');
         const latest = await access(db, workspaceId, user.userId, needed);
-        if (latest.revision !== record.revision) fail(409, '战术本已更新，请重试');
+        return latest;
       };
-      const execute = async (onTool, signal = request.signal) => {
+      const execute = async (onTool, signal = request.signal, onEvent) => {
         let reply;
         try {
           reply = await invokeBoardModel(config, input, {
-            runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize, onTool,
+            runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize, onTool, onEvent,
             signal, readResponse: limitedResponse,
           });
         } catch (error) {
           if (error instanceof ApiError) throw error;
           fail(502, error.message);
         }
-        await reauthorize(reply.kind === 'edit' ? 'write' : 'read');
-        return reply;
+        const latest = await reauthorize(reply.kind === 'edit' ? 'write' : 'read');
+        if (reply.kind === 'edit' && (requestedRevision !== record.revision || latest.revision !== record.revision)) {
+          const operations = reply.operations || [reply.operation];
+          const original = requestedRevision !== record.revision ? input.board.play : JSON.parse(record.data_json).plays.find(play => play.id === input.board.playId) || input.board.play;
+          const current = JSON.parse(latest.data_json).plays.find(play => play.id === input.board.playId);
+          const proposal = proposeEdit(input.board.play,operations,{locale:input.locale});
+          if (!current || proposalConflicts(original,current,operations,proposal)) fail(409,'本次修改涉及的对象已改变，请重新生成提案');
+        }
+        return {...reply, revision:latest.revision};
       };
       if (!body.stream) return json(await execute());
       const encoder = new TextEncoder();
@@ -163,7 +172,7 @@ export async function handleApi(request, env, user) {
         async start(controller) {
           const send = event => { if (!cancelled) controller.enqueue(encoder.encode(JSON.stringify(event) + '\n')); };
           try {
-            const result = await execute((name, args) => send({type:'tool', name, args}), streamAbort.signal);
+            const result = await execute((name, args) => send({type:'tool', name, args}), streamAbort.signal, event => send({type:'trace',event}));
             send({type:'result', result});
           } catch (error) {
             send({type:'error', error:error.message, status:error.status || 502});
