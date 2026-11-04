@@ -3,6 +3,7 @@ import { createDigitalBoard } from './digital-board.js';
 import { composeDigitalExport, pngExportDescription } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
 import { createBoardAssistant } from './board-assistant.js';
+import { animateAssistantLayer } from './assistant-transition.js';
 import { assistantPlayers } from './assistant-edit.js';
 import { proposeEdit } from './assistant-proposal.js';
 import { proposalConflicts } from './assistant-conflicts.js';
@@ -96,11 +97,38 @@ function importMadden(entry) {
 let boardAssistant = null;
 let assistantPreview = null;
 let assistantPreviewFrame = null;
-function clearAssistantPreview() {
+let assistantSettling = null;
+// A route morph explains an edit, even in traditional mode where decoration is off.
+const assistantMotionReduced = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+function clearAssistantPreview({keepLayer = false, refresh = true} = {}) {
+  if (assistantSettling) {
+    cancelAnimationFrame(assistantSettling.frame);
+    assistantSettling.svg.remove();
+    assistantSettling = null;
+  }
   if (assistantPreviewFrame) cancelAnimationFrame(assistantPreviewFrame);
   assistantPreviewFrame = null;
+  const previous = assistantPreview;
   assistantPreview = null;
-  document.querySelector('#field .assistant-preview')?.remove();
+  previous?.transition.cancel();
+  previous?.restore();
+  if (!keepLayer) previous?.svg.remove();
+  if (previous && refresh) digitalBoard?.refreshBackground();
+}
+function settleAssistantPreview(svg) {
+  const pending = {svg, frame: null, started: null};
+  assistantSettling = pending;
+  const step = stamp => {
+    if (assistantSettling !== pending) return;
+    if (!svg.isConnected) { assistantSettling = null; return; }
+    if (digitalBoard?.backgroundReady === false) { pending.frame = requestAnimationFrame(step); return; }
+    pending.started ??= stamp;
+    const progress = assistantMotionReduced() ? 1 : Math.min(1, (stamp - pending.started) / 180);
+    svg.style.opacity = String(.6 * (1 - progress));
+    if (progress < 1) pending.frame = requestAnimationFrame(step);
+    else { svg.remove(); assistantSettling = null; }
+  };
+  pending.frame = requestAnimationFrame(step);
 }
 function showAssistantHighlights(ids) {
   document.querySelector('#field .assistant-highlights')?.remove();
@@ -121,6 +149,15 @@ function showAssistantHighlights(ids) {
   stage.append(svg);
 }
 function showAssistantPreview(play, original) {
+  const source = document.createElement('template');
+  source.innerHTML = fieldSVG(original, viewSettings(), {prefix:'assistant-before'});
+  // A rebased proposal starts at the currently displayed shape if it is still on screen.
+  for (const type of ['route','player','zone','annotation']) {
+    for (const shown of assistantPreview?.svg.querySelectorAll(`[data-${type}]`) || []) {
+      const old = [...source.content.querySelectorAll(`[data-${type}]`)].find(node => node.dataset[type] === shown.dataset[type]);
+      old?.replaceWith(shown.cloneNode(true));
+    }
+  }
   clearAssistantPreview();
   const stage = document.querySelector('#field .pitch-stage');
   if (!stage) return;
@@ -138,11 +175,15 @@ function showAssistantPreview(play, original) {
   const changedPlayerIds = new Set(play.players.filter(player => changed('players', player)).map(player => player.id));
   svg.querySelectorAll('[data-route]').forEach(node => { if (!changedRouteIds.has(node.dataset.route)) node.remove(); });
   svg.querySelectorAll('[data-player]').forEach(node => { if (!changedPlayerIds.has(node.dataset.player) && !movingPlayerIds.has(node.dataset.player)) node.remove(); });
+  const changedObjectIds = {route:changedRouteIds,player:changedPlayerIds};
   for (const [type, attribute] of [['zones', 'zone'], ['annotations', 'annotation']]) {
     const ids = new Set(play[type].filter(value => changed(type, value)).map(value => value.id));
+    changedObjectIds[attribute] = ids;
     svg.querySelectorAll(`[data-${attribute}]`).forEach(node => { if (!ids.has(node.dataset[attribute])) node.remove(); });
   }
-  if (JSON.stringify(play.ball) === JSON.stringify(original.ball) && !movingPlayerIds.has(play.ball.holderId)) svg.querySelector('#assistant-preview-ball')?.remove();
+  const ballChanged = JSON.stringify(play.ball) !== JSON.stringify(original.ball);
+  const previewBall = svg.querySelector('#assistant-preview-ball');
+  if (!ballChanged && !movingPlayerIds.has(play.ball.holderId)) previewBall?.remove();
   const removedRoutes = original.routes.filter(route => !play.routes.some(item => item.id === route.id));
   if (removedRoutes.length) {
     const old = document.createElement('template');
@@ -150,6 +191,8 @@ function showAssistantPreview(play, original) {
     for (const route of removedRoutes) {
       const node = [...old.content.querySelectorAll('[data-route]')].find(item => item.dataset.route === route.id);
       if (!node) continue;
+      node.dataset.removing = '';
+      changedRouteIds.add(route.id);
       node.querySelectorAll('.route-hit').forEach(shape => shape.remove());
       node.querySelectorAll('path, line').forEach(shape => { shape.setAttribute('stroke', '#ff7777'); shape.setAttribute('stroke-dasharray', '8 6'); shape.removeAttribute('marker-end'); shape.removeAttribute('marker-mid'); });
       svg.append(node);
@@ -158,10 +201,41 @@ function showAssistantPreview(play, original) {
   svg.classList.add('assistant-preview');
   Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', opacity: '.6', pointerEvents: 'none', zIndex: '4' });
   stage.append(svg);
-  assistantPreview = { play, svg };
+  const hidden = [], masked = new Set(), rehearsalOnly = [];
+  const main = stage.querySelector(':scope > .pitch-svg');
+  const hide = node => {
+    if (node && !masked.has(node)) { hidden.push([node,node.style.opacity]); masked.add(node); node.style.opacity = '0'; }
+  };
+  for (const [type,ids] of Object.entries(changedObjectIds)) {
+    for (const node of main.querySelectorAll(`[data-${type}]`)) if (ids.has(node.dataset[type])) hide(node);
+  }
+  if (ballChanged) hide(main.querySelector('#pitch-ball'));
+  for (const node of svg.querySelectorAll('[data-player]')) if (!changedPlayerIds.has(node.dataset.player)) rehearsalOnly.push(node);
+  if (!ballChanged && previewBall?.isConnected) rehearsalOnly.push(previewBall);
+  for (const node of rehearsalOnly) node.style.visibility = 'hidden';
+  const mask = {playerIds:[...changedPlayerIds],routeIds:[...changedRouteIds],zoneIds:[...changedObjectIds.zone],ball:ballChanged};
+  const rehearse = () => {
+    for (const node of rehearsalOnly) node.style.visibility = '';
+    mask.playerIds = [...new Set([...changedPlayerIds,...movingPlayerIds])];
+    mask.ball = !!svg.querySelector('#assistant-preview-ball');
+    for (const node of main.querySelectorAll('[data-player]')) if (mask.playerIds.includes(node.dataset.player)) hide(node);
+    if (mask.ball) hide(main.querySelector('#pitch-ball'));
+    digitalBoard?.refreshBackground();
+  };
+  const resetRehearsal = () => {
+    updateAnimation(svg, play, 0, 'assistant-preview');
+    for (const node of rehearsalOnly) node.style.visibility = 'hidden';
+  };
+  const restore = () => { for (const [node,opacity] of hidden) node.style.opacity = opacity; };
+  const transition = animateAssistantLayer({layer:svg,beforeSvg:source.content.firstElementChild,reducedMotion:assistantMotionReduced()});
+  assistantPreview = { play, svg, restore, transition, mask, rehearse, resetRehearsal };
+  digitalBoard?.refreshBackground();
+  return assistantPreview;
 }
 function rehearseAssistantPreview() {
   if (!assistantPreview) return;
+  assistantPreview.transition.finish();
+  assistantPreview.rehearse();
   if (assistantPreviewFrame) cancelAnimationFrame(assistantPreviewFrame);
   const started = performance.now(), preview = assistantPreview;
   const step = now => {
@@ -172,6 +246,12 @@ function rehearseAssistantPreview() {
   };
   assistantPreviewFrame = requestAnimationFrame(step);
 }
+document.addEventListener('playbook:effects-changed', () => {
+  if (assistantMotionReduced()) assistantPreview?.transition.finish();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) assistantPreview?.transition.finish();
+});
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
 function mountBoardAssistant() {
   const host = $('#field');
@@ -215,14 +295,17 @@ function mountBoardAssistant() {
         const operations = result.operations || [result.operation];
         const initial = proposeEdit(play, operations, {roster: state.data.roster, locale});
         const preview = (baseline, proposal) => {
+          let active = true;
           const playerIds = [...new Set([...proposal.playerIds, ...proposal.effects.flatMap(effect => effect.playerIds)])];
-          showAssistantPreview(proposal.play, baseline);
+          const shown = showAssistantPreview(proposal.play, baseline);
           return {kind: 'preview', message: proposal.summary, summary: proposal.summary, changes: proposal.changes,
             operations, routeIds: proposal.routeIds, zoneIds: proposal.zoneIds, playerIds,
-            discard: clearAssistantPreview, rehearse: rehearseAssistantPreview,
+            discard() { active = false; clearAssistantPreview(); }, rehearse: rehearseAssistantPreview,
             async apply() {
+              await shown.transition.finished;
               if (workspace) await shared.sync.refreshForProposal();
               checkScope();
+              if (!active) throw Error(t('assistant.boardChanged'));
               if (!canEdit()) throw Error(editBlockedMessage());
               if (draft || drag) throw Error(t('assistant.finishDrawing'));
               if (proposalConflicts(baseline, current(), operations, proposal)) throw Error(t('assistant.boardChanged'));
@@ -230,10 +313,15 @@ function mountBoardAssistant() {
                 const latest = clone(current());
                 return preview(latest, proposeEdit(latest, operations, {roster: state.data.roster, locale}));
               }
-              clearAssistantPreview();
+              shown.resetRehearsal();
+              clearAssistantPreview({keepLayer:true,refresh:false});
               selection = proposal.routeId ? {type: 'route', id: proposal.routeId} : null;
               tool = 'select';
-              edit(p => Object.assign(p, proposal.play));
+              edit(p => Object.assign(p, proposal.play), {redraw:false});
+              const inspectorNode = $('.inspector');
+              inspectorNode.innerHTML = inspector();
+              inspectorNode.dataset.context = `${selection?.type || 'play'}:${selection?.id || current().id}`;
+              settleAssistantPreview(shown.svg);
               const checkpoint = history.past.at(-1);
               return {kind: 'edit', message: proposal.summary, summary: proposal.summary, operations,
                 routeIds: proposal.routeIds, zoneIds: proposal.zoneIds, playerIds,
@@ -306,7 +394,7 @@ function edit(fn, { redraw = true } = {}) {
   resetAnimation(); rehearsal = false; draft = null; previewPoint = null; history.record(state); fn(current(), state.data); save(); if (redraw) render(); else refreshMetadata();
 }
 function choose(id) { if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
-function restore(next) { if (!next || !canEdit()) return; resetAnimation(); rehearsal=false; state = next; book = current().book; selection = null; draft = null; save(); render(); $('#toast').classList.remove('visible'); }
+function restore(next) { if (!next || !canEdit()) return; clearAssistantPreview(); resetAnimation(); rehearsal=false; state = next; book = current().book; selection = null; draft = null; save(); render(); $('#toast').classList.remove('visible'); }
 
 function playCards(plays, selectedPlay) {
   return plays.length ? plays.map((play, i) => `<button data-action="choose:${e(play.id)}" class="play-card ${selectedPlay.id === play.id ? 'active' : ''}" aria-label="${t("editorExtra.open")}${e(play.title)}" aria-pressed="${selectedPlay.id === play.id}"><div class="play-thumb" data-thumbnail-index="${i}"></div><span class="play-card-info"><strong>${e(play.title)}</strong><small>${e(play.formation)} · ${e(play.category)}</small></span>${play.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : `<div class="empty-list">${t("editorExtra.no_matching_plays_found")}<br>${t("editorExtra.try_another_search_or_clear_the_filters")}<button class="text-button" data-action="clear-filters">${t("editorExtra.clear_all_filters")}</button></div>`;
@@ -314,6 +402,7 @@ function playCards(plays, selectedPlay) {
 
 function render() {
   const p = current(); if (!p) return;
+  clearAssistantPreview();
   const previousPlay=renderedPlayId, existingIds=new Set([...document.querySelectorAll('#field [data-player]')].map(n=>n.dataset.player));
   const restoreScroll=captureEditorScroll({samePlay:previousPlay===p.id});
   const retainedStage=previousPlay===p.id ? $('#field .pitch-stage') : null;
@@ -493,6 +582,7 @@ function inspector() {
 }
 function renderField() {
   const field=$('#field');if(!field)return;
+  if (assistantPreview || assistantSettling) clearAssistantPreview();
   const template=document.createElement('template');template.innerHTML=fieldSVG(current(),viewSettings(),{selected:selection,time,drawing:draft});
   const svg=field.querySelector('.pitch-svg'),next=template.content.firstElementChild;
   // Preserve the SVG root and renderer readiness while replacing editable content
@@ -537,6 +627,7 @@ function bindField() {
   field.addEventListener('pointerdown', event => {
     if(event.target.closest('.field-context'))return;
     if (event.button !== 0) return;
+    clearAssistantPreview();
     if (rehearsal || playing || time) { toast(t("feedback.return_to_design_mode_to_adjust_players"), { type: 'info' }); return; }
     const at = coordinates(event), hit = pick(event);
     if (!canEdit()) { selection = hit; refreshSelection(); return; }
@@ -694,7 +785,18 @@ function download(content, filename, mime) {
 }
 const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
 async function standaloneSVG(play, digital = false) {
-  const capture = digital && !play.reference ? digitalBoard?.capture() : null;
+  if (assistantPreview || assistantSettling) clearAssistantPreview();
+  if (digital && digitalBoard?.backgroundReady === false) {
+    await new Promise(resolve => {
+      const started = Date.now();
+      const check = () => {
+        if (digitalBoard?.backgroundReady !== false || Date.now() - started >= 1000) resolve();
+        else setTimeout(check, 16);
+      };
+      check();
+    });
+  }
+  const capture = digital && !play.reference && digitalBoard?.backgroundReady !== false && JSON.stringify(current()) === JSON.stringify(play) ? digitalBoard?.capture() : null;
   let svg = fieldSVG(play, viewSettings(), { prefix: 'export', time: capture?.time || 0 });
   if (capture) {
     const template=document.createElement('template');template.innerHTML=svg;const root=template.content.firstElementChild;
@@ -727,6 +829,7 @@ async function pngExport() {
   img.onerror = () => { URL.revokeObjectURL(url); toast(t("feedback.image_generation_failed_try_exporting_svg"), { type: 'error' }); }; img.src = url;
 }
 function togglePlay() {
+  clearAssistantPreview();
   if (current().reference) { toast(t("feedback.the_original_diagram_has_no_playable_route_data"), { type: 'info' }); return; }
   if(draft && !confirmDraft(togglePlay))return;
   if(playing){stop();syncPlayback();updateCanvasHint();return;}
@@ -831,7 +934,7 @@ const actions = {
   'dismiss-toast': () => $('#toast').classList.remove('visible'),
   'undo-point': () => {if(draft?.points.length>1){draft.points.pop();previewPoint=null;renderField();updateCanvasHint();}},
   'edit-mode': () => {if(!confirmDraft(()=>actions['edit-mode']()))return;resetAnimation();rehearsal=false;renderField();syncEditorChrome();},
-  'rehearse-mode': () => {if(!confirmDraft(()=>actions['rehearse-mode']()))return;rehearsal=true;draft=null;renderField();syncEditorChrome();},
+  'rehearse-mode': () => {if(!confirmDraft(()=>actions['rehearse-mode']()))return;clearAssistantPreview();rehearsal=true;draft=null;renderField();syncEditorChrome();},
   favorite: () => edit(p => { p.favorite = !p.favorite; }),
   undo: () => restore(history.undo(state)), redo: () => restore(history.redo(state)),
   mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success' }); },
@@ -1011,11 +1114,12 @@ function showEditor(show) {
   app.hidden = !show;
   if (show) {
     digitalBoard = createDigitalBoard({
-      getState: () => ({ play: current(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null }),
+      getState: () => ({ play: current(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null, presentationMask:assistantPreview?.mask, presentationSettling:!!assistantSettling }),
       notify: message => toast(message, { type: 'warning' }),
     });
     render();
   } else {
+    clearAssistantPreview();
     resetAnimation();
     boardAssistant?.destroy(); boardAssistant = null;
     if (maddenLibrary.isOpen) maddenLibrary.close();

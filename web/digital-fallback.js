@@ -79,14 +79,16 @@ export function createDigitalFallback(doc=document) {
     const label=node(doc,'text',{'text-anchor':'middle','dominant-baseline':'central',fill:'#eeeff0',stroke:'#212223','stroke-width':.85,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':700,'letter-spacing':-.3});label.textContent=p.label;group.append(label);overlay.append(group);
     return {group,shadow,ring,faces,label,key:null,shape:p.shape,color:p.color,labelText:p.label,side:p.side,lightTheme,bounds:null,depth:0};
   }
-  function draw({play,settings={},time=0,selected,hoveredId=null,draggingId=null,animated=true}){
+  function draw({play,settings={},time=0,selected,hoveredId=null,draggingId=null,animated=true,presentationMask}){
     if(disposed||!overlay)return;
+    const hiddenPlayers=new Set(presentationMask?.playerIds||[]);
     const live=new Set(play.players.map(p=>p.id));
     for(const [id,item]of players)if(!live.has(id)){disposeItem(item);players.delete(id);}
     for(const p of play.players){
       let item=players.get(p.id);const lightTheme=settings.fieldTheme==='light';
       if(item&&(item.shape!==p.shape||item.color!==p.color||item.side!==p.side||item.labelText!==p.label||item.lightTheme!==lightTheme)){disposeItem(item);players.delete(p.id);item=null;}
       if(!item){item=makePlayer(p,lightTheme);players.set(p.id,item);}
+      item.group.style.display=hiddenPlayers.has(p.id)?'none':'';
       const at=project(animatedPlayer(play,p,time));
       const lift=animated?(draggingId===p.id?5:hoveredId===p.id?1.5:0):0;
       const active=selected?.type==='player'&&selected.id===p.id;

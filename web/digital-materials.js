@@ -56,6 +56,7 @@ export function createDigitalMaterials(doc=document) {
   for(const x of [-5.3,5.3]){const band=new THREE.Mesh(new THREE.TorusGeometry(4.3,.55,8,32),white);band.rotation.y=Math.PI/2;band.position.x=x;ball.add(band);}board.add(ball);
   const raycaster=new THREE.Raycaster(),pointerNdc=new THREE.Vector2();
   let svg=null,stage=null,disposed=false,lost=false,snapshotGeneration=0,pendingImage=null,backgroundDirty=false,backgroundError=null,lastTextureTime=-1,lastTextureMaterial=-1,lastTheme=null,mountedPlayId=null,texturePlayId=null,presentedPlayId=null;
+  let textureGeneration=0,presentedTextureGeneration=0;
   let resolution=1,resolutionDirty=true,lastDrawView=null;
   const markResolutionDirty=()=>{resolutionDirty=true;};
   function setResolution(next){
@@ -154,7 +155,7 @@ export function createDigitalMaterials(doc=document) {
           // GPU texture untouched; a complete image is swapped in atomically.
           stagingContext.clearRect(0,0,2000,1600);stagingContext.drawImage(image,0,0,2000,1600);
           [textureCanvas,stagingCanvas]=[stagingCanvas,textureCanvas];[textureContext,stagingContext]=[stagingContext,textureContext];
-          fieldTexture.image=textureCanvas;fieldTexture.needsUpdate=true;texturePlayId=playId;backgroundError=null;
+          fieldTexture.image=textureCanvas;fieldTexture.needsUpdate=true;texturePlayId=playId;backgroundError=null;textureGeneration=generation;
         }
       }catch(error){fail(error);}
       finally{finish();}
@@ -164,32 +165,36 @@ export function createDigitalMaterials(doc=document) {
   function draw(view){
     if(disposed||lost)throw new Error('The 3D context is unavailable');
     lastDrawView=view;
-    const {play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true,rehearsal=false}=view;
+    const {play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true,rehearsal=false,presentationMask,presentationSettling=false}=view;
+    const hiddenPlayers=new Set(presentationMask?.playerIds||[]);
     resizeRenderer();
     const live=new Set(play.players.map(p=>p.id));for(const [id,item]of players)if(!live.has(id)){removePlayer(item);players.delete(id);}
     for(const p of play.players){
       let item=players.get(p.id);if(item&&(item.shape!==p.shape||item.color!==p.color||item.side!==p.side||item.labelText!==p.label||item.name!==p.name)){removePlayer(item);players.delete(p.id);item=null;}
       if(!item){item=makePlayer(p,materialTime);players.set(p.id,item);}
+      item.group.visible=!hiddenPlayers.has(p.id);item.shadow.visible=item.group.visible;
       const at=project(animatedPlayer(play,p,time)),lift=draggingId===p.id?7:hoveredId===p.id?1.5:0;
       item.lift=animated?item.lift+(lift-item.lift)*.24:0;item.group.position.set(at.x,800-at.y,item.lift);
       const age=animated?Math.min(1,Math.max(0,(materialTime-item.born)/.22)):1;item.group.scale.setScalar(.96+.04*(1-(1-age)**3));
       item.shadow.position.set(at.x+1,800-at.y-1,.22);item.shadow.scale.setScalar(1+item.lift*.025);item.shadow.material.opacity=.6-item.lift*.025;
-      item.ring.position.set(at.x,800-at.y,.35);item.ring.visible=selected?.type==='player'&&selected.id===p.id||hoveredId===p.id;item.ring.material.opacity=selected?.id===p.id?.9:.35;
+      item.ring.position.set(at.x,800-at.y,.35);item.ring.visible=item.group.visible&&(selected?.type==='player'&&selected.id===p.id||hoveredId===p.id);item.ring.material.opacity=selected?.id===p.id?.9:.35;
       if(item.nameLabel){item.nameLabel.visible=!!settings.showNames;item.nameLabel.material.color.set(settings.fieldTheme==='light'?'#696c70':'#ffffff');}
       item.head.material.time=materialTime;
     }
-    const ballPoint=animatedBall(play,time);ball.visible=!!ballPoint;
+    const ballPoint=animatedBall(play,time);ball.visible=!!ballPoint&&!presentationMask?.ball;
     if(ballPoint){const at=project(ballPoint),flight=play.ball?.receiverId&&time>=play.ball.passAt&&time<=play.ball.arriveAt,progress=flight?(time-play.ball.passAt)/Math.max(.01,play.ball.arriveAt-play.ball.passAt):0;ball.position.set(at.x+14,800-at.y-8,flight?24+Math.sin(progress*Math.PI)*55:23);ball.rotation.set(0,flight?progress*Math.PI*7:0,-.35);}
     // A failed background waits for an explicit edit/remount/mode retry instead
     // of starting another failed decode on every animation tick.
-    const animatedZones=animated&&!rehearsal&&play.zones.length>0;
+    // Let an applied edit's final snapshot drain before scheduling decorative
+    // zone refreshes. Slow decodes must not keep the preview handoff waiting.
+    const animatedZones=animated&&!rehearsal&&!presentationSettling&&play.zones.length>0;
     if(!backgroundError&&(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animatedZones&&materialTime-lastTextureMaterial>.12)){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
     // Refraction samples the actual 3D field and opaque chess-piece silhouettes.
     for(const item of players.values()){item.head.visible=false;item.label.visible=false;}
     renderer.setRenderTarget(target);renderer.clear();renderer.render(scene,camera);
     for(const item of players.values()){item.head.visible=true;item.label.visible=true;}
     renderer.setRenderTarget(null);renderer.clear();renderer.render(scene,camera);
-    presentedPlayId=play.id;svg?.classList.toggle('digital-ready',texturePlayId===play.id);canvas.style.visibility=ready()?'visible':'hidden';stage?.classList.add('is-three');canvas.dataset.renderer='three-perspective';
+    presentedPlayId=play.id;presentedTextureGeneration=textureGeneration;svg?.classList.toggle('digital-ready',texturePlayId===play.id);canvas.style.visibility=ready()?'visible':'hidden';stage?.classList.add('is-three');canvas.dataset.renderer='three-perspective';
   }
   function capture(){
     if(!ready())return null;
@@ -199,7 +204,8 @@ export function createDigitalMaterials(doc=document) {
     try{draw(view);return canvas.toDataURL('image/png');}
     finally{setResolution(previous);draw(view);resolutionDirty=pendingResize;}
   }
-  return {fullScene:true,mount,refreshBackground,draw,get status(){return backgroundError?'unavailable':ready()?'ready':'loading';},capture,
+  return {fullScene:true,mount,refreshBackground,draw,get status(){return backgroundError?'unavailable':ready()?'ready':'loading';},
+    get backgroundReady(){return ready()&&!pendingImage&&!backgroundDirty&&!backgroundError&&presentedTextureGeneration===snapshotGeneration;},capture,
     pick(clientX,clientY){if(!ready())return null;const rect=stage.getBoundingClientRect();if(!rect.width||!rect.height)return null;pointerNdc.set((clientX-rect.left)/rect.width*2-1,1-(clientY-rect.top)/rect.height*2);camera.updateMatrixWorld();scene.updateMatrixWorld(true);raycaster.setFromCamera(pointerNdc,camera);const hit=raycaster.intersectObjects(pickMeshes,false)[0];return hit?{type:'player',id:hit.object.userData.playerId}:null;},
     destroy(){if(disposed)return;disposed=true;snapshotGeneration++;resizeObserver?.disconnect();win.removeEventListener('resize',markResolutionDirty);svg?.classList.remove('digital-ready');stage?.classList.remove('is-three');canvas.remove();canvas.removeEventListener('webglcontextlost',lose);if(pendingImage){pendingImage.image.onload=null;pendingImage.image.onerror=null;URL.revokeObjectURL(pendingImage.url);pendingImage=null;}
       for(const item of players.values())removePlayer(item);players.clear();for(const pieces of sharedGeometry.values())for(const g of Object.values(pieces))g.dispose();sharedGeometry.clear();

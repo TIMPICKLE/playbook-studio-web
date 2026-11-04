@@ -25,7 +25,7 @@ export function createRouteFeedback(svg, play) {
     const p=project(zone), id=`digital-zone-${zones.size}`, gradient=el(doc,'radialGradient',{id});
     gradient.innerHTML=`<stop offset="0" stop-color="${zone.color}" stop-opacity=".13"/><stop offset=".72" stop-color="${zone.color}" stop-opacity=".06"/><stop offset="1" stop-color="${zone.color}" stop-opacity="0"/>`;
     defs.append(gradient);
-    const group=el(doc,'g',{transform:`translate(${p.x} ${p.y})`});
+    const group=el(doc,'g',{'data-feedback-zone':zone.id,transform:`translate(${p.x} ${p.y})`});
     group.append(el(doc,'ellipse',{rx:zone.rx*9.64,ry:zone.ry*7.6,fill:`url(#${id})`}));
     const contour=el(doc,'ellipse',{rx:zone.rx*9.64*.78,ry:zone.ry*7.6*.78,fill:'none',stroke:zone.color,'stroke-width':.8,opacity:.25});
     group.append(contour);zones.set(zone.id,{group,contour});layer.append(group);
@@ -47,10 +47,12 @@ export function createRouteFeedback(svg, play) {
   svg.insertBefore(layer,svg.querySelector('#pitch-players'));
   return {
     layer,
-    update({play,time,selected,animated=true,materialTime=time,rehearsal=false}) {
+    update({play,time,selected,animated=true,materialTime=time,rehearsal=false,presentationMask}) {
+      const hiddenRoutes=new Set(presentationMask?.routeIds||[]),hiddenZones=new Set(presentationMask?.zoneIds||[]),hiddenPlayers=new Set(presentationMask?.playerIds||[]);
       const flight=time>0?passFlightRoute(play):null;
       for (const route of play.routes) {
         const item=routes.get(route.id);if(!item)continue;
+        item.group.style.display=hiddenRoutes.has(route.id)?'none':'';
         const displayRoute=flight?.id===route.id?flight:dynamicBlockRoute(play,route,time);
         const d=route.kind==='motion'?motionPath(route):routePath(displayRoute);
         item.halo.setAttribute('d',d);item.tracer.setAttribute('d',d);
@@ -65,6 +67,7 @@ export function createRouteFeedback(svg, play) {
       }
       for (const zone of play.zones) {
         const item=zones.get(zone.id);if(!item)continue;
+        item.group.style.display=hiddenZones.has(zone.id)?'none':'';
         const p=project(zone);item.group.setAttribute('transform',`translate(${p.x} ${p.y})`);
         const active=selected?.type==='zone'&&selected.id===zone.id;
         const clock=rehearsal?time:materialTime;
@@ -75,12 +78,14 @@ export function createRouteFeedback(svg, play) {
       }
       const age=time-play.ball.arriveAt,b=animatedBall(play,time);
       for(const p of play.players){const trail=trails.get(p.id);if(!trail)continue;
+        trail.style.display=hiddenPlayers.has(p.id)?'none':'';
         const at=animatedPlayer(play,p,time),before=animatedPlayer(play,p,Math.max(0,time-.22));
         const moving=animated&&time>0&&Math.hypot(at.x-before.x,at.y-before.y)>.05;
         trail.setAttribute('opacity',moving?'.3':'0');
         if(moving)trail.setAttribute('d',Array.from({length:7},(_,i)=>{const v=project(animatedPlayer(play,p,Math.max(0,time-.22+i*.22/6)));return`${i?'L':'M'}${v.x} ${v.y}`;}).join(' '));
       }
       const flying=animated&&play.ball.receiverId&&time>=play.ball.passAt&&time<play.ball.arriveAt;
+      ballTrail.style.display=presentationMask?.ball?'none':'';catchRing.style.display=presentationMask?.ball?'none':'';
       ballTrail.setAttribute('opacity',flying?'.65':'0');
       if(flying)ballTrail.setAttribute('d',Array.from({length:9},(_,i)=>{const v=project(animatedBall(play,Math.max(play.ball.passAt,time-.12+i*.12/8)));return`${i?'L':'M'}${v.x+23} ${v.y-11}`;}).join(' '));
       const caught=animated&&play.ball.receiverId&&age>=0&&age<.6;

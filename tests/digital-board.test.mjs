@@ -37,6 +37,22 @@ test('drawn passing bends, release and catch share the same path across playback
   assert.equal(JSON.stringify(play),before);win.happyDOM.abort();
 });
 
+test('preview masks temporarily hide digital route and zone decorations',()=>{
+  const win=new Window(),play=clone(starterWorkspace().plays[0]);
+  play.zones=[{id:'masked-zone',x:50,y:35,rx:10,ry:8,color:'#888888',label:'Zone'}];
+  const before=JSON.stringify(play),route=play.routes[0];
+  win.document.body.innerHTML=fieldSVG(play);
+  const feedback=createRouteFeedback(win.document.querySelector('svg'),play);
+  try{
+    const routeNode=feedback.layer.querySelector(`[data-feedback-route="${route.id}"]`),zoneNode=feedback.layer.querySelector('[data-feedback-zone="masked-zone"]');
+    feedback.update({play,time:0,presentationMask:{routeIds:[route.id],zoneIds:['masked-zone']}});
+    assert.equal(routeNode.style.display,'none');assert.equal(zoneNode.style.display,'none');
+    feedback.update({play,time:0});
+    assert.equal(routeNode.style.display,'');assert.equal(zoneNode.style.display,'');
+    assert.equal(JSON.stringify(play),before);
+  }finally{feedback.destroy();win.happyDOM.abort();}
+});
+
 test('route light, blocking pulse and zones are deterministic at the playback time and do not mutate the play',()=>{
   const play=clone(starterWorkspace().plays[0]), before=JSON.stringify(play), route=play.routes.find(r=>r.kind==='block');
   assert.equal(feedbackProgress(play,route,route.delay+route.duration/2).progress,.5);
@@ -74,6 +90,36 @@ test('digital drawing pauses offscreen, resumes on return, and ignores pointer m
     assert.equal(f.frames.size,1);f.step(200);assert.ok(draws>before);
   }finally{await f.close();assert.equal(observer.disconnected,true);}
 });
+test('background readiness distinguishes startup, decoded scenes and vector fallback',async()=>{
+  let resolve,ready=false,status='loading';
+  const f=fixture(()=>new Promise(r=>{resolve=r;}));
+  try{
+    assert.equal(f.controller.backgroundReady,true);
+    f.doc.documentElement.dataset.visualMode='digital';
+    assert.equal(f.controller.backgroundReady,false);
+    const pending=f.controller.sync();await Promise.resolve();
+    assert.equal(f.controller.backgroundReady,false);
+    resolve({get status(){return status;},get backgroundReady(){return ready;},mount(){},draw(){},refreshBackground(){},destroy(){}});
+    await pending;assert.equal(f.controller.backgroundReady,false);
+    status='ready';ready=true;assert.equal(f.controller.backgroundReady,true);
+    ready=false;assert.equal(f.controller.backgroundReady,false);
+    status='unavailable';assert.equal(f.controller.backgroundReady,true,'current SVG is the fallback when field rasterization fails');
+    f.doc.documentElement.dataset.visualMode='traditional';await f.controller.sync();
+    assert.equal(f.controller.backgroundReady,true);
+  }finally{await f.close();}
+  const compatible=fixture(async()=>({mount(){},draw(){},refreshBackground(){},destroy(){}}));
+  try{
+    compatible.doc.documentElement.dataset.visualMode='digital';await compatible.controller.sync();
+    assert.equal(compatible.controller.backgroundReady,true,'older engines without the optional hook remain compatible');
+  }finally{await compatible.close();}
+  const unavailable=fixture(async()=>{throw new Error('WebGL unavailable');});
+  unavailable.win.console.warn=()=>{};
+  try{
+    unavailable.doc.documentElement.dataset.visualMode='digital';await unavailable.controller.sync();
+    assert.equal(unavailable.controller.backgroundReady,true,'the labelled vector fallback can take over immediately');
+  }finally{await unavailable.close();}
+});
+
 test('traditional mode never starts Three; stale digital startup is disposed without replacing the SVG',async()=>{
   let resolve,started=0,destroyed=0;
   const f=fixture(()=>{started++;return new Promise(r=>resolve=r);});

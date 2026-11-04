@@ -31,3 +31,12 @@ The static board assistant lazy-loads the ESM browser graph from `assistant-lang
 ## Zod board contracts
 
 `assistant-zod.js` bundles the locked Zod dependency for the shared board result schemas and JSON schema generation. Regenerate it with `node scripts/bundle-board-schema.mjs`. The MIT license is in `assistant-zod.NOTICES.txt`.
+
+## d3-interpolate-path 2.3.0
+
+`d3-interpolate-path-2.3.0.js` interpolates directed, open AI route previews with unequal point counts. It is minified from the official 2.3.0 ESM with the project's locked esbuild 0.28.0; there is no browser CDN request or additional runtime dependency.
+
+- Source: https://github.com/pbeshai/d3-interpolate-path/tree/v2.3.0
+- License: BSD-3-Clause; see `d3-interpolate-path-2.3.0.LICENSE.txt`.
+- Rebuild: `node scripts/bundle-route-morph.mjs` (verifies pinned source and license SHA-256 before writing).
+- Design and upgrade checks: `docs/AI_ROUTE_MOTION.md`.

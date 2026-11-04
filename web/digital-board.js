@@ -85,7 +85,15 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async()=>{
   };
   doc.addEventListener('playbook:effects-changed',changed);doc.addEventListener('visibilitychange',visibility);doc.addEventListener('pointermove',move,{passive:true});
   const hide=()=>{generation++;clear();},show=()=>sync();win.addEventListener('pagehide',hide);win.addEventListener('pageshow',show);
-  return {sync,pick(event){return allowed()?(engine||fallback)?.pick?.(event.clientX,event.clientY)||null:null;},refreshBackground(){engine?.refreshBackground();},capture(){
+  return {sync,
+    get backgroundReady(){
+      if(!allowed())return true;
+      if(pending||!svg)return false;
+      if(!engine)return !!fallback;
+      if(engine.status==='unavailable')return true;
+      return engine.backgroundReady??engine.status!=='loading';
+    },
+    pick(event){return allowed()?(engine||fallback)?.pick?.(event.clientX,event.clientY)||null:null;},refreshBackground(){if(svg)paint(getState());engine?.refreshBackground();},capture(){
     if(!allowed()||!svg||!feedback)return null;
     const state=getState();feedback.update({...state,materialTime,animated:doc.documentElement.dataset.effects!=='off'});
     let image=null;
