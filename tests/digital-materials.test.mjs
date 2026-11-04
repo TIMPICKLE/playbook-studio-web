@@ -47,6 +47,68 @@ async function sceneFixture(){
     close(){engine.destroy();delete globalThis[key];return win.happyDOM.abort();}};
 }
 
+test('background handoff waits for the newest decoded texture to be presented',async()=>{
+  const f=await sceneFixture();
+  try{
+    const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
+    f.engine.mount(f.svg,f.play,f.settings);draw();
+    assert.equal(f.engine.backgroundReady,false);
+    while(f.images.length)f.images.shift().onload();
+    assert.equal(f.engine.backgroundReady,false,'decoded work has not reached the canvas yet');
+    draw();assert.equal(f.engine.backgroundReady,true);
+    f.engine.refreshBackground();f.engine.refreshBackground();
+    assert.equal(f.engine.backgroundReady,false,'the previous complete frame is not the latest edit');
+    f.images.shift().onload();
+    assert.equal(f.engine.backgroundReady,false,'a queued newer snapshot still needs decoding');
+    f.images.shift().onload();
+    assert.equal(f.engine.backgroundReady,false);
+    draw();assert.equal(f.engine.backgroundReady,true);
+    f.engine.refreshBackground();f.images.shift().onerror();
+    assert.equal(f.engine.backgroundReady,false,'a failed texture cannot take over the animation');
+  }finally{await f.close();}
+});
+
+test('preview masks hide existing Three pieces, shadows, rings and ball until cleared',async()=>{
+  const f=await sceneFixture(),before=JSON.stringify(f.play),player=f.play.players[0];
+  try{
+    f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();
+    const view={play:f.play,settings:f.settings,time:0,animated:false,selected:{type:'player',id:player.id}};
+    f.engine.draw({...view,presentationMask:{playerIds:[player.id],ball:true}});
+    const scene=f.renders.at(-1).scene;
+    let body,ball;
+    scene.traverse(item=>{
+      if(item.userData.playerId===player.id)body=item.parent;
+      if(item.isGroup&&item.children.some(child=>child.geometry?.type==='SphereGeometry'&&child.geometry.parameters.radius===7))ball=item;
+    });
+    const siblings=body.parent.children,index=siblings.indexOf(body),shadow=siblings[index+1],ring=siblings[index+2];
+    assert.equal(body.visible,false);assert.equal(shadow.visible,false);assert.equal(ring.visible,false);assert.equal(ball.visible,false);
+    f.engine.draw(view);
+    assert.equal(body.visible,true);assert.equal(shadow.visible,true);assert.equal(ring.visible,true);assert.equal(ball.visible,true);
+    assert.equal(JSON.stringify(f.play),before);
+  }finally{await f.close();}
+});
+
+test('slow zone textures drain during preview handoff while real changes still refresh',async()=>{
+  const f=await sceneFixture();
+  try{
+    f.play.zones.push({id:'handoff-zone',x:50,y:40,rx:10,ry:10,color:'#888888',label:'Zone'});
+    f.engine.mount(f.svg,f.play,f.settings);
+    const draw=(materialTime,extra={})=>f.engine.draw({play:f.play,settings:f.settings,time:0,materialTime,animated:true,presentationSettling:true,...extra});
+    draw(0);while(f.images.length)f.images.shift().onload();draw(.01);
+    assert.equal(f.engine.backgroundReady,true);
+    f.engine.refreshBackground();
+    const slow=f.images.shift();
+    for(let i=1;i<=12;i++)draw(i*.13);
+    assert.equal(f.engine.backgroundReady,false,'the applied edit still waits for its pending decode');
+    slow.onload();
+    assert.equal(f.images.length,0,'decorative refreshes must not queue another decode behind the final edit');
+    draw(1.7);assert.equal(f.engine.backgroundReady,true,'the final edit can be presented even after a slow decode');
+    draw(1.8,{time:.5});assert.equal(f.images.length,1,'real timeline changes still refresh during handoff');
+    f.images.shift().onload();draw(1.9,{time:.5});assert.equal(f.engine.backgroundReady,true);
+    draw(2.1,{time:.5,presentationSettling:false});assert.equal(f.images.length,1,'decorative zone updates resume after handoff');
+  }finally{await f.close();}
+});
+
 test('3D buffers follow the displayed board size and remain capped on high-density screens',async()=>{
   const f=await sceneFixture();
   try{

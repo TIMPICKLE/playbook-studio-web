@@ -16,6 +16,20 @@ function fixture(markup='<svg class="pitch-svg" xmlns="http://www.w3.org/2000/sv
   return {win,doc,stage,svg,renderer};
 }
 
+test('preview masks hide and restore fallback pieces without rebuilding or mutating them',()=>{
+  const f=fixture(),play=starterWorkspace().plays[0],before=JSON.stringify(play),player=play.players[0];
+  try{
+    f.renderer.draw({play,settings:{},time:0});
+    const piece=f.doc.querySelector(`[data-vector-player="${player.id}"]`),geometry=piece.innerHTML;
+    f.renderer.draw({play,settings:{},time:0,presentationMask:{playerIds:[player.id]}});
+    assert.equal(piece.style.display,'none');
+    f.renderer.draw({play,settings:{},time:0});
+    assert.equal(piece.style.display,'');assert.equal(piece.innerHTML,geometry);
+    assert.equal(f.doc.querySelector(`[data-vector-player="${player.id}"]`),piece);
+    assert.equal(JSON.stringify(play),before);
+  }finally{f.renderer.destroy();f.win.happyDOM.abort();}
+});
+
 test('fallback chips use tall closed three-dimensional mesh surfaces for every symbol',()=>{
   for(const shape of ['circle','square','triangle']){
     const mesh=fallbackMesh(shape);assert.ok(mesh.length>25);
