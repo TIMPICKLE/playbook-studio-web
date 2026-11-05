@@ -1,4 +1,4 @@
-const CACHE = 'playbook-studio-v6.1-route-morph';
+const CACHE = 'playbook-studio-v6.2-editor-consistency';
 // The graph runtime is fetched and cached on first use.
 const FILES = [
   './assistant-transition.js', './vendor/d3-interpolate-path-2.3.0.js',

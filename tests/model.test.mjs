@@ -7,6 +7,18 @@ test('all starter plays roundtrip through the actual backup validation', () => {
   const w = starterWorkspace(); assert.deepEqual(decodeWorkspace(encodeWorkspace(w)), w);
   assert.equal(w.plays.length, 8); assert.equal(new Set(w.plays.map(p => p.book)).size, 3);
 });
+test('old backups can reload a converted line with stale run intent', () => {
+  const workspace = starterWorkspace();
+  const [converted, run] = workspace.plays[0].routes.filter(route => route.kind === 'route');
+  const intent = {concept:'dig', depthYards:12, breakTo:'inside'};
+  Object.assign(converted, {kind:'block', endCap:'bar', intent});
+  run.intent = intent;
+  const restored = decodeWorkspace(encodeWorkspace(workspace));
+  const route = id => restored.plays[0].routes.find(item => item.id === id);
+  assert.equal(route(converted.id).kind, 'block');
+  assert.equal(route(converted.id).intent, undefined);
+  assert.deepEqual(route(run.id).intent, intent);
+});
 test('mirror transforms all geometry and two mirrors restore the play', () => {
   const p = starterWorkspace().plays[0]; p.zones.push({ id: 'zone', x: 27, y: 38, rx: 10, ry: 8, color: '#88bfff', label: 'HOOK' }); p.annotations.push({ id: 'text', x: 22, y: 34, text: 'Read 1' });
   const m = mirrorPlay(p); assert.equal(m.players[0].x, 100 - p.players[0].x); assert.equal(m.routes[0].points[1].x, 100 - p.routes[0].points[1].x); assert.equal(m.zones[0].x, 73); assert.equal(m.annotations[0].x, 78); assert.deepEqual(mirrorPlay(m), p); assert.equal(p.zones[0].x, 27);

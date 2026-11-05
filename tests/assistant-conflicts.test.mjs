@@ -51,6 +51,13 @@ test('editing or deleting an involved player or route conflicts', () => {
   }
 });
 
+test('a concurrent center shift conflicts with a center-relative route proposal', () => {
+  const {play,operations,proposal} = setup();
+  const current = structuredClone(play);
+  current.players.find(player => player.label === 'C').x += 8;
+  assert.equal(proposalConflicts(play,current,operations,proposal),true);
+});
+
 test('moving a referenced block target conflicts while unrelated defenders remain editable', () => {
   const {play,actor} = setup();
   const defender = {id:'dt',label:'DT',name:'',x:actor.x,y:55,side:'defense',shape:'circle',color:'#c4a5f5'};

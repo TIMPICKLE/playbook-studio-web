@@ -278,8 +278,8 @@ export function validatePlay(p) {
       if (blockTargets.length !== points.length - 1 || blockTargets.includes(r.playerId)) fail('阻挡目标与路线不匹配');
     }
     let intent;
-    if (r.intent != null) {
-      if (r.kind !== 'route') fail('只有跑动路线可以保存路线意图');
+    // Older editors could leave the run intent on a route converted to a different line type.
+    if (r.kind === 'route' && r.intent != null) {
       intent = { concept: choice(r.intent.concept, ['slant','out','in','dig','curl','comeback','hitch','post','corner','go','fade','seam','flat','wheel','drag','screen'], '路线概念'), depthYards: num(r.intent.depthYards, .01, 40, '路线深度') };
       if (r.intent.breakTo != null) intent.breakTo = choice(r.intent.breakTo, ['inside', 'outside'], '路线折向');
     }

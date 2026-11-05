@@ -7,7 +7,7 @@ import { createPieceGeometries, roundedRectangle } from './digital-piece-geometr
 
 // The field, raised frame, pieces, shadows and ball occupy one real perspective
 // scene. The separate projected SVG is retained only for accessible editing.
-export function createDigitalMaterials(doc=document) {
+export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
   const win=doc.defaultView,canvas=doc.createElement('canvas');
   canvas.className='digital-scene-canvas';canvas.setAttribute('aria-hidden','true');
   canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none';
@@ -58,7 +58,7 @@ export function createDigitalMaterials(doc=document) {
   let svg=null,stage=null,disposed=false,lost=false,snapshotGeneration=0,pendingImage=null,backgroundDirty=false,backgroundError=null,lastTextureTime=-1,lastTextureMaterial=-1,lastTheme=null,mountedPlayId=null,texturePlayId=null,presentedPlayId=null;
   let textureGeneration=0,presentedTextureGeneration=0;
   let resolution=1,resolutionDirty=true,lastDrawView=null;
-  const markResolutionDirty=()=>{resolutionDirty=true;};
+  const markResolutionDirty=()=>{resolutionDirty=true;invalidate();};
   function setResolution(next){
     resolution=next;renderer.setPixelRatio(next);renderer.setSize(1000,800,false);
     target.setSize(Math.round(1000*next),Math.round(800*next));
@@ -76,7 +76,7 @@ export function createDigitalMaterials(doc=document) {
   // frame happen together, rather than flashing a blank board between frames.
   const resizeObserver=typeof win.ResizeObserver==='function'?new win.ResizeObserver(markResolutionDirty):null;
   win.addEventListener('resize',markResolutionDirty);
-  const lose=event=>{event.preventDefault();lost=true;};canvas.addEventListener('webglcontextlost',lose);
+  const lose=event=>{event.preventDefault();lost=true;invalidate();};canvas.addEventListener('webglcontextlost',lose);
   const ready=()=>!disposed&&!lost&&!!svg?.classList.contains('digital-ready');
 
   function geometries(shape){if(!sharedGeometry.has(shape))sharedGeometry.set(shape,createPieceGeometries(shape));return sharedGeometry.get(shape);}
@@ -116,7 +116,7 @@ export function createDigitalMaterials(doc=document) {
     if(svg!==next)svg?.classList.remove('digital-ready');
     if(stage!==nextStage){resizeObserver?.disconnect();stage?.classList.remove('is-three');}
     svg=next;stage=nextStage;mountedPlayId=play.id;
-    markResolutionDirty();resizeObserver?.observe(stage);
+    resolutionDirty=true;resizeObserver?.observe(stage);
     if(canvas.parentElement!==stage)stage.prepend(canvas);
     stage.classList.add('is-three');
     // A remount must retain the complete last frame until its replacement is
@@ -139,6 +139,7 @@ export function createDigitalMaterials(doc=document) {
       // Coalesce fast edits and begin the newest snapshot immediately, even
       // when animation is paused or the next frame has not arrived yet.
       if(backgroundDirty&&!disposed)refreshBackground();
+      invalidate();
     };
     const fail=error=>{
       if(disposed||pendingImage!==job||generation!==snapshotGeneration)return;
@@ -162,10 +163,11 @@ export function createDigitalMaterials(doc=document) {
     };
     image.onerror=()=>{fail(new Error('The 3D field image could not be decoded'));finish();};image.src=url;
   }
-  function draw(view){
+  function draw(view,{refreshTexture=false}={}){
     if(disposed||lost)throw new Error('The 3D context is unavailable');
     lastDrawView=view;
-    const {play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true,rehearsal=false,presentationMask,presentationSettling=false}=view;
+    const {play,settings,time,materialTime=0,selected,draggingId=null,hoveredId=null,animated=true,rehearsal=false,playing=false,presentationMask,presentationSettling=false}=view;
+    let moving=false;
     const hiddenPlayers=new Set(presentationMask?.playerIds||[]);
     resizeRenderer();
     const live=new Set(play.players.map(p=>p.id));for(const [id,item]of players)if(!live.has(id)){removePlayer(item);players.delete(id);}
@@ -174,8 +176,14 @@ export function createDigitalMaterials(doc=document) {
       if(!item){item=makePlayer(p,materialTime);players.set(p.id,item);}
       item.group.visible=!hiddenPlayers.has(p.id);item.shadow.visible=item.group.visible;
       const at=project(animatedPlayer(play,p,time)),lift=draggingId===p.id?7:hoveredId===p.id?1.5:0;
-      item.lift=animated?item.lift+(lift-item.lift)*.24:0;item.group.position.set(at.x,800-at.y,item.lift);
-      const age=animated?Math.min(1,Math.max(0,(materialTime-item.born)/.22)):1;item.group.scale.setScalar(.96+.04*(1-(1-age)**3));
+      const liftDelta=lift-item.lift;
+      if(!animated)item.lift=0;
+      else if(Math.abs(liftDelta)<.015)item.lift=lift;
+      else{item.lift+=liftDelta*.24;moving=true;}
+      item.group.position.set(at.x,800-at.y,item.lift);
+      const age=animated&&(!rehearsal||playing)?Math.min(1,Math.max(0,(materialTime-item.born)/.22)):1;
+      if(age<1)moving=true;
+      item.group.scale.setScalar(.96+.04*(1-(1-age)**3));
       item.shadow.position.set(at.x+1,800-at.y-1,.22);item.shadow.scale.setScalar(1+item.lift*.025);item.shadow.material.opacity=.6-item.lift*.025;
       item.ring.position.set(at.x,800-at.y,.35);item.ring.visible=item.group.visible&&(selected?.type==='player'&&selected.id===p.id||hoveredId===p.id);item.ring.material.opacity=selected?.id===p.id?.9:.35;
       if(item.nameLabel){item.nameLabel.visible=!!settings.showNames;item.nameLabel.material.color.set(settings.fieldTheme==='light'?'#696c70':'#ffffff');}
@@ -188,13 +196,14 @@ export function createDigitalMaterials(doc=document) {
     // Let an applied edit's final snapshot drain before scheduling decorative
     // zone refreshes. Slow decodes must not keep the preview handoff waiting.
     const animatedZones=animated&&!rehearsal&&!presentationSettling&&play.zones.length>0;
-    if(!backgroundError&&(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animatedZones&&materialTime-lastTextureMaterial>.12)){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
+    if(refreshTexture||!backgroundError&&(lastTheme!==settings.fieldTheme||Math.abs(time-lastTextureTime)>.066||animatedZones&&materialTime-lastTextureMaterial>.12)){lastTextureTime=time;lastTextureMaterial=materialTime;lastTheme=settings.fieldTheme;refreshBackground();}
     // Refraction samples the actual 3D field and opaque chess-piece silhouettes.
     for(const item of players.values()){item.head.visible=false;item.label.visible=false;}
     renderer.setRenderTarget(target);renderer.clear();renderer.render(scene,camera);
     for(const item of players.values()){item.head.visible=true;item.label.visible=true;}
     renderer.setRenderTarget(null);renderer.clear();renderer.render(scene,camera);
     presentedPlayId=play.id;presentedTextureGeneration=textureGeneration;svg?.classList.toggle('digital-ready',texturePlayId===play.id);canvas.style.visibility=ready()?'visible':'hidden';stage?.classList.add('is-three');canvas.dataset.renderer='three-perspective';
+    return moving;
   }
   function capture(){
     if(!ready())return null;

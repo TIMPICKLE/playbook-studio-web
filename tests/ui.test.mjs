@@ -54,6 +54,73 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       click('clear-selection');
     });
     await t.test('seed UI renders actual starter plays and an editable pitch', () => { assert.match(query('h1').textContent, /Mesh/); assert.equal(doc.querySelectorAll('.play-card').length, 5); assert.equal(doc.querySelectorAll('#field [data-player]').length, 11); assert.ok(query('#field svg[role="application"]')); });
+    await t.test('AI edits keep a visible preview across view changes and reload after a line type change', async () => {
+      const saved = () => win.localStorage.getItem(STORAGE_KEY);
+      const original = decodeWorkspace(saved());
+      const player = original.plays[0].players.find(item => item.label === 'X');
+      const operations = [{kind:'route', playerId:player.id, concept:'post', depthYards:12}];
+      const originalFetch = globalThis.fetch;
+      let changedView = false;
+      const ba = action => query(`[data-ba="${action}"]`);
+      const until = async predicate => {
+        const deadline = Date.now() + 5000;
+        while (!predicate() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 10));
+        assert.ok(predicate(), 'expected AI editor state');
+      };
+      globalThis.fetch = async (url, init) => {
+        assert.equal(url, 'https://api.openai.com/v1/chat/completions');
+        const turns = JSON.parse(init.body).messages.filter(message => message.role === 'tool').length;
+        const [name, args] = turns === 0 ? ['resolve_player', {role:'X'}]
+          : turns === 1 ? ['preview_edit', {operations}]
+          : ['submit_result', {result:{kind:'edit', summary:'X post', operations}}];
+        return new Response(JSON.stringify({choices:[{message:{role:'assistant',content:null,tool_calls:[{
+          id:`tool-${turns}`,type:'function',function:{name,arguments:JSON.stringify(args)}
+        }]}}]}));
+      };
+      const send = async () => {
+        const prompt = query('[data-ba-prompt]');
+        prompt.value = 'X 跑 12 码 post';
+        prompt.dispatchEvent(new win.Event('input', {bubbles:true}));
+        ba('send').click();
+        await until(() => query('.assistant-preview') && ba('apply'));
+      };
+      try {
+        ba('open').click(); ba('settings').click();
+        query('[data-ba-key]').value = 'test-provider-key';
+        ba('done').click();
+        await send();
+        const before = saved();
+        click('grid'); click('theme'); changedView = true;
+        assert.ok(query('.assistant-preview'));
+        assert.equal(ba('apply').textContent, '应用');
+        assert.equal(saved(), before);
+        ba('rehearse').click();
+        assert.equal(query(`.assistant-preview [data-player="${player.id}"]`).style.visibility, '');
+        click('edit-mode');
+        assert.equal(query('.assistant-preview'), null);
+        assert.equal(ba('rehearse'), null);
+        assert.equal(ba('apply').textContent, '重新预览');
+        ba('apply').click();
+        await until(() => query('.assistant-preview') && ba('apply')?.textContent === '应用');
+        assert.equal(saved(), before);
+        ba('rehearse').click(); ba('apply').click();
+        await until(() => ba('undo'));
+        const post = decodeWorkspace(saved()).plays[0].routes.find(route => route.intent?.concept === 'post');
+        assert.ok(post);
+        change('[data-prop="kind"]', 'block');
+        const block = decodeWorkspace(saved()).plays[0].routes.find(route => route.id === post.id);
+        assert.equal(block.kind, 'block');
+        assert.equal(block.intent, undefined);
+        click('undo');
+        assert.deepEqual(decodeWorkspace(saved()).plays[0].routes.find(route => route.id === post.id).intent, post.intent);
+        click('undo');
+        assert.deepEqual(decodeWorkspace(saved()), original);
+      } finally {
+        ba('close')?.click();
+        if (changedView) { click('grid'); click('theme'); }
+        globalThis.fetch = originalFetch;
+      }
+    });
     await t.test('repeated field themes preserve yard lines, the independent grid choice, focus and panel state', () => {
       const sidebar=query('.sidebar'), inspector=query('.inspector'), search=query('#search'), theme=query('[data-action="theme"]'), grid=query('[data-action="grid"]');
       const saved=win.localStorage.getItem(STORAGE_KEY), lineCount=doc.querySelectorAll('#field .yard-lines line').length;

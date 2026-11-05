@@ -29,6 +29,8 @@ export const providerMessages = {
       'No active route.': '球员没有可修改的路线。',
       'Player not found on this play.': '未在当前战术中找到球员。',
       'Route limit reached.': '战术路线已达上限，请先删除路线。',
+      'Route break direction conflicts with its concept.': '指定的折向与路线概念冲突，请确认概念或折向。',
+      'The route starts on the center line. Use waypoints to specify a left or right break.': '路线从中线起跑，请用落点指定向左或向右折。',
       'The selected route does not belong to this player.': '所选路线不属于该球员。',
       'Unsupported operation.': '当前不支持此类修改。',
     },
