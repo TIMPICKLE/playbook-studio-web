@@ -7,6 +7,7 @@ import * as runtime from '@langchain/langgraph';
 import { requestBoardAssistant, DEFAULT_BOARD_MODEL } from '../web/assistant-provider.js';
 import { makePlay, formationPlayers, validatePlay } from '../web/model.js';
 import { assistantPlayers, buildAssistantEdit } from '../web/assistant-edit.js';
+import { measuredRouteBreak, routeCenterX, routeDepthYards } from '../web/assistant-operations.js';
 import { hasEditableTrace } from '../web/madden-model.js';
 
 const corpusURL = new URL('../evals/board-assistant/cases.json', import.meta.url);
@@ -19,6 +20,10 @@ export function evaluationPlay(setup) {
   play.id = 'eval-play';
   play.notes = '';
   for (const player of play.players) player.id = player.label.toLowerCase();
+  if (setup === 'offset-center') {
+    play.players.find(player => player.id === 'c').x = 62;
+    play.players.find(player => player.id === 'x').x = 55;
+  }
   const defense = formationPlayers('4–3', 11, 'defense');
   const defenseIds = ['de-left', 'dt-front', 'dt-right', 'de-right', 'avery', 'mike', 'sam', 'cb-left', 'cb-right', 'ss', 'fs'];
   for (const [index, player] of defense.entries()) {
@@ -112,10 +117,10 @@ export function assertEvaluationResult(testCase, result, { before, after, previo
       if (op.kind === 'route' && op.depthYards && ['dig', 'out', 'in', 'go', 'seam', 'post', 'corner'].includes(Array.isArray(op.concept) ? op.concept[0] : op.concept)) {
         const route = after.routes.find(route => route.playerId === op.playerId && route.kind === 'route' && !route.optional);
         const point = route?.points[1];
-        check(point && inRange((67 - point.y) / 2, op.depthYards), 'rendered route break depth is outside expected yards');
+        check(point && inRange(routeDepthYards(point.y), op.depthYards), 'rendered route break depth is outside expected yards');
         if (point && ['dig', 'in'].includes(op.concept)) {
           const end = route.points.at(-1);
-          check(point.x < 50 ? end.x > point.x : end.x < point.x, 'rendered dig must break inside');
+          check(measuredRouteBreak(point.x, end.x, routeCenterX(after.players)) === 'inside', 'rendered dig must break inside');
         }
       }
       if (op.kind === 'timing') {

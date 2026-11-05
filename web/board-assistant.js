@@ -38,7 +38,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   const panel = q('.ba-panel'), output = q('.ba-output'), config = q('.ba-config'), prompt = q('[data-ba-prompt]');
   const status = q('.ba-status'), key = q('[data-ba-key]'), model = q('[data-ba-model]'), provider = q('[data-ba-provider]');
   const Speech = win.SpeechRecognition || win.webkitSpeechRecognition;
-  let scope, locale, pending, recognition, reply, clarification = '', selectedMode = 'auto', destroyed = false;
+  let scope, locale, pending, recognition, reply, applying, clarification = '', selectedMode = 'auto', destroyed = false;
   let previous = [], requestInstruction = '', trace = [], runNumber = 0;
   const remember = record => { previous = [...previous, record].slice(-5); };
   function clearPreview(keepRecord = true) {
@@ -124,8 +124,16 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       message.textContent = reply.message || lang.change;
       output.append(message);
       if (reply.kind === 'preview') {
+        const visible = reply.isVisible?.() !== false;
         if (Array.isArray(reply.changes)) { const list = doc.createElement('ul'); for (const change of reply.changes) { const li = doc.createElement('li'); li.textContent = String(change); list.append(li); } output.append(list); }
-        for (const action of ['apply','discard','rehearse']) { if (action === 'rehearse' && !reply.rehearse) continue; const control = doc.createElement('button'); control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = action; control.textContent = lang[action]; output.append(control); }
+        for (const action of ['apply','discard','rehearse']) {
+          if (action === 'rehearse' && (!visible || !reply.rehearse)) continue;
+          const control = doc.createElement('button');
+          control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = action;
+          control.textContent = action === 'apply' && !visible ? lang.repreview : lang[action];
+          control.disabled = action === 'apply' && applying === reply;
+          output.append(control);
+        }
       }
       if (reply.kind === 'handoff' && onHandoff) { const go = doc.createElement('button'); go.type = 'button'; go.className = 'ba-pill'; go.dataset.ba = 'handoff'; go.textContent = lang.handoff; output.append(go); }
       if (reply.undo) {
@@ -289,14 +297,17 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     else if (action === 'handoff') onHandoff?.(reply);
     else if (action === 'discard' && reply?.kind === 'preview') { clearPreview(); reply = null; panel.classList.remove('ba-collapsed'); outputView(); announce(copy().discarded); }
     else if (action === 'rehearse' && reply?.kind === 'preview') reply.rehearse?.();
-    else if (action === 'apply' && reply?.kind === 'preview') {
-      const preview = reply; b.disabled = true;
+    else if (action === 'apply' && reply?.kind === 'preview' && applying !== reply) {
+      const preview = reply; applying = preview; b.disabled = true;
       Promise.resolve().then(() => preview.apply()).then(result => {
         if (reply !== preview) return;
         reply = result; panel.classList.remove('ba-collapsed');
         if (result.kind !== 'preview') remember({instruction:requestInstruction, kind:'edit', status:'applied', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], zoneIds:result.zoneIds || [], playerIds:result.playerIds || []});
         outputView(); announce(result.message || copy().change);
-      }).catch(error => { if (reply === preview) { b.disabled = false; announce(error?.message || copy().error, true); } });
+      }).catch(error => { if (reply === preview) announce(error?.message || copy().error, true); }).finally(() => {
+        if (applying === preview) applying = null;
+        if (reply === preview) outputView();
+      });
     }
     else if (action === 'undo' && reply?.undo) {
       const applied = reply.undo(); reply = null; outputView(); announce(applied === false ? copy().undoExpired : copy().undone);
@@ -344,5 +355,6 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   resize?.observe(root); resize?.observe(panel);
   function destroy() { destroyed = true; resize?.disconnect(); close({clear:true}); root.remove(); }
   mount(host);
-  return {mount, refresh, open, close, destroy};
+  function refreshPreview() { if (reply?.kind === 'preview') outputView(); }
+  return {mount, refresh, refreshPreview, open, close, destroy};
 }

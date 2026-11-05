@@ -1,8 +1,10 @@
 import { uid, validatePlay } from './model.js';
-import { parseBoardOperations } from './assistant-schema.js';
+import { parseBoardOperations, routeBreak } from './assistant-schema.js';
 
 const YARDS_X = 100 / 53.333333;
 const YARDS_Y = 2;
+const SCRIMMAGE_Y = 67;
+const BREAK_TOLERANCE = .01;
 const field = n => Math.max(0, Math.min(100, n));
 const point = (x, y) => ({ x: field(x), y: field(y) });
 const position = p => ({ x: p.x, y: p.y });
@@ -10,6 +12,18 @@ const fail = reason => { throw new Error(reason); };
 const actorFor = (play, id) => play.players.find(p => p.id === id) || fail('Player not found on this play.');
 const active = (play, id, kind) => play.routes.find(r => r.playerId === id && r.kind === kind && !r.optional);
 const primary = (play, id) => play.routes.find(r => r.playerId === id && ['route', 'block'].includes(r.kind) && !r.optional);
+
+export function routeCenterX(players) {
+  const centers = players.filter(player => player.side === 'offense' && /^(c|center)$/i.test(player.label.trim()));
+  return centers.length === 1 ? centers[0].x : 50;
+}
+export const routeDepthYards = y => (SCRIMMAGE_Y - y) / YARDS_Y;
+export function measuredRouteBreak(originX, endX, centerX) {
+  const dx = endX - originX, centerOffset = centerX - originX;
+  if (Math.abs(dx) < BREAK_TOLERANCE) return 'straight';
+  if (Math.abs(centerOffset) < BREAK_TOLERANCE) return dx < 0 ? 'left' : 'right';
+  return dx * centerOffset > 0 ? 'inside' : 'outside';
+}
 function translateRouteTo(route, anchor) {
   const dx = anchor.x - route.points[0].x, dy = anchor.y - route.points[0].y;
   const translated = route.points.map(p => ({x: p.x + dx, y: p.y + dy}));
@@ -38,26 +52,30 @@ function baseRoute(actor, old, kind, points, motion, makeId) {
     delay: Math.max(old?.delay || 0, motion ? motion.delay + motion.duration : 0),
     duration: old?.duration || 4, endCap: kind === 'block' ? 'bar' : 'arrow', smooth: false, optional: false };
 }
-function routePoints(actor, op, start) {
+function routePoints(centerX, op, start) {
   if (Array.isArray(op.points)) {
     return [start, ...op.points.map(position)];
   }
-  const inside = start.x < 50 ? 1 : -1;
-  const side = op.breakTo === 'outside' ? -inside : inside;
-  const depth = field(67 - op.depthYards * YARDS_Y);
-  const breakPoint = point(start.x, depth);
-  const end = (dx, dy) => point(start.x + dx * YARDS_X, depth + dy * YARDS_Y);
+  const centerOffset = centerX - start.x;
+  if (op.breakTo && Math.abs(centerOffset) < BREAK_TOLERANCE)
+    fail('The route starts on the center line. Use waypoints to specify a left or right break.');
+  const inside = centerOffset > 0 ? 1 : -1;
+  const side = routeBreak(op) === 'outside' ? -inside : inside;
+  const requestedDepth = SCRIMMAGE_Y - op.depthYards * YARDS_Y;
+  const depth = field(requestedDepth);
+  const breakPoint = { x: start.x, y: requestedDepth };
+  const end = (dx, dy) => ({ x: start.x + dx * YARDS_X, y: depth + dy * YARDS_Y });
   switch (op.concept) {
     case 'go': case 'seam': return [start, breakPoint];
-    case 'fade': return [start, end(-inside * 4, 0)];
-    case 'slant': return [start, point(start.x, field(67 - 3 * YARDS_Y)), end(inside * 6, 0)];
-    case 'out': case 'corner': return [start, breakPoint, end(-inside * 8, op.concept === 'corner' ? -5 : 0)];
-    case 'in': case 'dig': case 'drag': return [start, breakPoint, end(inside * 8, 0)];
-    case 'post': return [start, breakPoint, end(inside * 8, -7)];
-    case 'curl': case 'hitch': case 'comeback': return [start, breakPoint, end(op.concept === 'comeback' ? -inside * 3 : 0, 2)];
-    case 'flat': return [start, end(-inside * 8, 0)];
-    case 'wheel': return [start, end(-inside * 6, 0), end(-inside * 6, -8)];
-    case 'screen': return [start, point(start.x + side * 4 * YARDS_X, start.y + 2 * YARDS_Y)];
+    case 'fade': return [start, end(side * 4, 0)];
+    case 'slant': return [start, { x: start.x, y: SCRIMMAGE_Y - 3 * YARDS_Y }, end(side * 6, 0)];
+    case 'out': case 'corner': return [start, breakPoint, end(side * 8, op.concept === 'corner' ? -5 : 0)];
+    case 'in': case 'dig': case 'drag': return [start, breakPoint, end(side * 8, 0)];
+    case 'post': return [start, breakPoint, end(side * 8, -7)];
+    case 'curl': case 'hitch': case 'comeback': return [start, breakPoint, end(op.concept === 'comeback' ? side * 3 : 0, 2)];
+    case 'flat': return [start, end(side * 8, 0)];
+    case 'wheel': return [start, end(side * 6, 0), end(side * 6, -8)];
+    case 'screen': return [start, { x: start.x + side * 4 * YARDS_X, y: start.y + 2 * YARDS_Y }];
   }
 }
 function run(play, op, makeId) {
@@ -103,8 +121,12 @@ function run(play, op, makeId) {
   if (op.kind === 'route' || op.kind === 'block') {
     const motion = active(play, actor.id, 'motion'), old = selectedRoute(play, op);
     const start = motion ? position(motion.points.at(-1)) : position(actor);
-    let points, targets;
-    if (op.kind === 'route') points = routePoints(actor, op, start);
+    let points, targets, clippedAtBoundary = false;
+    if (op.kind === 'route') {
+      const requested = routePoints(routeCenterX(play.players), op, start);
+      clippedAtBoundary = requested.some(({x, y}) => x < 0 || x > 100 || y < 0 || y > 100);
+      points = requested.map(({x, y}) => point(x, y));
+    }
     else {
       const ids = op.targetIds;
       if (new Set(ids).size !== ids.length) fail('Invalid block targets.');
@@ -117,7 +139,7 @@ function run(play, op, makeId) {
     if (op.kind === 'route' && !op.points) route.intent = { concept: op.concept, depthYards: op.depthYards, ...(op.breakTo ? { breakTo: op.breakTo } : {}) };
     if (targets) { route.blockTargets = targets.map(p => p.id); if (targets.length > 1) route.stagedBlock = true; }
     upsert(play, route, old);
-    return route.id;
+    return { routeId: route.id, clippedAtBoundary };
   }
   if (op.kind === 'motion') {
     const old = op.routeId ? selectedRoute(play, op, ['motion']) : active(play, actor.id, 'motion');
@@ -139,7 +161,7 @@ function run(play, op, makeId) {
       const previousMotionEnd = old ? old.delay + old.duration : 0;
       next.delay = Math.max(0, next.delay - previousMotionEnd) + route.delay + route.duration;
     }
-    return route.id;
+    return { routeId: route.id };
   }
   if (op.kind === 'move_player') {
     let dx = op.dxYards ?? 0, dy = op.dyYards ?? 0;
@@ -156,7 +178,7 @@ function run(play, op, makeId) {
   }
   if (op.kind === 'timing') {
     const r = selectedRoute(play, op, ['route', 'block', 'motion']); if (!r) fail('No active route.');
-    r.delay = op.delay; r.duration = op.duration; return r.id;
+    r.delay = op.delay; r.duration = op.duration; return { routeId: r.id };
   }
   if (op.kind === 'remove_route') {
     const r = selectedRoute(play, op, ['route', 'block', 'motion']);
@@ -178,7 +200,7 @@ function run(play, op, makeId) {
     const holder = actorFor(play, play.ball.holderId); play.ball.receiverId = actor.id; play.ball.passAt = op.throwAt; play.ball.arriveAt = op.arriveAt;
     const old = op.routeId ? selectedRoute(play, {...op, playerId:holder.id}, ['pass']) : active(play, holder.id, 'pass');
     const route = baseRoute(holder, old, 'pass', [position(holder),position(actor)], undefined, makeId);
-    route.delay = op.throwAt; route.duration = Math.min(10, op.arriveAt-op.throwAt); upsert(play,route,old); return route.id;
+    route.delay = op.throwAt; route.duration = Math.min(10, op.arriveAt-op.throwAt); upsert(play,route,old); return { routeId: route.id };
   }
   if (op.kind === 'zone') {
     const presets = {deep_third:[16,12,'DEEP ⅓'],deep_half:[24,12,'DEEP ½'],flat:[12,8,'FLAT'],hook_curl:[12,10,'HOOK CURL'],curl_flat:[14,10,'CURL FLAT'],middle_hole:[12,10,'MIDDLE HOLE']};
@@ -196,8 +218,9 @@ export function buildOperations(play, operations, { idFactory = uid } = {}) {
   for (const op of operations) {
     const before = Object.fromEntries(['players', 'routes', 'zones', 'annotations'].map(type =>
       [type, new Map(copy[type].map(item => [item.id, JSON.stringify(item)]))]));
-    routeId = run(copy,op,idFactory) || routeId;
-    const step = {};
+    const outcome = run(copy,op,idFactory);
+    routeId = outcome?.routeId || routeId;
+    const step = { centerX: routeCenterX(copy.players), clippedAtBoundary: outcome?.clippedAtBoundary ?? false };
     for (const type of ['players', 'routes', 'zones', 'annotations']) {
       step[type] = structuredClone(copy[type].filter(item => before[type].get(item.id) !== JSON.stringify(item)));
       step['removed' + type[0].toUpperCase() + type.slice(1)] = [...before[type].keys()].filter(id => !copy[type].some(item => item.id === id));

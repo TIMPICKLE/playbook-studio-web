@@ -41,8 +41,9 @@ async function sceneFixture(){
   doc.body.innerHTML=`<div class="pitch-stage">${fieldSVG(play,settings)}</div>`;
   const svg=doc.querySelector('svg'),stage=doc.querySelector('.pitch-stage');
   stage.getBoundingClientRect=()=>({left:70,top:110,width:500,height:400});
-  const engine=createDigitalMaterials(doc);
-  return {win,doc,engine,svg,stage,play,settings,renderer,renders,images,captures,environment,contexts,
+  let invalidations=0;
+  const engine=createDigitalMaterials(doc,{invalidate:()=>invalidations++});
+  return {win,doc,engine,svg,stage,play,settings,renderer,renders,images,captures,environment,contexts,get invalidations(){return invalidations;},
     fieldTexture(){let texture;renders.at(-1)?.scene.traverse(n=>{if(n.geometry?.parameters?.width===1000&&n.geometry?.parameters?.height===800)texture=n.material.map;});return texture;},
     close(){engine.destroy();delete globalThis[key];return win.happyDOM.abort();}};
 }
@@ -53,7 +54,9 @@ test('background handoff waits for the newest decoded texture to be presented',a
     const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
     f.engine.mount(f.svg,f.play,f.settings);draw();
     assert.equal(f.engine.backgroundReady,false);
+    const beforeDecode=f.invalidations;
     while(f.images.length)f.images.shift().onload();
+    assert.ok(f.invalidations>beforeDecode,'a completed texture wakes an idle board');
     assert.equal(f.engine.backgroundReady,false,'decoded work has not reached the canvas yet');
     draw();assert.equal(f.engine.backgroundReady,true);
     f.engine.refreshBackground();f.engine.refreshBackground();
@@ -116,7 +119,8 @@ test('3D buffers follow the displayed board size and remain capped on high-densi
     Object.defineProperty(f.win,'devicePixelRatio',{configurable:true,value:2});
     f.engine.mount(f.svg,f.play,f.settings);f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
     assert.equal(f.renderer.ratio,1.4);assert.equal(f.renders[0].target.width,1400);assert.equal(f.renders[0].target.height,1120);
-    width=1500;f.win.dispatchEvent(new f.win.Event('resize'));
+    width=1500;const beforeResize=f.invalidations;f.win.dispatchEvent(new f.win.Event('resize'));
+    assert.ok(f.invalidations>beforeResize,'an idle board wakes when its backing resolution needs to change');
     assert.equal(f.renderer.ratio,1.4,'resize waits for the frame that will redraw the cleared canvas');
     f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
     assert.equal(f.renderer.ratio,2);assert.equal(f.renders[0].target.width,2000);assert.equal(f.renders[0].target.height,1600);
@@ -153,6 +157,9 @@ test('static fields do not repeatedly regenerate textures but playback and pulsi
     draw(.5,2.3);assert.equal(f.images.length,1,'animated zones still refresh their texture');f.images.shift().onload();
     for(let i=24;i<=30;i++)draw(.5,i/10,true);
     assert.equal(f.images.length,0,'a paused rehearsal does not animate a zone from wall-clock time');
+    f.engine.draw({play:f.play,settings:f.settings,time:.52,materialTime:3.1,rehearsal:true,animated:true},{refreshTexture:true});
+    assert.equal(f.images.length,1,'an explicit scrub refresh includes timeline moves below the playback sampling interval');
+    f.images.shift().onload();assert.equal(f.images.length,0,'the timeline and explicit refresh coalesce into one snapshot');
   }finally{await f.close();}
 });
 

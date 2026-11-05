@@ -1,3 +1,6 @@
+import { routeCenterX } from './assistant-operations.js';
+import { routeBreak } from './assistant-schema.js';
+
 const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
 // Proposals may be regenerated after unrelated edits. Objects read or changed by
@@ -10,6 +13,8 @@ export function proposalConflicts(before, current, operations, proposal) {
   for (const operation of operations) {
     for (const id of [operation.playerId, operation.nearId, operation.receiverId, ...(operation.playerIds || []), ...(operation.targetIds || [])]) if (id) players.add(id);
     if (operation.routeId) routes.add(operation.routeId);
+    if (operation.kind === 'route' && operation.concept && routeBreak(operation) !== 'straight' &&
+        routeCenterX(before.players) !== routeCenterX(current.players)) return true;
     if (operation.kind === 'pass') { usesBall = true; players.add(before.ball.holderId); }
   }
   for (const route of proposal.play.routes) {

@@ -29,6 +29,7 @@
       "category": "route",
       "locale": "en",
       "mode": "edit",
+      "setup": "offset-center",
       "instruction": "Change X to a 12-yard dig breaking inside.",
       "expect": {
         "kind": "edit",

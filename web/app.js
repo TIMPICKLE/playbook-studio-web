@@ -18,7 +18,7 @@ import { clearDepthPlayer } from './depth-model.js';
 import { linkRosterPlayer, personnelMatches, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView, resolveHandoffContext } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
-import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, prepareWorkspaceAppend, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, History } from './model.js';
+import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, prepareWorkspaceAppend, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
@@ -100,7 +100,7 @@ let assistantPreviewFrame = null;
 let assistantSettling = null;
 // A route morph explains an edit, even in traditional mode where decoration is off.
 const assistantMotionReduced = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-function clearAssistantPreview({keepLayer = false, refresh = true} = {}) {
+function clearAssistantPreview({keepLayer = false, refresh = true, notify = true} = {}) {
   if (assistantSettling) {
     cancelAnimationFrame(assistantSettling.frame);
     assistantSettling.svg.remove();
@@ -114,6 +114,7 @@ function clearAssistantPreview({keepLayer = false, refresh = true} = {}) {
   previous?.restore();
   if (!keepLayer) previous?.svg.remove();
   if (previous && refresh) digitalBoard?.refreshBackground();
+  if (previous && notify && !keepLayer) boardAssistant?.refreshPreview();
 }
 function settleAssistantPreview(svg) {
   const pending = {svg, frame: null, started: null};
@@ -148,7 +149,7 @@ function showAssistantHighlights(ids) {
   Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '4' });
   stage.append(svg);
 }
-function showAssistantPreview(play, original) {
+function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
   const source = document.createElement('template');
   source.innerHTML = fieldSVG(original, viewSettings(), {prefix:'assistant-before'});
   // A rebased proposal starts at the currently displayed shape if it is still on screen.
@@ -158,7 +159,7 @@ function showAssistantPreview(play, original) {
       old?.replaceWith(shown.cloneNode(true));
     }
   }
-  clearAssistantPreview();
+  clearAssistantPreview({refresh:false, notify:false});
   const stage = document.querySelector('#field .pitch-stage');
   if (!stage) return;
   const template = document.createElement('template');
@@ -227,9 +228,9 @@ function showAssistantPreview(play, original) {
     for (const node of rehearsalOnly) node.style.visibility = 'hidden';
   };
   const restore = () => { for (const [node,opacity] of hidden) node.style.opacity = opacity; };
-  const transition = animateAssistantLayer({layer:svg,beforeSvg:source.content.firstElementChild,reducedMotion:assistantMotionReduced()});
-  assistantPreview = { play, svg, restore, transition, mask, rehearse, resetRehearsal };
-  digitalBoard?.refreshBackground();
+  const transition = animateAssistantLayer({layer:svg,beforeSvg:source.content.firstElementChild,reducedMotion:!!reuse || assistantMotionReduced()});
+  assistantPreview = Object.assign(reuse || {}, { play, original, svg, restore, transition, mask, rehearse, resetRehearsal });
+  if (refresh) digitalBoard?.refreshBackground();
   return assistantPreview;
 }
 function rehearseAssistantPreview() {
@@ -298,10 +299,12 @@ function mountBoardAssistant() {
           let active = true;
           const playerIds = [...new Set([...proposal.playerIds, ...proposal.effects.flatMap(effect => effect.playerIds)])];
           const shown = showAssistantPreview(proposal.play, baseline);
+          const isVisible = () => assistantPreview === shown && shown.svg.isConnected;
           return {kind: 'preview', message: proposal.summary, summary: proposal.summary, changes: proposal.changes,
             operations, routeIds: proposal.routeIds, zoneIds: proposal.zoneIds, playerIds,
-            discard() { active = false; clearAssistantPreview(); }, rehearse: rehearseAssistantPreview,
+            discard() { active = false; clearAssistantPreview({notify:false}); }, isVisible, rehearse: rehearseAssistantPreview,
             async apply() {
+              const wasVisible = isVisible();
               await shown.transition.finished;
               if (workspace) await shared.sync.refreshForProposal();
               checkScope();
@@ -309,7 +312,7 @@ function mountBoardAssistant() {
               if (!canEdit()) throw Error(editBlockedMessage());
               if (draft || drag) throw Error(t('assistant.finishDrawing'));
               if (proposalConflicts(baseline, current(), operations, proposal)) throw Error(t('assistant.boardChanged'));
-              if (JSON.stringify(current()) !== JSON.stringify(baseline)) {
+              if (!wasVisible || !isVisible() || JSON.stringify(current()) !== JSON.stringify(baseline)) {
                 const latest = clone(current());
                 return preview(latest, proposeEdit(latest, operations, {roster: state.data.roster, locale}));
               }
@@ -580,9 +583,10 @@ function inspector() {
   }
   return `${content}${selection ? `<button class="back-details" data-action="clear-selection">${t("editorExtra.back_to_play_details")}</button>` : ''}<div class="inspector-note">${icon('check')}${localRecovery || shared?.sync?.viewError ? t("editor.editing_and_autosave_are_paused_until_recovery_complete") : cloudMode() ? (canEdit() ? t("editor.all_changes_sync_to_the_shared_playbook") : t("editor.you_have_read_only_access")) : t("editor.all_changes_are_saved_in_this_browser")}</div>`;
 }
-function renderField() {
+function renderField({preservePreview = false} = {}) {
   const field=$('#field');if(!field)return;
-  if (assistantPreview || assistantSettling) clearAssistantPreview();
+  const preview = preservePreview ? assistantPreview : null;
+  if (assistantPreview || assistantSettling) clearAssistantPreview({refresh:false, notify:!preview});
   const template=document.createElement('template');template.innerHTML=fieldSVG(current(),viewSettings(),{selected:selection,time,drawing:draft});
   const svg=field.querySelector('.pitch-svg'),next=template.content.firstElementChild;
   // Preserve the SVG root and renderer readiness while replacing editable content
@@ -593,6 +597,7 @@ function renderField() {
   svg.setAttribute('class',[next.getAttribute('class'),...readyClasses].join(' '));
   svg.replaceChildren(...next.childNodes);
   updateAnimation(svg,current(),time);
+  if (preview) showAssistantPreview(preview.play, preview.original, {reuse:preview, refresh:false});
   digitalBoard?.sync({contentChanged:true});
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${t("editor.offense")} ${current().players.filter(p=>p.side==='offense').length} · ${t("editor.defense")} ${current().players.filter(p=>p.side==='defense').length}</span>`;
 }
@@ -832,7 +837,7 @@ function togglePlay() {
   clearAssistantPreview();
   if (current().reference) { toast(t("feedback.the_original_diagram_has_no_playable_route_data"), { type: 'info' }); return; }
   if(draft && !confirmDraft(togglePlay))return;
-  if(playing){stop();syncPlayback();updateCanvasHint();return;}
+  if(playing){stop();digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();return;}
   if(time>=animationLength(current()))time=0;
   rehearsal=true;playing=true;draft=null;previewPoint=null;
   renderField();syncEditorChrome();
@@ -842,7 +847,7 @@ function togglePlay() {
     lastFrame=stamp;
     if(time>=animationLength(current())) {
       if(loop)time%=animationLength(current());
-      else{time=animationLength(current());stop();updateAnimation($('#field svg'),current(),time);syncPlayback();updateCanvasHint();return;}
+      else{time=animationLength(current());stop();updateAnimation($('#field svg'),current(),time);digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();return;}
     }
     updateAnimation($('#field svg'),current(),time);syncPlayback();
     frame=requestAnimationFrame(tick);
@@ -940,8 +945,8 @@ const actions = {
   mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success' }); },
   duplicate: () => { if (state.data.plays.length >= 500) { toast(t("modal.the_playbook_can_contain_at_most_500_plays"), { type: 'warning' }); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
   'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';refreshSelection();syncEditorChrome();},
-  grid: () => { viewOverrides.showGrid = viewSettings().showGrid === false; renderField(); syncEditorChrome(); },
-  theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'light' ? 'dark' : 'light'; renderField(); syncEditorChrome(); },
+  grid: () => { viewOverrides.showGrid = viewSettings().showGrid === false; renderField({preservePreview:true}); syncEditorChrome(); },
+  theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'light' ? 'dark' : 'light'; renderField({preservePreview:true}); syncEditorChrome(); },
   'finish-route': finishRoute, 'cancel-draft': () => { draft=null;previewPoint=null;tool='select';renderField();syncEditorChrome(); },
   'delete-selection': deleteSelected,
   'create-play': () => {
@@ -989,7 +994,7 @@ const actions = {
   'download-json': () => { if (localRecovery) { downloadOriginal(); return; } download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast(t("feedback.full_playbook_exported"), { type: 'success' }); },
   'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast(t("feedback.current_play_exported"), { type: 'success' }); },
   'do-print': () => { if (!$('#print-root').children.length) { toast(t("feedback.no_plays_to_print"), { type: 'warning' }); return; } window.print(); },
-  play: togglePlay, reset: () => {resetAnimation();updateAnimation($('#field svg'),current(),0);syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
+  play: togglePlay, reset: () => {resetAnimation();clearAssistantPreview();updateAnimation($('#field svg'),current(),0);digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
 };
 
 document.addEventListener('click', event => {
@@ -1021,7 +1026,7 @@ document.addEventListener('compositionend', event => { if (event.target.id === '
 document.addEventListener('input', event => {
   const input = event.target;
   if (input.id === 'search' && !composingSearch && !event.isComposing) searchInput(input);
-  if(input.id==='timeline'){stop();rehearsal=true;time=Number(input.value);updateAnimation($('#field svg'),current(),time);syncEditorChrome();}
+  if(input.id==='timeline'){stop();clearAssistantPreview();rehearsal=true;time=Number(input.value);updateAnimation($('#field svg'),current(),time);digitalBoard?.refreshBackground();syncEditorChrome();}
 });
 document.addEventListener('change', event => {
   const input = event.target;
@@ -1056,16 +1061,41 @@ document.addEventListener('change', event => {
       const name = key.slice(5), ball = { ...current().ball, [name]: value };
       if (ball.arriveAt <= ball.passAt) { toast('到达时间必须晚于出手时间。', { type: 'info' }); input.value = current().ball[name]; return; }
       edit(p => { p.ball[name] = value; }, {redraw:false});
+    } else if (selection?.type === 'route') {
+      const previous = selectedObject();
+      if (!previous || previous[key] === value) return;
+      const next = clone(current());
+      const route = next.routes.find(item => item.id === previous.id);
+      route[key] = value;
+      if (key === 'kind') {
+        delete route.intent;
+        delete route.blockTargets;
+        delete route.stagedBlock;
+        if (value === 'block') route.endCap = 'bar';
+      }
+      if ((key === 'kind' || key === 'optional') && !route.optional && ['route', 'motion'].includes(route.kind)) {
+        for (const other of next.routes) {
+          if (other.id !== route.id && other.playerId === route.playerId && ['route', 'motion'].includes(other.kind)) other.optional = true;
+        }
+      }
+      try { validatePlay(next); }
+      catch {
+        if (input.type === 'checkbox') input.checked = !!previous[key];
+        else input.value = previous[key];
+        toast(getLocale() === 'en' ? 'This edit conflicts with a linked route. Adjust its motion or timing first.' : '这次调整与关联路线冲突，请先调整预动或时序。', {type:'warning'});
+        return;
+      }
+      edit(play => Object.assign(play, next), {redraw:false});
+      if (key === 'kind') $('[data-prop="endCap"]').value = route.endCap;
     } else {
       const selected = !!selection, s = selection;
-      edit((p, d) => { const obj = selected ? p[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]].find(v => v.id === s.id) : p; if (!obj) return; if (key === 'roster') linkRosterPlayer(obj, d.roster.find(r => r.id === value)); else { if (key === 'name' && obj.name !== value) delete obj.rosterId; obj[key] = value; if (key === 'kind' && value === 'block') obj.endCap = 'bar'; if (s?.type === 'route' && ((key === 'optional' && value === false) || key === 'kind') && !obj.optional && ['route', 'motion'].includes(obj.kind)) p.routes.filter(r => r.id !== obj.id && r.playerId === obj.playerId && ['route', 'motion'].includes(r.kind)).forEach(r => { r.optional = true; }); } }, {redraw:false});
+      edit((p, d) => { const obj = selected ? p[{ player: 'players', zone: 'zones', annotation: 'annotations' }[s.type]].find(v => v.id === s.id) : p; if (!obj) return; if (key === 'roster') linkRosterPlayer(obj, d.roster.find(r => r.id === value)); else { if (key === 'name' && obj.name !== value) delete obj.rosterId; obj[key] = value; } }, {redraw:false});
       if (key === 'roster' || key === 'name') {
         const marker = selectedObject();
         $('[data-prop="roster"]').value = marker.rosterId || '';
         $('[data-prop="name"]').value = marker.name;
         $('.player-preview strong').textContent = marker.name || t('editor.unassigned');
       }
-      if(key==='kind' && $('[data-prop="endCap"]'))$('[data-prop="endCap"]').value=selectedObject().endCap;
     }
   }
 });

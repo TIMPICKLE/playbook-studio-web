@@ -3,10 +3,20 @@ import { z } from './vendor/assistant-zod.js';
 const id = z.string().min(1).max(100);
 const routeId = id.optional();
 const waypoint = z.strictObject({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) });
-export const ROUTE_CONCEPTS = ['slant','out','in','dig','curl','comeback','hitch','post','corner','go','fade','seam','flat','wheel','drag','screen'];
+const conceptBreaks = {
+  slant: 'inside', out: 'outside', in: 'inside', dig: 'inside', curl: 'straight', comeback: 'outside',
+  hitch: 'straight', post: 'inside', corner: 'outside', go: 'straight', fade: 'outside', seam: 'straight',
+  flat: 'outside', wheel: 'outside', drag: 'inside', screen: null,
+};
+export const ROUTE_CONCEPTS = Object.keys(conceptBreaks);
+export const routeBreak = operation => operation.breakTo ?? conceptBreaks[operation.concept] ?? 'inside';
+const conflictingBreak = operation => operation.breakTo != null && operation.concept !== 'screen' &&
+  Object.hasOwn(conceptBreaks, operation.concept) && conceptBreaks[operation.concept] !== operation.breakTo;
 const direction = z.enum(['left', 'right']);
 const semanticRoute = z.strictObject({ kind: z.literal('route'), playerId: id, routeId,
-  concept: z.enum(ROUTE_CONCEPTS), depthYards: z.number().positive().max(40), breakTo: z.enum(['inside','outside']).optional() });
+  concept: z.enum(ROUTE_CONCEPTS), depthYards: z.number().positive().max(40),
+  breakTo: z.enum(['inside','outside']).optional().describe('Optional. Slant, in, dig, post and drag break inside. Out, corner, fade, flat, wheel and comeback break outside. Omit for go, seam, curl and hitch. Screen accepts either direction.'),
+}).refine(operation => !conflictingBreak(operation), {path:['breakTo'], message:'Route break direction conflicts with its concept.'});
 const pointRoute = z.strictObject({ kind: z.literal('route'), playerId: id, routeId, points: z.array(waypoint).min(1).max(32) });
 const targetBlock = z.strictObject({ kind: z.literal('block'), playerId: id, routeId, targetIds: z.array(id).min(1).max(6) });
 const groupBlock = z.strictObject({ kind: z.literal('block'), playerIds: z.array(id).min(1).max(11), scheme: z.enum(['zone','gap','pass_pro']), direction });
@@ -41,12 +51,14 @@ export const PreviewEditSchema = z.strictObject({ operations: BoardOperationsSch
 export const SubmitResultSchema = z.strictObject({ result: BoardResultSchema });
 const toJSON = schema => { const { $schema, ...json } = z.toJSONSchema(schema, { io: 'input', target: 'draft-7' }); return json; };
 export const submitResultTool = { type: 'function', function: { name: 'submit_result', description: 'Submit the final grounded result. For edits, preview the complete operation group first and inspect its actual effects. This ends the current request.', parameters: toJSON(SubmitResultSchema) } };
-export const previewEditTool = { type: 'function', function: { name: 'preview_edit', description: 'Simulate the complete operation group against the current diagram with full play validation, without saving. Inspect the actual route depth, breaks, target order and changed IDs before submitting an edit.', parameters: toJSON(PreviewEditSchema) } };
+export const previewEditTool = { type: 'function', function: { name: 'preview_edit', description: 'Simulate the complete operation group against the current diagram with full play validation, without saving. Inspect actual depth, breaks, boundary adjustments, target order and changed IDs before submitting. Inside and outside are relative to the offensive center, or the field midpoint when there is no unique center. Treat clipped geometry as an approximation.', parameters: toJSON(PreviewEditSchema) } };
 
 function operationError(operations) {
   if (!Array.isArray(operations) || !operations.length || operations.length > 20) return 'Expected 1–20 operations.';
   for (const operation of operations) {
     if (BoardOperationSchema.safeParse(operation).success) continue;
+    if (operation?.kind === 'route' && ['inside', 'outside'].includes(operation.breakTo) && conflictingBreak(operation))
+      return 'Route break direction conflicts with its concept.';
     const names = { route: operation?.points ? 'Invalid route waypoints.' : 'Invalid route concept or depth.',
       block: operation?.playerIds ? 'Invalid blocking scheme.' : 'Invalid block targets.', motion: 'Invalid motion.',
       move_player: operation?.alignment ? 'Invalid alignment.' : 'Invalid movement.', pass: 'Invalid pass timing.',

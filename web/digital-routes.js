@@ -90,7 +90,7 @@ export function createRouteFeedback(svg, play) {
       if(flying)ballTrail.setAttribute('d',Array.from({length:9},(_,i)=>{const v=project(animatedBall(play,Math.max(play.ball.passAt,time-.12+i*.12/8)));return`${i?'L':'M'}${v.x+23} ${v.y-11}`;}).join(' '));
       const caught=animated&&play.ball.receiverId&&age>=0&&age<.6;
       catchRing.setAttribute('opacity',caught?String((1-age/.6)*.8):'0');
-      if(b){const p=project(b);catchRing.setAttribute('cx',p.x);catchRing.setAttribute('cy',p.y);catchRing.setAttribute('r',String(17+age*40));}
+      if(b){const p=project(b);catchRing.setAttribute('cx',p.x);catchRing.setAttribute('cy',p.y);catchRing.setAttribute('r',String(17+clamp(age,0,.6)*40));}
       const ball=svg.querySelector('#pitch-ball');
       if(ball){const t=time>=play.ball.passAt&&time<play.ball.arriveAt&&play.ball.receiverId?time*560:0;
         for(const child of ball.children)child.setAttribute('transform',`rotate(${-35+(animated?t:0)})`);}

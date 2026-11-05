@@ -1,4 +1,4 @@
-import { buildOperations } from './assistant-operations.js';
+import { buildOperations, measuredRouteBreak, routeDepthYards } from './assistant-operations.js';
 import { validatePlay } from './model.js';
 import { parseBoardOperations } from './assistant-schema.js';
 
@@ -6,6 +6,10 @@ const round = value => Math.round(value * 100) / 100;
 const labels = {
   en: { route: 'route', block: 'block', motion: 'motion', move_player: 'move', pass: 'pass', zone: 'zone', timing: 'timing', remove_route: 'remove route', annotate: 'note', inside: 'inside', outside: 'outside', left: 'left', right: 'right', straight: 'straight', yards: 'yd', breakDepth: 'break depth', endDepth: 'end depth', at: 'at', duration: 'duration', delay: 'delay', to: 'to' },
   'zh-CN': { route: '路线', block: '阻挡', motion: '预动', move_player: '移动站位', pass: '传球', zone: '区域', timing: '时序', remove_route: '移除路线', annotate: '标注', inside: '向内', outside: '向外', left: '向左', right: '向右', straight: '直线', yards: '码', breakDepth: '折点深度', endDepth: '终点深度', at: '位置', duration: '时长', delay: '延迟', to: '至' },
+};
+const boundaryText = {
+  en: { depth: (requested, actual) => `Field boundary adjusted the requested ${requested} yd depth to ${actual} yd`, points: 'Waypoints adjusted to the field boundary' },
+  'zh-CN': { depth: (requested, actual) => `受球场边界限制，请求 ${requested} 码，实际 ${actual} 码`, points: '部分落点已调整至球场边界' },
 };
 
 function difference(before, after, type) {
@@ -34,15 +38,13 @@ function proposalIds(play, operations) {
   };
 }
 
-function routeEffect(route, play) {
-  const centerX = play.players.find(player => player.side === 'offense' && player.label === 'C')?.x ?? 50;
+function routeEffect(route, centerX) {
   const first = route.points[0], pivot = route.points[1], last = route.points.at(-1);
-  const dx = last.x - (route.points.length > 2 ? pivot.x : first.x);
-  const axisX = route.points.length > 2 ? pivot.x : first.x;
-  const breakTo = Math.abs(dx) < .01 ? 'straight' : Math.abs(axisX - centerX) < .01
-    ? (dx < 0 ? 'left' : 'right') : dx * (centerX - axisX) > 0 ? 'inside' : 'outside';
+  // A generated wheel initially breaks laterally and then runs vertically.
+  const origin = route.intent || route.points.length === 2 ? first : pivot;
+  const breakTo = measuredRouteBreak(origin.x, last.x, centerX);
   return { id: route.id, playerId: route.playerId, kind: route.kind,
-    breakDepthYards: round((67 - pivot.y) / 2), endDepthYards: round((67 - last.y) / 2), breakTo,
+    breakDepthYards: round(routeDepthYards(pivot.y)), endDepthYards: round(routeDepthYards(last.y)), breakTo,
     start: { ...first }, end: { ...last }, points: route.points.map(point => ({ ...point })), delay: route.delay, duration: route.duration,
     targetIds: (route.blockTargets || []).filter(Boolean) };
 }
@@ -54,7 +56,8 @@ export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } 
   play = validatePlay(play);
   operations = parseBoardOperations(operations);
   const result = buildOperations(play, operations, { idFactory: proposalIds(play, operations) });
-  const lang = labels[locale === 'en' ? 'en' : 'zh-CN'];
+  const language = locale === 'en' ? 'en' : 'zh-CN';
+  const lang = labels[language], boundary = boundaryText[language];
   const people = new Map(roster.map(person => [person.id, person]));
   const display = id => {
     const player = play.players.find(item => item.id === id) || result.play.players.find(item => item.id === id);
@@ -63,7 +66,7 @@ export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } 
   };
   const effects = result.operationChanges.map((step, index) => {
     const operation = operations[index];
-    const routes = step.routes.map(route => routeEffect(route, result.play));
+    const routes = step.routes.map(route => routeEffect(route, step.centerX));
     const playerIds = [...new Set([operation.playerId, operation.nearId, operation.receiverId, ...(operation.playerIds || []), ...step.players.map(player => player.id)].filter(Boolean))];
     const targetIds = routes.flatMap(route => route.targetIds);
     const effect = { index, kind: operation.kind, playerIds, playerLabels: playerIds.map(display),
@@ -74,14 +77,21 @@ export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } 
     if (operation.kind === 'route') {
       const route = routes[0];
       effect.concept = operation.concept;
-      effect.depthYards = ['slant', 'flat'].includes(operation.concept) ? route.endDepthYards : route.breakDepthYards;
+      const depthPoint = operation.concept === 'slant' ? route.end : route.points[1];
+      const actualDepth = routeDepthYards(depthPoint.y);
+      effect.depthYards = round(actualDepth);
       effect.endDepthYards = route.endDepthYards;
       effect.breakTo = route.breakTo;
+      descriptions.push(operation.concept || '');
+      if (route.points.length > 2) descriptions.push(`${lang.breakDepth} ${route.breakDepthYards} ${lang.yards}`);
+      descriptions.push(lang[route.breakTo], `${lang.endDepth} ${route.endDepthYards} ${lang.yards}`);
       if (operation.depthYards != null) {
         effect.requestedDepthYards = operation.depthYards;
-        effect.depthLimited = operation.concept !== 'screen' && Math.abs(effect.depthYards - operation.depthYards) > .01;
+        effect.depthLimited = operation.concept !== 'screen' && Math.abs(actualDepth - operation.depthYards) > 1e-6;
+        effect.clippedAtBoundary = step.clippedAtBoundary || effect.depthLimited;
+        if (effect.depthLimited) descriptions.push(boundary.depth(operation.depthYards, effect.depthYards));
+        else if (effect.clippedAtBoundary) descriptions.push(boundary.points);
       }
-      descriptions.push(operation.concept || '', `${lang.breakDepth} ${route.breakDepthYards} ${lang.yards}`, lang[route.breakTo], `${lang.endDepth} ${route.endDepthYards} ${lang.yards}`);
     } else if (operation.kind === 'block') {
       effect.scheme = operation.scheme;
       descriptions.push(operation.scheme || '', operation.direction ? lang[operation.direction] : '', effect.targetLabels.join(' → '));

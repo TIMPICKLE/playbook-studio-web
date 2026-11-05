@@ -60,13 +60,15 @@ test('route light, blocking pulse and zones are deterministic at the playback ti
   assert.equal(feedbackProgress(play,route,route.delay+route.duration+1).impact,0);
   const win=new Window();win.document.body.innerHTML=fieldSVG(play);const svg=win.document.querySelector('svg'), player=svg.querySelector('[data-player]');
   const feedback=createRouteFeedback(svg,play);feedback.update({play,time:1,animated:true});const first=feedback.layer.outerHTML;
+  for(const ring of feedback.layer.querySelectorAll('circle'))assert.ok(Number(ring.getAttribute('r'))>=0,'a hidden pre-catch ring must still have valid SVG geometry');
   feedback.update({play,time:4,animated:true});feedback.update({play,time:1,animated:true});assert.equal(feedback.layer.outerHTML,first);
   assert.equal(svg.querySelector('[data-player]'),player);assert.equal(JSON.stringify(play),before);feedback.destroy();assert.equal(svg.querySelector('.digital-decoration'),null);win.happyDOM.abort();
 });
 
-function fixture(makeEngine,{notify=()=>{},IntersectionObserver}={}){
+function fixture(makeEngine,{notify=()=>{},IntersectionObserver,ResizeObserver}={}){
   const win=new Window({width:1440,height:900}),doc=win.document,frames=new Map();let id=0,hidden=false;
   if(IntersectionObserver)win.IntersectionObserver=IntersectionObserver;
+  if(ResizeObserver)win.ResizeObserver=ResizeObserver;
   win.CanvasRenderingContext2D=function(){};win.requestAnimationFrame=fn=>{frames.set(++id,fn);return id;};win.cancelAnimationFrame=id=>frames.delete(id);
   Object.defineProperty(doc,'hidden',{get:()=>hidden});
   const data=starterWorkspace(),state={play:data.plays[0],settings:data.settings,time:0,playing:false,rehearsal:false};
@@ -79,7 +81,7 @@ test('digital drawing pauses offscreen, resumes on return, and ignores pointer m
   class Observer{constructor(callback){this.callback=callback;observer=this;}observe(node){this.node=node;}disconnect(){this.disconnected=true;}}
   const f=fixture(async()=>({status:'ready',mount(){},draw(){draws++;},refreshBackground(){},destroy(){},pick(){picks++;return null;}}),{IntersectionObserver:Observer});
   try{
-    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
+    f.state.playing=true;f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
     const stage=f.doc.querySelector('.pitch-stage');stage.getBoundingClientRect=()=>({left:100,top:100,width:500,height:400});
     f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:25,clientY:25,bubbles:true}));assert.equal(picks,0);
     f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:200,clientY:200,bubbles:true}));assert.equal(picks,1);
@@ -89,6 +91,51 @@ test('digital drawing pauses offscreen, resumes on return, and ignores pointer m
     observer.callback([{target:observer.node,isIntersecting:true}]);await Promise.resolve();
     assert.equal(f.frames.size,1);f.step(200);assert.ok(draws>before);
   }finally{await f.close();assert.equal(observer.disconnected,true);}
+});
+
+test('a still board sleeps and coalesces drag updates into one draw and texture request per frame',async()=>{
+  const draws=[];let wake,decoded=false,ready=true;
+  const f=fixture(async invalidate=>{
+    wake=invalidate;
+    return {status:'ready',get backgroundReady(){return ready;},mount(){},destroy(){},
+      draw(view,{refreshTexture=false}={}){draws.push({draggingId:view.draggingId,refreshTexture});if(refreshTexture)ready=false;else if(decoded)ready=true;}};
+  });
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';f.doc.documentElement.dataset.effects='off';
+    await f.controller.sync();
+    for(let i=1;i<=60;i++)f.step(i*16);
+    assert.equal(draws.length,1);assert.equal(f.frames.size,0);
+    f.state.draggingId=f.state.play.players[0].id;
+    f.controller.refreshBackground();f.controller.refreshBackground();f.controller.refreshBackground();
+    assert.equal(draws.length,1,'input events do not submit their own draws');
+    assert.equal(f.frames.size,1);assert.equal(f.controller.backgroundReady,false,'queued geometry is newer than the presented texture');
+    f.step(1000);
+    assert.equal(draws.length,2);assert.deepEqual(draws.at(-1),{draggingId:f.state.draggingId,refreshTexture:true});
+    assert.equal(f.frames.size,0,'an in-flight decode needs no frame polling');
+    decoded=true;wake();
+    assert.equal(f.controller.backgroundReady,false,'decoding alone must not complete the preview handoff');
+    f.step(1016);
+    assert.equal(f.controller.backgroundReady,true);assert.equal(f.frames.size,0);
+    assert.equal(draws.length,3);assert.equal(draws.at(-1).refreshTexture,false,'presenting the decoded texture must not request another one');
+  }finally{await f.close();}
+});
+
+test('a still board wakes on a changed hover or stage resize and then sleeps again',async()=>{
+  let resizeObserver;const draws=[];
+  class Observer{constructor(callback){this.callback=callback;resizeObserver=this;}observe(node){this.node=node;}disconnect(){this.disconnected=true;}}
+  const f=fixture(async()=>({status:'ready',mount(){},destroy(){},draw(view){draws.push(view);},pick(){return {id:'raised'};}}),{ResizeObserver:Observer});
+  try{
+    f.doc.documentElement.dataset.visualMode='digital';f.doc.documentElement.dataset.effects='off';await f.controller.sync();
+    const stage=f.doc.querySelector('.pitch-stage');stage.getBoundingClientRect=()=>({left:100,top:100,width:500,height:400});
+    const pointer=(x,y)=>f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:x,clientY:y,bubbles:true}));
+    pointer(200,200);pointer(210,200);assert.equal(f.frames.size,1);f.step(0);
+    assert.equal(draws.at(-1).hoveredId,'raised');assert.equal(f.frames.size,0);
+    pointer(220,200);assert.equal(f.frames.size,0,'moving over the same raised piece does not change the scene');
+    pointer(25,25);assert.equal(f.frames.size,1);f.step(16);assert.equal(draws.at(-1).hoveredId,null);
+    assert.equal(resizeObserver.node,stage);
+    resizeObserver.callback();f.win.dispatchEvent(new f.win.Event('resize'));
+    assert.equal(f.frames.size,1);f.step(32);assert.equal(f.frames.size,0);assert.equal(draws.length,4);
+  }finally{await f.close();assert.equal(resizeObserver.disconnected,true);}
 });
 test('background readiness distinguishes startup, decoded scenes and vector fallback',async()=>{
   let resolve,ready=false,status='loading';
@@ -135,11 +182,15 @@ test('digital renderer follows playback and survives theme remounts without rese
   const draws=[];let mounts=0,destroyed=0;
   const f=fixture(async()=>({status:'ready',mount(){mounts++;},draw(state){draws.push({...state});},refreshBackground(){},destroy(){destroyed++;}}));
   try{
+    f.state.play.zones.push({id:'active-zone',x:50,y:35,rx:10,ry:8,color:'#888888',label:'Zone'});
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);f.step(100);
-    f.state.rehearsal=true;f.state.time=2.5;f.step(200);const frozen=draws.at(-1).materialTime;f.step(300);assert.equal(draws.at(-1).materialTime,frozen);assert.equal(draws.at(-1).time,2.5);
+    assert.ok(draws.at(-1).materialTime>0,'active zones advance even while the play is not running');
+    f.state.rehearsal=true;f.state.playing=true;f.state.time=2.4;f.step(200);assert.equal(f.frames.size,1,'playback continues drawing');
+    f.state.playing=false;f.state.time=2.5;f.controller.refreshBackground();f.step(250);
+    const frozen=draws.at(-1).materialTime;f.step(300);assert.equal(draws.at(-1).materialTime,frozen);assert.equal(draws.at(-1).time,2.5);assert.equal(f.frames.size,0);
     f.doc.querySelector('svg').outerHTML=fieldSVG(f.state.play,{fieldTheme:'light'},{time:2.5});await f.controller.sync();f.step(400);
     assert.equal(mounts,2);assert.equal(draws.at(-1).time,2.5);assert.equal(f.doc.querySelectorAll('.digital-decoration').length,1);
-    f.visibility(true);assert.equal(f.frames.size,0);f.visibility(false);await Promise.resolve();assert.equal(f.frames.size,1);
+    f.visibility(true);assert.equal(f.frames.size,0);const before=draws.length;f.visibility(false);await Promise.resolve();assert.equal(draws.length,before+1);assert.equal(f.frames.size,0);
     f.doc.documentElement.dataset.visualMode='traditional';await f.controller.sync();assert.equal(f.frames.size,0);assert.equal(destroyed,1);assert.equal(f.doc.querySelectorAll('.digital-decoration').length,0);
   }finally{await f.close();}
 });
@@ -149,7 +200,7 @@ test('unavailable WebGL keeps SVG route feedback and accessible players; switchi
   f.win.console.warn=()=>{};
   try{
     const player=f.doc.querySelector('[data-player]');f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);
-    assert.equal(f.doc.documentElement.dataset.digitalBoard,'unavailable');assert.equal(f.doc.querySelector('[data-player]'),player);assert.ok(f.doc.querySelector('.digital-decoration'));assert.equal(f.frames.size,1);
+    assert.equal(f.doc.documentElement.dataset.digitalBoard,'unavailable');assert.equal(f.doc.querySelector('[data-player]'),player);assert.ok(f.doc.querySelector('.digital-decoration'));assert.equal(f.frames.size,0);
     await f.controller.sync({retry:true});f.step(100);assert.equal(mounts,1);assert.equal(f.doc.documentElement.dataset.digitalBoard,'ready');
   }finally{await f.close();}
 });
@@ -188,19 +239,19 @@ test('in-place route edits refresh feedback and paint synchronously without remo
 });
 
 test('background failures report once, export the current SVG and recover when the renderer is ready',async()=>{
-  let status='ready',svg,captures=0;const messages=[];
-  const f=fixture(async()=>({fullScene:true,get status(){return status;},mount(next){svg=next;},
+  let status='ready',svg,captures=0,wake;const messages=[];
+  const f=fixture(async invalidate=>{wake=invalidate;return {fullScene:true,get status(){return status;},mount(next){svg=next;},
     draw(){svg.classList.toggle('digital-ready',status==='ready');},refreshBackground(){},destroy(){},
-    capture(){captures++;return 'data:image/png;base64,c2NlbmU=';}}),{notify:message=>messages.push(message)});
+    capture(){captures++;return 'data:image/png;base64,c2NlbmU=';}};},{notify:message=>messages.push(message)});
   try{
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
     assert.equal(f.controller.capture().fullScene,true);assert.equal(captures,1);
-    status='unavailable';f.step(0);f.step(100);
+    status='unavailable';wake();f.step(0);wake();f.step(100);
     assert.equal(f.doc.documentElement.dataset.digitalBoard,'unavailable');assert.equal(messages.length,1);
     assert.match(messages[0],/显示最新平面图/);
     const capture=f.controller.capture();assert.equal(capture.image,null);assert.equal(capture.fullScene,false);assert.ok(capture.decoration);assert.equal(captures,1);
-    status='loading';f.step(200);assert.equal(f.doc.documentElement.dataset.digitalBoard,'loading');assert.equal(f.controller.capture().image,null);
-    status='ready';f.step(300);assert.equal(f.doc.documentElement.dataset.digitalBoard,'ready');assert.equal(f.controller.capture().fullScene,true);assert.equal(captures,2);
+    status='loading';wake();f.step(200);assert.equal(f.doc.documentElement.dataset.digitalBoard,'loading');assert.equal(f.controller.capture().image,null);
+    status='ready';wake();f.step(300);assert.equal(f.doc.documentElement.dataset.digitalBoard,'ready');assert.equal(f.controller.capture().fullScene,true);assert.equal(captures,2);
   }finally{await f.close();}
 });
 
@@ -211,6 +262,7 @@ test('route feedback bugs are surfaced without destroying WebGL or claiming a ca
   try{
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
     svg.querySelector=()=>{throw new TypeError('Route feedback failed');};
+    f.controller.refreshBackground();
     assert.throws(()=>f.step(0),/Route feedback failed/);
     assert.equal(destroyed,0);assert.deepEqual(messages,[]);assert.equal(f.frames.size,0);
   }finally{svg.querySelector=querySelector;await f.close();}
