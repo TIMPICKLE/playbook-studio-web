@@ -111,7 +111,10 @@ test('a rejected candidate stays original unless subsequently corrected and sour
 
 
 test('each expanded team has 40 editable plays using exactly the reviewed source images', () => {
-  assert.equal(catalog.teams.length, 10);
+  assert.equal(catalog.teams.length, 13);
+  for (const id of ['rams', 'seahawks', 'texans']) {
+    assert.ok(catalog.teams.some(team => team.id === id), id);
+  }
   const byId = new Map(catalog.plays.map(play => [play.id,play]));
   for (const team of catalog.teams) {
     const plays = catalog.plays.filter(play => play.team === team.id);

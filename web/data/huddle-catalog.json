@@ -1303,6 +1303,315 @@
         }
       ],
       "playCount": 79
+    },
+    {
+      "id": "rams",
+      "name": "Rams",
+      "city": "Los Angeles",
+      "code": "LAR",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/playbooks/rams-off/",
+      "formations": [
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/singleback-deuce-close/",
+          "name": "Deuce Close",
+          "group": "Singleback",
+          "playCount": 1
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/singleback-tight-y-off/",
+          "name": "Tight Y Off",
+          "group": "Singleback",
+          "playCount": 4
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-close/",
+          "name": "Wing Close",
+          "group": "Singleback",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight/",
+          "name": "Wing Tight",
+          "group": "Singleback",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight-z/",
+          "name": "Wing Tight Z",
+          "group": "Singleback",
+          "playCount": 4
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-bunch-te/",
+          "name": "Bunch TE",
+          "group": "Gun",
+          "playCount": 5
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-normal-y-off-close/",
+          "name": "Normal Y Off Close",
+          "group": "Gun",
+          "playCount": 4
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-tight-y-off/",
+          "name": "Tight Y Off",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-trips-te/",
+          "name": "Trips TE",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-wing-slot-offset/",
+          "name": "Wing Slot Offset",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/",
+          "name": "Y Off Trio Close",
+          "group": "Gun",
+          "playCount": 6
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/",
+          "name": "Y Off Trio Wk",
+          "group": "Gun",
+          "playCount": 6
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/rams-off/hail-mary-hail-mary/",
+          "name": "Hail Mary",
+          "group": "Hail Mary",
+          "playCount": 3
+        }
+      ],
+      "playCount": 44
+    },
+    {
+      "id": "seahawks",
+      "name": "Seahawks",
+      "city": "Seattle",
+      "code": "SEA",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/playbooks/seahawks-off/",
+      "formations": [
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/singleback-deuce-close/",
+          "name": "Deuce Close",
+          "group": "Singleback",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/singleback-wing-close/",
+          "name": "Wing Close",
+          "group": "Singleback",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/i-form-pro/",
+          "name": "Pro",
+          "group": "I Form",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/i-form-wing/",
+          "name": "Wing",
+          "group": "I Form",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/i-form-y-off-close/",
+          "name": "Y Off Close",
+          "group": "I Form",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/",
+          "name": "Bunch Open Offset",
+          "group": "Gun",
+          "playCount": 6
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-x-nasty/",
+          "name": "Bunch X Nasty",
+          "group": "Gun",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/",
+          "name": "Empty Base Flex",
+          "group": "Gun",
+          "playCount": 6
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/",
+          "name": "Empty Trey Stack",
+          "group": "Gun",
+          "playCount": 8
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-spread-dbl-flex/",
+          "name": "Spread Dbl Flex",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-slot-flip/",
+          "name": "Tight Slot Flip",
+          "group": "Gun",
+          "playCount": 1
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-y-off/",
+          "name": "Tight Y Off",
+          "group": "Gun",
+          "playCount": 5
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-trips-te/",
+          "name": "Trips TE",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/",
+          "name": "Y Off Trio Close",
+          "group": "Gun",
+          "playCount": 6
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/seahawks-off/hail-mary-hail-mary/",
+          "name": "Hail Mary",
+          "group": "Hail Mary",
+          "playCount": 3
+        }
+      ],
+      "playCount": 56
+    },
+    {
+      "id": "texans",
+      "name": "Texans",
+      "city": "Houston",
+      "code": "HOU",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/playbooks/texans-off/",
+      "formations": [
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/singleback-tight-y-off/",
+          "name": "Tight Y Off",
+          "group": "Singleback",
+          "playCount": 4
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/singleback-wing-close/",
+          "name": "Wing Close",
+          "group": "Singleback",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/i-form-tight/",
+          "name": "Tight",
+          "group": "I Form",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/i-form-wing/",
+          "name": "Wing",
+          "group": "I Form",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/i-form-y-off-close/",
+          "name": "Y Off Close",
+          "group": "I Form",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/strong-wing/",
+          "name": "Wing",
+          "group": "Strong",
+          "playCount": 1
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-x-nasty/",
+          "name": "Bunch X Nasty",
+          "group": "Gun",
+          "playCount": 4
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/",
+          "name": "Bunch Y-Flex",
+          "group": "Gun",
+          "playCount": 7
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-deuce-close/",
+          "name": "Deuce Close",
+          "group": "Gun",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-doubles-hb-wk/",
+          "name": "Doubles HB Wk",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-empty-base-flex/",
+          "name": "Empty Base Flex",
+          "group": "Gun",
+          "playCount": 5
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-normal-y-off-close/",
+          "name": "Normal Y Off Close",
+          "group": "Gun",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off/",
+          "name": "Tight Y Off",
+          "group": "Gun",
+          "playCount": 3
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/",
+          "name": "Tight Y Off Wk",
+          "group": "Gun",
+          "playCount": 6
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-trips-te/",
+          "name": "Trips TE",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-wing-slot-offset/",
+          "name": "Wing Slot Offset",
+          "group": "Gun",
+          "playCount": 2
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/",
+          "name": "Y Off Trio Close",
+          "group": "Gun",
+          "playCount": 9
+        },
+        {
+          "url": "https://huddle.gg/27/playbooks/texans-off/hail-mary-hail-mary/",
+          "name": "Hail Mary",
+          "group": "Hail Mary",
+          "playCount": 3
+        }
+      ],
+      "playCount": 64
     }
   ],
   "plays": [
@@ -19598,7 +19907,1811 @@
       "sourceUrl": "https://huddle.gg/27/playbooks/packers-off/singleback-wing-pair-heavy/pa-sprint-hb-flat/",
       "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-pair-heavy/pa-sprint-hb-flat.jpg",
       "image": "data/huddle-art/f6249f4d104ff8fdb526.jpg"
+    },
+    {
+      "id": "rams-d061519312e76aa6f8b1",
+      "team": "rams",
+      "name": "CURL FLAT CORNER",
+      "group": "Gun",
+      "formation": "Bunch TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-bunch-te/curl-flat-corner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/curl-flat-corner.jpg",
+      "image": "data/huddle-art/c12700ec4232b9e5f177.jpg"
+    },
+    {
+      "id": "rams-06c73e9a478f40174c30",
+      "team": "rams",
+      "name": "MESH",
+      "group": "Gun",
+      "formation": "Bunch TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-bunch-te/mesh/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/mesh.jpg",
+      "image": "data/huddle-art/edb612cf5be0ade5a8db.jpg"
+    },
+    {
+      "id": "rams-2c841e931bd5c15f2984",
+      "team": "rams",
+      "name": "PA BOOT OVER",
+      "group": "Gun",
+      "formation": "Bunch TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-bunch-te/pa-boot-over/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/pa-boot-over.jpg",
+      "image": "data/huddle-art/05f206e8ba9e203de742.jpg"
+    },
+    {
+      "id": "rams-30efd4136d2d2245fd57",
+      "team": "rams",
+      "name": "SPACING",
+      "group": "Gun",
+      "formation": "Bunch TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-bunch-te/spacing/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/spacing.jpg",
+      "image": "data/huddle-art/7e82265f8a61bbe79dbe.jpg"
+    },
+    {
+      "id": "rams-7bb80041f2855cdc843e",
+      "team": "rams",
+      "name": "X SPOT",
+      "group": "Gun",
+      "formation": "Bunch TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-bunch-te/x-spot/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-te/x-spot.jpg",
+      "image": "data/huddle-art/391bb2aeecae175fff00.jpg"
+    },
+    {
+      "id": "rams-5544939abcccf1ac4611",
+      "team": "rams",
+      "name": "CHEAT FLAT X POST",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-normal-y-off-close/cheat-flat-x-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/cheat-flat-x-post.jpg",
+      "image": "data/huddle-art/6f79239028caf1a9aaf8.jpg"
+    },
+    {
+      "id": "rams-d1219e6b901364d4d488",
+      "team": "rams",
+      "name": "HB SCISSORS",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-normal-y-off-close/hb-scissors/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/hb-scissors.jpg",
+      "image": "data/huddle-art/ac432dec4006e26f59a0.jpg"
+    },
+    {
+      "id": "rams-0b0b9db2da5ac85c1521",
+      "team": "rams",
+      "name": "RPO GLANCE POST",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-normal-y-off-close/rpo-glance-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/rpo-glance-post.jpg",
+      "image": "data/huddle-art/e9549390845056e52a2c.jpg"
+    },
+    {
+      "id": "rams-e67c96efaa741b04ecac",
+      "team": "rams",
+      "name": "Y-SAIL",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-normal-y-off-close/y--sail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/y--sail.jpg",
+      "image": "data/huddle-art/b66bf8ea4576f2123afe.jpg"
+    },
+    {
+      "id": "rams-5d2730bab27f176ac75e",
+      "team": "rams",
+      "name": "CHOICE PIVOT RETURN",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-tight-y-off/choice-pivot-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/choice-pivot-return.jpg",
+      "image": "data/huddle-art/648b52b5710400ae9977.jpg"
+    },
+    {
+      "id": "rams-6d7fb1f7a2a55baec351",
+      "team": "rams",
+      "name": "FLOOD DRIVE",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-tight-y-off/flood-drive/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/flood-drive.jpg",
+      "image": "data/huddle-art/e6d6fcfed96b85b5c52a.jpg"
+    },
+    {
+      "id": "rams-11df402c98f17d5d5ca3",
+      "team": "rams",
+      "name": "SLOT QUICK FLAT",
+      "group": "Gun",
+      "formation": "Trips TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-trips-te/slot-quick-flat/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/slot-quick-flat.jpg",
+      "image": "data/huddle-art/a24ab5a2f94b8db49d9f.jpg"
+    },
+    {
+      "id": "rams-873078f798fd20f7772e",
+      "team": "rams",
+      "name": "VERTICALS",
+      "group": "Gun",
+      "formation": "Trips TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-trips-te/verticals/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/verticals.jpg",
+      "image": "data/huddle-art/3a3c8c1b59f76b34030f.jpg"
+    },
+    {
+      "id": "rams-ce2481a09fa0b3436e94",
+      "team": "rams",
+      "name": "DRAGON SPACING",
+      "group": "Gun",
+      "formation": "Wing Slot Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-wing-slot-offset/dragon-spacing/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset/dragon-spacing.jpg",
+      "image": "data/huddle-art/d0d6ea470f57811a68f2.jpg"
+    },
+    {
+      "id": "rams-72c414e8b2224360e297",
+      "team": "rams",
+      "name": "PA READ",
+      "group": "Gun",
+      "formation": "Wing Slot Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-wing-slot-offset/pa-read/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset/pa-read.jpg",
+      "image": "data/huddle-art/ff2fe1604478bcb70f4b.jpg"
+    },
+    {
+      "id": "rams-41a31f412804834e77fe",
+      "team": "rams",
+      "name": "EMPTY MTN FLOOD H-TRAIL",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/empty-mtn-flood-h--trail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/empty-mtn-flood-h--trail.jpg",
+      "image": "data/huddle-art/6359dd75eeb34607ebc1.jpg"
+    },
+    {
+      "id": "rams-f3d986bc20d08aaa1157",
+      "team": "rams",
+      "name": "EMPTY MTN MESH FLAT",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/empty-mtn-mesh-flat/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/empty-mtn-mesh-flat.jpg",
+      "image": "data/huddle-art/a90cc03d7e99a35c6d60.jpg"
+    },
+    {
+      "id": "rams-5b95a74a54513bec6de9",
+      "team": "rams",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/flood.jpg",
+      "image": "data/huddle-art/410b573d642d55de84d2.jpg"
+    },
+    {
+      "id": "rams-1c3c6b478991d0a19cbf",
+      "team": "rams",
+      "name": "MTN X-DIG SLOT CORNER",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/mtn-x--dig-slot-corner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/mtn-x--dig-slot-corner.jpg",
+      "image": "data/huddle-art/1aeadd24c9ef09f8b203.jpg"
+    },
+    {
+      "id": "rams-756dd2f9a61bbd873bfb",
+      "team": "rams",
+      "name": "PA POWER SHALLOW CROSS",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/pa-power-shallow-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/pa-power-shallow-cross.jpg",
+      "image": "data/huddle-art/2b97a8947bbe1e9d9f22.jpg"
+    },
+    {
+      "id": "rams-e8454ccf45a20b232553",
+      "team": "rams",
+      "name": "SMASH RETURN",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-close/smash-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/smash-return.jpg",
+      "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg"
+    },
+    {
+      "id": "rams-763d3a8e0d6080d8ea9f",
+      "team": "rams",
+      "name": "FOUR VERTICALS",
+      "group": "Gun",
+      "formation": "Y Off Trio Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/four-verticals/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/four-verticals.jpg",
+      "image": "data/huddle-art/95636a2a517a934e2cc1.jpg"
+    },
+    {
+      "id": "rams-ec91febcc6aff97818ae",
+      "team": "rams",
+      "name": "MTN PA DEEP OVER",
+      "group": "Gun",
+      "formation": "Y Off Trio Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/mtn-pa-deep-over/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/mtn-pa-deep-over.jpg",
+      "image": "data/huddle-art/31ae73f7861e163db9d9.jpg"
+    },
+    {
+      "id": "rams-d6a058f81b78e9d97b92",
+      "team": "rams",
+      "name": "MTN SMASH GO",
+      "group": "Gun",
+      "formation": "Y Off Trio Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/mtn-smash-go/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/mtn-smash-go.jpg",
+      "image": "data/huddle-art/825c7cfc04a7f34688c4.jpg"
+    },
+    {
+      "id": "rams-538bb2e7c8bef69798e5",
+      "team": "rams",
+      "name": "QUICK FORK ZIG",
+      "group": "Gun",
+      "formation": "Y Off Trio Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/quick-fork-zig/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/quick-fork-zig.jpg",
+      "image": "data/huddle-art/2e59e599fb5168c9aca7.jpg"
+    },
+    {
+      "id": "rams-5e59eb98428e0e34634c",
+      "team": "rams",
+      "name": "QUICK SHORT POST",
+      "group": "Gun",
+      "formation": "Y Off Trio Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/quick-short-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/quick-short-post.jpg",
+      "image": "data/huddle-art/755cbb470d0d71dd8b22.jpg"
+    },
+    {
+      "id": "rams-ff66d308c0b110c83191",
+      "team": "rams",
+      "name": "QUICK UNDERS",
+      "group": "Gun",
+      "formation": "Y Off Trio Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/gun-y-off-trio-wk/quick-unders/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-wk/quick-unders.jpg",
+      "image": "data/huddle-art/88aa8be7c5d2740f3896.jpg"
+    },
+    {
+      "id": "rams-9bb2623726f5f4766615",
+      "team": "rams",
+      "name": "GOAL POST",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/hail-mary-hail-mary/goal-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/goal-post.jpg",
+      "image": "data/huddle-art/43b94d2515eb5ac43168.jpg"
+    },
+    {
+      "id": "rams-8b189e9f9d71cf22d2d4",
+      "team": "rams",
+      "name": "HAIL MARY",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/hail-mary-hail-mary/hail-mary/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/hail-mary.jpg",
+      "image": "data/huddle-art/615bb2cc8fc3aab9763a.jpg"
+    },
+    {
+      "id": "rams-74e31200202511a9f71e",
+      "team": "rams",
+      "name": "SHOT SAVE CLOCK",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/hail-mary-hail-mary/shot-save-clock/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/shot-save-clock.jpg",
+      "image": "data/huddle-art/b117674095966c9aa86c.jpg"
+    },
+    {
+      "id": "rams-a9374a617ae86b9be049",
+      "team": "rams",
+      "name": "PA BOOT SLIDE",
+      "group": "Singleback",
+      "formation": "Deuce Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-deuce-close/pa-boot-slide/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/deuce-close/pa-boot-slide.jpg",
+      "image": "data/huddle-art/7586c96858767520b323.jpg"
+    },
+    {
+      "id": "rams-b70b3a016b6b3a363749",
+      "team": "rams",
+      "name": "DEEP IN",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-tight-y-off/deep-in/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/deep-in.jpg",
+      "image": "data/huddle-art/33a43b484d188d090f8c.jpg"
+    },
+    {
+      "id": "rams-7b6ff6b9c3e18e04ffab",
+      "team": "rams",
+      "name": "DRIVE FLOOD",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-tight-y-off/drive-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/drive-flood.jpg",
+      "image": "data/huddle-art/27331c4a837613553f7a.jpg"
+    },
+    {
+      "id": "rams-455b74a25da1fc17d799",
+      "team": "rams",
+      "name": "OMAHA",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-tight-y-off/omaha/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/omaha.jpg",
+      "image": "data/huddle-art/2ecac828cfda1f20b3fb.jpg"
+    },
+    {
+      "id": "rams-a637cad1ac8b30500020",
+      "team": "rams",
+      "name": "PA FLOOD",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-tight-y-off/pa-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/pa-flood.jpg",
+      "image": "data/huddle-art/817bb5e1466c013456dc.jpg"
+    },
+    {
+      "id": "rams-8e44d710b37cfc720114",
+      "team": "rams",
+      "name": "PA CROSS",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-close/pa-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-cross.jpg",
+      "image": "data/huddle-art/ce3d28a185d1fda4d798.jpg"
+    },
+    {
+      "id": "rams-08471c9bec0163e8734a",
+      "team": "rams",
+      "name": "PA TE FLOOD",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-close/pa-te-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-te-flood.jpg",
+      "image": "data/huddle-art/097f9389f0583f38e50f.jpg"
+    },
+    {
+      "id": "rams-816fcea8c2afa1ba618a",
+      "team": "rams",
+      "name": "PA Y-DRAG WHEEL",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-close/pa-y--drag-wheel/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-y--drag-wheel.jpg",
+      "image": "data/huddle-art/2220fa43038295f065a9.jpg"
+    },
+    {
+      "id": "rams-bc7e795414eab5f78c2a",
+      "team": "rams",
+      "name": "PA BOOT SLIDE",
+      "group": "Singleback",
+      "formation": "Wing Tight",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight/pa-boot-slide/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight/pa-boot-slide.jpg",
+      "image": "data/huddle-art/ed72a7c33a9c0eee98d9.jpg"
+    },
+    {
+      "id": "rams-4e11fb5889a8855268c3",
+      "team": "rams",
+      "name": "SLUGGO SEAM",
+      "group": "Singleback",
+      "formation": "Wing Tight",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight/sluggo-seam/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight/sluggo-seam.jpg",
+      "image": "data/huddle-art/11a0f9e265220d8e3fd8.jpg"
+    },
+    {
+      "id": "rams-314f72980136ec0171c5",
+      "team": "rams",
+      "name": "CURL FLAT SEAM",
+      "group": "Singleback",
+      "formation": "Wing Tight Z",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight-z/curl-flat-seam/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight-z/curl-flat-seam.jpg",
+      "image": "data/huddle-art/0006042bf0b5147a1063.jpg"
+    },
+    {
+      "id": "rams-cb0986c2ee5fca295864",
+      "team": "rams",
+      "name": "PA BOOT LT",
+      "group": "Singleback",
+      "formation": "Wing Tight Z",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight-z/pa-boot-lt/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight-z/pa-boot-lt.jpg",
+      "image": "data/huddle-art/3455e118a94ff72626f1.jpg"
+    },
+    {
+      "id": "rams-91fa52dce2248f06aa5a",
+      "team": "rams",
+      "name": "PA Y-DRAG WHEEL",
+      "group": "Singleback",
+      "formation": "Wing Tight Z",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight-z/pa-y--drag-wheel/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight-z/pa-y--drag-wheel.jpg",
+      "image": "data/huddle-art/14393c5a30791d919445.jpg"
+    },
+    {
+      "id": "rams-bbf96c4494db8e267142",
+      "team": "rams",
+      "name": "TE ATTACK",
+      "group": "Singleback",
+      "formation": "Wing Tight Z",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/rams-off/singleback-wing-tight-z/te-attack/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-tight-z/te-attack.jpg",
+      "image": "data/huddle-art/8a177c42a9aea4fce6b6.jpg"
+    },
+    {
+      "id": "seahawks-dd79acf4595683b8c488",
+      "team": "seahawks",
+      "name": "FAKE SCREEN WHEEL",
+      "group": "Gun",
+      "formation": "Bunch Open Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/fake-screen-wheel/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/fake-screen-wheel.jpg",
+      "image": "data/huddle-art/64061a3a57c9d1a77c92.jpg"
+    },
+    {
+      "id": "seahawks-e5dfd8dd7d4bea6bae89",
+      "team": "seahawks",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Bunch Open Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/flood.jpg",
+      "image": "data/huddle-art/a30c5fdb9bebe6c18dd1.jpg"
+    },
+    {
+      "id": "seahawks-70819b6d12c137dc4949",
+      "team": "seahawks",
+      "name": "RELOAD FLOOD X-CHOICE",
+      "group": "Gun",
+      "formation": "Bunch Open Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/reload-flood-x--choice/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/reload-flood-x--choice.jpg",
+      "image": "data/huddle-art/94c46a0ab0879a5f596c.jpg"
+    },
+    {
+      "id": "seahawks-4cd68861b6f9c6efafac",
+      "team": "seahawks",
+      "name": "RELOAD SPACING SWITCH",
+      "group": "Gun",
+      "formation": "Bunch Open Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/reload-spacing-switch/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/reload-spacing-switch.jpg",
+      "image": "data/huddle-art/fba7b171e1495f662c67.jpg"
+    },
+    {
+      "id": "seahawks-e7950dd1fd1bd04a4575",
+      "team": "seahawks",
+      "name": "RPO READ BUBBLE",
+      "group": "Gun",
+      "formation": "Bunch Open Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/rpo-read-bubble/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/rpo-read-bubble.jpg",
+      "image": "data/huddle-art/0874a93a97c3186f8159.jpg"
+    },
+    {
+      "id": "seahawks-de0d412267be9f524ee7",
+      "team": "seahawks",
+      "name": "Y TRAIL",
+      "group": "Gun",
+      "formation": "Bunch Open Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-open-offset/y-trail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-open-offset/y-trail.jpg",
+      "image": "data/huddle-art/968d1e158e96e9b3776d.jpg"
+    },
+    {
+      "id": "seahawks-d43c0e162a23d1973df2",
+      "team": "seahawks",
+      "name": "MTN SMASH SLUGGO",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-x-nasty/mtn-smash-sluggo/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/mtn-smash-sluggo.jpg",
+      "image": "data/huddle-art/c3120da42812bb4b1e27.jpg"
+    },
+    {
+      "id": "seahawks-11ce855f3a715fc4baa7",
+      "team": "seahawks",
+      "name": "MTN SPEED DIG UNDER",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-x-nasty/mtn-speed-dig-under/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/mtn-speed-dig-under.jpg",
+      "image": "data/huddle-art/5fe4086456fcfae5b0be.jpg"
+    },
+    {
+      "id": "seahawks-41a62070e42391ae3eb5",
+      "team": "seahawks",
+      "name": "SMASH RETURN",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-bunch-x-nasty/smash-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/smash-return.jpg",
+      "image": "data/huddle-art/25eb2263512c442c0eeb.jpg"
+    },
+    {
+      "id": "seahawks-fc5084db634115295cfd",
+      "team": "seahawks",
+      "name": "HOSS Y JUKE",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/hoss-y-juke/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/hoss-y-juke.jpg",
+      "image": "data/huddle-art/ce18a4828db8b035b5c1.jpg"
+    },
+    {
+      "id": "seahawks-0ad29fd7d781aad3173d",
+      "team": "seahawks",
+      "name": "LEVELS SWITCH",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/levels-switch/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/levels-switch.jpg",
+      "image": "data/huddle-art/236122695ad2c10c9d95.jpg"
+    },
+    {
+      "id": "seahawks-3e28bfe848f31a9bb14a",
+      "team": "seahawks",
+      "name": "MIDDLE HI LO",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/middle-hi-lo/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/middle-hi-lo.jpg",
+      "image": "data/huddle-art/b6bbcd46ddc8a08732b3.jpg"
+    },
+    {
+      "id": "seahawks-4f288d3e1adc332ebcc3",
+      "team": "seahawks",
+      "name": "REDZONE UP",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/redzone-up/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/redzone-up.jpg",
+      "image": "data/huddle-art/398ec4638ee7446d0bc5.jpg"
+    },
+    {
+      "id": "seahawks-cc251edef79c634971a6",
+      "team": "seahawks",
+      "name": "STICK",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/stick/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/stick.jpg",
+      "image": "data/huddle-art/a8bfc7e6c9e95a5b53c8.jpg"
+    },
+    {
+      "id": "seahawks-7130ec38bcad3d25b424",
+      "team": "seahawks",
+      "name": "Y CORNER",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-base-flex/y-corner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/y-corner.jpg",
+      "image": "data/huddle-art/73b5fd2722b901c212cf.jpg"
+    },
+    {
+      "id": "seahawks-9979b881f0aea6946b7a",
+      "team": "seahawks",
+      "name": "BENCH CORNER",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/bench-corner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/bench-corner.jpg",
+      "image": "data/huddle-art/47297d8376cd3dcc8dc2.jpg"
+    },
+    {
+      "id": "seahawks-b5d163af20efa54d12a8",
+      "team": "seahawks",
+      "name": "CURL FLAT SALEM",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/curl-flat-salem/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/curl-flat-salem.jpg",
+      "image": "data/huddle-art/389d2274d63e407621fd.jpg"
+    },
+    {
+      "id": "seahawks-800811be1586eebb2bf8",
+      "team": "seahawks",
+      "name": "CURL SWITCH",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/curl-switch/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/curl-switch.jpg",
+      "image": "data/huddle-art/93ca2db85822aff68c52.jpg"
+    },
+    {
+      "id": "seahawks-66d95c135a8afd5796bd",
+      "team": "seahawks",
+      "name": "FADE OUT",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/fade-out/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/fade-out.jpg",
+      "image": "data/huddle-art/d7850e72f819bb08d14b.jpg"
+    },
+    {
+      "id": "seahawks-42c0c571833b8750ba22",
+      "team": "seahawks",
+      "name": "LEVELS",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/levels/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/levels.jpg",
+      "image": "data/huddle-art/b595de1db9807a5031b9.jpg"
+    },
+    {
+      "id": "seahawks-743cab9b0d54d4e5b6af",
+      "team": "seahawks",
+      "name": "SMASH SEAM",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/smash-seam/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/smash-seam.jpg",
+      "image": "data/huddle-art/7d7f57bb9708f1cc4ff0.jpg"
+    },
+    {
+      "id": "seahawks-87ba93e39a253ac30fd6",
+      "team": "seahawks",
+      "name": "STICK N NOD",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/stick-n-nod/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/stick-n-nod.jpg",
+      "image": "data/huddle-art/233d1a07e659a02f001b.jpg"
+    },
+    {
+      "id": "seahawks-a801b331bfe7520571c2",
+      "team": "seahawks",
+      "name": "Y STICK",
+      "group": "Gun",
+      "formation": "Empty Trey Stack",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-empty-trey-stack/y-stick/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-trey-stack/y-stick.jpg",
+      "image": "data/huddle-art/f9b8c49a947fcc7fec76.jpg"
+    },
+    {
+      "id": "seahawks-d44839146ab5eacbcf61",
+      "team": "seahawks",
+      "name": "HB SLIP SCREEN",
+      "group": "Gun",
+      "formation": "Spread Dbl Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-spread-dbl-flex/hb-slip-screen/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/spread-dbl-flex/hb-slip-screen.jpg",
+      "image": "data/huddle-art/55f11d59342d19f18a4e.jpg"
+    },
+    {
+      "id": "seahawks-d4c8c8ac6ed27d28d1df",
+      "team": "seahawks",
+      "name": "MTN DBL SLANTS WHEEL",
+      "group": "Gun",
+      "formation": "Spread Dbl Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-spread-dbl-flex/mtn-dbl-slants-wheel/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/spread-dbl-flex/mtn-dbl-slants-wheel.jpg",
+      "image": "data/huddle-art/c547ec9ab6dc861bcf04.jpg"
+    },
+    {
+      "id": "seahawks-f9ff76cc5da53e726d11",
+      "team": "seahawks",
+      "name": "PA READ",
+      "group": "Gun",
+      "formation": "Tight Slot Flip",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-slot-flip/pa-read/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-slot-flip/pa-read.jpg",
+      "image": "data/huddle-art/59b28b456af8f4e369b0.jpg"
+    },
+    {
+      "id": "seahawks-cbe57a48ee82d2fb0bad",
+      "team": "seahawks",
+      "name": "FLOOD DRIVE",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-y-off/flood-drive/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/flood-drive.jpg",
+      "image": "data/huddle-art/e6d6fcfed96b85b5c52a.jpg"
+    },
+    {
+      "id": "seahawks-129d63aa4cfd2394bdea",
+      "team": "seahawks",
+      "name": "MTN PA SPINNER",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-y-off/mtn-pa-spinner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/mtn-pa-spinner.jpg",
+      "image": "data/huddle-art/ef0088ef28a06f6491a8.jpg"
+    },
+    {
+      "id": "seahawks-919d8f6d7d1f3108dd4d",
+      "team": "seahawks",
+      "name": "MTN SLASH WHEEL CROSS",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-y-off/mtn-slash-wheel-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/mtn-slash-wheel-cross.jpg",
+      "image": "data/huddle-art/2f59e860b0d94a9f15cb.jpg"
+    },
+    {
+      "id": "seahawks-714a7218fd372895747c",
+      "team": "seahawks",
+      "name": "MTN SPOT Y QUICK",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-y-off/mtn-spot-y-quick/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/mtn-spot-y-quick.jpg",
+      "image": "data/huddle-art/7577fe1c7eb0a4ae4b5b.jpg"
+    },
+    {
+      "id": "seahawks-a4b4db957248a8a51370",
+      "team": "seahawks",
+      "name": "RPO PEEK SLANT",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-tight-y-off/rpo-peek-slant/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/rpo-peek-slant.jpg",
+      "image": "data/huddle-art/644565ec420df35d9a02.jpg"
+    },
+    {
+      "id": "seahawks-14a08d47f579cf4c0420",
+      "team": "seahawks",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Trips TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-trips-te/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/flood.jpg",
+      "image": "data/huddle-art/9d9747c8bd834cc9d75e.jpg"
+    },
+    {
+      "id": "seahawks-54cd4450892a1b24f822",
+      "team": "seahawks",
+      "name": "VERTICALS",
+      "group": "Gun",
+      "formation": "Trips TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-trips-te/verticals/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/verticals.jpg",
+      "image": "data/huddle-art/3a3c8c1b59f76b34030f.jpg"
+    },
+    {
+      "id": "seahawks-7aa8029855de95eb08f6",
+      "team": "seahawks",
+      "name": "EMPTY MTN FLOOD H-TRAIL",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/empty-mtn-flood-h--trail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/empty-mtn-flood-h--trail.jpg",
+      "image": "data/huddle-art/6359dd75eeb34607ebc1.jpg"
+    },
+    {
+      "id": "seahawks-2156eb44be0c50d396c1",
+      "team": "seahawks",
+      "name": "EMPTY MTN MESH FLAT",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/empty-mtn-mesh-flat/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/empty-mtn-mesh-flat.jpg",
+      "image": "data/huddle-art/a90cc03d7e99a35c6d60.jpg"
+    },
+    {
+      "id": "seahawks-d54b748db73ddd4ae462",
+      "team": "seahawks",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/flood.jpg",
+      "image": "data/huddle-art/410b573d642d55de84d2.jpg"
+    },
+    {
+      "id": "seahawks-07c5af63a124cce61e71",
+      "team": "seahawks",
+      "name": "PA POWER SHALLOW CROSS",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/pa-power-shallow-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/pa-power-shallow-cross.jpg",
+      "image": "data/huddle-art/2b97a8947bbe1e9d9f22.jpg"
+    },
+    {
+      "id": "seahawks-b632f8da9d318a1a8a43",
+      "team": "seahawks",
+      "name": "PA TOSS LEAD SWING CROSSER",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/pa-toss-lead-swing-crosser/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/pa-toss-lead-swing-crosser.jpg",
+      "image": "data/huddle-art/1baefdfd2f386a7e1abb.jpg"
+    },
+    {
+      "id": "seahawks-f33cfc9937220803507d",
+      "team": "seahawks",
+      "name": "SMASH RETURN",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/gun-y-off-trio-close/smash-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/smash-return.jpg",
+      "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg"
+    },
+    {
+      "id": "seahawks-d8beed3cbcc5d9800c0f",
+      "team": "seahawks",
+      "name": "GOAL POST",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/hail-mary-hail-mary/goal-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/goal-post.jpg",
+      "image": "data/huddle-art/43b94d2515eb5ac43168.jpg"
+    },
+    {
+      "id": "seahawks-689b676efe305fb0640d",
+      "team": "seahawks",
+      "name": "HAIL MARY",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/hail-mary-hail-mary/hail-mary/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/hail-mary.jpg",
+      "image": "data/huddle-art/615bb2cc8fc3aab9763a.jpg"
+    },
+    {
+      "id": "seahawks-ea9ae3c08beef8b27769",
+      "team": "seahawks",
+      "name": "SHOT SAVE CLOCK",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/hail-mary-hail-mary/shot-save-clock/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/shot-save-clock.jpg",
+      "image": "data/huddle-art/b117674095966c9aa86c.jpg"
+    },
+    {
+      "id": "seahawks-e76a531101b053a12bc1",
+      "team": "seahawks",
+      "name": "PA COMEBACK SLIDE",
+      "group": "I Form",
+      "formation": "Pro",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-pro/pa-comeback-slide/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/pro/pa-comeback-slide.jpg",
+      "image": "data/huddle-art/fb557176ff999df7f824.jpg"
+    },
+    {
+      "id": "seahawks-85e6d1119a03a2701d26",
+      "team": "seahawks",
+      "name": "PA SCISSORS",
+      "group": "I Form",
+      "formation": "Pro",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-pro/pa-scissors/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/pro/pa-scissors.jpg",
+      "image": "data/huddle-art/3ab68031a686a704dbbc.jpg"
+    },
+    {
+      "id": "seahawks-d1b6348ec587ef65a392",
+      "team": "seahawks",
+      "name": "QUICK SLANTS",
+      "group": "I Form",
+      "formation": "Pro",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-pro/quick-slants/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/pro/quick-slants.jpg",
+      "image": "data/huddle-art/8ed17eb0ad5a38727e74.jpg"
+    },
+    {
+      "id": "seahawks-ff8c75e6743efd011506",
+      "team": "seahawks",
+      "name": "PA BOOT FLOW",
+      "group": "I Form",
+      "formation": "Wing",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-wing/pa-boot-flow/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/wing/pa-boot-flow.jpg",
+      "image": "data/huddle-art/2defe2513e3f6cc5ff10.jpg"
+    },
+    {
+      "id": "seahawks-007a845fa33b408166fd",
+      "team": "seahawks",
+      "name": "PA SCISSORS",
+      "group": "I Form",
+      "formation": "Wing",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-wing/pa-scissors/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/wing/pa-scissors.jpg",
+      "image": "data/huddle-art/d030c54e44889d9dd80f.jpg"
+    },
+    {
+      "id": "seahawks-a3a87f6162ec9fb65340",
+      "team": "seahawks",
+      "name": "X SLANT",
+      "group": "I Form",
+      "formation": "Wing",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-wing/x-slant/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/wing/x-slant.jpg",
+      "image": "data/huddle-art/9eb0f44ef31f83f8a396.jpg"
+    },
+    {
+      "id": "seahawks-02a8f486e5e3e2f32711",
+      "team": "seahawks",
+      "name": "DBL OUTS",
+      "group": "I Form",
+      "formation": "Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-y-off-close/dbl-outs/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/dbl-outs.jpg",
+      "image": "data/huddle-art/5f3256c5ef16a6301ed7.jpg"
+    },
+    {
+      "id": "seahawks-71c50f5499cd7e9d3578",
+      "team": "seahawks",
+      "name": "PA PYLON SAIL",
+      "group": "I Form",
+      "formation": "Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-y-off-close/pa-pylon-sail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/pa-pylon-sail.jpg",
+      "image": "data/huddle-art/78344ebed49512747d23.jpg"
+    },
+    {
+      "id": "seahawks-869d15538006bb1e8173",
+      "team": "seahawks",
+      "name": "PA X DEEP OUT",
+      "group": "I Form",
+      "formation": "Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/i-form-y-off-close/pa-x-deep-out/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/pa-x-deep-out.jpg",
+      "image": "data/huddle-art/03f43cf066a2b3e0b14f.jpg"
+    },
+    {
+      "id": "seahawks-fecc2afb64967b5ba725",
+      "team": "seahawks",
+      "name": "PA BOOT SLIDE",
+      "group": "Singleback",
+      "formation": "Deuce Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/singleback-deuce-close/pa-boot-slide/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/deuce-close/pa-boot-slide.jpg",
+      "image": "data/huddle-art/7586c96858767520b323.jpg"
+    },
+    {
+      "id": "seahawks-92e23b4f7aa316888fa8",
+      "team": "seahawks",
+      "name": "PA SPRINT HB FLAT",
+      "group": "Singleback",
+      "formation": "Deuce Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/singleback-deuce-close/pa-sprint-hb-flat/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/deuce-close/pa-sprint-hb-flat.jpg",
+      "image": "data/huddle-art/c36489b2a577f2145ffd.jpg"
+    },
+    {
+      "id": "seahawks-95bd968daf7cf7b2bfff",
+      "team": "seahawks",
+      "name": "PA CROSS",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/singleback-wing-close/pa-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-cross.jpg",
+      "image": "data/huddle-art/ce3d28a185d1fda4d798.jpg"
+    },
+    {
+      "id": "seahawks-dcf6ddc47499a1f656ff",
+      "team": "seahawks",
+      "name": "PA TE FLOOD",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/singleback-wing-close/pa-te-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-te-flood.jpg",
+      "image": "data/huddle-art/097f9389f0583f38e50f.jpg"
+    },
+    {
+      "id": "seahawks-3669300fd2de980b7853",
+      "team": "seahawks",
+      "name": "PA Y-DRAG WHEEL",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/seahawks-off/singleback-wing-close/pa-y--drag-wheel/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-y--drag-wheel.jpg",
+      "image": "data/huddle-art/2220fa43038295f065a9.jpg"
+    },
+    {
+      "id": "texans-5b543770c12158e861bc",
+      "team": "texans",
+      "name": "CORNER OUT DIG",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-x-nasty/corner-out-dig/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/corner-out-dig.jpg",
+      "image": "data/huddle-art/d4242ee9d5f65307fbdf.jpg"
+    },
+    {
+      "id": "texans-13b3fe5bbdb6fa5333cb",
+      "team": "texans",
+      "name": "SMASH RETURN",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-x-nasty/smash-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/smash-return.jpg",
+      "image": "data/huddle-art/25eb2263512c442c0eeb.jpg"
+    },
+    {
+      "id": "texans-8dd2c3a87c250fb02b6e",
+      "team": "texans",
+      "name": "Y FLAT GOALLINE",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-x-nasty/y-flat-goalline/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/y-flat-goalline.jpg",
+      "image": "data/huddle-art/630f2293ed2d264b3e03.jpg"
+    },
+    {
+      "id": "texans-9c128d1a9c35dd130190",
+      "team": "texans",
+      "name": "Z SPOT GOALLINE",
+      "group": "Gun",
+      "formation": "Bunch X Nasty",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-x-nasty/z-spot-goalline/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-x-nasty/z-spot-goalline.jpg",
+      "image": "data/huddle-art/b5e2e660d8001881e3fd.jpg"
+    },
+    {
+      "id": "texans-052cc705b7b97d9651e3",
+      "team": "texans",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/flood.jpg",
+      "image": "data/huddle-art/19035a444f16e02a49b8.jpg"
+    },
+    {
+      "id": "texans-ef14f9d60bccd2a0d3b7",
+      "team": "texans",
+      "name": "JET PULL SHALLOW",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/jet-pull-shallow/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/jet-pull-shallow.jpg",
+      "image": "data/huddle-art/edec03d3091537677797.jpg"
+    },
+    {
+      "id": "texans-c9de6cabeed36356df15",
+      "team": "texans",
+      "name": "MTN DAGGER SIT",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/mtn-dagger-sit/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/mtn-dagger-sit.jpg",
+      "image": "data/huddle-art/c9a06295e568c46563c9.jpg"
+    },
+    {
+      "id": "texans-5b187fc62df7b048bee4",
+      "team": "texans",
+      "name": "MTN INSIDE POST",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/mtn-inside-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/mtn-inside-post.jpg",
+      "image": "data/huddle-art/5ab1046ab15cc483055d.jpg"
+    },
+    {
+      "id": "texans-0a5a725dbca642398e77",
+      "team": "texans",
+      "name": "RPO ALERT OUT",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/rpo-alert-out/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/rpo-alert-out.jpg",
+      "image": "data/huddle-art/3007ebf57f42f163ddba.jpg"
+    },
+    {
+      "id": "texans-a8b2c5bb6b4e3f32c96f",
+      "team": "texans",
+      "name": "SPACING",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/spacing/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/spacing.jpg",
+      "image": "data/huddle-art/341833422530dac05da8.jpg"
+    },
+    {
+      "id": "texans-b62f982f2a04946da7aa",
+      "team": "texans",
+      "name": "VERTICALS",
+      "group": "Gun",
+      "formation": "Bunch Y-Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-bunch-y--flex/verticals/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/bunch-y--flex/verticals.jpg",
+      "image": "data/huddle-art/c523e146d627a72d858f.jpg"
+    },
+    {
+      "id": "texans-27b6fc3d1e70f291ce18",
+      "team": "texans",
+      "name": "BENCH DIG CURL",
+      "group": "Gun",
+      "formation": "Deuce Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-deuce-close/bench-dig-curl/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/bench-dig-curl.jpg",
+      "image": "data/huddle-art/9eb36b43a5400bbaf543.jpg"
+    },
+    {
+      "id": "texans-e4ce6d6e972f339213a9",
+      "team": "texans",
+      "name": "PA DEEP OVER",
+      "group": "Gun",
+      "formation": "Deuce Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-deuce-close/pa-deep-over/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/pa-deep-over.jpg",
+      "image": "data/huddle-art/762b8ba686992f1462f3.jpg"
+    },
+    {
+      "id": "texans-892afabd2d8283830361",
+      "team": "texans",
+      "name": "STICK SWITCH",
+      "group": "Gun",
+      "formation": "Deuce Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-deuce-close/stick-switch/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/deuce-close/stick-switch.jpg",
+      "image": "data/huddle-art/921fa0c10f5382c03163.jpg"
+    },
+    {
+      "id": "texans-3fb035e7df98f745b4e8",
+      "team": "texans",
+      "name": "BOOMERANG SLOT SWING",
+      "group": "Gun",
+      "formation": "Doubles HB Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-doubles-hb-wk/boomerang-slot-swing/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-hb-wk/boomerang-slot-swing.jpg",
+      "image": "data/huddle-art/06c9349d2e54c00818f6.jpg"
+    },
+    {
+      "id": "texans-e9f63cb85c84c94a9130",
+      "team": "texans",
+      "name": "CURL COMBO",
+      "group": "Gun",
+      "formation": "Doubles HB Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-doubles-hb-wk/curl-combo/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/doubles-hb-wk/curl-combo.jpg",
+      "image": "data/huddle-art/a72181ccbd044bd08164.jpg"
+    },
+    {
+      "id": "texans-df4b7d3efa71ebb0e1e8",
+      "team": "texans",
+      "name": "HOSS Y JUKE",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-empty-base-flex/hoss-y-juke/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/hoss-y-juke.jpg",
+      "image": "data/huddle-art/ce18a4828db8b035b5c1.jpg"
+    },
+    {
+      "id": "texans-3413b7a66e8fe2667e6f",
+      "team": "texans",
+      "name": "LEVELS SWITCH",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-empty-base-flex/levels-switch/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/levels-switch.jpg",
+      "image": "data/huddle-art/236122695ad2c10c9d95.jpg"
+    },
+    {
+      "id": "texans-13ba4680fda339670def",
+      "team": "texans",
+      "name": "REDZONE UP",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-empty-base-flex/redzone-up/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/redzone-up.jpg",
+      "image": "data/huddle-art/398ec4638ee7446d0bc5.jpg"
+    },
+    {
+      "id": "texans-432c93328d55db8f8781",
+      "team": "texans",
+      "name": "STICK",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-empty-base-flex/stick/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/stick.jpg",
+      "image": "data/huddle-art/a8bfc7e6c9e95a5b53c8.jpg"
+    },
+    {
+      "id": "texans-26a6d65c3595d5ecc896",
+      "team": "texans",
+      "name": "TRAIL SHAKE",
+      "group": "Gun",
+      "formation": "Empty Base Flex",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-empty-base-flex/trail-shake/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/empty-base-flex/trail-shake.jpg",
+      "image": "data/huddle-art/4e73ecc2872ad0a7dea7.jpg"
+    },
+    {
+      "id": "texans-efca56d4c0b8236bc6e5",
+      "team": "texans",
+      "name": "CHEAT FLAT X POST",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-normal-y-off-close/cheat-flat-x-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/cheat-flat-x-post.jpg",
+      "image": "data/huddle-art/6f79239028caf1a9aaf8.jpg"
+    },
+    {
+      "id": "texans-8fb8c88ed5bde00862a3",
+      "team": "texans",
+      "name": "HB SCISSORS",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-normal-y-off-close/hb-scissors/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/hb-scissors.jpg",
+      "image": "data/huddle-art/ac432dec4006e26f59a0.jpg"
+    },
+    {
+      "id": "texans-b918513938a4e3e92f4c",
+      "team": "texans",
+      "name": "RPO GLANCE POST",
+      "group": "Gun",
+      "formation": "Normal Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-normal-y-off-close/rpo-glance-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/normal-y-off-close/rpo-glance-post.jpg",
+      "image": "data/huddle-art/e9549390845056e52a2c.jpg"
+    },
+    {
+      "id": "texans-aec989ecce9b91432b4e",
+      "team": "texans",
+      "name": "CHOICE PIVOT RETURN",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off/choice-pivot-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/choice-pivot-return.jpg",
+      "image": "data/huddle-art/648b52b5710400ae9977.jpg"
+    },
+    {
+      "id": "texans-af917a6c7478c5781f63",
+      "team": "texans",
+      "name": "FLOOD DRIVE",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off/flood-drive/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/flood-drive.jpg",
+      "image": "data/huddle-art/e6d6fcfed96b85b5c52a.jpg"
+    },
+    {
+      "id": "texans-5a0c3ca94253a35ab77f",
+      "team": "texans",
+      "name": "MTN PA SPINNER",
+      "group": "Gun",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off/mtn-pa-spinner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off/mtn-pa-spinner.jpg",
+      "image": "data/huddle-art/ef0088ef28a06f6491a8.jpg"
+    },
+    {
+      "id": "texans-41b73b6c415f34393a83",
+      "team": "texans",
+      "name": "CURLS",
+      "group": "Gun",
+      "formation": "Tight Y Off Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/curls/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/curls.jpg",
+      "image": "data/huddle-art/465503f7dfcae48314fe.jpg"
+    },
+    {
+      "id": "texans-33f6a7afaf81c2db0416",
+      "team": "texans",
+      "name": "HAMMER DAGGER",
+      "group": "Gun",
+      "formation": "Tight Y Off Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/hammer-dagger/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/hammer-dagger.jpg",
+      "image": "data/huddle-art/f47e4bf39b627924ec58.jpg"
+    },
+    {
+      "id": "texans-93b38d7f4901bab93745",
+      "team": "texans",
+      "name": "SHALLOW CROSS",
+      "group": "Gun",
+      "formation": "Tight Y Off Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/shallow-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/shallow-cross.jpg",
+      "image": "data/huddle-art/99ac63ff494e26c26eff.jpg"
+    },
+    {
+      "id": "texans-7ebad188ce9aa03291aa",
+      "team": "texans",
+      "name": "SHUFFLE HB CORNER",
+      "group": "Gun",
+      "formation": "Tight Y Off Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/shuffle-hb-corner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/shuffle-hb-corner.jpg",
+      "image": "data/huddle-art/3ad7f84542215a5cf805.jpg"
+    },
+    {
+      "id": "texans-091499ebcc01ca5809bd",
+      "team": "texans",
+      "name": "SPOT Y MIDDLE",
+      "group": "Gun",
+      "formation": "Tight Y Off Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/spot-y-middle/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/spot-y-middle.jpg",
+      "image": "data/huddle-art/3be16160fc9ba3785d69.jpg"
+    },
+    {
+      "id": "texans-217b990d5d2223d3c9ab",
+      "team": "texans",
+      "name": "WR UNDER",
+      "group": "Gun",
+      "formation": "Tight Y Off Wk",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-tight-y-off-wk/wr-under/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/tight-y-off-wk/wr-under.jpg",
+      "image": "data/huddle-art/fc1a65b7e8bcdd6e8770.jpg"
+    },
+    {
+      "id": "texans-47f2b89746903b662770",
+      "team": "texans",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Trips TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-trips-te/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/flood.jpg",
+      "image": "data/huddle-art/9d9747c8bd834cc9d75e.jpg"
+    },
+    {
+      "id": "texans-455fe568404ee843beec",
+      "team": "texans",
+      "name": "VERTICALS",
+      "group": "Gun",
+      "formation": "Trips TE",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-trips-te/verticals/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/trips-te/verticals.jpg",
+      "image": "data/huddle-art/3a3c8c1b59f76b34030f.jpg"
+    },
+    {
+      "id": "texans-c46097fe2c107f36074e",
+      "team": "texans",
+      "name": "DRAGON SPACING",
+      "group": "Gun",
+      "formation": "Wing Slot Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-wing-slot-offset/dragon-spacing/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset/dragon-spacing.jpg",
+      "image": "data/huddle-art/d0d6ea470f57811a68f2.jpg"
+    },
+    {
+      "id": "texans-18c79adb69dd46b3163a",
+      "team": "texans",
+      "name": "PA READ",
+      "group": "Gun",
+      "formation": "Wing Slot Offset",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-wing-slot-offset/pa-read/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/wing-slot-offset/pa-read.jpg",
+      "image": "data/huddle-art/ff2fe1604478bcb70f4b.jpg"
+    },
+    {
+      "id": "texans-ec09b23fef7062a79aff",
+      "team": "texans",
+      "name": "BOUNCE DASH CROSSER",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/bounce-dash-crosser/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/bounce-dash-crosser.jpg",
+      "image": "data/huddle-art/1cd0825e1ce1e2837c6e.jpg"
+    },
+    {
+      "id": "texans-79768aaa0d75596ed02a",
+      "team": "texans",
+      "name": "DASH FLOOD",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/dash-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/dash-flood.jpg",
+      "image": "data/huddle-art/39f01b5941f59ccf7d0d.jpg"
+    },
+    {
+      "id": "texans-6e11c2814e865c2f0fca",
+      "team": "texans",
+      "name": "EMPTY MTN FLOOD H-TRAIL",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/empty-mtn-flood-h--trail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/empty-mtn-flood-h--trail.jpg",
+      "image": "data/huddle-art/6359dd75eeb34607ebc1.jpg"
+    },
+    {
+      "id": "texans-d0990387424fd339dfb0",
+      "team": "texans",
+      "name": "EMPTY MTN MESH FLAT",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/empty-mtn-mesh-flat/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/empty-mtn-mesh-flat.jpg",
+      "image": "data/huddle-art/a90cc03d7e99a35c6d60.jpg"
+    },
+    {
+      "id": "texans-e313a5cda7463150a1ee",
+      "team": "texans",
+      "name": "FLOOD",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/flood.jpg",
+      "image": "data/huddle-art/410b573d642d55de84d2.jpg"
+    },
+    {
+      "id": "texans-4bad93d7cb68e449385d",
+      "team": "texans",
+      "name": "MTN X-DIG SLOT CORNER",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/mtn-x--dig-slot-corner/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/mtn-x--dig-slot-corner.jpg",
+      "image": "data/huddle-art/1aeadd24c9ef09f8b203.jpg"
+    },
+    {
+      "id": "texans-d1ba06194b1a16fe6249",
+      "team": "texans",
+      "name": "PA POWER SHALLOW CROSS",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/pa-power-shallow-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/pa-power-shallow-cross.jpg",
+      "image": "data/huddle-art/2b97a8947bbe1e9d9f22.jpg"
+    },
+    {
+      "id": "texans-fed5a44f01d792b7b0a6",
+      "team": "texans",
+      "name": "PA TOSS LEAD SWING CROSSER",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/pa-toss-lead-swing-crosser/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/pa-toss-lead-swing-crosser.jpg",
+      "image": "data/huddle-art/1baefdfd2f386a7e1abb.jpg"
+    },
+    {
+      "id": "texans-7cb7f95bfad38f41095e",
+      "team": "texans",
+      "name": "SMASH RETURN",
+      "group": "Gun",
+      "formation": "Y Off Trio Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/gun-y-off-trio-close/smash-return/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/gun/y-off-trio-close/smash-return.jpg",
+      "image": "data/huddle-art/9177a0fe464c2aa1ca69.jpg"
+    },
+    {
+      "id": "texans-e3bb3950f54e4650b281",
+      "team": "texans",
+      "name": "GOAL POST",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/hail-mary-hail-mary/goal-post/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/goal-post.jpg",
+      "image": "data/huddle-art/43b94d2515eb5ac43168.jpg"
+    },
+    {
+      "id": "texans-b7637cf3cb756ab09568",
+      "team": "texans",
+      "name": "HAIL MARY",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/hail-mary-hail-mary/hail-mary/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/hail-mary.jpg",
+      "image": "data/huddle-art/615bb2cc8fc3aab9763a.jpg"
+    },
+    {
+      "id": "texans-04ac230e7d8e928671af",
+      "team": "texans",
+      "name": "SHOT SAVE CLOCK",
+      "group": "Hail Mary",
+      "formation": "Hail Mary",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/hail-mary-hail-mary/shot-save-clock/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/hail-mary/hail-mary/shot-save-clock.jpg",
+      "image": "data/huddle-art/b117674095966c9aa86c.jpg"
+    },
+    {
+      "id": "texans-69a8cf9306eedf486931",
+      "team": "texans",
+      "name": "GOAL LINE FADE",
+      "group": "I Form",
+      "formation": "Tight",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-tight/goal-line-fade/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/tight/goal-line-fade.jpg",
+      "image": "data/huddle-art/1affe4341ba70a7dc543.jpg"
+    },
+    {
+      "id": "texans-1804a79a7ee8555ee5b7",
+      "team": "texans",
+      "name": "PA POWER O",
+      "group": "I Form",
+      "formation": "Tight",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-tight/pa-power-o/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/tight/pa-power-o.jpg",
+      "image": "data/huddle-art/8b0b915d8da15b789a49.jpg"
+    },
+    {
+      "id": "texans-5b64f94359c1503ae4e1",
+      "team": "texans",
+      "name": "PA BOOT FLOW",
+      "group": "I Form",
+      "formation": "Wing",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-wing/pa-boot-flow/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/wing/pa-boot-flow.jpg",
+      "image": "data/huddle-art/2defe2513e3f6cc5ff10.jpg"
+    },
+    {
+      "id": "texans-5f6758e90b44125d10f1",
+      "team": "texans",
+      "name": "X SLANT",
+      "group": "I Form",
+      "formation": "Wing",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-wing/x-slant/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/wing/x-slant.jpg",
+      "image": "data/huddle-art/9eb0f44ef31f83f8a396.jpg"
+    },
+    {
+      "id": "texans-65bc8a74f14ff6c3d2c7",
+      "team": "texans",
+      "name": "DBL OUTS",
+      "group": "I Form",
+      "formation": "Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-y-off-close/dbl-outs/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/dbl-outs.jpg",
+      "image": "data/huddle-art/5f3256c5ef16a6301ed7.jpg"
+    },
+    {
+      "id": "texans-e5602ef4ad4984e0b229",
+      "team": "texans",
+      "name": "PA PYLON SAIL",
+      "group": "I Form",
+      "formation": "Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-y-off-close/pa-pylon-sail/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/pa-pylon-sail.jpg",
+      "image": "data/huddle-art/78344ebed49512747d23.jpg"
+    },
+    {
+      "id": "texans-35d9fda68ce4678942a8",
+      "team": "texans",
+      "name": "PA X DEEP OUT",
+      "group": "I Form",
+      "formation": "Y Off Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/i-form-y-off-close/pa-x-deep-out/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/i-form/y-off-close/pa-x-deep-out.jpg",
+      "image": "data/huddle-art/03f43cf066a2b3e0b14f.jpg"
+    },
+    {
+      "id": "texans-79eaf8b9f9349f48ee8c",
+      "team": "texans",
+      "name": "DEEP IN",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-tight-y-off/deep-in/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/deep-in.jpg",
+      "image": "data/huddle-art/33a43b484d188d090f8c.jpg"
+    },
+    {
+      "id": "texans-9a4fdffbf33431343675",
+      "team": "texans",
+      "name": "DRIVE FLOOD",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-tight-y-off/drive-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/drive-flood.jpg",
+      "image": "data/huddle-art/27331c4a837613553f7a.jpg"
+    },
+    {
+      "id": "texans-dd74aadeb2d710c6c253",
+      "team": "texans",
+      "name": "OMAHA",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-tight-y-off/omaha/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/omaha.jpg",
+      "image": "data/huddle-art/2ecac828cfda1f20b3fb.jpg"
+    },
+    {
+      "id": "texans-a2c71e7856add7fce07b",
+      "team": "texans",
+      "name": "PA FLOOD",
+      "group": "Singleback",
+      "formation": "Tight Y Off",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-tight-y-off/pa-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/tight-y-off/pa-flood.jpg",
+      "image": "data/huddle-art/817bb5e1466c013456dc.jpg"
+    },
+    {
+      "id": "texans-c4c90192427081ee5d4a",
+      "team": "texans",
+      "name": "PA CROSS",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-wing-close/pa-cross/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-cross.jpg",
+      "image": "data/huddle-art/ce3d28a185d1fda4d798.jpg"
+    },
+    {
+      "id": "texans-6dd22c1ff34be9f8884e",
+      "team": "texans",
+      "name": "PA TE FLOOD",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-wing-close/pa-te-flood/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-te-flood.jpg",
+      "image": "data/huddle-art/097f9389f0583f38e50f.jpg"
+    },
+    {
+      "id": "texans-72165f06dc4f90bf6275",
+      "team": "texans",
+      "name": "PA Y-DRAG WHEEL",
+      "group": "Singleback",
+      "formation": "Wing Close",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/singleback-wing-close/pa-y--drag-wheel/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/singleback/wing-close/pa-y--drag-wheel.jpg",
+      "image": "data/huddle-art/2220fa43038295f065a9.jpg"
+    },
+    {
+      "id": "texans-3413d225033071b6848d",
+      "team": "texans",
+      "name": "PA SLIDE",
+      "group": "Strong",
+      "formation": "Wing",
+      "game": "Madden 27",
+      "sourceUrl": "https://huddle.gg/27/playbooks/texans-off/strong-wing/pa-slide/",
+      "imageUrl": "https://play-art.s3.amazonaws.com/madden-27/offense/strong/wing/pa-slide.jpg",
+      "image": "data/huddle-art/b81cf39ac909b1a63510.jpg"
     }
   ],
-  "expansionFetchedAt": "2026-11-12T09:35:24.758619+00:00"
+  "expansionFetchedAt": "2026-11-12T11:03:04.575044+00:00"
 }
