@@ -4607,6 +4607,873 @@ export const MADDEN_CONCEPT_TAGS = {
     "in",
     "out",
     "flood"
+  ],
+  "rams-d061519312e76aa6f8b1": [
+    "curl",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "rams-06c73e9a478f40174c30": [
+    "out",
+    "flat",
+    "mesh"
+  ],
+  "rams-2c841e931bd5c15f2984": [
+    "in"
+  ],
+  "rams-30efd4136d2d2245fd57": [
+    "curl",
+    "flat",
+    "out"
+  ],
+  "rams-7bb80041f2855cdc843e": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "rams-5544939abcccf1ac4611": [
+    "in",
+    "flat",
+    "flood"
+  ],
+  "rams-d1219e6b901364d4d488": [
+    "curl",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "rams-0b0b9db2da5ac85c1521": [
+    "flat",
+    "in"
+  ],
+  "rams-e67c96efaa741b04ecac": [
+    "flat",
+    "in",
+    "curl",
+    "out"
+  ],
+  "rams-5d2730bab27f176ac75e": [
+    "out",
+    "flat",
+    "smash"
+  ],
+  "rams-6d7fb1f7a2a55baec351": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "rams-11df402c98f17d5d5ca3": [
+    "in"
+  ],
+  "rams-873078f798fd20f7772e": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "rams-ce2481a09fa0b3436e94": [
+    "out",
+    "curl",
+    "flat",
+    "in"
+  ],
+  "rams-72c414e8b2224360e297": [
+    "in",
+    "out"
+  ],
+  "rams-41a31f412804834e77fe": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "rams-f3d986bc20d08aaa1157": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "rams-5b95a74a54513bec6de9": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "rams-1c3c6b478991d0a19cbf": [
+    "in",
+    "out",
+    "smash"
+  ],
+  "rams-756dd2f9a61bbd873bfb": [
+    "in",
+    "flat"
+  ],
+  "rams-e8454ccf45a20b232553": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "rams-763d3a8e0d6080d8ea9f": [
+    "vertical",
+    "in"
+  ],
+  "rams-ec91febcc6aff97818ae": [
+    "vertical",
+    "flat",
+    "in"
+  ],
+  "rams-d6a058f81b78e9d97b92": [
+    "vertical",
+    "curl",
+    "out",
+    "smash"
+  ],
+  "rams-538bb2e7c8bef69798e5": [
+    "out",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "rams-5e59eb98428e0e34634c": [
+    "out",
+    "in",
+    "flat",
+    "smash"
+  ],
+  "rams-ff66d308c0b110c83191": [
+    "out",
+    "flat",
+    "vertical"
+  ],
+  "rams-9bb2623726f5f4766615": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "rams-8b189e9f9d71cf22d2d4": [
+    "vertical",
+    "four verts"
+  ],
+  "rams-74e31200202511a9f71e": [
+    "vertical",
+    "out"
+  ],
+  "rams-a9374a617ae86b9be049": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "rams-b70b3a016b6b3a363749": [
+    "in",
+    "vertical",
+    "flat",
+    "flood"
+  ],
+  "rams-7b6ff6b9c3e18e04ffab": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "rams-455b74a25da1fc17d799": [
+    "out"
+  ],
+  "rams-a637cad1ac8b30500020": [
+    "vertical",
+    "in",
+    "out",
+    "flat"
+  ],
+  "rams-8e44d710b37cfc720114": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "rams-08471c9bec0163e8734a": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "rams-816fcea8c2afa1ba618a": [
+    "out",
+    "in"
+  ],
+  "rams-bc7e795414eab5f78c2a": [
+    "in",
+    "curl",
+    "flat",
+    "flood"
+  ],
+  "rams-4e11fb5889a8855268c3": [
+    "vertical",
+    "out"
+  ],
+  "rams-314f72980136ec0171c5": [
+    "vertical",
+    "out",
+    "smash"
+  ],
+  "rams-cb0986c2ee5fca295864": [
+    "in",
+    "flat"
+  ],
+  "rams-91fa52dce2248f06aa5a": [
+    "vertical",
+    "in"
+  ],
+  "rams-bbf96c4494db8e267142": [
+    "vertical",
+    "in"
+  ],
+  "seahawks-dd79acf4595683b8c488": [
+    "out",
+    "in",
+    "vertical"
+  ],
+  "seahawks-e5dfd8dd7d4bea6bae89": [
+    "in",
+    "out",
+    "flat",
+    "vertical",
+    "flood"
+  ],
+  "seahawks-70819b6d12c137dc4949": [
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "seahawks-4cd68861b6f9c6efafac": [
+    "out",
+    "curl"
+  ],
+  "seahawks-e7950dd1fd1bd04a4575": [
+    "out",
+    "flat"
+  ],
+  "seahawks-de0d412267be9f524ee7": [
+    "curl",
+    "flat",
+    "in"
+  ],
+  "seahawks-d43c0e162a23d1973df2": [
+    "in",
+    "out",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "seahawks-11ce855f3a715fc4baa7": [
+    "in",
+    "out",
+    "curl"
+  ],
+  "seahawks-41a62070e42391ae3eb5": [
+    "in",
+    "out"
+  ],
+  "seahawks-fc5084db634115295cfd": [
+    "out",
+    "vertical",
+    "in",
+    "curl"
+  ],
+  "seahawks-0ad29fd7d781aad3173d": [
+    "curl",
+    "vertical",
+    "in",
+    "smash"
+  ],
+  "seahawks-3e28bfe848f31a9bb14a": [
+    "curl",
+    "out",
+    "in",
+    "vertical",
+    "smash"
+  ],
+  "seahawks-4f288d3e1adc332ebcc3": [
+    "curl",
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "seahawks-cc251edef79c634971a6": [
+    "vertical",
+    "out",
+    "flat"
+  ],
+  "seahawks-7130ec38bcad3d25b424": [
+    "curl",
+    "out",
+    "smash"
+  ],
+  "seahawks-9979b881f0aea6946b7a": [
+    "out",
+    "in"
+  ],
+  "seahawks-b5d163af20efa54d12a8": [
+    "out",
+    "curl",
+    "vertical",
+    "in"
+  ],
+  "seahawks-800811be1586eebb2bf8": [
+    "in",
+    "curl"
+  ],
+  "seahawks-66d95c135a8afd5796bd": [
+    "out",
+    "in",
+    "vertical"
+  ],
+  "seahawks-42c0c571833b8750ba22": [
+    "in",
+    "flat",
+    "vertical",
+    "out"
+  ],
+  "seahawks-743cab9b0d54d4e5b6af": [
+    "out",
+    "in",
+    "vertical"
+  ],
+  "seahawks-87ba93e39a253ac30fd6": [
+    "vertical",
+    "out",
+    "in",
+    "flat"
+  ],
+  "seahawks-a801b331bfe7520571c2": [
+    "flat",
+    "in",
+    "out",
+    "vertical"
+  ],
+  "seahawks-d44839146ab5eacbcf61": [
+    "vertical",
+    "flat",
+    "four verts"
+  ],
+  "seahawks-d4c8c8ac6ed27d28d1df": [
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "seahawks-f9ff76cc5da53e726d11": [
+    "curl",
+    "flat",
+    "vertical",
+    "in",
+    "flood"
+  ],
+  "seahawks-cbe57a48ee82d2fb0bad": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "seahawks-129d63aa4cfd2394bdea": [
+    "vertical",
+    "in"
+  ],
+  "seahawks-919d8f6d7d1f3108dd4d": [
+    "out",
+    "curl",
+    "flat"
+  ],
+  "seahawks-714a7218fd372895747c": [
+    "out",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "seahawks-a4b4db957248a8a51370": [
+    "in",
+    "flat"
+  ],
+  "seahawks-14a08d47f579cf4c0420": [
+    "in",
+    "vertical",
+    "out",
+    "flood",
+    "smash"
+  ],
+  "seahawks-54cd4450892a1b24f822": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "seahawks-7aa8029855de95eb08f6": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "seahawks-2156eb44be0c50d396c1": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "seahawks-d54b748db73ddd4ae462": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "seahawks-07c5af63a124cce61e71": [
+    "in",
+    "flat"
+  ],
+  "seahawks-b632f8da9d318a1a8a43": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "seahawks-f33cfc9937220803507d": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "seahawks-d8beed3cbcc5d9800c0f": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "seahawks-689b676efe305fb0640d": [
+    "vertical",
+    "four verts"
+  ],
+  "seahawks-ea9ae3c08beef8b27769": [
+    "vertical",
+    "out"
+  ],
+  "seahawks-e76a531101b053a12bc1": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "seahawks-85e6d1119a03a2701d26": [
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "seahawks-d1b6348ec587ef65a392": [
+    "in",
+    "flat"
+  ],
+  "seahawks-ff8c75e6743efd011506": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "seahawks-007a845fa33b408166fd": [
+    "out",
+    "in",
+    "smash"
+  ],
+  "seahawks-a3a87f6162ec9fb65340": [
+    "flat",
+    "in"
+  ],
+  "seahawks-02a8f486e5e3e2f32711": [
+    "in",
+    "out"
+  ],
+  "seahawks-71c50f5499cd7e9d3578": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "seahawks-869d15538006bb1e8173": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "seahawks-fecc2afb64967b5ba725": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "seahawks-92e23b4f7aa316888fa8": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "seahawks-95bd968daf7cf7b2bfff": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "seahawks-dcf6ddc47499a1f656ff": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "seahawks-3669300fd2de980b7853": [
+    "out",
+    "in"
+  ],
+  "texans-5b543770c12158e861bc": [
+    "in",
+    "out",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "texans-13b3fe5bbdb6fa5333cb": [
+    "in",
+    "out"
+  ],
+  "texans-8dd2c3a87c250fb02b6e": [
+    "in",
+    "flat",
+    "out",
+    "flood",
+    "smash"
+  ],
+  "texans-9c128d1a9c35dd130190": [
+    "in",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "texans-052cc705b7b97d9651e3": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "texans-ef14f9d60bccd2a0d3b7": [
+    "vertical",
+    "in",
+    "curl",
+    "flood"
+  ],
+  "texans-c9de6cabeed36356df15": [
+    "vertical",
+    "flat",
+    "in"
+  ],
+  "texans-5b187fc62df7b048bee4": [
+    "out",
+    "in",
+    "flat"
+  ],
+  "texans-0a5a725dbca642398e77": [
+    "flat",
+    "out"
+  ],
+  "texans-a8b2c5bb6b4e3f32c96f": [
+    "flat"
+  ],
+  "texans-b62f982f2a04946da7aa": [
+    "in",
+    "out"
+  ],
+  "texans-27b6fc3d1e70f291ce18": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "texans-e4ce6d6e972f339213a9": [
+    "curl",
+    "in",
+    "smash"
+  ],
+  "texans-892afabd2d8283830361": [
+    "out",
+    "curl"
+  ],
+  "texans-3fb035e7df98f745b4e8": [
+    "out",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "texans-e9f63cb85c84c94a9130": [
+    "flat",
+    "curl",
+    "out"
+  ],
+  "texans-df4b7d3efa71ebb0e1e8": [
+    "out",
+    "vertical",
+    "in",
+    "curl"
+  ],
+  "texans-3413b7a66e8fe2667e6f": [
+    "curl",
+    "vertical",
+    "in",
+    "smash"
+  ],
+  "texans-13ba4680fda339670def": [
+    "curl",
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "texans-432c93328d55db8f8781": [
+    "vertical",
+    "out",
+    "flat"
+  ],
+  "texans-26a6d65c3595d5ecc896": [
+    "vertical",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "texans-efca56d4c0b8236bc6e5": [
+    "in",
+    "flat",
+    "flood"
+  ],
+  "texans-8fb8c88ed5bde00862a3": [
+    "curl",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "texans-b918513938a4e3e92f4c": [
+    "flat",
+    "in"
+  ],
+  "texans-aec989ecce9b91432b4e": [
+    "out",
+    "flat",
+    "smash"
+  ],
+  "texans-af917a6c7478c5781f63": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "texans-5a0c3ca94253a35ab77f": [
+    "vertical",
+    "in"
+  ],
+  "texans-41b73b6c415f34393a83": [
+    "vertical",
+    "flat",
+    "out",
+    "curl"
+  ],
+  "texans-33f6a7afaf81c2db0416": [
+    "in",
+    "vertical",
+    "out",
+    "curl",
+    "smash"
+  ],
+  "texans-93b38d7f4901bab93745": [
+    "in",
+    "flat",
+    "vertical"
+  ],
+  "texans-7ebad188ce9aa03291aa": [
+    "vertical",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "texans-091499ebcc01ca5809bd": [
+    "flat",
+    "out",
+    "vertical",
+    "curl",
+    "smash"
+  ],
+  "texans-217b990d5d2223d3c9ab": [
+    "out",
+    "in",
+    "smash",
+    "mesh"
+  ],
+  "texans-47f2b89746903b662770": [
+    "in",
+    "vertical",
+    "out",
+    "flood",
+    "smash"
+  ],
+  "texans-455fe568404ee843beec": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "texans-c46097fe2c107f36074e": [
+    "out",
+    "curl",
+    "flat",
+    "in"
+  ],
+  "texans-18c79adb69dd46b3163a": [
+    "in",
+    "out"
+  ],
+  "texans-ec09b23fef7062a79aff": [
+    "vertical",
+    "in"
+  ],
+  "texans-79768aaa0d75596ed02a": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "texans-6e11c2814e865c2f0fca": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "texans-d0990387424fd339dfb0": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "texans-e313a5cda7463150a1ee": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "texans-4bad93d7cb68e449385d": [
+    "in",
+    "out",
+    "smash"
+  ],
+  "texans-d1ba06194b1a16fe6249": [
+    "in",
+    "flat"
+  ],
+  "texans-fed5a44f01d792b7b0a6": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "texans-7cb7f95bfad38f41095e": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "texans-e3bb3950f54e4650b281": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "texans-b7637cf3cb756ab09568": [
+    "vertical",
+    "four verts"
+  ],
+  "texans-04ac230e7d8e928671af": [
+    "vertical",
+    "out"
+  ],
+  "texans-69a8cf9306eedf486931": [
+    "vertical",
+    "out"
+  ],
+  "texans-1804a79a7ee8555ee5b7": [
+    "out",
+    "vertical",
+    "in"
+  ],
+  "texans-5b64f94359c1503ae4e1": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "texans-5f6758e90b44125d10f1": [
+    "flat",
+    "in"
+  ],
+  "texans-65bc8a74f14ff6c3d2c7": [
+    "in",
+    "out"
+  ],
+  "texans-e5602ef4ad4984e0b229": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "texans-35d9fda68ce4678942a8": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "texans-79eaf8b9f9349f48ee8c": [
+    "in",
+    "vertical",
+    "flat",
+    "flood"
+  ],
+  "texans-9a4fdffbf33431343675": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "texans-dd74aadeb2d710c6c253": [
+    "out"
+  ],
+  "texans-a2c71e7856add7fce07b": [
+    "vertical",
+    "in",
+    "out",
+    "flat"
+  ],
+  "texans-c4c90192427081ee5d4a": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "texans-6dd22c1ff34be9f8884e": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "texans-72165f06dc4f90bf6275": [
+    "out",
+    "in"
+  ],
+  "texans-3413d225033071b6848d": [
+    "in",
+    "curl",
+    "flat"
   ]
 };
 export const MADDEN_NAME_TAGS = {
@@ -5368,6 +6235,145 @@ export const MADDEN_NAME_TAGS = {
     "flood"
   ],
   "packers-1612d52510c483ad98ee": [
+    "flood"
+  ],
+  "rams-d061519312e76aa6f8b1": [
+    "curl"
+  ],
+  "rams-06c73e9a478f40174c30": [
+    "mesh"
+  ],
+  "rams-6d7fb1f7a2a55baec351": [
+    "flood"
+  ],
+  "rams-873078f798fd20f7772e": [
+    "vertical"
+  ],
+  "rams-41a31f412804834e77fe": [
+    "flood"
+  ],
+  "rams-f3d986bc20d08aaa1157": [
+    "mesh"
+  ],
+  "rams-5b95a74a54513bec6de9": [
+    "flood"
+  ],
+  "rams-e8454ccf45a20b232553": [
+    "smash"
+  ],
+  "rams-763d3a8e0d6080d8ea9f": [
+    "vertical",
+    "four verts"
+  ],
+  "rams-d6a058f81b78e9d97b92": [
+    "smash"
+  ],
+  "rams-7b6ff6b9c3e18e04ffab": [
+    "flood"
+  ],
+  "rams-a637cad1ac8b30500020": [
+    "flood"
+  ],
+  "rams-08471c9bec0163e8734a": [
+    "flood"
+  ],
+  "rams-314f72980136ec0171c5": [
+    "curl"
+  ],
+  "seahawks-e5dfd8dd7d4bea6bae89": [
+    "flood"
+  ],
+  "seahawks-70819b6d12c137dc4949": [
+    "flood"
+  ],
+  "seahawks-d43c0e162a23d1973df2": [
+    "smash"
+  ],
+  "seahawks-41a62070e42391ae3eb5": [
+    "smash"
+  ],
+  "seahawks-b5d163af20efa54d12a8": [
+    "curl"
+  ],
+  "seahawks-800811be1586eebb2bf8": [
+    "curl"
+  ],
+  "seahawks-743cab9b0d54d4e5b6af": [
+    "smash"
+  ],
+  "seahawks-cbe57a48ee82d2fb0bad": [
+    "flood"
+  ],
+  "seahawks-14a08d47f579cf4c0420": [
+    "flood"
+  ],
+  "seahawks-54cd4450892a1b24f822": [
+    "vertical"
+  ],
+  "seahawks-7aa8029855de95eb08f6": [
+    "flood"
+  ],
+  "seahawks-2156eb44be0c50d396c1": [
+    "mesh"
+  ],
+  "seahawks-d54b748db73ddd4ae462": [
+    "flood"
+  ],
+  "seahawks-f33cfc9937220803507d": [
+    "smash"
+  ],
+  "seahawks-dcf6ddc47499a1f656ff": [
+    "flood"
+  ],
+  "texans-13b3fe5bbdb6fa5333cb": [
+    "smash"
+  ],
+  "texans-052cc705b7b97d9651e3": [
+    "flood"
+  ],
+  "texans-b62f982f2a04946da7aa": [
+    "vertical"
+  ],
+  "texans-27b6fc3d1e70f291ce18": [
+    "curl"
+  ],
+  "texans-e9f63cb85c84c94a9130": [
+    "curl"
+  ],
+  "texans-af917a6c7478c5781f63": [
+    "flood"
+  ],
+  "texans-41b73b6c415f34393a83": [
+    "curl"
+  ],
+  "texans-47f2b89746903b662770": [
+    "flood"
+  ],
+  "texans-455fe568404ee843beec": [
+    "vertical"
+  ],
+  "texans-79768aaa0d75596ed02a": [
+    "flood"
+  ],
+  "texans-6e11c2814e865c2f0fca": [
+    "flood"
+  ],
+  "texans-d0990387424fd339dfb0": [
+    "mesh"
+  ],
+  "texans-e313a5cda7463150a1ee": [
+    "flood"
+  ],
+  "texans-7cb7f95bfad38f41095e": [
+    "smash"
+  ],
+  "texans-9a4fdffbf33431343675": [
+    "flood"
+  ],
+  "texans-a2c71e7856add7fce07b": [
+    "flood"
+  ],
+  "texans-6dd22c1ff34be9f8884e": [
     "flood"
   ]
 };
