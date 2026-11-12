@@ -59,7 +59,7 @@ test('geometry tags come only from editable traces and remain separate from imag
   assert.deepEqual(MADDEN_CONCEPT_TAGS[tagged[0]], traceConceptTags(getEditableEntry(tagged[0])));
   const choices = searchMaddenCatalog(catalog, { tags: ['flood'] });
   assert.ok(choices.length);
-  assert.ok(choices.every(p => p.editable && p.tags.includes('flood') && p.evidence.includes('approximate')));
+  assert.ok(choices.every(p => p.tags.includes('flood') && (p.evidence.includes('approximate') || p.evidence.includes('Name-derived weak labels'))));
   const image = catalog.plays.find(p => !hasEditableTrace(p.id));
   assert.equal(MADDEN_CONCEPT_TAGS[image.id], undefined);
 });
@@ -93,7 +93,8 @@ test('geometric signals cover representative named catalog diagrams', async () =
   const { MADDEN_CONCEPT_TAGS } = await import('../web/data/madden-search-tags.js');
   for (const [name, tag, minimum] of [['FLOOD','flood',.7], ['SMASH','smash',.65], ['CURL','curl',.65], ['VERTICAL','vertical',.85]]) {
     // Names are an imperfect proxy for known examples, never used as geometry.
-    const entries = catalog.plays.filter(play => hasEditableTrace(play.id) && play.name.includes(name));
+    const { EDITABLE_TRACES } = await import('../web/data/madden-editable.js');
+    const entries = catalog.plays.filter(play => Object.hasOwn(EDITABLE_TRACES, play.id) && play.name.includes(name));
     const recognized = entries.filter(play => MADDEN_CONCEPT_TAGS[play.id]?.includes(tag));
     assert.ok(recognized.length / entries.length >= minimum, `${name}: ${recognized.length}/${entries.length}`);
   }
@@ -183,4 +184,15 @@ test('route feature depths use the board scale in yards', async () => {
     routes: [{ ...board.routes[0], points: [{ x: 20, y: 67 }, { x: 20, y: 27 }] }] };
   assert.deepEqual(boardConceptTags(board), ['vertical']);
   assert.deepEqual(boardConceptTags(doubleScale), ['vertical']);
+});
+
+
+test('original image entries can be searched by weak name labels without claiming route geometry', async () => {
+  const entry = catalog.plays.find(play => !hasEditableTrace(play.id) && /\bFLOOD\b/.test(play.name));
+  assert.ok(entry);
+  const [result] = searchMaddenCatalog({plays:[entry]}, {tags:['flood']});
+  assert.ok(result);
+  assert.equal(result.editable, false);
+  assert.deepEqual(result.geometryTags, []);
+  assert.match(result.evidence, /Name-derived weak labels \(not route confirmation\)/);
 });

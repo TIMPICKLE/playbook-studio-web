@@ -294,7 +294,7 @@ export function validatePlay(p) {
 }
 export function validateReference(r) {
   for (const key of ['provider', 'catalogId', 'team', 'game', 'sourceUrl', 'image']) text(r[key], 600, '战术来源');
-  if (r.provider !== 'huddle.gg' || !['eagles', 'ravens'].includes(r.team)) fail('战术来源无效');
+  if (r.provider !== 'huddle.gg' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(r.team)) fail('战术来源无效');
   if (!new RegExp(`^${r.team}-[a-f0-9]{20}$`).test(r.catalogId)) fail('来源战术 ID 无效');
   if (!/^Madden \d{2}$/.test(r.game)) fail('游戏版本无效');
   if (!/^data\/huddle-art\/[a-f0-9]{20}\.jpg$/.test(r.image)) fail('原图路径无效');

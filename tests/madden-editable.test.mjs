@@ -127,6 +127,7 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
     click('undo');click('mirror');click('undo');click('play');click('play');click('reset');
     click('compare-source');assert.equal($('.source-comparison').getAttribute('src'),'./'+source.image);click('close-modal');
     click('madden-library');await new Promise(r=>setTimeout(r,30));
+    $('#madden-editable-only').checked=true;$('#madden-editable-only').dispatchEvent(new win.Event('change',{bubbles:true}));
     assert.equal(win.document.querySelectorAll('.madden-card').length,Math.min(30,audit.summary.editableByTeam.eagles));
     // The original can now be on a later page as the library grows.
     const search=$('#madden-search');search.value=source.name;search.dispatchEvent(new win.Event('input',{bubbles:true}));

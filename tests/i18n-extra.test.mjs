@@ -20,6 +20,7 @@ test('English Madden library and matchup use locale resources and submit selecte
     await library.open();
     assert.match(win.document.querySelector('.madden-panel').textContent, /play library/i);
     assert.match(win.document.querySelector('#madden-count').textContent, /editable plays/);
+    assert.equal(win.document.querySelector('#madden-editable-only').checked, true);
     assert.equal(win.document.querySelector('#madden-search').getAttribute('aria-label'), 'Search Madden plays');
     library.close();
     let submitted;
