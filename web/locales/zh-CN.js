@@ -18,7 +18,7 @@ export default {
   "editor.playbook": "战术本",
   "editor.playbook_type": "战术本类型",
   "editor.madden_nfl_play_library": "Madden NFL 战术库",
-  "editor.eagles_ravens_drag_to_add": "Eagles · Ravens · 拖入即用",
+  "editor.eagles_ravens_drag_to_add": "NFL 球队 · 拖入即用",
   "editor.drop_here_to_add_to_offense": "＋ 拖到这里，加入进攻战术本",
   "editor.search_plays": "搜索战术…",
   "editor.search_plays_2": "搜索战术",

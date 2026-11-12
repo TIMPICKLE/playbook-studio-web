@@ -2,15 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
-import { makeMaddenPlay, filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace } from '../web/madden-model.js';
+import { makeMaddenPlay, filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace, getEditableEntry } from '../web/madden-model.js';
 import { validatePlay, starterWorkspace, encodeWorkspace, decodeWorkspace, STORAGE_KEY } from '../web/model.js';
 import { fieldSVG } from '../web/field.js';
 import { handleApi } from '../server/api.mjs';
 import { database } from './helpers/db.mjs';
 
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
-test('both complete team catalogs have unique identities and importable source metadata', () => {
-  assert.deepEqual(catalog.teams.map(t => t.id), ['eagles', 'ravens']);
+test('team catalogs have unique identities and importable source metadata', () => {
+  assert.ok(catalog.teams.length >= 2);
+  assert.equal(new Set(catalog.teams.map(t => t.id)).size, catalog.teams.length);
   assert.equal(new Set(catalog.plays.map(p => p.id)).size, catalog.plays.length);
   for (const team of catalog.teams) {
     const rows = catalog.plays.filter(p => p.team === team.id);
@@ -25,10 +26,11 @@ test('both complete team catalogs have unique identities and importable source m
       assert.equal(play.players.length, 11);
       // These reviewed originals show only four visible assignments; the remaining
       // player is movable but does not acquire an invented fifth route.
-      const stationaryPlayer = ['eagles-435b4fe699a13e3c036f','ravens-ae97fd6e39071c3ae0e5','ravens-3e40d279a11e7ef5628d','ravens-e7dac016716007ed60bd','eagles-a0fd05ba219769c9a861','eagles-04c50ebab4c15cdc2083','eagles-23b54c7b8a3a7d5c2922','eagles-70a79aa21ebd643e7fa1','ravens-69c8818e1a9a93acefb3','ravens-dce160819cf177f952dd','ravens-518ace0c313870800942','eagles-66c2f2f176cfa7911cdb','eagles-56621ebf973cc126f119','eagles-b00013dc3380c2f5b538','ravens-099d020a044bf7878ca6','ravens-038f3e33d95bffdc7117','eagles-d31f27b2c587abbe115d','eagles-2d1026ef8db01bde4845','ravens-3f10fa0d8eae78615dfe','eagles-5596a944605fa28088c3'].includes(entry.id);
+      const reviewedId = getEditableEntry(entry.id).id;
+      const stationaryPlayer = ['eagles-435b4fe699a13e3c036f','ravens-ae97fd6e39071c3ae0e5','ravens-3e40d279a11e7ef5628d','ravens-e7dac016716007ed60bd','eagles-a0fd05ba219769c9a861','eagles-04c50ebab4c15cdc2083','eagles-23b54c7b8a3a7d5c2922','eagles-70a79aa21ebd643e7fa1','ravens-69c8818e1a9a93acefb3','ravens-dce160819cf177f952dd','ravens-518ace0c313870800942','eagles-66c2f2f176cfa7911cdb','eagles-56621ebf973cc126f119','eagles-b00013dc3380c2f5b538','ravens-099d020a044bf7878ca6','ravens-038f3e33d95bffdc7117','eagles-d31f27b2c587abbe115d','eagles-2d1026ef8db01bde4845','ravens-3f10fa0d8eae78615dfe','eagles-5596a944605fa28088c3'].includes(reviewedId);
       // These source-reviewed RPO and passing diagrams visibly leave some players without drawn assignments.
       const newReviewedCounts = {"2":["eagles-03f685866fbd383bc829","eagles-9e5d03f848beb9a8b5d6"],"3":["eagles-8755fc0eb674e740b2b4","eagles-df9069d0dbb8be1233b9","eagles-3ca52b31d86f8c74d9bb","eagles-7f2f27ac3deb707e1081","ravens-65afa7c49574e9e524a6","ravens-eb4d77f026a8ffc25ba0","ravens-636067413ed2435181ac","eagles-5984fc46f848cfde5c82","eagles-2e363249bee3171e5465","eagles-704398da5fb27d258802","eagles-1139f5bdcf456adb9818","eagles-59a70d7a55b50d7fdde0","eagles-fa3dc488e9a2b58c0fde","eagles-cb4a6ea45f17ce46278c","eagles-8a0ffaa7362d4678123e","eagles-e5bfc403eb676efff532","ravens-4dd367bd99e69ac5d767","ravens-223479aab3a9f655bb4c","eagles-dc44ea12e54af99f3ee0","ravens-2f2e327d6e209600c188"],"4":["eagles-02156f5cb9ff4d9aa313","eagles-0fabe6e8cb236a6796ca","eagles-aceaf231614fd7035675","ravens-c16355db578dfdffac98","eagles-5bb72ee4536a4bcca838","eagles-94be657905499cbe2995","eagles-49d5a6730ff350c0d628","eagles-86757f6a9e50cc4f6a97","eagles-271231362540fd2d4430","eagles-874f7338ead39106abe0","ravens-e300b494b947b7d685b0","ravens-d0d2239f81294b029d65","ravens-f52b2e2f1cc8a1dc67b9","eagles-2e870d9a77663474b216","eagles-53ad7f8769e86be6eb32","ravens-6ef9a5e51d6e1384f08f","eagles-be8a8c89b20e2ba5b19c","eagles-af73e0a2270d64e340b1","ravens-7df9d61977d2027d69ca","ravens-4915dc91c7bfe2887afe","ravens-ddedef4576a502960255","ravens-b6cfc2a1e130f10b84e3","ravens-ea3dba2846df4af15b80","ravens-2d1daea16f2abdf55cbc","ravens-797b7b598de9d931fc8a","ravens-0744f02296246bb27bf3","eagles-c5d8d9a5f04bef2a0eb7","ravens-06b0c037b78ab6b7a88d","ravens-ff9ce8fd25d8a9a4f9b8","ravens-c0b16f640125507d1c01","eagles-eb9a32953a50b39ce8d6","ravens-f2166f60357f1ed691f2","eagles-389103a7c85a9ab6f347","eagles-77a30b3029a8926c5d83","eagles-9e36e0db9d6628ad03a9","eagles-b41772df26ea0133006f","eagles-07f253809e94b487a0c3","ravens-1459b8ff656886b77dd3","ravens-c98872a3224e1adab735","ravens-fe9a7838e6d44c9d75b8","ravens-33488314ef4fcf5ff7fa"]};
-      const expectedReviewedCount = [2,3,4].find(n=>newReviewedCounts[n].includes(entry.id));
+      const expectedReviewedCount = [2,3,4].find(n=>newReviewedCounts[n].includes(reviewedId));
       if (expectedReviewedCount) assert.equal(play.routes.length,expectedReviewedCount);
       else if (stationaryPlayer) assert.equal(play.routes.length,4);
       else assert.ok(play.routes.length >= 5);
@@ -72,16 +74,36 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     disconnect() {}
   };
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
+  const fixture = { ...catalog, teams: [...catalog.teams, { id:'fixtureteam', code:'FIX', name:'FixtureTeam', city:'Green Bay', game:'Madden 27', sourceUrl:'https://huddle.gg/playbooks/packers-off/', playCount:1 }], plays: [...catalog.plays, { ...catalog.plays[0], id:'fixtureteam-01234567890123456789', team:'fixtureteam', sourceUrl:'https://huddle.gg/27/playbooks/fixtureteam-off/gun-test/play/' }] };
   const names = ['window','document','navigator','localStorage','location','Image','Blob','requestAnimationFrame','cancelAnimationFrame','fetch'];
   const previous = Object.fromEntries(names.map(n => [n, Object.getOwnPropertyDescriptor(globalThis,n)]));
-  for (const n of names) Object.defineProperty(globalThis,n,{ configurable:true, value:n === 'fetch' ? async () => new Response(JSON.stringify(catalog), { headers:{'Content-Type':'application/json'} }) : ['requestAnimationFrame','cancelAnimationFrame'].includes(n) ? win[n].bind(win) : win[n] });
+  for (const n of names) Object.defineProperty(globalThis,n,{ configurable:true, value:n === 'fetch' ? async () => new Response(JSON.stringify(fixture), { headers:{'Content-Type':'application/json'} }) : ['requestAnimationFrame','cancelAnimationFrame'].includes(n) ? win[n].bind(win) : win[n] });
   try {
     await import(`../web/app.js?madden-test=${Date.now()}`);
     const doc = win.document, $ = s => doc.querySelector(s), click = action => $(`[data-action="${action}"]`).click();
     click('madden-library'); await new Promise(r => setTimeout(r, 50));
+    assert.equal($('#madden-editable-only').checked, true);
     assert.equal(doc.querySelectorAll('.madden-card').length, Math.min(30, filterCatalog(catalog, { team:'eagles', editableOnly:true }).length));
     $('#madden-editable-only').checked = false; $('#madden-editable-only').dispatchEvent(new win.Event('change', { bubbles:true }));
     assert.equal(doc.querySelectorAll('.madden-card').length, 30);
+    assert.equal(doc.querySelectorAll('[data-madden="team"]').length, fixture.teams.length);
+    $('[data-madden="team"][data-id="fixtureteam"]').click();
+    assert.equal(doc.querySelectorAll('.madden-card').length, 1);
+    assert.match($('.madden-editable-filter').textContent, /0/);
+    $('.madden-card [data-madden="preview"]').click();
+    assert.match($('.madden-detail small').textContent, /FixtureTeam/);
+    $('[data-madden="back"]').click();
+    $('.madden-card [data-madden="add"]').click();
+    assert.match(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.at(-1).personnel, /FixtureTeam/);
+    assert.match($('.madden-source-box').textContent, /Fixtureteam/i);
+    $('[data-madden="undo-result"]').click();
+    const fixtureCard = $('.madden-card'), fixtureTransfer = new win.DataTransfer();
+    const fixtureEvent = type => { const event = new win.Event(type, { bubbles:true, cancelable:true }); Object.defineProperty(event, 'dataTransfer', { value:fixtureTransfer }); return event; };
+    fixtureCard.dispatchEvent(fixtureEvent('dragstart'));
+    $('.madden-drop-target').dispatchEvent(fixtureEvent('drop'));
+    assert.match(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.at(-1).personnel, /FixtureTeam/);
+    $('[data-madden="undo-result"]').click();
+    $('[data-madden="team"][data-id="eagles"]').click();
     const panel = $('.madden-panel'), search = $('#madden-search'), firstCard = $('.madden-card');
     const firstId = firstCard.dataset.maddenCard;
     $('[data-madden="team"][data-id="ravens"]').focus();

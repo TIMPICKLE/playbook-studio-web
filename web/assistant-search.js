@@ -33,7 +33,7 @@ const asCandidate = (entry, trace) => ({
   tags: [...new Set([...(MADDEN_CONCEPT_TAGS[entry.id] || []), ...(MADDEN_NAME_TAGS[entry.id] || [])])],
   geometryTags: MADDEN_CONCEPT_TAGS[entry.id] || [], nameTags: MADDEN_NAME_TAGS[entry.id] || [],
   evidence: traceEvidence(trace) + (trace && MADDEN_CONCEPT_TAGS[entry.id]?.length ? ` Geometry-derived approximate tags: ${MADDEN_CONCEPT_TAGS[entry.id].join(', ')}.` : '') +
-    (trace && MADDEN_NAME_TAGS[entry.id]?.length ? ` Name-derived weak labels (not route confirmation): ${MADDEN_NAME_TAGS[entry.id].join(', ')}.` : ''),
+    (MADDEN_NAME_TAGS[entry.id]?.length ? ` Name-derived weak labels (not route confirmation): ${MADDEN_NAME_TAGS[entry.id].join(', ')}.` : ''),
 });
 
 // Catalog terms are supplied by the model's tool call, not inferred from the

@@ -2207,214 +2207,2553 @@ export const MADDEN_CONCEPT_TAGS = {
     "in",
     "curl",
     "flat"
+  ],
+  "49ers-4e2892a34146d363655a": [
+    "in",
+    "out",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "49ers-0835631e6b40e25f3f03": [
+    "in",
+    "out",
+    "curl"
+  ],
+  "49ers-1dd5af7b1a9db7d5696f": [
+    "in",
+    "out"
+  ],
+  "49ers-34fc9fb9e41278ee26fe": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "49ers-ae53a30d3b2a93ce564c": [
+    "vertical",
+    "in",
+    "curl",
+    "flood"
+  ],
+  "49ers-e0bef7ee83dab12e68f5": [
+    "vertical",
+    "flat",
+    "in"
+  ],
+  "49ers-8e8a44c8493449e147df": [
+    "out",
+    "in",
+    "flat"
+  ],
+  "49ers-6a038179dee890c40b0c": [
+    "flat",
+    "out"
+  ],
+  "49ers-d55056d21d5898a32ab9": [
+    "flat"
+  ],
+  "49ers-e2f391a12cd89b9bdc87": [
+    "in",
+    "out"
+  ],
+  "49ers-d2c9667f0bcfa72276e4": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "49ers-1c980a88606fb3f35768": [
+    "in",
+    "out"
+  ],
+  "49ers-00b804cc105e80fc7a25": [
+    "out",
+    "vertical"
+  ],
+  "49ers-9dc2bb47a469c8869fc1": [
+    "out",
+    "in"
+  ],
+  "49ers-86e59b9c420fad885901": [
+    "curl",
+    "in",
+    "smash"
+  ],
+  "49ers-58b4976e87536e209adc": [
+    "out",
+    "curl"
+  ],
+  "49ers-c10366cbbbc69aa46d58": [
+    "out",
+    "vertical",
+    "in",
+    "curl"
+  ],
+  "49ers-7c5750a8dc41e58dcc04": [
+    "curl",
+    "vertical",
+    "in",
+    "smash"
+  ],
+  "49ers-3a358745252e5f091130": [
+    "curl",
+    "out",
+    "in",
+    "vertical",
+    "smash"
+  ],
+  "49ers-b27847891b9431a46a1d": [
+    "curl",
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "49ers-06f12aa8b55abd69d581": [
+    "out",
+    "vertical",
+    "curl",
+    "smash"
+  ],
+  "49ers-c298f62c838ac2b28f7f": [
+    "vertical",
+    "out",
+    "flat"
+  ],
+  "49ers-28d435a995949f28ea0f": [
+    "vertical",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "49ers-226c300150b4eb80227b": [
+    "vertical",
+    "flat",
+    "four verts"
+  ],
+  "49ers-83806f8b8582e946b8a2": [
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "49ers-14c8656ff761ce8b71af": [
+    "curl",
+    "flat",
+    "vertical",
+    "in",
+    "flood"
+  ],
+  "49ers-c7ac62461f7e1dfef940": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "49ers-31ceba677c5c9d8e22b8": [
+    "out",
+    "curl",
+    "flat"
+  ],
+  "49ers-55ac095249e293ef25fc": [
+    "out",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "49ers-440f7e82205b05e19ac1": [
+    "in",
+    "flat"
+  ],
+  "49ers-d5e64dc7f7b1bb80c035": [
+    "vertical",
+    "in"
+  ],
+  "49ers-0e9f9ca47d22a38d35e8": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "49ers-0254a5d617331e121820": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "49ers-12bfcf199f3176eeedf3": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "49ers-768c9eaa6aa8f21f295e": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "49ers-c88a0ccd0660da86b535": [
+    "in",
+    "flat"
+  ],
+  "49ers-57e35110f911e1bcaaa3": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "49ers-512f7ceb41e9b4edf43c": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "49ers-9f56a13b545984b41e1a": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "49ers-40f44d81aa9e0f8d3bd7": [
+    "vertical",
+    "four verts"
+  ],
+  "49ers-5628aea4ba94e5c7fc25": [
+    "vertical",
+    "out"
+  ],
+  "49ers-dbd158021f8c58f5829d": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "49ers-fd93ca3f1d89115c7fe2": [
+    "flat",
+    "in"
+  ],
+  "49ers-37cf12252472de8bb61f": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "49ers-3827d2cfd35a9ba38ca1": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "49ers-5576159762aa10a44834": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "49ers-ca9bdfe09aae36ae37c3": [
+    "out",
+    "in"
+  ],
+  "49ers-70cb9d51b52b8eccb1df": [
+    "curl",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "49ers-03749ef660bc00d02715": [
+    "curl",
+    "in",
+    "flat"
+  ],
+  "49ers-4702aa01bf09089a4070": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "49ers-fe4cf162e48fc1eddb4c": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "49ers-148ad8e1dfc32c52e1e5": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "49ers-783cd2a2bd1dc962f8b3": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "49ers-5a57f662e38e04753258": [
+    "out",
+    "in"
+  ],
+  "49ers-9ddf2d77b0ef7155c9bf": [
+    "in",
+    "curl",
+    "flat"
+  ],
+  "bengals-d2a50d0d026fc423b528": [
+    "curl",
+    "in",
+    "flat",
+    "out"
+  ],
+  "bengals-9bc9ee4bca5fc8c330c1": [
+    "vertical",
+    "out",
+    "in",
+    "flat"
+  ],
+  "bengals-cad2eab7ccd45a2ff3e9": [
+    "vertical",
+    "in",
+    "flat",
+    "curl"
+  ],
+  "bengals-8e01c9588ab8662fb688": [
+    "in",
+    "flat",
+    "curl",
+    "vertical"
+  ],
+  "bengals-1dab48d6f6870add9b58": [
+    "in",
+    "flat",
+    "out",
+    "curl",
+    "vertical",
+    "smash"
+  ],
+  "bengals-d31a0e23dcf128eaf9ad": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "bengals-b2b05f148951be9fd8d4": [
+    "in",
+    "out"
+  ],
+  "bengals-1076bc4193d8c1b8251f": [
+    "out",
+    "in"
+  ],
+  "bengals-4968845d7db674931087": [
+    "vertical",
+    "out",
+    "flat",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "bengals-3fff0ae02e111f4d8e99": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "bengals-2a9929b38e99e00b585d": [
+    "curl",
+    "out",
+    "in",
+    "smash"
+  ],
+  "bengals-fa8e2a460908fc808e4d": [
+    "in",
+    "out"
+  ],
+  "bengals-22598b0021e5a485944a": [
+    "out",
+    "in"
+  ],
+  "bengals-78dbba7a25065226c9a2": [
+    "curl",
+    "out"
+  ],
+  "bengals-b6e3ed1877f979523203": [
+    "out",
+    "vertical",
+    "flat",
+    "curl",
+    "smash"
+  ],
+  "bengals-3f881fe199a03b56458e": [
+    "out",
+    "vertical",
+    "smash"
+  ],
+  "bengals-50c4d71d6f45c2c97b16": [
+    "in",
+    "out",
+    "vertical",
+    "smash",
+    "flood"
+  ],
+  "bengals-882e404e373fceaf6980": [
+    "out",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "bengals-b3f6d75ecb08a64f6c58": [
+    "flat",
+    "curl",
+    "out"
+  ],
+  "bengals-d974a00885f2f6642b14": [
+    "curl",
+    "in",
+    "flat",
+    "smash"
+  ],
+  "bengals-13f47ba57dfc8d98ad74": [
+    "curl",
+    "vertical",
+    "in"
+  ],
+  "bengals-bd115189ac607b5c5539": [
+    "out"
+  ],
+  "bengals-bd9b0a80d6ce83f90b73": [
+    "out",
+    "flat",
+    "in",
+    "vertical",
+    "flood"
+  ],
+  "bengals-ff85fba7d0465d9299b6": [
+    "vertical",
+    "out",
+    "flat",
+    "in",
+    "smash",
+    "mesh"
+  ],
+  "bengals-f48bfc3410da1966dde0": [
+    "curl"
+  ],
+  "bengals-8905fad050a09c2b3e7d": [
+    "out",
+    "flat",
+    "smash"
+  ],
+  "bengals-98dbdd4d62b5613f6f5e": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "bengals-eaae3836b7d5115ead16": [
+    "in",
+    "vertical",
+    "out",
+    "curl",
+    "smash"
+  ],
+  "bengals-a7cfdb903618b486f869": [
+    "in",
+    "out"
+  ],
+  "bengals-36b689cd81205cefbbd6": [
+    "flat",
+    "out",
+    "vertical",
+    "curl",
+    "smash"
+  ],
+  "bengals-ea165c25d1196fd8874b": [
+    "out",
+    "in",
+    "smash",
+    "mesh"
+  ],
+  "bengals-2cd6334051804089e870": [
+    "curl",
+    "flat",
+    "vertical",
+    "in"
+  ],
+  "bengals-ed76fc55662a7d95efcf": [
+    "vertical",
+    "in"
+  ],
+  "bengals-745eae633a92bc27a7b1": [
+    "curl",
+    "flat",
+    "in"
+  ],
+  "bengals-f37ab312cad551d2964f": [
+    "in",
+    "flat",
+    "out",
+    "mesh"
+  ],
+  "bengals-9061d2ef34db6472aba6": [
+    "out",
+    "flat",
+    "smash"
+  ],
+  "bengals-2f8411887d7633ff7f33": [
+    "out",
+    "flat",
+    "in",
+    "mesh"
+  ],
+  "bengals-35f79219790d5b3693ef": [
+    "flat",
+    "in",
+    "out"
+  ],
+  "bengals-701664f1bd495002c17d": [
+    "out",
+    "flat",
+    "vertical",
+    "in"
+  ],
+  "bengals-342ec66712773fec0e42": [
+    "vertical",
+    "out",
+    "smash"
+  ],
+  "bengals-6de9448ca73056e46dcf": [
+    "vertical",
+    "flat",
+    "in",
+    "flood"
+  ],
+  "bengals-e227bc40cbe0c18546a5": [
+    "in",
+    "flat",
+    "curl",
+    "vertical",
+    "smash"
+  ],
+  "bengals-7f74480cafac811b141e": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "bengals-605bd268e8fa1b1d9c75": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "bengals-003617db7255e53bf386": [
+    "out",
+    "curl",
+    "flat",
+    "in"
+  ],
+  "bengals-898e8baf0b6671c17bfe": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "bengals-2ccf11731f9b6507b01d": [
+    "vertical",
+    "four verts"
+  ],
+  "bengals-667df37173b48ba6d07a": [
+    "vertical",
+    "out"
+  ],
+  "bengals-0917ed1c38c0dfbda7a5": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "bengals-203543b8753b4d0c5246": [
+    "flat",
+    "in"
+  ],
+  "bengals-5066f42f01c3fca96c43": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "bengals-a988b083652657baf90c": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "bengals-752c1008ff59f29ab7b4": [
+    "vertical",
+    "out",
+    "smash"
+  ],
+  "bengals-2d3a3f180b9287da2eda": [
+    "in",
+    "flat"
+  ],
+  "bengals-6bea585279f827733fa6": [
+    "vertical",
+    "in"
+  ],
+  "bengals-0e9b2a8671a3f7e627f0": [
+    "vertical",
+    "in"
+  ],
+  "bills-f5e3e638780c0fab6593": [
+    "out",
+    "flat",
+    "mesh"
+  ],
+  "bills-ea780064317f76973498": [
+    "curl",
+    "flat",
+    "out"
+  ],
+  "bills-218c76e01d0c09dc9d49": [
+    "out",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "bills-df82a2b8fb67df9cfa70": [
+    "flat",
+    "curl",
+    "out"
+  ],
+  "bills-73a0cac1860919556656": [
+    "curl",
+    "flat"
+  ],
+  "bills-ad04aefe1796c13f3eda": [
+    "vertical",
+    "four verts"
+  ],
+  "bills-626788c9c234fb7a4387": [
+    "in",
+    "flat"
+  ],
+  "bills-b11585b1dfaa1ffaf9b1": [
+    "vertical",
+    "in"
+  ],
+  "bills-066b3692df5f17448961": [
+    "in",
+    "flat",
+    "flood"
+  ],
+  "bills-429d83b880dcb6788e2b": [
+    "in",
+    "out",
+    "vertical",
+    "flat",
+    "flood"
+  ],
+  "bills-f288e2088d3161bbe73f": [
+    "vertical",
+    "flat"
+  ],
+  "bills-9d0f4468dd746951f196": [
+    "flat",
+    "in"
+  ],
+  "bills-66830eea87a271e8900f": [
+    "flat",
+    "in",
+    "curl",
+    "out"
+  ],
+  "bills-2e49064ccd3aaae862a0": [
+    "in"
+  ],
+  "bills-7e61ed842f4217adb55f": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "bills-f387359eabb9acf5c036": [
+    "vertical",
+    "in"
+  ],
+  "bills-e1fa232819a7e4b4dd87": [
+    "vertical",
+    "flat",
+    "in"
+  ],
+  "bills-c4c525c44e474c592060": [
+    "vertical",
+    "curl",
+    "out",
+    "smash"
+  ],
+  "bills-124ad00a5e96ed00042e": [
+    "out",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "bills-b3e7dee0b8abf2e3a2f5": [
+    "out",
+    "in",
+    "flat",
+    "smash"
+  ],
+  "bills-ae852a60e6d218b27f7e": [
+    "out",
+    "flat",
+    "vertical"
+  ],
+  "bills-f1b761ec53b4379c0956": [
+    "out",
+    "vertical",
+    "curl",
+    "smash"
+  ],
+  "bills-7b748a98c19970e31eb2": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "bills-f7d0be1bdb4ea28a4558": [
+    "vertical",
+    "four verts"
+  ],
+  "bills-e50d177ab03369b64fdd": [
+    "vertical",
+    "out"
+  ],
+  "bills-4b14e12b435333469b69": [
+    "in",
+    "curl"
+  ],
+  "bills-28e211a0182be56bb358": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "bills-b7c3153c36d22b2ec98a": [
+    "in",
+    "flat"
+  ],
+  "bills-ac56ab5b9d1bfcdf000d": [
+    "out",
+    "vertical",
+    "in"
+  ],
+  "bills-3f993ec84b6d3822cd4c": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "bills-919b775d221bc23c62d0": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "bills-42d79bd88164ead730ef": [
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "bills-f32ac91e8b9ed2fdabd6": [
+    "vertical",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "bills-029f65c849ee6c3ce921": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "bills-f032987d3e1dc1ff40af": [
+    "vertical",
+    "flat"
+  ],
+  "bills-fa7b9635045c0a6ea9aa": [
+    "in",
+    "curl",
+    "flat",
+    "flood"
+  ],
+  "bills-d2f464946da049f9a30f": [
+    "vertical",
+    "in"
+  ],
+  "bills-900ef4e7163c430f4c17": [
+    "in",
+    "curl",
+    "out",
+    "vertical"
+  ],
+  "bills-666c0529b38e51f9cc30": [
+    "in"
+  ],
+  "bills-edf8ee61446e2f377369": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "bills-f9bd5cad62ec8e72dbe2": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "bills-3981d20e86302791ec13": [
+    "out",
+    "in"
+  ],
+  "bills-40de9b5eaf93593e13c5": [
+    "in",
+    "curl",
+    "flat"
+  ],
+  "chiefs-029af3d5c01c875124ff": [
+    "in",
+    "out",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "chiefs-13cd32416367ea77b8fe": [
+    "in",
+    "flat",
+    "out",
+    "flood",
+    "smash"
+  ],
+  "chiefs-b7e0d37bf2d836830077": [
+    "in",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "chiefs-c2437777e3bbef7183e7": [
+    "out",
+    "in",
+    "curl",
+    "flat",
+    "flood",
+    "smash"
+  ],
+  "chiefs-d1027d7b72f12aa46640": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "chiefs-097af679e8aef5f3a94c": [
+    "vertical",
+    "in",
+    "curl",
+    "flood"
+  ],
+  "chiefs-c3be555b74e16c23c8c0": [
+    "flat",
+    "out"
+  ],
+  "chiefs-73200c45eeb60ce5522f": [
+    "in",
+    "out",
+    "smash"
+  ],
+  "chiefs-4d93e9284cf98a09448c": [
+    "flat"
+  ],
+  "chiefs-02d55f2a1b0b13174762": [
+    "in",
+    "out"
+  ],
+  "chiefs-459588078a11d1948b7a": [
+    "out",
+    "vertical"
+  ],
+  "chiefs-7bd4bd66948314529702": [
+    "out",
+    "in"
+  ],
+  "chiefs-88b026752b4163fe2948": [
+    "vertical",
+    "out",
+    "flat",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "chiefs-80349d142a035ed2a321": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "chiefs-709a8e11fe4d72791458": [
+    "curl",
+    "out",
+    "in",
+    "smash"
+  ],
+  "chiefs-82a2a4e688779e2e69ef": [
+    "in",
+    "out"
+  ],
+  "chiefs-7725d3442b7d9830f9f3": [
+    "out",
+    "in"
+  ],
+  "chiefs-fd3ca4bb3e0e8d295782": [
+    "curl",
+    "out"
+  ],
+  "chiefs-27c927d571ab847f4297": [
+    "out",
+    "vertical",
+    "flat",
+    "curl",
+    "smash"
+  ],
+  "chiefs-5e34ae8ba97b979b3a07": [
+    "out",
+    "vertical",
+    "smash"
+  ],
+  "chiefs-75966fd1b62e9b201d41": [
+    "in",
+    "out",
+    "vertical",
+    "smash",
+    "flood"
+  ],
+  "chiefs-135b413c80eabbb3bb6d": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "chiefs-dc7730b74949a0d69a9f": [
+    "vertical",
+    "in"
+  ],
+  "chiefs-2a674a5a4643ad193ea6": [
+    "vertical",
+    "flat",
+    "out",
+    "curl"
+  ],
+  "chiefs-2468ac154dced8e5fbc5": [
+    "out",
+    "in",
+    "flood"
+  ],
+  "chiefs-e3ecdaae61c10e1abf77": [
+    "in",
+    "flat",
+    "vertical"
+  ],
+  "chiefs-f060148607ee49b4b349": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "chiefs-ddfcf5badacb701014fd": [
+    "out",
+    "in"
+  ],
+  "chiefs-c7bf839664ea47db6c68": [
+    "flat",
+    "out",
+    "curl"
+  ],
+  "chiefs-ca56acd32aac9d0e132d": [
+    "vertical",
+    "in"
+  ],
+  "chiefs-e0817669d191f7c0b337": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "chiefs-7aca8bb71064cecbd475": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "chiefs-3da960b367e3da8cfef1": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "chiefs-3c319779ca1650da1573": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "chiefs-fc3786a29dac8c4d7633": [
+    "in",
+    "flat"
+  ],
+  "chiefs-66b2dae3f338b834db38": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "chiefs-c708c0f2793d5eb9fccb": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "chiefs-98bc2183c5e46ee6b4fd": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "chiefs-ac3cd6a1779b2b98dbaf": [
+    "vertical",
+    "four verts"
+  ],
+  "chiefs-02d1ec4b7eaea4679fca": [
+    "vertical",
+    "out"
+  ],
+  "chiefs-54119c1feb49bfacec21": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "cowboys-e30fb03ed685218a14d1": [
+    "vertical",
+    "out",
+    "flat",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "cowboys-afc23a3d1e8274bbcd7f": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "cowboys-69168186354ea5c50ecb": [
+    "curl",
+    "out",
+    "in",
+    "smash"
+  ],
+  "cowboys-0a69c83749d0e5649cd3": [
+    "in",
+    "out"
+  ],
+  "cowboys-3cf3146cd5ae9ab90c72": [
+    "out",
+    "in"
+  ],
+  "cowboys-0ac71262fa842ce89a66": [
+    "curl",
+    "out"
+  ],
+  "cowboys-c933e25db700d4945286": [
+    "out",
+    "vertical",
+    "flat",
+    "curl",
+    "smash"
+  ],
+  "cowboys-3fa3d59515f804e34187": [
+    "out",
+    "vertical",
+    "smash"
+  ],
+  "cowboys-6eeaa4f3ee65726a892e": [
+    "in",
+    "out",
+    "vertical",
+    "smash",
+    "flood"
+  ],
+  "cowboys-0f12272d4e441de92d37": [
+    "out",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "cowboys-c58ee093d96f787675ed": [
+    "flat",
+    "curl",
+    "out"
+  ],
+  "cowboys-c88b38950099a9235c20": [
+    "curl"
+  ],
+  "cowboys-e818f91a3f35505345f7": [
+    "curl",
+    "vertical",
+    "in",
+    "smash"
+  ],
+  "cowboys-48bc48627ee13b8d9d59": [
+    "curl",
+    "out",
+    "in",
+    "vertical",
+    "smash"
+  ],
+  "cowboys-8700c4d933b8741f720f": [
+    "curl",
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "cowboys-b4f336da356b0813162f": [
+    "out",
+    "vertical",
+    "curl",
+    "smash"
+  ],
+  "cowboys-14f152c73d4c6d5f47bc": [
+    "vertical",
+    "out",
+    "flat"
+  ],
+  "cowboys-27b4801208dd23d9f1c2": [
+    "vertical",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "cowboys-85e17f3ef593cca68b78": [
+    "curl",
+    "out",
+    "smash"
+  ],
+  "cowboys-18641735a8177d1c94e7": [
+    "out"
+  ],
+  "cowboys-187b270d732cc7d7c585": [
+    "out",
+    "flat",
+    "in",
+    "vertical",
+    "flood"
+  ],
+  "cowboys-86bcf42821339cca3926": [
+    "vertical",
+    "out",
+    "flat",
+    "in",
+    "smash",
+    "mesh"
+  ],
+  "cowboys-46ea9bd8f371cb63eed6": [
+    "in",
+    "out",
+    "vertical"
+  ],
+  "cowboys-3576770f19f11f4f0d49": [
+    "curl"
+  ],
+  "cowboys-4532ab4958112172063e": [
+    "out",
+    "flat",
+    "in",
+    "flood"
+  ],
+  "cowboys-26dac80504ec24866d66": [
+    "curl",
+    "flat",
+    "vertical",
+    "in"
+  ],
+  "cowboys-dc607bd51dc38de14fb6": [
+    "vertical",
+    "in"
+  ],
+  "cowboys-6c80dff6501fe6d49abb": [
+    "curl",
+    "flat",
+    "in"
+  ],
+  "cowboys-831610cb07fce08496bd": [
+    "in",
+    "flat",
+    "out",
+    "mesh"
+  ],
+  "cowboys-db5f25105327c5ca3bf0": [
+    "flat",
+    "in",
+    "out"
+  ],
+  "cowboys-e0e119a62e515d47bfaf": [
+    "vertical",
+    "out"
+  ],
+  "cowboys-3d0eaa188d38fb6a1c30": [
+    "vertical",
+    "out",
+    "smash"
+  ],
+  "cowboys-f897b926173d2f5b067c": [
+    "in",
+    "flat"
+  ],
+  "cowboys-d913a26803688f80b181": [
+    "in",
+    "flat",
+    "out",
+    "vertical",
+    "flood"
+  ],
+  "cowboys-c5b310918f3146215844": [
+    "in",
+    "flat",
+    "out",
+    "flood",
+    "mesh"
+  ],
+  "cowboys-22fdb8d9479353fd2f7a": [
+    "vertical",
+    "in"
+  ],
+  "cowboys-d63294b40df08605877b": [
+    "in",
+    "curl"
+  ],
+  "cowboys-acd942dcffcf1a4427ee": [
+    "vertical",
+    "in"
+  ],
+  "cowboys-7c79d0ca1e31a382fe38": [
+    "curl",
+    "in"
+  ],
+  "cowboys-87563fd6585eb64fc8d6": [
+    "curl",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "cowboys-37b50f7f3e1f59362f9d": [
+    "curl",
+    "flat",
+    "in",
+    "smash"
+  ],
+  "cowboys-70089245c915d3995afa": [
+    "vertical",
+    "curl",
+    "out",
+    "smash"
+  ],
+  "cowboys-51a4528d2946d6b0a86f": [
+    "vertical",
+    "in",
+    "out"
+  ],
+  "cowboys-0524ff5c6a84a9cd3f99": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "cowboys-4c5c63951465d35df6d6": [
+    "vertical",
+    "in"
+  ],
+  "cowboys-9b0692ffddecf045fde7": [
+    "curl",
+    "flat",
+    "vertical",
+    "smash"
+  ],
+  "cowboys-0609d39c385229c946c7": [
+    "vertical",
+    "flat",
+    "out",
+    "in"
+  ],
+  "cowboys-8692fce06b9200ff68bc": [
+    "vertical",
+    "in",
+    "flat"
+  ],
+  "cowboys-e38987e46e576e8e2992": [
+    "out",
+    "curl",
+    "flat",
+    "in"
+  ],
+  "cowboys-c7be5dc6e1882d59674f": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "cowboys-92593b97094179bfaab2": [
+    "vertical",
+    "four verts"
+  ],
+  "cowboys-60333ec96006003f043f": [
+    "vertical",
+    "out"
+  ],
+  "cowboys-dfeddf2367a54f715345": [
+    "flat",
+    "curl"
+  ],
+  "cowboys-b6573d5bd5b057514047": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "cowboys-2daf780ab69f3fed86f1": [
+    "flat",
+    "in"
+  ],
+  "cowboys-a82d5243f021b3396fc8": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "cowboys-83710a7f0026e616f6a3": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "cowboys-d31f200e873e6288b181": [
+    "curl",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "cowboys-638dd6585d858d8c9cdd": [
+    "curl",
+    "in",
+    "flat"
+  ],
+  "cowboys-6d55cc38f4f57058254e": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "cowboys-85533b13cca800477113": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "cowboys-6e446d14a1c0080976f8": [
+    "vertical",
+    "flat"
+  ],
+  "cowboys-3cf2a851feb08b648545": [
+    "in",
+    "curl",
+    "flat",
+    "flood"
+  ],
+  "cowboys-126c800f34736c48bcb2": [
+    "vertical",
+    "in"
+  ],
+  "cowboys-23aa8adc9c676590b38d": [
+    "in",
+    "curl",
+    "out",
+    "vertical"
+  ],
+  "cowboys-40ee68b0fa05dc6dbe90": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "cowboys-bcceef12e18663a80157": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "cowboys-a5cead58f5bd59070678": [
+    "out",
+    "in"
+  ],
+  "dolphins-ca69d5d690b3530a4203": [
+    "curl",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "dolphins-6221ac23d47b107ae408": [
+    "out",
+    "flat",
+    "mesh"
+  ],
+  "dolphins-c64cf5346202a97d870e": [
+    "out",
+    "in"
+  ],
+  "dolphins-43b1f0eb25c2cb3a5de7": [
+    "in",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "dolphins-f62ab17a4635072d398a": [
+    "in"
+  ],
+  "dolphins-15c795fab626b9010984": [
+    "curl",
+    "flat",
+    "out"
+  ],
+  "dolphins-666b0e8e1b494456303d": [
+    "out",
+    "in",
+    "flood"
+  ],
+  "dolphins-9b9a4b649dc99c68d6bf": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "dolphins-80933ff72934bfd515f6": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "dolphins-a058bb95158678ba0fcc": [
+    "out",
+    "curl"
+  ],
+  "dolphins-f92f8071399a5530bc49": [
+    "vertical",
+    "out",
+    "flat",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "dolphins-7b19a4080f6e1baec5f2": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "dolphins-1f7c72b0dfb514dbed35": [
+    "curl",
+    "out",
+    "in",
+    "smash"
+  ],
+  "dolphins-9bb4a5bae5dd37d91cbd": [
+    "in",
+    "out"
+  ],
+  "dolphins-73b0e791439cf72adabd": [
+    "out",
+    "in"
+  ],
+  "dolphins-42d0f1003c9ac1b33abf": [
+    "curl",
+    "out"
+  ],
+  "dolphins-7649d3f5f5d6129d5aba": [
+    "out",
+    "vertical",
+    "flat",
+    "curl",
+    "smash"
+  ],
+  "dolphins-d9bf4dc4797380a068b4": [
+    "out",
+    "vertical",
+    "smash"
+  ],
+  "dolphins-07e6ae11b611631ad24a": [
+    "in",
+    "out",
+    "vertical",
+    "smash",
+    "flood"
+  ],
+  "dolphins-493c9a0d005e97746edd": [
+    "in",
+    "flat",
+    "flood"
+  ],
+  "dolphins-51951e5cbc303f2f3cf6": [
+    "curl",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "dolphins-821e9b40a2f10e98797b": [
+    "flat",
+    "in"
+  ],
+  "dolphins-33d413c18510d070120c": [
+    "flat",
+    "in",
+    "curl",
+    "out"
+  ],
+  "dolphins-380214806780c0b8b1d2": [
+    "out",
+    "flat",
+    "smash"
+  ],
+  "dolphins-a6708f50ec373e263115": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "dolphins-06226ee0cfe317e78f76": [
+    "vertical",
+    "in"
+  ],
+  "dolphins-3b14ce3aae06c539f571": [
+    "vertical",
+    "flat",
+    "out",
+    "curl"
+  ],
+  "dolphins-21c9749629e6b32c05e7": [
+    "out",
+    "in",
+    "curl"
+  ],
+  "dolphins-d4b0f0341c0fa177a8a8": [
+    "curl",
+    "in"
+  ],
+  "dolphins-5090c391bfb58c45604c": [
+    "curl",
+    "out",
+    "in",
+    "flat"
+  ],
+  "dolphins-7971bbe8644126bf7859": [
+    "vertical",
+    "in"
+  ],
+  "dolphins-c04a997799f38473551e": [
+    "curl",
+    "in"
+  ],
+  "dolphins-c3e75d6fc57f8c5b5dd4": [
+    "curl",
+    "flat",
+    "in"
+  ],
+  "dolphins-1cd38bb8759eb593e127": [
+    "out",
+    "flat",
+    "in",
+    "mesh"
+  ],
+  "dolphins-1eede9befc478d810048": [
+    "flat",
+    "in",
+    "out"
+  ],
+  "dolphins-660ef30855c9216f98e3": [
+    "vertical",
+    "out",
+    "smash"
+  ],
+  "dolphins-a72ace6fd6f91e69b8b4": [
+    "in",
+    "flat",
+    "curl",
+    "vertical",
+    "smash"
+  ],
+  "dolphins-670293f192bf6303e3e3": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "dolphins-0bc05ace639e174cedfa": [
+    "in",
+    "flat",
+    "out",
+    "flood",
+    "mesh"
+  ],
+  "dolphins-7285f888f5f763337311": [
+    "out",
+    "curl",
+    "flat",
+    "in"
+  ],
+  "dolphins-e1ed2e197e26ed41fa0c": [
+    "in",
+    "out"
+  ],
+  "dolphins-e8febe3127954e63d64f": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "dolphins-cc6ef43faf59d3cd8e7a": [
+    "out",
+    "flat"
+  ],
+  "dolphins-8b23137525151ae912cd": [
+    "in",
+    "curl",
+    "flat"
+  ],
+  "dolphins-0e67903503412a3fb61f": [
+    "vertical",
+    "flat",
+    "curl"
+  ],
+  "dolphins-49764f9935b6a01055e7": [
+    "in",
+    "out",
+    "flat",
+    "flood",
+    "smash"
+  ],
+  "dolphins-7a20a2cf2b371d9af00f": [
+    "in"
+  ],
+  "dolphins-7c9c33e4ed4e4165f28d": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "dolphins-858f8bdfe5830f6cb09b": [
+    "vertical",
+    "four verts"
+  ],
+  "dolphins-ee77a75ae35ff58b0e50": [
+    "vertical",
+    "out"
+  ],
+  "dolphins-0400a6e0bf740c189bb8": [
+    "vertical",
+    "out"
+  ],
+  "dolphins-67837c20a0431fa02a0d": [
+    "in",
+    "curl"
+  ],
+  "dolphins-483e85eb9aa6617a36f8": [
+    "in",
+    "out",
+    "vertical"
+  ],
+  "dolphins-66b6964c92ac4d708fbd": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "dolphins-e2931f1b39b6d7bb62c9": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "dolphins-6509d664a86459f5d74e": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "dolphins-b0202687283ad7d27398": [
+    "curl",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "dolphins-4f2d9d7000ae76c31cc3": [
+    "out",
+    "in"
+  ],
+  "dolphins-4c228bf4ab01e2fa2261": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "dolphins-205eeb96e7b7656651c7": [
+    "out"
+  ],
+  "dolphins-0b14c7a52627d533252c": [
+    "vertical",
+    "in",
+    "out",
+    "flat"
+  ],
+  "dolphins-e1ad06f34cd75ecf0fee": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "dolphins-393f11448eff7561578d": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "dolphins-f6e8f7ed8593991dc6bc": [
+    "out",
+    "in"
+  ],
+  "lions-eba15a007b0f433291d3": [
+    "curl",
+    "in",
+    "flat",
+    "out"
+  ],
+  "lions-7e4ffcb57f02492e4333": [
+    "vertical",
+    "out",
+    "in",
+    "flat"
+  ],
+  "lions-517e0adf3172c369d79a": [
+    "vertical",
+    "in",
+    "flat",
+    "curl"
+  ],
+  "lions-cc771c4d0e235fcff38e": [
+    "in",
+    "flat",
+    "curl",
+    "vertical"
+  ],
+  "lions-8e422370189c549ba7da": [
+    "in",
+    "flat",
+    "out",
+    "curl",
+    "vertical",
+    "smash"
+  ],
+  "lions-d5c442aa5c599ab4044e": [
+    "in",
+    "out",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "lions-0b954599b7b83f9cb7e3": [
+    "in",
+    "out"
+  ],
+  "lions-f3931a489a7f4e2568b7": [
+    "in",
+    "flat",
+    "out",
+    "flood",
+    "smash"
+  ],
+  "lions-9fcaeb870a1fd8806758": [
+    "in",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "lions-2b7a9c79172e36cbf212": [
+    "vertical",
+    "out",
+    "flat",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "lions-6dc6e2bdfeb67bb1add3": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "lions-5c9d49a0f9a6f01eb33c": [
+    "curl",
+    "out",
+    "in",
+    "smash"
+  ],
+  "lions-9aee7ccf03f996d7f148": [
+    "in",
+    "out"
+  ],
+  "lions-6e9e0f90340173ee71b8": [
+    "out",
+    "in"
+  ],
+  "lions-abfbccc2a491b64bac06": [
+    "curl",
+    "out"
+  ],
+  "lions-66901f6264e5525eba05": [
+    "out",
+    "vertical",
+    "flat",
+    "curl",
+    "smash"
+  ],
+  "lions-d07b5306fe3551a94caa": [
+    "out",
+    "vertical",
+    "smash"
+  ],
+  "lions-83fc70dcbe494dda3c8a": [
+    "in",
+    "out",
+    "vertical",
+    "smash",
+    "flood"
+  ],
+  "lions-135f01fcabef709cae93": [
+    "out"
+  ],
+  "lions-db53b4b11322c8b5e3ad": [
+    "out",
+    "flat",
+    "in",
+    "vertical",
+    "flood"
+  ],
+  "lions-b64160eb69d86db3193d": [
+    "vertical",
+    "out",
+    "flat",
+    "in",
+    "smash",
+    "mesh"
+  ],
+  "lions-99d5962f20cd273b27cb": [
+    "in",
+    "out",
+    "vertical"
+  ],
+  "lions-6cabf965d7f1f9d62f79": [
+    "curl"
+  ],
+  "lions-fb3a65975f7ff9929dd5": [
+    "vertical",
+    "flat",
+    "out",
+    "curl"
+  ],
+  "lions-45a94da38bd3c02b7f7a": [
+    "in",
+    "vertical",
+    "out",
+    "curl",
+    "smash"
+  ],
+  "lions-d37ba21deb36a7eda65d": [
+    "out",
+    "in",
+    "curl"
+  ],
+  "lions-0d260c80216706c41cf6": [
+    "out",
+    "in",
+    "flood"
+  ],
+  "lions-a09f76939b49af4300b1": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "lions-76780af3c3e7d36c7217": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "lions-8111dd3015a5582273ef": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "lions-545d7bf7dcdc999f5ecf": [
+    "in",
+    "flat"
+  ],
+  "lions-ea9102d7b81bc2fc5ec3": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "lions-011e47a4a659f188dd83": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "lions-18f07316dbeed4a39725": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "lions-6c5fa77313427dc25229": [
+    "vertical",
+    "four verts"
+  ],
+  "lions-5ab76ea14b83e14d0b76": [
+    "vertical",
+    "out"
+  ],
+  "lions-71494590f9de7690bd8a": [
+    "in",
+    "out"
+  ],
+  "lions-4b7783d263a87479b040": [
+    "vertical",
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "lions-9abc96ce732f8e9f2216": [
+    "in",
+    "out",
+    "flat"
+  ],
+  "lions-59a11fdf4946c5d30e52": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "lions-fc65e7786836161fd640": [
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "lions-3df76f4d11bcb8fe0db0": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "lions-3c43913edb518c4b05d1": [
+    "vertical",
+    "flat"
+  ],
+  "lions-13bc16adc970d4c7b444": [
+    "vertical",
+    "in"
+  ],
+  "lions-acb51b22dfa1883329b3": [
+    "in",
+    "curl",
+    "out",
+    "vertical"
+  ],
+  "lions-d155987a06f51e6920b5": [
+    "out",
+    "flat",
+    "in",
+    "flood"
+  ],
+  "lions-b65609c3069554fd9a79": [
+    "in",
+    "vertical"
+  ],
+  "lions-3638b7c5b7f48cc410e9": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "lions-985ae3add91519215031": [
+    "out",
+    "in"
+  ],
+  "packers-29cc4da28d3745a8407b": [
+    "curl",
+    "out",
+    "flat",
+    "smash"
+  ],
+  "packers-87a860a390068bcad0e5": [
+    "out",
+    "flat",
+    "mesh"
+  ],
+  "packers-0537e3e5365bcb816483": [
+    "out",
+    "in"
+  ],
+  "packers-d7d4b96df7662157e6e1": [
+    "in",
+    "curl",
+    "flat",
+    "smash"
+  ],
+  "packers-bf4e7268d7ddab5338d0": [
+    "in"
+  ],
+  "packers-abae2af24b6311938959": [
+    "curl",
+    "flat",
+    "out"
+  ],
+  "packers-d28610d9280dc384306c": [
+    "out",
+    "in",
+    "flood"
+  ],
+  "packers-c618843a83f341f31c04": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "packers-d1e2e0ef5d4c06a248c6": [
+    "vertical",
+    "out",
+    "flat",
+    "curl",
+    "flood",
+    "smash"
+  ],
+  "packers-245e84fad3f5f22e70e7": [
+    "in",
+    "vertical",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "packers-6e56b8c217c76444078c": [
+    "curl",
+    "out",
+    "in",
+    "smash"
+  ],
+  "packers-a4f12b05467b88e12a82": [
+    "in",
+    "out"
+  ],
+  "packers-d76bd910bd1f1e209840": [
+    "out",
+    "in"
+  ],
+  "packers-bbd40ad73e985a9ed19b": [
+    "curl",
+    "out"
+  ],
+  "packers-88494e2fb7138faf8184": [
+    "out",
+    "vertical",
+    "flat",
+    "curl",
+    "smash"
+  ],
+  "packers-8e16c91f4f8368bc6e0b": [
+    "out",
+    "vertical",
+    "smash"
+  ],
+  "packers-1b35d04b6675afb32e9f": [
+    "in",
+    "out",
+    "vertical",
+    "smash",
+    "flood"
+  ],
+  "packers-6739bfcb7099355a7dfa": [
+    "out",
+    "flat"
+  ],
+  "packers-01ad7affba4e30889880": [
+    "curl",
+    "flat"
+  ],
+  "packers-769946639b77b3bff527": [
+    "curl",
+    "out",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "packers-cb2f46a243aad08a7a91": [
+    "vertical",
+    "four verts"
+  ],
+  "packers-1cc61dfad37a65a79658": [
+    "in",
+    "flat"
+  ],
+  "packers-4a3592e4ca6916b26334": [
+    "in",
+    "flat"
+  ],
+  "packers-f9bda12128c45bdbd9b3": [
+    "vertical",
+    "in"
+  ],
+  "packers-422c05ddec6a10c3af3e": [
+    "out",
+    "flat",
+    "smash"
+  ],
+  "packers-a7c9f72633c2ab934ec9": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "packers-e4d0c3ff708449034e4f": [
+    "vertical",
+    "in"
+  ],
+  "packers-8c3743c97b6f96ffa380": [
+    "in",
+    "vertical",
+    "out",
+    "curl",
+    "smash"
+  ],
+  "packers-9a755ef76b754a095b65": [
+    "in",
+    "out"
+  ],
+  "packers-a35c0026552b99e9158c": [
+    "flat",
+    "out",
+    "vertical",
+    "curl",
+    "smash"
+  ],
+  "packers-b0d6f45d8d7b27fe0773": [
+    "out",
+    "in",
+    "smash",
+    "mesh"
+  ],
+  "packers-a47c1bd6296e70d36c75": [
+    "vertical",
+    "out",
+    "in",
+    "flood"
+  ],
+  "packers-bbac7f10faf2427feb9b": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "packers-edd33644efb6f96e2980": [
+    "in",
+    "vertical",
+    "flat",
+    "out"
+  ],
+  "packers-b26fc9e8ceb5a2560738": [
+    "in",
+    "out",
+    "flood"
+  ],
+  "packers-1a9083aa7612971ebb97": [
+    "out",
+    "flat"
+  ],
+  "packers-5508faac0aac2c0e4fdc": [
+    "in",
+    "curl",
+    "flat"
+  ],
+  "packers-f75acaca345d62ff8b03": [
+    "vertical",
+    "flat",
+    "curl"
+  ],
+  "packers-39727ad24b576b08c76a": [
+    "in",
+    "out",
+    "flat",
+    "flood",
+    "smash"
+  ],
+  "packers-9801df229d8e352008f2": [
+    "in"
+  ],
+  "packers-2edef49b3b8314753afd": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "packers-a3cc711c49f79ac4b367": [
+    "out",
+    "in"
+  ],
+  "packers-9d2a2159ad2154ad8528": [
+    "flat",
+    "out",
+    "curl"
+  ],
+  "packers-9b906a00f1a4b4a4562f": [
+    "out",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "packers-965cbd98bf2bbc371b94": [
+    "out",
+    "curl",
+    "flat",
+    "flood",
+    "mesh"
+  ],
+  "packers-e5e769f6952708486aa6": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "packers-9569906c7ea909727db9": [
+    "in",
+    "flat"
+  ],
+  "packers-b6617bcc62e541789eae": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "packers-d7c4e7438215f029529d": [
+    "out",
+    "flat",
+    "in",
+    "flood",
+    "smash"
+  ],
+  "packers-3e3fb1061b2f18c00f1e": [
+    "in",
+    "vertical",
+    "four verts"
+  ],
+  "packers-3aee8d02e3de4a2f17de": [
+    "vertical",
+    "four verts"
+  ],
+  "packers-a20256541410af265cf9": [
+    "vertical",
+    "out"
+  ],
+  "packers-b096b1c238d23ea3a378": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "packers-3bf03a305f44404bf8b8": [
+    "out",
+    "in",
+    "smash"
+  ],
+  "packers-9ec5dd0fc62e2b4a556f": [
+    "flat",
+    "in"
+  ],
+  "packers-1dd0945e042c37a90ce5": [
+    "out",
+    "curl",
+    "flat"
+  ],
+  "packers-d01db79da237862b5ecf": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "packers-20b535fa7f38e537d007": [
+    "in",
+    "out",
+    "flat",
+    "flood"
+  ],
+  "packers-438277cca308a87d1105": [
+    "in",
+    "flat"
+  ],
+  "packers-406f41ff839a7f55fce6": [
+    "curl",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "packers-880b324e6472d970138a": [
+    "in"
+  ],
+  "packers-4785200bbc7ceed7073e": [],
+  "packers-fe031e839f6737dd8ec5": [
+    "vertical",
+    "out",
+    "in"
+  ],
+  "packers-ec70cb42e8cc57e99acf": [
+    "flat",
+    "in",
+    "out",
+    "curl",
+    "smash"
+  ],
+  "packers-caea2d80e2a7f450dcbf": [
+    "in",
+    "flat",
+    "curl"
+  ],
+  "packers-835ce5a8304cebf156ed": [
+    "out",
+    "vertical",
+    "flat"
+  ],
+  "packers-f0f773a30d77a7182f7e": [
+    "curl",
+    "in",
+    "flat",
+    "flood"
+  ],
+  "packers-35682438f1d6f91fd8c8": [
+    "curl",
+    "in",
+    "flat"
+  ],
+  "packers-fbdc574e76f80b76f2c8": [
+    "flat",
+    "in",
+    "out",
+    "flood"
+  ],
+  "packers-fbdc3e0b0f46908318fa": [
+    "in",
+    "vertical",
+    "flat",
+    "flood"
+  ],
+  "packers-690058cf515f619241d0": [
+    "vertical",
+    "in",
+    "flat",
+    "out",
+    "flood"
+  ],
+  "packers-f36ad3ccdc3ff6dae5ee": [
+    "out"
+  ],
+  "packers-ae1b1033d587b63ca4d1": [
+    "vertical",
+    "in",
+    "out",
+    "flat"
+  ],
+  "packers-4be91efa702b4a9bb7eb": [
+    "in",
+    "vertical",
+    "flat"
+  ],
+  "packers-1612d52510c483ad98ee": [
+    "in",
+    "vertical",
+    "out"
+  ],
+  "packers-7a192efc48a41fc8090f": [
+    "out",
+    "in"
+  ],
+  "packers-67e03d177d47c765bd5b": [
+    "out",
+    "flat",
+    "in",
+    "flood"
+  ],
+  "packers-21f4ca7681c455051854": [
+    "in",
+    "vertical"
+  ],
+  "packers-116a27bc76e517fc393c": [
+    "flat",
+    "in",
+    "out",
+    "flood"
   ]
 };
 export const MADDEN_NAME_TAGS = {
-  "eagles-124a123dd24974935bb1": [],
-  "eagles-e5410a0e511936345df5": [],
-  "eagles-5c77e37ba82641a2324e": [],
-  "eagles-472cff64ff73e76828d3": [],
-  "eagles-30367299cad650de2be2": [],
+  "eagles-e7f104964ec22be8cbe7": [
+    "mesh"
+  ],
   "eagles-8e51f55f7deb304a2227": [
     "curl"
   ],
   "eagles-0b5edd04ecdfdd78596a": [
     "mesh"
   ],
-  "eagles-1264c34cfa363c275457": [],
-  "eagles-759643d4abcb6712beaa": [],
-  "eagles-a57609dd1ade55d41ed8": [],
-  "eagles-8ab8ce82f913b140888f": [],
-  "eagles-22cb97715e4fdaeb457c": [],
-  "eagles-872efbe3c3b72e1400d5": [],
-  "eagles-b139e13c8d88d234dca2": [],
+  "eagles-c1d8d85d9337b4685c42": [
+    "flood"
+  ],
+  "eagles-2b6d9601c1fff735744a": [
+    "flood"
+  ],
+  "eagles-b19832dbdd640479e1d2": [
+    "mesh"
+  ],
+  "eagles-cfee699a91a61c3c2188": [
+    "mesh"
+  ],
+  "eagles-a1df960e37263ebd4fa4": [
+    "mesh"
+  ],
   "eagles-c6af29e88ba7d94179f5": [
     "smash"
   ],
-  "eagles-1f8787b5830415c96173": [],
   "eagles-0bc8e46e853f532fcba3": [
     "smash"
   ],
-  "eagles-a7777a8b8a28f6b78db3": [],
-  "eagles-34ca553a0c5c7883dda7": [],
+  "eagles-636f3e143549e8a9efe4": [
+    "mesh"
+  ],
   "eagles-081254f5bce5962fa46b": [
     "curl"
   ],
-  "eagles-3a45eb796798fc6d5515": [],
-  "eagles-bef0a3c9603b6d3ed04e": [],
-  "eagles-74c574bc59044cf38eec": [],
+  "eagles-7985409b5e08e5f34c83": [
+    "mesh"
+  ],
   "eagles-73b5912a0d55679a87a8": [
     "curl"
   ],
   "eagles-dd8a63144965b39980ca": [
     "flood"
   ],
-  "eagles-490f62cc89686f89486a": [],
-  "eagles-5596a944605fa28088c3": [],
-  "eagles-3750d1115e524fdef808": [],
-  "eagles-bf57fe7d3372f7d44f63": [],
-  "eagles-ec63731ea042d3b2c69c": [],
+  "eagles-ce7bb4a57fbc409fcc13": [
+    "smash"
+  ],
+  "eagles-b95019607d16787e963c": [
+    "mesh"
+  ],
+  "eagles-b658f1f1321a94c9dc8c": [
+    "smash"
+  ],
   "eagles-8b6a1052b431556d3600": [
     "smash"
   ],
-  "eagles-33bb20b6ec6e23689aef": [],
-  "eagles-5e8f471e0d2b78ec89ff": [],
-  "eagles-2c8525433c0fc7723b2b": [],
-  "eagles-1b7ef22d05012d5e7a83": [],
-  "eagles-f3e29ff9fa2682009c0c": [],
-  "eagles-eb7dff440c8ab784ac94": [],
-  "eagles-f7cc5994a6147a69d0ee": [],
-  "eagles-8eee931cea2aa604bf1b": [],
-  "eagles-d235316076e261247879": [],
-  "eagles-2e3342c51abafaf8feb2": [],
-  "eagles-364bf1784fe37c65a36e": [],
-  "eagles-fd2267e23547b4dab4d8": [],
-  "eagles-693ecda88ecbf448f181": [],
-  "eagles-0aba897ed5c33c64b124": [],
-  "eagles-f5e45466e706c1e72f06": [],
-  "eagles-c2fb731d06e14eddf487": [],
-  "eagles-57f887b05dcb6721c51e": [],
-  "eagles-921ed0d0224561a6f749": [],
+  "eagles-7eb51a770f1e3f3e93eb": [
+    "mesh"
+  ],
   "eagles-1af4ff8d1b9f5710f59d": [
     "curl"
   ],
   "eagles-e75f3a2f81868e61ed98": [
     "curl"
   ],
-  "eagles-3674ebe8d346527326b2": [],
-  "eagles-a1f98fdf45f3e37f7ab6": [],
   "eagles-03749dc62187068fa44c": [
     "smash"
   ],
-  "eagles-eba27c2d1b152e6eb630": [],
-  "eagles-21a6ea7b873297d39fce": [],
-  "eagles-5889e60aa0fce5ff522a": [],
-  "eagles-3327a14af55adbdee82d": [],
   "eagles-214279c3dc5f6c6e41bf": [
     "curl"
   ],
-  "eagles-81f11dd9dc338932f069": [],
   "eagles-635e78510c136040d40f": [
     "vertical",
     "four verts"
   ],
-  "eagles-5984fc46f848cfde5c82": [],
-  "eagles-82903aafe4d4960e203a": [],
-  "eagles-33b787a6a9d48c4345af": [],
-  "eagles-d6dfd2a0505c924ad9f1": [],
   "eagles-6afdc490c47ed359dfd9": [
     "curl"
   ],
-  "eagles-15ff20b029ace2ab4b23": [],
-  "eagles-2e363249bee3171e5465": [],
-  "eagles-50664f26db7ebc2ea3d1": [],
-  "eagles-f43c1a5ff767210d346c": [],
-  "eagles-8047f15669c1f0357b87": [],
-  "eagles-5e896fa6325f66ab810c": [],
-  "eagles-704398da5fb27d258802": [],
-  "eagles-c5d8d9a5f04bef2a0eb7": [],
-  "eagles-ee4efa6ad5c52bc936f9": [],
-  "eagles-1bdc2c839bd58e19b940": [],
-  "eagles-d7461401b20c8fe4fb7a": [],
+  "eagles-5abfd8e3980628ca9d3e": [
+    "vertical"
+  ],
   "eagles-c016f0461e662702d700": [
     "vertical",
     "four verts"
   ],
-  "eagles-117058b872265c45fbd5": [],
-  "eagles-220f44b255bbce134c8b": [],
-  "eagles-9ce2a811a90294ec803d": [],
-  "eagles-d4dcd8ec8b7cf2b00bc0": [],
-  "eagles-ac479ecbaadf3bf35f53": [],
-  "eagles-fa97fbc231bb13853bf9": [],
-  "eagles-e4ee44bc2f72118e8e37": [],
-  "eagles-df9069d0dbb8be1233b9": [],
-  "eagles-89eec09ad09da7a20c61": [],
-  "eagles-d0200a11af82372b84aa": [],
-  "eagles-f3769c98826564f13c7a": [],
-  "eagles-c60bc62adf02c2764036": [],
-  "eagles-b4ba27433b508c064103": [],
-  "eagles-8fb7a6cbdc069066e6fe": [],
-  "eagles-abcbd31c1ee8aa22c4bf": [],
-  "eagles-1139f5bdcf456adb9818": [],
-  "eagles-59a70d7a55b50d7fdde0": [],
-  "eagles-a382b1bdb386e70cf781": [],
-  "eagles-f587e5e43a58841e70a2": [],
+  "eagles-02a51a51e60c927536ce": [
+    "curl"
+  ],
   "eagles-aa6c77ece46298eb02fd": [
     "flood"
   ],
-  "eagles-c73a53961b7fa3b5fc89": [],
-  "eagles-8b4b6c65e95bf3aca8bf": [],
-  "eagles-eac7d04acdb4b1b94481": [],
-  "eagles-fa3dc488e9a2b58c0fde": [],
+  "eagles-2ddeb5917fd09a13ae82": [
+    "mesh"
+  ],
   "eagles-a17195daba29578ace80": [
     "curl"
   ],
-  "eagles-004aafb2837a5faa9f28": [],
-  "eagles-1f4a88983d76d108c768": [],
-  "eagles-141b2db09c63e1b0191f": [],
-  "eagles-9b7a5b544a1d9c178e99": [],
-  "eagles-23b54c7b8a3a7d5c2922": [],
-  "eagles-97575c78a219ad004b1c": [],
   "eagles-c5c91dc8c27c624ece6d": [
     "curl"
   ],
-  "eagles-d6c62a4db0dd6e23304b": [],
   "eagles-f24fd644284fd364c8d0": [
     "vertical",
     "four verts"
   ],
+  "eagles-d432a01c32e8738af688": [
+    "flood"
+  ],
   "eagles-112322fd13a4cdf47de9": [
     "mesh"
   ],
-  "eagles-d1a1ed46acdb2078ddaa": [],
-  "eagles-f8b9a998f2000c589d6c": [],
-  "eagles-e9e81b2bf56ede586025": [],
-  "eagles-6d8ae64164ff32d3d7ee": [],
-  "eagles-3a481f39a7a27ca36791": [],
-  "eagles-01d1e056e9f00abdc2a3": [],
-  "eagles-7e279bbe0188aeb66520": [],
-  "eagles-ee80fe2e8a2784f7c6d1": [],
-  "eagles-604bc7fe55c35cc4eaae": [],
-  "eagles-968ed88b80d332b4cff3": [],
-  "eagles-acda5433cae871793ebe": [],
-  "eagles-fc0418a59e6d709adcc3": [],
   "eagles-18b5754314290abf602b": [
     "flood"
   ],
-  "eagles-d4aaeb4455ae9d64a557": [],
+  "eagles-a658962ca9cac14a26e8": [
+    "curl"
+  ],
   "eagles-ce5ad6b2e9a857ad496e": [
     "flood"
   ],
-  "eagles-c0309263ade888a6afd1": [],
-  "eagles-f17635cdbb69e5fef1b5": [],
-  "eagles-eba9fafc399f41e5ce88": [],
   "eagles-4963f5be6db008c04880": [
     "vertical"
   ],
-  "eagles-bff4240b860ad0613f11": [],
-  "eagles-d878818d83c512c00cb1": [],
-  "eagles-4b962fb8a0eda2ab6dee": [],
-  "eagles-d3eec59a136a0bb7b71c": [],
-  "eagles-b157c65d5d91cd336e96": [],
-  "eagles-7f277ce0f64bb4794090": [],
-  "eagles-cb4a6ea45f17ce46278c": [],
-  "eagles-1cb6da720707ca468fd1": [],
   "eagles-f6b8266e405cf2aa628f": [
     "vertical"
   ],
-  "eagles-67b98b445a25bc24469c": [],
-  "eagles-27f54731267daa362cb8": [],
-  "eagles-62b46dd01c3407056aa5": [],
-  "eagles-435b4fe699a13e3c036f": [],
-  "eagles-70a79aa21ebd643e7fa1": [],
-  "eagles-ae00783b2ffe5951f9f6": [],
+  "eagles-324f403fb07a00363b4d": [
+    "curl"
+  ],
   "eagles-120fe82d298c827d609b": [
     "smash"
   ],
-  "eagles-1314e53480636cc81709": [],
-  "eagles-35c396d648753d68129f": [],
-  "eagles-2e870d9a77663474b216": [],
-  "eagles-3ca52b31d86f8c74d9bb": [],
+  "eagles-a1d127e57ece56896a46": [
+    "smash"
+  ],
+  "eagles-5162ad6a9337699676d9": [
+    "mesh"
+  ],
+  "eagles-ff98619f48a2f326ac1c": [
+    "mesh"
+  ],
+  "eagles-fa5ca87766e87f82dc0e": [
+    "smash"
+  ],
   "eagles-05decf940422b8ec6ba2": [
     "vertical",
     "four verts"
@@ -2422,18 +4761,19 @@ export const MADDEN_NAME_TAGS = {
   "eagles-87489630d4a0aafcb28f": [
     "vertical"
   ],
-  "eagles-975cd45d715e69adf253": [],
-  "eagles-257da030fa914acf4915": [],
-  "eagles-7f2f27ac3deb707e1081": [],
-  "eagles-8a0ffaa7362d4678123e": [],
   "eagles-40fcac92b785b6722a9b": [
     "vertical",
     "four verts"
   ],
-  "eagles-3e5eba0857d61c00129a": [],
-  "eagles-3213809c70c18b772a68": [],
-  "eagles-5776192f0c2f297ad8f1": [],
-  "eagles-a0fd05ba219769c9a861": [],
+  "eagles-2f88ca13654ad1b91c01": [
+    "mesh"
+  ],
+  "eagles-ba29f433816193c57057": [
+    "smash"
+  ],
+  "eagles-3dfba8ed44881330cc80": [
+    "mesh"
+  ],
   "eagles-66c2f2f176cfa7911cdb": [
     "flood"
   ],
@@ -2446,145 +4786,90 @@ export const MADDEN_NAME_TAGS = {
   "eagles-eb9a32953a50b39ce8d6": [
     "flood"
   ],
-  "eagles-53ad7f8769e86be6eb32": [],
-  "eagles-3db498b0b97add9066e0": [],
+  "eagles-2039e744eab4f3eb6a4d": [
+    "mesh"
+  ],
   "eagles-64ac6128e65374859f16": [
     "smash"
   ],
-  "eagles-2384155055a77aed77a4": [],
-  "eagles-afdeba8915a57debcf6c": [],
-  "eagles-a55d0ac43000a501eead": [],
-  "eagles-6889a722d4d5a2a50537": [],
-  "eagles-02156f5cb9ff4d9aa313": [],
-  "eagles-5bb72ee4536a4bcca838": [],
-  "eagles-94be657905499cbe2995": [],
-  "eagles-49d5a6730ff350c0d628": [],
-  "eagles-5cb7d0d2f40eddce8960": [],
-  "eagles-d4bedbc5305fe9b4a755": [],
-  "eagles-35e45c5b8468fc5c10ad": [],
+  "eagles-d836d31524541af6e15d": [
+    "curl"
+  ],
+  "eagles-7642379be4e508b451b0": [
+    "mesh"
+  ],
   "eagles-dc8d7d3fffb2a12825c6": [
     "flood"
   ],
-  "eagles-86757f6a9e50cc4f6a97": [],
-  "eagles-d31f27b2c587abbe115d": [],
-  "eagles-271231362540fd2d4430": [],
-  "eagles-24588118705ff04a8d19": [],
-  "eagles-de52c045cf8c4215666a": [],
-  "eagles-fb6a246072cba614afb1": [],
-  "eagles-f9740e6a7a1146dad0f0": [],
-  "eagles-7d0015ce10a20d4615df": [],
-  "eagles-784593230b25f0cb55dd": [],
   "eagles-389103a7c85a9ab6f347": [
     "curl"
   ],
   "eagles-56621ebf973cc126f119": [
     "flood"
   ],
-  "eagles-b00013dc3380c2f5b538": [],
-  "eagles-dc44ea12e54af99f3ee0": [],
-  "eagles-a2997a6be90d8319b291": [],
-  "eagles-86fbe765e7996468d05f": [],
-  "eagles-03f685866fbd383bc829": [],
-  "eagles-59c53ee625586c1caae1": [],
-  "eagles-114bbfb5f54d8f168dac": [],
-  "eagles-5629dec866c2e449b5f8": [],
-  "eagles-77a30b3029a8926c5d83": [],
-  "eagles-0fabe6e8cb236a6796ca": [],
-  "eagles-cac8660548c7e7a378d8": [],
-  "eagles-840bc8fe301c9302cd97": [],
-  "eagles-9e36e0db9d6628ad03a9": [],
-  "eagles-4212d2ffac2848ff1d5f": [],
-  "eagles-375ba96a73d1b69f1ff9": [],
-  "eagles-2d1026ef8db01bde4845": [],
-  "eagles-c42813ac57ac8f9dbd6f": [],
-  "eagles-af09126bdaf4b564ca76": [],
-  "eagles-224d5ce23983d0080eb0": [],
-  "eagles-7c3bcd1ca34ea48d6dfb": [],
-  "eagles-e53ea3e9f9fa54ae1203": [],
-  "eagles-aae49a0572543e7b5448": [],
-  "eagles-ccd1d4ba2268ccb50665": [],
-  "eagles-bc051a7b8da92c050768": [],
-  "eagles-2c600ee935b5dd6ebc6f": [],
+  "eagles-4dd27c4dbf38ff56143c": [
+    "mesh"
+  ],
+  "eagles-176f65c5fefa26138abd": [
+    "mesh"
+  ],
+  "eagles-9d0448650b9d407b108d": [
+    "smash"
+  ],
   "eagles-a363bdbb9a8ebfc2453b": [
     "curl"
   ],
-  "eagles-944c8097702e9811f60b": [],
-  "eagles-b41772df26ea0133006f": [],
   "eagles-4e8d5371fbb52f69636f": [
     "flood"
   ],
-  "eagles-bfc84457b51c9dd48ecb": [],
+  "eagles-1d36a44bb403617c0848": [
+    "flood"
+  ],
   "eagles-be8a8c89b20e2ba5b19c": [
     "flood"
   ],
-  "eagles-874f7338ead39106abe0": [],
   "eagles-b083d2fd003ed84f775b": [
     "curl"
   ],
-  "eagles-0d57ca6c5367f111e671": [],
-  "eagles-9e5d03f848beb9a8b5d6": [],
-  "eagles-cdf777ace5b5285a028c": [],
-  "eagles-aceaf231614fd7035675": [],
-  "eagles-ce77d07ff5452d2d7f3f": [],
-  "eagles-e5bfc403eb676efff532": [],
-  "eagles-04c50ebab4c15cdc2083": [],
-  "eagles-af73e0a2270d64e340b1": [],
-  "eagles-07f253809e94b487a0c3": [],
-  "eagles-8755fc0eb674e740b2b4": [],
+  "eagles-e6abcb71651f06405c68": [
+    "mesh"
+  ],
+  "eagles-05c457447338a892559d": [
+    "flood"
+  ],
+  "eagles-93e8c318d5a4dc2a1661": [
+    "flood"
+  ],
+  "eagles-cc4f8d6445d07a9b29ce": [
+    "mesh"
+  ],
   "eagles-82020e94c83748b09776": [
     "flood"
   ],
-  "eagles-776e5a78f1b01805686e": [],
-  "eagles-81e61297681dff28e952": [],
-  "eagles-f17fb41c9342c5d6fb7b": [],
-  "eagles-fa8664062767b0f44561": [],
-  "eagles-026b754d6e2772e768c6": [],
-  "eagles-ffb81db90e9888f2dd17": [],
-  "eagles-fe780d71c3173867eca6": [],
-  "ravens-099d020a044bf7878ca6": [],
-  "ravens-dee006f50d0f5272325d": [],
   "ravens-c0b16f640125507d1c01": [
     "flood"
+  ],
+  "ravens-47c1cc1d0d4c37fb8e16": [
+    "mesh"
   ],
   "ravens-08b56dff2e08ce0e93b1": [
     "flood"
   ],
-  "ravens-f22bbb7cdb3df181817b": [],
-  "ravens-4dd367bd99e69ac5d767": [],
-  "ravens-1459b8ff656886b77dd3": [],
-  "ravens-21f9a4e252d617078635": [],
-  "ravens-2011af002be8c50cedfb": [],
   "ravens-0fd6361aad95186097a4": [
     "flood"
   ],
-  "ravens-432054255cbfe0da5763": [],
-  "ravens-0d30b0d9949cf7c997f2": [],
-  "ravens-cdd350492c9cb2a1f471": [],
-  "ravens-eb4d77f026a8ffc25ba0": [],
   "ravens-10a4775644bccc36aec3": [
     "smash"
   ],
-  "ravens-3e06a362c5db24c1944f": [],
   "ravens-775ad538e34e263ed108": [
     "vertical"
   ],
-  "ravens-e10211b491172cca974b": [],
-  "ravens-ad5f39a5533508fd6d5b": [],
-  "ravens-29843a6a1dd63a5d5067": [],
-  "ravens-a6a6195a059c7d1e84b6": [],
-  "ravens-c65c1f17b04b29ae00e2": [],
-  "ravens-4df192a48d782ab222b3": [],
-  "ravens-bdfa1a26fbd5d19ec1e1": [],
+  "ravens-db07e79edf92a33fba6a": [
+    "mesh"
+  ],
   "ravens-4d108c062c5c6e046a6a": [
     "curl"
   ],
-  "ravens-51ab0b732b0b5fecc1a9": [],
-  "ravens-91adc3d379cd7c1066c9": [],
-  "ravens-986bb4461dfe433a0223": [],
-  "ravens-050a377c0d264cd28c70": [],
-  "ravens-06b0c037b78ab6b7a88d": [],
-  "ravens-bdb43418ce066bb31dfe": [],
-  "ravens-98eae5dbcd84d494cd7f": [],
   "ravens-0c2666566f2ee5883035": [
     "curl"
   ],
@@ -2592,57 +4877,46 @@ export const MADDEN_NAME_TAGS = {
     "vertical",
     "four verts"
   ],
-  "ravens-33b7d9f33e18a84d1da0": [],
-  "ravens-5f24121158b683a7d40d": [],
-  "ravens-47411aef1f7cc23c1845": [],
-  "ravens-c44eb2052be5fd37b086": [],
+  "ravens-eab3a00c6b93ea4d0c8d": [
+    "mesh"
+  ],
+  "ravens-a3707cb0bc1788dda8a9": [
+    "mesh"
+  ],
   "ravens-1a625978c8f74cea24eb": [
     "curl"
   ],
-  "ravens-ff9ce8fd25d8a9a4f9b8": [],
-  "ravens-223479aab3a9f655bb4c": [],
-  "ravens-339a491b0ae8f76544f9": [],
-  "ravens-ae97fd6e39071c3ae0e5": [],
+  "ravens-2d9ffc68085adadeb630": [
+    "mesh"
+  ],
+  "ravens-dc37ec299485cfc6feb7": [
+    "mesh"
+  ],
   "ravens-e089220d1b393a4c911c": [
     "curl"
   ],
-  "ravens-576ceb524f5e9d90b4ca": [],
   "ravens-7f66830c6385495457c4": [
     "vertical",
     "four verts"
   ],
-  "ravens-c20c7fa913d8aea197dc": [],
-  "ravens-9f5d1b6578473b0c92b7": [],
-  "ravens-3e07a37838626ac02b91": [],
-  "ravens-f3eb4d47d2f22031fd3d": [],
-  "ravens-636067413ed2435181ac": [],
-  "ravens-30de023f66c922b9fe34": [],
-  "ravens-7f4cde37954ec2690568": [],
-  "ravens-85852ebf11e67b80f3ea": [],
-  "ravens-d8702aefb8a4cf29a22f": [],
-  "ravens-ec61ea34c633286d640d": [],
+  "ravens-14963456ac95caf3e2a0": [
+    "smash"
+  ],
   "ravens-8f9cb3134e343daf82b3": [
     "mesh"
   ],
-  "ravens-f029e73228983a8cce08": [],
-  "ravens-5339f58f275d3e8d0b58": [],
-  "ravens-c98872a3224e1adab735": [],
-  "ravens-d12e139a64dbd85f4fa9": [],
-  "ravens-aae9bb00aec63ae0e673": [],
-  "ravens-70512056886a951d7dcf": [],
+  "ravens-ea2f5686e1d8a490dc09": [
+    "flood"
+  ],
   "ravens-2d0aeaa000934c2d51e6": [
     "mesh"
   ],
-  "ravens-9c166328e4c19262fd09": [],
-  "ravens-8e3ee5935a56022d0672": [],
-  "ravens-55b41629ad1603d52fca": [],
   "ravens-e4b8029b404b46dc1c75": [
     "smash"
   ],
   "ravens-c72a0187f76f89346944": [
     "smash"
   ],
-  "ravens-374ea141606c3d029a95": [],
   "ravens-ea9930e93578ac4cfe0a": [
     "curl"
   ],
@@ -2653,89 +4927,55 @@ export const MADDEN_NAME_TAGS = {
     "vertical",
     "four verts"
   ],
-  "ravens-1b0d356634b112794f03": [],
   "ravens-91e54cd24ce4de5e6487": [
     "mesh"
   ],
   "ravens-6c04631e5001aaffb9ed": [
     "mesh"
   ],
-  "ravens-122b905bb88ac514252a": [],
-  "ravens-c9cd2199f6ce2063c7ad": [],
-  "ravens-96b625aeafac85e17e8e": [],
-  "ravens-16040b064020e9089b46": [],
-  "ravens-7d2635a5808a5fb582ae": [],
-  "ravens-a156f47ec3f41b08db12": [],
-  "ravens-f3c1bdeebbd34628916f": [],
   "ravens-67b2656f21a5640e7f8d": [
     "flood"
   ],
-  "ravens-9baee2fc1e25634fde66": [],
-  "ravens-18ecaa27d4ab54036987": [],
-  "ravens-b52d1b139976e6d80173": [],
-  "ravens-d32f45a1843361c83a21": [],
-  "ravens-69c8818e1a9a93acefb3": [],
-  "ravens-04fefb4847df09ed513a": [],
   "ravens-492be26a404de2908b36": [
     "vertical",
     "four verts"
   ],
-  "ravens-fe9a7838e6d44c9d75b8": [],
-  "ravens-51dba763e72dfdec1825": [],
-  "ravens-191b2f00ed09cb07af3b": [],
-  "ravens-ce40bf4366b98ff84ca0": [],
-  "ravens-dce160819cf177f952dd": [],
-  "ravens-4c7b9f49154eecb2483f": [],
-  "ravens-68f6dc5356b56de035cf": [],
-  "ravens-fb749f795d6dd35f6f7c": [],
-  "ravens-0184dead7cc85452dfb3": [],
   "ravens-548233fef4ea573782c3": [
     "vertical"
   ],
-  "ravens-f56969e6e135e2b24a51": [],
   "ravens-f70e97dcccd732e271df": [
     "flood"
   ],
-  "ravens-f63d46625d2125b7c7ff": [],
   "ravens-33488314ef4fcf5ff7fa": [
     "flood"
   ],
-  "ravens-9a103358c6e8a537f3f5": [],
   "ravens-ac52279279f67c696a29": [
     "flood"
   ],
-  "ravens-6d340af05d478cf72b78": [],
-  "ravens-f52b2e2f1cc8a1dc67b9": [],
-  "ravens-2f2e327d6e209600c188": [],
-  "ravens-001e6733c4292da759d6": [],
   "ravens-c0edd30acebab8210c27": [
     "vertical"
   ],
   "ravens-e102091733ef216e5fc1": [
     "curl"
   ],
-  "ravens-e5de0730015b3942d5f4": [],
-  "ravens-1ded835a4fa23ebf5524": [],
-  "ravens-e8b25d37472dc34d4cfa": [],
-  "ravens-84fb1860eac95a07fe3a": [],
-  "ravens-fa4dc03c4a61f5dad5bd": [],
-  "ravens-29e019a87ac6699ce318": [],
-  "ravens-94eee13fc260da93707c": [],
   "ravens-525f084bff5c03ffb06b": [
     "flood"
   ],
-  "ravens-d56616ba682fe46a1803": [],
-  "ravens-cd6b0318ec441dd3e624": [],
-  "ravens-30f2964842b132f6146c": [],
-  "ravens-5d3d9b1f54b09df5c74e": [],
+  "ravens-4d11445493a60785d47b": [
+    "mesh"
+  ],
   "ravens-5acc73fb15adab389a24": [
     "smash"
+  ],
+  "ravens-4f0a890c35dc9e08eb0a": [
+    "vertical"
   ],
   "ravens-2c8b6ace500b4d1a87a8": [
     "vertical"
   ],
-  "ravens-d21485f223286df92574": [],
-  "ravens-65afa7c49574e9e524a6": [],
+  "ravens-9e69093681e3e01d412b": [
+    "mesh"
+  ],
   "ravens-e112c4ed3c856723b857": [
     "flood"
   ],
@@ -2745,80 +4985,389 @@ export const MADDEN_NAME_TAGS = {
   "ravens-f2166f60357f1ed691f2": [
     "flood"
   ],
-  "ravens-781bbac194ed147f0696": [],
-  "ravens-3e40d279a11e7ef5628d": [],
-  "ravens-6ef9a5e51d6e1384f08f": [],
+  "ravens-3b86c8d00ec52aa9dc21": [
+    "mesh"
+  ],
   "ravens-3146585d0447492ffa87": [
     "smash"
   ],
-  "ravens-f0d343f0ef8d2cba2a21": [],
-  "ravens-0a8c437be53d7fdd92df": [],
   "ravens-aabce98ef8b8a495fa1b": [
     "vertical",
     "four verts"
   ],
-  "ravens-2f0780ceab1629be294e": [],
-  "ravens-e7dac016716007ed60bd": [],
   "ravens-b3f55155027f0bfb89ce": [
     "smash"
   ],
-  "ravens-c920ddf25f5775817b73": [],
-  "ravens-304c31bcc002121769fa": [],
-  "ravens-00670b12eb93875cf152": [],
-  "ravens-b58657162d219ebad949": [],
-  "ravens-0c1113ff4ce658cc48bc": [],
-  "ravens-70399f1cf5d4231a3d24": [],
-  "ravens-1ddc0dfb57fe6d8358b3": [],
-  "ravens-2cea46b57ae8eda420e0": [],
-  "ravens-7df9d61977d2027d69ca": [],
-  "ravens-e77ecfe18ab23c05bbc6": [],
-  "ravens-b8f62d5d19d01126dad1": [],
+  "ravens-7956ba414fc4dce6c296": [
+    "mesh"
+  ],
   "ravens-3c51daa4785de3fdd91f": [
     "curl"
   ],
-  "ravens-3d4359828d78fc01f0d3": [],
-  "ravens-6d34505dcf75eba52bee": [],
-  "ravens-17b425f0e90c8e742214": [],
-  "ravens-3f10fa0d8eae78615dfe": [],
-  "ravens-6b4c7c90d7cfbd54e9ac": [],
-  "ravens-4915dc91c7bfe2887afe": [],
-  "ravens-ddedef4576a502960255": [],
-  "ravens-b6cfc2a1e130f10b84e3": [],
-  "ravens-0125c9993acbc0952abe": [],
-  "ravens-ea3dba2846df4af15b80": [],
-  "ravens-038f3e33d95bffdc7117": [],
-  "ravens-5eb1c81e1d72b1152fdc": [],
-  "ravens-c16355db578dfdffac98": [],
-  "ravens-518ace0c313870800942": [],
-  "ravens-7231afcbbe5242504c2c": [],
-  "ravens-0744f02296246bb27bf3": [],
-  "ravens-6a94f4697ed589326649": [],
-  "ravens-8c55abc630bc693d561b": [],
-  "ravens-c225c7cb8ff3fce3d939": [],
-  "ravens-2d1daea16f2abdf55cbc": [],
-  "ravens-9343f003814631af24ec": [],
-  "ravens-d0d2239f81294b029d65": [],
-  "ravens-05feaa931491235b83ff": [],
-  "ravens-beff1e02606c463d21b5": [],
-  "ravens-aa2c9ab7d264493ae0a4": [],
-  "ravens-cb9489c29a3f2b517a32": [],
-  "ravens-0f2ca3bec32e79a0a03b": [],
-  "ravens-d74a5d42e4f274c36011": [],
-  "ravens-5858d87021635c8143d4": [],
-  "ravens-d090736f611dd391171f": [],
+  "ravens-6f89ed21627b24bc165f": [
+    "flood"
+  ],
+  "ravens-a4db94bcb9f306291dd4": [
+    "mesh"
+  ],
+  "ravens-6b141a160d5e0cd3019c": [
+    "flood"
+  ],
   "ravens-6bd9dcee411d92151690": [
     "smash"
   ],
-  "ravens-e300b494b947b7d685b0": [],
   "ravens-92457297055e2428c023": [
     "flood"
   ],
-  "ravens-d09fcd26a8fc97a7e23a": [],
   "ravens-864ac980a7569b405d32": [
     "curl"
   ],
-  "ravens-797b7b598de9d931fc8a": [],
-  "ravens-dd0472676e4099e4391b": [],
-  "ravens-5848f7df75699593294b": [],
-  "ravens-cdec301e456d3328ddeb": []
+  "ravens-df552c97f9c5938d49fe": [
+    "flood"
+  ],
+  "49ers-4e2892a34146d363655a": [
+    "smash"
+  ],
+  "49ers-1dd5af7b1a9db7d5696f": [
+    "smash"
+  ],
+  "49ers-34fc9fb9e41278ee26fe": [
+    "flood"
+  ],
+  "49ers-e2f391a12cd89b9bdc87": [
+    "vertical"
+  ],
+  "49ers-d2c9667f0bcfa72276e4": [
+    "curl"
+  ],
+  "49ers-c7ac62461f7e1dfef940": [
+    "flood"
+  ],
+  "49ers-0e9f9ca47d22a38d35e8": [
+    "flood"
+  ],
+  "49ers-0254a5d617331e121820": [
+    "flood"
+  ],
+  "49ers-12bfcf199f3176eeedf3": [
+    "mesh"
+  ],
+  "49ers-768c9eaa6aa8f21f295e": [
+    "flood"
+  ],
+  "49ers-512f7ceb41e9b4edf43c": [
+    "smash"
+  ],
+  "49ers-fe4cf162e48fc1eddb4c": [
+    "flood"
+  ],
+  "49ers-783cd2a2bd1dc962f8b3": [
+    "flood"
+  ],
+  "bengals-d31a0e23dcf128eaf9ad": [
+    "curl"
+  ],
+  "bengals-4968845d7db674931087": [
+    "curl"
+  ],
+  "bengals-3fff0ae02e111f4d8e99": [
+    "flood"
+  ],
+  "bengals-3f881fe199a03b56458e": [
+    "smash"
+  ],
+  "bengals-b3f6d75ecb08a64f6c58": [
+    "curl"
+  ],
+  "bengals-ff85fba7d0465d9299b6": [
+    "mesh"
+  ],
+  "bengals-98dbdd4d62b5613f6f5e": [
+    "flood"
+  ],
+  "bengals-2cd6334051804089e870": [
+    "curl"
+  ],
+  "bengals-ed76fc55662a7d95efcf": [
+    "vertical",
+    "four verts"
+  ],
+  "bengals-f37ab312cad551d2964f": [
+    "mesh"
+  ],
+  "bengals-9061d2ef34db6472aba6": [
+    "mesh"
+  ],
+  "bengals-7f74480cafac811b141e": [
+    "flood"
+  ],
+  "bengals-a988b083652657baf90c": [
+    "flood"
+  ],
+  "bengals-752c1008ff59f29ab7b4": [
+    "curl"
+  ],
+  "bills-f5e3e638780c0fab6593": [
+    "mesh"
+  ],
+  "bills-df82a2b8fb67df9cfa70": [
+    "curl"
+  ],
+  "bills-73a0cac1860919556656": [
+    "curl"
+  ],
+  "bills-ad04aefe1796c13f3eda": [
+    "vertical",
+    "four verts"
+  ],
+  "bills-f288e2088d3161bbe73f": [
+    "curl"
+  ],
+  "bills-7e61ed842f4217adb55f": [
+    "vertical"
+  ],
+  "bills-f387359eabb9acf5c036": [
+    "vertical",
+    "four verts"
+  ],
+  "bills-c4c525c44e474c592060": [
+    "smash"
+  ],
+  "bills-f32ac91e8b9ed2fdabd6": [
+    "smash"
+  ],
+  "bills-f032987d3e1dc1ff40af": [
+    "curl"
+  ],
+  "bills-f9bd5cad62ec8e72dbe2": [
+    "flood"
+  ],
+  "chiefs-d1027d7b72f12aa46640": [
+    "flood"
+  ],
+  "chiefs-73200c45eeb60ce5522f": [
+    "smash"
+  ],
+  "chiefs-02d55f2a1b0b13174762": [
+    "vertical"
+  ],
+  "chiefs-88b026752b4163fe2948": [
+    "curl"
+  ],
+  "chiefs-80349d142a035ed2a321": [
+    "flood"
+  ],
+  "chiefs-5e34ae8ba97b979b3a07": [
+    "smash"
+  ],
+  "chiefs-135b413c80eabbb3bb6d": [
+    "flood"
+  ],
+  "chiefs-2a674a5a4643ad193ea6": [
+    "curl"
+  ],
+  "chiefs-f060148607ee49b4b349": [
+    "vertical",
+    "four verts"
+  ],
+  "chiefs-e0817669d191f7c0b337": [
+    "flood"
+  ],
+  "chiefs-7aca8bb71064cecbd475": [
+    "flood"
+  ],
+  "chiefs-3da960b367e3da8cfef1": [
+    "mesh"
+  ],
+  "chiefs-3c319779ca1650da1573": [
+    "flood"
+  ],
+  "chiefs-c708c0f2793d5eb9fccb": [
+    "smash"
+  ],
+  "cowboys-e30fb03ed685218a14d1": [
+    "curl"
+  ],
+  "cowboys-afc23a3d1e8274bbcd7f": [
+    "flood"
+  ],
+  "cowboys-3fa3d59515f804e34187": [
+    "smash"
+  ],
+  "cowboys-c58ee093d96f787675ed": [
+    "curl"
+  ],
+  "cowboys-86bcf42821339cca3926": [
+    "mesh"
+  ],
+  "cowboys-26dac80504ec24866d66": [
+    "curl"
+  ],
+  "cowboys-dc607bd51dc38de14fb6": [
+    "vertical",
+    "four verts"
+  ],
+  "cowboys-831610cb07fce08496bd": [
+    "mesh"
+  ],
+  "cowboys-d913a26803688f80b181": [
+    "flood"
+  ],
+  "cowboys-acd942dcffcf1a4427ee": [
+    "vertical",
+    "four verts"
+  ],
+  "cowboys-8692fce06b9200ff68bc": [
+    "vertical"
+  ],
+  "cowboys-dfeddf2367a54f715345": [
+    "curl"
+  ],
+  "cowboys-6e446d14a1c0080976f8": [
+    "curl"
+  ],
+  "cowboys-bcceef12e18663a80157": [
+    "flood"
+  ],
+  "dolphins-ca69d5d690b3530a4203": [
+    "curl"
+  ],
+  "dolphins-6221ac23d47b107ae408": [
+    "mesh"
+  ],
+  "dolphins-80933ff72934bfd515f6": [
+    "curl"
+  ],
+  "dolphins-f92f8071399a5530bc49": [
+    "curl"
+  ],
+  "dolphins-7b19a4080f6e1baec5f2": [
+    "flood"
+  ],
+  "dolphins-d9bf4dc4797380a068b4": [
+    "smash"
+  ],
+  "dolphins-a6708f50ec373e263115": [
+    "flood"
+  ],
+  "dolphins-3b14ce3aae06c539f571": [
+    "curl"
+  ],
+  "dolphins-5090c391bfb58c45604c": [
+    "vertical"
+  ],
+  "dolphins-7971bbe8644126bf7859": [
+    "vertical",
+    "four verts"
+  ],
+  "dolphins-cc6ef43faf59d3cd8e7a": [
+    "smash"
+  ],
+  "dolphins-4c228bf4ab01e2fa2261": [
+    "flood"
+  ],
+  "dolphins-0b14c7a52627d533252c": [
+    "flood"
+  ],
+  "dolphins-393f11448eff7561578d": [
+    "flood"
+  ],
+  "lions-0b954599b7b83f9cb7e3": [
+    "smash"
+  ],
+  "lions-2b7a9c79172e36cbf212": [
+    "curl"
+  ],
+  "lions-6dc6e2bdfeb67bb1add3": [
+    "flood"
+  ],
+  "lions-d07b5306fe3551a94caa": [
+    "smash"
+  ],
+  "lions-b64160eb69d86db3193d": [
+    "mesh"
+  ],
+  "lions-fb3a65975f7ff9929dd5": [
+    "curl"
+  ],
+  "lions-a09f76939b49af4300b1": [
+    "flood"
+  ],
+  "lions-76780af3c3e7d36c7217": [
+    "mesh"
+  ],
+  "lions-8111dd3015a5582273ef": [
+    "flood"
+  ],
+  "lions-011e47a4a659f188dd83": [
+    "smash"
+  ],
+  "lions-3c43913edb518c4b05d1": [
+    "curl"
+  ],
+  "packers-29cc4da28d3745a8407b": [
+    "curl"
+  ],
+  "packers-87a860a390068bcad0e5": [
+    "mesh"
+  ],
+  "packers-d1e2e0ef5d4c06a248c6": [
+    "curl"
+  ],
+  "packers-245e84fad3f5f22e70e7": [
+    "flood"
+  ],
+  "packers-8e16c91f4f8368bc6e0b": [
+    "smash"
+  ],
+  "packers-01ad7affba4e30889880": [
+    "curl"
+  ],
+  "packers-cb2f46a243aad08a7a91": [
+    "vertical",
+    "four verts"
+  ],
+  "packers-a7c9f72633c2ab934ec9": [
+    "flood"
+  ],
+  "packers-a47c1bd6296e70d36c75": [
+    "flood"
+  ],
+  "packers-edd33644efb6f96e2980": [
+    "flood"
+  ],
+  "packers-1a9083aa7612971ebb97": [
+    "smash"
+  ],
+  "packers-2edef49b3b8314753afd": [
+    "vertical",
+    "four verts"
+  ],
+  "packers-9b906a00f1a4b4a4562f": [
+    "flood"
+  ],
+  "packers-965cbd98bf2bbc371b94": [
+    "mesh"
+  ],
+  "packers-e5e769f6952708486aa6": [
+    "flood"
+  ],
+  "packers-d7c4e7438215f029529d": [
+    "smash"
+  ],
+  "packers-1dd0945e042c37a90ce5": [
+    "curl"
+  ],
+  "packers-d01db79da237862b5ecf": [
+    "flood"
+  ],
+  "packers-690058cf515f619241d0": [
+    "flood"
+  ],
+  "packers-ae1b1033d587b63ca4d1": [
+    "flood"
+  ],
+  "packers-1612d52510c483ad98ee": [
+    "flood"
+  ]
 };

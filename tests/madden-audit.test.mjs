@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { materializeHuddleArt } from '../scripts/huddle-art.mjs';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
+import { TEAM_TRACE_ALIASES } from '../web/data/madden-team-trace-aliases.js';
 import { SEED_TRACES } from '../web/data/madden-editable-seed.js';
 import { BATCH_TRACES } from '../web/data/madden-editable-batch.js';
 import { EXPANDED_TRACES } from '../web/data/madden-editable-80.js';
@@ -22,14 +23,15 @@ const continuedReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-r
 const finalReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-final.json',import.meta.url)));
 const octoberReview=JSON.parse(readFileSync(new URL('../scripts/madden-trace-review-oct28.json',import.meta.url)));
 
-test('the audit covers every catalog entry exactly once, and unsuccessful images stay original',()=>{
+test('the historical audit covers its catalog entries exactly once, and unsuccessful images stay original',()=>{
   assert.deepEqual(audit.summary,TRACE_SUMMARY);
-  assert.equal(createHash('sha256').update(catalogBytes).digest('hex'),TRACE_SUMMARY.catalogSha256);
-  assert.equal(audit.entries.length,catalog.plays.length);
-  assert.equal(new Set(audit.entries.map(r=>r.id)).size,catalog.plays.length);
+  const historical = {...catalog, teams:catalog.teams.filter(team=>['eagles','ravens'].includes(team.id)), plays:catalog.plays.filter(play=>['eagles','ravens'].includes(play.team))};
+  delete historical.expansionFetchedAt;
+  assert.equal(createHash('sha256').update(JSON.stringify(historical,null,2)+'\n').digest('hex'),TRACE_SUMMARY.catalogSha256);
+  assert.equal(new Set(audit.entries.map(r=>r.id)).size,audit.entries.length);
   assert.equal(TRACE_SUMMARY.attemptedRemaining,TRACE_SUMMARY.newlyEditable+TRACE_SUMMARY.retainedOriginal);
-  for(const entry of catalog.plays){
-    const r=audit.entries.find(r=>r.id===entry.id);assert.ok(r);assert.equal(r.image,entry.image);
+  for(const r of audit.entries){
+    const entry=catalog.plays.find(entry=>entry.id===r.id);assert.ok(entry);assert.equal(r.image,entry.image);
     const editable=r.status!=='retained-original';assert.equal(hasEditableTrace(entry.id),editable);
     const play=makeMaddenPlay(entry);
     if(editable)assert.equal(play.diagramSource.catalogId,entry.id);
@@ -105,4 +107,26 @@ test('a rejected candidate stays original unless subsequently corrected and sour
   assert.equal(hasEditableTrace(approvedId),true);
   assert.ok(continuedReview.approved[approvedId]);
   assert.equal(audit.entries.find(r=>r.id===approvedId).status,'converted');
+});
+
+
+test('each expanded team has 40 editable plays using exactly the reviewed source images', () => {
+  assert.equal(catalog.teams.length, 10);
+  const byId = new Map(catalog.plays.map(play => [play.id,play]));
+  for (const team of catalog.teams) {
+    const plays = catalog.plays.filter(play => play.team === team.id);
+    assert.ok(plays.length >= 40, team.id);
+    assert.ok(plays.filter(play => hasEditableTrace(play.id)).length >= 40, team.id);
+  }
+  for (const [id, originalId] of Object.entries(TEAM_TRACE_ALIASES)) {
+    const entry = byId.get(id), original = EDITABLE_TRACES[originalId];
+    assert.ok(entry && original, id);
+    for (const key of ['name','group','formation','game','image','imageUrl']) assert.equal(entry[key], original[key], `${id}: ${key}`);
+    const imported = makeMaddenPlay(entry);
+    assert.equal(imported.diagramSource.catalogId, entry.id);
+    assert.equal(imported.diagramSource.team, entry.team);
+    assert.equal(imported.diagramSource.sourceUrl, entry.sourceUrl);
+    assert.equal(imported.diagramSource.image, entry.image);
+    assert.equal(imported.players.length, 11);
+  }
 });

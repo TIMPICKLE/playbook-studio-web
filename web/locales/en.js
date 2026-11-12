@@ -18,7 +18,7 @@ export default {
   "editor.playbook": "Playbook",
   "editor.playbook_type": "Playbook type",
   "editor.madden_nfl_play_library": "Madden NFL play library",
-  "editor.eagles_ravens_drag_to_add": "Eagles · Ravens · Drag to add",
+  "editor.eagles_ravens_drag_to_add": "NFL teams · Drag to add",
   "editor.drop_here_to_add_to_offense": "＋ Drop here to add to offense",
   "editor.search_plays": "Search plays…",
   "editor.search_plays_2": "Search plays",
