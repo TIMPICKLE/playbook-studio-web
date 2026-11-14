@@ -55,3 +55,31 @@
   #ai-results .ai-scenario-grid{grid-template-columns:1fr}
 }
 @media(max-width:390px){#ai-results .ai-scenario-tabs{grid-template-columns:1fr}}
+
+/* A portrait iPad needs a usable field before the long provider form. */
+@media screen and (max-width:900px) {
+  .ai-layout { grid-template-columns:minmax(0,1fr); grid-template-areas:'board' 'setup' 'results'; }
+  .ai-board-card { position:static; }
+  .ai-two-fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .ai-board .pitch-svg { max-height:58dvh; }
+}
+@media screen and (max-width:600px) {
+  .ai-page { padding-left:max(12px,env(safe-area-inset-left,0px)); padding-right:max(12px,env(safe-area-inset-right,0px)); padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)); }
+  .ai-page-header { flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .ai-page-header>div { min-width:0; }
+  .ai-page .ai-setup { padding:16px; }
+  .ai-board-heading,.ai-result-title { flex-wrap:wrap; gap:8px; }
+  .ai-board-legend { flex-wrap:wrap; gap:9px; }
+  .ai-page .ai-board { min-height:0; }
+  .ai-page .ai-board .pitch-svg { max-height:none; }
+  .ai-page .ai-scenario { padding:15px; }
+  .ai-result-summary,.ai-result-badge,.ai-board-caption,.ai-section-heading { overflow-wrap:anywhere; }
+}
+@media screen and (any-pointer:coarse), screen and (max-width:900px) {
+  .ai-page .ai-field :is(input,select,textarea) { font-size:16px; }
+  .ai-page .ai-field :is(input,select),.ai-link-button,.ai-book button,.ai-cancel,.ai-page .ai-scenario-tabs button { min-height:44px; }
+  .ai-check { min-height:44px; align-items:center; }
+  .ai-check input { width:20px; height:20px; margin:0; }
+  .ai-evidence a { display:inline-flex; align-items:center; min-height:44px; max-width:100%; overflow-wrap:anywhere; }
+}
+@media screen and (max-width:390px) { .ai-two-fields { grid-template-columns:minmax(0,1fr); } }

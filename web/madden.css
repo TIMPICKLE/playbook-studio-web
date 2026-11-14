@@ -19,3 +19,35 @@
 .madden-result-bar{position:relative;z-index:2;display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 20px;background:#2b2c2e;border-top:1px solid #9a9fa766;flex-shrink:0}.madden-result-message{flex:1;min-width:120px;font-size:12px}.madden-result-bar button{min-height:44px;padding:8px 14px;border:1px solid #9a9fa766;border-radius:8px;color:var(--accent)}.madden-result-bar[data-type=error]{border-color:#ff9185}.madden-detail-slot:has(.madden-detail)+.madden-result-bar{position:absolute;bottom:0;left:0;right:0}.madden-detail{padding-bottom:100px}.madden-card.just-added{animation:card-added .6s ease-out}@keyframes card-added{50%{box-shadow:0 0 0 2px #9a9fa7}}@media(prefers-reduced-motion:reduce){.madden-card.just-added{animation:none}}
 
 .madden-editable-filter{display:flex;gap:8px;align-items:center;padding:6px 24px;color:var(--accent);font-size:12px}.madden-editable-filter input{width:18px;height:18px}.source-comparison{width:100%;background:#080808;border-radius:10px;margin-bottom:16px}.play-actions{flex-wrap:wrap}
+
+.madden-detail-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; flex:none; }
+.madden-detail-bar .madden-close { flex:none; }
+@media screen and (max-width:1180px), screen and (any-pointer:coarse) {
+  #madden-root:not([hidden]) { position:fixed; inset:0; z-index:75; background:#080a0e77; }
+  #madden-root .madden-panel {
+    inset:auto; top:calc(var(--visible-top,0px) + max(8px,env(safe-area-inset-top,0px)));
+    left:max(8px,env(safe-area-inset-left,0px)); right:max(8px,env(safe-area-inset-right,0px));
+    width:auto; max-width:1000px; margin:0 auto;
+    height:calc(var(--visible-height,100dvh) - max(8px,env(safe-area-inset-top,0px)) - max(8px,env(safe-area-inset-bottom,0px)));
+    max-height:none;
+  }
+  .madden-panel :is(.madden-header,.madden-team-tabs,.madden-filterbar,.madden-result-heading,.madden-footer,.madden-editable-filter,.madden-result-bar) { flex-shrink:0; }
+  .madden-close,.madden-panel .madden-back { min-width:44px; min-height:44px; }
+  .madden-panel .madden-filterbar :is(input,select) { min-height:44px; font-size:16px; }
+  .madden-panel .madden-card-foot button,.madden-panel .madden-pagination button { min-height:44px; }
+  .madden-editable-filter { min-height:44px; }
+  .madden-art-hint { opacity:1; }
+  .madden-card:hover { transform:none; }
+  .madden-short .madden-panel { overflow:auto; overscroll-behavior:contain; }
+  .madden-short .madden-panel:has(.madden-detail) { overflow:hidden; }
+  .madden-detail { overscroll-behavior:contain; }
+  .madden-short .madden-results { flex:none; overflow:visible; }
+  .madden-short .madden-header small,.madden-short .madden-result-heading>span { display:none; }
+  .madden-short .madden-header { padding:8px 12px; }
+  .madden-short .madden-header h2 { margin:0; font-size:20px; }
+  .madden-short .madden-team-tabs { padding-bottom:8px; }
+  .madden-short .madden-team { padding:6px 10px; }
+  .madden-short .madden-team small { display:none; }
+  .madden-short .madden-team-code { height:30px; width:30px; }
+  .madden-short .madden-result-heading { padding-top:6px; padding-bottom:6px; }
+}

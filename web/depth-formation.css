@@ -123,6 +123,11 @@
 .df-ranks dt { font-size: 12px; color: var(--text-2); }
 .df-ranks dd { margin: 2px 0 0; font-size: 14px; font-weight: 630; overflow-wrap: anywhere; }
 .df-no-backups { margin-top: 7px; }
+@media (max-width: 1180px), (any-pointer: coarse) {
+  .df-find select { min-height: 44px; font-size: 16px; }
+  .df-pitch .df-node { min-width: 44px; }
+  .df-detail-head button { min-height: 44px; min-width: 44px; }
+}
 @container (max-width: 625px) {
   .df-find label { max-width: 100%; }
   .df-find select { min-width: 0; max-width: 62cqi; font-size: 16px; }

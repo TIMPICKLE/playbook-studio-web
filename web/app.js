@@ -58,6 +58,7 @@ let saveState = localRecovery ? t("editorExtra.recovery_required_autosave_paused
 const history = new History();
 let shared = null, digitalBoard = null, analysisView = null, demoAnalysisData = null;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
+let cancelFieldGesture = () => {};
 const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
 const panels = createWorkspacePanels();
@@ -251,8 +252,10 @@ document.addEventListener('playbook:effects-changed', () => {
   if (assistantMotionReduced()) assistantPreview?.transition.finish();
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) assistantPreview?.transition.finish();
+  if (document.hidden) { assistantPreview?.transition.finish(); cancelFieldGesture(); }
 });
+window.addEventListener('blur', () => cancelFieldGesture());
+window.addEventListener('resize', () => cancelFieldGesture());
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
 function mountBoardAssistant() {
   const host = $('#field');
@@ -631,7 +634,9 @@ function bindField() {
   const field = $('#field');
   field.addEventListener('pointerdown', event => {
     if(event.target.closest('.field-context'))return;
-    if (event.button !== 0) return;
+    // One contact owns an edit until it finishes. A second finger belongs to
+    // browser navigation/zoom and must never replace the active edit baseline.
+    if (event.button !== 0 || drag || (event.pointerType === 'touch' && !event.isPrimary)) return;
     clearAssistantPreview();
     if (rehearsal || playing || time) { toast(t("feedback.return_to_design_mode_to_adjust_players"), { type: 'info' }); return; }
     const at = coordinates(event), hit = pick(event);
@@ -651,17 +656,20 @@ function bindField() {
       if (draft.points.length < 200 && (!draft.points.at(-1) || Math.hypot(at.x - draft.points.at(-1).x, at.y - draft.points.at(-1).y) > .3)) draft.points.push(at);
       previewPoint=null;renderField(); updateCanvasHint(); return;
     }
-    // Empty turf remains a scroll/pan surface on touch devices in selection mode.
-    if (event.pointerType === 'touch' && tool === 'select' && !hit) { selection=null;refreshSelection();return; }
-    event.preventDefault(); field.setPointerCapture?.(event.pointerId);
-    if (tool === 'zone') { drag = { type: 'new-zone', start: at, before: clone(state), zoneId: uid() }; return; }
     const point = event.target.closest('[data-point]');
-    if (point) { drag = { type: 'point', routeId: point.dataset.routeId, index: Number(point.dataset.point), start: at, before: clone(state) }; return; }
+    // Route handles are siblings of their route, so pick() correctly returns
+    // no object for them. Resolve the handle before classifying empty turf.
+    if (event.pointerType === 'touch' && tool === 'select' && !hit && !point) { selection=null;refreshSelection();return; }
+    event.preventDefault(); field.setPointerCapture?.(event.pointerId);
+    const gesture = { start: at, before: clone(state), pointerId: event.pointerId, selectionBefore: selection };
+    if (tool === 'zone') { drag = { ...gesture, type: 'new-zone', zoneId: uid() }; return; }
+    if (point) { drag = { ...gesture, type: 'point', routeId: point.dataset.routeId, index: Number(point.dataset.point) }; return; }
     selection = hit;
-    if (hit) { drag = { ...hit, start: at, before: clone(state), original: clone(selectedObject()), moved: false }; }
+    if (hit) { drag = { ...gesture, ...hit, original: clone(selectedObject()), moved: false }; }
     refreshSelection();
   });
   field.addEventListener('pointermove', event => {
+    if (drag && event.pointerId !== drag.pointerId || event.pointerType === 'touch' && !event.isPrimary) return;
     if(draft && !drag) {previewPoint=coordinates(event); if(!gestureFrame)gestureFrame=requestAnimationFrame(()=>{gestureFrame=null;previewDraft(field.querySelector('svg'),draft,previewPoint);});return;}
     if (!drag || !canEdit()) return;
     pendingPoint=coordinates(event);
@@ -689,15 +697,27 @@ function bindField() {
     const readout=field.querySelector('.drag-readout');readout.hidden=false;readout.textContent=`${drag.original?.label||t("editorExtra.adjust_position")} · X ${at.x.toFixed(1)} / Y ${at.y.toFixed(1)}`;
   }
   const endDrag = event => {
-    if (!drag) return;
+    if (!drag || event.pointerId !== drag.pointerId) return;
     // Flush the last pointer sample even if release happens before the next frame.
+    pendingPoint = coordinates(event);
     flushGesture(); const before=drag.before,moved=drag.moved;
-    if(field.hasPointerCapture?.(event.pointerId))field.releasePointerCapture(event.pointerId);
     drag=null;field.classList.remove('is-dragging');field.querySelector('.drag-readout').hidden=true;
+    // Releasing capture can synchronously dispatch lostpointercapture.
+    if(field.hasPointerCapture?.(event.pointerId))field.releasePointerCapture(event.pointerId);
     if(moved){history.record(before);save();render();}
   };
+  const cancelDrag = event => {
+    if (!drag || event && event.pointerId !== drag.pointerId) return;
+    if (gestureFrame) cancelAnimationFrame(gestureFrame);
+    gestureFrame=null;pendingPoint=null;
+    const previous=drag;drag=null;state=previous.before;selection=previous.selectionBefore;
+    if(field.hasPointerCapture?.(previous.pointerId))field.releasePointerCapture(previous.pointerId);
+    render();
+  };
+  cancelFieldGesture = cancelDrag;
   field.addEventListener('pointerup',endDrag);
-  field.addEventListener('pointercancel',()=>{if(gestureFrame)cancelAnimationFrame(gestureFrame);gestureFrame=null;pendingPoint=null;if(drag){state=drag.before;drag=null;render();}});
+  field.addEventListener('pointercancel',cancelDrag);
+  field.addEventListener('lostpointercapture',cancelDrag);
   field.addEventListener('pointerleave',()=>{if(!drag)previewDraft(field.querySelector('svg'),draft,null);});
   field.addEventListener('dblclick', event => { if (draft) { event.preventDefault(); finishRoute(); } });
   field.addEventListener('keydown', event => {

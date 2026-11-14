@@ -30,6 +30,7 @@
 .depth-mobile-label { display: none; }
 .depth-athlete, .depth-backups li { display: inline-flex; align-items: baseline; gap: 6px; max-width: 100%; }
 .depth-athlete { font-size: 14px; font-weight: 550; }
+.depth-athlete, .depth-athlete > span, .depth-backups li { min-width: 0; }
 .depth-jersey, .depth-rank { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .depth-jersey { font-size: 12px; color: var(--text-2); font-weight: 600; }
 .depth-starter .depth-athlete {
@@ -149,4 +150,9 @@
   .depth-view-picker { order: 2; flex-basis: 100%; }
   .depth-view-picker button { flex: 1 1 0; padding-inline: 5px; }
   .depth-lineup { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 10px 10px; }
+}
+@media (max-width: 1180px), (any-pointer: coarse) {
+  .depth-view-picker button, .depth-rank-tools button { min-height: 44px; }
+  .depth-rank-tools button { min-width: 44px; }
+  .depth-lineup li > button { min-height: 58px; }
 }

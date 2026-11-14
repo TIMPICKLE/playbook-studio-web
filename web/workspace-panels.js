@@ -1,7 +1,12 @@
 export const COMPACT_WIDTH = 1180;
+export const TOUCH_COMPACT_WIDTH = 1400;
+export function isCompactWorkspace(win = window) {
+  return win.innerWidth <= COMPACT_WIDTH
+    || (win.innerWidth <= TOUCH_COMPACT_WIDTH && !!win.matchMedia?.('(any-pointer: coarse)').matches);
+}
 export function createWorkspacePanels() {
   let active = null, returnFocus = null;
-  let compact = window.innerWidth <= COMPACT_WIDTH;
+  let compact = isCompactWorkspace();
   const panel = name => document.querySelector(name === 'plays' ? '.sidebar' : '.inspector-panel');
   function mount() {
     const opened = compact && !!active;
@@ -16,7 +21,7 @@ export function createWorkspacePanels() {
       else { node.removeAttribute('role'); node.removeAttribute('aria-modal'); }
     }
     const main = document.querySelector('#main-content'); if (main) main.inert = compact && active === 'plays';
-    for (const node of document.querySelectorAll('#cloud-root,.topbar,.play-header,.canvas-section,.board-width-resizer,.app-footer,.compact-nav')) node.inert = opened;
+    for (const node of document.querySelectorAll('#cloud-root,.topbar,.play-header,.canvas-section,.board-width-resizer,.app-footer,.compact-nav,.board-ai.ba-floating')) node.inert = opened;
     for (const node of document.querySelectorAll('[data-action="sidebar"]')) node.setAttribute('aria-expanded', String(compact && active === 'plays'));
     for (const node of document.querySelectorAll('[data-action="inspector-panel"]')) node.setAttribute('aria-expanded', String(compact && active === 'properties'));
     document.querySelector('.compact-nav [data-action="panel-field"]')?.setAttribute('aria-pressed', String(!active));
@@ -35,11 +40,13 @@ export function createWorkspacePanels() {
     returnFocus = document.activeElement;
     active = name; mount();
   }
-  window.addEventListener('resize', () => {
-    const next = window.innerWidth <= COMPACT_WIDTH;
+  function updateLayout() {
+    const next = isCompactWorkspace();
     if (next !== compact) { compact = next; close({ focus: false }); }
     else mount();
-  });
+  }
+  window.addEventListener('resize', updateLayout);
+  window.matchMedia?.('(any-pointer: coarse)').addEventListener?.('change', updateLayout);
   document.addEventListener('keydown', event => {
     if (!compact || !active || document.querySelector('.modal,.madden-panel')) return;
     if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); close(); return; }

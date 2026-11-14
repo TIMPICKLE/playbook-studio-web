@@ -346,7 +346,7 @@ html[data-visual-mode] .modal h2 { font-size: var(--t-xl); font-weight: 650; let
 /* --------------------------------------------------------------------------
    Desktop stage layout: floating islands around the field.
    -------------------------------------------------------------------------- */
-@media screen and (min-width: 1181px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
   html[data-visual-mode] .workspace:not(.board-expanded) { grid-template-columns: 284px minmax(0, 1fr); max-width: none; }
 
   html[data-visual-mode] .workspace .sidebar {
@@ -382,10 +382,10 @@ html[data-visual-mode] .modal h2 { font-size: var(--t-xl); font-weight: 650; let
   html[data-visual-mode] .app-footer { padding-left: 32px; padding-right: 28px; }
 }
 /* Narrower desktops: the dock keeps its icons and drops its words. */
-@media screen and (min-width: 1181px) and (max-width: 1440px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) and (max-width: 1440px) {
   html[data-visual-mode] .draw-tools .tool-button { padding: 0 10px; }
 }
-@media screen and (min-width: 1181px) and (max-width: 1320px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) and (max-width: 1320px) {
   html[data-visual-mode] .draw-tools .tool-name { display: none; }
   html[data-visual-mode] .draw-tools .tool-button { padding: 0 12px; }
 }
@@ -398,7 +398,7 @@ html[data-visual-mode=traditional] .compact-nav button { background: transparent
 html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true]) { color: var(--text-1); background: var(--night-3); }
 html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true]) svg { color: var(--accent-main); }
 
-@media screen and (max-width: 1180px) {
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   html[data-visual-mode] .draw-tools .tool-button.active { background: var(--night-4); }
   html[data-visual-mode] .stage-dock { flex-direction: column; align-items: stretch; margin-top: 12px; }
   html[data-visual-mode] .stage-dock :is(.editor-mode, .draw-tools) { border-radius: 18px; }
@@ -470,7 +470,7 @@ html[data-visual-mode=traditional] :is(.madden-card-foot button, .madden-paginat
 html[data-visual-mode=traditional] .madden-drop-target { border-color: var(--accent-main); background: var(--accent-soft); color: var(--text-1); }
 
 /* Compact refinements */
-@media screen and (max-width: 1180px) {
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   html[data-visual-mode] .stage-dock .editor-mode { display: grid; grid-template-columns: 1fr 1fr; }
   html[data-visual-mode] .canvas-actions { margin-left: auto; }
 }
@@ -482,7 +482,7 @@ html[data-visual-mode] .stage-dock .rehearsal-toolbar::after { display: none; }
 
 /* Desktop: height is set by the handle under the field (keyboard-accessible
    separator), so the heading keeps only zoom, expand and reset. */
-@media screen and (min-width: 1181px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
   html[data-visual-mode] .board-dimensions { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
   html[data-visual-mode] .board-dimensions > label[for=board-height],
   html[data-visual-mode] #board-height,
@@ -517,10 +517,10 @@ html[data-visual-mode] .stage-dock #timeline { flex: 1 1 auto; min-width: 140px;
 html[data-visual-mode] .stage-dock #time-label { font-size: 16px; white-space: nowrap; }
 html[data-visual-mode] .stage-dock .speed-label select { min-height: 32px; height: 32px; padding: 0 26px 0 10px; border-radius: var(--r-pill); background-color: var(--night-3); border: 0; font-size: var(--t-xs); }
 
-@media screen and (min-width: 1181px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
   html[data-visual-mode] .stage-dock .playback { width: min(640px, calc(100% - 260px)); }
 }
-@media screen and (max-width: 1180px) {
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   html[data-visual-mode] .stage-dock .playback { flex-wrap: wrap; border-radius: 18px; padding: 10px 12px 8px; row-gap: 6px; }
   html[data-visual-mode] .stage-dock .playback-top { order: 0; width: 100%; justify-content: space-between; }
   html[data-visual-mode] .stage-dock .transport { width: 100%; }
@@ -541,7 +541,7 @@ html[data-visual-mode] details.inspector-section[open] > summary::after { transf
 html[data-visual-mode] details.inspector-section > summary:hover::after { border-color: var(--text-1); }
 
 /* One home per feature: on desktop the Madden library lives in the sidebar. */
-@media screen and (min-width: 1181px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
   html[data-visual-mode] .workspace:not(.board-expanded) .top-actions [data-action=madden-library] { display: none; }
 }
 
@@ -678,7 +678,7 @@ html[data-visual-mode] #toast .toast-close {
 }
 html[data-visual-mode] #toast .toast-close:hover { color: var(--text-1); background: var(--hairline); }
 html[data-visual-mode] #toast .toast-close svg { width: 14px; height: 14px; }
-@media screen and (max-width: 1180px) {
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   html[data-visual-mode] #toast { top: calc(10px + env(safe-area-inset-top, 0px)); bottom: auto; flex-wrap: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -744,3 +744,34 @@ html[data-visual-mode] #toast { width: max-content; }
 .entry-language select { color: var(--text-1); background: var(--night-2); border: 1px solid var(--hairline); border-radius: 999px; padding: 8px 10px; font: inherit; font-size: 12px; }
 html[lang="en"] .entry-page .entry-copy h1 { white-space: normal; font-size: clamp(36px, 4vw, 64px); }
 @media (max-width: 720px) { .entry-header { flex-wrap: wrap; } .entry-header-actions { flex-wrap: wrap; } }
+
+/* Touch controls stay usable after the desktop theme's more specific rules. */
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
+  html[data-visual-mode] .workspace { min-width:0; }
+  html[data-visual-mode] :is(.main,.canvas-section,.stage-dock,.toolbar,.draw-tools) { min-width:0; }
+  html[data-visual-mode] :is(.topbar,.play-header,.app-footer,.cloud-bar) {
+    padding-left:max(12px,env(safe-area-inset-left,0px));
+    padding-right:max(12px,env(safe-area-inset-right,0px));
+  }
+  html[data-visual-mode] .stage-dock :is(.tool-button,.editor-mode button,.play-button,.icon-button),
+  html[data-visual-mode] .canvas-heading :is(.tool-button,.add-object-menu > summary),
+  html[data-visual-mode] :is(.board-zoom-controls button,.board-size-actions button,.board-advanced > summary) { min-width:44px; min-height:44px; }
+  html[data-visual-mode] .stage-dock .speed-label select { min-height:44px; font-size:16px; }
+  html[data-visual-mode] .stage-dock #timeline { min-width:60px; min-height:24px; }
+  html[data-visual-mode] .workspace .sidebar { overscroll-behavior:contain; }
+  html[data-visual-mode] .inspector-panel .inspector { overscroll-behavior:contain; scroll-padding-block:16px; }
+  html[data-visual-mode] .panel-heading { padding-top:8px; padding-bottom:8px; }
+  html[data-visual-mode] .compact-nav { overscroll-behavior:contain; }
+}
+@media screen and (max-width:600px) {
+  html[data-visual-mode] .play-header h1 { font-size:clamp(20px,5.5vw,26px); overflow-wrap:anywhere; }
+  html[data-visual-mode] .canvas-heading .view-tools { gap:2px; }
+  html[data-visual-mode] .stage-dock #time-label { font-size:12px; }
+  .entry-page .entry-copy h1 { white-space:normal; overflow-wrap:anywhere; }
+}
+@media screen and (max-width:380px) {
+  html[data-visual-mode] .play-header { grid-template-columns:minmax(0,1fr); }
+  html[data-visual-mode] .play-actions { display:flex; justify-content:flex-end; }
+  html[data-visual-mode] .board-zoom-controls { gap:2px; }
+  html[data-visual-mode] .board-zoom-controls output { min-width:36px; }
+}
