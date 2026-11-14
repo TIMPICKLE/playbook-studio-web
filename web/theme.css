@@ -747,6 +747,8 @@ html[lang="en"] .entry-page .entry-copy h1 { white-space: normal; font-size: cla
 
 /* Touch controls stay usable after the desktop theme's more specific rules. */
 @media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
+  .locale-control { position:static; width:max-content; max-width:calc(100% - 32px); margin:16px max(16px,env(safe-area-inset-right,0px)) calc(88px + env(safe-area-inset-bottom,0px)) auto; min-height:44px; }
+  .locale-control select { min-height:44px; font-size:16px; }
   html[data-visual-mode] .workspace { min-width:0; }
   html[data-visual-mode] :is(.main,.canvas-section,.stage-dock,.toolbar,.draw-tools) { min-width:0; }
   html[data-visual-mode] :is(.topbar,.play-header,.app-footer,.cloud-bar) {
@@ -774,4 +776,7 @@ html[lang="en"] .entry-page .entry-copy h1 { white-space: normal; font-size: cla
   html[data-visual-mode] .play-actions { display:flex; justify-content:flex-end; }
   html[data-visual-mode] .board-zoom-controls { gap:2px; }
   html[data-visual-mode] .board-zoom-controls output { min-width:36px; }
+}
+@media screen and (max-width:600px) {
+  .cloud-local-entry > button { flex:none; white-space:nowrap; }
 }

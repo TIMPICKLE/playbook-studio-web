@@ -21,7 +21,7 @@ export function createWorkspacePanels() {
       else { node.removeAttribute('role'); node.removeAttribute('aria-modal'); }
     }
     const main = document.querySelector('#main-content'); if (main) main.inert = compact && active === 'plays';
-    for (const node of document.querySelectorAll('#cloud-root,.topbar,.play-header,.canvas-section,.board-width-resizer,.app-footer,.compact-nav,.board-ai.ba-floating')) node.inert = opened;
+    for (const node of document.querySelectorAll('#cloud-root,.topbar,.play-header,.canvas-section,.board-width-resizer,.app-footer,.compact-nav,.locale-control,.board-ai.ba-floating')) node.inert = opened;
     for (const node of document.querySelectorAll('[data-action="sidebar"]')) node.setAttribute('aria-expanded', String(compact && active === 'plays'));
     for (const node of document.querySelectorAll('[data-action="inspector-panel"]')) node.setAttribute('aria-expanded', String(compact && active === 'properties'));
     document.querySelector('.compact-nav [data-action="panel-field"]')?.setAttribute('aria-pressed', String(!active));
