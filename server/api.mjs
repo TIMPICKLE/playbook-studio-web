@@ -9,6 +9,7 @@ import { proposeEdit } from '../web/assistant-proposal.js';
 import { proposalConflicts } from '../web/assistant-conflicts.js';
 import { runMatchupAgent, assertPrivateRuntime } from './matchup-agent.mjs';
 import { localizeMatchupAnnotations } from './matchup-locale.mjs';
+import { ANALYSIS_COVERAGES, authorizedKnowledgePack } from '../web/analysis-evidence.js';
 export { MAX_BODY } from './http.mjs';
 const ROLES = ['editor', 'viewer'];
 const normalizeEmail = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -184,9 +185,9 @@ export async function handleApi(request, env, user) {
     }
     if (path[2] === 'matchup-analysis' && path.length === 3 && request.method === 'POST') {
       const record = await access(db, workspaceId, user.userId);
-      const body = await readJson(request, 12000);
+      const body = await readJson(request, 48000);
       if (revision(body.revision) !== record.revision) return json({ error: '战术本已更新，请刷新后重新选择战术', code: 'revision_conflict' }, 409);
-      if (body.coverage && !['unknown', 'cover3_spot', 'cover3_match', 'cover2', 'man'].includes(body.coverage)) fail(400, '覆盖类型不正确');
+      if (body.coverage && !ANALYSIS_COVERAGES.includes(body.coverage)) fail(400, '覆盖类型不正确');
       if (body.mode && !['real_football', 'madden'].includes(body.mode)) fail(400, '分析语境不正确');
       const data = JSON.parse(record.data_json);
       const offense = data.plays.find(p => p.id === body.offensePlayId && p.book === 'offense');
@@ -199,9 +200,12 @@ export async function handleApi(request, env, user) {
         if (!player) fail(400, '所选观察球员不属于对应战术');
         perspective = { side, playerId: `${side}:player:${player.id}`, label: player.label };
       }
+      let knowledgePack;
+      try { knowledgePack = authorizedKnowledgePack(body.knowledgePack); }
+      catch (error) { fail(400, error.message); }
       modelEndpoint(body.model, env);
       await checkModelBudget(db, user.userId);
-      const matchup = buildMatchup(offense, defense, { coverage: body.coverage, includeNotes: body.includeNotes === true, mirrorDefense: body.mirrorDefense === true });
+      const matchup = buildMatchup(offense, defense, { coverage: body.coverage, includeNotes: body.includeNotes === true, mirrorDefense: body.mirrorDefense === true, knowledgePack, context: body.context, knowledgeQuery: body.knowledgeQuery, locale: body.locale });
       const reauthorize = async () => {
         const identity = await resolveIdentity(request, env, platformUser);
         if (!identity?.userId || identity.userId !== user.userId) fail(401, '登录状态已失效，请重新登录');

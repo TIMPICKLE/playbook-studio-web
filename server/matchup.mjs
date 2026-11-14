@@ -1,6 +1,7 @@
-import { sampledRoute } from '../web/model.js';
 import { orientDefense } from '../web/matchup-model.js';
 import { fail } from './http.mjs';
+import { ANALYSIS_COVERAGES, retrieveMatchupKnowledge, knowledgeEvidence, diagramFacts, diagramIntersections } from '../web/analysis-evidence.js';
+export { segmentHitsZone } from '../web/analysis-evidence.js';
 
 const PROVIDERS = {
   deepseek: { openai: 'https://api.deepseek.com/chat/completions', anthropic: 'https://api.deepseek.com/anthropic/v1/messages' },
@@ -8,27 +9,8 @@ const PROVIDERS = {
   openrouter: { openai: 'https://openrouter.ai/api/v1/chat/completions' },
   openai: { openai: 'https://api.openai.com/v1/chat/completions' },
 };
-const COVERAGES = ['unknown', 'cover3_spot', 'cover3_match', 'cover2', 'man'];
-const COVERAGE_KNOWLEDGE = {
-  cover3_spot: { id: 'cover3.hook_flat', content: '已确认是普通落位 Cover 3 时，同侧 Hook 和 Flat 可以对浅层 curl/flat 防守者形成阅读；向外扩展时 Hook 可能出现窗口，沉入 curl 时 Flat 可能可用。其他防守者、保护、时序和球队规则会影响结果。', source: 'https://blogs.usafootball.com/blog/7736/teaching-the-quarterback-to-read-hank' },
-  cover3_match: { id: 'cover3.match', content: 'Cover 3 match 的责任可能依接球手释放及路线调整；不能把静态区域自动等同于实际盯防和交接。具体规则必须由球队确认。', source: 'https://blogs.usafootball.com/blog/7544/how-to-play-cover-3-behind-a-simulated-pressure' },
-};
 const text = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 const ref = (side, type, id) => `${side}:${type}:${id}`;
-
-// Test segment/ellipse intersection in normalized coordinates, including tangency.
-export function segmentHitsZone(a, b, zone) {
-  const x = (a.x - zone.x) / zone.rx, y = (a.y - zone.y) / zone.ry;
-  const dx = (b.x - a.x) / zone.rx, dy = (b.y - a.y) / zone.ry;
-  const c = x*x + y*y - 1;
-  if (c <= 0) return true;
-  const aa = dx*dx + dy*dy;
-  if (!aa) return false;
-  const bb = 2*(x*dx + y*dy), disc = bb*bb - 4*aa*c;
-  if (disc < 0) return false;
-  const root = Math.sqrt(disc), t1 = (-bb-root)/(2*aa), t2 = (-bb+root)/(2*aa);
-  return (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1);
-}
 
 function selectedPlay(play, side, includeNotes) {
   const players = play.players.filter(p => p.side === side);
@@ -37,7 +19,7 @@ function selectedPlay(play, side, includeNotes) {
     title: text(play.title, 120), formation: text(play.formation, 100), category: text(play.category, 60),
     referenceOnly: !!play.reference,
     players: players.map(p => ({ id: ref(side, 'player', p.id), label: p.label, x: p.x, y: p.y })),
-    routes: play.routes.filter(r => ids.has(r.playerId)).map(r => ({ id: ref(side, 'route', r.id), playerId: ref(side, 'player', r.playerId), kind: r.kind, optional: r.optional, points: r.points, smooth: r.smooth })),
+    routes: play.routes.filter(r => ids.has(r.playerId)).map(r => ({ id: ref(side, 'route', r.id), playerId: ref(side, 'player', r.playerId), kind: r.kind, optional: r.optional, points: r.points, smooth: r.smooth, ...(r.intent ? { intent: r.intent } : {}) })),
     zones: side === 'defense' ? play.zones.map(z => ({ id: ref(side, 'zone', z.id), x: z.x, y: z.y, rx: z.rx, ry: z.ry, label: z.label })) : [],
     ...(includeNotes ? { notes: text(play.notes, 3000) } : {}),
   };
@@ -47,18 +29,9 @@ export function buildMatchup(offense, defense, options = {}) {
   defense = orientDefense(defense, options.mirrorDefense === true);
   const off = selectedPlay(offense, 'offense', options.includeNotes);
   const def = selectedPlay(defense, 'defense', options.includeNotes);
-  const offenseRoutes = offense.routes.filter(r => r.kind === 'route' && offense.players.some(p => p.id === r.playerId && p.side === 'offense'));
-  const work = offenseRoutes.reduce((sum, route) => sum + route.points.length * (route.smooth ? 16 : 1), 0) * defense.zones.length;
-  if (work > 500000) fail(400, '所选战术的路线和区域过于复杂，请简化后再分析');
-  const intersections = [];
-  for (const route of offenseRoutes) {
-    const points = sampledRoute(route);
-    for (const zone of defense.zones) {
-      if (points.slice(1).some((p, i) => segmentHitsZone(points[i], p, zone))) {
-        intersections.push({ routeId: ref('offense', 'route', route.id), zoneId: ref('defense', 'zone', zone.id) });
-      }
-    }
-  }
+  let intersections;
+  try { intersections = diagramIntersections(offense, defense); }
+  catch (error) { fail(400, error.message); }
   const evidence = [];
   for (const [side, play] of [['offense', off], ['defense', def]]) {
     for (const player of play.players) evidence.push({ id: player.id, side, type: 'player', label: `${player.label} · 站位` });
@@ -68,18 +41,23 @@ export function buildMatchup(offense, defense, options = {}) {
     }
     for (const zone of play.zones) evidence.push({ id: zone.id, side, type: 'zone', label: `${zone.label || '未命名区域'} · 防守区域` });
   }
-  const coverage = COVERAGES.includes(options.coverage) ? options.coverage : 'unknown';
-  const knowledge = COVERAGE_KNOWLEDGE[coverage] ? [COVERAGE_KNOWLEDGE[coverage]] : [];
-  for (const card of knowledge) evidence.push({ id: `knowledge:${card.id}`, side: 'context', type: 'knowledge', label: '覆盖规则 · ' + coverage, source: card.source });
+  const coverage = ANALYSIS_COVERAGES.includes(options.coverage) ? options.coverage : 'unknown';
+  let knowledge;
+  try { knowledge = retrieveMatchupKnowledge(offense, defense, { ...options, coverage }); }
+  catch (error) { fail(400, error.message); }
+  evidence.push(...knowledgeEvidence(knowledge, options.locale));
+  const facts = diagramFacts(offense, defense, { ...options, coverage }, intersections);
   const warnings = [];
   if (off.referenceOnly || def.referenceOnly) warnings.push('原图战术没有可用坐标，本次只使用名称和阵型等文字；未发送原始图片。');
   if (options.includeNotes && (offense.notes.length > 3000 || defense.notes.length > 3000)) warnings.push('战术笔记每套最多发送前 3000 字，可能有内容未包含。');
   if (!off.routes.length) warnings.push('进攻路线信息不足，无法比较具体路线。');
   if (!def.zones.length) warnings.push('防守战术没有标注覆盖区域，不能判断路线与区域的关系。');
   if (coverage === 'unknown') warnings.push('防守覆盖类型未确认；不要从前线阵型推断覆盖。');
+  if (coverage === 'cover2') warnings.push('Cover 2 具体规则未确认；不能将普通落位与 Cover 2 Read 的原则混用。');
+  if (!knowledge.length) warnings.push('当前知识库没有相关命中；只能依据图面事实进行有限推演。');
   if (options.mirrorDefense) warnings.push('防守图已左右镜像；文字笔记不会自动镜像，请确认方位。');
   warnings.push('图上重叠不代表同一时刻到达；演示时长不是实战时序。');
-  return { offense: off, defense: def, intersections, evidence, coverage, mirrorDefense: options.mirrorDefense === true, knowledge, warnings };
+  return { offense: off, defense: def, intersections, evidence, coverage, mirrorDefense: options.mirrorDefense === true, knowledge, facts, warnings };
 }
 
 export function modelEndpoint(config, env = {}) {
