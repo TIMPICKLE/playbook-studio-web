@@ -65,7 +65,7 @@ html[data-material=liquid] #ambient-particles{opacity:.38}
 @keyframes liquid-title{to{background-position:100% 100%}}
 html[data-effects=off] #liquid-metal-world,html[data-effects=off] .liquid-surface-canvas{display:none}
 html[data-effects=off] .login-heading h1{animation:none}
-@media(max-width:1180px){.workspace .sidebar{background:#171819c4}.inspector-panel{background:#171819e0;border-color:#fff6;border-radius:24px 0 0 24px}.inspector-panel .inspector{border-radius:0}.cloud-bar{padding-top:8px;padding-bottom:8px}}
+@media((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))){.workspace .sidebar{background:#171819c4}.inspector-panel{background:#171819e0;border-color:#fff6;border-radius:24px 0 0 24px}.inspector-panel .inspector{border-radius:0}.cloud-bar{padding-top:8px;padding-bottom:8px}}
 @media(max-width:600px){.draw-tools,.playback{border-radius:18px}.book-card{border-radius:20px}.login-panel{border-radius:26px 26px 0 0;border-top:1px solid #fff7}.field-wrap{border-radius:19px}.cloud-bar .workspace-current-card{min-height:56px}.topbar{border-radius:0 0 16px 16px}}
 @media(prefers-reduced-transparency:reduce){.liquid-surface-canvas{display:none}.liquid-surface{background:#222324!important}}
 @media print{#liquid-metal-world,.liquid-surface-canvas{display:none!important}}

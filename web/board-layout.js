@@ -1,4 +1,5 @@
 import { t } from './i18n.js';
+import { isCompactWorkspace } from './workspace-panels.js';
 // Device-local layout preferences. This module never edits the shared playbook.
 export const BOARD_LAYOUT_KEY = 'playbook-studio-board-layout-v1';
 const bound = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)));
@@ -17,7 +18,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
 
   const defaultHeight = () => window.innerWidth <= 720
     ? bound(Math.min((window.innerWidth - 28) * .8, window.innerHeight * .7), heightMin, 600)
-    : window.innerWidth <= 1180
+    : isCompactWorkspace()
       ? bound(Math.min((window.innerWidth - 36) * .8, window.innerHeight * .5), heightMin, 760)
       : bound(window.innerHeight * .62, 420, 820);
   const height = () => expanded

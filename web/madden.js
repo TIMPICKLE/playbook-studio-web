@@ -6,13 +6,25 @@ import { filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace, retainedReason, team
 
 export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
   let root, catalog, loading, opened = false, failure = '', team = 'eagles', group = '', formation = '', query = '', page = 1, preview = null, returnFocus;
-  let result = null, editableOnly = true;
+  let result = null, editableOnly = true, listPanelTop = 0;
   const pageSize = 30;
+  const compact = () => window.innerWidth <= 1180 || window.matchMedia?.('(any-pointer: coarse)').matches;
+  const focusable = () => [...root.querySelectorAll('button,input,select,a[href],[tabindex]')]
+    .filter(node => !node.disabled && node.tabIndex >= 0 && !node.closest('[hidden],[inert]') && (!preview || node.closest('.madden-detail,.madden-result-bar')));
   const imported = () => new Set(getPlays().map(p => p.diagramSource?.catalogId || (p.reference && !hasEditableTrace(p.reference.catalogId) ? p.reference.catalogId : null)).filter(Boolean));
   const entry = id => catalog?.plays.find(p => p.id === id);
   const options = (values, selected) => values.map(v => `<option value="${e(v)}" ${v === selected ? 'selected' : ''}>${e(v)}</option>`).join('');
+  function syncViewport() {
+    if (!root || !opened) return;
+    root.classList.toggle('madden-short', (window.visualViewport?.height || window.innerHeight) < 540);
+    const panel = root.querySelector('.madden-panel');
+    panel?.setAttribute('aria-modal', String(compact()));
+    if (preview && panel) panel.scrollTop = 0;
+  }
   function attach() {
     root = document.querySelector('#madden-root');
+    window.addEventListener('resize', syncViewport);
+    window.visualViewport?.addEventListener('resize', syncViewport);
     root.addEventListener('click', event => {
       const b = event.target.closest('[data-madden]'); if (!b || b.disabled) return;
       const action = b.dataset.madden, id = b.dataset.id;
@@ -21,8 +33,8 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
       if (action === 'view-result' && result?.view) { const view = result.view; close(); view(); }
       if (action === 'retry') { loading = null; load(); }
       if (action === 'team') { team = id; group = ''; formation = ''; page = 1; preview = null; render(); }
-      if (action === 'preview') { preview = id; render(); root.querySelector('[data-madden="back"]')?.focus(); }
-      if (action === 'back') { const prior = preview; preview = null; render(); root.querySelector(`[data-madden="preview"][data-id="${prior}"]`)?.focus(); }
+      if (action === 'preview') { listPanelTop = root.querySelector('.madden-panel')?.scrollTop || 0; preview = id; render(); root.querySelector('[data-madden="back"]')?.focus({ preventScroll: true }); }
+      if (action === 'back') backToList();
       if (action === 'add') add(id);
       if (action === 'clear') { group = ''; formation = ''; query = ''; page = 1; render(); }
       if (action === 'prev' || action === 'next') { page += action === 'next' ? 1 : -1; render(); root.querySelector('.madden-results')?.scrollTo?.(0, 0); root.querySelector(`[data-madden="${action}"]:not(:disabled)`)?.focus(); if (!root.contains(document.activeElement) || document.activeElement.disabled) root.querySelector('.madden-pagination button:not(:disabled)')?.focus(); }
@@ -61,8 +73,20 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
     root.addEventListener('keydown', event => {
       // Keep editor shortcuts from operating on the play behind the library.
       event.stopPropagation();
-      if (event.key === 'Escape') { if (preview) { const prior = preview; preview = null; render(); root.querySelector(`[data-madden="preview"][data-id="${prior}"]`)?.focus(); } else close(); }
+      if (event.key === 'Tab' && compact()) {
+        const controls = focusable(), first = controls[0], last = controls.at(-1);
+        if (!controls.length) { event.preventDefault(); return; }
+        if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && (document.activeElement === last || !controls.includes(document.activeElement))) { event.preventDefault(); first.focus(); }
+      }
+      if (event.key === 'Escape') { if (preview) backToList(); else close(); }
     });
+  }
+  function backToList() {
+    const prior = preview; preview = null; render();
+    const panel = root.querySelector('.madden-panel');
+    if (panel) panel.scrollTop = listPanelTop;
+    root.querySelector(`[data-madden="preview"][data-id="${prior}"]`)?.focus({ preventScroll: true });
   }
   function clearDrag() { document.body.classList.remove('madden-dragging'); document.querySelectorAll('.madden-drop-hover').forEach(n => n.classList.remove('madden-drop-hover')); }
   function add(id) {
@@ -99,18 +123,19 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
     const groups = [...new Set(allTeamPlays.map(p => p.group))];
     const formations = [...new Set(allTeamPlays.filter(p => !group || p.group === group).map(p => `${p.group} ${p.formation}`))];
     root.hidden = false;
-    reconcileHTML(root, `<section class="madden-panel" aria-label="Madden NFL ${t("extra.playLibrary")}"><header class="madden-header"><div><small>PLAYBOOK COLLECTION / ${e(selectedTeam?.game || 'MADDEN NFL')}</small><h2>Madden ${t("extra.playLibrary")} <span>${t("extra.offense")}</span></h2></div><button class="madden-close" data-madden="close" aria-label="${t("extra.closeMaddenPlayLibrary")}">✕</button></header><div class="madden-team-tabs" role="group" aria-label="${t("extra.chooseTeam")}">${(catalog?.teams || []).map(({id,code,name,city,playCount}) => `<button class="madden-team ${id === team ? 'active' : ''}" data-madden="team" data-id="${e(id)}" aria-pressed="${id === team}"><span class="madden-team-code ${e(id)}">${e(code || ({eagles:'PHI',ravens:'BAL','49ers':'SF',bengals:'CIN',bills:'BUF',chiefs:'KC',cowboys:'DAL',dolphins:'MIA',lions:'DET',packers:'GB'})[id] || name.slice(0,3).toUpperCase())}</span><span><strong>${e(name)}</strong><small>${e(city || '')}</small></span><em>${e(String(playCount ?? '—'))}</em></button>`).join('')}</div>${catalog ? `<div class="madden-filterbar"><input id="madden-search" type="search" value="${e(query)}" aria-label="${t("extra.searchMaddenPlays")}" placeholder="${t("extra.searchPlaysOrFormationsInsideZoneMesh")}"><div><select id="madden-group" aria-label="${t("extra.maddenFormationGroup")}"><option value="">${t("extra.allFormationGroups")}</option>${options(groups, group)}</select><select id="madden-formation" aria-label="${t("extra.maddenFormation")}"><option value="">${t("extra.allFormations")}</option>${options(formations, formation)}</select></div></div><label class="madden-editable-filter"><input id="madden-editable-only" type="checkbox" ${editableOnly ? 'checked' : ''}>${t("extra.editableFilterCount", { count: teamEditableCount })}</label><div class="madden-result-heading"><strong id="madden-count"></strong><span>${canEdit() ? (t("extra.dragToTheOffensePlaybookOrSelect")) : (t("extra.readOnlyBrowseAndPreview"))}</span></div><div class="madden-results"></div><footer class="madden-footer"><span>${editableOnly ? (t("extra.editableReconstructions")) : t('extra.recordedEditableCount', { count: teamEditableCount })} · ${e(selectedTeam.game)} · ${catalog.fetchedAt.slice(0,10)}</span><a href="${e(selectedTeam.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("extra.sourceHuddleGg")}</a></footer>` : `<div class="madden-empty" role="status">${failure ? `${e(failure)}<button data-madden="retry">${t("extra.tryAgain")}</button>` : (t("extra.loadingTeamPlaybooks"))}</div>`}<div class="madden-detail-slot"></div><div class="madden-result-bar" hidden></div></section>`);
+    reconcileHTML(root, `<section class="madden-panel" role="dialog" aria-modal="${compact()}" aria-label="Madden NFL ${t("extra.playLibrary")}"><header class="madden-header"><div><small>PLAYBOOK COLLECTION / ${e(selectedTeam?.game || 'MADDEN NFL')}</small><h2>Madden ${t("extra.playLibrary")} <span>${t("extra.offense")}</span></h2></div><button class="madden-close" data-madden="close" aria-label="${t("extra.closeMaddenPlayLibrary")}">✕</button></header><div class="madden-team-tabs" role="group" aria-label="${t("extra.chooseTeam")}">${(catalog?.teams || []).map(({id,code,name,city,playCount}) => `<button class="madden-team ${id === team ? 'active' : ''}" data-madden="team" data-id="${e(id)}" aria-pressed="${id === team}"><span class="madden-team-code ${e(id)}">${e(code || ({eagles:'PHI',ravens:'BAL','49ers':'SF',bengals:'CIN',bills:'BUF',chiefs:'KC',cowboys:'DAL',dolphins:'MIA',lions:'DET',packers:'GB'})[id] || name.slice(0,3).toUpperCase())}</span><span><strong>${e(name)}</strong><small>${e(city || '')}</small></span><em>${e(String(playCount ?? '—'))}</em></button>`).join('')}</div>${catalog ? `<div class="madden-filterbar"><input id="madden-search" type="search" value="${e(query)}" aria-label="${t("extra.searchMaddenPlays")}" placeholder="${t("extra.searchPlaysOrFormationsInsideZoneMesh")}"><div><select id="madden-group" aria-label="${t("extra.maddenFormationGroup")}"><option value="">${t("extra.allFormationGroups")}</option>${options(groups, group)}</select><select id="madden-formation" aria-label="${t("extra.maddenFormation")}"><option value="">${t("extra.allFormations")}</option>${options(formations, formation)}</select></div></div><label class="madden-editable-filter"><input id="madden-editable-only" type="checkbox" ${editableOnly ? 'checked' : ''}>${t("extra.editableFilterCount", { count: teamEditableCount })}</label><div class="madden-result-heading"><strong id="madden-count"></strong><span>${canEdit() ? (t("extra.dragToTheOffensePlaybookOrSelect")) : (t("extra.readOnlyBrowseAndPreview"))}</span></div><div class="madden-results"></div><footer class="madden-footer"><span>${editableOnly ? (t("extra.editableReconstructions")) : t('extra.recordedEditableCount', { count: teamEditableCount })} · ${e(selectedTeam.game)} · ${catalog.fetchedAt.slice(0,10)}</span><a href="${e(selectedTeam.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("extra.sourceHuddleGg")}</a></footer>` : `<div class="madden-empty" role="status">${failure ? `${e(failure)}<button data-madden="retry">${t("extra.tryAgain")}</button>` : (t("extra.loadingTeamPlaybooks"))}</div>`}<div class="madden-detail-slot"></div><div class="madden-result-bar" hidden></div></section>`);
     renderResults();
     const results = root.querySelector('.madden-results'); if (results) results.scrollTop = scrollTop;
     if (!preview) root.querySelector('.madden-detail-slot').replaceChildren();
     if (preview && entry(preview)) {
       const p = entry(preview), added = imported().has(p.id);
-      reconcileHTML(root.querySelector('.madden-detail-slot'), `<div class="madden-detail"><button data-madden="back" class="madden-back">← ${t("extra.backToPlayLibrary")}</button><small>${e(p.game)} · ${e(teamDisplayName(p.team, catalog.teams.find(t => t.id === p.team)?.name))}</small><h2>${e(p.name)}</h2><p>${e(p.group)} / ${e(p.formation)}</p><img src="./${e(p.image)}" alt="${e(p.name)} ${t("extra.originalPlayDiagram")}"><p class="madden-reference-note">${hasEditableTrace(p.id) ? (t("extra.playerPositionsAndVisibleRoutesWereReconstructed")) : `${t("extra.originalImage")}${e(t('extra.reason.' + retainedReason(p.id)))}。${t("extra.youCanAddAnnotateExportAndPrint")}`}</p><button class="button primary" data-madden="add" data-id="${e(p.id)}" ${!canEdit() || added ? 'disabled' : ''}>${added ? ("✓ " + t("extra.alreadyInThisPlaybook")) : hasEditableTrace(p.id) ? ("＋ " + t("extra.addEditablePlay")) : ("＋ " + t("extra.addOriginalImage2"))}</button><a href="${e(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("extra.viewOriginalOnHuddleGg")}</a></div>`);
+      reconcileHTML(root.querySelector('.madden-detail-slot'), `<div class="madden-detail"><div class="madden-detail-bar"><button data-madden="back" class="madden-back">← ${t("extra.backToPlayLibrary")}</button><button class="madden-close" data-madden="close" aria-label="${t("extra.closeMaddenPlayLibrary")}">✕</button></div><small>${e(p.game)} · ${e(teamDisplayName(p.team, catalog.teams.find(t => t.id === p.team)?.name))}</small><h2>${e(p.name)}</h2><p>${e(p.group)} / ${e(p.formation)}</p><img src="./${e(p.image)}" alt="${e(p.name)} ${t("extra.originalPlayDiagram")}"><p class="madden-reference-note">${hasEditableTrace(p.id) ? (t("extra.playerPositionsAndVisibleRoutesWereReconstructed")) : `${t("extra.originalImage")}${e(t('extra.reason.' + retainedReason(p.id)))}。${t("extra.youCanAddAnnotateExportAndPrint")}`}</p><button class="button primary" data-madden="add" data-id="${e(p.id)}" ${!canEdit() || added ? 'disabled' : ''}>${added ? ("✓ " + t("extra.alreadyInThisPlaybook")) : hasEditableTrace(p.id) ? ("＋ " + t("extra.addEditablePlay")) : ("＋ " + t("extra.addOriginalImage2"))}</button><a href="${e(p.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("extra.viewOriginalOnHuddleGg")}</a></div>`);
     }
     const bar = root.querySelector('.madden-result-bar');
     bar.hidden = !result;
     if (result) reconcileHTML(bar, `<span class="madden-result-message" tabindex="-1" role="${result.type === 'error' ? 'alert' : 'status'}">${e(result.message)}</span>${result.canUndo?.() ? ("<button data-madden=\"undo-result\">" + t("extra.undo") + "</button>") : ''}${result.view ? ("<button data-madden=\"view-result\">" + t("extra.view") + "</button>") : ''}`);
     if (result) bar.dataset.type = result.type;
+    syncViewport();
   }
   async function open() { if (!root) attach(); opened = true; result = null; returnFocus = document.activeElement; document.body.classList.add('madden-open'); render(); root.querySelector('[data-madden="close"]')?.focus(); if (!catalog) await load(); }
   function close() { opened = false; preview = null; if (root) { root.hidden = true; root.innerHTML = ''; } document.body.classList.remove('madden-open'); clearDrag(); if (returnFocus?.isConnected && !returnFocus.closest('[inert]')) returnFocus.focus(); else document.querySelector('.topbar [data-action="madden-library"]')?.focus(); }
