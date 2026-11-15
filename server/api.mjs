@@ -4,7 +4,8 @@ import { resolveIdentity, handleAuth, createAccountStatements, resetAccount } fr
 import { buildMatchup, limitedResponse, modelEndpoint } from './matchup.mjs';
 import { boardAssistantInput, invokeBoardModel } from '../web/assistant-provider.js';
 import * as boardGraph from '@langchain/langgraph';
-import { searchServerMadden } from './board-assistant-catalog.mjs';
+import { searchServerMadden, boardCatalogRows } from './board-assistant-catalog.mjs';
+import { EDITOR_ACTIONS } from '../web/editor-actions.js';
 import { proposeEdit } from '../web/assistant-proposal.js';
 import { proposalConflicts } from '../web/assistant-conflicts.js';
 import { runMatchupAgent, assertPrivateRuntime } from './matchup-agent.mjs';
@@ -129,8 +130,13 @@ export async function handleApi(request, env, user) {
       const requestedRevision = revision(body.revision);
       const config = modelEndpoint(body.model, env);
       let input;
-      try { input = boardAssistantInput(body); }
+      try { input = boardAssistantInput({...body,editor:{view:body.editor?.view}}); }
       catch (error) { fail(400, error.message); }
+      const editorData = JSON.parse(record.data_json);
+      const currentIndex = editorData.plays.findIndex(play => play.id === input.board.playId);
+      if (currentIndex >= 0) editorData.plays[currentIndex] = input.board.play;
+      else editorData.plays.push(input.board.play);
+      input.editor = {data:editorData,selectedId:input.board.playId,view:input.editor?.view || {},readOnly:!['owner','editor'].includes(record.role),catalogRows:boardCatalogRows};
       assertPrivateRuntime(env);
       await checkModelBudget(db, user.userId);
       // The board is the editor's working copy. Model tools only read this snapshot.
@@ -151,12 +157,14 @@ export async function handleApi(request, env, user) {
           if (error instanceof ApiError) throw error;
           fail(502, error.message);
         }
-        const latest = await reauthorize(reply.kind === 'edit' ? 'write' : 'read');
+        const workspaceEdit = reply.kind === 'editor' && reply.actions.some(action => EDITOR_ACTIONS[action.kind].lane === 'workspace' || action.kind === 'history_action' || action.kind === 'draft_action' && action.action === 'finish');
+        const latest = await reauthorize(reply.kind === 'edit' || workspaceEdit ? 'write' : 'read');
+        if (workspaceEdit && (requestedRevision !== record.revision || latest.revision !== record.revision)) fail(409,'战术本已改变，请重新生成提案');
         if (reply.kind === 'edit' && (requestedRevision !== record.revision || latest.revision !== record.revision)) {
           const operations = reply.operations || [reply.operation];
           const original = requestedRevision !== record.revision ? input.board.play : JSON.parse(record.data_json).plays.find(play => play.id === input.board.playId) || input.board.play;
           const current = JSON.parse(latest.data_json).plays.find(play => play.id === input.board.playId);
-          const proposal = proposeEdit(input.board.play,operations,{locale:input.locale});
+          const proposal = proposeEdit(input.board.play,operations,{locale:input.locale,roster:editorData.roster,formations:editorData.formations,depthChart:editorData.depthChart});
           if (!current || proposalConflicts(original,current,operations,proposal)) fail(409,'本次修改涉及的对象已改变，请重新生成提案');
         }
         return {...reply, revision:latest.revision};

@@ -1,6 +1,6 @@
 export const providerMessages = {
   'zh-CN': {
-    limit: '已达到本次助手查询上限，请缩小范围重试。',
+    noProgress: '助手连续重复查询，未获得新信息。请补充目标后重试。',
     instruction: '请输入 1–2000 字的战术指令。',
     settings: '请填写有效的模型名称和 API Key。',
     unsupported: '此服务商不支持浏览器直连。',
@@ -20,9 +20,13 @@ export const providerMessages = {
       'Invalid motion.': '开球前移动的类型或方向无效。',
       'Invalid movement.': '球员移动距离无效。',
       'Invalid operation.': '修改操作格式无效。',
+      'Invalid defensive formation or mode.': '防守阵型或操作无效，当前支持添加或明确重置 4–3 防守。',
+      'A reference diagram has no editable player coordinates.': '原图战术没有可编辑球员坐标，请先选择可编辑战术。',
+      'This play already has defenders. Explicitly request a reset to replace them.': '当前战术已有防守球员。如需替换，请明确要求重置 4–3 防守。',
+      'Adding a full 11-player 4-3 defense would exceed 40 player markers.': '添加完整的 11 人 4–3 防守后将超过 40 个球员标记，请先移除部分球员。',
       'Invalid pass timing.': '传球时间无效，接球时间须晚于出手时间。',
       'Invalid route concept or depth.': '路线概念或深度无效，请提供 0 至 40 码以内的有效深度。',
-      'Invalid route waypoints.': '路线落点无效，请选择场内的 1 至 32 个落点。',
+      'Invalid route waypoints.': '路线落点无效，请选择场内的 1 至 199 个后续落点。',
       'Invalid timing.': '路线的延迟或持续时间无效。',
       'Invalid zone.': '防守区域类型或方向无效。',
       'Moving the route would put a waypoint outside the field.': '移动后路线会超出球场范围，请缩小移动距离。',
@@ -36,7 +40,7 @@ export const providerMessages = {
     },
   },
   en: {
-    limit: 'The assistant reached its query limit. Narrow the request and try again.',
+    noProgress: 'The assistant repeated queries without finding new information. Clarify the target and try again.',
     instruction: 'Enter a board instruction of 1–2000 characters.',
     settings: 'Enter a valid model ID and API key.',
     unsupported: 'This provider is unavailable in the browser.',

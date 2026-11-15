@@ -1,6 +1,7 @@
 import { buildOperations, measuredRouteBreak, routeDepthYards } from './assistant-operations.js';
 import { validatePlay } from './model.js';
 import { parseBoardOperations } from './assistant-schema.js';
+import { describeEditorPlayCommand, EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
 
 const round = value => Math.round(value * 100) / 100;
 const labels = {
@@ -51,11 +52,11 @@ function routeEffect(route, centerX) {
 
 // Both Agent preview tools and the editor build a fully validated proposal here.
 // The input play is never mutated and the caller retains ownership of persistence.
-export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } = {}) {
-  if (play.reference) throw new Error(locale === 'en' ? 'An original diagram has no editable geometry.' : '原图战术没有可编辑坐标。');
+export function proposeEdit(play, operations, { roster = [], formations = [], depthChart, locale = 'zh-CN' } = {}) {
+  if (play.reference && operations.some(operation => operation.kind !== 'play_update')) throw new Error(locale === 'en' ? 'An original diagram has no editable geometry.' : '原图战术没有可编辑坐标。');
   play = validatePlay(play);
   operations = parseBoardOperations(operations);
-  const result = buildOperations(play, operations, { idFactory: proposalIds(play, operations) });
+  const result = buildOperations(play, operations, { idFactory: proposalIds(play, operations), roster, formations, depthChart });
   const language = locale === 'en' ? 'en' : 'zh-CN';
   const lang = labels[language], boundary = boundaryText[language];
   const people = new Map(roster.map(person => [person.id, person]));
@@ -65,7 +66,7 @@ export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } 
     return player ? [player.label, person?.name || player.name, person?.number && '#' + person.number].filter(Boolean).join(' ') : id;
   };
   const effects = result.operationChanges.map((step, index) => {
-    const operation = operations[index];
+    const operation = step.operation || operations[index];
     const routes = step.routes.map(route => routeEffect(route, step.centerX));
     const playerIds = [...new Set([operation.playerId, operation.nearId, operation.receiverId, ...(operation.playerIds || []), ...step.players.map(player => player.id)].filter(Boolean))];
     const targetIds = routes.flatMap(route => route.targetIds);
@@ -73,8 +74,27 @@ export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } 
       routeIds: [...step.routes.map(route => route.id), ...step.removedRoutes],
       zoneIds: step.zones.map(zone => zone.id), annotationIds: step.annotations.map(item => item.id),
       routes, targetIds, targetLabels: targetIds.map(display) };
-    const descriptions = [effect.playerLabels.join(', '), lang[operation.kind]].filter(Boolean);
-    if (operation.kind === 'route') {
+    const editorCommand = Object.values(EDITOR_PLAY_COMMANDS).some(command => command.id === operation.kind);
+    const descriptions = editorCommand || operation.kind === 'defense_formation' ? [] : [effect.playerLabels.join(', '), lang[operation.kind]].filter(Boolean);
+    if (editorCommand) {
+      descriptions.push(describeEditorPlayCommand(operation, language));
+      if (effect.playerLabels.length && effect.playerLabels.length <= 3) descriptions.unshift(effect.playerLabels.join(', '));
+      if (operation.kind === 'object_remove') {
+        const type={player:'players',route:'routes',zone:'zones',annotation:'annotations'}[operation.objectType];
+        const removed=play[type].find(item => item.id === operation.objectId);
+        if (removed) descriptions.push(removed.label || removed.text || (removed.playerId ? display(removed.playerId) : ''));
+      }
+      effect.createdPlayerIds = step.players.filter((_, i) => !step.previousPlayers[i]).map(player => player.id);
+      effect.removedPlayerIds = step.removedPlayers;
+    } else if (operation.kind === 'defense_formation') {
+      effect.formation = operation.formation;
+      effect.mode = operation.mode;
+      effect.addedPlayerCount = step.players.filter((_, i) => !step.previousPlayers[i]).length;
+      effect.removedPlayerIds = step.removedPlayers;
+      descriptions.push(language === 'en'
+        ? `${operation.mode === 'reset' ? 'Reset' : 'Add'} 4–3 defense · ${effect.addedPlayerCount} defenders · 4 linemen, 3 linebackers, 4 defensive backs · formation does not assign coverage`
+        : `${operation.mode === 'reset' ? '重置' : '添加'} 4–3 防守 · ${effect.addedPlayerCount} 名防守球员 · 4 锋线、3 线卫、4 后卫 · 阵型本身不指定覆盖`);
+    } else if (operation.kind === 'route') {
       const route = routes[0];
       effect.concept = operation.concept;
       const depthPoint = operation.concept === 'slant' ? route.end : route.points[1];
@@ -118,7 +138,7 @@ export function proposeEdit(play, operations, { roster = [], locale = 'zh-CN' } 
     effect.text = descriptions.filter(Boolean).join(' · ');
     return effect;
   });
-  const removed = Object.fromEntries(['routes', 'zones', 'annotations'].map(type => [type, play[type].filter(item => !result.play[type].some(next => next.id === item.id)).map(item => item.id)]));
+  const removed = Object.fromEntries(['players', 'routes', 'zones', 'annotations'].map(type => [type, play[type].filter(item => !result.play[type].some(next => next.id === item.id)).map(item => item.id)]));
   const changes = effects.map(effect => effect.text);
   return { play: result.play, routeId: result.routeId, routeIds: result.routeIds,
     playerIds: difference(play, result.play, 'players'), zoneIds: difference(play, result.play, 'zones'), annotationIds: difference(play, result.play, 'annotations'),

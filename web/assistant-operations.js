@@ -1,5 +1,7 @@
 import { uid, validatePlay } from './model.js';
 import { parseBoardOperations, routeBreak } from './assistant-schema.js';
+import { withDefense43 } from './defense-formation.js';
+import { runEditorPlayCommand } from './editor-play-commands.js';
 
 const YARDS_X = 100 / 53.333333;
 const YARDS_Y = 2;
@@ -78,7 +80,13 @@ function routePoints(centerX, op, start) {
     case 'screen': return [start, { x: start.x + side * 4 * YARDS_X, y: start.y + 2 * YARDS_Y }];
   }
 }
-function run(play, op, makeId) {
+function run(play, op, makeId, context) {
+  const command = runEditorPlayCommand(play, op, {...context,idFactory:makeId});
+  if (command) return command;
+  if (op.kind === 'defense_formation') {
+    Object.assign(play, withDefense43(play, { reset: op.mode === 'reset', idFactory: makeId }));
+    return;
+  }
   if (op.kind === 'block' && Array.isArray(op.playerIds)) {
     if (new Set(op.playerIds).size !== op.playerIds.length) fail('Invalid blocking scheme.');
     const assigned = new Set();
@@ -212,22 +220,37 @@ function run(play, op, makeId) {
   }
   fail('Unsupported operation.');
 }
-export function buildOperations(play, operations, { idFactory = uid } = {}) {
+export function buildOperations(play, operations, { idFactory = uid, roster = [], formations = [], depthChart } = {}) {
   operations = parseBoardOperations(operations);
-  const copy = structuredClone(play), changed = new Set(), operationChanges = []; let routeId;
-  for (const op of operations) {
+  const copy = structuredClone(play), changed = new Set(), operationChanges = [], aliases = new Map(); let routeId;
+  const references = new Set(['playerId','receiverId','holderId','nearId','objectId','routeId','zoneId','annotationId','relativeToId']);
+  const bind = (value, key) => {
+    if (typeof value === 'string' && references.has(key) && value.startsWith('$')) {
+      if (!aliases.has(value.slice(1))) fail('Unknown local object reference. Create it earlier in this operation group.');
+      return aliases.get(value.slice(1));
+    }
+    if (Array.isArray(value)) return value.map(item => bind(item, ['targetIds','playerIds'].includes(key) ? 'playerId' : key));
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([field,item]) => [field,bind(item,field)]));
+    return value;
+  };
+  for (const original of operations) {
+    const op = bind(original);
     const before = Object.fromEntries(['players', 'routes', 'zones', 'annotations'].map(type =>
       [type, new Map(copy[type].map(item => [item.id, JSON.stringify(item)]))]));
-    const outcome = run(copy,op,idFactory);
+    const outcome = run(copy,op,idFactory,{roster,formations,depthChart});
+    if (op.as) {
+      if (!outcome?.createdId || aliases.has(op.as)) fail('Local object references must be unique and name a newly created object.');
+      aliases.set(op.as,outcome.createdId);
+    }
     routeId = outcome?.routeId || routeId;
-    const step = { centerX: routeCenterX(copy.players), clippedAtBoundary: outcome?.clippedAtBoundary ?? false };
+    const step = { operation:op, centerX: routeCenterX(copy.players), clippedAtBoundary: outcome?.clippedAtBoundary ?? false };
     for (const type of ['players', 'routes', 'zones', 'annotations']) {
       step[type] = structuredClone(copy[type].filter(item => before[type].get(item.id) !== JSON.stringify(item)));
       step['removed' + type[0].toUpperCase() + type.slice(1)] = [...before[type].keys()].filter(id => !copy[type].some(item => item.id === id));
     }
     for (const route of step.routes) changed.add(route.id);
     for (const id of step.removedRoutes) changed.add(id);
-    step.previousPlayers = step.players.map(player => JSON.parse(before.players.get(player.id)));
+    step.previousPlayers = step.players.map(player => before.players.has(player.id) ? JSON.parse(before.players.get(player.id)) : null);
     operationChanges.push(step);
   }
   return {play:validatePlay(copy),routeId,routeIds:[...changed],operationChanges};

@@ -31,6 +31,25 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     try { localStorage.setItem(BOARD_LAYOUT_KEY, JSON.stringify(prefs)); }
     catch { notify(t("controls.size_adjusted_but_browser_storage_is_unavailable_default")); }
   }
+  const getState = () => ({zoom, expanded, height:height(), inspectorWidth:inspector(), panX:q('.pitch-viewport')?.scrollLeft || 0, panY:q('.pitch-viewport')?.scrollTop || 0});
+  function setState(next = {}) {
+    finish(true);
+    if (next.reset) { prefs = {}; expanded = false; zoom = 1; dimensionsOpen = !smallScreen; }
+    if (next.expanded != null) expanded = !!next.expanded;
+    if (next.zoom != null) zoom = Math.min(3, Math.max(1, next.zoom));
+    if (next.fit) zoom = 1;
+    if (next.height != null) setHeight(next.height);
+    if (next.inspectorWidth != null) prefs.inspector = bound(next.inspectorWidth, 220, maxInspector());
+    apply();
+    const viewport=q('.pitch-viewport');
+    if(viewport) {
+      if(next.fit || next.reset) {viewport.scrollLeft=0;viewport.scrollTop=0;}
+      if(next.panX != null) viewport.scrollLeft=Math.min(Math.max(0,viewport.scrollWidth-viewport.clientWidth),Math.max(0,next.panX));
+      if(next.panY != null) viewport.scrollTop=Math.min(Math.max(0,viewport.scrollHeight-viewport.clientHeight),Math.max(0,next.panY));
+    }
+    persist();
+    return getState();
+  }
   function apply() {
     const workspace = q('.workspace');
     if (!workspace) return;
@@ -126,13 +145,11 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
   document.addEventListener('click', event => {
     const action = event.target.closest('[data-board-action]')?.dataset.boardAction;
     if (!action) return;
-    finish(true);
-    if (action === 'expand') expanded = !expanded;
-    if (action === 'zoom-in') zoom = Math.min(3, zoom + .25);
-    if (action === 'zoom-out') zoom = Math.max(1, zoom - .25);
-    if (action === 'fit' || action === 'reset') { zoom = 1; q('.pitch-viewport')?.scrollTo?.(0, 0); }
-    if (action === 'reset') { prefs = {}; expanded = false; persist(); notify(t("controls.restored_default_board_size_and_side_panels")); }
-    apply();
+    if (action === 'expand') setState({expanded:!expanded});
+    if (action === 'zoom-in') setState({zoom:zoom + .25});
+    if (action === 'zoom-out') setState({zoom:zoom - .25});
+    if (action === 'fit') setState({fit:true});
+    if (action === 'reset') { setState({reset:true,fit:true}); notify(t("controls.restored_default_board_size_and_side_panels")); }
   });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && (gesture || (expanded && !hasDraft() && !q('.modal')))) {
@@ -157,7 +174,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
       event.stopImmediatePropagation();
     }
   });
-  return { mount: apply };
+  return { mount: apply, getState, setState };
 }
 
 export function boardSizeControls() {

@@ -123,6 +123,12 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       const message = doc.createElement('p');
       message.textContent = reply.message || lang.change;
       output.append(message);
+      if (reply.action?.run) {
+        const control = doc.createElement('button');
+        control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = 'continue';
+        control.textContent = reply.action.label;
+        output.append(control);
+      }
       if (reply.kind === 'preview') {
         const visible = reply.isVisible?.() !== false;
         if (Array.isArray(reply.changes)) { const list = doc.createElement('ul'); for (const change of reply.changes) { const li = doc.createElement('li'); li.textContent = String(change); list.append(li); } output.append(list); }
@@ -248,7 +254,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
           progress.push(subjects.length ? `${label} ${subjects.join(', ').slice(0, 160)}` : label);
           announce(progress.slice(-10).join(' → '));
         }});
-      if (pending !== control || destroyed || requestScope !== getContext().scope) return;
+      if (pending !== control || destroyed || (requestScope !== getContext().scope && result.scope !== getContext().scope)) return;
       reply = result;
       clarification = result.kind === 'clarify' ? result.message : '';
       if (result.kind !== 'preview') remember({instruction, kind:result.kind, summary:result.summary || result.message || '', message:result.message, operations:result.operations});
@@ -307,6 +313,17 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     else if (action === 'clear-mode') { selectedMode = 'auto'; updateButtons(); }
     else if (action === 'expand') panel.classList.remove('ba-collapsed');
     else if (action === 'handoff') onHandoff?.(reply);
+    else if (action === 'continue' && reply?.action?.run) {
+      const previousReply = reply;
+      b.disabled = true;
+      // Invoke inside the actual click so native file/print dialogs retain
+      // browser user activation. Tools never trigger these side effects.
+      try {
+        Promise.resolve(previousReply.action.run()).then(result => {
+          if (reply === previousReply && result) { reply = result; outputView(); announce(result.message || copy().change); }
+        }).catch(error => announce(error?.message || copy().error, true)).finally(() => { if (b.isConnected) b.disabled = false; });
+      } catch (error) { b.disabled = false; announce(error?.message || copy().error, true); }
+    }
     else if (action === 'discard' && reply?.kind === 'preview') { clearPreview(); reply = null; panel.classList.remove('ba-collapsed'); outputView(); announce(copy().discarded); }
     else if (action === 'rehearse' && reply?.kind === 'preview') reply.rehearse?.();
     else if (action === 'apply' && reply?.kind === 'preview' && applying !== reply) {
@@ -369,5 +386,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   function destroy() { destroyed = true; resize?.disconnect(); win.removeEventListener('resize', syncPanelLayout); close({clear:true}); root.remove(); }
   mount(host);
   function refreshPreview() { if (reply?.kind === 'preview') outputView(); }
-  return {mount, refresh, refreshPreview, open, close, destroy};
+  // Only the trusted editor host may adopt a scope after its own navigation or
+  // transaction. Unrelated user navigation still resets/cancels the request.
+  function adoptScope(next) { scope = next; previous = []; clarification = ''; }
+  return {mount, refresh, refreshPreview, open, close, destroy, adoptScope};
 }

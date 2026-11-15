@@ -13,7 +13,7 @@ const board = {playId:'p',players:[
 ],routes:[],book:'offense'};
 const call = (name,args) => ({role:'assistant',content:null,tool_calls:[{id:'a',type:'function',function:{name,arguments:JSON.stringify(args)}}]});
 const final = result => call('submit_result', {result});
-test('mode scopes tools and keeps full names, context and previous followups', async () => {
+test('mode preserves preference, full names and followups without hiding editor capabilities', async () => {
   const input = boardAssistantInput({instruction:'find Avery',board,mode:'search',previous:[{instruction:'prior',summary:'done'}]});
   assert.equal(input.board.players.find(p=>p.id==='l').name,'Avery Smith');
   let definitions;
@@ -22,7 +22,7 @@ test('mode scopes tools and keeps full names, context and previous followups', a
     assert.equal(JSON.parse(messages[1].content).previous[0].instruction,'prior');
     return final({kind:'clarify',message:'which one?'});
   }});
-  assert.deepEqual(definitions,['search_madden','submit_result']);
+  for (const name of ['search_madden','read_board','resolve_player','preview_edit','read_editor','list_capabilities','get_command_schema','preview_actions','submit_result']) assert.ok(definitions.includes(name),name);
   assert.equal(result.kind,'clarify');
 });
 test('group resolution grounds an entire atomic operations array', async () => {
@@ -84,18 +84,18 @@ test('cloud streamed tool events are delivered before the final result', async (
   assert.deepEqual(progress,['search_madden']);
   assert.equal(result.kind,'search');
 });
-test('defense playbooks cannot expose Madden search tools', async () => {
-  let calls=0;
+test('viewing defense does not prevent searching and importing offensive catalog plays', async () => {
   const defense={...board,book:'defense'};
-  const search=boardAssistantInput({instruction:'find',board:defense,mode:'search'});
-  const denied=await runBoardAssistant({runtime,input:search,callModel:async()=>{calls++;}});
-  assert.equal(denied.kind,'clarify');
-  assert.equal(calls,0);
-  const auto=boardAssistantInput({instruction:'show board',board:defense,mode:'auto'});
-  await runBoardAssistant({runtime,input:auto,callModel:async(_messages,tools)=>{
-    assert.ok(!tools.some(tool=>tool.function.name==='search_madden'));
-    return final({kind:'clarify',message:'Which player?'});
-  }});
+  for (const mode of ['search','auto','edit']) {
+    let count=0;
+    const input=boardAssistantInput({instruction:'find an offensive flood play',board:defense,mode});
+    const result=await runBoardAssistant({runtime,input,searchCatalog:async()=>[{id:'verified-flood',name:'Flood'}],callModel:async(_messages,tools)=>{
+      assert.ok(tools.some(tool=>tool.function.name==='search_madden'));
+      return ++count===1 ? call('search_madden',{concepts:['flood']}) : final({kind:'search',matches:[{id:'verified-flood',reason:'An offensive candidate to review.'}]});
+    }});
+    assert.equal(result.matches[0].id,'verified-flood');
+    assert.equal(input.board.book,'defense');
+  }
 });
 test('invalid semantic route depth is returned to the model for repair', async () => {
   const input=boardAssistantInput({instruction:'C go',board,mode:'edit'});

@@ -64,13 +64,16 @@ test('ordinary model text cannot bypass native submission and preview rules', as
   assert.equal(result.submission,'tool');assert.equal(result.repairs,1);
 });
 
-test('the final model turn forces submit_result and a known unsupported choice falls back to the generated text contract', async () => {
-  let calls=0;
+test('a stalled model is asked to submit and a known unsupported choice falls back to the generated text contract', async () => {
+  let calls=0, lookups=0;
   const result=await requestBoardAssistant({instruction:'inspect',board:{...play,play,playId:play.id},runtime,model:{provider:'openai',model:'test-model',apiKey:'unit-test-key'},fetchImpl:async(_url,options)=>{
     calls++;
     const body=JSON.parse(options.body);
-    if(calls<6)return Response.json({choices:[{message:call('read_board',{},'read-'+calls)}]});
-    if(calls===6){
+    if(body.tool_choice==='auto'){
+      lookups++;
+      return Response.json({choices:[{message:call('read_board',{},'read-'+calls)}]});
+    }
+    if(body.tool_choice){
       assert.deepEqual(body.tool_choice,{type:'function',function:{name:'submit_result'}});
       assert.deepEqual(body.tools.map(tool=>tool.function.name),['submit_result']);
       return Response.json({error:{message:'tool_choice is not supported by this model'}},{status:400});
@@ -79,17 +82,16 @@ test('the final model turn forces submit_result and a known unsupported choice f
     assert.match(body.messages.at(-1).content,/generated contract/);
     return Response.json({choices:[{message:{role:'assistant',content:JSON.stringify({kind:'clarify',message:'Which assignment?'})}}]});
   }});
-  assert.equal(result.submission,'text');assert.equal(result.modelCalls,6);assert.equal(result.providerCalls,7);
+  assert.equal(result.submission,'text');assert.equal(result.modelCalls,lookups+1);assert.equal(result.providerCalls,result.modelCalls+1);
 });
 
 test('unrelated provider HTTP errors do not trigger a forced-tool fallback', async () => {
   let calls=0;
   await assert.rejects(requestBoardAssistant({instruction:'inspect',board:{...play,play},runtime,model:{provider:'openai',model:'test-model',apiKey:'unit-test-key'},fetchImpl:async()=>{
     calls++;
-    if(calls<6)return Response.json({choices:[{message:call('read_board',{},'read-'+calls)}]});
     return Response.json({error:{message:'invalid tools JSON schema'}},{status:400});
   }}),/HTTP 400/);
-  assert.equal(calls,6);
+  assert.equal(calls,1);
 });
 
 test('a failed preview is reported to the model and counts toward the shared repair limit', async () => {
