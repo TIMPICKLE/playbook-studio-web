@@ -1,13 +1,15 @@
-import { EDITABLE_TRACES } from './data/madden-editable.js';
+import { TRACE_SHARDS } from './data/madden-trace-index.js';
 import { TEAM_TRACE_ALIASES } from './data/madden-team-trace-aliases.js';
+import { editableTraces } from './madden-traces.js';
+export { loadEditableEntries, EditableTraceNotLoadedError } from './madden-traces.js';
 import { RETAINED_REASONS } from './data/madden-trace-status.js';
 import { uid } from './model.js';
 
 export const teamDisplayName = (id, name) => name || String(id || '').split(/[-_]/).map(part => part ? part[0].toUpperCase() + part.slice(1) : '').join(' ');
-export const editableTraceCount = Object.keys(EDITABLE_TRACES).length + Object.keys(TEAM_TRACE_ALIASES).length;
+export const editableTraceCount = Object.keys(TRACE_SHARDS).length + Object.keys(TEAM_TRACE_ALIASES).length;
 export const retainedReason = id => RETAINED_REASONS[id] || '尚未确认可编辑路线';
-export const hasEditableTrace = id => Object.hasOwn(EDITABLE_TRACES, id) || Object.hasOwn(TEAM_TRACE_ALIASES, id);
-export const getEditableEntry = id => EDITABLE_TRACES[id] || EDITABLE_TRACES[TEAM_TRACE_ALIASES[id]] || null;
+export const hasEditableTrace = id => editableTraces.has(id);
+export const getEditableEntry = id => editableTraces.get(id);
 export const MADDEN_DRAG_TYPE = 'application/x-playbook-madden';
 export function filterCatalog(catalog, { team = 'eagles', group = '', formation = '', query = '', editableOnly = false } = {}) {
   const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);

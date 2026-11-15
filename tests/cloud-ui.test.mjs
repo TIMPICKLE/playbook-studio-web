@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
 import { clone, encodeWorkspace, starterWorkspace, STORAGE_KEY } from '../web/model.js';
-import { makeMaddenPlay } from '../web/madden-model.js';
+import { makeMaddenPlay, loadEditableEntries } from '../web/madden-model.js';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
 import { SharedWorkspace } from '../web/cloud.js';
+await loadEditableEntries([Object.values(EDITABLE_TRACES)[0].id]);
 
 test('cloud editor restricts readers, saves editor changes, imports legacy JSON and manages owner invitations', async t => {
   const win = new Window({ url: 'https://playbook.test/editor/index.html', width: 1440, height: 1000 });

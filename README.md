@@ -95,6 +95,7 @@ npm run build       # 构建 Worker
 | [使用指南](docs/USER_GUIDE.md) | 图解教程、人员组、演练、Madden 与协作 |
 | [AI 功能详解](docs/AI_GUIDE.md) | 两个 AI 入口的配置、用法、知识库与问题排查 |
 | [部署手册](docs/AGENT_DEPLOYMENT.md) | 本机、静态托管与云端部署 |
+| [Web 平台优化](docs/WEB_PLATFORM_OPTIMIZATION.md) | 按需加载、局部渲染、原生弹窗与可重复审计 |
 | [AI 命令架构](docs/EDITOR_COMMAND_ARCHITECTURE.md) / [工具流程](docs/BOARD_ASSISTANT.md) | 手动与 AI 的共享执行器、预览和撤销 |
 | [AI 分析研究](docs/ai-analysis/README.md) | 竞品、知识库架构、实施与评估记录 |
 | [云端架构](docs/CLOUD.md) / [多语言开发](docs/I18N.md) | API、数据、身份接入与国际化 |

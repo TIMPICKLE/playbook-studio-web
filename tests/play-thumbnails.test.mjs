@@ -51,3 +51,28 @@ test('browsers without IntersectionObserver still render every diagram', async (
   try { thumbs.mount(doc.querySelector('.play-list'), starterWorkspace().plays.slice(0, 2)); assert.equal(doc.querySelectorAll('.play-list svg').length, 2); }
   finally { thumbs.destroy(); await win.happyDOM.abort(); }
 });
+
+test('retained thumbnails refresh only changed geometry and keep unique markers when list indices move',async()=>{
+  const win=new Window(),doc=win.document;
+  win.IntersectionObserver=undefined;
+  const plays=starterWorkspace().plays.slice(0,3);
+  doc.body.innerHTML='<div class="play-list"><span data-thumbnail-index="0"></span><span data-thumbnail-index="1"></span></div>';
+  const list=doc.querySelector('.play-list'),thumbs=createPlayThumbnails(win);
+  try {
+    thumbs.mount(list,plays.slice(0,2));
+    const first=list.children[0],second=list.children[1],firstSvg=first.firstElementChild,secondSvg=second.firstElementChild;
+    plays[0].title='Metadata-only rename';thumbs.mount(list,plays.slice(0,2));
+    assert.ok(first.firstElementChild===firstSvg && second.firstElementChild===secondSvg,'metadata does not invalidate editable diagram geometry');
+    list.prepend(second);second.dataset.thumbnailIndex='0';first.dataset.thumbnailIndex='1';
+    thumbs.mount(list,[plays[1],plays[0]]);
+    assert.ok(first.firstElementChild===firstSvg && second.firstElementChild===secondSvg);
+    const extra=doc.createElement('span');extra.dataset.thumbnailIndex='2';list.append(extra);
+    thumbs.mount(list,[plays[1],plays[0],plays[2]]);
+    const markers=[...list.querySelectorAll('marker')].map(node=>node.id);
+    assert.ok(markers.length);assert.equal(new Set(markers).size,markers.length);
+    plays[0].players[0].label='NEW';thumbs.refresh(plays[0]);
+    assert.ok(first.firstElementChild!==firstSvg,'geometry changes refresh the affected thumbnail');
+    assert.ok(second.firstElementChild===secondSvg,'other thumbnail SVGs remain mounted');
+    assert.match(first.textContent,/NEW/);
+  } finally {thumbs.destroy();await win.happyDOM.abort();}
+});

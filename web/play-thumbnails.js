@@ -1,9 +1,24 @@
 import { fieldSVG } from './field.js';
 
+let nextScope = 0;
+
 // Keep the complete list available to search and keyboard navigation, but only
 // build the expensive SVGs near the scroll viewport.
 export function createPlayThumbnails(win = window) {
   let observer = null, generation = 0, entries = new Map();
+  const rendered = new WeakMap(), scope = ++nextScope;
+  let nextNode = 0;
+  function render({node,play}) {
+    const signature = JSON.stringify(play.reference ? [play.title,play.reference.image] :
+      [play.players,play.routes,play.zones,play.annotations,play.ball]);
+    const prior = rendered.get(node);
+    if (prior?.signature === signature && prior.svg === node.firstElementChild) return;
+    // A node keeps its marker prefix when filtering changes its list index.
+    // New nodes always get a new prefix, avoiding duplicate SVG marker IDs.
+    const prefix = prior?.prefix || `thumb-${scope}-${++nextNode}`;
+    node.innerHTML = fieldSVG(play, {showGrid:false}, {thumbnail:true,prefix});
+    rendered.set(node,{signature,prefix,svg:node.firstElementChild});
+  }
 
   function mount(list, plays) {
     generation++;
@@ -15,11 +30,8 @@ export function createPlayThumbnails(win = window) {
     const nodes = [...list.querySelectorAll('[data-thumbnail-index]')];
     for (const node of nodes) {
       const index = Number(node.dataset.thumbnailIndex), play = plays[index];
-      if (play) entries.set(play.id, { node, play, index });
+      if (play) entries.set(play.id, { node, play });
     }
-    const render = ({ node, play, index }) => {
-      node.innerHTML = fieldSVG(play, { showGrid: false }, { thumbnail: true, prefix: `thumb-${index}` });
-    };
     if (typeof win.IntersectionObserver !== 'function') {
       entries.forEach(render);
       return;
@@ -32,7 +44,7 @@ export function createPlayThumbnails(win = window) {
         const entry = play && entries.get(play.id);
         if (!entry || entry.node !== change.target) continue;
         if (change.isIntersecting) {
-          if (!entry.node.firstElementChild) render(entry);
+          render(entry);
         } else if (entry.node.firstElementChild) {
           entry.node.replaceChildren();
         }
@@ -45,7 +57,7 @@ export function createPlayThumbnails(win = window) {
     const entry = entries.get(play.id);
     if (!entry) return;
     entry.play = play;
-    if (entry.node.firstElementChild) entry.node.innerHTML = fieldSVG(play, { showGrid: false }, { thumbnail: true, prefix: `thumb-${entry.index}` });
+    if (entry.node.firstElementChild) render(entry);
   }
 
   return { mount, refresh, destroy() { generation++; observer?.disconnect(); observer = null; entries.clear(); } };

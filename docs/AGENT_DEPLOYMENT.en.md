@@ -29,6 +29,24 @@ Configure, build and validate, then publish to the destination I authorized. Ver
 Report the URL, deployed version, verification results, data location and any unfinished work. State blockers honestly; do not claim unverified features work.
 ```
 
+### Web checks before development and release
+
+Agents changing interactions or loading behavior can use the pinned **modern-web-guidance 1.0.0** `search` → `retrieve` workflow to inspect relevant browser capabilities before implementing them in the existing code. This is a development reference, not football knowledge or a browser runtime dependency; bulk skill installation is unnecessary. Run from the project root:
+
+```bash
+npm run audit:web                         # legacy-scan web --json; telemetry off by default
+npm run audit:startup                     # Static module graph and raw source bytes
+npm run audit:startup -- --ref acb803e      # Compare with a Git revision
+npm run check
+npm run typecheck
+npm test
+npm run build
+```
+
+Review scanner findings manually. The byte report describes static source-module dependencies, not actual transfer size or page timing. Before release, check iPhone / iPad Safari and Chrome, plus desktop browsers: CJK input-method confirmation, dialog focus and return behavior, asynchronous Madden imports, repeated search, and narrow field/property panels. Record the devices, browsers and gaps actually tested; DOM tests do not replace browser acceptance. See [Web platform optimization and regression notes](WEB_PLATFORM_OPTIMIZATION.md) (Chinese) for implementation details.
+
+**Madden assets and offline limits:** publish every `web/data/madden-editable-*.js` geometry shard. Browsing and search do not load these large files; adding an editable play requests its required shard. The Service Worker does not precache all geometry. Successfully fetched same-origin resources can enter the runtime cache, but the first offline import from an unfetched shard is unavailable and needs an online load. Offline availability also depends on cache retention. Once imported, players and routes are stored in the playbook, so editing that saved play does not need its source shard again; cloud sign-in and synchronization still require a connection. Opening the home page does not make every Madden play available for offline import.
+
 ### Path A: local static demo
 
 Requires Git and **Node.js 24** (minimum 22.13.0). Inspect the branch and working tree before using an existing checkout.

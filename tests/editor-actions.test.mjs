@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { starterWorkspace, decodeWorkspace, encodeWorkspace } from '../web/model.js';
-import { hasEditableTrace } from '../web/madden-model.js';
+import { hasEditableTrace, loadEditableEntries } from '../web/madden-model.js';
 import { EDITOR_ACTIONS, EditorActionSchema, parseEditorActions, prepareEditorActions, getEditorOverview } from '../web/editor-actions.js';
 
 const context = () => {
@@ -174,9 +174,10 @@ test('a local batch resolves selections against the play selected earlier in tha
   ]), /not on the current diagram/);
 });
 
-test('catalog import requires actual entries, preserves references and remaps editable geometry coherently', () => {
+test('catalog import requires actual entries, preserves references and remaps editable geometry coherently', async () => {
   const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url), 'utf8'));
   const entry = catalog.plays.find(row => hasEditableTrace(row.id));
+  await loadEditableEntries([entry.id]);
   const input = {...context(), catalogRows:[entry]}, actions = [{kind:'catalog_import', catalogId:entry.id}];
   const plan = prepareEditorActions(input, actions);
   const play = plan.data.plays.find(play => play.id === plan.selectedId);

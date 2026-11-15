@@ -1,12 +1,14 @@
-import { t } from './i18n.js';
+import { t, getLocale } from './i18n.js';
+import { maddenLoadingCopy } from './locales/madden-loading.js';
 import { loadMaddenCatalog } from './madden-catalog.js';
 import { reconcileHTML } from './reconcile.js';
 import { escapeHTML as e } from './model.js';
 import { filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace, retainedReason, teamDisplayName } from './madden-model.js';
 
-export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
+export function createMaddenLibrary({ canEdit, getPlays, onImport }) {
   let root, catalog, loading, opened = false, failure = '', team = 'eagles', group = '', formation = '', query = '', page = 1, preview = null, returnFocus;
   let result = null, editableOnly = true, listPanelTop = 0;
+  let importing = null, importSession = 0;
   const pageSize = 30;
   const compact = () => window.innerWidth <= 1180 || window.matchMedia?.('(any-pointer: coarse)').matches;
   const focusable = () => [...root.querySelectorAll('button,input,select,a[href],[tabindex]')]
@@ -89,18 +91,32 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
     root.querySelector(`[data-madden="preview"][data-id="${prior}"]`)?.focus({ preventScroll: true });
   }
   function clearDrag() { document.body.classList.remove('madden-dragging'); document.querySelectorAll('.madden-drop-hover').forEach(n => n.classList.remove('madden-drop-hover')); }
-  function add(id) {
+  async function add(id) {
+    if (importing) return;
     const play = entry(id);
     if (!play || !canEdit() || imported().has(id)) {
       result = { type: 'warning', message: !play ? (t("extra.thisPlayIsNotInTheCurrent")) : !canEdit() ? (t("extra.youHaveReadOnlyAccessAndCannot")) : (t("extra.thisPlayIsAlreadyInYourPlaybook")) };
     } else {
-      const outcome = onImport({ ...play, teamName: catalog.teams.find(t => t.id === play.team)?.name });
-      result = outcome?.ok ? { ...outcome, type: 'success', message: `${t("extra.added")} ${play.name}${hasEditableTrace(play.id) ? (" · " + t("extra.editable")) : (" · " + t("extra.imageOnly"))}` } : { type: 'error', message: outcome?.message || (t("extra.couldNotAddPlayPleaseTryAgain")) };
+      const job = {id, session:importSession,controller:new AbortController()};
+      importing = job;
+      result = {type:'info', message:maddenLoadingCopy(getLocale()).loading};
+      render();
+      try {
+        const outcome = await onImport({ ...play, teamName: catalog.teams.find(t => t.id === play.team)?.name },{signal:job.controller.signal});
+        if (importing !== job || job.session !== importSession || !opened) return;
+        result = outcome?.ok ? { ...outcome, type: 'success', message: `${t("extra.added")} ${play.name}${hasEditableTrace(play.id) ? (" · " + t("extra.editable")) : (" · " + t("extra.imageOnly"))}` } : { type:outcome?.awaitingUser ? 'info' : 'error', message: outcome?.message || (t("extra.couldNotAddPlayPleaseTryAgain")) };
+      } catch {
+        if (importing !== job || job.session !== importSession || !opened) return;
+        result = {type:'error', message:maddenLoadingCopy(getLocale()).failed};
+      } finally {
+        if (importing === job) importing = null;
+      }
+      if (job.session !== importSession || !opened) return;
     }
     render();
     const card = root.querySelector(`[data-madden-card="${id}"]`);
     if (result.type === 'success') { card?.classList.add('just-added'); setTimeout(() => card?.classList.remove('just-added'), 650); }
-    root.querySelector('.madden-result-message')?.focus({ preventScroll: true });
+    if (root.contains(document.activeElement)) root.querySelector('.madden-result-message')?.focus({ preventScroll: true });
   }
   async function load() {
     failure = ''; render();
@@ -135,9 +151,12 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport, notify }) {
     bar.hidden = !result;
     if (result) reconcileHTML(bar, `<span class="madden-result-message" tabindex="-1" role="${result.type === 'error' ? 'alert' : 'status'}">${e(result.message)}</span>${result.canUndo?.() ? ("<button data-madden=\"undo-result\">" + t("extra.undo") + "</button>") : ''}${result.view ? ("<button data-madden=\"view-result\">" + t("extra.view") + "</button>") : ''}`);
     if (result) bar.dataset.type = result.type;
+    root.querySelector('.madden-panel')?.setAttribute('aria-busy', String(!!importing));
+    root.querySelectorAll('[data-madden="add"]').forEach(button => { button.disabled = !!importing || !canEdit() || imported().has(button.dataset.id); });
+    root.querySelectorAll('[data-madden-card]').forEach(card => { card.draggable = !importing && canEdit() && !imported().has(card.dataset.maddenCard); });
     syncViewport();
   }
-  async function open() { if (!root) attach(); opened = true; result = null; returnFocus = document.activeElement; document.body.classList.add('madden-open'); render(); root.querySelector('[data-madden="close"]')?.focus(); if (!catalog) await load(); }
-  function close() { opened = false; preview = null; if (root) { root.hidden = true; root.innerHTML = ''; } document.body.classList.remove('madden-open'); clearDrag(); if (returnFocus?.isConnected && !returnFocus.closest('[inert]')) returnFocus.focus(); else document.querySelector('.topbar [data-action="madden-library"]')?.focus(); }
+  async function open() { if (!root) attach(); importing?.controller.abort(); importSession++; importing = null; opened = true; result = null; returnFocus = document.activeElement; document.body.classList.add('madden-open'); render(); root.querySelector('[data-madden="close"]')?.focus(); if (!catalog) await load(); }
+  function close() { importing?.controller.abort(); importSession++; importing = null; opened = false; preview = null; if (root) { root.hidden = true; root.innerHTML = ''; } document.body.classList.remove('madden-open'); clearDrag(); if (returnFocus?.isConnected && !returnFocus.closest('[inert]')) returnFocus.focus(); else document.querySelector('.topbar [data-action="madden-library"]')?.focus(); }
   return { open, close, refresh: render, get isOpen() { return opened; } };
 }

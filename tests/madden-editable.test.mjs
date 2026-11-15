@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
-import { makeMaddenPlay, filterCatalog, spaceMaddenLine } from '../web/madden-model.js';
+import { makeMaddenPlay, filterCatalog, spaceMaddenLine, loadEditableEntries } from '../web/madden-model.js';
 import { validatePlay, starterWorkspace, encodeWorkspace, decodeWorkspace, movePlayer, mirrorPlay, animatedPlayer, STORAGE_KEY } from '../web/model.js';
 import { handleApi } from '../server/api.mjs';
 import { database } from './helpers/db.mjs';
 const entries = Object.values(EDITABLE_TRACES);
+await loadEditableEntries(entries.map(entry => entry.id));
 const audit = JSON.parse(readFileSync(new URL('../docs/madden-conversion-audit.json', import.meta.url)));
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
 
@@ -115,6 +116,8 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
     await import(`../web/app.js?traced=${Date.now()}`);
     const $=s=>win.document.querySelector(s),click=a=>$(`[data-action="${a}"]`).click();
     click('convert-reference');
+    const conversionDeadline=Date.now()+3000;
+    while (decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length===9 && Date.now()<conversionDeadline) await new Promise(resolve=>setTimeout(resolve,10));
     let saved=decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
     assert.equal(saved.plays.length,10);assert.deepEqual(saved.plays[0],original);
     const copy=saved.plays.at(-1);assert.ok(copy.diagramSource);assert.match(copy.notes,/My coaching note/);
@@ -135,6 +138,8 @@ test('an existing original gets an editable copy; drag, mirror, playback and sou
     search.value='';search.dispatchEvent(new win.Event('input',{bubbles:true}));
     const next=[...win.document.querySelectorAll('.madden-card')].find(node=>!node.querySelector('[data-madden="add"]').disabled);
     assert.ok(next);next.querySelector('[data-madden="add"]').click();
+    const importDeadline=Date.now()+3000;
+    while ($('.madden-panel')?.getAttribute('aria-busy')==='true' && Date.now()<importDeadline) await new Promise(resolve=>setTimeout(resolve,10));
     assert.match($('.madden-result-bar').textContent,/可编辑/);
     click('madden-library'); // editor controls can reopen the same persistent panel
     $('[data-madden="close"]').click();

@@ -69,10 +69,10 @@ test('zoomed editor retains the viewport through deletion and history operations
     const height=q('#board-height');height.value='700';height.dispatchEvent(new win.Event('input',{bubbles:true}));height.dispatchEvent(new win.Event('change',{bubbles:true}));
     const layout=win.localStorage.getItem('playbook-studio-board-layout-v1'), width=q('.workspace').style.getPropertyValue('--pitch-width');
     const routeId=seed.plays[0].routes[0].id, routeCount=seed.plays[0].routes.length;
-    await t.test('delete button preserves both pitch axes and the page after replacing the editor',()=>{
+    await t.test('delete button preserves the live viewport, both pitch axes and the page',()=>{
       selectRoute(routeId);positionView();const viewport=q('.pitch-viewport');
       click('.inspector [data-action="delete-selection"]');
-      assert.notEqual(q('.pitch-viewport'),viewport,'regression exercises a full remount');
+      assert.ok(q('.pitch-viewport')===viewport,'same-play edits retain the live viewport');
       assert.equal(data().plays[0].routes.length,routeCount-1);assert.equal(q(`#field [data-route="${routeId}"]`),null);
       assertView();assert.equal(q('.workspace').style.getPropertyValue('--pitch-width'),width);
       assert.equal(win.localStorage.getItem('playbook-studio-board-layout-v1'),layout,'editing does not overwrite local dimensions');

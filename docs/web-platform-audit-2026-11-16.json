@@ -1,0 +1,190 @@
+{
+  "date": "2026-11-16",
+  "baselineCommit": "acb803eb59229441daa3ff0fe6a83ba84ee19fd9",
+  "before": {
+    "ref": "acb803e",
+    "measurement": "UTF-8 source bytes; excludes compression, HTTP cache, execution time and runtime imports",
+    "startup": {
+      "modules": 101,
+      "bytes": 3253453,
+      "geometry": [
+        {
+          "path": "web/data/madden-editable.js",
+          "bytes": 521
+        },
+        {
+          "path": "web/data/madden-editable-seed.js",
+          "bytes": 71036
+        },
+        {
+          "path": "web/data/madden-editable-batch.js",
+          "bytes": 37960
+        },
+        {
+          "path": "web/data/madden-editable-80.js",
+          "bytes": 329919
+        },
+        {
+          "path": "web/data/madden-editable-oct28.js",
+          "bytes": 95067
+        },
+        {
+          "path": "web/data/madden-editable-continued.js",
+          "bytes": 567408
+        },
+        {
+          "path": "web/data/madden-editable-final.js",
+          "bytes": 542151
+        }
+      ]
+    },
+    "serviceWorker": {
+      "precacheFiles": 134,
+      "geometry": [
+        "web/data/madden-editable-seed.js",
+        "web/data/madden-editable-batch.js",
+        "web/data/madden-editable-80.js",
+        "web/data/madden-editable-oct28.js",
+        "web/data/madden-editable-continued.js",
+        "web/data/madden-editable-final.js",
+        "web/data/madden-editable.js"
+      ]
+    },
+    "largestStartupModules": [
+      {
+        "path": "web/data/madden-editable-continued.js",
+        "bytes": 567408
+      },
+      {
+        "path": "web/data/madden-editable-final.js",
+        "bytes": 542151
+      },
+      {
+        "path": "web/vendor/assistant-zod.js",
+        "bytes": 453877
+      },
+      {
+        "path": "web/data/madden-editable-80.js",
+        "bytes": 329919
+      },
+      {
+        "path": "web/app.js",
+        "bytes": 140821
+      },
+      {
+        "path": "web/data/madden-search-tags.js",
+        "bytes": 97882
+      },
+      {
+        "path": "web/data/madden-editable-oct28.js",
+        "bytes": 95067
+      },
+      {
+        "path": "web/data/madden-editable-seed.js",
+        "bytes": 71036
+      },
+      {
+        "path": "web/data/madden-trace-status.js",
+        "bytes": 50434
+      },
+      {
+        "path": "web/vendor/embla-carousel-8.6.0/embla-carousel.esm.js",
+        "bytes": 48089
+      }
+    ]
+  },
+  "after": {
+    "ref": "working-tree",
+    "measurement": "UTF-8 source bytes; excludes compression, HTTP cache, execution time and runtime imports",
+    "startup": {
+      "modules": 99,
+      "bytes": 1737735,
+      "geometry": []
+    },
+    "serviceWorker": {
+      "precacheFiles": 134,
+      "geometry": []
+    },
+    "largestStartupModules": [
+      {
+        "path": "web/vendor/assistant-zod.js",
+        "bytes": 453877
+      },
+      {
+        "path": "web/app.js",
+        "bytes": 145727
+      },
+      {
+        "path": "web/data/madden-search-tags.js",
+        "bytes": 97882
+      },
+      {
+        "path": "web/data/madden-trace-evidence.js",
+        "bytes": 94672
+      },
+      {
+        "path": "web/data/madden-trace-status.js",
+        "bytes": 50434
+      },
+      {
+        "path": "web/vendor/embla-carousel-8.6.0/embla-carousel.esm.js",
+        "bytes": 48089
+      },
+      {
+        "path": "web/cloud.js",
+        "bytes": 41933
+      },
+      {
+        "path": "web/data/madden-team-trace-aliases.js",
+        "bytes": 39862
+      },
+      {
+        "path": "web/locales/en.js",
+        "bytes": 36049
+      },
+      {
+        "path": "web/locales/zh-CN.js",
+        "bytes": 35917
+      }
+    ]
+  },
+  "validation": {
+    "automatedTests": {
+      "command": "node --test --test-concurrency=4 tests/*.test.mjs",
+      "passed": 634,
+      "failed": 0
+    },
+    "checks": [
+      "npm run check",
+      "npm run typecheck",
+      "npm run build",
+      "changed-file ESLint",
+      "git diff --check"
+    ],
+    "legacyScan": {
+      "tool": "modern-web-guidance@1.0.0",
+      "rules": 35,
+      "before": 1,
+      "after": 0
+    },
+    "browser": {
+      "engine": "Chrome",
+      "coverage": [
+        "native dialog open/Escape/focus return",
+        "Madden editable import and library undo",
+        "library actions not obscured by global controls",
+        "English and Chinese component layout",
+        "220–428px inspector widths",
+        "545x374 zoomed narrow viewport, properties drawer and dialog"
+      ],
+      "notVerified": [
+        "real iPhone/iPad Safari and Chrome input methods or software keyboard",
+        "runtime INP/LCP improvement or compressed transfer reduction"
+      ]
+    }
+  },
+  "limitations": [
+    "Source byte accounting is not a network or timing benchmark.",
+    "Geometry not previously fetched is unavailable for first-time offline import."
+  ]
+}
