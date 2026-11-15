@@ -2,6 +2,7 @@ import { getLocale } from './i18n.js';
 import { escapeHTML as e } from './model.js';
 import en from './locales/board-assistant.en.js';
 import zh from './locales/board-assistant.zh-CN.js';
+import { MODEL_PROVIDER_PRESETS, PROTOCOL_OPTIONS } from './model-protocol.js';
 
 const symbols = {
   spark: '<path d="m11 2 2.1 6.6L20 11l-6.9 2.3L11 20l-2.2-6.7L2 11l6.8-2.4zM19 2v4m-2-2h4"/>',
@@ -21,8 +22,10 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     <section class="ba-panel" id="board-ai-panel" role="dialog" aria-modal="false" aria-labelledby="board-ai-heading" hidden>
       <header class="ba-header"><button type="button" class="ba-expand ba-pill" data-ba="expand" data-text="expand"></button><div class="ba-heading" data-ba-drag>${glyph('spark')}<div><h2 id="board-ai-heading" data-text="title"></h2><small class="ba-scope"></small></div></div>
         <button type="button" class="ba-icon" data-ba="settings">${glyph('settings')}</button><button type="button" class="ba-icon" data-ba="close">${glyph('close')}</button></header>
-      <div class="ba-content"><div class="ba-config" hidden><label><span data-text="provider"></span><select data-ba-provider><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option></select></label>
-        <label><span data-text="model"></span><input data-ba-model value="gpt-6.1-terra" maxlength="150" autocomplete="off" spellcheck="false"></label>
+      <div class="ba-content"><div class="ba-config" hidden><label><span data-text="provider"></span><select data-ba-provider>${Object.entries(MODEL_PROVIDER_PRESETS).map(([id,preset])=>`<option value="${e(id)}">${e(preset.label)}</option>`).join('')}</select></label>
+        <label><span data-text="protocol"></span><select data-ba-protocol></select></label>
+        <label data-ba-custom hidden><span>API Base URL</span><input data-ba-base-url type="url" maxlength="400" autocomplete="off" spellcheck="false" placeholder="https://api.example.com/v1"><small data-ba-url-hint></small></label>
+        <label><span data-text="model"></span><input data-ba-model value="gpt-6.1-terra" maxlength="160" autocomplete="off" spellcheck="false"></label>
         <label><span data-text="key"></span><input data-ba-key type="password" autocomplete="off" maxlength="512" spellcheck="false"></label><small data-text="keyHint"></small>
         <button type="button" class="ba-pill" data-ba="done" data-text="done"></button></div>
         <div class="ba-output" hidden></div><div class="ba-welcome"><strong data-ba-guide></strong><div class="ba-examples">
@@ -37,6 +40,19 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   const button = name => q('[data-ba="' + name + '"]');
   const panel = q('.ba-panel'), output = q('.ba-output'), config = q('.ba-config'), prompt = q('[data-ba-prompt]');
   const status = q('.ba-status'), key = q('[data-ba-key]'), model = q('[data-ba-model]'), provider = q('[data-ba-provider]');
+  const protocol = q('[data-ba-protocol]'), baseUrl = q('[data-ba-base-url]');
+  provider.value = 'openai';
+  function syncModelOptions(reset = false) {
+    const preset = MODEL_PROVIDER_PRESETS[provider.value];
+    const selected = !reset && preset.protocols.includes(protocol.value) ? protocol.value : preset.defaultProtocol;
+    protocol.innerHTML = preset.protocols.map(value=>`<option value="${e(value)}">${e(PROTOCOL_OPTIONS[value])}</option>`).join('');
+    protocol.value = selected;
+    q('[data-ba-custom]').hidden = provider.value !== 'custom';
+    q('[data-ba-url-hint]').textContent = getContext().serverProxy ? copy().customCloudHint : copy().customBrowserHint;
+    const custom = provider.querySelector('option[value="custom"]');
+    if (custom) custom.textContent = copy().customProvider;
+  }
+  syncModelOptions();
   const Speech = win.SpeechRecognition || win.webkitSpeechRecognition;
   let scope, locale, pending, recognition, reply, applying, clarification = '', selectedMode = 'auto', destroyed = false;
   let previous = [], requestInstruction = '', trace = [], runNumber = 0;
@@ -181,6 +197,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     outputView(); updateButtons();
   }
   function showConfig(show) {
+    if (show) syncModelOptions();
     config.hidden = !show; outputView(); updateButtons();
     if (show) key.focus();
   }
@@ -211,6 +228,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       for (const action of ['open','settings','close']) label(button(action), lang[action]);
       label(prompt, lang.prompt);
       q('[data-ba-drag]').title = lang.move;
+      syncModelOptions();
     }
     if (scope !== ctx.scope) { scope = ctx.scope; reset(); }
     q('.ba-scope').textContent = ctx.title || '';
@@ -234,6 +252,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     const lang = copy(), text = prompt.value.trim();
     if (!text || recognition) return;
     if (!key.value.trim() || !model.value.trim()) { showConfig(true); announce(lang.configure); return; }
+    if (provider.value === 'custom' && !baseUrl.value.trim()) { showConfig(true); announce(lang.customUrlRequired,true); baseUrl.focus(); return; }
     const requestScope = getContext().scope;
     const control = new AbortController();
     pending = control;
@@ -243,7 +262,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     const progress = [];
     config.hidden = true; reply = null; outputView(); updateButtons(); announce(lang.loading);
     try {
-      const result = await onRequest({prompt:instruction, mode:selectedMode, provider:provider.value, model:model.value.trim(),
+      const result = await onRequest({prompt:instruction, mode:selectedMode, provider:provider.value, protocol:protocol.value, baseUrl:provider.value === 'custom' ? baseUrl.value.trim() : '', model:model.value.trim(),
         apiKey:key.value.trim(), signal:control.signal, locale:getLocale(), previous:previous.slice(),
         onEvent(event) { if (pending === control && !control.signal.aborted && requestScope === getContext().scope) recordEvent(event); },
         onTool(name, args) {
@@ -345,7 +364,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     }
   });
   prompt.addEventListener('input', updateButtons);
-  provider.addEventListener('change', () => { key.value = ''; model.value = provider.value === 'openrouter' ? 'openai/gpt-6.1-terra' : 'gpt-6.1-terra'; key.focus(); });
+  provider.addEventListener('change', () => { key.value = ''; baseUrl.value = ''; model.value = MODEL_PROVIDER_PRESETS[provider.value].defaultModel; syncModelOptions(true); key.focus(); });
   root.addEventListener('keydown', event => {
     event.stopPropagation();
     if (event.isComposing || event.keyCode === 229) return;

@@ -2,12 +2,9 @@ import { runBoardAssistant, BOARD_AGENT_LIMITS } from './assistant-harness.js';
 import { providerMessages } from './locales/assistant-provider.js';
 import { validatePlay, COLORS, clone, decodeWorkspace, encodeWorkspace } from './model.js';
 import { submitResultTool } from './assistant-schema.js';
+import { buildModelRequest, parseModelResponse, resolveModelEndpoint } from './model-protocol.js';
 
 export const DEFAULT_BOARD_MODEL = 'gpt-6.1-terra';
-const endpoints = new Map([
-  ['openai', 'https://api.openai.com/v1/chat/completions'],
-  ['openrouter', 'https://openrouter.ai/api/v1/chat/completions'],
-]);
 const words = locale => providerMessages[locale === 'en' ? 'en' : 'zh-CN'];
 const text = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
 const validPoint = point => point && [point.x, point.y].every(n => Number.isFinite(n) && n >= 0 && n <= 100);
@@ -49,40 +46,12 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
       ...(play.players.some(p => p.id === selected) ? {selectedPlayerId:selected} : {})}};
 }
 
-function anthropicMessages(messages) {
-  const out = [];
-  for (const m of messages.slice(1)) {
-    if (m.role === 'tool') {
-      const block = { type: 'tool_result', tool_use_id: m.tool_call_id, content: m.content };
-      const last = out.at(-1);
-      if (last?.role === 'user' && Array.isArray(last.content)) last.content.push(block);
-      else out.push({ role: 'user', content: [block] });
-    } else out.push({ role: m.role, content: m.anthropicContent ?? m.content });
-  }
-  return out;
-}
-
 function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {
-  const anthropic = config.protocol === 'anthropic';
   const max = BOARD_AGENT_LIMITS.replyTokens;
   return async (messages, definitions, allowTools, {forceSubmit = false} = {}) => {
-    const headers = { 'Content-Type': 'application/json' };
-    let payload;
-    if (anthropic) {
-      headers['x-api-key'] = config.apiKey;
-      headers['anthropic-version'] = '2023-06-01';
-      payload = { model: config.model, system: messages[0].content, messages: anthropicMessages(messages), max_tokens: max,
-        tools: definitions.map(({ function: f }) => ({ name: f.name, description: f.description, input_schema: f.parameters })),
-        tool_choice: forceSubmit ? {type:'tool',name:'submit_result'} : {type:'auto'} };
-    } else {
-      headers.Authorization = 'Bearer ' + config.apiKey;
-      payload = { model: config.model, messages, tools: definitions, tool_choice: forceSubmit ? {type:'function',function:{name:'submit_result'}} : 'auto',
-        ...(config.provider === 'openai' ? { max_completion_tokens: max } : { max_tokens: max }) };
-    }
-    // Terra's Chat Completions endpoint accepts function tools with reasoning disabled.
-    if (config.provider === 'openai' && config.model === 'gpt-6.1-terra') payload.reasoning_effort = 'none';
-    if (config.provider === 'deepseek') payload.thinking = { type: 'disabled' };
-    const send = async body => {
+    const makeRequest = (history, tools, toolChoice) => buildModelRequest(config,history,{tools,toolChoice,maxTokens:max,browser:config.browser === true});
+    const payload = makeRequest(messages,definitions,forceSubmit ? {type:'function',function:{name:'submit_result'}} : 'auto');
+    const send = async ({headers,body}) => {
       if (signal?.aborted) throw signal.reason || new DOMException('The assistant request was cancelled.', 'AbortError');
       const request = new AbortController();
       const abort = () => request.abort(signal.reason);
@@ -125,20 +94,14 @@ function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {
         /tool[_ -]?choice|forced? tool|function selection/i.test(detail) && /not supported|unsupported|does not support|not allowed/i.test(detail);
       if (!unsupportedChoice) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
       textFallback = true;
-      const {tools,tool_choice,...fallback} = payload;
-      fallback.messages = [...payload.messages,{role:'user',content:'This provider cannot force a tool. Return only the inner result object as JSON according to this generated contract: '+JSON.stringify(submitResultTool.function.parameters.properties.result)}];
+      const fallbackMessages = [...messages,{role:'user',content:'This provider cannot force a tool. Return only the inner result object as JSON according to this generated contract: '+JSON.stringify(submitResultTool.function.parameters.properties.result)}];
+      const fallback = makeRequest(fallbackMessages,config.protocol === 'anthropic' ? definitions : [],'auto');
+      delete fallback.body.tool_choice;
       ({response,data} = await send(fallback));
       if (!response.ok) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
     }
-    if (anthropic && Array.isArray(data?.content)) {
-      const calls = data.content.filter(b => b.type === 'tool_use').map(b => ({ id: b.id, type: 'function', function: { name: b.name, arguments: JSON.stringify(b.input) } }));
-      return { role: 'assistant', textFallback, anthropicContent: data.content, content: data.content.filter(b => b.type === 'text').map(b => b.text).join(''), tool_calls: calls };
-    }
-    const m = data?.choices?.[0]?.message;
-    if (!m || (m.tool_calls != null && !Array.isArray(m.tool_calls))) throw new Error(words(locale).invalid);
-    return { role: 'assistant', textFallback, content: typeof m.content === 'string' ? m.content : null,
-      ...(Array.isArray(m.tool_calls) && m.tool_calls.length ? { tool_calls: m.tool_calls } : {}),
-      ...(typeof m.reasoning_content === 'string' ? { reasoning_content: m.reasoning_content } : {}) };
+    try { return {...parseModelResponse(config,data),textFallback}; }
+    catch (error) { throw new Error(words(locale).invalid + (error?.message ? ' ' + error.message : '')); }
   };
 }
 
@@ -190,14 +153,15 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
     if (!result) throw new Error(words(locale).invalid);
     return result;
   }
-  const endpoint = endpoints.get(provider);
-  if (!endpoint) throw new Error(words(locale).unsupported);
+  let resolved;
+  try { resolved=resolveModelEndpoint(config); }
+  catch (error) { throw new Error(words(locale).settings + (error?.message ? ' ' + error.message : '')); }
   const searchCatalog = async(args, options) => {
     const { searchMaddenCatalog, loadAssistantCatalog } = await import('./assistant-search.js');
     return searchMaddenCatalog(await (loadCatalog || loadAssistantCatalog)(), args, options);
   };
   if (input.editor) input.editor.loadCatalog = loadCatalog || (await import('./assistant-search.js')).loadAssistantCatalog;
-  return invokeBoardModel({ ...config, protocol: 'openai', endpoint }, input, {
+  return invokeBoardModel({ ...resolved, browser:true }, input, {
     runtime: runtime || await import('./vendor/assistant-langgraph.js'), signal, fetchImpl, searchCatalog, onTool, onEvent,
   });
 }

@@ -439,8 +439,8 @@ function mountBoardAssistant() {
     let offered = new Map();
     boardAssistant = createBoardAssistant({
       host,
-      getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit()}),
-      async onRequest({prompt, mode, previous, onTool, onEvent, provider, model, apiKey, signal, locale}) {
+      getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit(), serverProxy:cloudMode()}),
+      async onRequest({prompt, mode, previous, onTool, onEvent, provider, protocol, baseUrl, model, apiKey, signal, locale}) {
         clearAssistantPreview();
         document.querySelector('#field .assistant-highlights')?.remove();
         const play = clone(current()), scope = assistantScope();
@@ -448,7 +448,7 @@ function mountBoardAssistant() {
         const workspace = cloudMode() ? shared?.current : null;
         if (cloudMode() && !workspace) throw Error(editBlockedMessage());
         const result = await requestBoardAssistant({
-          instruction: prompt, mode, previous, onTool, onEvent, locale, signal, model: {provider, model, apiKey},
+          instruction: prompt, mode, previous, onTool, onEvent, locale, signal, model: {provider, protocol, baseUrl, model, apiKey},
           board: {...play, play: clone(play), playId: play.id, players: assistantPlayers(play, state.data.roster),
             selectedPlayerId: selection?.type === 'player' ? selection.id : null,
             routes: play.routes},
