@@ -1,14 +1,9 @@
 import { orientDefense } from '../web/matchup-model.js';
 import { fail } from './http.mjs';
 import { ANALYSIS_COVERAGES, retrieveMatchupKnowledge, knowledgeEvidence, diagramFacts, diagramIntersections } from '../web/analysis-evidence.js';
+import { resolveModelEndpoint } from '../web/model-protocol.js';
 export { segmentHitsZone } from '../web/analysis-evidence.js';
 
-const PROVIDERS = {
-  deepseek: { openai: 'https://api.deepseek.com/chat/completions', anthropic: 'https://api.deepseek.com/anthropic/v1/messages' },
-  anthropic: { anthropic: 'https://api.anthropic.com/v1/messages' },
-  openrouter: { openai: 'https://openrouter.ai/api/v1/chat/completions' },
-  openai: { openai: 'https://api.openai.com/v1/chat/completions' },
-};
 const text = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 const ref = (side, type, id) => `${side}:${type}:${id}`;
 
@@ -62,26 +57,16 @@ export function buildMatchup(offense, defense, options = {}) {
 
 export function modelEndpoint(config, env = {}) {
   if (!config || typeof config !== 'object') fail(400, '请填写模型服务配置');
-  const provider = text(config.provider, 30);
-  const protocol = config.protocol == null || config.protocol === '' ? (provider === 'anthropic' ? 'anthropic' : 'openai') : config.protocol;
-  if (!['openai', 'anthropic'].includes(protocol)) fail(400, '请选择支持的 API 格式');
-  let endpoint = PROVIDERS[provider]?.[protocol];
-  if (provider === 'custom') {
-    let u;
-    try { u = new URL(config.baseUrl); } catch { fail(400, '自定义地址须为 HTTPS API 地址'); }
+  let resolved;
+  try { resolved = resolveModelEndpoint(config); }
+  catch (error) { fail(400, error.message); }
+  if (resolved.provider === 'custom') {
+    const u = new URL(resolved.endpoint);
     const allowed = String(env.AI_ALLOWED_HOSTS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
     const host = u.hostname.toLowerCase();
     if (u.protocol !== 'https:' || u.username || u.password || u.search || u.hash || (u.port && u.port !== '443') || !allowed.includes(host) || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal') || /^[0-9.]+$/.test(host) || host.includes(':') || host.includes('[')) fail(400, '自定义地址不在管理员允许的安全主机列表中');
-    u.pathname = u.pathname.replace(/\/+$/, '');
-    const suffix = protocol === 'anthropic' ? '/messages' : '/chat/completions';
-    if (!u.pathname.endsWith(suffix)) u.pathname += suffix;
-    endpoint = u.toString();
   }
-  if (!endpoint) fail(400, '请选择支持的模型服务');
-  const model = text(config.model, 160), apiKey = typeof config.apiKey === 'string' ? config.apiKey.trim() : '';
-  if (!model || /[\r\n]/.test(model)) fail(400, '请输入服务商提供的模型 ID');
-  if (!apiKey || apiKey.length > 512 || /[^\x21-\x7e]/.test(apiKey)) fail(400, '请输入有效的 API Key');
-  return { provider, protocol, endpoint, model, apiKey };
+  return resolved;
 }
 
 export function parseModelResult(raw, evidence) {

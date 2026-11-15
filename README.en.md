@@ -6,324 +6,116 @@
 
 # Playbook Studio
 
-An American football playbook workspace for drawing plays, rehearsing routes, analyzing matchups, and sharing a playbook with your team.
+An American football workspace for drawing plays, rehearsal, AI-assisted analysis and team collaboration.
 
-[Open the cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [Live demo · no sign-in](https://timpickle.github.io/playbook-studio-web/) · [Visual walkthrough](#visual-walkthrough) · [AI deployment](#ai-agent-deployment-guide) · [Local development](#local-development)
+[Live demo · no sign-in](https://timpickle.github.io/playbook-studio-web/) · [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md)
 
 </div>
 
-The interface supports English and Simplified Chinese. Choose a language from the language menu; play names and notes you create remain unchanged. See the [localization guide](docs/I18N.md) for adding languages.
-
-![The current silver and graphite workspace: playbook on the left, field in the center, floating toolbar below, and properties on the right](docs/assets/readme/editor-silver.jpg)
-
-Choose a play on the left, arrange players and draw routes in the center, and adjust properties on the right. Below the field, switch between **布阵与画线** (Edit) and **战术演练** (Rehearse). All screenshots below were captured from the current local demo using built-in examples and Madden catalog plays.
+![Silver workspace with the playbook, field and properties panel](docs/assets/readme/editor-silver.jpg)
 
 ## What you can do
 
-| Workflow | Available features |
+| Feature | Capabilities |
 |---|---|
-| **Design plays** | Move offensive and defensive players; draw routes, blocks, pre-snap motion, passes, coverage zones, and text. Use curves, option routes, mirroring, undo, and redo |
-| **Explain and rehearse** | Play, pause, loop, change speed, and scrub the timeline. Set route start times, durations, ball carriers, and pass timing |
-| **Build a playbook** | Organize offense, defense, and special teams; search, favorite, duplicate, and save formation templates and coaching notes |
-| **Manage players** | See starters and ranked backups on each group’s formation diagram. Search the player roster by name, number or position |
-| **Import Madden plays** | Filter, preview, and add plays from 13 NFL teams. Edit players and routes in 1,056 reconstructed entries |
-| **Analyze matchups with AI** | Inspect real diagram facts and retrieved coaching references without a key; import local team knowledge, then connect a model for conditional scenarios with source inspection and diagram highlights |
-| **Share with your team** | Cloud autosave, access across devices, per-playbook permissions, conflict handling, and the latest 20 saved versions |
-| **Export and print** | Export PNG, SVG, an individual play, or a full playbook as JSON. Print A4 playbooks, nine-panel wristband cards, and call sheets |
+| **Edit plays** | Players, routes, blocks, motion, passes, coverage zones and text; mirroring, templates, undo and redo |
+| **Rehearse** | Playback, looping, speed and timeline controls; route and pass timing |
+| **Playbooks and players** | Offense, defense and special teams; favorites, notes, formations and personnel-group DEPTH CHARTs |
+| **Madden library** | 13 NFL teams and 1,827 entries, including 1,056 editable plays; filter, preview and import |
+| **AI board assistant** | Natural-language editing, formations, playbook management, view and rehearsal controls, and file workflows |
+| **AI matchup analysis** | Diagram briefs, retrieved coaching evidence and conditional model scenarios with diagram highlights |
+| **Team collaboration** | Cloud autosave, permissions, access across devices, conflict handling and version history |
+| **Export and print** | PNG, SVG and JSON; A4 playbooks, wristband cards and call sheets |
 
-The current interface uses a silver and graphite palette. Drawing and rehearsal controls share a floating toolbar below the field. The cloud and demo workspaces both offer three cards for playbook editing, player management and AI matchup analysis; phones and iPads use the traditional view with touch controls.
-
-The analysis workspace includes 13 sourced bilingual coaching principles and distinguishes Cover 3 spot / Match and variant-unconfirmed Cover 2 / Cover 2 Read. Import playbook-scoped, device-local JSON / Markdown / TXT knowledge packs, or preprocess selectable-text PDFs with the local tool. See the [analysis guide and research](docs/ai-analysis/README.md), [competitor study](docs/ai-analysis/research.md), and [multimodal knowledge architecture](docs/ai-analysis/knowledge-architecture.md). Image references provide provenance; visual understanding and cloud knowledge synchronization are future integrations.
+English and Simplified Chinese are supported. Phones and iPads use the traditional view; desktops also offer a digital board.
 
 ## Quick start
 
-1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/). Select **Edit playbook**, then choose a sample or select **新建战术** (New play).
-2. Drag players into position. Use **添加对象** (Add objects) to add individual players or a complete **4–3 defensive formation**.
-3. Select a player, choose **跑动** (Route) or press `R`, then click to place route points. Press `Enter` or select **完成** (Finish).
-4. Switch to **战术演练** (Rehearsal) to play, pause, or scrub the timeline. The space bar also toggles playback.
-5. Save in the current browser or export a JSON backup. For team sharing, sign in to the [cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) and create a playbook.
+1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/) and choose **Edit playbook**.
+2. Open a sample or create a play. Drag players into position; **Add objects** can add a complete **4–3 defense**.
+3. Select a player, press `R`, click route points, then press `Enter` to finish.
+4. Switch to **Rehearsal**, press Space to play or pause, and scrub the timeline.
+5. Export JSON backups. Use the cloud app to create a shared team playbook.
 
-Eight teaching examples are included: Mesh, Four Verticals, Flood, Slants, Inside Zone, Cover 3, Nickel Blitz, and Field Goal. Formation tools support 6-, 7-, 8-, 9-, 11-, and 12-player formats, plus custom templates.
+[Full visual walkthrough, shortcuts and DEPTH CHART instructions →](docs/USER_GUIDE.en.md)
 
-<details>
-<summary>Keyboard shortcuts</summary>
+## AI features
 
-| Action | Shortcut | Action | Shortcut |
-|---|---|---|---|
-| Select / move | `V` | Route | `R` |
-| Block | `B` | Pre-snap motion | `M` |
-| Pass | `P` | Coverage zone / text | `Z` / `T` |
-| Play / pause | `Space` | Finish a route | `Enter` |
-| Undo | `Ctrl / ⌘ + Z` | Redo | `Ctrl / ⌘ + Shift + Z` |
-| Cancel / close | `Esc` | Delete selection | `Delete` |
+- **Board assistant:** click **AI** on the field and enter your model and API key. Try “Add a 4-3 defense,” “Have X run a 12-yard post,” or “Duplicate this play.” Data edits are previewed before applying and undo together.
+- **Matchup analysis:** open **AI matchup analysis** from the workspace. Diagram briefs and retrieved references work without a key. Connect a model for sourced conditional scenarios, and optionally import team knowledge packs.
 
-</details>
+Both entry points support **Anthropic Messages, OpenAI Chat Completions and Responses**, with DeepSeek, Claude, OpenAI, OpenRouter and custom compatible services. Available formats follow the selected provider.
 
-## Game-day DEPTH CHART
+**[Detailed AI guide: setup, examples, knowledge, troubleshooting and limits →](docs/AI_GUIDE.en.md)**
 
-1. Open **Player management** from the workspace. The **DEPTH CHART** opens in formation view. Choose offense, defense or special teams, then a personnel group. Switch from Spread to Bunch to see the receivers cluster on one side. Other templates include the 4-2-5 defense, kickoff, kickoff return, punt, punt return and field goal.
-2. Select a position on the field to see its starter and backups. Choose your name under **Find player** to highlight each role you fill and its depth order. Use **Depth order** to compare positions or **Starters only** for a sideline roll call. Coaches can select **Adjust** to assign players, or choose **Start** beside a backup and save to swap the two players. Add new players in **Player roster**.
-3. Copy a group for an upcoming opponent to keep its lineup and change just the positions you need. For example, select a returner for this week’s Punt Return group and add game-day instructions about when to make the substitution.
-4. To use a lineup on the field, open **Edit playbook** from the workspace. In the details of an editable play, choose a personnel group from the same unit. Review the position matches and select **Apply matching starters**. For example, the QB on the DEPTH CHART matches a single QB marker on the play. Field positions, routes and rehearsal timing stay intact.
+## Play library and player management
 
-For a custom personnel group, choose **Group options → Edit group details → Field diagram template**. Matching positions appear on the field. Other positions are listed separately with their starters and backups.
+Filter Madden entries and select **Add**, or drag them into the playbook. **Editable entries** support route editing and rehearsal; **image-only entries** support viewing, favorites, notes and exports. An image is not automatically converted into editable routes.
 
-## Visual walkthrough
+Open **Player management → DEPTH CHART** for starters and backups in each personnel group. Apply matching starters in the editor without changing positions or routes. [User guide](docs/USER_GUIDE.en.md) · [Madden data notes](docs/MADDEN_BATCH.md)
 
-### 1. Select a route and adjust its points and timing
+![Filter Madden plays and add them to the playbook](docs/assets/readme/madden-library-silver.jpg)
 
-Open **Mesh · 浅交叉** from the play list and click a route on the field. Drag its solid control points to change the path. The right panel switches from play details to **路线设置** (Route settings).
+## Storage and devices
 
-![The selected Y route exposes draggable control points; the right panel shows line styles, curves, and animation timing](docs/assets/readme/route-editing-silver.jpg)
+- **No-sign-in demo:** data stays in the current browser and does not sync across devices. Export JSON before clearing browser data.
+- **Cloud:** sharing and owner/editor/viewer permissions are scoped to each playbook, with the latest 20 saved versions available for recovery.
+- **View and layout:** zoom and resize the field and panels. The desktop digital view uses a compatibility display when WebGL is unavailable.
 
-| Task | Control |
-|---|---|
-| Change a route's direction or depth | Drag the solid points on the selected route |
-| Draw a new route | Select a player → choose **跑动** or press `R` → click turning points → press `Enter` |
-| Change line appearance | Set the line type, color, end marker, or **平滑曲线** (Smooth curve) in the right panel |
-| Adjust departure and arrival timing | Set **启动延迟** (Start delay) and **跑动时长** (Duration), in seconds, under **动画时序** |
-| Undo a change | Use the undo button next to the title or press `Ctrl / ⌘ + Z` |
+[Collaboration and migration](docs/USER_GUIDE.en.md#cloud-collaboration-and-storage) · [Touch devices](docs/TOUCH_WORKSPACE.md) · [Digital board](docs/DIGITAL_BOARD.md)
 
-### 2. Scrub the timeline to inspect crossings and passes
+## Local development and deployment
 
-Select **战术演练** (Rehearse) below the field, then press play or the space bar. Drag the timeline to inspect player positions at a specific moment. The toolbar also provides speed, loop, and reset controls.
-
-![Mesh paused at 2.6 seconds during a pass, with playback, timeline, speed, and loop controls below the field](docs/assets/readme/rehearsal-silver.jpg)
-
-This example is paused at **2.6 seconds**, showing the crossing routes and the ball in flight. Switch back to **布阵与画线** (Edit) to make changes. Set the passer, receiver, and pass timing under **足球移动** (Ball movement) in the right panel.
-
-## Madden play library
-
-Filter by team, formation group, specific formation, or English play name. Preview a play, then drag it into your playbook or select **＋ 加入** (Add); the button also works on mobile. Importing detects duplicates and supports undoing the most recent eligible addition.
-
-### 3. Filter and import an editable play
-
-1. Open **Madden NFL 战术库** on the left and choose a team, such as **Eagles**, **Ravens**, or **Rams**.
-2. Enable **仅看可编辑** (Editable only), then choose a formation. The example below uses **Gun → Gun Bunch TE**.
-3. Click an image to preview it. Select **＋ 加入可编辑版** (Add editable version), or drag the card into the dashed target on the left.
-4. Close the library and continue editing. Next to the play title, **原图对照** (Original image) opens the source image, and **整理锋线间距** (Normalize line spacing) spreads crowded positions.
-
-![Eagles Gun Bunch TE results with the editable-only filter, play cards, add buttons, and drag target on the left](docs/assets/readme/madden-library-silver.jpg)
-
-**MESH after importing:** the visible source routes are now selectable, editable objects. Continue adjusting player positions, route points, and rehearsal timing.
-
-![Imported Madden MESH with editable players, colored routes, original-image comparison, and line-spacing controls](docs/assets/readme/madden-editable-silver.jpg)
-
-| Current Madden 27 catalog snapshot | Count |
-|---|---:|
-| Teams | 13 |
-| Eagles entries | 620 |
-| Ravens entries | 588 |
-| Other 11 teams | 619 |
-| **Total entries** | **1,827** |
-| Editable entries | 1,056 |
-| Image-only entries | 771 |
-| Deduplicated source image files | 1,121 |
-
-**Editable plays** let you move players, adjust visible routes, mirror the formation, and rehearse. Open the original image for comparison. Imports normalize offensive line spacing; existing editable plays also have an undoable **整理锋线间距** (Normalize line spacing) action.
-
-**Image-only plays** can be favorited, annotated with notes, exported, and printed. Players inside the image cannot be moved, and its original routes cannot be played automatically. Editable reconstructions use only visible image content: off-image routes, real timing, and game decisions cannot be established from the image. Rehearsals use adjustable default timing.
-
-[Catalog data](web/data/huddle-catalog.json) · [Data notes](docs/MADDEN_BATCH.md) · [Reconstruction records](docs/MADDEN_REVIEW_2026-10-28-FINAL.md)
-
-
-## AI assistant on the field
-
-Open the editor, click **AI** on the field, and enter your provider, model and API key in settings. Type an instruction or dictate it with the microphone, review the text, and send.
-
-- **Add defense.** Say “Add a 4-3 defense” on an offensive play such as Mesh. Preview 11 defensive markers while retaining the offense and its routes. To replace existing defenders, explicitly request “Reset the defense to 4-3.” The formation itself does not assign coverage. Applied changes can be undone together.
-- **Edit a play.** Try “Have C block the DT in front of him, then block the LB named Alex.” Name or link the intended linebacker to help identify the marker. The assistant resolves markers and previews the proposed changes. Rehearse the preview, apply it, or discard it. Applied groups can be undone together. The assistant also supports route concepts, multiple players, motion, alignment, passing timing, zones, and annotations.
-- **Edit objects and the playbook.** Try “Add a blue square LB,” “Rename this play Red Mesh and mirror it,” “Duplicate this play,” or “Create an 11-player 4-3 defense.” Commands cover player, route, zone and text creation, deletion and styling, ball assignments, notes, favorites, formations and existing starter groups. Diagram edits use a field preview; playbook changes use a change list. Applied groups undo together.
-- **Control the board.** Try “Use a light field and hide yard lines,” “Loop the rehearsal at half speed,” “Expand the field,” or “Filter for Mesh.” Commands cover selection, tools, drafts, undo/redo, playback, timeline, view, layout, filters, panels and play navigation.
-- **Use file workflows.** Try “Export this play as SVG,” “Print this play as a wristband,” or “Import a local playbook.” Select **Continue** to open the browser download, print or file-selection flow. The assistant waits for any required file or print interaction.
-- **Find a play.** Try “Find Madden passing concepts against Cover 3.” Results come from the 13-team catalog, including similarity search based on route features. Each card shows the diagram, formation, editability and a short rationale. Select **Add** to import a play.
-
-The cloud and static editors run the same coaching agent in LangGraph. AI proposals and manual edits share command executors. The assistant discovers actual capabilities and schemas before preparing edits or operating local controls. Reference images, read-only access, device support and file-selection requirements still apply. The static editor calls the selected provider directly and keeps the key in page memory. Dictation requires browser speech recognition and microphone permission. [Usage and tool flow (Chinese)](docs/BOARD_ASSISTANT.md) · [Full capability coverage and shared commands (Chinese)](docs/EDITOR_COMMAND_ARCHITECTURE.md)
-
-There is no per-task quota of six model requests or ten tool calls. Queries can continue while they discover new information. Repeated queries without progress trigger a grounded conclusion; you can cancel at any time.
-
-[Shared-command implementation and validation · PR #43](https://github.com/TIMPICKLE/playbook-studio-web/pull/43): all 541 tests passed, followed by 191 affected tests after the final adjustments. Model workflows were verified with scripted responses.
-
-## AI matchup analysis
-
-Open **AI matchup analysis** from the workspace. Cloud members use a playbook they can read; the [no-sign-in demo](https://timpickle.github.io/playbook-studio-web/) provides sample offensive and defensive plays.
-
-1. Select an offense and defense from the same playbook, with optional player perspective, defense mirroring and game context.
-2. Choose the coverage assumption: unknown, Cover 3 spot, Cover 3 Match, variant-unconfirmed Cover 2, Cover 2 Read, or man. Keep it unknown when only alignment is known.
-3. **No API key is needed** for the diagram brief and actual reference retrieval. Drawn blocking lines do not establish protection assignments.
-4. Expand references to inspect conditions, exceptions, read keys and original sources. Import team JSON / Markdown / TXT, or [preprocess selectable-text PDFs locally](docs/ai-analysis/pdf-ingestion.md) to preserve pages and regions.
-5. Enter your model and API key for a conditional model report. Scenario evidence highlights diagram objects; knowledge evidence opens its source details.
-
-| Capability | Current scope |
-|---|---|
-| Curated knowledge | 13 bilingual coaching principles; concept-specific cards require relevant concept wording or aliases, rather than broad words such as read or timing |
-| Team references | Up to 1 MB / 400 passages per pack; device- and playbook-local storage, deduplication, export and removal; no cloud or cross-device synchronization |
-| Retrieval | At most 6 passages / 24,000 UTF-8 bytes; only selected passages are sent; a shared page never automatically links every figure |
-| Cloud analysis | Existing LangGraph single-agent read-only tool loop, at most four model requests, with permission, revision, output and citation-ID checks |
-| Static demo | Local retrieval plus one OpenRouter / OpenAI request; shared geometry and citation-ID checks, explicitly limited status |
-
-Cloud providers include DeepSeek (OpenAI or Anthropic format), Anthropic, OpenRouter and OpenAI. Custom HTTPS hosts need administrator configuration. Keys stay in page memory. Provider charges may apply; browser requests also depend on networking and CORS. Player names, rosters, images and notes are excluded by default; coaching notes can be included explicitly.
-
-Successful imports, reference removal or matchup changes invalidate old reports and cancel pending requests. Missing knowledge is reported honestly; dedicated run-game and Four Verticals material is incomplete. OCR, visual diagram understanding, vector retrieval and shared cloud knowledge are future integrations. Valid citation IDs locate evidence; they do not establish that a model conclusion is correct or predict game outcomes.
-
-**2026-11-15 acceptance:** [PR #42](https://github.com/TIMPICKLE/playbook-studio-web/pull/42) was merged after three independent Agent evaluation teams. All 467 JavaScript tests, four PDF tests and the production build passed. Chromium desktop, narrow viewports, language switching and no-key prompts were checked. Real-provider answer quality and iOS / Safari hardware touch behavior remain separate validation tasks. Check Actions and deployment records for the live publication state.
-
-[QA and merge evaluation](docs/ai-analysis/qa-evaluation.md) · [Coaching usability evaluation](docs/ai-analysis/practical-evaluation.md) · [Usage and research](docs/ai-analysis/README.md) · [Knowledge architecture](docs/ai-analysis/knowledge-architecture.md)
-
-## Traditional and digital views
-
-| View | Experience |
-|---|---|
-| **Traditional** | Enabled by default. Flat player markers, clear routes, and no decorative motion for everyday editing and reading |
-| **Digital** | Optional on desktop. A perspective board, raised pieces, glass and metal materials, and route, movement, blocking, passing, and zone feedback during rehearsal |
-
-Switch views through **显示模式** (Display mode) in the upper right. The screenshot below shows the silver glass interface and raised pieces in the **compatibility view**. WebGL was unavailable in the capture environment, so this is not a screenshot of the full WebGL 3D renderer.
-
-![Digital mode's compatibility view with silver glass controls, a perspective board, and raised player pieces](docs/assets/readme/digital-compatible-silver.jpg)
-
-Phones and iPads use the traditional view while retaining editing and rehearsal. When WebGL is unavailable, digital mode uses an interactive compatibility view. Reduced-motion preferences retain materials while stopping decorative movement.
-
-The board supports **100–300% zoom**, fit-to-screen, and adjustable height. Desktop users can also change its width or expand the board. Display preferences stay on the current device and do not modify shared plays. See the [digital board guide](docs/DIGITAL_BOARD.md).
-
-## Cloud collaboration and storage
-
-| Entry point | Access | Data and capabilities |
-|---|---|---|
-| [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) | An administrator-provided username and password, or the existing ChatGPT sign-in option | Cloud database, member permissions, access across devices, version history, and AI analysis |
-| [Demo without sign-in](https://timpickle.github.io/playbook-studio-web/) | Choose one of three workspace cards | The browser stores plays, the roster and each group’s DEPTH CHART locally. The AI demo uses a sample matchup and your own API key |
-| [Migration guide](https://timpickle.github.io/playbook-studio-web/landing.html) | Project links and migration tools | Opens the cloud app or local demo and exports data from the earlier browser-only version |
-
-Sharing is scoped to a **playbook**, with independent membership for each one. Owners manage members and restore history; owners and editors can maintain the roster and each personnel group’s DEPTH CHART. Viewers can inspect starters and backups and search the roster, as well as inspect, rehearse, export and print plays. Under **成员与权限** (Members and permissions), an owner can create a member account or add an existing one. Email invitation links must be copied and sent manually.
-
-Changes save automatically, and background polling retrieves other members' updates. Conflict handling retains the local draft and asks users to resolve changes that cannot be merged automatically. Owners can restore from the latest **20 saved versions**. Unsynced drafts support recovery on the original device; they do not guarantee offline sign-in or a cold start. Keep JSON backups of important playbooks.
-
-To migrate from the earlier version, open the [migration guide](https://timpickle.github.io/playbook-studio-web/landing.html) on the **original device and browser**, export the local plays, then upload the JSON when creating or importing a cloud playbook. Browser storage is separate for the two domains. Uploading during playbook creation imports the full backup; **导入战术本** (Import playbook) inside the editor appends plays.
-
-A separate team hierarchy, team owner accounts, and full multi-tenant team management remain planned. Current collaboration is implemented at the playbook level. See the [cloud architecture guide](docs/CLOUD.md) and [multi-team roadmap](docs/MULTI_TENANCY_ROADMAP.md).
-
-## AI Agent deployment guide
-
-Give this section to an AI coding agent that can inspect files and run commands. Select the target first:
-
-| Target | Current support | Storage and capabilities |
-|---|---|---|
-| Local demo | Node.js static workspace | Browser-local storage, roster management, editing, rehearsal, import/export and sample AI demo; no accounts or cloud sharing |
-| GitHub Pages / static hosting | Included build script and Pages workflow | Same static capabilities; each visitor's data stays in their browser |
-| Cloud collaboration | Current implementation uses ChatGPT Sites + Worker + D1 | Accounts, shared playbooks and AI analysis require your own Site, database and platform access |
-
-**Before distributing a copy:** the `project_id` in `.openai/hosting.json` belongs to the original project. Do not use it to create another person's Site or overwrite the original. Cloud links in `web/landing.html` and `web/cloud.js` point to the original deployment. Replace them with your own URL, or remove/clearly label them when publishing a static-only copy. The MIT license does not cover the original Madden / Huddle.gg images; verify their terms before public redistribution.
-
-### Prompt for your agent
-
-```text
-Deploy Playbook Studio following the AI Agent deployment guide in the README.
-
-Target: [local demo / GitHub Pages static version / my own ChatGPT Sites cloud version]
-Repository or hosting account: [provide the destination; omit for local use]
-Audience: [local only / specified audience / public]
-
-Read the README, package.json, docs/CLOUD.md and relevant deployment configuration first.
-Inspect the current branch and uncommitted changes; preserve existing files and data.
-Choose the appropriate path for my target. Do not reuse the original owner's Site ID, database, cloud URL or credentials.
-If the target, platform access or audience is unclear, ask me. Use the platform's secure authentication flow; do not ask me to paste passwords or API keys into chat.
-Configure, build and validate, then publish to the destination I authorized. Verify the actual entry point, core operations, data persistence and capability boundaries.
-Report the URL, deployed version, verification results, data location and any unfinished work. State blockers honestly; do not claim unverified features work.
-```
-
-### Path A: local static demo
-
-Requires Git and **Node.js 24** (minimum 22.13.0). Inspect the branch and working tree before using an existing checkout.
-
-```bash
-git clone https://github.com/TIMPICKLE/playbook-studio-web.git
-cd playbook-studio-web
-npm run start:local
-```
-
-Open `http://localhost:3000/`. The script restores bundled Madden images; stop the server with `Ctrl+C`. This is a development static server, not a public production service. Data is stored in the current browser: export a JSON backup before clearing it or changing devices.
-
-Verify that the page and Madden images load, player movement and route drawing work, both languages are selectable, edits survive refresh, and JSON export works. `/api/*` is not supplied by this static server.
-
-### Path B: GitHub Pages / static hosting
-
-1. Fork or prepare a repository you can publish from and resolve the original cloud links as described above.
-2. Ensure GitHub Actions can run in the repository. In **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**. The included `.github/workflows/pages.yml` publishes the static build. If your default branch is not `main`, adjust its branch condition first.
-3. Changes to `web/**`, `scripts/prepare-pages.mjs` or the workflow on `main` trigger the workflow. You can also run **Deploy GitHub Pages** manually; README-only changes do not trigger it. Check the run and the actual URL in Pages settings.
-4. For another static host, generate and publish the entire `github-pages/` directory:
-
-   ```bash
-   node scripts/prepare-pages.mjs
-   ```
-
-   `index.html` opens the card workspace, `local.html` opens the editor directly, and `landing.html` retains the migration guide. Include the generated image assets. See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-
-Open all three cards from the deployed root without signing in. Add a player, refresh, search for that player, and return to the workspace. Verify the `local.html` editor shortcut, language switching, editing, refresh persistence, Madden images, JSON export and workflow status. Static storage does not sync across users or devices and does not provide cloud accounts or sharing; verify the AI demo entry, sample matchup overlay and missing-key message. Browser data and language preferences are separate across origins.
-
-### Path C: your own cloud collaboration Site
-
-The current cloud implementation needs **Vinext / Cloudflare Worker, D1 bound as `DB`, database migrations, and a platform-verified identity entry point**. For ChatGPT Sites, an authorized deployer must create **their own new Site and database**; use the Sites workflow available in that environment to configure the new project, build, apply migrations, publish and check status. Do not initialize, reset or migrate an existing Site or database without identifying the target.
-
-To initialize team accounts, configure a one-time `PLAYBOOK_SETUP_KEY` as a secure runtime secret. `POST /api/auth/bootstrap` requires `X-Playbook-Setup-Key` and a JSON `accounts` list: the first account is an `owner`, subsequent accounts are `editor` or `viewer`; each account includes `username`, `password`, `role`, and an optional display `name`. Usernames contain 3–32 lowercase letters, digits or underscores and start with a letter; passwords are 8–128 characters. The request's `Origin` must exactly match the Site origin. Initialization succeeds only once and is not a password-reset mechanism. Remove the setup secret afterward. Use secure platform inputs; never put credentials in the repository, logs, command arguments or chat. See `server/auth.mjs` and [cloud operations](docs/CLOUD.md) for the implementation.
-
-Verify HTTPS login, `/api/health`, anonymous denial of playbook access, and authenticated creation/read, autosave, refresh recovery and language switching. Where needed, test membership permissions with two authorized accounts. AI analysis requires separate provider/model credentials and validation. Report the Site URL, source version, database and checks without disclosing credentials.
-
-`npm run build && npm start` starts a local Worker / Wrangler environment; it is **not** an already configured public production deployment. A turnkey VPS cloud deployment is not currently provided. Other Worker / D1 platforms require their own deployment configuration, migrations and verified authentication; never trust externally supplied Sites identity headers. If platform access is missing, report the blocker rather than presenting the static version as a complete cloud deployment.
-
-
-## Local development
-
-**Node.js 24** is recommended; the repository declares a minimum of 22.13.0.
+**Node.js 24** is recommended (minimum 22.13.0).
 
 ```bash
 git clone https://github.com/TIMPICKLE/playbook-studio-web.git
 cd playbook-studio-web
 npm ci --ignore-scripts
-
-# Static editor: http://localhost:3000/
 npm run start:local
 ```
 
-Scripts extract the play images from archives in the repository; viewing them does not require runtime requests to the source image website. The static server is suitable for editor development. Cloud APIs, accounts, and shared data require the Worker / D1 runtime.
+Open `http://localhost:3000/`. The static version does not supply cloud accounts or shared APIs.
 
 ```bash
 npm run check       # JavaScript syntax checks
 npm run typecheck   # TypeScript checks
-npm test            # Model, UI, permission, and synchronization tests
+npm test            # Automated tests
 npm run dev         # Vinext development environment
-npm run build       # Prepare editor assets and build the Worker
+npm run build       # Build the Worker
 ```
 
-Production builds copy `web/` into `public/editor/` before producing `dist/`. GitHub Pages hosts the static experience; ChatGPT Sites deployment uses Cloudflare Workers and D1. Standalone server support remains planned, so deploying the static files alone does not provide the complete cloud service.
+**[AI Agent deployment guide →](docs/AGENT_DEPLOYMENT.en.md)** includes a ready-to-use agent prompt and separate paths for local use, GitHub Pages and your own cloud app. Cloud operation requires Worker / D1; a local build is not a public deployment.
 
-| Component | Main implementation |
+## Documentation
+
+| Guide | Contents |
 |---|---|
-| Editor and rehearsal | Vanilla JavaScript, SVG, and CSS; Three.js for the digital view |
-| Web and API | Vinext, React, Cloudflare Workers |
-| Cloud storage | Cloudflare D1 and Drizzle |
-| AI analysis | LangGraph, LangChain, and third-party models with tool calling |
-| Validation | Node.js Test Runner, Happy DOM, and TypeScript |
+| [User guide](docs/USER_GUIDE.en.md) | Visual walkthrough, personnel groups, rehearsal, Madden and collaboration |
+| [AI feature guide](docs/AI_GUIDE.en.md) | Both AI entry points, configuration, knowledge and troubleshooting |
+| [Deployment guide](docs/AGENT_DEPLOYMENT.en.md) | Local, static-hosted and cloud deployment |
+| [AI command architecture](docs/EDITOR_COMMAND_ARCHITECTURE.md) / [Tool flow](docs/BOARD_ASSISTANT.md) | Shared manual/AI execution, previews and undo |
+| [AI analysis research](docs/ai-analysis/README.md) | Competitors, knowledge architecture, implementation and evaluations |
+| [Cloud architecture](docs/CLOUD.md) / [Localization](docs/I18N.md) | APIs, storage, identity and internationalization |
+| [Design](docs/DESIGN.md) / [Liquid materials](docs/LIQUID_MATERIALS.md) / [Validation](docs/VALIDATION.md) | Interaction, visuals and regression notes |
+| [Public script investigation](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) / [Reproduction](docs/REA_REPRODUCE.md) | Public-source research and reproduction records |
 
-Use `npm run db:generate` to generate database migrations and `npm run import:huddle` to refresh Madden data. Deployment, migration, and identity integration details are in [CLOUD.md](docs/CLOUD.md).
+User-facing guides are bilingual; most engineering documents are in Chinese.
 
 ## Scope and licensing
 
-- Rehearsal is a teaching visualization, with no autonomous defensive AI or real game physics. AI matchup analysis is not a game-outcome predictor either.
-- Cloud requests for a single playbook are limited to approximately **950 KB**. Exporting an image-only play as SVG still embeds the image; it does not turn it into editable vector routes. Calibrate printed pages and wristband sizes for your printer.
-- Local data belongs to the current browser. Export before clearing browser data or switching devices; cloud saving is not a substitute for personal backups.
-- The project independently implements features inspired by public examples. It does not connect to the Playmaker X backend, and compatibility with that product's file format has not been verified.
-- Source code is available under the [MIT License](LICENSE). Original Madden / Huddle.gg images, game assets, official runtime templates, and third-party components retain their respective terms. **The project's MIT license does not cover the Madden source images.** Catalog sources: [Eagles](https://huddle.gg/playbooks/eagles-off/) / [Ravens](https://huddle.gg/playbooks/ravens-off/).
-
-## Further reading
-
-Most technical documentation is currently in Chinese.
-
-[Interaction and visual design](docs/DESIGN.md) · [Liquid materials](docs/LIQUID_MATERIALS.md) · [Validation notes](docs/VALIDATION.md) · [Public script investigation](docs/PUBLIC_BUNDLE_STATIC_FINDINGS.md) · [Reproduction guide](docs/REA_REPRODUCE.md)
-
----
+- Rehearsal is a teaching visualization. AI analysis supports review, without real game physics or outcome predictions.
+- The project is independently implemented and does not connect to the Playmaker X backend. File-format compatibility is unverified.
+- Source code uses the [MIT License](LICENSE). Madden / Huddle.gg images and third-party components retain their own terms and **are not covered by the project's MIT license**. [Full scope notes](docs/USER_GUIDE.en.md#scope-and-licensing)
 
 ## Sponsors
 
-Individuals, teams, and companies are welcome to support Playbook Studio. **[Submit a sponsorship inquiry](https://github.com/TIMPICKLE/playbook-studio-web/issues/new?template=sponsorship.yml)**; the maintainer [@TIMPICKLE](https://github.com/TIMPICKLE) will respond in the issue.
+Individuals, teams and companies can [submit a sponsorship inquiry](https://github.com/TIMPICKLE/playbook-studio-web/issues/new?template=sponsorship.yml). Maintainer [@TIMPICKLE](https://github.com/TIMPICKLE) will respond. No payment channel is currently published; this form is for discussing cooperation.
+
+![Three reserved placements, not existing sponsors](docs/assets/brand/sponsor-placeholders.svg)
+
+<details>
+<summary>Cooperation process and recognition policy</summary>
 
 No verified GitHub Sponsors or other payment channel is currently published. This form is for discussing cooperation and does not accept payments. Do not post payment details, identity documents, contracts, or other sensitive information in public issues.
 
@@ -331,6 +123,6 @@ No verified GitHub Sponsors or other payment channel is currently published. Thi
 2. After the maintainer responds, agree on a suitable private contact channel before discussing amounts, duration, and terms. Any payment requires separate confirmation of an official channel.
 3. Once cooperation is confirmed and support has been delivered, recognition is added to both READMEs through a PR with the sponsor's consent. An inquiry does not automatically reserve a placement.
 
-![Three reserved placements, not existing sponsors](docs/assets/brand/sponsor-placeholders.svg)
-
 **Recognition policy:** choose a credit, name / logo with one official website link, or anonymity. Content, order, and display duration are agreed in advance; there is no unagreed ranking by contribution amount. Recognition does not imply product endorsement or promises of code merges, feature priority, or exclusivity. Contact the maintainer in the original issue to change a name, link, or duration, or request removal.
+
+</details>

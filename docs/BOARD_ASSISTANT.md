@@ -91,6 +91,24 @@ Agent 试算与编辑器预览均调用 [proposeEdit](../web/assistant-proposal.
 - 会话只保留当前页面最近五轮。历史记录不会在刷新后恢复，也不能跨战术沿用。静态版需要用户配置 API Key，语音听写依赖浏览器和麦克风权限。
 - 能力受实际上下文约束：参考图不能编辑几何或演练，手机和 iPad 使用传统模式，名单与人员组须已存在。导入、打印、原图转换等入口可以由助手打开，后续仍需提供文件或完成相应流程。账号及团队管理属于战术板之外的功能。
 
+## 模型接口
+
+战术板助手和攻防分析、浏览器静态版和云端 Worker 共用 [model-protocol.js](../web/model-protocol.js) 的服务商配置、请求构造和响应解析。用户配置说明见 [AI 功能指南](AI_GUIDE.md#连接模型)。
+
+| 格式 | 请求与返回 | 多轮工具续接 |
+|---|---|---|
+| OpenAI Chat Completions | `/chat/completions`；`messages`、`choices[].message` | `tool_calls` 与 `tool_call_id`；保留服务商返回的 reasoning 字段 |
+| Anthropic Messages | `/messages`；独立 `system` 与内容块 | `tool_use` 与聚合的 `tool_result`；原样保留已签名 thinking 块 |
+| OpenAI Responses | `/responses`；`instructions`、`input` 与 `output` 项 | `function_call`、`function_call_output` 通过 `call_id` 关联，完整重放原始输出及加密 reasoning |
+
+预设支持 DeepSeek（Chat / Messages）、Anthropic（Messages）、OpenAI 与 OpenRouter（Chat / Responses）；自定义服务可选择三种格式。自定义基础 URL 或完整接口地址会保留路径前缀，并按所选格式替换末尾接口；不会自动补 `/v1`。云端继续检查管理员允许的 HTTPS 主机。
+
+Responses 使用 `store:false`，应用维护本次上下文，不依赖 `previous_response_id`。工具 schema 包含可选字段，因此显式使用 `strict:false`，最终操作仍由统一 schema 与领域层验证。不支持强制工具选择时，按原协议重建文本回退请求；不会把 Chat 的 `messages` 塞入 Responses。拒绝、截断、未完成响应不作为可执行结果。
+
+这里的 Claude Code message 格式指 **Anthropic Messages API**，不依赖 Claude Code CLI 或其登录凭据。浏览器直连官方 Anthropic 地址使用该 API 要求的浏览器访问头；第三方网关仍受自身 CORS 支持影响。
+
+参考：[OpenAI Responses 迁移](https://developers.openai.com/api/docs/guides/migrate-to-responses)、[Anthropic 工具调用](https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls)、[OpenRouter Responses](https://openrouter.ai/docs/api/api-reference/responses/create-a-response)。协议回归包括三种真实 HTTP 消息形状、静态与 Worker 两入口、并行结果、多轮续接、JSON 修复和错误处理；使用脚本化响应，不等同真实服务商语义评测。
+
 ## 宿主与数据
 
 GitHub Pages 在浏览器中加载 LangGraph 浏览器包，并直接调用选择的服务商。云端由 Worker 调用相同的图，使用服务端目录并在请求入口、模型调用前以及结果返回前核对身份、工作区权限和版本。返回编辑提案需要写权限。客户端还会在应用预览时重新检查权限和画布是否变化。[浏览器与云端传输](../web/assistant-provider.js) · [云端处理](../server/api.mjs)
@@ -103,7 +121,7 @@ GitHub Pages 在浏览器中加载 LangGraph 浏览器包，并直接调用选�
 
 | 方案 | 本场景可以复用的能力 | 接入成本与判断 |
 |---|---|---|
-| Claude Agent SDK | Claude Code 的工具循环、权限和会话。官方 TypeScript SDK 支持 Node，浏览器 SDK 也提供与远端 CLI 通信的传输接口。 | 采用远端 CLI 需提供运行服务并管理其会话。战术板当前需要的是画布对象和目录查询，以及教练选择的 OpenAI 模型。单独引入该运行环境的收益有限。 |
+| Claude Agent SDK | Claude Code 的工具循环、权限和会话。官方 TypeScript SDK 支持 Node，浏览器 SDK 也提供与远端 CLI 通信的传输接口。 | 采用远端 CLI 需提供运行服务并管理其会话。战术板当前需要的是画布对象和目录查询，以及教练选择的兼容模型。单独引入该运行环境的收益有限。 |
 | Pi agent-core | 可嵌入的工具循环、流式事件、自定义模型传输和停止控制。官方示例也包含浏览器代理传输。 | 可胜任这两个交互。采用 Pi 将另引入一套消息和工具适配层，需要同时维护它和已有对位分析所用的 LangGraph。 |
 | LangGraph.js | 状态图、条件边和单次运行的状态。节点可以调用项目自己的模型适配器与领域工具。 | 选用此方案。两套宿主共享图与工具契约，模型可在同一轮指令中读取画布、查找球员或迭代检索目录，再给出操作。 |
 

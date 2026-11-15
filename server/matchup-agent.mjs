@@ -2,6 +2,7 @@ import { Annotation, StateGraph, START, END } from '@langchain/langgraph';
 import { traceable } from 'langsmith/traceable';
 import { ApiError, fail } from './http.mjs';
 import { limitedResponse, modelEndpoint, parseModelResult } from './matchup.mjs';
+import { buildModelRequest, parseModelResponse, parseModelUsage } from '../web/model-protocol.js';
 
 // These limits apply to one user-authorized run, not to each graph node.
 export const AGENT_LIMITS = Object.freeze({ modelCalls: 4, toolRounds: 2, toolCalls: 6, toolRequestsPerTurn: 12, toolArguments: 2048, contextBytes: 120000, conversationBytes: 250000 });
@@ -94,47 +95,16 @@ function makeToolRunner(matchup, perspective, mode, context) {
   return { run, used };
 }
 
-// The graph uses a common internal message shape. Anthropic requires system
-// separately and all results for parallel tool calls in one user message.
-function anthropicMessages(messages) {
-  const converted = [];
-  for (const message of messages) {
-    if (message.role === 'system') continue;
-    if (message.role === 'tool') {
-      const block = { type: 'tool_result', tool_use_id: message.tool_call_id, content: message.content };
-      const last = converted.at(-1);
-      if (last?.role === 'user' && Array.isArray(last.content) && last.content.every(item => item.type === 'tool_result')) last.content.push(block);
-      else converted.push({ role: 'user', content: [block] });
-    } else if (message.role === 'assistant') {
-      // Preserve signed thinking blocks exactly for Anthropic's multi-turn API.
-      if (!Array.isArray(message.anthropicContent)) fail(502, '模型回复缺少可继续分析的内容');
-      converted.push({ role: 'assistant', content: message.anthropicContent });
-    } else if (message.role === 'user') converted.push({ role: 'user', content: message.content });
-  }
-  return converted;
-}
-
 async function callProvider(config, messages, choice, signal) {
   if (signal?.aborted) fail(504, '分析已取消或超时；已发起的请求可能仍由服务商计费');
-  let body, headers;
-  if (config.protocol === 'anthropic') {
-    // New Claude models can reject forced tool selection. Offer only the
-    // mandatory context tool on the first turn and verify it was actually used.
-    const first = typeof choice === 'object';
-    const tools = first ? TOOLS.filter(tool => tool.function.name === 'get_matchup_context') : TOOLS;
-    body = { model: config.model, system: messages[0].content, messages: anthropicMessages(messages), max_tokens: 3500, stream: false,
-      tools: tools.map(({ function: fn }) => ({ name: fn.name, description: fn.description, input_schema: fn.parameters })),
-      tool_choice: { type: first ? 'auto' : choice } };
-    if (config.provider === 'deepseek') body.thinking = { type: 'disabled' };
-    headers = { 'Content-Type': 'application/json', 'x-api-key': config.apiKey, 'anthropic-version': '2023-06-01' };
-  } else {
-    body = { model: config.model, messages, tools: TOOLS, tool_choice: choice, stream: false };
-    if (config.provider === 'openai') body.max_completion_tokens = 3500;
-    else body.max_tokens = 3500;
-    // DeepSeek defaults to thinking mode, which rejects a named tool_choice.
-    if (config.provider === 'deepseek') body.thinking = { type: 'disabled' };
-    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` };
-  }
+  // Protocol adapters share one normalized transcript. Anthropic can reject
+  // named tool forcing while thinking, so offer only context on its first turn.
+  const firstAnthropic = config.protocol === 'anthropic' && typeof choice === 'object';
+  const { body, headers } = buildModelRequest(config, messages, {
+    tools: firstAnthropic ? TOOLS.filter(tool => tool.function.name === 'get_matchup_context') : TOOLS,
+    toolChoice: firstAnthropic ? 'auto' : choice,
+    maxTokens: 3500,
+  });
   if (byteLength(JSON.stringify(body)) > AGENT_LIMITS.conversationBytes) fail(400, '分析上下文过大，请简化战术后重试');
   let response;
   try {
@@ -151,26 +121,16 @@ async function callProvider(config, messages, choice, signal) {
   let data;
   try { data = await limitedResponse(response); }
   catch (error) { if (error instanceof ApiError) throw error; fail(502, '读取模型回复失败或已超时，请重试'); }
-  if (config.protocol === 'anthropic') {
-    if (data?.stop_reason === 'max_tokens') fail(502, '模型回复被截断，请使用支持工具调用且输出长度足够的模型');
-    if (data?.stop_reason === 'refusal') fail(502, '模型服务未能返回可用分析');
-    if (!Array.isArray(data?.content) || data.content.some(block => !block || !['text', 'tool_use', 'thinking', 'redacted_thinking'].includes(block.type))) fail(502, '模型服务未返回可用消息');
-    const calls = data.content.filter(block => block.type === 'tool_use').map(block => {
-      if (!block.input || typeof block.input !== 'object' || Array.isArray(block.input)) fail(502, '模型返回了无效的工具调用');
-      return { id: block.id, type: 'function', function: { name: block.name, arguments: JSON.stringify(block.input) } };
-    });
-    if ((data.stop_reason === 'tool_use') !== (calls.length > 0)) fail(502, '模型服务返回的工具调用状态无效');
-    const usage = data.usage;
-    const validUsage = Number.isSafeInteger(usage?.input_tokens) && usage.input_tokens >= 0 && Number.isSafeInteger(usage?.output_tokens) && usage.output_tokens >= 0;
-    return { message: { content: data.content.filter(block => block.type === 'text').map(block => block.text || '').join('\n'), ...(calls.length ? { tool_calls: calls } : {}), anthropicContent: data.content }, usage: validUsage ? { inputTokens: usage.input_tokens, outputTokens: usage.output_tokens } : null };
+  let message;
+  try { message = parseModelResponse(config, data); }
+  catch (error) {
+    const reason = `${error?.code || ''} ${error?.message || ''}`;
+    if (/truncat|incomplete|max_tokens|length/i.test(reason)) fail(502, '模型回复被截断，请使用支持工具调用且输出长度足够的模型');
+    if (/refus|content_filter/i.test(reason)) fail(502, '模型服务未能返回可用分析');
+    if (/tool/i.test(reason)) fail(502, '模型返回了无效的工具调用');
+    fail(502, '模型服务未返回可用消息');
   }
-  const item = data?.choices?.[0];
-  if (item?.finish_reason === 'length') fail(502, '模型回复被截断，请使用支持工具调用且输出长度足够的模型');
-  if (item?.finish_reason === 'content_filter') fail(502, '模型服务未能返回可用分析');
-  if (!item?.message || typeof item.message !== 'object') fail(502, '模型服务未返回可用消息');
-  const usage = data?.usage;
-  const validUsage = Number.isSafeInteger(usage?.prompt_tokens) && usage.prompt_tokens >= 0 && Number.isSafeInteger(usage?.completion_tokens) && usage.completion_tokens >= 0;
-  return { message: item.message, usage: validUsage ? { inputTokens: usage.prompt_tokens, outputTokens: usage.completion_tokens } : null };
+  return { message, usage: parseModelUsage(config, data) };
 }
 
 function assistantMessage(message, provider, toolCalls) {
@@ -180,6 +140,7 @@ function assistantMessage(message, provider, toolCalls) {
   if ((provider === 'deepseek' || provider === 'custom') && typeof message.reasoning_content === 'string') out.reasoning_content = message.reasoning_content;
   if (provider === 'openrouter' && Array.isArray(message.reasoning_details)) out.reasoning_details = message.reasoning_details;
   if (Array.isArray(message.anthropicContent)) out.anthropicContent = message.anthropicContent;
+  if (Array.isArray(message.responsesOutput)) out.responsesOutput = message.responsesOutput;
   return out;
 }
 

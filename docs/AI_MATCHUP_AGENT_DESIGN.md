@@ -59,7 +59,9 @@ flowchart TD
 
 ## 5. 模型协议和隐私
 
-支持 OpenAI Chat Completions 和 Anthropic Messages 两种工具调用协议。DeepSeek 支持两种格式，分别使用固定的官方地址；原生 Anthropic 使用 `https://api.anthropic.com/v1/messages`。其他服务仍须由管理员配置 `AI_ALLOWED_HOSTS`，按所选协议拼接地址，不跟随重定向。服务商切换时清空页面中的 Key，避免误发给另一家服务。
+通过共享 [model-protocol.js](../web/model-protocol.js) 支持 OpenAI Chat Completions、Anthropic Messages 和 OpenAI Responses 三种工具调用协议。DeepSeek 支持 Chat / Messages；Anthropic 支持 Messages；OpenAI 和 OpenRouter 支持 Chat / Responses，均使用预设地址。自定义服务可选三格式，云端由管理员配置 `AI_ALLOWED_HOSTS`，按所选协议替换或添加端点后缀，保留路径前缀且不跟随重定向。切换服务商时清空 Key 与自定义地址；只切换协议时保留模型、Key 和地址。
+
+Responses 使用无状态 `store:false`，以 `call_id` 关联 `function_call` 和 `function_call_output`，并在下一轮完整重放原始 output 项和加密 reasoning。它不复用 Chat 的 `messages` 结构，也不依赖 `previous_response_id`。浏览器演示通过同一协议层进行一次模型请求；云端继续使用本页定义的只读工具循环。用户配置见 [AI 功能指南](AI_GUIDE.md#连接模型)，协议细节见 [接口说明](BOARD_ASSISTANT.md#模型接口)。
 
 DeepSeek Chat Completions 默认开启思考模式，且思考模式拒绝强制指定工具；因此本工作流对 DeepSeek 显式禁用思考，保留首轮命名工具及后续工具预算。Anthropic 协议将 system 独立传递，使用 `tool_use` 和同一用户消息中的 `tool_result`，并在多轮中原样传回带签名的思考块；首轮只提供基础对局工具并由服务端验证实际调用，兼容不接受强制工具选择的 Claude 模型。OpenRouter 的 `reasoning_details` 和必要的中间推理仅保留在单次请求内，不展示、记录或持久化。参考 [DeepSeek Chat Completions](https://api-docs.deepseek.com/api/create-chat-completion/)、[DeepSeek Anthropic 格式](https://api-docs.deepseek.com/guides/anthropic_api/) 和 [Anthropic 工具调用](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works)。
 
