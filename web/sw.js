@@ -1,10 +1,11 @@
-const CACHE = 'playbook-studio-v6.7-model-protocols';
+const CACHE = 'playbook-studio-v6.8-onboarding';
 // The graph runtime is fetched and cached on first use.
 const FILES = [
   './assistant-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
   './assistant-schema.js', './assistant-proposal.js', './assistant-conflicts.js', './vendor/assistant-zod.js',
   './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',
   './model-protocol.js',
+  './onboarding.js', './onboarding-steps.js', './onboarding.css', './locales/onboarding.en.js', './locales/onboarding.zh-CN.js', './vendor/driver-1.14.0.js', './vendor/driver-1.14.0.css',
   './board-assistant.js', './board-assistant.css', './assistant-edit.js', './assistant-operations.js', './assistant-search.js', './madden-catalog.js', './madden-concepts.js', './data/madden-search-tags.js',
   './assistant-provider.js', './assistant-harness.js', './assistant-tools.js', './locales/assistant-edit.js',
   './locales/assistant-provider.js', './locales/board-assistant.en.js', './locales/board-assistant.zh-CN.js',

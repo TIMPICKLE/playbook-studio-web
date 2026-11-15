@@ -1,5 +1,14 @@
 # Vendored browser dependency
 
+## Driver.js 1.14.0
+
+`driver-1.14.0.js` and `driver-1.14.0.css` are the unmodified browser ESM and stylesheet from the pinned `driver.js@1.14.0` package. Product tours load the script only when a guide starts; no runtime CDN is used.
+
+- Upstream: https://github.com/nilbuild/driver.js
+- Docs: https://driverjs.com/docs/configuration
+- License: MIT; see `driver-1.14.0.LICENSE.txt`.
+- Regenerate with `node scripts/vendor-onboarding.mjs` after installing the lockfile. Review the controller and styling before changing the pinned version.
+
 `tsparticles.slim-4.4.0.min.js` is the unmodified tsParticles Slim 4.4.0 browser bundle.
 
 - Upstream: https://github.com/tsparticles/tsparticles
