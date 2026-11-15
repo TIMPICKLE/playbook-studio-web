@@ -14,6 +14,16 @@ Detailed instructions for editing, rehearsal, roster management, Madden imports 
 
 Eight teaching examples are included: Mesh, Four Verticals, Flood, Slants, Inside Zone, Cover 3, Nickel Blitz, and Field Goal. Formation tools support 6-, 7-, 8-, 9-, 11-, and 12-player formats, plus custom templates.
 
+## Quick tour
+
+On your first visit to the workspace home, play editor, AI analysis or player management, the tour highlights relevant modules and explains them beside the page. Choose **Next** or **Back** to browse, then **Get started** to finish the current page's tour. Automatic tours wait while you draw, rehearse, enter information or have a panel open.
+
+Choose **Skip guide** or press `Esc` to leave at any time; automatic tours will then stop across all pages. To revisit a tour, choose **Quick tour** beside the language selector. Completing a tour only stops automatic guidance for that page; other pages can still show their tours on the first visit.
+
+Completion and skip choices are stored in this browser's `localStorage`, independently of your account or shared playbook. Clearing site data or using another browser brings the tours back. The tour explains controls without changing plays, opening AI conversations or sending requests. On phones and iPads, it highlights visible playbook and properties menu buttons without opening drawers; try the controls after the tour.
+
+![The guided tour highlights properties, explains the feature, and offers previous, next and skip controls](assets/readme/onboarding-tour.jpg)
+
 ## Keyboard shortcuts
 
 | Action | Shortcut | Action | Shortcut |

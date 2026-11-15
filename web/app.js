@@ -31,6 +31,8 @@ import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHand
 import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
 import { createWorkspacePanels } from './workspace-panels.js';
 import { createPlayThumbnails } from './play-thumbnails.js';
+import { createOnboarding } from './onboarding.js';
+import { onboardingSteps, onboardingLabels } from './onboarding-steps.js';
 
 const $ = selector => document.querySelector(selector);
 const icons = {
@@ -1448,3 +1450,33 @@ localeSelect.addEventListener('change', () => {
   try { setLocale(next); location.reload(); }
   catch { alert(t('editor.language_storage_error')); localeSelect.value = getLocale(); }
 });
+
+// Keep onboarding outside the editor's render tree: a tour must never become
+// a play mutation, lose its controls on redraw, or open a hidden mobile drawer.
+const tourCopy = onboardingLabels(getLocale());
+const replayTour = document.createElement('button');
+replayTour.type = 'button'; replayTour.className = 'onboarding-replay';
+replayTour.dataset.onboarding = 'replay';
+replayTour.textContent = tourCopy.replay; replayTour.title = tourCopy.replayTitle;
+replayTour.setAttribute('aria-label', tourCopy.replayTitle);
+localeControl.prepend(replayTour);
+function onboardingContext() {
+  let id = null;
+  const shown = selector => { const node=$(selector); return !!node && !node.closest('[hidden]'); };
+  if (shown('#app') && $('#app .workspace')) id = 'editor';
+  else if (shown('#ai-matchup-root') && $('#ai-matchup-root .ai-page')) id = 'analysis';
+  else if (shown('#roster-root') && $('#roster-root .roster-page')) id = 'roster';
+  else if (shown('#cloud-root .studio-home')) id = 'home';
+  else if (shown('#cloud-root .cloud-empty')) id = 'empty';
+  if (replayTour.hidden !== !id) replayTour.hidden = !id;
+  return id ? {id,locale:getLocale(),readOnly:!canEdit(),reference:id === 'editor' && !!current().reference} : null;
+}
+const onboarding = createOnboarding({document,getContext:onboardingContext,getSteps:context=>onboardingSteps(context,document),isBusy:()=>
+  !!(draft || drag || playing || localRecovery || panels.active || rosterView.isEditing() ||
+    document.querySelector('.modal,dialog[open],.madden-panel,.ba-panel:not([hidden]),.ba-compose textarea[readonly]')),
+});
+replayTour.addEventListener('click', async () => {
+  if (!await onboarding.start({manual:true})) toast(tourCopy.busy,{type:'info'});
+});
+onboarding.sync();
+window.addEventListener('pagehide',()=>onboarding.stop());
