@@ -8,6 +8,8 @@ const warningsEn = {
   '防守覆盖类型未确认；不要从前线阵型推断覆盖。': 'Defensive coverage is unconfirmed. Do not infer it from the front.',
   '防守图已左右镜像；文字笔记不会自动镜像，请确认方位。': 'The defensive diagram is mirrored; text notes are not. Check the orientation.',
   '图上重叠不代表同一时刻到达；演示时长不是实战时序。': 'Diagram overlap does not mean simultaneous arrival; demo timing is not game timing.',
+  'Cover 2 具体规则未确认；不能将普通落位与 Cover 2 Read 的原则混用。': 'The Cover 2 variant is unconfirmed. Do not mix spot-drop principles with Cover 2 Read.',
+  '当前知识库没有相关命中；只能依据图面事实进行有限推演。': 'No relevant knowledge was retrieved. Only a limited interpretation of diagram facts is available.',
 };
 const suffixEn = { '站位': 'position', '选项阻挡': 'option block', '选项移动': 'option motion', '选项传球': 'option pass', '选项路线': 'option route', '阻挡': 'block', '移动': 'motion', '传球': 'pass', '路线': 'route', '防守区域': 'defensive zone' };
 export function localizeMatchupAnnotations(evidence, warnings, locale) {

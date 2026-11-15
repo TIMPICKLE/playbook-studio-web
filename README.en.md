@@ -27,11 +27,13 @@ Choose a play on the left, arrange players and draw routes in the center, and ad
 | **Build a playbook** | Organize offense, defense, and special teams; search, favorite, duplicate, and save formation templates and coaching notes |
 | **Manage players** | See starters and ranked backups on each group’s formation diagram. Search the player roster by name, number or position |
 | **Import Madden plays** | Filter, preview, and add Eagles / Ravens plays. Edit players and routes in 437 reconstructed entries |
-| **Analyze matchups with AI** | Select an offensive and a defensive play in the cloud app, use your own model service and API key, and review conditional scenarios, player choices, evidence, and missing information |
+| **Analyze matchups with AI** | Inspect real diagram facts and retrieved coaching references without a key; import local team knowledge, then connect a model for conditional scenarios with source inspection and diagram highlights |
 | **Share with your team** | Cloud autosave, access across devices, per-playbook permissions, conflict handling, and the latest 20 saved versions |
 | **Export and print** | Export PNG, SVG, an individual play, or a full playbook as JSON. Print A4 playbooks, nine-panel wristband cards, and call sheets |
 
 The current interface uses a silver and graphite palette. Drawing and rehearsal controls share a floating toolbar below the field. The cloud and demo workspaces both offer three cards for playbook editing, player management and AI matchup analysis; phones and iPads use the traditional view with touch controls.
+
+The analysis workspace includes 13 sourced bilingual coaching principles and distinguishes Cover 3 spot / Match and variant-unconfirmed Cover 2 / Cover 2 Read. Import playbook-scoped, device-local JSON / Markdown / TXT knowledge packs, or preprocess selectable-text PDFs with the local tool. See the [analysis guide and research](docs/ai-analysis/README.md), [competitor study](docs/ai-analysis/research.md), and [multimodal knowledge architecture](docs/ai-analysis/knowledge-architecture.md). Image references provide provenance; visual understanding and cloud knowledge synchronization are future integrations.
 
 ## Quick start
 

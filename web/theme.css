@@ -713,18 +713,8 @@ html[data-visual-mode] .choice-body p { color: var(--text-2); font-size: var(--t
 html[data-visual-mode] .choice-link { color: var(--text-1); border-top: 1px solid var(--hairline); font-size: var(--t-sm); }
 html[data-visual-mode] .studio-home-foot { color: var(--text-3); }
 
-/* AI matchup page: graphite surfaces. */
-html[data-visual-mode] :is(.ai-page, .ai-empty) { color: var(--text-1); }
-html[data-visual-mode] #ai-matchup-root { background: var(--night-0); }
-html[data-visual-mode] :is(.ai-page-header p, .ai-empty p, .ai-section-heading p, .ai-field small, .ai-book small) { color: var(--text-3); }
-html[data-visual-mode] .ai-link-button { color: var(--text-2); }
-html[data-visual-mode] :is(.ai-panel, .ai-board-card, .ai-result-card, .ai-results-empty) { background: var(--night-1); border: 1px solid var(--hairline); box-shadow: var(--island-shadow); border-radius: var(--r-island); }
-html[data-visual-mode] .ai-step { background: var(--night-3); color: var(--text-1); }
-html[data-visual-mode] .ai-book { background: var(--night-2); }
-html[data-visual-mode] .ai-book button { color: var(--text-2); }
-html[data-visual-mode] .ai-field > span { color: var(--text-2); }
-html[data-visual-mode] :is(.ai-field input, .ai-field select, .ai-field textarea) { background-color: var(--night-2); border: 1px solid transparent; color: var(--text-1); border-radius: var(--r-control); }
-html[data-visual-mode] .studio-eyebrow, html[data-visual-mode] .ai-kicker { color: var(--text-3); letter-spacing: .02em; font-weight: 600; }
+/* The analysis workspace owns its light evidence-reading surfaces. */
+html[data-visual-mode] .studio-eyebrow { color: var(--text-3); letter-spacing: .02em; font-weight: 600; }
 
 /* Login: fields sit on a darker well so they read as inputs on the panel. */
 html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]) { background-color: var(--night-0); border: 1px solid var(--hairline-strong); min-height: 46px; }
