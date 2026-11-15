@@ -1,6 +1,6 @@
 import { runBoardAssistant, BOARD_AGENT_LIMITS } from './assistant-harness.js';
 import { providerMessages } from './locales/assistant-provider.js';
-import { validatePlay, COLORS } from './model.js';
+import { validatePlay, COLORS, clone, decodeWorkspace, encodeWorkspace } from './model.js';
 import { submitResultTool } from './assistant-schema.js';
 
 export const DEFAULT_BOARD_MODEL = 'gpt-6.1-terra';
@@ -12,7 +12,7 @@ const words = locale => providerMessages[locale === 'en' ? 'en' : 'zh-CN'];
 const text = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
 const validPoint = point => point && [point.x, point.y].every(n => Number.isFinite(n) && n >= 0 && n <= 100);
 
-export function boardAssistantInput({ instruction, board, locale, mode, previous }) {
+export function boardAssistantInput({ instruction, board, locale, mode, previous, editor }) {
   if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
     throw new Error(words(locale).instruction);
   const source = board?.play || board || {};
@@ -29,7 +29,20 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
     return {...p, name:text(original.name || p.name,100), position:text(original.position || p.label,40), ...(original.number != null ? {number:text(String(original.number),12)} : {})};
   });
   const selected = board?.selectedPlayerId;
+  let editorContext;
+  if (editor) {
+    const data=editor.data ? decodeWorkspace(encodeWorkspace(editor.data)) : undefined;
+    if (data) {
+      const index=data.plays.findIndex(item => item.id === play.id);
+      if (index < 0) throw new Error(words(locale).invalid);
+      data.plays[index]=clone(play);
+    }
+    const view=editor.view && typeof editor.view === 'object' && !Array.isArray(editor.view) ? clone(editor.view) : {};
+    if (JSON.stringify(view).length > 12000) throw new Error(words(locale).invalid);
+    editorContext={data,selectedId:play.id,view,readOnly:editor.readOnly === true};
+  }
   return {instruction:instruction.trim(),locale:locale === 'en' ? 'en' : 'zh-CN',mode:['edit','search'].includes(mode) ? mode : 'auto',
+    ...(editorContext ? {editor:editorContext} : {}),
     previous:Array.isArray(previous) ? previous.slice(-5) : [],
     board:{...play, playId:play.id, players:compactPlayers, play,
       geometry:{losY:67,xUnitsPerYard:1.875,yUnitsPerYard:2,offenseDirection:'decreasing_y'},
@@ -70,25 +83,53 @@ function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {
     if (config.provider === 'openai' && config.model === 'gpt-6.1-terra') payload.reasoning_effort = 'none';
     if (config.provider === 'deepseek') payload.thinking = { type: 'disabled' };
     const send = async body => {
-      try { onRequest?.(); return await fetchImpl(config.endpoint, {method:'POST',headers,credentials:'omit',redirect:'error',body:JSON.stringify(body),signal}); }
-      catch { throw new Error(signal.aborted ? words(locale).timeout : words(locale).network); }
+      if (signal?.aborted) throw signal.reason || new DOMException('The assistant request was cancelled.', 'AbortError');
+      const request = new AbortController();
+      const abort = () => request.abort(signal.reason);
+      signal?.addEventListener('abort', abort, {once:true});
+      let timedOut = false, reading = false, rejectAbort;
+      const aborted = new Promise((_,reject) => { rejectAbort = reject; });
+      const stopped = () => rejectAbort(request.signal.reason);
+      request.signal.addEventListener('abort', stopped, {once:true});
+      const timer = setTimeout(() => { timedOut = true; request.abort(); },90000);
+      try {
+        const operation = async () => {
+          onRequest?.();
+          const response = await fetchImpl(config.endpoint, {method:'POST',headers,credentials:'omit',redirect:'error',body:JSON.stringify(body),signal:request.signal});
+          reading = true;
+          let data;
+          try { data = await readResponse(response); }
+          catch (error) {
+            if (response.ok || request.signal.aborted) throw error;
+            data = {};
+          }
+          return {response,data};
+        };
+        // Race the body reader too: provider headers alone are not a completed
+        // response, and custom readers need not implement AbortSignal support.
+        return await Promise.race([operation(),aborted]);
+      } catch {
+        if (signal?.aborted) throw signal.reason || new DOMException('The assistant request was cancelled.', 'AbortError');
+        throw new Error(timedOut ? words(locale).timeout : reading ? words(locale).invalid : words(locale).network);
+      } finally {
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', abort);
+        request.signal.removeEventListener('abort', stopped);
+      }
     };
-    let response = await send(payload);
-    let data, textFallback = false;
+    let {response,data} = await send(payload);
+    let textFallback = false;
     if (!response.ok) {
-      let errorPayload;
-      try { errorPayload = await readResponse(response); } catch { errorPayload = {}; }
-      const detail = String(errorPayload?.error?.message || errorPayload?.message || '');
+      const detail = String(data?.error?.message || data?.message || '');
       const unsupportedChoice = forceSubmit && [400,422].includes(response.status) &&
         /tool[_ -]?choice|forced? tool|function selection/i.test(detail) && /not supported|unsupported|does not support|not allowed/i.test(detail);
       if (!unsupportedChoice) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
       textFallback = true;
       const {tools,tool_choice,...fallback} = payload;
       fallback.messages = [...payload.messages,{role:'user',content:'This provider cannot force a tool. Return only the inner result object as JSON according to this generated contract: '+JSON.stringify(submitResultTool.function.parameters.properties.result)}];
-      response = await send(fallback);
+      ({response,data} = await send(fallback));
       if (!response.ok) throw new Error(words(locale).failed + ' (HTTP ' + response.status + ')');
     }
-    try { data = await readResponse(response); } catch { throw new Error(words(locale).invalid); }
     if (anthropic && Array.isArray(data?.content)) {
       const calls = data.content.filter(b => b.type === 'tool_use').map(b => ({ id: b.id, type: 'function', function: { name: b.name, arguments: JSON.stringify(b.input) } }));
       return { role: 'assistant', textFallback, anthropicContent: data.content, content: data.content.filter(b => b.type === 'text').map(b => b.text).join(''), tool_calls: calls };
@@ -102,38 +143,30 @@ function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {
 }
 
 export async function invokeBoardModel(config, input, { signal, fetchImpl = fetch, readResponse = r => r.json(), runtime, searchCatalog, onTool, onEvent, reauthorize } = {}) {
-  const run = new AbortController();
-  const abort = () => run.abort();
-  signal?.addEventListener('abort', abort, { once: true });
-  if (signal?.aborted) abort();
-  const timer = setTimeout(abort, 90000);
-  try {
-    let providerCalls = 0;
-    const send = transport(config, input.locale, fetchImpl, readResponse, run.signal, () => providerCalls++);
-    const result = await runBoardAssistant({ input, runtime, searchCatalog, signal: run.signal, onTool, onEvent,
-      async callModel(messages, tools, allowTools, options) {
-        if (reauthorize) await reauthorize();
-        return send(messages, tools, allowTools, options);
-      } });
-    return {...result,providerCalls};
-  } finally {
-    clearTimeout(timer);
-    signal?.removeEventListener('abort', abort);
-  }
+  let providerCalls = 0;
+  const send = transport(config, input.locale, fetchImpl, readResponse, signal, () => providerCalls++);
+  const result = await runBoardAssistant({ input, runtime, searchCatalog, signal, onTool, onEvent,
+    async callModel(messages, tools, allowTools, options) {
+      if (reauthorize) await reauthorize();
+      return send(messages, tools, allowTools, options);
+    } });
+  return {...result,providerCalls};
 }
 
-export async function requestBoardAssistant({ instruction, board, locale, mode, previous, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool, onEvent }) {
-  const input = boardAssistantInput({ instruction, board, locale, mode, previous });
+export async function requestBoardAssistant({ instruction, board, locale, mode, previous, editor, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool, onEvent }) {
+  const input = boardAssistantInput({ instruction, board, locale, mode, previous, editor });
   const provider = model?.provider || 'openai';
   const modelId = model?.model?.trim() || (provider === 'openai' ? DEFAULT_BOARD_MODEL : '');
   const apiKey = model?.apiKey?.trim();
   if (!modelId || modelId.length > 160 || !apiKey || apiKey.length > 512 || /[^\x21-\x7e]/.test(apiKey)) throw new Error(words(locale).settings);
   const config = { ...model, provider, model: modelId, apiKey };
   if (workspace) {
+    // The Worker supplies authoritative workspace data; transmit only local view state.
+    const payloadInput={...input,...(input.editor ? {editor:{view:input.editor.view}} : {})};
     const path = '/api/workspaces/' + encodeURIComponent(workspace.id) + '/board-assistant';
-    if (!onTool && !onEvent) return request(path, {method:'POST', body:{...input, model:config, revision:workspace.revision}, signal});
+    if (!onTool && !onEvent) return request(path, {method:'POST', body:{...payloadInput, model:config, revision:workspace.revision}, signal});
     const response = await (fetchImpl || fetch)(path, {method:'POST', credentials:'same-origin', cache:'no-store',
-      headers:{'Content-Type':'application/json'}, body:JSON.stringify({...input, model:config, revision:workspace.revision, stream:true}), signal});
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify({...payloadInput, model:config, revision:workspace.revision, stream:true}), signal});
     if (!response.ok) {
       let payload; try { payload = await response.json(); } catch { payload = {}; }
       throw Object.assign(new Error(payload.error || words(locale).failed), {status:response.status});
@@ -163,6 +196,7 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
     const { searchMaddenCatalog, loadAssistantCatalog } = await import('./assistant-search.js');
     return searchMaddenCatalog(await (loadCatalog || loadAssistantCatalog)(), args, options);
   };
+  if (input.editor) input.editor.loadCatalog = loadCatalog || (await import('./assistant-search.js')).loadAssistantCatalog;
   return invokeBoardModel({ ...config, protocol: 'openai', endpoint }, input, {
     runtime: runtime || await import('./vendor/assistant-langgraph.js'), signal, fetchImpl, searchCatalog, onTool, onEvent,
   });

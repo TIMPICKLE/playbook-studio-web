@@ -1,6 +1,6 @@
 # 战术板 AI 助手架构与使用边界
 
-画布上的助手由一个 LangGraph Agent 和编辑器共同完成任务。模型决定读取什么、调用哪个工具、如何组织修改提案。编辑器根据提案构造预览，教练确认后再提交一次可撤销的事务。[状态图](../web/assistant-harness.js) · [编辑器接入](../web/app.js)
+画布上的助手由一个 LangGraph Agent、共享命令层和编辑器共同完成任务。模型读取真实能力与状态，选择编辑命令或本机控件。战术数据先预览再提交一次可撤销事务，本机视图由宿主执行，文件流程保留浏览器交接。[完整功能覆盖与共享命令架构](EDITOR_COMMAND_ARCHITECTURE.md) · [状态图](../web/assistant-harness.js) · [编辑器接入](../web/app.js)
 
 ## 状态图与统一契约
 
@@ -9,26 +9,36 @@ flowchart TD
     M["model · 理解指令与选择工具"] -->|"读取或试算"| T["tools · 返回可核对的证据"]
     T --> M
     M -->|"submit_result"| V["validate · 同源 schema 与证据检查"]
-    V -->|"首次失败且有预算"| M
-    V -->|"edit"| P["编辑器预览，等待教练应用"]
+    V -->|"首次格式失败"| M
+    V -->|"edit / workspace"| P["编辑器预览，等待教练应用"]
+    V -->|"local"| L["宿主操作控件并返回状态"]
+    V -->|"interaction"| I["继续按钮打开文件或打印流程"]
     V -->|"其他结果"| R["展示候选、回答、澄清或移交"]
     V -->|"再次失败"| F["结束并提示"]
 ```
 
-结果类型与操作参数统一定义在 [assistant-schema.js](../web/assistant-schema.js)。Zod 定义同时生成模型工具的 JSON schema 和程序校验器。提示词只说明使用方式，最终结果通过 `submit_result` 提交。最后一轮强制选择该工具。服务商明确不支持指定工具时，传输层回退到 JSON 正文，仍使用同一个 schema 和证据校验。
+结果类型与操作参数统一定义在 [assistant-schema.js](../web/assistant-schema.js)。Zod 定义同时生成模型工具的 JSON schema 和程序校验器。提示词只说明使用方式，最终结果通过 `submit_result` 提交。连续查询无进展时要求选择该工具。服务商明确不支持指定工具时，传输层回退到 JSON 正文，仍使用同一个 schema 和证据校验。
 
 | 工具 | 功能 |
 |---|---|
+| `list_capabilities` | 按当前战术、工作区和只读状态发现 `play`、`workspace`、`local`、`interaction` 能力及可用原因。 |
+| `get_command_schema` | 获取已注册编辑命令的权威参数 schema。 |
 | `read_board` | 提供完整战术快照与场上人员信息，路线带 ID、时序和可选 intent。 |
+| `read_editor` | 读取真实战术 ID、名单、自定义阵型、人员组及当前工具、视图、演练和布局状态。 |
 | `resolve_player` | 根据位置、姓名片段、号码和相对位置定位真实棋子。 |
 | `resolve_players` | 批量定位多组条件，位置组可以返回多名球员。 |
 | `search_madden` | 按名称、近似几何标签、阵型与球队检索，或按当前战术寻找相似条目。 |
 | `preview_edit` | 调用共享提案函数，完整校验整组操作，返回实测深度、折向、阻挡顺序、变更 ID 与摘要。 |
-| `submit_result` | 提交 edit、search、answer、clarify 或 handoff。编辑结果必须对应已经试算并查看过的操作组。 |
+| `preview_actions` | 准备战术本变更、本机操作或文件交互，返回真实变更清单；同组不得混合执行通道。 |
+| `submit_result` | 提交 edit、editor、search、answer、clarify 或 handoff。编辑与编辑器操作必须对应已经试算并查看过的完整命令组。 |
 
 Agent 试算与编辑器预览均调用 [proposeEdit](../web/assistant-proposal.js)。它校验原战术、运行整组操作，再对结果执行完整 `validatePlay`。同一规范化战术和操作会得到相同的新对象 ID。变更清单复用该函数的几何测量摘要。模型有机会根据工具返回的实际效果修正提案，编辑器负责最终写入、自动保存和一次撤销。
 
-图的状态保存下一节点、模型调用数和修正标志。工具证据与模型消息只存在于本次运行。一次运行最多 6 次模型调用、10 次工具调用，单条消息最多提出 5 个工具调用，执行层依次执行。回复上限为 1,800 tokens，调用前检查对话是否超过 120,000 字节，单次运行最多 90 秒。校验失败且有预算时允许修正一次。[状态图与预算](../web/assistant-harness.js) · [传输适配](../web/assistant-provider.js)
+球员、路线、区域、文字、球权、元数据、镜像、阵型和人员操作由 [editor-play-commands.js](../web/editor-play-commands.js) 提供共享执行器；战术本、视图和交互由 [editor-actions.js](../web/editor-actions.js) 分类。模型可添加对象并用 `as` 声明组内别名，后续命令通过 `$别名` 引用，不必先让用户手动创建球员。
+
+战术本修改先显示变更清单，应用后整组撤销；本机视图操作执行后返回状态；文件和打印流程显示「继续」并保持 `awaiting_user`。打开文件选择器不是完成导入，打开打印面板不是完成打印。知识库和 Madden 目录用于提供资料与条目，助手的执行能力来自共享命令注册表。
+
+图的状态保存下一节点、调用统计和修正标志。工具证据与模型消息只存在于本次运行。正常推进的任务没有固定模型轮数或工具调用总额。连续三轮没有新增有效工具证据时，要求模型根据已有信息提交结果；仍重复查询则以明确的无进展说明结束。长对话压缩重复历史，保留原始指令、唯一工具证据和最新完整工具轮次，120,000 字节仅触发压缩。单条消息最多提出 5 个工具调用，执行层依次执行；模型单次回复上限为 1,800 tokens，格式校验失败允许修正一次。每次模型 HTTP 请求及响应读取有 90 秒超时，正常推进的整个任务没有 90 秒总时限；用户取消仍可立即结束任务。[循环与进展检查](../web/assistant-harness.js) · [传输适配](../web/assistant-provider.js)
 
 ## 意图、跟进与并发
 
@@ -42,10 +52,17 @@ Agent 试算与编辑器预览均调用 [proposeEdit](../web/assistant-proposal.
 
 ## 支持的指令
 
-先将涉及的球员放在当前战术图中。姓名可用名、姓或全名匹配，号码支持 `12`、`#12` 和 `12号`。多个匹配对象会要求教练澄清。以下示例描述期望的提案，实际调用顺序由模型决定。
+可以直接添加球员或本地 4–3 防守，无需 Madden 目录或先创建空白防守板。修改指定球员时可引用已核对的场上球员或本组新建对象的别名。姓名可用名、姓或全名匹配，号码支持 `12`、`#12` 和 `12号`。多个匹配对象会要求教练澄清。以下示例描述期望的结果，实际调用顺序由模型决定；[完整命令覆盖表](EDITOR_COMMAND_ARCHITECTURE.md#功能覆盖表)同时包含视图、演练与文件功能。
 
 | 指令示例 | 期望的预览 |
 |---|---|
+| “添加一名蓝色方形 LB” | 创建防守球员并设置标签、颜色、形状；不要求用户先放置球员。 |
+| “把战术改名为 Red Mesh，再左右镜像” | 在同组预览中修改标题和镜像图面；一次撤销。 |
+| “复制当前战术”或“新建一套 11 人 4–3 防守” | 基于真实战术或内置阵型展示战术本变更清单，应用后切换到结果战术。 |
+| “切到浅色球场，隐藏码线，半速循环演练” | 通过本机通道操作现有视图和演练控件，不修改战术数据。 |
+| “导出 SVG”或“导入本地战术本” | 准备交互并展示「继续」，随后进入真实浏览器下载或文件选择流程。 |
+| “在这张 Mesh 上添加 4–3 防守” | 使用 `defense_formation` 添加 4 名锋线、3 名线卫和 4 名后卫，保留进攻与路线，不自动指定覆盖。固定完整 11 人，不按工作区人数设置截断。 |
+| “把现有防守重置为 4–3” | 明确替换旧防守，移除旧防守路线、清理失效阻挡引用并修复球权。预览后才应用；未明确重置时拒绝覆盖已有防守。 |
 | “X 跑 12 码 dig，向内折” | 生成概念路线。支持 slant、out、in、dig、curl、comeback、hitch、post、corner、go、fade、seam、flat、wheel、drag 和 screen。 |
 | “C 先挡前面的 DT，再挡叫 Avery 的 LB” | 按顺序生成分段阻挡。演练时目标的当前位置用于计算接触点。 |
 | “OL 全线向左 zone 阻挡” | 批量定位锋线，一次提议多条阻挡路线。还支持 gap 和 pass protection 方案。 |
@@ -67,11 +84,12 @@ Agent 试算与编辑器预览均调用 [proposeEdit](../web/assistant-proposal.
 ## 当前限制
 
 - 几何是基于固定开球线 `y=67`、进攻方朝减小的 y 方向和画布比例生成的近似示意，路线和阻挡方案仍需教练检查。阻挡目标被删除后使用保存的路线点。没有目标 ID 的旧路线沿用原有动画。
-- Madden 当前目录来自 Eagles 和 Ravens 的进攻战术。可编辑轨迹的标签按几何近似生成，并非经战术教练逐条认证。原图条目只提供名称和阵型等元数据，不提供推测的路线标签。目录缺少人员组、跑传和比赛情境数据，模型检索工具暂不提供这些筛选参数。
+- Madden 当前目录包含 13 支球队的进攻战术。可编辑轨迹的标签按几何近似生成，并非经战术教练逐条认证。原图条目只提供名称和阵型等元数据，不提供推测的路线标签。目录缺少人员组、跑传和比赛情境数据，模型检索工具暂不提供这些筛选参数。
 - 几何标签仍有漏检。以当前可编辑目录的战术名称作弱标注，FLOOD 命中 17/23、SMASH 命中 9/13、CURL 命中 13/20、VERTICAL 命中 16/18。名称不是逐条真值，这些数字用于检查召回，不能作为准确率。检索分别标明名称标签和近似几何标签，可靠评估还需要教练标注的独立样本。
 - 模型推荐的依据和战术问答是辅助判断。图上对象的来源可校验，战术解释的正确性仍取决于模型与所给上下文。
 - 相似检索依赖可编辑路线和阵型特征。AI 不会从原图中即时识别完整战术。只有原图的战术仍是参考图，无法按可编辑路线演练。
 - 会话只保留当前页面最近五轮。历史记录不会在刷新后恢复，也不能跨战术沿用。静态版需要用户配置 API Key，语音听写依赖浏览器和麦克风权限。
+- 能力受实际上下文约束：参考图不能编辑几何或演练，手机和 iPad 使用传统模式，名单与人员组须已存在。导入、打印、原图转换等入口可以由助手打开，后续仍需提供文件或完成相应流程。账号及团队管理属于战术板之外的功能。
 
 ## 宿主与数据
 
@@ -93,12 +111,12 @@ GitHub Pages 在浏览器中加载 LangGraph 浏览器包，并直接调用选�
 
 ## 维护与回归
 
-新能力先在 [工具注册表](../web/assistant-tools.js)或[领域操作](../web/assistant-operations.js)中定义可验证的输入与结果，再扩展[图的结果校验](../web/assistant-harness.js)和编辑器事务。增加数据字段时检查 [model.js](../web/model.js) 的校验、保存与旧数据兼容。Madden 几何标签的生成入口在 [脚本](../scripts/build-madden-search-tags.mjs)，路线特征在 [madden-concepts.js](../web/madden-concepts.js)。
+新能力先在 [战术命令](../web/editor-play-commands.js)或[编辑器动作](../web/editor-actions.js)定义 schema、执行和结果，再接入手动控件、[能力发现](../web/editor-capabilities.js)、预览及宿主提交，并补充[覆盖表](EDITOR_COMMAND_ARCHITECTURE.md#功能覆盖表)。不要单独给 AI 增加一套与按钮不同的领域逻辑。增加数据字段时检查 [model.js](../web/model.js) 的校验、保存与旧数据兼容。Madden 几何标签的生成入口在 [脚本](../scripts/build-madden-search-tags.mjs)，路线特征在 [madden-concepts.js](../web/madden-concepts.js)。
 
 更新 LangGraph 依赖后运行 `node scripts/bundle-board-agent.mjs`，提交生成的浏览器包和署名文件。下列测试使用脚本化模型，无需 API Key。
 
 ```sh
-node --test tests/assistant-*.test.mjs tests/board-assistant-ui.test.mjs
+node --test --test-concurrency=2 tests/assistant-*.test.mjs tests/editor-play-commands.test.mjs tests/editor-actions.test.mjs tests/board-assistant-ui.test.mjs
 ```
 
 ## 真实模型评测

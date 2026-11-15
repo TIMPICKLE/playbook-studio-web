@@ -4,25 +4,29 @@ import { composeDigitalExport, pngExportDescription } from './digital-export.js'
 import { createMaddenLibrary } from './madden.js';
 import { createBoardAssistant } from './board-assistant.js';
 import { animateAssistantLayer } from './assistant-transition.js';
+import { withDefense43 } from './defense-formation.js';
+import { runEditorPlayCommand } from './editor-play-commands.js';
+import { prepareEditorActions } from './editor-actions.js';
+import { deviceIsTraditional } from './visual-mode.js';
 import { assistantPlayers } from './assistant-edit.js';
 import { proposeEdit } from './assistant-proposal.js';
 import { proposalConflicts } from './assistant-conflicts.js';
 import { requestBoardAssistant } from './assistant-provider.js';
 import { loadAssistantCatalog, resolveMaddenResults } from './assistant-search.js';
-import { makeMaddenPlay, hasEditableTrace, getEditableEntry, spaceMaddenLine, teamDisplayName } from './madden-model.js';
+import { hasEditableTrace, getEditableEntry, spaceMaddenLine, teamDisplayName } from './madden-model.js';
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, request } from './cloud.js';
 import { startGuestWorkspace } from './guest-workspace.js';
 import { createRosterView } from './roster.js';
 import { clearDepthPlayer } from './depth-model.js';
-import { linkRosterPlayer, personnelMatches, refreshRosterBindings } from './board-personnel.js';
+import { personnelMatches, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView, resolveHandoffContext } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
-import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, makePlay, formationPlayers, prepareWorkspaceAppend, mirrorPlay, movePlayer, animatedPlayer, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
+import { BOOKS, COLORS, FORMATIONS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, movePlayer, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
 import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
-import { effectsControl, initEffects, burstAt } from './effects.js';
+import { effectsControl, initEffects, burstAt, setEffectsMode, visualMode } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
 import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
 import { createWorkspacePanels } from './workspace-panels.js';
@@ -80,13 +84,13 @@ const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.
   if (!confirmDraft(() => importMadden(entry))) return;
   return importMadden(entry);
 } });
-function importMadden(entry) {
+function importMadden(entry, {adoptScope = false} = {}) {
   if (!canEdit()) return;
   if (state.data.plays.some(p => (hasEditableTrace(entry.id) ? p.diagramSource : p.reference)?.catalogId === entry.id)) { toast(t("feedback.this_play_is_already_in_the_current_playbook"), { type: 'success' }); return; }
   if (state.data.plays.length >= 500) return { ok: false, message: t("feedback.a_playbook_can_hold_at_most_500_plays_remove_some_befor") };
-  const play = makeMaddenPlay(entry);
-  book = 'offense'; filter = ''; formationFilter = ''; query = ''; selection = null; tool = 'select';
-  edit((p, data) => { data.plays.push(play); state.selectedId = play.id; });
+  const plan = prepareEditorActions({...editorSnapshot(),catalogRows:[entry]},[{kind:'catalog_import',catalogId:entry.id}],{idFactory:uid,locale:getLocale(),now:new Date().toISOString()});
+  commitEditorPlan(plan,{adoptScope});
+  const play = current();
   const checkpoint = history.past.at(-1);
   return { ok: true, canUndo: () => canEdit() && history.past.at(-1) === checkpoint,
     undo: () => { if (canEdit() && history.past.at(-1) === checkpoint) restore(history.undo(state)); },
@@ -175,11 +179,14 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
   const changedRouteIds = new Set(changedRoutes.map(route => route.id));
   const movingPlayerIds = new Set(changedRoutes.map(route => route.playerId));
   const changedPlayerIds = new Set(play.players.filter(player => changed('players', player)).map(player => player.id));
+  const removedPlayerIds = original.players.filter(player => !play.players.some(item => item.id === player.id)).map(player => player.id);
+  const maskedPlayerIds = new Set([...changedPlayerIds, ...removedPlayerIds]);
   svg.querySelectorAll('[data-route]').forEach(node => { if (!changedRouteIds.has(node.dataset.route)) node.remove(); });
   svg.querySelectorAll('[data-player]').forEach(node => { if (!changedPlayerIds.has(node.dataset.player) && !movingPlayerIds.has(node.dataset.player)) node.remove(); });
-  const changedObjectIds = {route:changedRouteIds,player:changedPlayerIds};
+  const changedObjectIds = {route:changedRouteIds,player:maskedPlayerIds};
   for (const [type, attribute] of [['zones', 'zone'], ['annotations', 'annotation']]) {
     const ids = new Set(play[type].filter(value => changed(type, value)).map(value => value.id));
+    for (const item of original[type]) if (!play[type].some(next=>next.id===item.id)) ids.add(item.id);
     changedObjectIds[attribute] = ids;
     svg.querySelectorAll(`[data-${attribute}]`).forEach(node => { if (!ids.has(node.dataset[attribute])) node.remove(); });
   }
@@ -215,10 +222,10 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
   for (const node of svg.querySelectorAll('[data-player]')) if (!changedPlayerIds.has(node.dataset.player)) rehearsalOnly.push(node);
   if (!ballChanged && previewBall?.isConnected) rehearsalOnly.push(previewBall);
   for (const node of rehearsalOnly) node.style.visibility = 'hidden';
-  const mask = {playerIds:[...changedPlayerIds],routeIds:[...changedRouteIds],zoneIds:[...changedObjectIds.zone],ball:ballChanged};
+  const mask = {playerIds:[...maskedPlayerIds],routeIds:[...changedRouteIds],zoneIds:[...changedObjectIds.zone],ball:ballChanged};
   const rehearse = () => {
     for (const node of rehearsalOnly) node.style.visibility = '';
-    mask.playerIds = [...new Set([...changedPlayerIds,...movingPlayerIds])];
+    mask.playerIds = [...new Set([...maskedPlayerIds,...movingPlayerIds])];
     mask.ball = !!svg.querySelector('#assistant-preview-ball');
     for (const node of main.querySelectorAll('[data-player]')) if (mask.playerIds.includes(node.dataset.player)) hide(node);
     if (mask.ball) hide(main.querySelector('#pitch-ball'));
@@ -257,6 +264,175 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', () => cancelFieldGesture());
 window.addEventListener('resize', () => cancelFieldGesture());
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
+const scopeFor = selectedId => JSON.stringify([shared?.current?.id || 'local', selectedId]);
+function editorSnapshot() {
+  return {data:clone(state.data), selectedId:current().id, readOnly:!canEdit(), view:editorViewState()};
+}
+function editorViewState() {
+  return {
+    selection:clone(selection), tool, draft:!!draft, readOnly:!canEdit(),
+    playback:{playing,time,speed,loop,mode:rehearsal?'rehearse':'edit'},
+    theme:viewSettings().fieldTheme, grid:viewSettings().showGrid, names:viewSettings().showNames,
+    visualMode:visualMode(), digitalAvailable:!deviceIsTraditional(),
+    layout:boardLayout.getState(), filter:{query,category:filter,formation:formationFilter,book}, panel:panels.active,
+    canUndo:history.past.length>0, canRedo:history.future.length>0,
+  };
+}
+function applyPlayCommand(operation, {redraw = true, idFactory = uid} = {}) {
+  const next = clone(current());
+  let outcome;
+  try {
+    outcome = runEditorPlayCommand(next, operation, {idFactory, roster:state.data.roster, formations:state.data.formations, depthChart:state.data.depthChart});
+    if (!outcome) throw Error('Unknown editor command.');
+    validatePlay(next);
+  } catch (error) { toast(error.message, {type:'warning'}); return null; }
+  edit(play => Object.assign(play,next), {redraw});
+  return outcome;
+}
+function commitEditorPlan(plan, {adoptScope = false} = {}) {
+  const existing = new Set(state.data.plays.map(play=>play.id));
+  for (const play of plan.data.plays) if (!existing.has(play.id) && !play.createdAt) play.createdAt = new Date().toISOString();
+  if (adoptScope) boardAssistant?.adoptScope(scopeFor(plan.selectedId));
+  selection = null; tool = 'select'; query = ''; filter = ''; formationFilter = '';
+  edit((_play,data) => {
+    Object.assign(data,plan.data); state.selectedId = plan.selectedId;
+    book = current().book;
+  });
+}
+function applyWorkspaceActions(commands) {
+  try {
+    const plan = prepareEditorActions(editorSnapshot(),commands,{idFactory:uid,locale:getLocale(),now:new Date().toISOString()});
+    commitEditorPlan(plan);
+    return plan;
+  } catch(error) {toast(error.message,{type:'warning'});return null;}
+}
+function operationContext(operations) {
+  const rosterIds = new Set(operations.flatMap(operation=>[operation.rosterId,operation.patch?.rosterId]).filter(Boolean));
+  const formationIds = new Set(operations.map(operation=>operation.formationId).filter(Boolean));
+  const groupIds = new Set(operations.map(operation=>operation.groupId).filter(Boolean));
+  return JSON.stringify({
+    roster:state.data.roster.filter(person=>groupIds.size || rosterIds.has(person.id)),
+    formations:state.data.formations.filter(formation=>formationIds.has(formation.id)),
+    groups:state.data.depthChart?.groups?.filter(group=>groupIds.has(group.id)) || [],
+  });
+}
+function executeEditorLocal(actionsToRun) {
+  // Validate availability before making device changes. Data edits remain in
+  // the separate preview/transaction lane.
+  let plannedPlay=current(), plannedDraft=!!draft;
+  for (const action of actionsToRun) {
+    if (!canEdit() && (action.kind==='history_action' || action.kind==='draft_action' || action.kind==='tool_set' && action.tool!=='select')) throw Error(editBlockedMessage());
+    if (action.kind==='view_set' && action.visualMode==='digital' && deviceIsTraditional()) throw Error(t('controls.phones_and_ipads_use_traditional_mode_rehearsal_remains_'));
+    if (action.kind==='playback_set' && plannedPlay.reference) throw Error(t('feedback.the_original_diagram_has_no_playable_route_data'));
+    if (action.kind==='tool_set' && action.tool!=='select' && plannedPlay.reference) throw Error(t('feedback.this_original_diagram_supports_notes_but_has_no_editabl'));
+    const changesPlayback=action.kind==='playback_set' && (action.mode || action.reset || action.time!=null || action.playing!=null);
+    if (plannedDraft && (action.kind==='play_select' || action.kind==='filter_set' && action.book!=null || changesPlayback || action.kind==='tool_set' && action.tool!==tool)) throw Error(t('assistant.finishDrawing'));
+    if (action.kind==='draft_action' && ['finish','cancel'].includes(action.action)) plannedDraft=false;
+    if (action.kind==='play_select') plannedPlay=state.data.plays.find(play=>play.id===action.playId) || plannedPlay;
+    if (action.kind==='filter_set' && action.book!=null) plannedPlay=state.data.plays.find(play=>play.book===action.book) || plannedPlay;
+  }
+  for (const action of actionsToRun) {
+    if (action.kind === 'history_action' || action.kind === 'draft_action' || action.kind === 'tool_set' && action.tool !== 'select') {
+      if (!canEdit()) throw Error(editBlockedMessage());
+    }
+    if (action.kind === 'selection_set') {
+      selection = action.objectType === 'none' ? null : {type:action.objectType,id:action.id};
+      refreshSelection();
+    } else if (action.kind === 'tool_set') setTool(action.tool);
+    else if (action.kind === 'draft_action') {
+      if (action.action === 'set_mode') {
+        if (!draft) throw Error(getLocale()==='en'?'There is no active drawing draft.':'当前没有正在绘制的路线。');
+        draft.mode=action.mode;updateCanvasHint();continue;
+      }
+      if (action.action === 'finish' && (!draft || draft.points.length<2)) throw Error(t('editorExtra.click_at_least_one_route_endpoint'));
+      actions[action.action === 'finish' ? 'finish-route' : action.action === 'cancel' ? 'cancel-draft' : 'undo-point']();
+    } else if (action.kind === 'history_action') {
+      if (!(action.action === 'undo' ? history.past : history.future).length) throw Error(getLocale()==='en'?'No history is available.':'当前没有可撤销或重做的修改。');
+      const next = action.action === 'undo' ? history.undo(state) : history.redo(state);
+      boardAssistant?.adoptScope(scopeFor(next.selectedId)); restore(next);
+    } else if (action.kind === 'playback_set') {
+      if (current().reference) throw Error(t('feedback.the_original_diagram_has_no_playable_route_data'));
+      if (draft && (action.mode || action.reset || action.time!=null || action.playing!=null)) throw Error(t('assistant.finishDrawing'));
+      if (action.mode || action.reset || action.time != null || action.playing != null) clearAssistantPreview();
+      if (action.mode === 'edit' || action.reset) { resetAnimation(); rehearsal = action.mode === 'rehearse'; }
+      if (action.mode === 'rehearse') rehearsal = true;
+      if (action.speed != null) speed = action.speed;
+      if (action.loop != null) loop = action.loop;
+      if (action.time != null) { stop(); time = Math.min(action.time,animationLength(current())); rehearsal = true; }
+      if (action.playing != null && playing !== action.playing) togglePlay();
+      if (action.mode || action.reset) renderField();
+      updateAnimation($('#field svg'),current(),time); syncEditorChrome();
+    } else if (action.kind === 'view_set') {
+      if (action.visualMode === 'digital' && deviceIsTraditional()) throw Error(t('controls.phones_and_ipads_use_traditional_mode_rehearsal_remains_'));
+      if (action.theme != null) viewOverrides.fieldTheme = action.theme;
+      if (action.grid != null) viewOverrides.showGrid = action.grid;
+      if (action.names != null) viewOverrides.showNames = action.names;
+      if (action.visualMode != null) setEffectsMode(action.visualMode);
+      renderField({preservePreview:true}); syncEditorChrome();
+    } else if (action.kind === 'layout_set') boardLayout.setState(action);
+    else if (action.kind === 'filter_set') {
+      if (action.book != null) {
+        resetAnimation();draft=null;selection=null;book=action.book;query='';filter='';formationFilter='';
+        const first=state.data.plays.find(play=>play.book===book);
+        if(first){boardAssistant?.adoptScope(scopeFor(first.id));state.selectedId=first.id;}
+        panels.close({focus:false});
+      }
+      if (action.query != null) query = action.query;
+      if (action.category != null) filter = action.category;
+      if (action.formation != null) formationFilter = action.formation;
+      render();
+    } else if (action.kind === 'panel_set') {
+      if (['field','none'].includes(action.panel)) { panels.close({focus:false}); if(action.panel==='field')$('#field')?.scrollIntoView?.({block:'nearest'}); }
+      else if (panels.active !== action.panel) panels.toggle(action.panel);
+      const target = action.panel === 'plays' ? $('.sidebar') : action.panel === 'properties' ? $('.inspector') : $('#field');
+      target?.scrollIntoView?.({block:'nearest'});
+    } else if (action.kind === 'play_select') {
+      if (draft || drag) throw Error(t('assistant.finishDrawing'));
+      const next = state.data.plays.find(play=>play.id===action.playId);
+      if (!next) throw Error(t('assistant.boardChanged'));
+      book = next.book; boardAssistant?.adoptScope(scopeFor(next.id)); choose(next.id);
+    }
+  }
+  return {kind:'answer',scope:assistantScope(),message:getLocale()==='en'?'Editor updated.':'已更新战术板。',editorState:editorViewState(),actions:actionsToRun};
+}
+function editorInteractionReply(plan) {
+  const message = getLocale()==='en'?'Ready. Continue to open the requested file, export or dialog.':'已准备好，请点击继续打开文件选择、导出或对应面板。';
+  return {kind:'answer',message,status:'awaiting_user',actions:plan.actions, action:{
+    label:getLocale()==='en'?'Continue':'继续',
+    run() {
+      let awaitingUser=false, exported=false;
+      for (const action of plan.actions) {
+        if (action.kind === 'export_request') { actions[{'png':'download-png','svg':'download-svg','play_json':'download-play','workspace_json':'download-json'}[action.format]]();exported=true; }
+        else if (action.kind === 'import_request') {actions.import();awaitingUser=true;}
+        else if (action.kind === 'print_request') {
+          printModal(); $('#print-scope').value=action.scope; $('#print-layout').value=action.layout; updatePrint();
+          awaitingUser=true;
+        } else if (action.kind === 'dialog_open') {
+          const mapping = {help:'help',new_play:'new',export:'export',madden:'madden-library',source:'compare-source',recovery:'local-recovery'};
+          if (action.dialog === 'personnel') { selection=null;refreshSelection();if(panels.active!=='properties')panels.toggle('properties');$('#personnel-group')?.focus(); }
+          else if (action.dialog === 'convert_reference') {
+            if (!canEdit()) throw Error(editBlockedMessage());
+            const reference=current().reference,entry=getEditableEntry(reference?.catalogId);
+            if (!reference || !entry) throw Error(getLocale()==='en'?'This diagram has no verified editable reconstruction.':'这张原图暂无经过验证的可编辑重建。');
+            const outcome=importMadden({...entry,id:reference.catalogId,team:reference.team,game:reference.game,sourceUrl:reference.sourceUrl,image:reference.image,name:current().title,personalNotes:current().notes,personalFavorite:current().favorite},{adoptScope:true});
+            if (!outcome?.ok) throw Error(outcome?.message || t('assistant.boardChanged'));
+            return {kind:'edit',scope:assistantScope(),message:getLocale()==='en'?'Created an editable copy.':'已创建可编辑副本。',undo:outcome.undo};
+          }
+          else if (action.dialog === 'source' && !current().diagramSource) {
+            const reference=current().reference;
+            if (!reference) throw Error(getLocale()==='en'?'This play has no source diagram.':'当前战术没有来源原图。');
+            openModal(current().title,`<img class="source-comparison" src="./${e(reference.image)}" alt="${e(current().title)}">`,`<button class="button primary" data-action="close-modal">${t('modal.close')}</button>`,true);
+          }
+          else actions[mapping[action.dialog]]();
+          awaitingUser=true;
+        }
+      }
+      return {kind:'answer',scope:assistantScope(),status:awaitingUser?'awaiting_user':'started',message:awaitingUser
+        ? (getLocale()==='en'?'The requested browser flow is open. Complete it there.':'已打开对应流程，请在其中完成文件选择、打印或操作。')
+        : exported ? (getLocale()==='en'?'Started the requested export. Check your browser downloads.':'已启动导出，请查看浏览器下载。') : plan.summary};
+    }
+  }};
+}
 function mountBoardAssistant() {
   const host = $('#field');
   if (!boardAssistant) {
@@ -268,6 +444,7 @@ function mountBoardAssistant() {
         clearAssistantPreview();
         document.querySelector('#field .assistant-highlights')?.remove();
         const play = clone(current()), scope = assistantScope();
+        const requestEditorSnapshot=editorSnapshot(), requestWorkspaceState=JSON.stringify(requestEditorSnapshot.data);
         const workspace = cloudMode() ? shared?.current : null;
         if (cloudMode() && !workspace) throw Error(editBlockedMessage());
         const result = await requestBoardAssistant({
@@ -275,13 +452,42 @@ function mountBoardAssistant() {
           board: {...play, play: clone(play), playId: play.id, players: assistantPlayers(play, state.data.roster),
             selectedPlayerId: selection?.type === 'player' ? selection.id : null,
             routes: play.routes},
-          workspace: workspace ? {id: workspace.id, revision: workspace.revision} : undefined, request,
+          editor:requestEditorSnapshot, workspace: workspace ? {id: workspace.id, revision: workspace.revision} : undefined, request,
         });
         const checkScope = () => {
           signal.throwIfAborted();
           if ($('#app').hidden || assistantScope() !== scope) throw Error(t('assistant.boardChanged'));
         };
         checkScope();
+        if (result.kind === 'editor') {
+          const snapshot = editorSnapshot();
+          if (result.actions.some(action=>action.kind==='catalog_import')) snapshot.catalogRows = (await loadAssistantCatalog()).plays;
+          checkScope();
+          const plan = prepareEditorActions(snapshot,result.actions,{locale});
+          if (plan.lane === 'local') return executeEditorLocal(plan.actions);
+          if (plan.lane === 'interaction') return editorInteractionReply(plan);
+          if (JSON.stringify(state.data)!==requestWorkspaceState) throw Error(t('assistant.boardChanged'));
+          if (!canEdit()) throw Error(editBlockedMessage());
+          if (draft || drag) throw Error(t('assistant.finishDrawing'));
+          let active = true;
+          const baseline = JSON.stringify(state.data);
+          return {kind:'preview',message:plan.summary,summary:plan.summary,changes:plan.changes,actions:plan.actions,
+            isVisible:()=>active,discard(){active=false;},
+            async apply() {
+              if (workspace) await shared.sync.refreshForProposal();
+              checkScope();
+              if (!active || JSON.stringify(state.data)!==baseline) throw Error(t('assistant.boardChanged'));
+              if (!canEdit()) throw Error(editBlockedMessage());
+              if (draft || drag) throw Error(t('assistant.finishDrawing'));
+              commitEditorPlan(plan,{adoptScope:true}); active=false;
+              const checkpoint = history.past.at(-1), appliedScope=assistantScope();
+              return {kind:'edit',scope:appliedScope,message:plan.summary,summary:plan.summary,actions:plan.actions,
+                undo() {
+                  if (!canEdit() || assistantScope()!==appliedScope || history.past.at(-1)!==checkpoint) return false;
+                  const previous=history.undo(state); boardAssistant?.adoptScope(scopeFor(previous.selectedId));restore(previous);return true;
+                }};
+            }};
+        }
         if (result.kind === 'search') {
           const catalog = await loadAssistantCatalog();
           checkScope();
@@ -297,9 +503,10 @@ function mountBoardAssistant() {
         if (!canEdit()) throw Error(editBlockedMessage());
         if (draft || drag) throw Error(t('assistant.finishDrawing'));
         const operations = result.operations || [result.operation];
-        const initial = proposeEdit(play, operations, {roster: state.data.roster, locale});
+        const initial = proposeEdit(play, operations, {roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale});
         const preview = (baseline, proposal) => {
           let active = true;
+          const externalContext = operationContext(operations);
           const playerIds = [...new Set([...proposal.playerIds, ...proposal.effects.flatMap(effect => effect.playerIds)])];
           const shown = showAssistantPreview(proposal.play, baseline);
           const isVisible = () => assistantPreview === shown && shown.svg.isConnected;
@@ -311,13 +518,14 @@ function mountBoardAssistant() {
               await shown.transition.finished;
               if (workspace) await shared.sync.refreshForProposal();
               checkScope();
+              if (operationContext(operations)!==externalContext) throw Error(t('assistant.boardChanged'));
               if (!active) throw Error(t('assistant.boardChanged'));
               if (!canEdit()) throw Error(editBlockedMessage());
               if (draft || drag) throw Error(t('assistant.finishDrawing'));
               if (proposalConflicts(baseline, current(), operations, proposal)) throw Error(t('assistant.boardChanged'));
               if (!wasVisible || !isVisible() || JSON.stringify(current()) !== JSON.stringify(baseline)) {
                 const latest = clone(current());
-                return preview(latest, proposeEdit(latest, operations, {roster: state.data.roster, locale}));
+                return preview(latest, proposeEdit(latest, operations, {roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale}));
               }
               shown.resetRehearsal();
               clearAssistantPreview({keepLayer:true,refresh:false});
@@ -343,7 +551,7 @@ function mountBoardAssistant() {
         if (proposalConflicts(play, current(), operations, initial)) throw Error(t('assistant.boardChanged'));
         onTool?.('build_preview');
         const latest = clone(current());
-        return preview(latest, proposeEdit(latest, operations, {roster: state.data.roster, locale}));
+        return preview(latest, proposeEdit(latest, operations, {roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale}));
       },
       onHighlight: showAssistantHighlights,
       onHandoff(result) {
@@ -422,7 +630,7 @@ function render() {
       <a class="brand" href="${cloudMode() ? './index.html' : '#home'}" aria-label="Playbook Studio"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="44" height="24" alt=""><span>Playbook<span>Studio</span></span><small title="${cloudMode() ? t("editor.saved_in_the_cloud_and_shared_by_member_permissions") : t("editor.saved_in_this_browser_only_export_backups_regularly")}">${cloudMode() ? t("editor.cloud") : t("editor.local")}</small></a>
       <div class="team-switch"><span class="team-avatar" aria-hidden="true">${e([...(state.data.team.name || '').trim()][0] || '队')}</span><span><strong>${e(state.data.team.name)}</strong><small>${e(state.data.team.subtitle)}</small></span></div>
       <div class="side-label"><span>${t("editor.playbook")}</span></div>
-      <nav class="book-nav" aria-label="${t("editor.playbook_type")}">${Object.entries(BOOKS).map(([key, name]) => `<button ${key === 'offense' ? 'data-madden-drop="offense"' : ''} data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${t(key === 'offense' ? 'editor.offense' : key === 'defense' ? 'editor.defense' : 'editor.special_teams')}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
+      <nav class="book-nav" aria-label="${t("editor.playbook_type")}">${Object.keys(BOOKS).map(key => `<button ${key === 'offense' ? 'data-madden-drop="offense"' : ''} data-action="book:${key}" class="${key === book ? 'active' : ''}" aria-pressed="${key === book}">${icon(key === 'offense' ? 'route' : key === 'defense' ? 'zone' : 'flag')}<span>${t(key === 'offense' ? 'editor.offense' : key === 'defense' ? 'editor.defense' : 'editor.special_teams')}</span><em>${state.data.plays.filter(p => p.book === key).length}</em></button>`).join('')}</nav>
       <button class="madden-launch" data-action="madden-library">${icon('ball')}<span><strong>${t("editor.madden_nfl_play_library")}</strong><small>${t("editor.eagles_ravens_drag_to_add")}</small></span><b>↗</b></button>
       <div class="madden-drop-target" data-madden-drop="offense">${t("editor.drop_here_to_add_to_offense")}<small>${canEdit() ? t("editor.add_to_current_workspace_autosaved") : t("editor.read_only_cannot_add")}</small></div>
       <div class="side-divider"></div>
@@ -493,6 +701,10 @@ function syncPlayback() {
   }
   $('.playback').classList.toggle('is-playing',playing);
   $('#field').classList.toggle('is-running',playing);
+  if ($('#speed')) $('#speed').value=String(speed);
+  for (const button of document.querySelectorAll('[data-action="loop"]')) {
+    button.classList.toggle('enabled',loop);button.setAttribute('aria-pressed',String(loop));
+  }
 }
 function syncEditorChrome() {
   const field=$('#field');if(!field)return;
@@ -504,6 +716,7 @@ function syncEditorChrome() {
   gridButton?.classList.toggle('enabled',gridVisible);
   gridButton?.setAttribute('aria-pressed',String(gridVisible));
   $('[data-action="theme"]')?.setAttribute('aria-pressed',String(viewSettings().fieldTheme==='light'));
+  if ($('#show-names')) $('#show-names').checked=!!viewSettings().showNames;
   for(const action of ['edit-mode','rehearse-mode']) {const button=$(`.editor-mode [data-action="${action}"]`);if(button){const active=action==='rehearse-mode'?rehearsal:!rehearsal;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);}}
   panels.mount();
   updateCanvasHint();syncPlayback();
@@ -700,11 +913,34 @@ function bindField() {
     if (!drag || event.pointerId !== drag.pointerId) return;
     // Flush the last pointer sample even if release happens before the next frame.
     pendingPoint = coordinates(event);
-    flushGesture(); const before=drag.before,moved=drag.moved;
+    flushGesture(); const completed=drag,before=drag.before,moved=drag.moved;
     drag=null;field.classList.remove('is-dragging');field.querySelector('.drag-readout').hidden=true;
     // Releasing capture can synchronously dispatch lostpointercapture.
     if(field.hasPointerCapture?.(event.pointerId))field.releasePointerCapture(event.pointerId);
-    if(moved){history.record(before);save();render();}
+    if(moved){
+      // Pointermove is an ephemeral visual preview. Commit its final intent
+      // through the same reducer used by property forms and AI proposals.
+      const next=clone(before.data.plays.find(play=>play.id===state.selectedId));
+      let command;
+      if(completed.type==='player') {
+        const player=current().players.find(item=>item.id===completed.id);
+        command={kind:'player_update',playerId:player.id,patch:{x:player.x,y:player.y}};
+      } else if(completed.type==='point') command={kind:'route_update',routeId:completed.routeId,patch:{points:clone(current().routes.find(route=>route.id===completed.routeId).points)}};
+      else if(completed.type==='new-zone') {
+        const zone=clone(current().zones.find(item=>item.id===completed.zoneId));delete zone.id;
+        command={kind:'zone_add',...zone};
+      } else if(completed.type==='zone') {
+        const zone=current().zones.find(item=>item.id===completed.id);
+        command={kind:'zone_update',zoneId:zone.id,patch:{x:zone.x,y:zone.y}};
+      } else if(completed.type==='annotation') {
+        const annotation=current().annotations.find(item=>item.id===completed.id);
+        command={kind:'annotation_update',annotationId:annotation.id,patch:{x:annotation.x,y:annotation.y}};
+      }
+      try {
+        if(command)runEditorPlayCommand(next,command,{idFactory:()=>completed.zoneId,roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart});
+        validatePlay(next);Object.assign(current(),next);history.record(before);save();render();
+      } catch(error) {state=before;selection=completed.selectionBefore;render();toast(error.message,{type:'warning'});}
+    }
   };
   const cancelDrag = event => {
     if (!drag || event && event.pointerId !== drag.pointerId) return;
@@ -731,7 +967,8 @@ function finishRoute() {
   const alreadyMoving = current().routes.some(r => r.playerId === draft.playerId && !r.optional && ['route', 'motion'].includes(r.kind));
   const route = { id: uid(), playerId: draft.playerId, points: clone(draft.points), kind: tool, color: tool === 'pass' ? COLORS.pass : current().players.find(p => p.id === draft.playerId).color, smooth: false, endCap: tool === 'block' ? 'bar' : 'arrow', delay: 0, duration: tool === 'block' ? 2 : 4, optional: alreadyMoving && draft.mode==='optional' && ['route', 'motion'].includes(tool) };
   selection={type:'route',id:route.id};tool='select';
-  edit(p=>{if(!route.optional&&['route','motion'].includes(route.kind))p.routes.filter(r=>r.playerId===route.playerId&&!r.optional&&['route','motion'].includes(r.kind)).forEach(r=>{r.optional=true;});p.routes.push(route);});
+  const {id:routeId,kind:routeKind,...properties}=route;
+  applyPlayCommand({kind:'route_add',routeKind,...properties},{idFactory:()=>routeId});
   burstAt(document.querySelector('#field-context'));
   toast(alreadyMoving&&!route.optional?t("editorExtra.new_route_set_as_main_the_old_route_remains_o"):route.optional?t("editorExtra.optional_route_saved_rehearsal_continues_to_u"):t("editorExtra.route_saved_drag_points_to_adjust_it_undo_ava"));
 }
@@ -877,40 +1114,16 @@ function togglePlay() {
 
 function deleteSelected() {
   if (!selection || !selectedObject()) return;
-  const s = selection;
-  if (s.type === 'player' && current().players.length <= 1) { toast(t("modal.keep_at_least_one_player"), { type: 'warning' }); return; }
-  const selectedRoute = s.type === 'route' ? current().routes.find(route => route.id === s.id) : null;
-  const player = selectedRoute?.kind === 'motion' ? current().players.find(item => item.id === selectedRoute.playerId) : null;
-  const motionEnd = selectedRoute?.points.at(-1);
-  const affected = player ? current().routes.filter(route => route.playerId === player.id && route.id !== selectedRoute.id &&
-    route.kind !== 'motion' && Math.hypot(route.points[0].x - motionEnd.x, route.points[0].y - motionEnd.y) <= .01) : [];
-  const wouldLeaveField = affected.some(route => route.points.some(point => {
-    const x = point.x + player.x - route.points[0].x, y = point.y + player.y - route.points[0].y;
-    return x < 0 || x > 100 || y < 0 || y > 100;
-  }));
-  if (wouldLeaveField) { toast(getLocale() === 'en' ? 'Removing this motion would move a route outside the field.' : '删除此预动会使路线超出球场，请先调整路线。', { type: 'warning' }); return; }
-  selection = null;
-  edit(p => {
-    const removedRoute = s.type === 'route' ? p.routes.find(route => route.id === s.id) : null;
-    const key = { player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[s.type]; p[key] = p[key].filter(x => x.id !== s.id);
-    if (removedRoute?.kind === 'motion') {
-      const player = p.players.find(item => item.id === removedRoute.playerId);
-      const end = removedRoute.points.at(-1);
-      if (player) p.routes.filter(route => route.playerId === player.id && route.kind !== 'motion' && Math.hypot(route.points[0].x - end.x, route.points[0].y - end.y) <= .01).forEach(route => {
-        const dx = player.x - route.points[0].x, dy = player.y - route.points[0].y;
-        route.points = route.points.map(point => ({x: point.x + dx, y: point.y + dy}));
-        if (dx || dy) delete route.intent;
-        route.delay = Math.max(0, route.delay - removedRoute.delay - removedRoute.duration);
-      });
-    }
-    if (s.type === 'player') { p.routes = p.routes.filter(r => r.playerId !== s.id); if (p.ball.holderId === s.id) p.ball.holderId = p.players[0].id; if (p.ball.receiverId === s.id) p.ball.receiverId = ''; }
-  }); toast(t("modal.object_deleted_undo_to_restore_it"), { type: 'success' });
+  const selected = selection;
+  const result = applyPlayCommand({kind:'object_remove',objectType:selected.type,objectId:selected.id});
+  if (result) { selection=null;refreshSelection();toast(t("modal.object_deleted_undo_to_restore_it"), {type:'success'}); }
 }
+
 const actions = {
   'apply-personnel': () => {
     const { group, changes } = chosenPersonnel();
     if (!changes.length) return;
-    edit(() => { for (const { marker, player } of changes) linkRosterPlayer(marker, player); });
+    applyPlayCommand({kind:'personnel_apply',groupId:group.id});
     toast(t('editor.chart_applied', { count: changes.length, name: group.name }), { type: 'success' });
   },
   'local-recovery': localRecoveryModal,
@@ -945,7 +1158,7 @@ const actions = {
       toast(result.reason === 'already-spaced' ? t("feedback.line_spacing_is_already_sufficient") : t("feedback.the_line_cannot_be_safely_adjusted_automatically_please"), { type: 'warning' });
       return;
     }
-    edit(p => Object.assign(p, updated));
+    applyPlayCommand({kind:'line_space'});
     toast(t("feedback.line_and_nearby_player_spacing_adjusted_undo_is_availab"), { type: 'success' });
   },
   'madden-library': () => { resetAnimation(); if (confirmDraft(() => {panels.close({focus:false});maddenLibrary.open();})) {panels.close({focus:false});maddenLibrary.open();} },
@@ -961,28 +1174,24 @@ const actions = {
   'undo-point': () => {if(draft?.points.length>1){draft.points.pop();previewPoint=null;renderField();updateCanvasHint();}},
   'edit-mode': () => {if(!confirmDraft(()=>actions['edit-mode']()))return;resetAnimation();rehearsal=false;renderField();syncEditorChrome();},
   'rehearse-mode': () => {if(!confirmDraft(()=>actions['rehearse-mode']()))return;clearAssistantPreview();rehearsal=true;draft=null;renderField();syncEditorChrome();},
-  favorite: () => edit(p => { p.favorite = !p.favorite; }),
+  favorite: () => applyPlayCommand({kind:'play_update',patch:{favorite:!current().favorite}}),
   undo: () => restore(history.undo(state)), redo: () => restore(history.redo(state)),
-  mirror: () => { const mirrored = mirrorPlay(current()); edit(p => Object.assign(p, mirrored)); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success' }); },
-  duplicate: () => { if (state.data.plays.length >= 500) { toast(t("modal.the_playbook_can_contain_at_most_500_plays"), { type: 'warning' }); return; } const copy = clone(current()); copy.id = uid(); copy.title = `${copy.title} · 副本`.slice(0, 120); copy.createdAt = new Date().toISOString(); selection = null; edit((p, d) => { d.plays.push(copy); state.selectedId = copy.id; }); },
+  mirror: () => { applyPlayCommand({kind:'play_mirror'}); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success' }); },
+  duplicate: () => applyWorkspaceActions([{kind:'play_duplicate',playId:current().id,title:`${current().title} · 副本`.slice(0,120)}]),
   'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';refreshSelection();syncEditorChrome();},
-  grid: () => { viewOverrides.showGrid = viewSettings().showGrid === false; renderField({preservePreview:true}); syncEditorChrome(); },
-  theme: () => { viewOverrides.fieldTheme = viewSettings().fieldTheme === 'light' ? 'dark' : 'light'; renderField({preservePreview:true}); syncEditorChrome(); },
+  grid: () => executeEditorLocal([{kind:'view_set',grid:viewSettings().showGrid===false}]),
+  theme: () => executeEditorLocal([{kind:'view_set',theme:viewSettings().fieldTheme==='light'?'dark':'light'}]),
   'finish-route': finishRoute, 'cancel-draft': () => { draft=null;previewPoint=null;tool='select';renderField();syncEditorChrome(); },
   'delete-selection': deleteSelected,
   'create-play': () => {
     if (state.data.plays.length >= 500) { toast(t("modal.the_playbook_can_contain_at_most_500_plays"), { type: 'warning' }); return; }
     const title = $('#new-title').value.trim(), b = $('#new-book').value, form = $('#new-formation').value, count = Number($('#new-count').value);
     if (!title) { feedback(t("modal.enter_a_play_name_before_creating_it")); $('#new-title').focus(); return; }
-    const custom = form.startsWith('custom:') ? state.data.formations.find(f => f.id === form.slice(7)) : null;
-    const p = makePlay({ title, formation: custom?.name || form, book: b, count });
-    if (getLocale() === 'en') { p.category = t(b === 'defense' ? 'editor.demo_zone' : 'editor.demo_pass'); if (count !== 11) p.personnel = `${count} players`; }
-    if (custom) { p.players = clone(custom.players); p.ball.holderId = p.players.find(v => v.label === 'QB')?.id || p.players[0].id; }
-    closeModal(); selection = null; book = b; query = ''; filter = ''; formationFilter = ''; edit((_, d) => { d.plays.push(p); state.selectedId = p.id; d.settings.league = count; });
+    closeModal(); applyWorkspaceActions([{kind:'play_create',title,book:b,formation:form,count}]);
   },
-  'create-text': node => { const value = $('#annotation-text').value.trim(); if (!value) { toast(t("modal.enter_annotation_text"), { type: 'warning' }); return; } const a = { id: uid(), text: value, x: Number(node.dataset.x), y: Number(node.dataset.y) }; closeModal(); selection = { type: 'annotation', id: a.id }; tool = 'select'; edit(p => p.annotations.push(a)); },
+  'create-text': node => { const value = $('#annotation-text').value.trim(); if (!value) { toast(t("modal.enter_annotation_text"), { type: 'warning' }); return; } closeModal(); const result=applyPlayCommand({kind:'annotation_add',text:value,x:Number(node.dataset.x),y:Number(node.dataset.y)}); if(result){selection={type:'annotation',id:result.createdId};tool='select';refreshSelection();} },
   'save-formation': () => openModal(t("modal.save_custom_formation"), `<p class="muted small">${t("modal.only_starting_positions_labels_and_colors_are_save")}</p><label class="form-field"><span>${t("modal.formation_name")}</span><input id="formation-name" value="${e(current().formation)} · 自定义" maxlength="100"></label>`, `<button class="button primary" data-action="confirm-formation">${t("modal.save_formation")}</button>`),
-  'confirm-formation': () => { const name = $('#formation-name').value.trim(); if (!name) return; if (state.data.formations.length >= 100) { toast(t("editorExtra.at_most_100_custom_formations_can_be_saved"), { type: 'warning' }); return; } const f = { id: uid(), name, book: current().book, players: clone(current().players) }; closeModal(); edit((p, d) => { d.formations.push(f); p.formation = name; }); toast(t("editorExtra.custom_formation_saved_and_available_for_new_"), { type: 'success' }); },
+  'confirm-formation': () => { const name = $('#formation-name').value.trim(); if (!name) return; if (state.data.formations.length >= 100) { toast(t("editorExtra.at_most_100_custom_formations_can_be_saved"), { type: 'warning' }); return; } closeModal(); applyWorkspaceActions([{kind:'formation_save',name}]); toast(t("editorExtra.custom_formation_saved_and_available_for_new_"), { type: 'success' }); },
   'add-defense-43': confirmed => {
     if (current().players.filter(p => p.side !== 'defense').length + 11 > 40) { toast(t("editorExtra.adding_the_defense_would_exceed_40_player_mar"), { type: 'warning' }); return; }
     const defenders=new Set(current().players.filter(p=>p.side==='defense').map(p=>p.id)), routes=current().routes.filter(r=>defenders.has(r.playerId)).length;
@@ -991,24 +1200,19 @@ const actions = {
       openModal(t("editorExtra.reset_the_4_3_defense"),`<p>${t("editorExtra.reposition_defenders_as_4_linemen_3_linebacke")}<strong>${routes}${t("editorExtra.routes")}</strong>。</p><p class="muted">${t("editorExtra.offensive_players_and_routes_are_retained_you")}</p>`,`<button class="button subtle" data-action="close-modal">${t("editorExtra.keep_current_defense")}</button><button class="button primary" data-action="confirm-defense-43">${t("editorExtra.reset_defense_and_clear_routes")}</button>`);return;
     }
     const hadDefense = current().players.some(p => p.side === 'defense');
+    const updated = withDefense43(current(), { reset: hadDefense });
     selection = null; tool = 'select';
-    edit(p => {
-      const oldDefense = new Set(p.players.filter(v => v.side === 'defense').map(v => v.id));
-      p.players = [...p.players.filter(v => !oldDefense.has(v.id)), ...formationPlayers('4–3', 11, 'defense')];
-      p.routes = p.routes.filter(r => !oldDefense.has(r.playerId));
-      if (oldDefense.has(p.ball.holderId)) p.ball.holderId = p.players.find(v => v.label === 'QB' && v.side === 'offense')?.id || p.players[0].id;
-      if (oldDefense.has(p.ball.receiverId)) p.ball.receiverId = '';
-    });
+    edit(p => Object.assign(p, updated));
     toast(`${hadDefense ? t("editorExtra.reset") : t("editorExtra.added")}${t("editorExtra.4_3_defense_4_linemen_3_linebackers_4_defensi")}`);
   },
   opponents: () => {
     const side = current().book === 'defense' ? 'offense' : 'defense', remove = current().players.some(v => v.side === side);
     if (remove && current().players.every(v => v.side === side)) { toast(t("editorExtra.the_formation_has_only_players_from_this_side"), { type: 'warning' }); return; }
     if (!remove && current().players.length + state.data.settings.league > 40) { toast(t("editorExtra.adding_players_would_exceed_40_markers_remove"), { type: 'warning' }); return; }
-    edit(p => { if (remove) { const ids = new Set(p.players.filter(v => v.side === side).map(v => v.id)); p.players = p.players.filter(v => !ids.has(v.id)); p.routes = p.routes.filter(r => !ids.has(r.playerId)); if (ids.has(p.ball.holderId)) p.ball.holderId = p.players[0].id; if (ids.has(p.ball.receiverId)) p.ball.receiverId = ''; } else p.players.push(...formationPlayers(side === 'offense' ? 'Gun Doubles' : '4–3', state.data.settings.league, side)); });
+    applyPlayCommand({kind:'opponents_set',enabled:!remove,count:state.data.settings.league});
   },
   'delete-play': () => { if (state.data.plays.length === 1) { toast(t("editorExtra.keep_at_least_one_play"), { type: 'warning' }); return; } openModal(t("modal.delete_this_play"), `<p>${t("editorExtra.delete")}${e(current().title)}${t("editorExtra.this_change_can_be_undone")}</p>`, `<button class="button subtle" data-action="close-modal">${t("modal.cancel")}</button><button class="button danger" data-action="confirm-delete">${t("modal.delete_play")}</button>`); },
-  'confirm-delete': () => { const id = current().id; closeModal(); selection = null; edit((p, d) => { d.plays = d.plays.filter(p => p.id !== id); state.selectedId = d.plays.find(p => p.book === book)?.id || d.plays[0].id; book = current().book; }); },
+  'confirm-delete': () => { const playId=current().id;closeModal();applyWorkspaceActions([{kind:'play_delete',playId}]); },
   import: () => $('#import-input').click(),
   'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast(t("feedback.svg_diagram_created"), { type: 'success' }); } catch { toast(t("feedback.could_not_load_the_source_diagram_try_again"), { type: 'error', action: 'download-svg', label: t("feedback.retry") }); } },
   'download-png': pngExport,
@@ -1028,10 +1232,10 @@ document.addEventListener('click', event => {
   if(node.closest('.add-object-menu'))node.closest('details').open=false;
   if (name === 'choose') return choose(value);
   if (['book','new','import','add-player','add-defense-43','opponents','mirror'].includes(name) && !confirmDraft(() => node.click())) return;
-  if (name === 'book') { resetAnimation(); draft = null; selection = null; book = value; filter = ''; formationFilter = ''; query = ''; panels.close({focus:false}); const p = filtered()[0]; if (p) state.selectedId = p.id; render(); return; }
+  if (name === 'book') { executeEditorLocal([{kind:'filter_set',book:value}]); return; }
   if (name === 'tool') { setTool(value); return; }
   if (name === 'select-route') { selection = { type: 'route', id: value }; tool = 'select'; draft = null; refreshSelection(); return; }
-  if (name === 'add-player') { if (current().players.length >= 40) { toast(t("editorExtra.each_play_can_have_at_most_40_player_markers"), { type: 'warning' }); return; } const p = { id: uid(), label: value === 'offense' ? 'WR' : 'DB', x: 25, y: value === 'offense' ? 75 : 45, name: '', side: value, color: COLORS[value], shape: value === 'offense' ? 'circle' : 'square' }; selection = { type: 'player', id: p.id }; edit(play => play.players.push(p)); return; }
+  if (name === 'add-player') { const result=applyPlayCommand({kind:'player_add',side:value,label:value==='offense'?'WR':'DB',x:25,y:value==='offense'?75:45}); if(result){selection={type:'player',id:result.createdId};refreshSelection();} return; }
   actions[name]?.(node);
 });
 function refreshPlayList() {
@@ -1047,7 +1251,7 @@ document.addEventListener('compositionend', event => { if (event.target.id === '
 document.addEventListener('input', event => {
   const input = event.target;
   if (input.id === 'search' && !composingSearch && !event.isComposing) searchInput(input);
-  if(input.id==='timeline'){stop();clearAssistantPreview();rehearsal=true;time=Number(input.value);updateAnimation($('#field svg'),current(),time);digitalBoard?.refreshBackground();syncEditorChrome();}
+  if(input.id==='timeline')executeEditorLocal([{kind:'playback_set',time:Number(input.value)}]);
 });
 document.addEventListener('change', event => {
   const input = event.target;
@@ -1055,68 +1259,47 @@ document.addEventListener('change', event => {
   if (input.id === 'category-filter') { filter = input.value; render(); }
   else if (input.id === 'formation-filter') { formationFilter = input.value; render(); }
   else if (input.id === 'personnel-group') previewPersonnel();
-  else if(input.id==='draft-mode' && draft)draft.mode=input.value;
-  else if (input.id === 'speed') speed = Number(input.value);
-  else if (input.id === 'show-names') { viewOverrides.showNames = input.checked; render(); }
+  else if(input.id==='draft-mode' && draft)executeEditorLocal([{kind:'draft_action',action:'set_mode',mode:input.value}]);
+  else if (input.id === 'speed') executeEditorLocal([{kind:'playback_set',speed:Number(input.value)}]);
+  else if (input.id === 'show-names') executeEditorLocal([{kind:'view_set',names:input.checked}]);
   else if (input.id === 'print-scope' || input.id === 'print-layout') updatePrint();
   else if (input.id === 'apply-formation' && input.value) {
     const [kind, ...rest] = input.value.split(':'), value = rest.join(':');
     const custom = kind === 'custom' ? state.data.formations.find(f => f.id === value) : null;
-    const players = custom ? clone(custom.players) : formationPlayers(value, state.data.settings.league, current().book === 'defense' ? 'defense' : 'offense');
-    const apply = () => { closeModal(); edit(p => { p.players = players; p.formation = custom?.name || value; p.routes = []; p.zones = []; p.annotations = []; p.ball.holderId = players.find(v => v.label === 'QB')?.id || players[0].id; p.ball.receiverId = ''; }); toast(t("editorExtra.formation_replaced_and_routes_and_annotations"), { type: 'success' }); };
+    const command = custom ? {kind:'formation_apply',formationId:custom.id} : {kind:'formation_apply',formation:value,count:state.data.settings.league};
+    const apply = () => { closeModal(); applyPlayCommand(command); toast(t("editorExtra.formation_replaced_and_routes_and_annotations"), {type:'success'}); };
     if (current().routes.length || current().zones.length || current().annotations.length) {
       actions['confirm-apply-formation'] = () => { delete actions['confirm-apply-formation']; apply(); };
       input.value = '';
       openModal(t("editorExtra.replace_the_starting_formation"), `<p>${t("editorExtra.replace_the_current_play_with")}<strong>${e(custom?.name || value)}</strong>。</p><p>${t("editorExtra.this_will_clear")}${current().routes.length}${t("editorExtra.routes")}、${current().zones.length}${t("editorExtra.zones_and")}${current().annotations.length}${t("editorExtra.annotations_the_roster_and_other_plays_are_un")}</p>`, `<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-apply-formation">${t("editorExtra.replace_formation_and_clear_routes")}</button>`);
     } else apply();
   } else if (input.dataset.ball) {
-    edit(p => { p.ball[input.dataset.ball] = input.value; if (p.ball.holderId === p.ball.receiverId) p.ball.receiverId = ''; }, {redraw:false});
+    applyPlayCommand({kind:'ball_update',patch:{[input.dataset.ball]:input.value}},{redraw:false});
     const receiver=$('[data-ball="receiverId"]'); if(receiver)receiver.innerHTML=`<option value="">${t("editorExtra.no_pass_run")}</option>${current().players.filter(v=>v.id!==current().ball.holderId).map(v=>option(v.id,`${v.label}${v.name?' · '+v.name:''}`,current().ball.receiverId)).join('')}`;
     const summary=$('.ball-section > summary small'); if(summary)summary.textContent=ballSummary(current());
   }
   else if (input.dataset.prop) {
     const key = input.dataset.prop;
     let value = input.type === 'checkbox' ? input.checked : input.type === 'number' ? Number(input.value) : input.value;
-    if (input.type === 'number') { if (!Number.isFinite(value)) return; value = clamp(value, Number(input.min), Number(input.max)); }
-    if (key.startsWith('ball.')) {
-      const name = key.slice(5), ball = { ...current().ball, [name]: value };
-      if (ball.arriveAt <= ball.passAt) { toast('到达时间必须晚于出手时间。', { type: 'info' }); input.value = current().ball[name]; return; }
-      edit(p => { p.ball[name] = value; }, {redraw:false});
-    } else if (selection?.type === 'route') {
-      const previous = selectedObject();
-      if (!previous || previous[key] === value) return;
-      const next = clone(current());
-      const route = next.routes.find(item => item.id === previous.id);
-      route[key] = value;
-      if (key === 'kind') {
-        delete route.intent;
-        delete route.blockTargets;
-        delete route.stagedBlock;
-        if (value === 'block') route.endCap = 'bar';
-      }
-      if ((key === 'kind' || key === 'optional') && !route.optional && ['route', 'motion'].includes(route.kind)) {
-        for (const other of next.routes) {
-          if (other.id !== route.id && other.playerId === route.playerId && ['route', 'motion'].includes(other.kind)) other.optional = true;
-        }
-      }
-      try { validatePlay(next); }
-      catch {
-        if (input.type === 'checkbox') input.checked = !!previous[key];
-        else input.value = previous[key];
-        toast(getLocale() === 'en' ? 'This edit conflicts with a linked route. Adjust its motion or timing first.' : '这次调整与关联路线冲突，请先调整预动或时序。', {type:'warning'});
-        return;
-      }
-      edit(play => Object.assign(play, next), {redraw:false});
-      if (key === 'kind') $('[data-prop="endCap"]').value = route.endCap;
-    } else {
-      const selected = !!selection, s = selection;
-      edit((p, d) => { const obj = selected ? p[{ player: 'players', zone: 'zones', annotation: 'annotations' }[s.type]].find(v => v.id === s.id) : p; if (!obj) return; if (key === 'roster') linkRosterPlayer(obj, d.roster.find(r => r.id === value)); else { if (key === 'name' && obj.name !== value) delete obj.rosterId; obj[key] = value; } }, {redraw:false});
-      if (key === 'roster' || key === 'name') {
-        const marker = selectedObject();
-        $('[data-prop="roster"]').value = marker.rosterId || '';
-        $('[data-prop="name"]').value = marker.name;
-        $('.player-preview strong').textContent = marker.name || t('editor.unassigned');
-      }
+    if (input.type === 'number') { if (!Number.isFinite(value)) return; value = clamp(value,Number(input.min),Number(input.max)); }
+    const previous = selectedObject() || current();
+    let command;
+    if (key.startsWith('ball.')) command={kind:'ball_update',patch:{[key.slice(5)]:value}};
+    else if (!selection) command={kind:'play_update',patch:{[key]:value}};
+    else if (selection.type==='player') command={kind:'player_update',playerId:selection.id,patch:{[key==='roster'?'rosterId':key]:value}};
+    else if (selection.type==='route') command={kind:'route_update',routeId:selection.id,patch:{[key]:value}};
+    else if (selection.type==='zone') command={kind:'zone_update',zoneId:selection.id,patch:{[key]:value}};
+    else if (selection.type==='annotation') command={kind:'annotation_update',annotationId:selection.id,patch:{[key]:value}};
+    if (!command || !applyPlayCommand(command,{redraw:false})) {
+      if (input.type==='checkbox') input.checked=!!previous[key]; else input.value=previous[key]??'';
+      return;
+    }
+    if (selection?.type==='route' && key==='kind') $('[data-prop="endCap"]').value=selectedObject().endCap;
+    if (selection?.type==='player' && (key==='roster'||key==='name')) {
+      const marker=selectedObject();
+      $('[data-prop="roster"]').value=marker.rosterId||'';
+      $('[data-prop="name"]').value=marker.name;
+      $('.player-preview strong').textContent=marker.name||t('editor.unassigned');
     }
   }
 });

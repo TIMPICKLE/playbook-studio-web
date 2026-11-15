@@ -168,5 +168,8 @@ test('schema and proposal share movement limits and support either individual ax
   const tool = JSON.stringify(previewEditTool.function.parameters);
   assert.match(tool, /53\.333333/);
   assert.match(tool, /"maximum":30/);
-  assert.doesNotMatch(tool, /"maximum":50/);
+  const flatten = schema => schema.anyOf ? schema.anyOf.flatMap(flatten) : [schema];
+  const movement = flatten(previewEditTool.function.parameters.properties.operations.items).filter(branch => branch.properties?.kind?.const === 'move_player');
+  assert.ok(movement.length);
+  assert.doesNotMatch(JSON.stringify(movement), /"maximum":50/);
 });

@@ -61,14 +61,17 @@ test('the Terra compatibility setting is specific to the OpenAI model and endpoi
   }
 });
 
-test('harness repairs an invented ID once, and bounds a model that repeatedly calls tools', async () => {
+test('harness repairs an invented ID once, and stops a model that repeatedly returns no new evidence', async () => {
   const input = boardAssistantInput({ instruction: 'edit', board });
   let count = 0;
   await assert.rejects(runBoardAssistant({ input, runtime, callModel: async() => {count++; return final(edit);} }));
   assert.equal(count, 2);
   count = 0;
-  await assert.rejects(runBoardAssistant({ input, runtime, callModel: async() => {count++; return calls(invoke('read_board', {}));} }), /上限/);
-  assert.equal(count, 6);
+  const stalled = await runBoardAssistant({ input, runtime, callModel: async() => {count++; return calls(invoke('read_board', {}));} });
+  assert.equal(stalled.kind,'clarify');
+  assert.match(stalled.message,/重复查询/);
+  assert.doesNotMatch(stalled.message,/上限/);
+  assert.equal(count, 5);
 });
 
 test('a model can refine a zero-result catalog search before selecting a returned play', async () => {
