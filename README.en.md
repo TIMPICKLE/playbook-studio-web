@@ -142,6 +142,8 @@ The cloud and static editors run the same coaching agent in LangGraph. AI propos
 
 There is no per-task quota of six model requests or ten tool calls. Queries can continue while they discover new information. Repeated queries without progress trigger a grounded conclusion; you can cancel at any time.
 
+[Shared-command implementation and validation · PR #43](https://github.com/TIMPICKLE/playbook-studio-web/pull/43): all 541 tests passed, followed by 191 affected tests after the final adjustments. Model workflows were verified with scripted responses.
+
 ## AI matchup analysis
 
 Open **AI matchup analysis** from the workspace. Cloud members use a playbook they can read; the [no-sign-in demo](https://timpickle.github.io/playbook-studio-web/) provides sample offensive and defensive plays.
