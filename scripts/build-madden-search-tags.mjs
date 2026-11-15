@@ -1,10 +1,11 @@
 import { writeFile } from 'node:fs/promises';
 import catalog from '../web/data/huddle-catalog.json' with { type: 'json' };
-import { getEditableEntry } from '../web/madden-model.js';
+import { getEditableEntry, loadEditableEntries } from '../web/madden-model.js';
 import { traceConceptTags } from '../web/madden-concepts.js';
 
 const entries = {};
 const names = {};
+await loadEditableEntries(catalog.plays.map(play => play.id));
 for (const play of catalog.plays) {
   const trace = getEditableEntry(play.id);
   if (trace) entries[play.id] = traceConceptTags(trace);

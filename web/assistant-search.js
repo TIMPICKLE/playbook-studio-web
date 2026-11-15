@@ -1,4 +1,6 @@
-import { getEditableEntry } from './madden-model.js';
+import { hasEditableTrace } from './madden-model.js';
+import { editableTraces } from './madden-traces.js';
+import { TRACE_EVIDENCE } from './data/madden-trace-evidence.js';
 import { MADDEN_CONCEPT_TAGS, MADDEN_NAME_TAGS } from './data/madden-search-tags.js';
 import { boardConceptTags } from './madden-concepts.js';
 export { loadMaddenCatalog as loadAssistantCatalog } from './madden-catalog.js';
@@ -15,12 +17,7 @@ function containsPhrase(text, phrase) {
 }
 
 // Endpoints are source pixels. Provide just the diagram evidence a coach could check.
-function traceEvidence(trace) {
-  if (!trace) return 'Original image only; metadata: catalog name and formation.';
-  const routes = trace.routes.filter(route => route.kind === 'route' && !route.optional);
-  const endpoints = routes.map(route => `${route.owner} ${route.points[0].join(',')}→${route.points.at(-1).join(',')}`);
-  return `Editable trace: primary route start→finish (source px; right +x, downfield −y, LOS y=${trace.coordinateSystem.lineOfScrimmageY}): ${endpoints.join('; ')}.`;
-}
+const traceEvidence = id => TRACE_EVIDENCE[editableTraces.canonicalId(id)] || 'Original image only; metadata: catalog name and formation.';
 
 const traceTags = Object.values(MADDEN_CONCEPT_TAGS);
 const tagFrequency = new Map();
@@ -32,7 +29,7 @@ const asCandidate = (entry, trace) => ({
   editable: !!trace,
   tags: [...new Set([...(MADDEN_CONCEPT_TAGS[entry.id] || []), ...(MADDEN_NAME_TAGS[entry.id] || [])])],
   geometryTags: MADDEN_CONCEPT_TAGS[entry.id] || [], nameTags: MADDEN_NAME_TAGS[entry.id] || [],
-  evidence: traceEvidence(trace) + (trace && MADDEN_CONCEPT_TAGS[entry.id]?.length ? ` Geometry-derived approximate tags: ${MADDEN_CONCEPT_TAGS[entry.id].join(', ')}.` : '') +
+  evidence: traceEvidence(entry.id) + (trace && MADDEN_CONCEPT_TAGS[entry.id]?.length ? ` Geometry-derived approximate tags: ${MADDEN_CONCEPT_TAGS[entry.id].join(', ')}.` : '') +
     (MADDEN_NAME_TAGS[entry.id]?.length ? ` Name-derived weak labels (not route confirmation): ${MADDEN_NAME_TAGS[entry.id].join(', ')}.` : ''),
 });
 
@@ -63,7 +60,7 @@ export function searchMaddenCatalog(catalog, { concepts = [], tags = [], formati
     const tagHits = requestedTags.filter(tag => [...conceptTags, ...nameTags].some(value => searchable(value) === tag));
     const namedTagHits = requestedTags.filter(tag => nameTags.some(value => searchable(value) === tag));
     if ((phrases.length || requestedTags.length) && !hits.length && !tagHits.length) continue;
-    const trace = getEditableEntry(entry.id);
+    const trace = hasEditableTrace(entry.id);
     if (editableOnly && !trace) continue;
     // Similarity requires comparable route data. Original-only entries have no
     // geometry to compare, so they cannot be ranked as similar on route evidence.
@@ -101,7 +98,7 @@ export function resolveMaddenResults(catalog, matches) {
     const entry = plays.get(match?.id);
     const reason = typeof match?.reason === 'string' ? match.reason.trim().slice(0, 450) : '';
     if (!entry || !reason) continue;
-    cards.push({ ...asCandidate(entry, getEditableEntry(entry.id)), image: entry.image, reason, entry });
+    cards.push({ ...asCandidate(entry, hasEditableTrace(entry.id)), image: entry.image, reason, entry });
     plays.delete(entry.id);
     if (cards.length === 5) break;
   }

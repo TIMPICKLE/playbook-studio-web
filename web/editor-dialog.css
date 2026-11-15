@@ -1,0 +1,26 @@
+/* The existing modal contents stay unchanged; the browser owns modality and
+   stacking. Retain visualViewport sizing for touch keyboards and browser bars. */
+dialog.editor-dialog {
+  position:fixed;
+  top:var(--visible-top,0px);
+  right:0;
+  bottom:auto;
+  left:0;
+  width:100%;
+  height:var(--visible-height,100dvh);
+  max-width:none;
+  max-height:none;
+  margin:0;
+  border:0;
+  color:inherit;
+  overflow:hidden;
+}
+dialog.editor-dialog:not([open]) {display:none;}
+dialog.editor-dialog::backdrop {background:transparent;}
+dialog.editor-dialog .modal {min-height:0;max-height:calc(var(--visible-height,100dvh) - 56px);}
+@media(max-width:1180px) {
+  dialog.editor-dialog .modal {max-height:calc(var(--visible-height,100dvh) - 24px);}
+}
+@media(max-width:600px) {
+  dialog.editor-dialog .modal {max-height:calc(var(--visible-height,100dvh) - max(16px,env(safe-area-inset-top,0px) + env(safe-area-inset-bottom,0px)));}
+}

@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { searchMaddenCatalog, resolveMaddenResults } from '../web/assistant-search.js';
 import { searchServerMadden } from '../server/board-assistant-catalog.mjs';
-import { editableTraceCount, hasEditableTrace, makeMaddenPlay } from '../web/madden-model.js';
+import { editableTraceCount, hasEditableTrace, makeMaddenPlay, loadEditableEntries } from '../web/madden-model.js';
 
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
+await loadEditableEntries(catalog.plays.map(entry => entry.id));
 const byId = new Map(catalog.plays.map(entry => [entry.id, entry]));
 
 test('search tools retrieve real concept and diagram evidence from the shipped catalog', () => {

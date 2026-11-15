@@ -2,13 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
-import { makeMaddenPlay, filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace, getEditableEntry } from '../web/madden-model.js';
+import { makeMaddenPlay, filterCatalog, MADDEN_DRAG_TYPE, hasEditableTrace, getEditableEntry, loadEditableEntries } from '../web/madden-model.js';
 import { validatePlay, starterWorkspace, encodeWorkspace, decodeWorkspace, STORAGE_KEY } from '../web/model.js';
 import { fieldSVG } from '../web/field.js';
 import { handleApi } from '../server/api.mjs';
 import { database } from './helpers/db.mjs';
 
 const catalog = JSON.parse(readFileSync(new URL('../web/data/huddle-catalog.json', import.meta.url)));
+await loadEditableEntries(catalog.plays.map(entry => entry.id));
 test('team catalogs have unique identities and importable source metadata', () => {
   assert.ok(catalog.teams.length >= 2);
   assert.equal(new Set(catalog.teams.map(t => t.id)).size, catalog.teams.length);
@@ -65,7 +66,7 @@ test('the cloud API persists imported diagrams and rejects invalid image metadat
   data.plays.at(-1).reference.image = 'https://example.org/tracker.jpg';
   assert.equal((await call(`/workspaces/${workspace.id}`, 'PUT', { data, revision: 1 })).status, 400);
 });
-test('Madden UI supports import by click and drag, duplicate prevention, undo, notes, printing, and reload', async t => {
+test('Madden UI supports import by click and drag, duplicate prevention, undo, notes, printing, and reload', async () => {
   const win = new Window({ url: 'http://localhost:3000/local.html', width: 1440, height: 1000 });
   // happy-dom has no layout engine, so explicitly report thumbnails as visible.
   win.IntersectionObserver = class {
@@ -81,6 +82,11 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
   try {
     await import(`../web/app.js?madden-test=${Date.now()}`);
     const doc = win.document, $ = s => doc.querySelector(s), click = action => $(`[data-action="${action}"]`).click();
+    const imported = async () => {
+      const deadline=Date.now()+3000;
+      while ($('.madden-panel')?.getAttribute('aria-busy') === 'true' && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,10));
+      assert.notEqual($('.madden-panel')?.getAttribute('aria-busy'),'true','the asynchronous import completed');
+    };
     click('madden-library'); await new Promise(r => setTimeout(r, 50));
     assert.equal($('#madden-editable-only').checked, true);
     assert.equal(doc.querySelectorAll('.madden-card').length, Math.min(30, filterCatalog(catalog, { team:'eagles', editableOnly:true }).length));
@@ -94,6 +100,7 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     assert.match($('.madden-detail small').textContent, /FixtureTeam/);
     $('[data-madden="back"]').click();
     $('.madden-card [data-madden="add"]').click();
+    await imported();
     assert.match(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.at(-1).personnel, /FixtureTeam/);
     assert.match($('.madden-source-box').textContent, /Fixtureteam/i);
     $('[data-madden="undo-result"]').click();
@@ -101,11 +108,11 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     const fixtureEvent = type => { const event = new win.Event(type, { bubbles:true, cancelable:true }); Object.defineProperty(event, 'dataTransfer', { value:fixtureTransfer }); return event; };
     fixtureCard.dispatchEvent(fixtureEvent('dragstart'));
     $('.madden-drop-target').dispatchEvent(fixtureEvent('drop'));
+    await imported();
     assert.match(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.at(-1).personnel, /FixtureTeam/);
     $('[data-madden="undo-result"]').click();
     $('[data-madden="team"][data-id="eagles"]').click();
-    const panel = $('.madden-panel'), search = $('#madden-search'), firstCard = $('.madden-card');
-    const firstId = firstCard.dataset.maddenCard;
+    const panel = $('.madden-panel'), search = $('#madden-search');
     $('[data-madden="team"][data-id="ravens"]').focus();
     $('[data-madden="team"][data-id="ravens"]').click();
     assert.equal($('.madden-panel'), panel); assert.equal($('#madden-search'), search);
@@ -113,6 +120,7 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     $('[data-madden="team"][data-id="eagles"]').click();
     const cardBefore = $('.madden-card');
     $('.madden-card [data-madden="add"]').click();
+    await imported();
     assert.equal($('.madden-panel'), panel); assert.equal($('.madden-card'), cardBefore);
     assert.match($('.madden-result-bar').textContent, /已加入/);
     assert.ok($('[data-madden="undo-result"]')); assert.ok($('[data-madden="view-result"]'));
@@ -124,6 +132,7 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     for (let i=0;i<3;i++) {
       const card = doc.querySelectorAll('.madden-card')[i];
       card.querySelector('[data-madden="add"]').click();
+      await imported();
       assert.equal(doc.querySelectorAll('.madden-card')[i], card);
       assert.equal($('.madden-panel'), panel);
     }
@@ -132,6 +141,7 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     click('madden-library');
 
     $('.madden-card [data-madden="add"]').click();
+    await imported();
     let data = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
     assert.equal(data.plays.length, 9); assert.ok(data.plays.at(-1).reference); assert.ok($('.reference-play'));
     assert.equal($('.madden-card [data-madden="add"]').disabled, true);
@@ -140,8 +150,10 @@ test('Madden UI supports import by click and drag, duplicate prevention, undo, n
     card.dispatchEvent(dragEvent('dragstart'));
     assert.equal(transfer.getData(MADDEN_DRAG_TYPE), card.dataset.maddenCard);
     $('.madden-drop-target').dispatchEvent(dragEvent('drop'));
+    await imported();
     data = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)); assert.equal(data.plays.length,10);
     $('.madden-drop-target').dispatchEvent(dragEvent('drop'));
+    await imported();
     assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length,10);
     $('[data-madden="close"]').click(); click('undo'); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.length,9);
     click('redo');

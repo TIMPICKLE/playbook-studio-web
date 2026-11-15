@@ -13,7 +13,8 @@ import { proposeEdit } from './assistant-proposal.js';
 import { proposalConflicts } from './assistant-conflicts.js';
 import { requestBoardAssistant } from './assistant-provider.js';
 import { loadAssistantCatalog, resolveMaddenResults } from './assistant-search.js';
-import { hasEditableTrace, getEditableEntry, spaceMaddenLine, teamDisplayName } from './madden-model.js';
+import { hasEditableTrace, getEditableEntry, loadEditableEntries, spaceMaddenLine, teamDisplayName } from './madden-model.js';
+import { maddenLoadingCopy } from './locales/madden-loading.js';
 import { feedback, feedbackBox } from './ui.js';
 import { SharedWorkspace, cloudMode, request } from './cloud.js';
 import { startGuestWorkspace } from './guest-workspace.js';
@@ -33,6 +34,7 @@ import { createWorkspacePanels } from './workspace-panels.js';
 import { createPlayThumbnails } from './play-thumbnails.js';
 import { createOnboarding } from './onboarding.js';
 import { onboardingSteps, onboardingLabels } from './onboarding-steps.js';
+import { patchEditorHTML } from './editor-render.js';
 
 const $ = selector => document.querySelector(selector);
 const icons = {
@@ -81,13 +83,33 @@ function protectReadOnly() {
 const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
 const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
 const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
-const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.plays, notify: toast, onImport(entry) {
+const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.plays, notify: toast, onImport(entry, {signal} = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
-  if (!confirmDraft(() => importMadden(entry))) return;
-  return importMadden(entry);
+  if (draft || drag) return {ok:false,awaitingUser:true,message:maddenLoadingCopy(getLocale()).draft};
+  return importMadden(entry,{signal});
 } });
-function importMadden(entry, {adoptScope = false} = {}) {
+function maddenImportTarget(signal) {
+  return {scope:assistantScope(),book,data:JSON.stringify(state.data),document,signal};
+}
+function maddenImportBlocked(target) {
+  if (!canEdit()) return editBlockedMessage();
+  if (target.signal?.aborted || document !== target.document || !$('#app') || $('#app').hidden || assistantScope() !== target.scope || book !== target.book || JSON.stringify(state.data) !== target.data)
+    return maddenLoadingCopy(getLocale()).changed;
+  const focused=document.activeElement;
+  if ($('#app').contains(focused) && !focused.closest('.board-ai') &&
+    (focused.matches('input:not([readonly]),textarea:not([readonly]),select') || focused.isContentEditable))
+    return maddenLoadingCopy(getLocale()).changed;
+  if (draft || drag) return maddenLoadingCopy(getLocale()).draft;
+  return null;
+}
+async function importMadden(entry, {adoptScope = false,signal} = {}) {
   if (!canEdit()) return;
+  const target=maddenImportTarget(signal);
+  if (signal?.aborted) return {ok:false,message:maddenLoadingCopy(getLocale()).changed};
+  try { await loadEditableEntries([entry.id]); }
+  catch { return {ok:false,message:maddenLoadingCopy(getLocale()).failed}; }
+  const blocked=maddenImportBlocked(target);
+  if (blocked) return {ok:false,message:blocked};
   if (state.data.plays.some(p => (hasEditableTrace(entry.id) ? p.diagramSource : p.reference)?.catalogId === entry.id)) { toast(t("feedback.this_play_is_already_in_the_current_playbook"), { type: 'success' }); return; }
   if (state.data.plays.length >= 500) return { ok: false, message: t("feedback.a_playbook_can_hold_at_most_500_plays_remove_some_befor") };
   const plan = prepareEditorActions({...editorSnapshot(),catalogRows:[entry]},[{kind:'catalog_import',catalogId:entry.id}],{idFactory:uid,locale:getLocale(),now:new Date().toISOString()});
@@ -98,6 +120,17 @@ function importMadden(entry, {adoptScope = false} = {}) {
     undo: () => { if (canEdit() && history.past.at(-1) === checkpoint) restore(history.undo(state)); },
     view: () => { choose(play.id); const card = document.querySelector(`[data-action="choose:${play.id}"]`); card?.scrollIntoView?.({ block: 'nearest' }); $('#main-content')?.focus(); }
   };
+}
+async function convertReference({adoptScope = false} = {}) {
+  const play=current(), reference=play.reference;
+  if (!reference || !hasEditableTrace(reference.catalogId)) return {ok:false,message:maddenLoadingCopy(getLocale()).failed};
+  const target=maddenImportTarget();
+  try { await loadEditableEntries([reference.catalogId]); }
+  catch { return {ok:false,message:maddenLoadingCopy(getLocale()).failed}; }
+  const blocked=maddenImportBlocked(target);
+  if (blocked) return {ok:false,message:blocked};
+  const entry=getEditableEntry(reference.catalogId);
+  return importMadden({...entry,id:reference.catalogId,team:reference.team,game:reference.game,sourceUrl:reference.sourceUrl,image:reference.image,name:play.title,personalNotes:play.notes,personalFavorite:play.favorite},{adoptScope});
 }
 // The agent returns proposals only. The editor owns the active play, edit rights,
 // autosave and the undo checkpoint. A late response cannot modify another play.
@@ -401,7 +434,7 @@ function editorInteractionReply(plan) {
   const message = getLocale()==='en'?'Ready. Continue to open the requested file, export or dialog.':'已准备好，请点击继续打开文件选择、导出或对应面板。';
   return {kind:'answer',message,status:'awaiting_user',actions:plan.actions, action:{
     label:getLocale()==='en'?'Continue':'继续',
-    run() {
+    async run() {
       let awaitingUser=false, exported=false;
       for (const action of plan.actions) {
         if (action.kind === 'export_request') { actions[{'png':'download-png','svg':'download-svg','play_json':'download-play','workspace_json':'download-json'}[action.format]]();exported=true; }
@@ -414,9 +447,9 @@ function editorInteractionReply(plan) {
           if (action.dialog === 'personnel') { selection=null;refreshSelection();if(panels.active!=='properties')panels.toggle('properties');$('#personnel-group')?.focus(); }
           else if (action.dialog === 'convert_reference') {
             if (!canEdit()) throw Error(editBlockedMessage());
-            const reference=current().reference,entry=getEditableEntry(reference?.catalogId);
-            if (!reference || !entry) throw Error(getLocale()==='en'?'This diagram has no verified editable reconstruction.':'这张原图暂无经过验证的可编辑重建。');
-            const outcome=importMadden({...entry,id:reference.catalogId,team:reference.team,game:reference.game,sourceUrl:reference.sourceUrl,image:reference.image,name:current().title,personalNotes:current().notes,personalFavorite:current().favorite},{adoptScope:true});
+            const reference=current().reference;
+            if (!reference || !hasEditableTrace(reference.catalogId)) throw Error(getLocale()==='en'?'This diagram has no verified editable reconstruction.':'这张原图暂无经过验证的可编辑重建。');
+            const outcome=await convertReference({adoptScope:true});
             if (!outcome?.ok) throw Error(outcome?.message || t('assistant.boardChanged'));
             return {kind:'edit',scope:assistantScope(),message:getLocale()==='en'?'Created an editable copy.':'已创建可编辑副本。',undo:outcome.undo};
           }
@@ -463,7 +496,10 @@ function mountBoardAssistant() {
         checkScope();
         if (result.kind === 'editor') {
           const snapshot = editorSnapshot();
-          if (result.actions.some(action=>action.kind==='catalog_import')) snapshot.catalogRows = (await loadAssistantCatalog()).plays;
+          if (result.actions.some(action=>action.kind==='catalog_import')) {
+            snapshot.catalogRows = (await loadAssistantCatalog()).plays;
+            await loadEditableEntries(result.actions.filter(action=>action.kind==='catalog_import').map(action=>action.catalogId));
+          }
           checkScope();
           const plan = prepareEditorActions(snapshot,result.actions,{locale});
           if (plan.lane === 'local') return executeEditorLocal(plan.actions);
@@ -566,11 +602,11 @@ function mountBoardAssistant() {
         if (cloudMode()) shared?.setMode('analysis');
         else window.location.hash = 'analysis';
       },
-      onAdd(id) {
+      async onAdd(id) {
         const card = offered.get(id);
         if (!card || card.scope !== assistantScope() || !canEdit()) return false;
         if (draft || drag) throw Error(t('assistant.finishDrawing'));
-        const result = importMadden(card.entry);
+        const result = await importMadden(card.entry);
         if (result?.message) throw Error(result.message);
         return result?.ok === true;
       },
@@ -616,17 +652,24 @@ function playCards(plays, selectedPlay) {
   return plays.length ? plays.map((play, i) => `<button data-action="choose:${e(play.id)}" class="play-card ${selectedPlay.id === play.id ? 'active' : ''}" aria-label="${t("editorExtra.open")}${e(play.title)}" aria-pressed="${selectedPlay.id === play.id}"><div class="play-thumb" data-thumbnail-index="${i}"></div><span class="play-card-info"><strong>${e(play.title)}</strong><small>${e(play.formation)} · ${e(play.category)}</small></span>${play.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : `<div class="empty-list">${t("editorExtra.no_matching_plays_found")}<br>${t("editorExtra.try_another_search_or_clear_the_filters")}<button class="text-button" data-action="clear-filters">${t("editorExtra.clear_all_filters")}</button></div>`;
 }
 
+let renderedFieldState = '';
+let renderedCardState = '';
+const cardState = () => {const play=current();return JSON.stringify([play.id,play.title,play.formation,play.category,play.favorite,play.book]);};
+const fieldState = () => JSON.stringify([current().reference ? [current().title,current().reference] :
+  [current().players,current().routes,current().zones,current().annotations,current().ball],viewSettings(),selection,time,draft]);
+const inspectorContext = () => `${selection?.type || 'play'}:${selection?.id || current().id}`;
+
 function render() {
   const p = current(); if (!p) return;
   clearAssistantPreview();
   const previousPlay=renderedPlayId, existingIds=new Set([...document.querySelectorAll('#field [data-player]')].map(n=>n.dataset.player));
   const restoreScroll=captureEditorScroll({samePlay:previousPlay===p.id});
-  const retainedStage=previousPlay===p.id ? $('#field .pitch-stage') : null;
+  const patchShell=previousPlay===p.id && !!$('#field .pitch-stage') && !!p.reference === $('.workspace')?.classList.contains('reference-play');
   document.documentElement.style.setProperty('--team-color', state.data.team.accent);
   document.title = `${p.title} · Playbook Studio`;
   const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
-  $('#app').innerHTML = `<div class="workspace ${p.reference ? 'reference-play' : ''}">
+  const html = `<div class="workspace ${p.reference ? 'reference-play' : ''}">
     <button class="sidebar-scrim" data-action="close-panel" aria-label="${t("editor.close_side_panel")}" tabindex="-1"></button><aside class="sidebar" id="plays-panel" aria-label="${t("editor.play_list")}">
       <button class="panel-close compact-only" data-action="close-panel" aria-label="${t("editor.close_play_list")}">${icon('close')}</button>
       <a class="brand" href="${cloudMode() ? './index.html' : '#home'}" aria-label="Playbook Studio"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="44" height="24" alt=""><span>Playbook<span>Studio</span></span><small title="${cloudMode() ? t("editor.saved_in_the_cloud_and_shared_by_member_permissions") : t("editor.saved_in_this_browser_only_export_backups_regularly")}">${cloudMode() ? t("editor.cloud") : t("editor.local")}</small></a>
@@ -648,23 +691,28 @@ function render() {
       <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', t("editor.undo_ctrl_z"), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', t("editor.redo_ctrl_shift_z"), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
       ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? t("editor.recovery_required") : shared?.sync?.viewError ? t("editor.view_recovery_required") : t("editor.read_only")}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : t("editor.you_can_view_rehearse_export_and_print_ask_an_administr")}</span>${localRecovery ? `<button class="button subtle" data-action="local-recovery">${t("editor.recovery_options")}</button>` : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="${t("editor.field_and_rehearsal")}">
         <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button><button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button><button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
-        <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
+        <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
         <div class="stage-dock"><div class="editor-mode" role="group" aria-label="${t("editor.workspace_mode")}"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}${t("editor.design_play")}</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}${t("editor.rehearse")}</button></div><div class="toolbar" role="toolbar" aria-label="${t("editor.drawing_tools")}"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', t("editor.select_move_v")], ['route', 'route', t("editor.route_r")], ['block', 'block', t("editor.block_b")], ['motion', 'motion', t("editor.pre_snap_motion_m")], ['pass', 'pass', t("editor.pass_p")], ['zone', 'zone', t("editor.coverage_zone_z")], ['text', 'text', t("editor.text_t")]].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:t("editor.select"),route:t("editor.route"),block:t("editor.block"),motion:t("editor.motion"),pass:t("editor.pass"),zone:t("editor.zone"),text:t("editor.text")})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>${t("editor.rehearse")}</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">${t("editorExtra.speed")}<select id="speed" aria-label="${t("editor.playback_speed")}">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', t("editor.loop"), `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? t("editor.pause") : t("editor.play"), 'play-button')}${btn('reset', 'reset', t("editor.reset_animation"), 'icon-button')}<input type="range" id="timeline" aria-label="${t("editor.animation_time")}" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div></div>
         ${boardHeightHandle}
         <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
-      </section>${boardWidthHandle}<section class="inspector-panel" id="properties-panel" aria-label="${t("editor.play_properties")}"><header class="panel-heading compact-only"><strong>${t("editor.properties_and_settings")}</strong><button class="panel-close" data-action="close-panel" aria-label="${t("editor.close_properties")}">${icon('close')}</button></header><aside class="inspector" aria-label="${t("editor.play_properties")}">${inspector()}</aside></section></div>
+      </section>${boardWidthHandle}<section class="inspector-panel" id="properties-panel" aria-label="${t("editor.play_properties")}"><header class="panel-heading compact-only"><strong>${t("editor.properties_and_settings")}</strong><button class="panel-close" data-action="close-panel" aria-label="${t("editor.close_properties")}">${icon('close')}</button></header><aside class="inspector" data-context="${e(inspectorContext())}" aria-label="${t("editor.play_properties")}">${inspector()}</aside></section></div>
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>${t("editor.draw_the_routes_understand_the_game")}</span><button data-action="help">${t("editorExtra.shortcuts_and_help")}${icon('chevron')}</button></footer>
     </main><nav class="compact-nav" aria-label="${t("editor.workspace_panels")}"><button data-action="sidebar" aria-controls="plays-panel">${icon('book')}<span>${t("editor.playbook")}</span></button><button data-action="panel-field" aria-pressed="true">${icon('grid')}<span>${t("editor.field")}</span></button><button data-action="inspector-panel" aria-controls="properties-panel">${icon('select')}<span>${t("editor.properties")}</span></button></nav></div>`;
-  // Keep the live renderer and its SVG root through edits to the same play.
-  // Reconnecting them synchronously avoids a blank canvas between UI commits.
-  if(retainedStage){$('#field .pitch-stage').replaceWith(retainedStage);renderField();}
+  // A same-play update patches only changed shell nodes; managed SVG, AI and
+  // material surfaces stay connected. Switching plays keeps a fresh boundary.
+  if (patchShell) {
+    patchEditorHTML($('#app'),html);
+    if (renderedFieldState !== fieldState()) renderField();
+  } else { $('#app').innerHTML = html; renderedFieldState = fieldState(); }
   thumbnails.mount($('.play-list'), plays);
   bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh(); mountBoardAssistant();
+  if ($('#personnel-group')?.value) previewPersonnel();
   restoreScroll();
   if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
   if(!previousPlay) enterWorkbench(document.querySelector('.workspace'));
   renderedPlayId=p.id;
+  renderedCardState=cardState();
   digitalBoard?.sync();
 }
 function fieldContext() {
@@ -818,24 +866,27 @@ function renderField({preservePreview = false} = {}) {
   if (preview) showAssistantPreview(preview.play, preview.original, {reuse:preview, refresh:false});
   digitalBoard?.sync({contentChanged:true});
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${t("editor.offense")} ${current().players.filter(p=>p.side==='offense').length} · ${t("editor.defense")} ${current().players.filter(p=>p.side==='defense').length}</span>`;
+  renderedFieldState = fieldState();
 }
 function refreshSelection() {
   const inspectorNode=$('.inspector'), context=inspectorNode.dataset.context, next=`${selection?.type||'play'}:${selection?.id||current().id}`;
-  inspectorNode.innerHTML=inspector();inspectorNode.dataset.context=next;
+  if (context === next) patchEditorHTML(inspectorNode,inspector());
+  else inspectorNode.innerHTML=inspector();
+  inspectorNode.dataset.context=next;
   if(context!==next)enterContext(inspectorNode);
   renderField();updateCanvasHint();protectReadOnly();
 }
 function refreshMetadata() {
   const play=current(), heading=$('.play-header h1');
   heading.firstChild.textContent=`${play.title} `;document.title=`${play.title} · Playbook Studio`;
-  for(const card of document.querySelectorAll('.play-card'))if(card.dataset.action===`choose:${play.id}`){
-    card.querySelector('strong').textContent=play.title;card.querySelector('small').textContent=`${play.formation} · ${play.category}`;
-    card.setAttribute('aria-label',`${t("editorExtra.open")}${play.title}`);
-  }
+  // Metadata changes can also change whether this play matches the active
+  // search/filter. Geometry-only edits do not need to revisit the entire list.
+  if (renderedCardState !== cardState()) {refreshPlayList();renderedCardState=cardState();}
   thumbnails.refresh(play);
   $('.eyebrow').innerHTML=`${e(play.personnel)} <span>·</span> ${e(play.category)}`;
   $('[data-action="undo"]').disabled=!history.past.length;$('[data-action="redo"]').disabled=!history.future.length;
-  renderField();syncEditorChrome();protectReadOnly();
+  if (renderedFieldState !== fieldState()) renderField();
+  syncEditorChrome();protectReadOnly();
 }
 function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {
@@ -845,8 +896,11 @@ function pick(event) {
   for (const type of ['player', 'route', 'zone', 'annotation']) if (node.dataset[type]) return { type, id: node.dataset[type] };
   return null;
 }
+const boundFields = new WeakSet();
 function bindField() {
   const field = $('#field');
+  if (boundFields.has(field)) return;
+  boundFields.add(field);
   field.addEventListener('pointerdown', event => {
     if(event.target.closest('.field-context'))return;
     // One contact owns an edit until it finishes. A second finger belongs to
@@ -976,13 +1030,50 @@ function finishRoute() {
 }
 
 function openModal(title, body, footer = '', wide = false) {
-  const previous = document.activeElement;
-  $('#modal-root').innerHTML = `<div class="modal-backdrop"><section class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${e(title)}"><header><h2>${e(title)}</h2>${btn('close-modal', 'close', t("editorExtra.close"), 'icon-button')}</header><div class="modal-body">${body}${feedbackBox()}</div>${footer ? `<footer>${footer}</footer>` : ''}</section></div>`;
-  $('#modal-root')._previous = previous;
-  $('#app').inert = true; document.body.classList.add('modal-open');
-  ($('#modal-root').querySelector('.modal-body input:not([readonly]),.modal-body select,.modal-body textarea') || $('#modal-root').querySelector('footer .primary,header button'))?.focus();
+  const root = $('#modal-root');
+  // Replacing a recovery/confirmation step keeps the original opener rather
+  // than retaining a disconnected button from the previous dialog.
+  const previous = root.contains(document.activeElement) ? root._previous : document.activeElement;
+  for (const [node, inert] of root._inert || []) node.inert = inert;
+  root._inert = null;
+  root.innerHTML = `<dialog class="editor-dialog modal-backdrop" aria-label="${e(title)}"><section class="modal ${wide ? 'wide' : ''}"><header><h2>${e(title)}</h2>${btn('close-modal', 'close', t("editorExtra.close"), 'icon-button')}</header><div class="modal-body">${body}${feedbackBox()}</div>${footer ? `<footer>${footer}</footer>` : ''}</section></dialog>`;
+  root._previous = previous;
+  const dialog = root.querySelector('dialog');
+  const native = typeof dialog.showModal === 'function';
+  dialog.dataset.nativeModal = String(native);
+  dialog.addEventListener('cancel', event => {
+    event.preventDefault();
+    if (root.querySelector('dialog') !== dialog) return;
+    pendingNavigation = null; closeModal();
+  });
+  dialog.addEventListener('close', () => {
+    // A queued close event from an old step must never close its replacement.
+    if (root.querySelector('dialog') === dialog) closeModal();
+  });
+  const initial = root.querySelector('.modal-body input:not([readonly]):not(:disabled),.modal-body select:not(:disabled),.modal-body textarea:not(:disabled)') || root.querySelector('footer .primary:not(:disabled),header button');
+  initial?.setAttribute('autofocus', '');
+  document.body.classList.add('modal-open');
+  if (native) dialog.showModal();
+  else {
+    dialog.setAttribute('open', ''); dialog.setAttribute('role', 'dialog'); dialog.setAttribute('aria-modal', 'true');
+    root._inert = [...document.body.children].filter(node => node !== root).map(node => [node, node.inert]);
+    for (const [node] of root._inert) node.inert = true;
+  }
+  initial?.focus({ preventScroll: true });
 }
-function closeModal() { $('#app').inert = false; document.body.classList.remove('modal-open'); $('#modal-root').innerHTML = ''; $('#print-root').innerHTML = ''; $('#modal-root')._previous?.focus?.(); document.dispatchEvent(new window.Event('playbook:modal-closed')); }
+function closeModal() {
+  const root = $('#modal-root'), dialog = root.querySelector('dialog'), previous = root._previous;
+  root._previous = null;
+  // Detach first: close events may be synchronous in DOM implementations.
+  dialog?.remove();
+  if (dialog?.open && typeof dialog.close === 'function') dialog.close();
+  root.replaceChildren();
+  for (const [node, inert] of root._inert || []) node.inert = inert;
+  root._inert = null;
+  document.body.classList.remove('modal-open'); $('#print-root').innerHTML = '';
+  if (previous?.isConnected && !previous.closest('[hidden],[inert]')) previous.focus?.({ preventScroll: true });
+  document.dispatchEvent(new window.Event('playbook:modal-closed'));
+}
 function localRecoveryModal() {
   if (!localRecovery) return;
   openModal(t("editorExtra.recover_local_playbook"), `<p>${t("editorExtra.the_saved_playbook_could_not_be_read_the_exam")}</p><p class="muted">${localRecovery.raw !== null ? t("editorExtra.download_the_original_file_to_preserve_any_re") : t("editorExtra.the_browser_cannot_currently_read_the_saved_d")}</p><p class="muted small">${t("editorExtra.reason")}${e(localRecovery.error.message)}</p>`, `<button class="button subtle" data-action="download-original" ${localRecovery.raw === null ? 'disabled' : ''}>${t("editorExtra.download_original")}</button><button class="button primary" data-action="retry-local-load">${t("editorExtra.retry_loading")}</button><button class="button subtle" data-action="replace-local-workspace">${t("editorExtra.start_again_from_example")}</button>`);
@@ -1140,11 +1231,8 @@ const actions = {
     localRecovery = null; history.past = []; history.future = []; refreshRecoveredWorkspace();
     toast(t("editorExtra.a_new_local_playbook_was_created_from_the_exa"), { type: 'success' });
   },
-  'convert-reference': () => {
-    const reference = current().reference;
-    const entry = getEditableEntry(reference?.catalogId);
-    if (!entry) return;
-    const outcome = importMadden({ ...entry, id: reference.catalogId, team: reference.team, game: reference.game, sourceUrl: reference.sourceUrl, image: reference.image, name: current().title, personalNotes: current().notes, personalFavorite: current().favorite });
+  'convert-reference': async () => {
+    const outcome = await convertReference();
     if (outcome?.ok) toast(t("feedback.editable_copy_created_the_original_is_retained_undo_is_"), { type: 'success' });
     else if (outcome?.message) toast(outcome.message, { type: 'warning' });
   },
@@ -1242,7 +1330,7 @@ document.addEventListener('click', event => {
 });
 function refreshPlayList() {
   const p = current(), plays = filtered();
-  $('.play-list').innerHTML = playCards(plays, p);
+  patchEditorHTML($('.play-list'),playCards(plays,p));
   $('.play-list-label b').textContent = plays.length;
   thumbnails.mount($('.play-list'), plays);
 }
@@ -1258,8 +1346,8 @@ document.addEventListener('input', event => {
 document.addEventListener('change', event => {
   const input = event.target;
   if (!canEdit() && (input.dataset.prop || input.dataset.ball || input.id === 'apply-formation')) return;
-  if (input.id === 'category-filter') { filter = input.value; render(); }
-  else if (input.id === 'formation-filter') { formationFilter = input.value; render(); }
+  if (input.id === 'category-filter') { filter = input.value; refreshPlayList(); }
+  else if (input.id === 'formation-filter') { formationFilter = input.value; refreshPlayList(); }
   else if (input.id === 'personnel-group') previewPersonnel();
   else if(input.id==='draft-mode' && draft)executeEditorLocal([{kind:'draft_action',action:'set_mode',mode:input.value}]);
   else if (input.id === 'speed') executeEditorLocal([{kind:'playback_set',speed:Number(input.value)}]);
@@ -1323,14 +1411,18 @@ $('#import-input').addEventListener('change', async event => {
   event.target.value = '';
 });
 document.addEventListener('keydown', event => {
-  if (maddenLibrary.isOpen) { if (event.key === 'Escape') maddenLibrary.close(); return; }
   const modal = $('.modal');
   if (modal) {
-    if (event.key === 'Escape') { pendingNavigation=null; closeModal(); }
+    // Enter/Escape also confirm or cancel CJK character conversion. Leave
+    // those keystrokes to the IME, including Safari's keyCode 229 sequence.
+    if (event.isComposing || event.keyCode === 229) return;
+    const native = modal.closest('dialog')?.dataset.nativeModal === 'true';
+    if (event.key === 'Escape' && !native) { event.preventDefault(); pendingNavigation=null; closeModal(); }
     if (event.key === 'Enter' && event.target.matches('input') && !event.target.closest('form')) { const primary=modal.querySelector('footer .button.primary:not(:disabled)'); if(primary){event.preventDefault();primary.click();} }
-    if (event.key === 'Tab') { const inputs = [...modal.querySelectorAll('button,input,select,textarea,a[href]')].filter(n => !n.disabled); const first = inputs[0], last = inputs.at(-1); if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); } }
+    if (event.key === 'Tab' && !native) { const inputs = [...modal.querySelectorAll('button,input,select,textarea,a[href]')].filter(n => !n.disabled && !n.closest('[hidden],[inert]')); const first = inputs[0], last = inputs.at(-1); if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); } }
     return;
   }
+  if (maddenLibrary.isOpen) { if (event.key === 'Escape') maddenLibrary.close(); return; }
   if ($('#app').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName) || event.target.isContentEditable) return;
   const key = event.key.toLowerCase();
   if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); restore(event.shiftKey ? history.redo(state) : history.undo(state)); return; }

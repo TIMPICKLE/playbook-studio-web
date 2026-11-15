@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { z } from '../web/vendor/assistant-zod.js';
 import { clone, makePlay, starterWorkspace, validatePlay } from '../web/model.js';
 import { EDITABLE_TRACES } from '../web/data/madden-editable.js';
-import { makeMaddenPlay } from '../web/madden-model.js';
+import { makeMaddenPlay, loadEditableEntries } from '../web/madden-model.js';
 import { EDITOR_PLAY_COMMANDS, EditorPlayOperationSchema, runEditorPlayCommand, describeEditorPlayCommand } from '../web/editor-play-commands.js';
+await loadEditableEntries(Object.keys(EDITABLE_TRACES));
 
 const ids = prefix => { let index = 0; return () => `${prefix}-${++index}`; };
 function execute(play, op, options = {}) {

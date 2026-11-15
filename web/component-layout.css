@@ -1,0 +1,138 @@
+/* The outer workspace still chooses desktop columns or touch drawers from the
+   viewport. These components respond to their allocated space inside it.
+   Inline-size containment leaves height, pitch geometry and scrolling intact. */
+@media screen {
+  /* Global utilities must not cover a library's sticky result actions. Keep
+     their layout slot on touch pages while the library owns this surface. */
+  body.madden-open .locale-control { visibility:hidden; pointer-events:none; }
+  html[data-visual-mode] .inspector :is(.form-field,.form-row,.route-quick,.route-list,.formation-actions,.inspector-heading,.player-preview) {
+    min-inline-size:0;
+    max-inline-size:100%;
+  }
+  html[data-visual-mode] .inspector :is(input,select,textarea) {
+    min-inline-size:0;
+    max-inline-size:100%;
+  }
+  html[data-visual-mode] .inspector :is(.form-field > span,.inspector-heading > span,.player-preview > div,.formation-actions button,.route-quick button,.route-list button > span) {
+    min-inline-size:0;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  html[data-visual-mode] .inspector-heading { flex-wrap:wrap; }
+  html[data-visual-mode] .inspector .check-label { align-items:flex-start; }
+  html[data-visual-mode] .inspector .check-label input { flex:none; margin-block-start:3px; }
+
+  @supports (container-type:inline-size) {
+    /* Neither .inspector-panel (display:contents on desktop) nor the SVG is a
+       size container. Both real surfaces already have a grid/flex width. */
+    html[data-visual-mode] .canvas-section { container:editor-canvas / inline-size; }
+    html[data-visual-mode] .inspector { container:play-properties / inline-size; }
+
+    @container editor-canvas (min-width:921px) {
+      html[data-visual-mode] .draw-tools .tool-name { display:inline; }
+    }
+
+    @container editor-canvas (max-width:920px) {
+      html[data-visual-mode] .workspace:not(.reference-play) .stage-dock {
+        flex-direction:column;
+        align-items:stretch;
+        margin-block-start:12px;
+      }
+      html[data-visual-mode] .stage-dock .editor-mode {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        inline-size:100%;
+        border-radius:var(--ui-radius-card,16px);
+      }
+      html[data-visual-mode] .stage-dock .editor-mode button {
+        min-inline-size:0;
+        min-block-size:44px;
+        white-space:normal;
+        overflow-wrap:anywhere;
+      }
+      html[data-visual-mode] .stage-dock .toolbar { inline-size:100%; }
+      html[data-visual-mode] .stage-dock .draw-tools {
+        display:grid;
+        grid-template-columns:repeat(7,minmax(0,1fr));
+        grid-auto-flow:row;
+        gap:0;
+        inline-size:100%;
+        border-radius:var(--ui-radius-card,16px);
+      }
+      html[data-visual-mode] .stage-dock .draw-tools .tool-button {
+        min-inline-size:0;
+        min-block-size:44px;
+        padding-inline:6px;
+        gap:4px;
+        font-size:12px;
+      }
+      html[data-visual-mode] .stage-dock .draw-tools .tool-name { display:inline; }
+      html[data-visual-mode] .stage-dock .playback {
+        inline-size:100%;
+        width:100%;
+        min-inline-size:0;
+        flex-wrap:wrap;
+        gap:8px;
+        padding:10px 12px;
+        border-radius:var(--ui-radius-card,16px);
+      }
+      html[data-visual-mode] .stage-dock .playback-top {
+        order:0;
+        inline-size:100%;
+        min-inline-size:0;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:8px;
+      }
+      html[data-visual-mode] .stage-dock .transport {
+        order:1;
+        inline-size:100%;
+        min-inline-size:0;
+        flex-wrap:wrap;
+      }
+      html[data-visual-mode] .stage-dock #timeline { min-inline-size:60px; }
+      html[data-visual-mode] .stage-dock #time-label { font-size:13px; }
+    }
+
+    @container editor-canvas (max-width:620px) {
+      html[data-visual-mode] .canvas-heading { flex-wrap:wrap; align-items:center; gap:8px; }
+      html[data-visual-mode] .canvas-heading .board-size-controls {
+        flex:1 1 220px;
+        min-inline-size:0;
+        flex-wrap:wrap;
+        gap:4px;
+      }
+      html[data-visual-mode] .board-dimensions { flex-wrap:wrap; }
+      html[data-visual-mode] .board-size-actions { flex-wrap:wrap; }
+      html[data-visual-mode] .canvas-heading .canvas-actions { margin-inline-start:auto; }
+    }
+
+    @container editor-canvas (max-width:560px) {
+      html[data-visual-mode] .stage-dock .draw-tools {
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:4px;
+      }
+      html[data-visual-mode] .stage-dock .draw-tools .tool-indicator { display:none; }
+      html[data-visual-mode] .stage-dock .draw-tools .tool-button {
+        flex-direction:row;
+        block-size:auto;
+        padding:8px 4px;
+        border-radius:var(--ui-radius-control,10px);
+        white-space:normal;
+        overflow-wrap:anywhere;
+      }
+      html[data-visual-mode] .stage-dock .draw-tools .tool-button.active { background:var(--night-4,#34373b); }
+    }
+
+    @container play-properties (max-width:260px) {
+      html[data-visual-mode] .inspector .form-row { grid-template-columns:minmax(0,1fr); gap:0; }
+      html[data-visual-mode] .inspector .route-quick { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      html[data-visual-mode] .inspector .route-quick button { gap:5px; padding-inline:6px; }
+      html[data-visual-mode] .inspector .player-preview { align-items:flex-start; }
+    }
+
+    @container play-properties (min-width:350px) {
+      html[data-visual-mode] .inspector .route-quick { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { previewEditTool, previewActionsTool, parseBoardOperations } from './ass
 import { EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
 import { parseEditorActions, prepareEditorActions, getEditorOverview } from './editor-actions.js';
 import { editorCapabilities, editorCommandSchema } from './editor-capabilities.js';
+import { loadEditableEntries } from './madden-model.js';
 
 const string = { type: 'string' };
 const object = properties => ({ type: 'object', properties, additionalProperties: false });
@@ -78,6 +79,7 @@ export function createBoardTools(input, searchCatalog) {
         if (!input.editor?.data) throw new Error('Workspace context is unavailable.');
         if (actions.some(action => action.kind === 'catalog_import' && !candidates.has(action.catalogId))) throw new Error('Search the catalog and choose a returned catalog ID before importing.');
         const catalogRows=actions.some(action => action.kind === 'catalog_import') ? input.editor.catalogRows || (await input.editor.loadCatalog?.())?.plays : undefined;
+        await loadEditableEntries(actions.filter(action => action.kind === 'catalog_import').map(action => action.catalogId));
         const plan=prepareEditorActions({...input.editor,selectedId:input.board.playId,catalogRows},actions,{locale:input.locale});
         const evidence={lane:plan.lane,changes:plan.changes,summary:plan.summary,selectedId:plan.selectedId};
         actionPreviews.set(JSON.stringify(actions),evidence);

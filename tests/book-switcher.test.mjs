@@ -135,7 +135,7 @@ test('card switching loads the right workspace, guards pending changes and survi
       click('[data-cloud-action="books"]');click('#modal-root [data-cloud-action="new"]');
       assert.equal(q('#book-card-picker'),null);assert.ok(q('#cloud-new-title'));
       click('#modal-root [data-action="close-modal"]');
-      click('[data-cloud-action="books"]');q('#modal-root .modal').dispatchEvent(new win.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
+      click('[data-cloud-action="books"]');q('#modal-root dialog').dispatchEvent(new win.Event('cancel',{cancelable:true}));
       assert.equal(q('#book-card-picker'),null);assert.ok(win.document.activeElement===q('.workspace-current-card'));
     });
   } finally {await win.happyDOM.abort();for(const n of names){if(previous[n])Object.defineProperty(globalThis,n,previous[n]);else delete globalThis[n];}}
