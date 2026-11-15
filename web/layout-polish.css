@@ -80,11 +80,11 @@
 .modal > footer { border-radius:inherit; border-top-left-radius:0; border-top-right-radius:0; }
 .modal > header,.modal-body,.modal > footer { padding-left:20px; padding-right:20px; }
 
-@media screen and (min-width:1181px) {
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
   .editor-layout { column-gap:8px; }
   .board-width-resizer::before { background:#c9cbcd18; }
 }
-@media screen and (max-width:1180px) {
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   .workspace .sidebar { border-radius:0 var(--ui-radius-panel) var(--ui-radius-panel) 0; }
   .inspector-panel { border-radius:var(--ui-radius-panel) 0 0 var(--ui-radius-panel); overflow:hidden; }
   /* The outer drawer owns its surface. Its scroll area must not paint square corners. */

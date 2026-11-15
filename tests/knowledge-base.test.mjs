@@ -41,6 +41,64 @@ test('bilingual domain aliases retrieve the same conditional concepts', () => {
   assert.equal(retrieveKnowledge({ query: '', coverage: 'unknown' }).length, 0);
 });
 
+test('generic read, timing and assignment wording cannot fill missing concepts with unrelated examples', () => {
+  const unrelated = new Set(['cover3.hook_flat', 'hank.progression', 'spacing.cover3', 'spacing.cover2', 'fourstrong.flood', 'fourstrong.assignments', 'mesh.man', 'mesh.traffic']);
+  const queries = [
+    ['Inside Zone Gun Trips Cover 3 第三档 6 码，请说明关键阅读点和防守反制。', 'cover3_spot'],
+    ['Four Verticals Gun Trips Cover 3 read timing assignment', 'man'],
+  ];
+  for (const [query, coverage] of queries) assert.ok(retrieveKnowledge({ query, coverage }).every(card => !unrelated.has(card.id)));
+  assert.deepEqual(retrieveKnowledge({ query: queries[1][0], coverage: 'man' }), []);
+  for (const [query, coverage] of [['Flood critical read timing', 'cover3_spot'], ['Hank hook flat timing', 'cover3_spot'], ['Spacing assignment read', 'cover3_spot']]) {
+    const result = retrieveKnowledge({ query, coverage });
+    assert.ok(result.length > 0);
+    assert.ok(!result.some(card => card.id.startsWith('mesh.')));
+  }
+});
+
+test('controlled concept aliases preserve retrieval without treating names as verified diagram concepts', () => {
+  const cases = [
+    ['HookFlat', 'cover3_spot', 'cover3.hook_flat'],
+    ['钩区和平区', 'cover3_spot', 'cover3.hook_flat'],
+    ['shallow crossers', 'man', 'mesh.man'],
+    ['浅交叉', 'man', 'mesh.man'],
+    ['空间分布概念', 'cover3_spot', 'spacing.cover3'],
+    ['fourstrong', 'cover3_spot', 'fourstrong.assignments'],
+    ['4-strong', 'cover3_spot', 'fourstrong.assignments'],
+    ['洪水', 'cover3_spot', 'fourstrong.flood'],
+  ];
+  for (const [query, coverage, id] of cases) {
+    const card = retrieveKnowledge({ query, coverage }).find(card => card.id === id);
+    assert.ok(card, `${query} should retrieve ${id}`);
+    assert.match(card.matchReasons.join(' '), /尚未确认图中实际概念/);
+    assert.equal(card.conceptVerified, undefined);
+  }
+  assert.ok(!retrieveKnowledge({ query: 'meshwork read timing', coverage: 'man' }).some(card => card.id.startsWith('mesh.')));
+});
+
+test('broad coverage caveats survive coverage-only lookup and unknown-coverage counterexamples remain conditional', () => {
+  for (const [coverage, id] of [['cover3_match', 'cover3.match'], ['cover2', 'cover2.variant'], ['cover2_read', 'cover2.read']]) {
+    const result = retrieveKnowledge({ coverage });
+    assert.ok(result.some(card => card.id === id));
+    assert.ok(!result.some(card => card.retrievalConcepts?.length));
+  }
+  const unknown = retrieveKnowledge({ query: 'Smash Cover 2 Read', coverage: 'unknown' }).find(card => card.id === 'cover2.read');
+  assert.ok(unknown);
+  assert.equal(unknown.applicability, 'conditional');
+  assert.deepEqual(retrieveKnowledge({ coverage: 'man' }), []);
+});
+
+test('team-authored notes retain lexical retrieval and cannot assert curated retrieval policy metadata', () => {
+  const pack = fixture();
+  pack.cards[1].retrievalConcepts = ['mesh'];
+  const normalized = validateKnowledgePack(pack);
+  assert.equal(normalized.cards[1].retrievalConcepts, undefined);
+  const found = retrieveKnowledge({ query: 'zebra', coverage: 'cover3_match', packs: [normalized] }).find(card => card.id === 'install:wheel');
+  assert.ok(found);
+  assert.equal(found.source.kind, 'team');
+  assert.ok(!found.matchReasons.some(reason => reason.includes('图中实际概念')));
+});
+
 test('coverage filters never promote Cover 2 Read or Cover 3 Match as a different coverage', () => {
   const spot = retrieveKnowledge({ query: 'Cover 3 Match Hank Hook Flat', coverage: 'cover3_spot' });
   assert.ok(spot.every(card => !card.coverages.length || card.coverages.includes('cover3_spot')));

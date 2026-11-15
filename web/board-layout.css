@@ -16,7 +16,7 @@
 .reference-play .pitch-stage { aspect-ratio:1000 / 560; }
 .pitch-stage > .pitch-svg { display:block; position:relative; width:100%; height:100%; min-width:0; max-width:none; max-height:none; touch-action:none; user-select:none; }
 .tool-select .pitch-stage > .pitch-svg { touch-action:pan-y pinch-zoom; }
-.tool-select .pitch-viewport [data-player],.pitch-viewport .point-handle { touch-action:none; }
+.tool-select .pitch-viewport :is([data-player],[data-zone],[data-annotation]),.pitch-viewport .point-handle { touch-action:none; }
 .pitch-zoomed .tool-select .pitch-stage > .pitch-svg { touch-action:pan-x pan-y pinch-zoom; }
 .board-zoom-controls { display:flex; align-items:center; gap:4px; }
 .board-zoom-controls button { min-width:34px; min-height:34px; padding:4px 7px; border:1px solid var(--glass-edge); border-radius:8px; }

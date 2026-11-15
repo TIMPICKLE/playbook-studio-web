@@ -98,6 +98,9 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
       const imported = parseKnowledgeText(raw, { name: file.name });
       const merged = knowledgeStore.merge(knowledgePack, imported);
       knowledgePack = knowledgeStore.save(workspaceId, merged);
+      // Another analysis can start while the file is being read. Invalidate
+      // that newer run only after persistence succeeds and knowledge changes.
+      clearResult();
       knowledgeNotice = t('analysis.imported', { count: imported.cards.length });
     } catch (error) {
       if (!active || token !== importGeneration || getCurrent()?.id !== workspaceId) return;

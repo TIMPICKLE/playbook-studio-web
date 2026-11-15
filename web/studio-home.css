@@ -79,3 +79,12 @@
   .studio-home .node-defense { right: 13%; top: 17%; }
   .studio-home .choice-ai-label { font-size: 9px; padding: 4px 6px; }
 }
+
+/* Account names and the language picker must wrap in Split View and on phones. */
+.studio-home-header { gap:12px; flex-wrap:wrap; padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px)); }
+.studio-home-account { min-width:0; flex-wrap:wrap; }
+.studio-home-account > span { overflow-wrap:anywhere; }
+.studio-home-main { padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px)); padding-bottom:calc(40px + env(safe-area-inset-bottom,0px)); }
+@media (any-pointer:coarse) {
+  .studio-home-account :is(button,a),.studio-home-foot a { min-height:44px; display:inline-flex; align-items:center; }
+}

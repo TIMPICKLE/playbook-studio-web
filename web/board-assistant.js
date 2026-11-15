@@ -178,10 +178,22 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     config.hidden = !show; outputView(); updateButtons();
     if (show) key.focus();
   }
+  // The field is clipped and may be shorter than the software keyboard. A
+  // modeless viewport layer keeps the composer reachable without blocking turf.
+  function syncPanelLayout() {
+    const floating = !panel.hidden && (win.innerWidth <= 600 || win.matchMedia?.('(any-pointer: coarse)').matches);
+    root.classList.toggle('ba-floating', floating);
+    if (win.innerWidth > 600) panel.classList.remove('ba-collapsed');
+    const parent = floating ? doc.body : host;
+    if (root.parentElement !== parent) parent.append(root);
+    if (floating) {
+      panel.style.left = ''; panel.style.top = ''; panel.style.right = '';
+    }
+  }
   function close({clear = false} = {}) {
     if (reply?.kind === 'preview') { clearPreview(); reply = null; outputView(); }
     cancel(); panel.hidden = true; button('open').hidden = false;
-    button('open').setAttribute('aria-expanded', 'false'); config.hidden = true;
+    button('open').setAttribute('aria-expanded', 'false'); config.hidden = true; syncPanelLayout();
     if (clear) { key.value = ''; reset(); }
     if (root.contains(doc.activeElement)) button('open').focus();
   }
@@ -205,11 +217,11 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     if (destroyed || !next) return;
     host = next;
     if (root.parentElement !== next) next.append(root);
-    refresh();
+    refresh(); syncPanelLayout();
   }
   function open() {
     refresh(); panel.hidden = false; button('open').hidden = true;
-    button('open').setAttribute('aria-expanded', 'true'); prompt.focus();
+    button('open').setAttribute('aria-expanded', 'true'); syncPanelLayout(); prompt.focus();
   }
   async function send() {
     if (pending) { cancel(); prompt.focus(); return; }
@@ -329,7 +341,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   const grip = q('[data-ba-drag]');
   let drag;
   grip.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || event.isPrimary === false) return;
+    if (event.button !== 0 || event.isPrimary === false || root.classList.contains('ba-floating')) return;
     const bounds = panel.getBoundingClientRect();
     drag = {x:event.clientX - bounds.left, y:event.clientY - bounds.top};
     grip.setPointerCapture?.(event.pointerId);
@@ -353,7 +365,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     if (!panel.hidden && panel.style.left) positionPanel(parseFloat(panel.style.left), parseFloat(panel.style.top));
   });
   resize?.observe(root); resize?.observe(panel);
-  function destroy() { destroyed = true; resize?.disconnect(); close({clear:true}); root.remove(); }
+  win.addEventListener('resize', syncPanelLayout);
+  function destroy() { destroyed = true; resize?.disconnect(); win.removeEventListener('resize', syncPanelLayout); close({clear:true}); root.remove(); }
   mount(host);
   function refreshPreview() { if (reply?.kind === 'preview') outputView(); }
   return {mount, refresh, refreshPreview, open, close, destroy};

@@ -1,4 +1,4 @@
-const CACHE = 'playbook-studio-v6.4-madden-thirteen-teams';
+const CACHE = 'playbook-studio-v6.5-touch-workspace';
 // The graph runtime is fetched and cached on first use.
 const FILES = [
   './assistant-transition.js', './vendor/d3-interpolate-path-2.3.0.js',

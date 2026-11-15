@@ -151,3 +151,38 @@
 .ai-source-match{margin:9px 0 13px;display:grid;gap:4px}.ai-source-match span{font-size:11px;line-height:1.7;color:#8e7969;background:#f8f5f1;border-radius:4px;padding:5px 8px}
 .ai-knowledge-card summary>strong{font-size:13px}.ai-knowledge-card-preview{font-size:11px}.ai-knowledge-card-content{font-size:12px}.ai-source-section strong{font-size:11px}.ai-knowledge-card-top,.ai-source-original{font-size:10px}.ai-source-kind{font-size:9px}.ai-knowledge-card-bottom{font-size:10px}.ai-knowledge-storage-hint,.ai-knowledge-selection,.ai-knowledge-formats{font-size:11px}.ai-import-button,.ai-export-button{font-size:11px}.ai-knowledge-search input{font-size:12px!important}.ai-knowledge-search input::placeholder{font-size:11px}.ai-fact-grid span,.ai-coverage-note{font-size:11px}.ai-brief-footnote{font-size:10px}.ai-local-badge{font-size:10px}
 @media(max-width:760px){.ai-knowledge-card summary>strong{font-size:13px}.ai-knowledge-card-preview{font-size:11px}.ai-knowledge-card-content{font-size:12px}.ai-source-kind{font-size:9px}.ai-knowledge-card-bottom{font-size:10px}.ai-local-badge{font-size:9px}.ai-knowledge-storage-hint{font-size:10px}.ai-knowledge-selection{font-size:10px}.ai-brief-heading small{font-size:9px}}
+/* A portrait iPad needs a usable field before the long provider form. */
+@media screen and (max-width:900px) {
+  .ai-layout { grid-template-columns:minmax(0,1fr); grid-template-areas:'board' 'setup' 'knowledge' 'results'; }
+  .ai-board-card { position:static; }
+  .ai-two-fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .ai-board .pitch-svg { max-height:58dvh; }
+}
+@media screen and (max-width:600px) {
+  .ai-page { padding-left:max(12px,env(safe-area-inset-left,0px)); padding-right:max(12px,env(safe-area-inset-right,0px)); padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)); }
+  .ai-page-header { flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .ai-page-header>div { min-width:0; }
+  .ai-page .ai-setup { padding:16px; }
+  .ai-board-heading,.ai-result-title { flex-wrap:wrap; gap:8px; }
+  .ai-board-legend { flex-wrap:wrap; gap:9px; }
+  .ai-page .ai-board { min-height:0; }
+  .ai-page .ai-board .pitch-svg { max-height:none; }
+  .ai-page .ai-scenario { padding:15px; }
+  .ai-result-summary,.ai-result-badge,.ai-board-caption,.ai-section-heading { overflow-wrap:anywhere; }
+}
+@media screen and (any-pointer:coarse), screen and (max-width:900px) {
+  .ai-page .ai-field :is(input,select,textarea) { font-size:16px; }
+  .ai-page .ai-field :is(input,select),.ai-link-button,.ai-book button,.ai-cancel,.ai-page .ai-scenario-tabs button { min-height:44px; }
+  .ai-check { min-height:44px; align-items:center; }
+  .ai-check input { width:20px; height:20px; margin:0; }
+  .ai-evidence a { display:inline-flex; align-items:center; min-height:44px; max-width:100%; overflow-wrap:anywhere; }
+}
+@media screen and (max-width:390px) { .ai-two-fields { grid-template-columns:minmax(0,1fr); } }
+
+/* Knowledge controls share the mobile editor's readable text and touch targets. */
+@media screen and (any-pointer:coarse), screen and (max-width:900px) {
+  .ai-page .ai-field input:not([type=checkbox]),.ai-page .ai-field select,.ai-page .ai-field textarea,.ai-page .ai-knowledge-search input { font-size:16px!important; }
+  .ai-page .ai-knowledge-search input { min-height:44px; }
+  .ai-import-button,.ai-export-button,.ai-library-source button,.ai-evidence button,.ai-inspector-heading button { min-height:44px; }
+  .ai-source-original a { display:inline-flex;align-items:center;min-height:44px; }
+}

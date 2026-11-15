@@ -188,3 +188,30 @@ test('the local process log shows only bounded tool evidence and clears with the
   assert.equal(f.win.localStorage.length,0); assert.equal(f.win.sessionStorage.length,0);
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });
+
+test('touch assistant escapes the clipped pitch and returns to its current host on close', async () => {
+  const f = fixture(() => ({kind:'search',items:[]}));
+  const root = f.q('.board-ai'), panel = f.q('.ba-panel');
+  assert.equal(root.parentElement, f.host);
+  f.win.happyDOM.setWindowSize({width:390,height:844});
+  f.win.dispatchEvent(new f.win.Event('resize'));
+  assert.equal(root.classList.contains('ba-floating'),true);
+  assert.equal(root.parentElement,f.win.document.body);
+  assert.equal(f.q('[data-ba-key]').value,'test-opaque-value');
+  const nextHost=f.win.document.createElement('div');f.win.document.body.append(nextHost);
+  f.assistant.mount(nextHost);
+  assert.equal(root.parentElement,f.win.document.body);
+  f.click('close');assert.equal(panel.hidden,true);assert.equal(root.parentElement,nextHost);
+  f.click('open');assert.equal(root.parentElement,f.win.document.body);
+  // Large iPads still use the viewport composer with a touch pointer.
+  f.win.happyDOM.setWindowSize({width:1366,height:1024});
+  f.win.matchMedia=query=>({matches:query==='(any-pointer: coarse)'});
+  f.win.dispatchEvent(new f.win.Event('resize'));
+  assert.equal(root.classList.contains('ba-floating'),true);
+  panel.classList.add('ba-collapsed');f.win.dispatchEvent(new f.win.Event('resize'));
+  assert.equal(panel.classList.contains('ba-collapsed'),false);
+  f.win.matchMedia=()=>({matches:false});f.win.dispatchEvent(new f.win.Event('resize'));
+  assert.equal(root.parentElement,nextHost);assert.equal(panel.hidden,false);
+  assert.equal(f.q('[data-ba-key]').value,'test-opaque-value');
+  f.assistant.destroy();assert.equal(f.q('.board-ai'),null);await f.win.happyDOM.abort();
+});

@@ -28,6 +28,16 @@ const pageNumber = value => {
   return value;
 };
 const COVERAGES = new Set(['unknown', 'cover3_spot', 'cover3_match', 'cover2', 'cover2_read', 'man']);
+const CONCEPT_HINTS = {
+  hank: /\bhank\b|汉克/iu,
+  mesh: /\bmesh\b|\bshallow[ -]+cross(?:er|ing)?s?\b|浅交叉|网格概念/iu,
+  spacing: /\bspacing\b|间距概念|空间分布概念/iu,
+  fourstrong: /\b4[ -]*strong\b|\bfour[ -]*strong\b|四强侧|四人强侧/iu,
+  flood: /\bflood\b|洪水|多层拉伸/iu,
+  pressure: /\b(?:pressure|blitz|simulated)\b|施压|压迫|压力|突袭|闪击/iu,
+  press: /\bpress\b|近身|贴身/iu,
+};
+const CONCEPT_KEYS = new Set([...Object.keys(CONCEPT_HINTS), 'hook_flat']);
 
 // Navigation only: this helper never downloads a source or an image.
 export function safeSourceUrl(value) {
@@ -126,7 +136,12 @@ function normalizePack(raw, allowPublisher = false) {
     for (const field of ['readKey', 'coachingCue']) { const value = clean(rawCard[field], 500, field); if (value) out[field] = value; }
     if (rawCard.parentId != null) out.parentId = identifier(rawCard.parentId, '父卡片 ID');
     // Imported wording is retained as authored; built-in translations are curated.
-    if (allowPublisher) { const translations = localized(rawCard.translations); if (translations) out.translations = translations; }
+    if (allowPublisher) {
+      const translations = localized(rawCard.translations); if (translations) out.translations = translations;
+      const concepts = strings(rawCard.retrievalConcepts, '检索概念', 8, 30);
+      if (concepts.some(concept => !CONCEPT_KEYS.has(concept))) invalid('检索概念不在受控词表中');
+      if (concepts.length) out.retrievalConcepts = concepts;
+    }
     cardsByKey.set(key, out);
     return out;
   });
@@ -213,6 +228,7 @@ const ALIASES = [
   ['man', /\bman(?:[ -]to[ -]man)?\b|盯人|人盯人/iu],
   ['match', /\bmatch\b|匹配|交接/iu], ['hank', /\bhank\b/iu],
   ['hook', /\bhook\b|钩区|勾区|勾型/iu], ['curl', /\bcurl\b|卷曲|回卷/iu],
+  ['hook_flat', /\bhook[ _/-]*flat\b/iu],
   ['flat', /\bflat\b|平区|平传|外摆|外侧短区/iu],
   ['mesh', /\bmesh\b|浅交叉|交叉概念/iu], ['crossing', /\bcross(?:er|ing)?s?\b|交叉|横穿/iu],
   ['spacing', /\bspacing\b|间距|空间分布/iu], ['snag', /\bsnag\b/iu], ['hitch', /\bhitch\b|急停/iu],
@@ -237,6 +253,15 @@ function displayCard(card, locale) {
   const translation = card.translations?.[locale];
   const { translations: _translations, ...plain } = card;
   return translation ? { ...plain, ...translation } : plain;
+}
+
+function conceptHints(query) {
+  const normalized = query.normalize('NFKC');
+  const hints = new Set(Object.entries(CONCEPT_HINTS).filter(([, pattern]) => pattern.test(normalized)).map(([concept]) => concept));
+  const hook = /\b(?:hook|curl)\b|钩区|勾区|回卷/iu.test(normalized);
+  const flat = /\bflat\b|平区|平传|外侧短区/iu.test(normalized);
+  if (hook && flat || /\bhook[ _/-]*flat\b/iu.test(normalized)) hints.add('hook_flat');
+  return hints;
 }
 
 function compiledKnowledge(imported) {
@@ -268,8 +293,10 @@ export function retrieveKnowledge({ query = '', coverage = 'unknown', packs = []
   if (!limit) return [];
   const imported = packs.length ? mergeKnowledgePacks(packs) : EMPTY_KNOWLEDGE_PACK;
   const { all, frequencies, allByKey } = compiledKnowledge(imported);
-  const q = terms(query.slice(0, KNOWLEDGE_LIMITS.queryChars));
-  const eligible = item => coverage === 'unknown' || !item.card.coverages.length || item.card.coverages.includes(coverage);
+  const boundedQuery = query.slice(0, KNOWLEDGE_LIMITS.queryChars);
+  const q = terms(boundedQuery), hints = conceptHints(boundedQuery);
+  const eligible = item => (coverage === 'unknown' || !item.card.coverages.length || item.card.coverages.includes(coverage))
+    && (!item.builtin || !item.card.retrievalConcepts?.length || item.card.retrievalConcepts.some(concept => hints.has(concept)));
   const candidates = all.filter(eligible).map(item => {
     const title = item.titleTerms, tags = item.tagTerms, body = item.bodyTerms;
     const matched = [...q].filter(term => title.has(term) || tags.has(term) || body.has(term));
@@ -289,6 +316,7 @@ export function retrieveKnowledge({ query = '', coverage = 'unknown', packs = []
     const card = displayCard(item.card, locale), conditional = coverage === 'unknown' && card.coverages.length > 0;
     const en = locale === 'en';
     const matchReasons = [parent ? (en ? 'Explicit parent context from the same source' : '同来源的显式父卡片上下文') : (en ? 'Relevant terms: ' : '相关词：') + item.matched.slice(0, 8).join(' / ')];
+    if (item.builtin && card.retrievalConcepts?.length) matchReasons.push(en ? 'Concept wording is a retrieval hint; the drawn concept is not verified' : '概念词仅供检索；尚未确认图中实际概念');
     if (conditional) matchReasons.push(en ? 'Coverage is unconfirmed; applicability remains conditional' : '覆盖未确认；适用性仍待核实');
     else if (card.coverages.length) matchReasons.push(en ? 'Coverage matches; other conditions remain unverified' : '覆盖类型一致；其余适用条件仍待核实');
     return { ...card, source: { ...item.source }, evidenceId: item.builtin ? `knowledge:${card.id}` : `knowledge:team:${encodeURIComponent(card.sourceId)}:${encodeURIComponent(card.id)}`, matchReasons, applicability: conditional ? 'conditional' : card.coverages.length ? 'coverage_matched' : 'general' };

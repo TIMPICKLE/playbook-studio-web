@@ -131,3 +131,9 @@
   .personnel-picker { max-width: none; }
   .personnel-picker select, .personnel-dialog textarea { font-size: 16px; }
 }
+@media (max-width: 1180px), (any-pointer: coarse) {
+  .personnel-units button, .personnel-actions :is(button, summary), .personnel-danger {
+    min-height: 44px;
+  }
+  .personnel-picker select, .personnel-dialog textarea { min-height: 44px; font-size: 16px; }
+}

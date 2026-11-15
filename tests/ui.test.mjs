@@ -183,7 +183,7 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
     });
     await t.test('editing persists a validated backup and undo restores the name', () => { change('[data-prop="title"]', 'Integration Test'); assert.match(query('h1').textContent, /Integration Test/); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].title, 'Integration Test'); click('undo'); assert.match(query('h1').textContent, /Mesh/); click('redo'); assert.match(query('h1').textContent, /Integration Test/); });
     await t.test('route pointer sequence creates an editable route with correct origin', () => {
-      geometry(); const player = query('#field [data-player]'); pointer(player, 'pointerdown', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 480, 430); geometry(); pointer(query('#field'), 'pointerdown', 580, 350); click('finish-route');
+      geometry(); const player = query('#field [data-player]'); pointer(player, 'pointerdown', 400, 500); pointer(query('#field'), 'pointerup', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 480, 430); geometry(); pointer(query('#field'), 'pointerdown', 580, 350); click('finish-route');
       assert.ok(query('[data-prop="duration"]')); assert.ok(query('#field [data-point]'));
       const data = decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), route = data.plays[0].routes.at(-1), owner = data.plays[0].players.find(p => p.id === route.playerId); assert.deepEqual(route.points[0], { x: owner.x, y: owner.y }); assert.equal(route.points.length, 3); assert.ok(query('[data-action="undo"]').disabled === false);
     });
@@ -242,7 +242,7 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       click('undo'); assert.deepEqual(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)), before);
     });
     await t.test('unfinished route prompts before changing tools; keep and discard choices follow user intent', () => {
-      query('[data-action="clear-selection"]')?.click(); geometry(); pointer(query('#field [data-player]'), 'pointerdown', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 500, 350);
+      query('[data-action="clear-selection"]')?.click(); geometry(); pointer(query('#field [data-player]'), 'pointerdown', 400, 500); pointer(query('#field'), 'pointerup', 400, 500); click('tool:route'); geometry(); pointer(query('#field'), 'pointerdown', 500, 350);
       assert.ok(query('.drawing-steps')); assert.match(query('.drawing-steps').textContent, /完成并保存/);
       click('tool:select'); assert.match(query('.modal h2').textContent, /还没有完成/);
       click('keep-drawing'); assert.ok(query('[data-action="finish-route"]'));

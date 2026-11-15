@@ -9,7 +9,22 @@ const sources = [
   { id: 'publisher.usafootball.fourstrong', title: 'USA Football · Andy Reid’s 4 Strong passing concept', url: 'https://blogs.usafootball.com/blog/7594/how-', kind: 'publisher', revision: 'curated-2026-11-15' },
 ];
 
-const card = (id, sourceId, title, content, tags, coverages, appliesWhen, exceptions, readKey, coachingCue, en) => ({ id, sourceId, title, content, tags, coverages, appliesWhen, exceptions, readKey, coachingCue, figures: [], translations: { en } });
+// Concept-specific examples need an explicit name/alias in the retrieval query.
+// Broad words such as "read", "timing" or "assignment" are insufficient. These
+// hints select reference material; they never classify the selected diagram.
+const retrievalConcepts = {
+  'cover3.hook_flat': ['hank', 'hook_flat'],
+  'hank.progression': ['hank', 'hook_flat'],
+  'pressure.coverage': ['pressure'],
+  'mesh.man': ['mesh'],
+  'mesh.traffic': ['mesh'],
+  'cover2.press': ['press'],
+  'spacing.cover3': ['spacing'],
+  'spacing.cover2': ['spacing'],
+  'fourstrong.flood': ['fourstrong', 'flood'],
+  'fourstrong.assignments': ['fourstrong'],
+};
+const card = (id, sourceId, title, content, tags, coverages, appliesWhen, exceptions, readKey, coachingCue, en) => ({ id, sourceId, title, content, tags, coverages, appliesWhen, exceptions, readKey, coachingCue, retrievalConcepts: retrievalConcepts[id] || [], figures: [], translations: { en } });
 
 export const BUILTIN_KNOWLEDGE_PACK = {
   format: 'playbook-studio-knowledge', version: 1, sources,

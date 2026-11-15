@@ -5,13 +5,13 @@
 .panel-close { display:grid; place-items:center; width:44px; height:44px; flex:none; border-radius:10px; }
 .panel-close:hover { background:#ffffff12; }
 .sidebar > .compact-only { display:none; }
-@media (pointer:coarse) {
+@media (any-pointer:coarse) {
   .icon-button,.small-icon,.tool-button,.play-button,.transport .icon-button { min-width:44px; min-height:44px; }
   input:not([type=checkbox]):not([type=range]),select,textarea { font-size:16px!important; }
   .pitch-viewport .point-handle { r:10px; }
   .play-card:hover { transform:none; }
 }
-@media screen and (max-width:1180px) {
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   .workspace { display:block; padding-bottom:calc(76px + env(safe-area-inset-bottom,0px)); }
   .main { width:100%; }
   .workspace .editor-layout { display:grid; grid-template-columns:minmax(0,1fr); padding:0 max(18px,env(safe-area-inset-right,0px)) 0 max(18px,env(safe-area-inset-left,0px)); gap:0; }
@@ -20,7 +20,7 @@
   .compact-nav { display:flex; position:fixed; inset:auto 0 0; z-index:30; justify-content:center; gap:8px; padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px)); background:#202224f5; border-top:1px solid var(--glass-edge); backdrop-filter:blur(20px); }
   .compact-nav button { display:flex; justify-content:center; align-items:center; gap:9px; min-height:48px; flex:1; max-width:260px; border-radius:11px; font-size:13px; }
   .compact-nav [aria-pressed=true],.compact-nav [aria-expanded=true] { color:var(--accent); background:#9a9fa712; }
-  .workspace .sidebar { display:flex; position:fixed; left:0; top:0!important; height:100dvh!important; width:min(340px,90vw); z-index:45; padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-105%); visibility:hidden; background:#202224f5; box-shadow:14px 0 70px #0005; transition:transform .24s var(--ease-out),visibility .24s; }
+  .workspace .sidebar { display:flex; position:fixed; left:0; top:var(--visible-top,0px)!important; height:var(--visible-height,100dvh)!important; width:min(340px,90vw); z-index:45; padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-105%); visibility:hidden; background:#202224f5; box-shadow:14px 0 70px #0005; transition:transform .24s var(--ease-out),visibility .24s; }
   .workspace.sidebar-open .sidebar { display:flex; transform:none; visibility:visible; transition-property:transform; }
   .sidebar > .panel-close { display:grid; position:absolute; top:calc(8px + env(safe-area-inset-top,0px)); right:10px; }
   .sidebar .brand { margin-right:46px; }
@@ -89,14 +89,14 @@
   .madden-card:hover { transform:none; }
   .madden-open { overflow:hidden; }
 }
-@media screen and (min-width:601px) and (max-width:1180px) {
+@media screen and (min-width:601px) and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
   .login-layout { grid-template-columns:minmax(240px,.9fr) minmax(360px,1.1fr); }
   .login-story { padding:34px 28px; }
   .login-heading h1 { font-size:clamp(36px,5vw,56px); }
   .login-panel { padding:60px 32px; }
   .login-form-wrap input:not([type=checkbox]) { font-size:16px; }
 }
-@media screen and (min-width:601px) and (max-width:1180px) and (max-height:850px) {
+@media screen and (min-width:601px) and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) and (max-height:850px) {
   .play-header p,.play-header .eyebrow { display:none; }
   .play-header { padding-top:8px; padding-bottom:8px; }
   .play-header h1 { font-size:23px; margin:0; }
@@ -167,7 +167,7 @@
   .board-size-actions button { flex:1; }
   .madden-cards { grid-template-columns:minmax(0,1fr); }
 }
-@media screen and (min-width:601px) and (max-width:1180px) and (max-height:600px) {
+@media screen and (min-width:601px) and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) and (max-height:600px) {
   .play-header p,.play-header .eyebrow,.touch-board-help { display:none; }
   .play-header { padding-top:8px; padding-bottom:8px; }
   .play-header h1 { font-size:21px; margin:0; }

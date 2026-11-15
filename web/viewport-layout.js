@@ -1,4 +1,4 @@
-import { COMPACT_WIDTH } from './workspace-panels.js';
+import { isCompactWorkspace } from './workspace-panels.js';
 
 // Full editor renders replace the scroll containers. Restore the view only after
 // boardLayout.mount() has reapplied the zoom and size, otherwise the browser
@@ -39,7 +39,7 @@ export function initViewportLayout() {
     for (const [key, value] of [['--visible-height', `${height}px`], ['--visible-top', `${top}px`]]) if (style.getPropertyValue(key) !== value) style.setProperty(key, value);
   }
   function measure() {
-    const sticky = !!header && window.innerWidth > COMPACT_WIDTH && !root.querySelector('.cloud-empty');
+    const sticky = !!header && !isCompactWorkspace() && !root.querySelector('.cloud-empty');
     if (root.classList.contains('sticky-cloud-header') !== sticky) root.classList.toggle('sticky-cloud-header', sticky);
     const height = sticky ? Math.ceil(header.getBoundingClientRect().height) : 0;
     const style = document.documentElement.style;
@@ -59,6 +59,8 @@ export function initViewportLayout() {
   changes.observe(root, { childList: true });
   const onResize = () => { measure(); measureViewport(); };
   window.addEventListener('resize', onResize);
+  const touchMedia = window.matchMedia?.('(any-pointer: coarse)');
+  touchMedia?.addEventListener?.('change', onResize);
   window.visualViewport?.addEventListener('resize', measureViewport);
   window.visualViewport?.addEventListener('scroll', measureViewport);
   observeHeader();
@@ -66,6 +68,7 @@ export function initViewportLayout() {
   return () => {
     changes.disconnect(); sizes?.disconnect();
     window.removeEventListener('resize', onResize);
+    touchMedia?.removeEventListener?.('change', onResize);
     window.visualViewport?.removeEventListener('resize', measureViewport);
     window.visualViewport?.removeEventListener('scroll', measureViewport);
   };

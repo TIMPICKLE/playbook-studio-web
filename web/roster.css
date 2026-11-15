@@ -10,6 +10,10 @@
   max-width: 1056px;
   margin: 0 auto;
   padding: 24px clamp(16px, 4vw, 44px) 86px;
+  padding-inline-start: max(clamp(16px, 4vw, 44px), env(safe-area-inset-left));
+  padding-inline-end: max(clamp(16px, 4vw, 44px), env(safe-area-inset-right));
+  padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  min-width: 0;
 }
 .roster-back, .roster-text, .roster-remove {
   min-height: 42px;
@@ -91,6 +95,9 @@
   background: var(--night-1);
   color: var(--text-1);
   box-shadow: var(--island-shadow);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 20px 90px;
 }
 .roster-dialog::backdrop { background: #08090dcc; }
 .roster-dialog h2 { margin-bottom: 22px; font-size: 22px; }
@@ -131,6 +138,37 @@
   .roster-results :is(thead th,tbody th,tbody td) { padding: 6px 8px; }
   .roster-results th:first-child, .roster-results td:first-child { padding-inline-start: 14px; }
   .roster-results th[scope=row] { width: auto; }
+  .roster-results table { table-layout: fixed; }
+  .roster-results :is(th,td):first-child { width: 48px; }
+  .roster-results :is(th,td):nth-child(3) { width: 54px; }
+  .roster-results :is(th,td):nth-child(4) { width: 60px; }
+  .roster-position { display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
   .roster-fields :is(input, select) { font-size: 16px; }
   .roster-dialog { padding: 20px; }
+}
+
+/* Native dialogs need the keyboard's visible viewport, not the layout viewport.
+   Keep the form scrollable while its cancel/save controls remain reachable. */
+@media (max-width: 1180px), (any-pointer: coarse) {
+  body:has(#roster-root dialog[open]) { overflow: hidden; }
+  .roster-dialog {
+    position: fixed;
+    inset: calc(var(--visible-top, 0px) + max(12px, env(safe-area-inset-top, 0px))) 0 auto;
+    margin: 0 auto;
+    max-height: calc(min(100dvh, var(--visible-height, 100dvh)) - max(12px, env(safe-area-inset-top, 0px)) - max(12px, env(safe-area-inset-bottom, 0px)));
+  }
+  .roster-dialog-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    padding-top: 14px;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--hairline);
+    background: var(--night-1);
+  }
+  .roster-fields :is(input, select), .roster-tools input { font-size: 16px; }
+  #roster-root :is(.roster-back, .roster-text, .roster-remove, .roster-secondary, .roster-primary) {
+    min-height: 44px;
+  }
+  #roster-root .roster-text { min-width: 44px; }
 }

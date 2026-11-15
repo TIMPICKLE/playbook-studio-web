@@ -32,7 +32,9 @@ test('graph performs bounded multi-tool reasoning and sends tool results with ma
   assert.equal(requests[1].messages[2].reasoning_content,'private-reasoning');
   assert.deepEqual(requests[2].messages.filter(m=>m.role==='tool').map(m=>m.tool_call_id),['ctx','player','route','rules']);
   assert.equal(requests[2].tool_choice,'none');assert.doesNotMatch(JSON.stringify(output),/private-reasoning|fake-test-key/);
-  assert.equal(output.status,'complete');
+  // Mesh versus spot-drop Cover 3 has no installed-concept principle in the
+  // curated corpus; unrelated Hook/Flat cards must not upgrade completeness.
+  assert.equal(output.status,'limited');
 });
 
 test('Anthropic Messages converts tool results, retains signed thinking and checks evidence',async t=>{
