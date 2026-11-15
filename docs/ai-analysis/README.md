@@ -1,6 +1,6 @@
 # AI 战术分析与知识库
 
-本分支将 AI 分析扩展为可复核的美式橄榄球对局工作台：图面事实、用户选择的覆盖假设、条件化知识与模型推演分别呈现。
+AI 分析现已扩展为可复核的美式橄榄球对局工作台：图面事实、用户选择的覆盖假设、条件化知识与模型推演分别呈现。
 
 ## 阅读入口
 
@@ -10,6 +10,8 @@
 | [知识库技术研究](knowledge-architecture.md) | 图文关联、RAG 分层、模型边界、检索与引用评估 |
 | [Task Plan](task-plan.md) | Team A 初稿及独立 Team B 审阅后的执行计划 |
 | [产品审阅](review-product.md) / [架构审阅](review-architecture.md) | 开发前的独立挑战与必须修订项 |
+| [三组 QA 与合并评估](qa-evaluation.md) | 467 项 JS / 4 项 PDF 测试、真实浏览器检查与修复记录 |
+| [教练实用性评估](practical-evaluation.md) | 真实示例、24 组对局／覆盖组合与语料边界 |
 | [实施与验收记录](plan-review.md) | 审阅意见如何落地及实际验证边界 |
 | [战术验收案例](acceptance-cases.md) | Cover 2 Read、Cover 3 Match、Mesh、保护与未知责任等反例 |
 | [PDF 本地预处理](pdf-ingestion.md) | 提取文本、页码、区域和离线预览；扫描件处理边界 |

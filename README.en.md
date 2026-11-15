@@ -26,7 +26,7 @@ Choose a play on the left, arrange players and draw routes in the center, and ad
 | **Explain and rehearse** | Play, pause, loop, change speed, and scrub the timeline. Set route start times, durations, ball carriers, and pass timing |
 | **Build a playbook** | Organize offense, defense, and special teams; search, favorite, duplicate, and save formation templates and coaching notes |
 | **Manage players** | See starters and ranked backups on each group’s formation diagram. Search the player roster by name, number or position |
-| **Import Madden plays** | Filter, preview, and add Eagles / Ravens plays. Edit players and routes in 437 reconstructed entries |
+| **Import Madden plays** | Filter, preview, and add plays from 13 NFL teams. Edit players and routes in 1,056 reconstructed entries |
 | **Analyze matchups with AI** | Inspect real diagram facts and retrieved coaching references without a key; import local team knowledge, then connect a model for conditional scenarios with source inspection and diagram highlights |
 | **Share with your team** | Cloud autosave, access across devices, per-playbook permissions, conflict handling, and the latest 20 saved versions |
 | **Export and print** | Export PNG, SVG, an individual play, or a full playbook as JSON. Print A4 playbooks, nine-panel wristband cards, and call sheets |
@@ -98,7 +98,7 @@ Filter by team, formation group, specific formation, or English play name. Previ
 
 ### 3. Filter and import an editable play
 
-1. Open **Madden NFL 战术库** on the left and choose **Eagles** or **Ravens**.
+1. Open **Madden NFL 战术库** on the left and choose a team, such as **Eagles**, **Ravens**, or **Rams**.
 2. Enable **仅看可编辑** (Editable only), then choose a formation. The example below uses **Gun → Gun Bunch TE**.
 3. Click an image to preview it. Select **＋ 加入可编辑版** (Add editable version), or drag the card into the dashed target on the left.
 4. Close the library and continue editing. Next to the play title, **原图对照** (Original image) opens the source image, and **整理锋线间距** (Normalize line spacing) spreads crowded positions.
@@ -111,10 +111,12 @@ Filter by team, formation group, specific formation, or English play name. Previ
 
 | Current Madden 27 catalog snapshot | Count |
 |---|---:|
+| Teams | 13 |
 | Eagles entries | 620 |
 | Ravens entries | 588 |
-| **Total entries** | **1,208** |
-| Editable entries | 437 |
+| Other 11 teams | 619 |
+| **Total entries** | **1,827** |
+| Editable entries | 1,056 |
 | Image-only entries | 771 |
 | Deduplicated source image files | 1,121 |
 
@@ -130,26 +132,35 @@ Filter by team, formation group, specific formation, or English play name. Previ
 Open the editor, click **AI** on the field, and enter your provider, model and API key in settings. Type an instruction or dictate it with the microphone, review the text, and send.
 
 - **Edit a play.** Try “Have C block the DT in front of him, then block the LB named Alex.” Place the defenders on the board first and name or link the intended linebacker. The assistant resolves markers and previews the proposed changes. Rehearse the preview, apply it, or discard it. Applied groups can be undone together. The assistant also supports route concepts, multiple players, motion, alignment, passing timing, zones, and annotations.
-- **Find a play.** Try “Find Madden passing concepts against Cover 3.” Results come from the Eagles and Ravens catalog, including similarity search based on route features. Each card shows the diagram, formation, editability and a short rationale. Select **Add** to import a play.
+- **Find a play.** Try “Find Madden passing concepts against Cover 3.” Results come from the 13-team catalog, including similarity search based on route features. Each card shows the diagram, formation, editability and a short rationale. Select **Add** to import a play.
 
 The cloud and static editors run the same coaching agent in LangGraph. The model chooses read-only tools, and the editor validates and commits edits. The static editor calls the selected provider directly and keeps the key in page memory. Dictation requires browser speech recognition and microphone permission. [Agent architecture, example tool calls, and maintenance guide (Chinese)](docs/BOARD_ASSISTANT.md)
 
 ## AI matchup analysis
 
-AI analysis is available from the cloud home screen to any member with read access to the selected playbook:
+Open **AI matchup analysis** from the workspace. Cloud members use a playbook they can read; the [no-sign-in demo](https://timpickle.github.io/playbook-studio-web/) provides sample offensive and defensive plays.
 
-1. Open **AI分析战局** (AI matchup analysis) and choose one offensive and one defensive play from the same playbook.
-2. Optionally select a player perspective and coverage assumption, or mirror the defense for alignment. These choices affect only the analysis, not the saved plays.
-3. Select a provider, enter a model that supports tool calling and your own API key, then run the analysis.
-4. Review the overview and conditional scenarios. Switch the player of interest to see relevant players, routes, and zones highlighted on the combined diagram.
+1. Select an offense and defense from the same playbook, with optional player perspective, defense mirroring and game context.
+2. Choose the coverage assumption: unknown, Cover 3 spot, Cover 3 Match, variant-unconfirmed Cover 2, Cover 2 Read, or man. Keep it unknown when only alignment is known.
+3. **No API key is needed** for the diagram brief and actual reference retrieval. Drawn blocking lines do not establish protection assignments.
+4. Expand references to inspect conditions, exceptions, read keys and original sources. Import team JSON / Markdown / TXT, or [preprocess selectable-text PDFs locally](docs/ai-analysis/pdf-ingestion.md) to preserve pages and regions.
+5. Enter your model and API key for a conditional model report. Scenario evidence highlights diagram objects; knowledge evidence opens its source details.
 
-Supported providers are DeepSeek (OpenAI or Anthropic API format), Anthropic, OpenRouter, and OpenAI. Custom HTTPS services require an administrator to allow the host. The backend uses **LangGraph to run a single analysis agent with read-only tools**, checking permissions, playbook revisions, output structure, and evidence references. Each analysis makes at most **four model requests**.
+| Capability | Current scope |
+|---|---|
+| Curated knowledge | 13 bilingual coaching principles; concept-specific cards require relevant concept wording or aliases, rather than broad words such as read or timing |
+| Team references | Up to 1 MB / 400 passages per pack; device- and playbook-local storage, deduplication, export and removal; no cloud or cross-device synchronization |
+| Retrieval | At most 6 passages / 24,000 UTF-8 bytes; only selected passages are sent; a shared page never automatically links every figure |
+| Cloud analysis | Existing LangGraph single-agent read-only tool loop, at most four model requests, with permission, revision, output and citation-ID checks |
+| Static demo | Local retrieval plus one OpenRouter / OpenAI request; shared geometry and citation-ID checks, explicitly limited status |
 
-The application does not persist your API key; refresh or sign out and you must enter it again. Requests pass through the authenticated backend to your chosen provider, include necessary data from the selected plays, and may incur provider charges. Names, rosters, images, and notes are excluded by default; notes can be included explicitly. Results distinguish saved facts, geometric observations, and model assumptions. They do not predict win probabilities or real game outcomes. Image-only entries provide no editable coordinates, limiting the available analysis.
+Cloud providers include DeepSeek (OpenAI or Anthropic format), Anthropic, OpenRouter and OpenAI. Custom HTTPS hosts need administrator configuration. Keys stay in page memory. Provider charges may apply; browser requests also depend on networking and CORS. Player names, rosters, images and notes are excluded by default; coaching notes can be included explicitly.
 
-[Implementation guide](docs/AI_MATCHUP_IMPLEMENTATION.md) · [Agent workflow and tools](docs/AI_MATCHUP_AGENT_DESIGN.md) · [Future analysis roadmap](docs/AI_MATCHUP_ANALYSIS_ROADMAP.md)
+Successful imports, reference removal or matchup changes invalidate old reports and cancel pending requests. Missing knowledge is reported honestly; dedicated run-game and Four Verticals material is incomplete. OCR, visual diagram understanding, vector retrieval and shared cloud knowledge are future integrations. Valid citation IDs locate evidence; they do not establish that a model conclusion is correct or predict game outcomes.
 
-**No-sign-in demo:** Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/), choose the AI matchup analysis card, and provide an OpenRouter or OpenAI model ID and API key. Your browser sends the sample diagrams and entered context directly to the chosen provider; charges may apply. The key stays in page memory and is cleared on exit or refresh. Network or provider CORS restrictions may prevent a connection. This is a single model request, without the cloud LangGraph tool workflow or verified evidence.
+**2026-11-15 acceptance:** [PR #42](https://github.com/TIMPICKLE/playbook-studio-web/pull/42) was merged after three independent Agent evaluation teams. All 467 JavaScript tests, four PDF tests and the production build passed. Chromium desktop, narrow viewports, language switching and no-key prompts were checked. Real-provider answer quality and iOS / Safari hardware touch behavior remain separate validation tasks. Check Actions and deployment records for the live publication state.
+
+[QA and merge evaluation](docs/ai-analysis/qa-evaluation.md) · [Coaching usability evaluation](docs/ai-analysis/practical-evaluation.md) · [Usage and research](docs/ai-analysis/README.md) · [Knowledge architecture](docs/ai-analysis/knowledge-architecture.md)
 
 ## Traditional and digital views
 
