@@ -100,6 +100,17 @@
   scroll-padding-block: 20px 90px;
 }
 .roster-dialog::backdrop { background: #08090dcc; }
+.roster-confirm {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--danger-1);
+  border-radius: 8px;
+  background: var(--night-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.roster-confirm p { margin: 0 0 8px; }
+.roster-confirm > div { display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-end; }
 .roster-dialog h2 { margin-bottom: 22px; font-size: 22px; }
 .roster-fields, .roster-fields label { display: grid; gap: 7px; }
 .roster-fields { gap: 16px; }

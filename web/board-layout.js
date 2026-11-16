@@ -5,7 +5,7 @@ export const BOARD_LAYOUT_KEY = 'playbook-studio-board-layout-v1';
 const bound = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)));
 const heightMin = 280, heightMax = 1400;
 
-export function createBoardLayout({ notify = () => {}, hasDraft = () => false } = {}) {
+export function createBoardLayout({ notify = () => {}, hasDraft = () => false,onChange=()=>{} } = {}) {
   const q = selector => document.querySelector(selector);
   let prefs = {}, expanded = false, zoom = 1, gesture = null, frame = null, pending = null;
   let smallScreen = window.innerWidth <= 600, dimensionsOpen = !smallScreen;
@@ -16,17 +16,23 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
     if (Number.isFinite(saved?.inspector)) prefs.inspector = bound(saved.inspector, 220, 480);
   } catch { /* A denied or invalid preference must not block the editor. */ }
 
-  const defaultHeight = () => window.innerWidth <= 720
-    ? bound(Math.min((window.innerWidth - 28) * .8, window.innerHeight * .7), heightMin, 600)
-    : isCompactWorkspace()
-      ? bound(Math.min((window.innerWidth - 36) * .8, window.innerHeight * .5), heightMin, 760)
-      : bound(window.innerHeight * .62, 420, 820);
+  const defaultHeight = () => {
+    const field=q('#field'), top=field ? field.getBoundingClientRect().top+(window.scrollY||0) : 0;
+    const dock=q('.stage-dock')?.getBoundingClientRect().height||56;
+    const compact=q('.compact-nav')?.getBoundingClientRect().height||0;
+    // Size the initial pitch around real controls, rather than making the
+    // coach scroll to discover drawing/transport controls below a tall pitch.
+    const available=window.innerHeight-top-Math.max(56,dock)-compact-48;
+    const preferred=window.innerWidth<=720 ? Math.min((window.innerWidth-28)*.8,window.innerHeight*.7)
+      : isCompactWorkspace()?Math.min((window.innerWidth-36)*.8,window.innerHeight*.5):window.innerHeight*.62;
+    return bound(Math.min(preferred,available),heightMin,820);
+  };
   const height = () => expanded
     ? prefs.expandedHeight ?? bound((window.innerWidth - 48) * .8, heightMin, 1100)
     : prefs.height ?? defaultHeight();
   const setHeight = value => { prefs[expanded ? 'expandedHeight' : 'height'] = bound(value, heightMin, heightMax); };
   const maxInspector = () => bound((q('.editor-layout')?.clientWidth || window.innerWidth) * .4, 220, 480);
-  const inspector = () => bound(prefs.inspector ?? 250, 220, maxInspector());
+  const inspector = () => bound(prefs.inspector ?? 320, 220, maxInspector());
   function persist() {
     try { localStorage.setItem(BOARD_LAYOUT_KEY, JSON.stringify(prefs)); }
     catch { notify(t("controls.size_adjusted_but_browser_storage_is_unavailable_default")); }
@@ -82,6 +88,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false } 
       toggle.querySelector('span').textContent = expanded ? t("controls.exit_expanded_view") : t("controls.expand_board");
       toggle.title = expanded ? t("controls.exit_expanded_view_esc") : t("controls.expand_board_and_collapse_side_panels");
     }
+    onChange(getState());
   }
   function flush() {
     if (frame !== null) window.cancelAnimationFrame(frame);

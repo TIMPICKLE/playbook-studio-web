@@ -5,12 +5,19 @@ import { DEPTH_LIMITS, DEPTH_TEMPLATES, bindDepthTemplate, createDepthGroup, cop
 const units = ['offense', 'defense', 'special'];
 const unitName = unit => t(`personnel.${unit}`);
 
-export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, commit, onSelect }) {
+export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, commit, onSelect, sessionStore = new Map() }) {
   const q = selector => root.querySelector(selector);
   const groups = () => getData().depthChart.groups;
   const flag5 = () => getData().settings.league === 5;
   let unit = 'offense', workspace = getWorkspaceId(), draft = null;
-  const selected = new Map();
+  let selected = new Map();
+  const remember = () => sessionStore.set(workspace, { unit, selected: new Map(selected) });
+  function restore() {
+    const saved = sessionStore.get(workspace);
+    unit = units.includes(saved?.unit) ? saved.unit : 'offense';
+    selected = new Map(saved?.selected || []);
+  }
+  restore();
   const getSelectedId = () => selected.get(unit) || null;
   root.innerHTML = `<div class="personnel-controls"></div><p class="personnel-notice" role="status"></p>
     <dialog class="roster-dialog personnel-dialog" aria-labelledby="personnel-form-title"></dialog>`;
@@ -18,13 +25,14 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
 
   function refresh() {
     if (workspace !== getWorkspaceId()) {
-      workspace = getWorkspaceId(); selected.clear(); unit = 'offense'; notice.textContent = '';
+      remember(); workspace = getWorkspaceId(); restore(); notice.textContent = '';
     }
     const entries = groups(), choices = entries.filter(group => group.unit === unit);
     const current = choices.find(group => group.id === getSelectedId())
       || choices.find(group => flag5() && DEPTH_TEMPLATES.some(template => template.id === group.templateId && template.league === 5))
       || choices[0];
     selected.set(unit, current?.id);
+    remember();
     const editable = canEdit(), full = entries.length >= DEPTH_LIMITS.groups;
     controls.innerHTML = `<div class="personnel-units" role="group" aria-label="${t('personnel.units')}">${units.map(key =>
       `<button type="button" data-personnel-unit="${key}" aria-pressed="${key === unit}">${unitName(key)}</button>`
@@ -180,6 +188,7 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
   return {
     refresh, getSelectedId, isEditing: () => !!draft,
     destroy() {
+      remember();
       if (dialog.open) dialog.close();
       draft = null;
       root.removeEventListener('click', click);

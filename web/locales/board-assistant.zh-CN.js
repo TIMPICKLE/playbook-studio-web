@@ -1,4 +1,11 @@
 export default {
+  updateGroupsFirst:'请先更新所选修改组的预览，再继续对话。',
+  chooseGroups:'选择要保留的修改组',updateGroups:'更新预览',groupHint:'按整轮修改选择；先重新预览，再应用。',groupRequired:'至少保留一组修改，或使用放弃取消整个提案。',groupDependency:'这组修改依赖前面的步骤，请保留所需的前序组。',groupsUpdated:'已更新预览，确认后才会写入战术。',
+  fieldLeft:'场地左侧',fieldRight:'场地右侧',fieldMiddle:'场地中间',
+  offense:'进攻',defense:'防守',selectedTarget:'已选择目标',targetReady:'目标已确认，可继续上一条指令。',continueSelected:'使用刚选中的球员，继续上一条指令。',
+  properties: '属性', assistantTab: 'AI 助手', float: '浮动', dock: '停靠', conversation: '本战术对话', resumePreview: '重新生成预览', retry: '重试这条指令', canceled: '已取消生成，已有修改保留。',
+  turnStates: {pending:'待应用',applied:'已应用',undone:'已撤销',redone:'已重做',stale:'需重新预览',discarded:'已放弃',failed:'未完成',canceled:'已取消',clarify:'待补充',answered:'已回复'},
+  runStates: {previewing:'正在重新校验所选修改组…',running:'正在处理 · 不会自动应用修改',preview:'预览待确认 · 可继续对话调整',clarify:'需要补充信息 · 已保留此前修改',complete:'已完成本轮',applying:'正在应用修改…',applied:'已应用 · 可在编辑器撤销',undone:'已撤销本次修改',failed:'本轮未完成 · 已保留战术与待确认修改',canceled:'已停止生成 · 已保留此前修改'},
   viewProcess: '查看过程', traceTool: '工具', traceValidation: '校验修正', traceResult: '结果',
   clearMode: '清除模式', apply: '应用', repreview: '重新预览', discard: '放弃', rehearse: '预览演练', discarded: '已放弃预览。', pendingTitle: '待应用的修改', revert: '撤回上一步', reverted: '已撤回上一步，其余修改仍待应用。', resolveFirst: '请先应用或放弃上面的战术本变更，再发送下一条指令。', expand: '展开预览', handoff: '前往战局分析',
   toolProgress: {read_editor:'正在读取编辑器状态…',list_capabilities:'正在检查可用功能…',get_command_schema:'正在核对操作参数…',preview_actions:'正在准备操作预览…',read_board:'正在读取战术板…', resolve_player:'正在定位', resolve_players:'正在定位球员组', search_madden:'正在检索 Madden 战术…', build_preview:'正在生成改图预览…'},

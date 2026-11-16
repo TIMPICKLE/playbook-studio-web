@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
 
-test('static preview opens a default matchup and keeps the API key in memory only', async () => {
+test('static preview opens a default matchup and retains same-session credentials and reports without persisting the key', async () => {
   const win = new Window({ url: 'https://timpickle.github.io/playbook-studio-web/', width: 390, height: 844 });
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
   win.setInterval = () => 1;
@@ -47,8 +47,9 @@ test('static preview opens a default matchup and keeps the API key in memory onl
     assert.ok(q('[data-cloud-action="enter-roster"]'));
     assert.ok(q('[data-cloud-action="enter-editor"]'));
     q('[data-cloud-action="enter-analysis"]').click();
-    assert.equal(q('[data-ai-field="apiKey"]').value, '');
-    assert.equal(q('.ai-scenario'), null);
+    assert.equal(q('[data-ai-field="apiKey"]').value, 'fake-private-key', 'Module navigation keeps the shared in-memory connection');
+    assert.match(q('.ai-scenario').textContent, /Mock/, 'Module navigation keeps the completed report');
+    assert.doesNotMatch(JSON.stringify(win.localStorage), /fake-private-key/);
   } finally {
     await win.happyDOM.abort();
     for (const n of names) { if (previous[n]) Object.defineProperty(globalThis, n, previous[n]); else delete globalThis[n]; }

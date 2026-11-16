@@ -1,4 +1,12 @@
 export default {
+  'depth.promoteNamed': '{label}: swap backup {rank} with the starter',
+  'depth.upNamed': '{label}: move backup {rank} up one place',
+  'depth.downNamed': '{label}: move backup {rank} down one place',
+  'depth.rankUpdated': 'Updated the starter and backup order for {label}.',
+  'depth.undoChange': 'Undo this change',
+  'depth.undone': 'Lineup change undone.',
+  'depth.changedRetry': 'This position changed. Check the latest lineup and try again.',
+  'depth.undoChanged': 'The lineup changed, so this adjustment cannot be undone directly. Update the latest lineup instead.',
   'depth.viewLabel': 'View',
   'depth.viewFormation': 'Formation',
   'depth.viewRanks': 'Depth order',

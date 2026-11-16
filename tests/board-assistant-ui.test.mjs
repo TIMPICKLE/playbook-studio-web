@@ -112,14 +112,15 @@ test('mode persists across typing and edit proposals require an explicit apply',
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });
 
-test('closing a pending preview discards it without applying', async () => {
+test('collapsing a pending preview preserves it until an explicit discard', async () => {
   let applied = 0, discarded = 0;
   const f = fixture(() => ({kind:'preview', message:'Route', changes:['X dig 12'],
     apply:() => { applied++; }, discard:() => { discarded++; }}));
   f.type('[data-ba-prompt]', 'X dig 12'); f.click('send'); await flush();
   f.click('close');
-  assert.equal(discarded, 1); assert.equal(applied, 0);
-  f.click('open'); assert.equal(f.q('[data-ba=apply]'), null);
+  assert.equal(discarded, 0); assert.equal(applied, 0);
+  f.click('open'); assert.ok(f.q('[data-ba=apply]'));
+  f.click('discard'); assert.equal(discarded,1); assert.equal(f.q('[data-ba=apply]'),null);
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });
 
@@ -283,4 +284,144 @@ test('a pending playbook transaction is confirmed or dropped before the next ins
   assert.equal(calls,1); assert.equal(discarded,0);
   assert.match(f.q('.ba-status').textContent,/先应用或放弃/); assert.equal(f.q('[data-ba-prompt]').value,'rename it');
   f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('conversations and unsent text return with their play; old drafts need an explicit fresh preview', async () => {
+  const requests = []; let discarded = 0;
+  const f = fixture(request => {
+    requests.push(request);
+    return {kind:'preview',stackable:true,message:'X slant',playerIds:['x'],operations:[{kind:'route',playerId:'x'}],discard() { discarded++; }};
+  });
+  f.type('[data-ba-prompt]','X slant'); f.click('send'); await flush();
+  f.type('[data-ba-prompt]','two yards deeper');
+  f.context.scope = 'book/b'; f.assistant.refresh();
+  assert.equal(discarded,1); assert.equal(f.q('[data-ba=apply]'),null);
+  assert.equal(f.q('.ba-history').hidden,true); assert.equal(f.q('[data-ba-prompt]').value,'');
+  f.type('[data-ba-prompt]','B unsent text');
+  f.context.scope = 'book/a'; f.assistant.refresh();
+  assert.equal(f.q('[data-ba-prompt]').value,'two yards deeper');
+  assert.match(f.q('.ba-history').textContent,/X slant/);
+  assert.equal(f.q('.ba-turn-status').dataset.status,'stale');
+  assert.equal(f.q('[data-ba=apply]'),null,'returning never silently reinstates an old write handle');
+  f.click('repreview-turn'); await flush();
+  assert.equal(requests[1].prompt,'X slant'); assert.equal(requests[1].previous[0].status,'stale');
+  assert.ok(f.q('[data-ba=apply]'));
+  f.context.scope = 'book/b'; f.assistant.refresh();
+  assert.equal(f.q('[data-ba-prompt]').value,'B unsent text');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('transaction receipts keep applied, undone and redone conversation state aligned across scopes', async () => {
+  const requests = [];
+  const f = fixture(request => {
+    requests.push(request);
+    return {kind:'preview',message:'Change X',playerIds:['x'],discard() {},apply() { return {kind:'edit',message:'Applied',transactionId:'tx-x',undo:()=>true}; }};
+  });
+  f.type('[data-ba-prompt]','change X'); f.click('send'); await flush(); f.click('apply'); await flush();
+  assert.equal(f.q('.ba-turn-status').dataset.status,'applied');
+  f.context.scope = 'book/b'; f.assistant.refresh();
+  assert.equal(f.assistant.notifyTransaction({id:'tx-x',status:'undone'}),true);
+  f.context.scope = 'book/a'; f.assistant.refresh();
+  assert.equal(f.q('.ba-turn-status').dataset.status,'undone');
+  f.assistant.notifyTransaction({id:'tx-x',status:'redone'});
+  assert.equal(f.q('.ba-turn-status').dataset.status,'redone');
+  f.type('[data-ba-prompt]','deeper'); f.click('send'); await flush();
+  assert.equal(requests[1].previous[0].status,'redone');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('failure recovery retries only the failed request and preserves an existing draft', async () => {
+  let calls = 0, discarded = 0; const requests = [];
+  const f = fixture(request => {
+    requests.push(request); calls++;
+    if (calls === 2) throw Error('Provider is temporarily unavailable');
+    return {kind:'preview',stackable:true,message:'Draft',turns:[{instruction:'X slant',summary:'Draft',playerIds:['x']}],discard() { discarded++; }};
+  });
+  f.type('[data-ba-prompt]','X slant'); f.click('send'); await flush();
+  f.type('[data-ba-prompt]','make it deeper'); f.click('send'); await flush();
+  assert.equal(f.q('.ba-run-state').dataset.state,'failed'); assert.ok(f.q('[data-ba=apply]'));
+  f.click('retry'); await flush();
+  assert.equal(requests[2].prompt,'make it deeper'); assert.equal(discarded,0);
+  assert.match(f.q('.ba-history').textContent,/Provider is temporarily unavailable/);
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('desktop docks beside the field, floating remains available, and touch uses a viewport sheet', async () => {
+  const changes = [], selected = [];
+  const f = fixture(() => ({kind:'answer',message:'Ready'}),undefined,undefined,{onPanelChange:change=>changes.push(change),onSelectTarget:id=>selected.push(id)});
+  const dockHost = f.win.document.createElement('aside'); f.win.document.body.append(dockHost);
+  f.context.dockHost = dockHost; f.assistant.refresh(); f.assistant.mount(f.host);
+  assert.equal(f.q('.board-ai').parentElement,dockHost); assert.equal(f.q('.board-ai').classList.contains('ba-task-panel'),true);
+  f.click('float'); assert.equal(f.q('.board-ai').parentElement,f.win.document.body);
+  f.click('float'); assert.equal(f.q('.board-ai').parentElement,dockHost);
+  f.win.happyDOM.setWindowSize({width:390,height:844}); f.win.dispatchEvent(new f.win.Event('resize'));
+  assert.equal(f.q('.board-ai').classList.contains('ba-docked'),true);
+  f.assistant.compose('X runs a post'); assert.equal(f.q('[data-ba-prompt]').value,'X runs a post');
+  assert.equal(changes.at(-1).open,true);
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('ambiguous real candidates can be picked and become the next conversation focus', async () => {
+  const requests = [], selected = [];
+  const f = fixture(request => {
+    requests.push(request);
+    request.onEvent({type:'tool',name:'resolve_player',summary:JSON.stringify({status:'ambiguous',candidates:[{id:'left-dt',label:'DT',side:'defense'},{id:'right-dt',label:'DT',side:'defense'}]})});
+    return {kind:'clarify',message:'Which DT?'};
+  },undefined,undefined,{onSelectTarget:id=>selected.push(id)});
+  f.type('[data-ba-prompt]','move DT left'); f.click('send'); await flush();
+  const choices = f.win.document.querySelectorAll('[data-ba=choose-target]'); assert.equal(choices.length,2);
+  choices[1].click(); assert.deepEqual(selected,['right-dt']);
+  f.click('send'); await flush();
+  assert.deepEqual(requests[1].previous.at(-1).playerIds,['right-dt']);
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('choosing a subset recomputes a preview before Apply and settles the correct original turns', async () => {
+  const turns = ['Add defenders','X slant','Y post'].map((summary,index)=>({instruction:summary,summary,playerIds:['p'+index]}));
+  let applied = 0, selected;
+  const make = groups => ({kind:'preview',stackable:true,message:'Proposal',turns:groups,changes:groups.map(turn=>turn.summary),discard() {},
+    selectTurns(indices) { selected=indices; return make(indices.map(index=>groups[index])); },
+    apply() { applied++; return {kind:'edit',message:'Applied',turns:groups,transactionId:'subset'}; }});
+  const f = fixture(()=>make(turns));
+  f.type('[data-ba-prompt]','three changes');f.click('send');await flush();
+  const check=f.q('[data-ba-group="1"]');check.checked=false;check.dispatchEvent(new f.win.Event('change',{bubbles:true}));
+  assert.equal(f.q('[data-ba=apply]').disabled,true);assert.equal(applied,0);
+  f.click('update-groups');await flush();
+  assert.deepEqual(selected,[0,2]);assert.equal(applied,0);
+  assert.deepEqual([...f.q('.ba-output ul').children].map(node=>node.textContent),['Add defenders','Y post']);
+  assert.equal(f.q('[data-ba=apply]').disabled,false);
+  f.click('apply');await flush();
+  assert.equal(applied,1);
+  const states=[...f.win.document.querySelectorAll('.ba-turn')].map(node=>[node.querySelector('.ba-turn-user').textContent,node.querySelector('.ba-turn-status').dataset.status]);
+  assert.deepEqual(states,[['Add defenders','applied'],['X slant','discarded'],['Y post','applied']]);
+  f.assistant.destroy();await f.win.happyDOM.abort();
+});
+
+test('dependent group rejection and empty selection leave the original proposal untouched', async () => {
+  let applied=0, selections=0;
+  const f=fixture(()=>({kind:'preview',stackable:true,message:'Proposal',changes:['Add defender','Move that defender'],turns:[{instruction:'Add defender',summary:'Add defender'},{instruction:'Move it',summary:'Move that defender'}],discard(){},
+    selectTurns(){selections++;throw Error('Keep group 1: this defender is created there.');},apply(){applied++;}}));
+  f.type('[data-ba-prompt]','add and move');f.click('send');await flush();
+  const toggle=(index,checked)=>{const input=f.q(`[data-ba-group="${index}"]`);input.checked=checked;input.dispatchEvent(new f.win.Event('change',{bubbles:true}));};
+  toggle(0,false);f.click('update-groups');await flush();
+  assert.match(f.q('.ba-group-error').textContent,/Keep group 1/);
+  assert.equal(f.q('.ba-output ul').children.length,2);assert.equal(applied,0);
+  assert.deepEqual([...f.win.document.querySelectorAll('.ba-turn-status')].map(node=>node.dataset.status),['pending','pending']);
+  toggle(1,false);assert.equal(f.q('[data-ba=update-groups]').disabled,true);assert.match(f.q('.ba-group-error').textContent,/至少保留一组/);
+  toggle(0,true);toggle(1,true);assert.equal(f.q('[data-ba=apply]').disabled,false);assert.equal(selections,1);
+  f.assistant.destroy();await f.win.happyDOM.abort();
+});
+
+test('native conversion continuations acknowledge a trusted scope change and bind its transaction', async () => {
+  let f;
+  f=fixture(()=>({kind:'answer',message:'Ready to convert',action:{label:'Continue',run(){
+    f.context.scope='book/copy';f.assistant.adoptScope(f.context.scope);
+    return {kind:'edit',scope:f.context.scope,message:'Editable copy created',transactionId:'convert',undo:()=>true};
+  }}}));
+  f.type('[data-ba-prompt]','convert this diagram');f.click('send');await flush();f.click('continue');await flush();
+  assert.match(f.q('.ba-output').textContent,/Editable copy created/);assert.ok(f.q('[data-ba=undo]'));
+  assert.equal(f.q('.ba-turn-status').dataset.status,'applied');
+  f.assistant.notifyTransaction({id:'convert',status:'undone'});
+  assert.equal(f.q('.ba-turn-status').dataset.status,'undone');assert.equal(f.q('[data-ba=undo]'),null);
+  f.assistant.destroy();await f.win.happyDOM.abort();
 });

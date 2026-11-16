@@ -1,9 +1,11 @@
 import { burstAt } from './effects.js';
 // Motion describes a change of context. Direct manipulation never waits for it.
-export const reducedMotion = () => document.documentElement.dataset.effects === 'off' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+// Rendering and decoration are device preferences. Functional transitions only
+// follow the user's motion preference, so flat editing keeps clear feedback.
+export const reducedMotion = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 export function animate(node, frames, options = {}) {
   if (!node?.animate || reducedMotion()) return null;
-  return node.animate(frames, { duration: 240, easing: 'cubic-bezier(.22,1,.36,1)', ...options });
+  return node.animate(frames, { duration: 180, easing: 'cubic-bezier(.22,1,.36,1)', ...options });
 }
 export function enterContext(node) {
   animate(node, [{ opacity: .35, translate: '0 7px' }, { opacity: 1, translate: '0 0' }]);
@@ -17,7 +19,7 @@ export function enterPlayers(field, ids) {
     animate(node.querySelector('.player-symbol'), [
       { opacity: 0, transform: 'translateY(-18px) scale(.5)' },
       { opacity: 1, transform: 'translateY(0) scale(1)' }
-    ], { duration: 400, delay: index++ * 22, fill: 'backwards' });
+    ], { duration: 220, delay: index++ * 12, fill: 'backwards' });
   }
 }
 export function revealPlay(field) {
@@ -30,6 +32,6 @@ export function revealPlay(field) {
 
 export function enterWorkbench(root) {
   for (const [index, selector] of ['.sidebar','.play-header','.canvas-section','.inspector'].entries()) {
-    animate(root?.querySelector(selector), [{opacity:.35,translate:'0 14px'},{opacity:1,translate:'0 0'}], {duration:440,delay:index*55,fill:'backwards'});
+    animate(root?.querySelector(selector), [{opacity:.65,translate:'0 4px'},{opacity:1,translate:'0 0'}], {duration:180,delay:index*20,fill:'backwards'});
   }
 }

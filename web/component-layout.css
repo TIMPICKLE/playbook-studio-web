@@ -1,10 +1,45 @@
-/* The outer workspace still chooses desktop columns or touch drawers from the
+/* Navigation, task allocation and component containers. Appearance tokens and
+   primitive states live in theme.css, never in another layer of final fixes.
+   The outer workspace still chooses desktop columns or touch drawers from the
    viewport. These components respond to their allocated space inside it.
    Inline-size containment leaves height, pitch geometry and scrolling intact. */
 @media screen {
+  .workspace-nav { display:flex; align-items:center; gap:4px; min-width:0; padding:8px 20px; border-bottom:1px solid var(--ui-border); background:var(--ui-bg); overflow:auto; scrollbar-width:thin; }
+  .workspace-nav :is(a,button) { display:inline-flex; align-items:center; justify-content:center; gap:6px; flex:none; min-height:36px; padding:6px 12px; border:1px solid transparent; border-radius:var(--r-control); color:var(--ui-text-muted); font-size:var(--t-sm); text-decoration:none; white-space:nowrap; }
+  .workspace-nav :is(a,button):hover { color:var(--ui-text); background:var(--ui-surface-hover); }
+  .workspace-nav :is([aria-current=page],[aria-pressed=true],.active) { color:var(--ui-text); background:var(--ui-surface-raised); border-color:var(--ui-border-strong); font-weight:650; }
+  .workspace-nav :is(a,button) svg { width:16px; height:16px; }
+  .workspace-nav-short { display:none; }
+  .workspace-nav .workspace-home { min-width:36px; padding-inline:8px; }
+  .editor-status { display:flex; align-items:center; gap:8px; min-width:0; min-height:32px; color:var(--ui-text-muted); font-size:var(--t-xs); line-height:1.5; }
+  .editor-status > :is(span,strong) { min-width:0; overflow-wrap:anywhere; }
+  .editor-status :is(button,a) { flex:none; min-height:32px; padding:4px 8px; color:inherit; border:1px solid var(--ui-border-strong); border-radius:var(--r-inset); text-underline-offset:3px; }
+  .editor-status[data-state=saved] > :is(svg,[aria-hidden=true]) { color:var(--ui-success); }
+  .editor-status:is([data-state=offline],[data-state=saving]) > :is(svg,[aria-hidden=true]) { color:var(--ui-warning); }
+  .editor-status[data-state=error] { color:var(--ui-danger); }
+  .editor-status[data-state=error] :is(button,a) { border-color:currentColor; }
+  .task-panel-tabs { display:flex; flex:none; gap:4px; padding:8px; border-bottom:1px solid var(--ui-border); background:var(--ui-bg); }
+  .task-panel-tabs button { display:inline-flex; align-items:center; justify-content:center; flex:1; min-width:0; min-height:36px; padding:6px 10px; border:1px solid transparent; border-radius:var(--r-control); color:var(--ui-text-muted); font-size:var(--t-sm); }
+  .task-panel-tabs button:hover { background:var(--ui-surface-hover); color:var(--ui-text); }
+  .task-panel-tabs [aria-pressed=true] { background:var(--ui-surface-raised); color:var(--ui-text); border-color:var(--ui-border-strong); font-weight:650; }
+  .inspector-panel:has(> .task-panel-tabs) .ba-task-panel .ba-mode-switch { display:none; }
+  .selection-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:4px; min-width:0; }
+  .selection-toolbar button { display:inline-flex; justify-content:center; align-items:center; gap:5px; min-height:36px; padding:6px 10px; border:1px solid var(--ui-border-strong); border-radius:var(--r-control); color:var(--ui-text-muted); font-size:var(--t-xs); }
+  .selection-toolbar button[aria-pressed=true] { background:var(--ui-accent); color:var(--ui-on-accent); border-color:var(--ui-accent); }
+  .selection-count { font-size:var(--t-xs); color:var(--ui-text-muted); white-space:nowrap; }
+  .selection-count:empty { display:none; }
+  .selection-player-list { list-style:none; margin:12px 0; padding:0; }
+  .selection-player-list li { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--ui-border); font-size:var(--t-sm); }
+  .selection-player-list small { min-width:0; text-align:end; color:var(--ui-text-muted); overflow-wrap:anywhere; }
+  .selection-nudge { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-block:12px; }
+  .selection-nudge button { padding:6px; min-width:0; min-height:40px; }
+  .selection-candidates { display:flex; flex-wrap:wrap; align-items:center; gap:6px; max-width:100%; }
+  .selection-candidates > :is(span,strong) { flex-basis:100%; padding:4px 8px; white-space:normal; font-size:var(--t-xs); }
+  .selection-candidates button { min-height:44px; min-width:44px; border:1px solid var(--ui-border-strong); border-radius:var(--r-control); }
   /* Global utilities must not cover a library's sticky result actions. Keep
      their layout slot on touch pages while the library owns this surface. */
-  body.madden-open .locale-control { visibility:hidden; pointer-events:none; }
+  body.madden-open .locale-control,
+  body:has(.board-ai .ba-panel:not([hidden])) .locale-control { visibility:hidden; pointer-events:none; }
   html[data-visual-mode] .inspector :is(.form-field,.form-row,.route-quick,.route-list,.formation-actions,.inspector-heading,.player-preview) {
     min-inline-size:0;
     max-inline-size:100%;
@@ -23,8 +58,7 @@
   html[data-visual-mode] .inspector .check-label input { flex:none; margin-block-start:3px; }
 
   @supports (container-type:inline-size) {
-    /* Neither .inspector-panel (display:contents on desktop) nor the SVG is a
-       size container. Both real surfaces already have a grid/flex width. */
+    /* Containers are the allocated content surfaces, not the SVG or panel shell. */
     html[data-visual-mode] .canvas-section { container:editor-canvas / inline-size; }
     html[data-visual-mode] .inspector { container:play-properties / inline-size; }
 
@@ -135,4 +169,31 @@
       html[data-visual-mode] .inspector .route-quick { grid-template-columns:repeat(4,minmax(0,1fr)); }
     }
   }
+}
+
+@media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
+  html[data-visual-mode] .inspector-panel { display:flex; flex-direction:column; position:sticky; top:calc(var(--cloud-height,0px) + 12px); min-width:0; height:var(--board-height,580px); max-height:calc(100dvh - var(--cloud-height,0px) - 100px); border:1px solid var(--ui-border); border-radius:var(--r-island); overflow:hidden; background:var(--ui-surface); }
+  html[data-visual-mode] .workspace .inspector { flex:1; position:static; max-height:none; min-height:0; overflow:auto; padding:16px; border:0; border-radius:0; background:transparent; box-shadow:none; }
+  html[data-visual-mode] .workspace[data-assistant-open=true] .inspector { display:none; }
+  html[data-visual-mode] .workspace.board-expanded .inspector-panel { display:none; }
+}
+
+@media screen and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
+  .workspace-nav { padding:6px max(12px,env(safe-area-inset-right,0px)) 6px max(12px,env(safe-area-inset-left,0px)); }
+  .workspace-nav :is(a,button) { min-height:44px; }
+  .editor-status { flex-wrap:wrap; }
+  .editor-status :is(button,a) { min-height:44px; }
+  .task-panel-tabs button { min-height:44px; }
+  .selection-toolbar button { min-height:44px; min-width:44px; }
+}
+
+@media screen and (max-width:600px) {
+  .workspace-nav { gap:2px; }
+  .workspace-nav :is(a,button) { padding-inline:10px; font-size:12px; }
+  .workspace-nav [data-workspace-mode=roster] .workspace-nav-label { display:none; }
+  .workspace-nav-short { display:inline; }
+  .editor-status { font-size:12px; gap:6px; }
+  .selection-toolbar { flex:1 1 auto; }
+  .selection-toolbar button { padding-inline:8px; }
+  .selection-count { max-width:100%; overflow:hidden; text-overflow:ellipsis; }
 }

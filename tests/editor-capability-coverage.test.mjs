@@ -22,6 +22,7 @@ const bound = binding => capabilities.filter(capability => capability.uiBindings
 const terminalFeatures = [
   ['add-player','player_add'], ['add-defense-43','defense_formation'],
   ['delete-selection','object_remove'], ['create-text','annotation_add'],
+  ['delete-selection','players_remove'], ['selection-nudge','players_move'], ['multi-select','selection_set'],
   ['favorite','play_update'], ['mirror','play_mirror'],
   ['apply-formation','formation_apply'], ['opponents','opponents_set'],
   ['space-madden-line','line_space'], ['apply-personnel','personnel_apply'],
@@ -100,6 +101,7 @@ test('metadata and ball inspector features have typed command coverage', () => {
 test('field gestures have command mappings for the same terminal changes', () => {
   for (const [binding,commandId] of [
     ['field:select','selection_set'], ['field:drag-player','player_update'],
+    ['field:drag-players','players_move'],
     ['field:drag-point','route_update'], ['field:draw-route','route_add'],
     ['field:draw-zone','zone_add'], ['field:drag-zone','zone_update'],
     ['field:drag-annotation','annotation_update'],

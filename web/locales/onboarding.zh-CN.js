@@ -1,5 +1,10 @@
 const copy = {
   replay: '新手引导', replayTitle: '重新查看当前页面的引导', busy: '请先结束当前操作或关闭面板，再开始引导。',
+  continueEditing: '继续编辑', openEditor: '打开战术编辑器',
+  firstTaskTitle: '可选练习：完成第一张战术', firstTaskIntro: '按自己的节奏练习。清单只记录你实际完成的操作，不会替你修改战术。',
+  firstTaskCreated: '新建一张战术，选择每方人数', firstTaskRoute: '选中球员，完成一条路线',
+  firstTaskRehearsed: '播放演练，检查移动与时序', firstTaskExported: '导出一份战术本备份',
+  taskDone: '已完成', taskPending: '待练习', taskProgress: '项已完成', taskStart: '到战术板练习',
   homeEditor: ['从战术本开始', '打开示例或新建战术，在球场上摆放球员、画路线，并播放演练。'],
   homeRoster: ['安排首发与替补', '在 DEPTH CHART 查看每个人员组的站位、首发和替补；球员名单也在这里维护。'],
   homeAnalysis: ['按图面分析攻防', '选择一攻一守，先看图面简报和知识资料。需要模型推演时，再填写自己的 API Key。'],

@@ -1,5 +1,6 @@
 import { t } from './i18n.js';
 import { escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute, dynamicBlockRoute } from './model.js';
+import { projectBoardPoint } from './digital-projection.js';
 export const project = p => ({ x: 18 + p.x * 9.64, y: 20 + p.y * 7.6 });
 const n = x => Number(x).toFixed(2);
 const xy = p => { const v = project(p); return `${n(v.x)},${n(v.y)}`; };
@@ -36,7 +37,8 @@ const inkOn = color => { const h = String(color).replace('#', ''); const v = h.l
 export const displayColor = (color, light = false) => (light ? LIGHT_DISPLAY : DARK_DISPLAY)[String(color).toLowerCase()] || color;
 export function fieldSVG(play, settings = {}, options = {}) {
   if (play.reference) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" class="pitch-svg reference-svg" role="img" aria-label="${e(play.title)} · ${t('support.original')}"><rect width="1000" height="560" fill="#080808"/><image href="./${e(play.reference.image)}" width="1000" height="560" preserveAspectRatio="xMidYMid meet"/></svg>`;
-  const { thumbnail = false, selected = null, time = 0, drawing = null, print = false, prefix = 'pitch' } = options;
+  const { thumbnail = false, selected = null, selectedPlayerIds = [], time = 0, drawing = null, print = false, prefix = 'pitch' } = options;
+  const selectedPlayers = new Set([...selectedPlayerIds, ...(selected?.type === 'players' ? selected.ids || [] : selected?.type === 'player' ? [selected.id] : [])]);
   const light = settings.fieldTheme === 'light' || print;
   // Graphite turf with mowing bands under a soft floodlight; chalk lines stay quiet so routes read first.
   const bg = light ? '#f4f5f7' : '#1a1c20', band = light ? '#eceef1' : '#1e2025', line = light ? '#d3d7dd' : '#33363d', major = light ? '#bfc4cc' : '#464a53', ink = light ? '#4a4f57' : '#dfe2e7';
@@ -67,8 +69,8 @@ export function fieldSVG(play, settings = {}, options = {}) {
     const displayRoute = dynamicBlockRoute(play, r, time);
     const d = r.kind === 'motion' ? motionPath(r) : routePath(displayRoute);
     const dash = r.kind === 'pass' ? '4 7' : r.optional ? '9 6' : '';
-    let path = `<g data-route="${e(r.id)}" role="button" aria-label="${e(t(r.optional ? 'support.option_route' : 'support.route', { label: play.players.find(p => p.id === r.playerId)?.label ?? '' }))}" tabindex="0"><path d="${d}" fill="none" stroke="transparent" stroke-width="20" class="route-hit"/><path class="route-stroke" ${dash ? '' : 'pathLength="1"'} d="${d}" fill="none" stroke="${stroke}" stroke-width="${active ? 4 : thumbnail ? 4 : 2.8}" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''} opacity="${r.optional ? .65 : 1}" ${r.stagedBlock && r.kind === 'block' ? `marker-mid="url(#${markerId}-bar)"` : ''} marker-end="url(#${markerId}-${r.endCap})" pointer-events="none"/></g>`;
-    if (active && !thumbnail && !print && time === 0) path += displayRoute.points.slice(1).map((p, j) => { const v = project(p); return `<circle data-point="${j + 1}" data-route-id="${e(r.id)}" cx="${n(v.x)}" cy="${n(v.y)}" r="6" fill="${stroke}" stroke="${bg}" stroke-width="2" class="point-handle"/>`; }).join('');
+    let path = `<g data-route="${e(r.id)}" role="button" aria-label="${e(t(r.optional ? 'support.option_route' : 'support.route', { label: play.players.find(p => p.id === r.playerId)?.label ?? '' }))}" tabindex="0"><path d="${d}" fill="none" stroke="transparent" stroke-width="20" vector-effect="non-scaling-stroke" class="route-hit"/><path class="route-stroke" ${dash ? '' : 'pathLength="1"'} d="${d}" fill="none" stroke="${stroke}" stroke-width="${active ? 4 : thumbnail ? 4 : 2.8}" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ''} opacity="${r.optional ? .65 : 1}" ${r.stagedBlock && r.kind === 'block' ? `marker-mid="url(#${markerId}-bar)"` : ''} marker-end="url(#${markerId}-${r.endCap})" pointer-events="none"/></g>`;
+    if (active && !thumbnail && !print && time === 0) path += displayRoute.points.slice(1).map((p, j) => { const v = project(p), attributes = `data-point="${j + 1}" data-route-id="${e(r.id)}" cx="${n(v.x)}" cy="${n(v.y)}"`; return `<circle ${attributes} r="16" fill="transparent" class="point-hit"/><circle ${attributes} r="6" fill="${stroke}" stroke="${bg}" stroke-width="2" class="point-handle" pointer-events="none"/>`; }).join('');
     return path;
   }).join('');
   if (drawing?.points?.length) {
@@ -76,7 +78,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
   }
   const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffffff" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffffff" stroke="#111214" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffffff" stroke="#111214" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffffff" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
   const players = play.players.map(p => {
-    const v = project(animatedPlayer(play, p, time)), active = selected?.type === 'player' && selected.id === p.id;
+    const v = project(animatedPlayer(play, p, time)), active = selectedPlayers.has(p.id);
     const fill = displayColor(p.color, light);
     return `<g data-player="${e(p.id)}" transform="translate(${n(v.x)} ${n(v.y)})" role="button" aria-label="${e(p.label)} ${e(p.name)}" aria-pressed="${active}" tabindex="0" class="player-token"><g class="player-symbol">${active && !thumbnail && !print ? `<circle class="selection-ring" r="25" fill="none" stroke="${light ? '#17191c' : '#ffffff'}" stroke-width="2"/>` : ''}<circle class="player-hit" r="27" fill="transparent"/><g class="player-body">${symbol(p, fill)}</g><text class="player-label" y="6" text-anchor="middle" font-family="'Big Shoulders Display','Arial Narrow',Arial,sans-serif" font-size="${p.label.length > 3 ? 13 : 17}" font-weight="800" fill="${inkOn(fill)}" pointer-events="none">${e(p.label)}</text>${settings.showNames && p.name && !thumbnail ? `<text y="34" text-anchor="middle" font-size="12" fill="${ink}" pointer-events="none">${e(p.name)}</text>` : ''}</g></g>`;
   }).join('');
@@ -136,4 +138,70 @@ export function previewDraft(svg, drawing, point) {
   path.setAttribute('d',point ? routePath({ points:[drawing.points.at(-1), point] }) : '');
   cursor.setAttribute('visibility',point?'visible':'hidden');
   if(point) { const v=project(point); cursor.setAttribute('cx',n(v.x));cursor.setAttribute('cy',n(v.y)); }
+}
+
+function fieldMatrix(svg) {
+  try {
+    const matrix = svg.getScreenCTM?.();
+    if (matrix && ['a','b','c','d','e','f'].every(key => Number.isFinite(matrix[key]))) return matrix;
+  } catch { /* A detached SVG may have no screen matrix yet. */ }
+  const box = svg.getBoundingClientRect();
+  return { a:(box.width || 1000)/1000, b:0, c:0, d:(box.height || 800)/800, e:box.left || 0, f:box.top || 0 };
+}
+
+function minimumScale(matrix) {
+  // The smaller singular value also covers skewed/rotated 2.5D fields. Using
+  // only the x scale can leave one dimension smaller than the touch target.
+  const sum = matrix.a**2 + matrix.b**2 + matrix.c**2 + matrix.d**2;
+  const determinant = matrix.a * matrix.d - matrix.b * matrix.c;
+  const squared = (sum - Math.sqrt(Math.max(0, sum**2 - 4 * determinant**2))) / 2;
+  return Math.sqrt(Math.max(squared, 1e-8));
+}
+
+const targetSize = ({ pointerType = 'mouse', minTargetPx } = {}) => Number.isFinite(minTargetPx) && minTargetPx > 0
+  ? minTargetPx : pointerType === 'touch' || pointerType === 'pen' ? 44 : 24;
+
+/** Resize invisible targets after render/resize/zoom; visible pieces stay fixed. */
+export function syncFieldHitTargets(svg, options = {}) {
+  if (!svg || svg.classList.contains('reference-svg')) return;
+  const size = targetSize(options), radius = size / (2 * minimumScale(fieldMatrix(svg)));
+  for (const node of svg.querySelectorAll('.player-hit')) node.setAttribute('r', n(Math.max(27, radius)));
+  for (const node of svg.querySelectorAll('.point-hit')) node.setAttribute('r', n(Math.max(6, radius)));
+  for (const node of svg.querySelectorAll('.route-hit')) node.setAttribute('stroke-width', n(size));
+}
+
+function fieldNodeCenter(svg, node, matrix) {
+  const player = node.matches('[data-player]');
+  const translation = player ? /translate\(\s*([-+\d.e]+)[,\s]+([-+\d.e]+)\s*\)/i.exec(node.getAttribute('transform') || '') : null;
+  const x = player ? Number(translation?.[1]) : Number(node.getAttribute('cx'));
+  const y = player ? Number(translation?.[2]) : Number(node.getAttribute('cy'));
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  const stage = svg.closest('.pitch-stage.is-perspective');
+  if (stage) {
+    const box = stage.getBoundingClientRect(), projected = projectBoardPoint(x,y);
+    return { x:box.left + projected.x * box.width/1000, y:box.top + projected.y * box.height/800 };
+  }
+  return { x:matrix.a*x + matrix.c*y + matrix.e, y:matrix.b*x + matrix.d*y + matrix.f };
+}
+
+/** Nearby players/waypoints, nearest first. The host presents ambiguity choices.
+ * Uses CSS-pixel distances so overlapping expanded targets do not choose the
+ * last SVG node by accident. `element` can start the existing pointer gesture.
+ */
+export function fieldHitCandidates(svg, event, options = {}) {
+  if (!svg || !Number.isFinite(event?.clientX) || !Number.isFinite(event?.clientY)) return [];
+  const matrix = fieldMatrix(svg), size = targetSize({ pointerType:event.pointerType, ...options });
+  const scale = minimumScale(matrix), candidates = [];
+  for (const node of svg.querySelectorAll('[data-player],.point-hit')) {
+    const player = !!node.dataset.player;
+    if (options.playersOnly && !player) continue;
+    const center = fieldNodeCenter(svg,node,matrix);
+    if (!center) continue;
+    const distance = Math.hypot(event.clientX-center.x,event.clientY-center.y);
+    if (distance > Math.max(size/2, (player ? 27 : 6) * scale)) continue;
+    candidates.push(player
+      ? { type:'player', id:node.dataset.player, label:node.getAttribute('aria-label') || node.dataset.player, distance, element:node }
+      : { type:'point', id:node.dataset.routeId, routeId:node.dataset.routeId, index:Number(node.dataset.point), distance, element:node });
+  }
+  return candidates.sort((a,b) => a.distance-b.distance || (a.type===b.type ? 0 : a.type==='point' ? -1 : 1));
 }

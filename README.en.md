@@ -30,6 +30,8 @@ An American football workspace for drawing plays, rehearsal, AI-assisted analysi
 
 English and Simplified Chinese are supported. Phones and iPads use the traditional view; desktops also offer a digital board.
 
+**Workflow update:** refine a continuous AI draft, preview selected change groups, and apply them; select and edit multiple players, share one properties/AI task area, and retain the current play and browsing position across modules. [UX changes and validation →](docs/UX_REDESIGN.md)
+
 ## Quick start
 
 1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/) and choose **Edit playbook**.

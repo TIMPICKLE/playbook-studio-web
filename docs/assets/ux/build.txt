@@ -1,0 +1,61 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> playbook-studio-web@4.2.1 build
+> node scripts/prepare-web.mjs && node scripts/run-framework.mjs build
+
+/usr/bin/timeout
+Running bounded vinext build...
+
+  vinext build  (Vite 8.0.13)
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+[1/5] analyze client references...
+[2Ktransforming...✓ 849 modules transformed.
+rendering chunks...
+[33m[PLUGIN_TIMINGS] [0mYour build spent significant time in plugins. Here is a breakdown:
+  - rsc:virtual-client-package (18%)
+  - vinext:css-data-url (13%)
+  - alias (12%)
+  - vinext:jsx-in-js (12%)
+  - vinext:og-inline-fetch-assets (10%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 7.37s
+[2/5] analyze server references...
+[2Ktransforming...✓ 78 modules transformed.
+rendering chunks...
+✓ built in 124ms
+[3/5] build rsc environment...
+[2Ktransforming...✓ 851 modules transformed.
+rendering chunks...
+computing gzip size...
+[33m[PLUGIN_TIMINGS] [0mYour build spent significant time in plugins. Here is a breakdown:
+  - rsc:virtual-client-package (26%)
+  - vite-plugin-commonjs (15%)
+  - vinext:middleware-server-only (11%)
+  - vinext:og-inline-fetch-assets (10%)
+  - vinext:css-data-url (6%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+✓ built in 3.33s
+[4/5] build client environment...
+[2Ktransforming...✓ 124 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 980ms
+[5/5] build ssr environment...
+[2Ktransforming...✓ 84 modules transformed.
+rendering chunks...
+computing gzip size...
+✓ built in 503ms
+[0m
+  Route (app)
+  ┌ ƒ /          
+  └ λ /api/:path+
+
+  λ API  ƒ Dynamic
+
+  Build complete. Run `vinext start` to start the production server.
+

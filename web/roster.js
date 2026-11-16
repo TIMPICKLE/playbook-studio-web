@@ -35,6 +35,18 @@ function editorFields(type, values) {
 export function createRosterView({ root, getData, getWorkspaceId, canEdit, commit }) {
   let draft = null;
   let pane = 'depth', groups, chart;
+  let workspace = getWorkspaceId(), restoreGeneration = 0;
+  const sessions = new Map(), groupSessions = new Map(), chartSessions = new Map();
+  const win = root.ownerDocument.defaultView;
+  const session = () => {
+    if (!sessions.has(workspace)) sessions.set(workspace, { pane: 'depth', query: '', scrollTop: 0 });
+    return sessions.get(workspace);
+  };
+  function remember() {
+    if (!find('.roster-page')) return;
+    Object.assign(session(), { pane, query: find('.roster-tools [type="search"]').value,
+      scrollTop: win.scrollY || root.ownerDocument.documentElement.scrollTop || 0 });
+  }
   const find = selector => root.querySelector(selector);
   const dialog = () => find('[aria-labelledby="roster-form-title"]');
   const notice = message => { find('.roster-notice').textContent = message; };
@@ -54,6 +66,12 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
 
   function refresh() {
     if (root.hidden) return;
+    if (workspace !== getWorkspaceId()) {
+      remember(); workspace = getWorkspaceId();
+      pane = session().pane;
+      find('.roster-tools [type="search"]').value = session().query;
+      updateTabs();
+    }
     const data = getData(), editable = canEdit();
     find('.roster-team-name').textContent = data.team.name;
     find('.roster-team-meta').textContent = [data.team.subtitle, leagueName(data.settings.league)].filter(Boolean).join(' · ');
@@ -71,25 +89,34 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     }
     if (draft) {
       const blocked = draft.workspace !== getWorkspaceId() || !editable;
-      dialog().querySelector('[type="submit"]').disabled = blocked;
+      dialog().querySelector('[type="submit"]').disabled = blocked || !!draft.removing;
+      const confirm = dialog().querySelector('[data-roster="confirm-remove"]');
+      if (confirm) confirm.disabled = blocked;
       if (blocked) error(t(draft.workspace !== getWorkspaceId() ? 'roster.workspaceChanged' : 'roster.permissionChanged'));
     }
   }
 
   function selectPane(next, focus = false) {
     pane = next;
+    session().pane = next;
+    updateTabs(focus);
+    refresh();
+  }
+
+  function updateTabs(focus = false) {
     for (const tab of root.querySelectorAll('[data-roster-tab]')) {
-      const active = tab.dataset.rosterTab === next;
+      const active = tab.dataset.rosterTab === pane;
       tab.setAttribute('aria-selected', String(active));
       tab.tabIndex = active ? 0 : -1;
       find('#' + tab.getAttribute('aria-controls')).hidden = !active;
       if (active && focus) tab.focus();
     }
-    refresh();
   }
 
   function show(visible) {
     if (visible && !root.hidden && find('.roster-page')) { refresh(); return; }
+    const token = ++restoreGeneration;
+    if (!visible) remember();
     root.hidden = !visible;
     if (!visible) {
       if (dialog()?.open) dialog().close();
@@ -100,6 +127,7 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
       draft = null;
       return;
     }
+    workspace = getWorkspaceId();
     root.innerHTML = `<main class="roster-page">
       <button type="button" data-cloud-action="home" class="roster-back">← ${t('extra.backToWorkspace')}</button>
       <header class="roster-heading"><h1 tabindex="-1">${t('roster.title')}</h1></header>
@@ -121,10 +149,15 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
       <dialog class="roster-dialog" aria-labelledby="roster-form-title"></dialog>
     </main>`;
     const context = { getData, getWorkspaceId, canEdit, commit };
-    groups = createPersonnelGroups({ ...context, root: find('.roster-groups-root'), onSelect: () => chart?.refresh() });
-    chart = createDepthChartView({ ...context, root: find('.roster-chart-root'), getSelectedId: () => groups.getSelectedId(), onChange: () => groups.refresh() });
-    selectPane('depth');
+    groups = createPersonnelGroups({ ...context, root: find('.roster-groups-root'), sessionStore: groupSessions, onSelect: () => chart?.refresh() });
+    chart = createDepthChartView({ ...context, root: find('.roster-chart-root'), sessionStore: chartSessions, getSelectedId: () => groups.getSelectedId(), onChange: () => groups.refresh() });
+    find('.roster-tools [type="search"]').value = session().query;
+    selectPane(session().pane);
     find('h1').focus({ preventScroll: true });
+    const expectedWorkspace = workspace, scrollTop = session().scrollTop;
+    win.requestAnimationFrame(() => {
+      if (token === restoreGeneration && !root.hidden && expectedWorkspace === getWorkspaceId()) win.scrollTo?.({ top: scrollTop, behavior: 'instant' });
+    });
   }
 
   function openEditor(type, id) {
@@ -140,7 +173,9 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     draft = { type, workspace: getWorkspaceId(), before: { ...values } };
     const title = { add: 'roster.add', edit: 'roster.editPlayer', team: 'roster.teamSettings' }[type];
     dialog().innerHTML = `<form><h2 id="roster-form-title">${t(title)}</h2><div class="roster-fields">${editorFields(type, values)}</div>
-      <p class="roster-error" role="alert"></p><div class="roster-dialog-actions">
+      <p class="roster-error" role="alert"></p>
+      ${type === 'edit' ? `<section class="roster-confirm" hidden><p>${e(t('roster.confirmRemove', { name: values.name }))}</p><p>${t('roster.removeImpact')}</p><div><button type="button" class="roster-secondary" data-roster="keep">${t('modal.cancel')}</button><button type="button" class="roster-remove" data-roster="confirm-remove">${t('roster.remove')}</button></div></section>` : ''}
+      <div class="roster-dialog-actions">
       ${type === 'edit' ? `<button type="button" class="roster-remove" data-roster="remove">${t('roster.remove')}</button>` : ''}
       <button type="button" class="roster-secondary" data-roster="cancel">${t('modal.cancel')}</button>
       <button type="submit" class="roster-primary">${t('roster.save')}</button></div></form>`;
@@ -171,7 +206,8 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     const compare = remove ? Object.entries(before) : changes;
     if (current && compare.some(([key]) => current[key] !== before[key])) { error(t('roster.conflict')); return; }
     if (!remove && !values.name) { error(t(isTeam ? 'roster.teamRequired' : 'roster.required')); form.elements.namedItem('name').focus(); return; }
-    if (remove && !root.ownerDocument.defaultView.confirm(t('roster.confirmRemove', { name: before.name }))) return;
+    if (remove && !draft.removing) return;
+    if (!remove && draft.removing) return;
     if (type === 'add' && data.roster.length >= 200) { error(t('editorExtra.the_roster_can_contain_at_most_200_players')); return; }
     if (!remove && type !== 'add' && !changes.length) { closeEditor(before.id); return; }
     const id = before.id || (type === 'add' ? uid() : null);
@@ -197,9 +233,16 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     if (root.hidden || !button || button.disabled) return;
     switch (button.dataset.roster) {
       case 'add': case 'team': case 'edit': openEditor(button.dataset.roster, button.dataset.id); break;
-      case 'remove': submit(true); break;
+      case 'remove':
+        draft.removing = true; find('.roster-confirm').hidden = false;
+        dialog().querySelector('[type="submit"]').disabled = true;
+        find('[data-roster="keep"]').focus(); break;
+      case 'keep':
+        draft.removing = false; find('.roster-confirm').hidden = true; refresh();
+        find('[data-roster="remove"]').focus(); break;
+      case 'confirm-remove': submit(true); break;
       case 'cancel': closeEditor(draft.before.id); break;
-      case 'clear': find('.roster-tools [type="search"]').value = ''; renderList(); find('.roster-tools [type="search"]').focus(); break;
+      case 'clear': find('.roster-tools [type="search"]').value = ''; session().query = ''; renderList(); find('.roster-tools [type="search"]').focus(); break;
     }
   });
   root.addEventListener('keydown', event => {
@@ -210,13 +253,14 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     else if (event.key === 'End') selectPane('directory', true);
     else selectPane(pane === 'depth' ? 'directory' : 'depth', true);
   });
-  root.addEventListener('input', event => { if (event.target.matches('.roster-tools [type="search"]')) renderList(); });
+  root.addEventListener('input', event => { if (event.target.matches('.roster-tools [type="search"]')) { session().query = event.target.value; renderList(); } });
   root.addEventListener('submit', event => {
     if (dialog()?.contains(event.target)) { event.preventDefault(); submit(); }
   });
   root.addEventListener('cancel', event => {
     if (event.target !== dialog() || !draft) return;
     event.preventDefault();
+    if (draft.removing) { find('[data-roster="keep"]').click(); return; }
     closeEditor(draft.before.id);
   }, true);
   return { show, refresh, isEditing: () => !!(dialog()?.open || groups?.isEditing() || chart?.isEditing()) };

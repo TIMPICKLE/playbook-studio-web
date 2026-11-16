@@ -3,6 +3,7 @@ import { providerMessages } from './locales/assistant-provider.js';
 import { validatePlay, COLORS, clone, decodeWorkspace, encodeWorkspace } from './model.js';
 import { submitResultTool } from './assistant-schema.js';
 import { buildModelRequest, parseModelResponse, resolveModelEndpoint } from './model-protocol.js';
+import { conversationRecords } from './assistant-session.js';
 import { getPlayLeague, isFlag5Play } from './game-formats.js';
 
 export const DEFAULT_BOARD_MODEL = 'gpt-6.1-terra';
@@ -28,6 +29,7 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
     return {...p, name:text(original.name || p.name,100), position:text(original.position || p.label,40), ...(original.number != null ? {number:text(String(original.number),12)} : {}), ...(flag5 ? { gameFormat: 'flag5' } : {})};
   });
   const selected = board?.selectedPlayerId;
+  const selectedIds = [...new Set(Array.isArray(board?.selectedPlayerIds) ? board.selectedPlayerIds : selected ? [selected] : [])].filter(id => play.players.some(player=>player.id===id));
   let editorContext;
   if (editor) {
     const data=editor.data ? decodeWorkspace(encodeWorkspace(editor.data)) : undefined;
@@ -42,10 +44,10 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
   }
   return {instruction:instruction.trim(),locale:locale === 'en' ? 'en' : 'zh-CN',mode:['edit','search'].includes(mode) ? mode : 'auto',
     ...(editorContext ? {editor:editorContext} : {}),
-    previous:Array.isArray(previous) ? previous.slice(-5) : [],
+    previous:conversationRecords(previous),
     board:{...play, playId:play.id, players:compactPlayers, play, playersPerSide:getPlayLeague(play), gameFormat:flag5 ? 'flag5' : 'unspecified',
       geometry:{losY:67,xUnitsPerYard:1.875,yUnitsPerYard:2,offenseDirection:'decreasing_y', ...(flag5 ? { scale:'diagram_grid', regulationFieldVerified:false } : {})},
-      ...(play.players.some(p => p.id === selected) ? {selectedPlayerId:selected} : {})}};
+      ...(play.players.some(p => p.id === selected) ? {selectedPlayerId:selected} : {}), ...(selectedIds.length ? {selectedPlayerIds:selectedIds} : {})}};
 }
 
 function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {

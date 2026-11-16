@@ -20,7 +20,7 @@ async function withView(run) {
   const input = (field, value) => { const node = root.querySelector(`[data-ai-field="${field}"]`); node.value = value; node.dispatchEvent(new win.Event(node.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); };
   const switchWorkspace = (id, title = id) => { record = { id, title, revision: 1 }; view.onData(data, record); };
   try { view.onData(data, record); view.show(true); await run({ win, root, view, calls, input, switchWorkspace }); }
-  finally { view.show(false); await win.happyDOM.abort(); for (const [name, descriptor] of Object.entries(previous)) { if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name]; } }
+  finally { view.destroy(); await win.happyDOM.abort(); for (const [name, descriptor] of Object.entries(previous)) { if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name]; } }
 }
 
 test('knowledge dictionaries have matching keys', async () => {
@@ -103,7 +103,8 @@ test('model requests include only selected local passages and source metadata', 
     assert.doesNotMatch(JSON.stringify(sent.knowledgePack), /unrelatedpassageforcheck|test-private-key/);
     assert.ok(root.querySelector('.ai-scenario'));
     root.querySelector('[data-knowledge-delete]').click();
-    assert.equal(root.querySelector('.ai-scenario'), null);
+    assert.ok(root.querySelector('.ai-scenario'), 'Keep the completed report after reference changes');
+    assert.match(root.querySelector('.ai-report-context').textContent, /输入已变化/);
   });
 });
 

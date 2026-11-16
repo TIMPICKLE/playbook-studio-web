@@ -20,6 +20,7 @@ export default {
   'roster.save': '保存',
   'roster.remove': '移除球员',
   'roster.confirmRemove': '确定从当前战术本的名单中移除 {name}？',
+  'roster.removeImpact': '该球员会从人员组中移除，战术上的关联会解除。其他球员和战术保留。',
   'roster.required': '请输入姓名。',
   'roster.teamRequired': '请输入球队名称。',
   'roster.workspaceChanged': '当前战术本已切换。请复制需要保留的内容，再关闭窗口。',

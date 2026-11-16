@@ -1,17 +1,5 @@
-/* STINGERS stadium. Purple glass and yellow action accents. Glass is deliberately requested; the SVG remains opaque. */
-:root {
-  color-scheme: dark;
-  --paper:#17181a; --surface:#2e3032; --surface-soft:#36383c;
-  --ink:#f9f9f9; --muted:#c3c5c7; --line:#cacccf26;
-  --green:#9a9fa7; --green-dark:#bbbec3; --accent:#9a9fa7;
-  --danger:#ffb3a6; --danger-soft:#602c2a66;
-  --glass:linear-gradient(135deg,#ffffff0d,#ffffff02),#2e30346b;
-  --glass-raised:linear-gradient(130deg,#ffffff12,#ffffff03),#313336e8;
-  --glass-edge:#dddfe12c;
-  --glass-shadow:inset 0 1px 0 #f3f3f418,0 12px 32px #00000015;
-  --ease-spring:cubic-bezier(.16,1,.3,1);
-  --ease-out:cubic-bezier(.22,1,.36,1);
-}
+/* Legacy digital material structures. Shared palette lives in theme.css. */
+
 html{background:#17181a;scrollbar-color:#6d6f7155 #17181a;scrollbar-width:thin}
 body{background:transparent;isolation:isolate;position:relative}
 .atmosphere{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:#17181a;contain:strict}
@@ -202,7 +190,7 @@ html[data-effects=off] #ambient-particles{display:none}
 @media print{.atmosphere,#action-particles,.effects-menu{display:none!important}:root{color-scheme:light}.print-page{color:#2c2d2f}.print-page *{box-shadow:none}}
 
 /* Team identity from the supplied STINGERS artwork. */
-:root{--brand-purple:#484c53;--brand-yellow:#9a9fa7}
+
 .light-one{background:radial-gradient(ellipse at 18% 12%,#70767e6b,transparent 52%)}
 .light-two{background:radial-gradient(ellipse at 84% 62%,#9399a218,transparent 42%)}
 .brand img,.cloud-brand img{background:transparent;padding:0;border-radius:0;object-fit:contain;width:46px;height:46px;flex:none}

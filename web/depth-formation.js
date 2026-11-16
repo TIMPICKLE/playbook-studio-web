@@ -6,6 +6,16 @@ function playerName(player) {
   return player ? [player.number && `#${player.number}`, player.name].filter(Boolean).join(' ') : t('depth.vacant');
 }
 
+export function depthRankActions(slot, index, groupId, editable) {
+  if (!editable || !index || !slot.playerIds[index]) return '';
+  const attrs = `data-slot="${e(slot.id)}" data-group="${e(groupId)}" data-player="${e(slot.playerIds[index])}" data-ranks="${e(JSON.stringify(slot.playerIds))}"`;
+  return `<span class="depth-inline-actions">
+    <button type="button" data-depth-chart="quick-promote" ${attrs} aria-label="${e(t('depth.promoteNamed', { label: slot.label, rank: index }))}">${t('depth.promote')}</button>
+    ${index > 1 ? `<button type="button" data-depth-chart="quick-up" ${attrs} aria-label="${e(t('depth.upNamed', { label: slot.label, rank: index }))}">↑</button>` : ''}
+    ${index + 1 < slot.playerIds.length ? `<button type="button" data-depth-chart="quick-down" ${attrs} aria-label="${e(t('depth.downNamed', { label: slot.label, rank: index }))}">↓</button>` : ''}
+  </span>`;
+}
+
 function roleButton(slot, players, selected, playerId, style = '') {
   const starter = players.get(slot.playerIds[0]);
   const name = playerName(starter);
@@ -30,14 +40,15 @@ function pitchMarker(marker, markers, players, selected, playerId) {
   return roleButton(slot, players, selected === slot.id, playerId, style);
 }
 
-function selectedRole(slot, players, editable) {
+function selectedRole(slot, players, editable, groupId) {
   const ids = slot.playerIds.length ? slot.playerIds : [null];
   return `<section class="df-detail" id="depth-formation-detail" aria-label="${e(t('formationDetail.roleRanks', { role: slot.label }))}">
     <div class="df-detail-head"><h4>${e(slot.label)}</h4>
       ${editable ? `<button type="button" class="roster-text" data-depth-chart="edit" data-slot="${e(slot.id)}"
          aria-label="${e(t('depth.editLabel', { label: slot.label }))}">${t('depth.edit')}</button>` : ''}</div>
     <dl class="df-ranks">${ids.map((id, rank) => `<div><dt>${rank ? t('depth.backup', { rank }) : t('depth.starter')}</dt>
-      <dd>${e(playerName(players.get(id)))}</dd></div>`).join('')}</dl>
+      <dd>${e(playerName(players.get(id)))}${depthRankActions(slot, rank, groupId, editable)}</dd></div>`).join('')}</dl>
+    <div data-depth-feedback="${e(slot.id)}"></div>
     ${ids.length === 1 ? `<p class="df-no-backups">${t('depth.noBackups')}</p>` : ''}</section>`;
 }
 
@@ -68,6 +79,6 @@ export function renderDepthFormation(group, players, selectedSlotId, editable, p
     </figure>` : `<p class="df-unplaced-hint">${t('formationDetail.noLayout')}</p>`}
     ${unmapped.length ? `<section class="df-extra"><h4>${t('formationDetail.unplaced')}</h4><div class="df-extra-roles">
       ${unmapped.map(slot => roleButton(slot, players, slot.id === selected.id, playerId)).join('')}</div></section>` : ''}
-    ${selectedRole(selected, players, editable)}
+    ${selectedRole(selected, players, editable, group.id)}
   </div>`;
 }

@@ -13,7 +13,10 @@ export const getEditableEntry = id => editableTraces.get(id);
 export const MADDEN_DRAG_TYPE = 'application/x-playbook-madden';
 export function filterCatalog(catalog, { team = 'eagles', group = '', formation = '', query = '', editableOnly = false } = {}) {
   const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
-  return catalog.plays.filter(p => p.team === team && (!editableOnly || hasEditableTrace(p.id)) && (!group || p.group === group) && (!formation || `${p.group} ${p.formation}` === formation) && terms.every(term => `${p.name} ${p.group} ${p.formation}`.toLowerCase().includes(term)));
+  const teams = new Map((catalog.teams || []).map(item => [item.id, `${item.name || ''} ${item.city || ''} ${item.code || ''}`]));
+  // An explicit empty team is the cross-team scope; the omitted default stays
+  // Eagles for existing AI/catalog callers.
+  return catalog.plays.filter(p => (!team || p.team === team) && (!editableOnly || hasEditableTrace(p.id)) && (!group || p.group === group) && (!formation || `${p.group} ${p.formation}` === formation) && terms.every(term => `${p.name} ${p.group} ${p.formation} ${teams.get(p.team) || ''}`.toLowerCase().includes(term)));
 }
 export function makeMaddenPlay(entry) {
   const trace = getEditableEntry(entry.id);

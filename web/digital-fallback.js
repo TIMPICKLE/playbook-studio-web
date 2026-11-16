@@ -91,7 +91,7 @@ export function createDigitalFallback(doc=document) {
       item.group.style.display=hiddenPlayers.has(p.id)?'none':'';
       const at=project(animatedPlayer(play,p,time));
       const lift=animated?(draggingId===p.id?5:hoveredId===p.id?1.5:0):0;
-      const active=selected?.type==='player'&&selected.id===p.id;
+      const active=selected?.type==='player'&&selected.id===p.id || selected?.type==='players'&&selected.ids?.includes(p.id);
       const key=`${at.x},${at.y},${lift},${active}`;if(item.key===key)continue;item.key=key;
       const projected=[];
       for(const face of item.faces){

@@ -40,6 +40,22 @@
   padding: 4px 8px;
 }
 .depth-backups ol { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; }
+.depth-backups li { flex-wrap: wrap; }
+.depth-inline-actions { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.depth-inline-actions button {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 4px 7px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 6px;
+  color: var(--text-1);
+  background: var(--night-2);
+  font: 600 12px/1.3 var(--font-ui);
+}
+.depth-inline-actions button:hover { background: var(--night-3); }
+.df-ranks dd .depth-inline-actions { display: flex; margin-top: 6px; }
+.depth-status[data-state=error] { color: var(--danger-1); }
+.depth-status:not(:empty) { padding: 8px 10px; border-inline-start: 2px solid var(--hairline-strong); }
 .depth-rank {
   min-width: 1.45em;
   padding: 1px 3px;
@@ -152,6 +168,7 @@
   .depth-lineup { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 10px 10px; }
 }
 @media (max-width: 1180px), (any-pointer: coarse) {
+  .depth-inline-actions button { min-width: 44px; min-height: 44px; }
   .depth-view-picker button, .depth-rank-tools button { min-height: 44px; }
   .depth-rank-tools button { min-width: 44px; }
   .depth-lineup li > button { min-height: 58px; }

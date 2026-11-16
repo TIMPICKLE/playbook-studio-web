@@ -49,7 +49,8 @@ test('consecutive turns build on the staged preview and commit as one undoable t
     const x=selected.players.find(player=>player.label==='X');
     assert.ok(x);assert.ok(!selected.players.some(player=>player.side==='defense'));
     ba('open').click();ba('settings').click();q('[data-ba-key]').value='test-provider-key';ba('done').click();
-    assert.equal(q('.board-ai').parentElement,win.document.body,'the open panel is a page-level window');
+    assert.equal(q('.board-ai').parentElement,q('.inspector-panel'),'the desktop assistant docks beside the board');
+    assert.ok(q('.board-ai').classList.contains('ba-task-panel'));
 
     const first=await send('添加 4-3 防守',()=>[{kind:'defense_formation',formation:'4-3',mode:'add'}]);
     assert.equal(first.board.players.filter(player=>player.side==='defense').length,0);
@@ -62,6 +63,18 @@ test('consecutive turns build on the staged preview and commit as one undoable t
     assert.ok(q('.assistant-preview').querySelectorAll('[data-player]').length>=11,'the preview still shows the first turn');
     assert.deepEqual(saved(),original,'nothing is committed while turns are staged');
 
+    // Visiting another module removes the editor DOM, not its conversation or
+    // working draft. Reopening the assistant must require preview confirmation.
+    q('[data-ba-prompt]').value='unsent follow-up';
+    q('.workspace-nav button[data-workspace-mode="roster"]').click();
+    await until(()=>q('#app').hidden&&win.document.body.dataset.workspaceMode==='roster');
+    q('.workspace-nav button[data-workspace-mode="editor"]').click();
+    await until(()=>!q('#app').hidden&&!!ba('open'));
+    ba('open').click();
+    assert.equal(q('[data-ba-prompt]').value,'unsent follow-up');
+    assert.equal([...win.document.querySelectorAll('.ba-turn-status')].filter(node=>node.dataset.status==='pending').length,2);
+    assert.ok(ba('apply'));assert.deepEqual(saved(),original);
+
     // No subject and no lookup: the focus of the previous turn is already grounded.
     const third=await send('再深两码',({board,context})=>{
       const route=board.routes.find(item=>item.playerId===x.id&&item.intent);
@@ -72,6 +85,13 @@ test('consecutive turns build on the staged preview and commit as one undoable t
     assert.equal(third.preview.effects[0].endDepthYards,7);assert.equal(changes().length,3);
     assert.deepEqual(saved(),original);
 
+    // The third group deepens the route created by group two. Removing its
+    // dependency must fail without changing either the document or its preview.
+    let group=q('[data-ba-group="1"]');group.checked=false;group.dispatchEvent(new win.Event('change',{bubbles:true}));
+    ba('update-groups').click();await until(()=>!!q('.ba-group-error')?.textContent);
+    assert.match(q('.ba-group-error').textContent,/依赖/);assert.equal(changes().length,3);assert.deepEqual(saved(),original);
+    group=q('[data-ba-group="1"]');group.checked=true;group.dispatchEvent(new win.Event('change',{bubbles:true}));
+
     ba('revert').click();
     assert.equal(changes().length,2,'dropping the newest turn keeps the earlier ones');
     ba('revert').click();
@@ -79,15 +99,26 @@ test('consecutive turns build on the staged preview and commit as one undoable t
     await send('X 改成 5 码 slant',()=>[{kind:'route',playerId:x.id,concept:'slant',depthYards:5}],'X');
     await send('再深两码',({board})=>[{kind:'route',playerId:x.id,routeId:board.routes.find(item=>item.playerId===x.id&&item.intent).id,concept:'slant',depthYards:7}]);
 
+    // Keep only the first two turns, explicitly re-preview them, then apply.
+    group=q('[data-ba-group="2"]');group.checked=false;group.dispatchEvent(new win.Event('change',{bubbles:true}));
+    assert.equal(ba('apply').disabled,true);ba('update-groups').click();
+    await until(()=>changes().length===2&&!ba('apply').disabled);
+    assert.deepEqual(saved(),original,'choosing groups only refreshes the preview');
+
     ba('apply').click();await until(()=>!!ba('undo'));
     const play=saved().plays.find(item=>item.id===selected.id);
     assert.equal(play.players.filter(player=>player.side==='defense').length,11);
     const route=play.routes.find(item=>item.playerId===x.id&&item.intent);
-    assert.equal(route.intent.concept,'slant');assert.equal(route.intent.depthYards,7);
+    assert.equal(route.intent.concept,'slant');assert.equal(route.intent.depthYards,5,'the excluded depth change is never committed');
     assert.deepEqual(play.players.filter(player=>player.side==='offense'),selected.players);
     assert.ok(!ba('apply'),'nothing is left pending');
     ba('undo').click();
     assert.deepEqual(saved(),original,'the whole conversation is one undo checkpoint');
+    assert.ok([...win.document.querySelectorAll('.ba-turn-status')].some(node=>node.dataset.status==='undone'));
+    q('[data-action="redo"]').click();
+    assert.equal(saved().plays.find(item=>item.id===selected.id).players.filter(player=>player.side==='defense').length,11);
+    assert.ok([...win.document.querySelectorAll('.ba-turn-status')].some(node=>node.dataset.status==='redone'));
+    q('[data-action="undo"]').click(); assert.deepEqual(saved(),original);
   }finally{
     ba('close')?.click();globalThis.fetch=originalFetch;
     await win.happyDOM.abort();

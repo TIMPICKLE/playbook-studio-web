@@ -1,5 +1,5 @@
 /* Liquid material finish: clear bevels, silver reflections, molten-gold actions. */
-:root{--paper:#0f1011;--surface:#28292b;--surface-soft:#393a3b;--glass-edge:#f3f4f555;--muted:#cfd0d2;--glass-shadow:inset 0 1px 1px #fff6,inset 0 -1px 1px #a5a9ae55,0 14px 46px #0005}
+
 html{background:#0f1011}
 .atmosphere{background:radial-gradient(ellipse at 20% 15%,#414345,transparent 60%),#0f1011}
 #liquid-metal-world{position:absolute;inset:0;opacity:.55}

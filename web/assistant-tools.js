@@ -54,6 +54,7 @@ export function createBoardTools(input, searchCatalog) {
         if (!boardRead) throw new Error('Read the current board before preparing editor commands.');
         for (const [field,type] of [['playerId','player'],['routeId','route'],['zoneId','zone'],['annotationId','annotation']])
           if (op[field] && !exists(op[field],type)) throw new Error('The referenced editor object does not exist.');
+        for (const id of op.playerIds || []) if (!exists(id,'player')) throw new Error('The referenced editor object does not exist.');
         if (op.objectId && !exists(op.objectId,op.objectType)) throw new Error('The referenced editor object does not exist.');
         for (const id of [op.patch?.holderId,op.patch?.receiverId].filter(Boolean)) if (!exists(id,'player')) throw new Error('The referenced ball player does not exist.');
         if (op.as) {

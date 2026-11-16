@@ -14,8 +14,9 @@ const definitions = [
   ['play_delete', 'workspace', 'Delete a real play while retaining at least one play in the book.', true, true, ['delete-play', 'confirm-delete'], action('play_delete', {playId:id})],
   ['formation_save', 'workspace', 'Save the current editable starting positions as a custom formation.', false, true, ['save-formation', 'confirm-formation'], action('formation_save', {name:z.string().trim().min(1).max(100)})],
   ['catalog_import', 'workspace', 'Import a verified Madden catalog entry loaded by the host. Do not invent catalog IDs.', false, true, ['madden:add'], action('catalog_import', {catalogId:id})],
-  ['selection_set', 'local', 'Select a real player, route, zone or annotation, or clear selection.', false, false, ['clear-selection', 'select-route', 'field:select'], z.union([
+  ['selection_set', 'local', 'Select a real player, route, zone or annotation, select multiple existing players, or clear selection.', false, false, ['clear-selection', 'select-route', 'field:select','multi-select','pick-candidate'], z.union([
     action('selection_set', {objectType:z.enum(['player', 'route', 'zone', 'annotation']), id}),
+    action('selection_set', {objectType:z.literal('players'),ids:z.array(id).min(1).max(40).refine(values=>new Set(values).size===values.length,'Choose each player only once.')}),
     action('selection_set', {objectType:z.literal('none')}),
   ])],
   ['tool_set', 'local', 'Select the editor drawing tool.', false, false, ['tool'], action('tool_set', {tool:z.enum(['select', 'route', 'block', 'motion', 'pass', 'zone', 'text'])})],
@@ -119,8 +120,9 @@ export function prepareEditorActions({data, selectedId, catalogRows} = {}, value
       }
       if (action.kind === 'selection_set' && action.objectType !== 'none') {
         const current = data ? requirePlay(data, previewSelectedId) : null;
-        const type = {player:'players', route:'routes', zone:'zones', annotation:'annotations'}[action.objectType];
-        if (!current?.[type].some(item => item.id === action.id)) throw new Error('The requested object is not on the current diagram.');
+        const type = {player:'players', players:'players',route:'routes', zone:'zones', annotation:'annotations'}[action.objectType];
+        const requested=action.objectType==='players'?action.ids:[action.id];
+        if (!requested.every(id=>current?.[type].some(item => item.id === id))) throw new Error('The requested object is not on the current diagram.');
       }
       changes.push(localDescription(action, locale));
     }
