@@ -1,5 +1,10 @@
 const copy = {
   replay: 'Quick tour', replayTitle: 'Replay the tour for this page', busy: 'Finish the current action or close the open panel before starting the tour.',
+  continueEditing: 'Continue editing', openEditor: 'Open the play editor',
+  firstTaskTitle: 'Optional practice: your first play', firstTaskIntro: 'Work at your own pace. This checklist records actions you complete and never changes a play for you.',
+  firstTaskCreated: 'Create a play and choose the player count', firstTaskRoute: 'Select a player and finish a route',
+  firstTaskRehearsed: 'Rehearse the play and check the timing', firstTaskExported: 'Export a playbook backup',
+  taskDone: 'Completed', taskPending: 'To practise', taskProgress: 'completed', taskStart: 'Practise on the field',
   homeEditor: ['Start with your playbook', 'Open a sample or create a play, arrange players, draw routes, and rehearse the diagram.'],
   homeRoster: ['Arrange starters and backups', 'Use DEPTH CHART to inspect each personnel group, its positions and depth order. Manage your player roster here too.'],
   homeAnalysis: ['Review an offensive matchup', 'Select an offense and defense to inspect diagram facts and coaching references. Add your own API key when you want model analysis.'],

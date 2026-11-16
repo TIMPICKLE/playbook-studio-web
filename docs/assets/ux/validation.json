@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-16",
+  "baseline": "36c9be7",
+  "branch": "feature/ux-workflow-redesign",
+  "javascript": {
+    "passed": 754,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pdf": {
+    "passed": 4,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "check": "npm test",
+      "evidence": "tests.txt",
+      "sha256": "b248db90055b0d14f49b21c04e3953f8513606937496fd102ac258ddb702d42a",
+      "result": "passed"
+    },
+    {
+      "check": "PDF unittest",
+      "evidence": "pdf-tests.txt",
+      "sha256": "358a108ba1c3b10a7b3a7b7c9bd42df1c81aa40e9936f2eef5b5bfc4557dc5e8",
+      "result": "passed"
+    },
+    {
+      "check": "Production build",
+      "evidence": "build.txt",
+      "sha256": "04d0cee48610c17a32b00f55c7d8b382664b873179f6c0aa465c86b7b5230c54",
+      "result": "passed"
+    },
+    {
+      "check": "Syntax check",
+      "evidence": "syntax-check.txt",
+      "sha256": "faa69ba9fe0caf98f63853c0de030a9978c9b30df44777a57688d220efef8010",
+      "result": "passed"
+    },
+    {
+      "check": "Type check",
+      "evidence": "typecheck.txt",
+      "sha256": "7a2d5d1869bb75f2a8388e562e32cc67f634306d3f34f58914dc2a5d896ac471",
+      "result": "passed"
+    }
+  ],
+  "browser": {
+    "engine": "Managed desktop Chromium",
+    "realIosDevice": false,
+    "modelCalls": "Scripted protocol fixtures only; no external model request",
+    "observations": [
+      {
+        "cssViewport": {
+          "width": 1363,
+          "height": 936
+        },
+        "documentWidth": 1353,
+        "passed": [
+          "module navigation above all work surfaces",
+          "analysis to editor returns with field height 478px",
+          "toolbar bottom 900.4px within viewport",
+          "AI panel dock and collapse",
+          "no horizontal document overflow"
+        ],
+        "screenshots": [
+          "editor-after.jpg",
+          "analysis-after.jpg",
+          "home-after.jpg",
+          "assistant-after.jpg"
+        ]
+      },
+      {
+        "cssViewport": {
+          "width": 676,
+          "height": 468
+        },
+        "mode": "desktop browser zoom 200%, not device emulation",
+        "passed": [
+          "compact layout",
+          "AI input focus",
+          "close and reopen assistant",
+          "no horizontal document overflow"
+        ]
+      },
+      {
+        "cssViewport": {
+          "width": 451,
+          "height": 312
+        },
+        "mode": "desktop browser zoom 300%, not device emulation",
+        "passed": [
+          "compact layout",
+          "AI input focus",
+          "close and reopen assistant",
+          "no horizontal document overflow"
+        ],
+        "screenshots": [
+          "narrow-after.jpg"
+        ]
+      }
+    ]
+  },
+  "blocked": [
+    "8 exact viewport E2E cases: Chromium singleton socket denied by execution environment, see qa-matrix.json"
+  ],
+  "notVerified": [
+    "iPhone/iPad Safari touch and software keyboard",
+    "External model instruction accuracy",
+    "Comparable performance benchmarks"
+  ]
+}

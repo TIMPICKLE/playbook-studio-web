@@ -1,0 +1,76 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Window } from 'happy-dom';
+import { readFileSync } from 'node:fs';
+import { makePlay, starterWorkspace, STORAGE_KEY, encodeWorkspace, decodeWorkspace } from '../web/model.js';
+import { project } from '../web/field.js';
+
+test('editor multiselect moves and deletes one group, supports touch choices, cancellation and annotation keyboard activation',async()=>{
+  const win=new Window({url:'http://localhost:3000/local.html#editor',width:1440,height:1000});
+  const data=starterWorkspace(),play=makePlay({title:'Group practice',formation:'Gun Trips'});
+  play.players=play.players.slice(0,3);
+  const [a,b,c]=play.players;
+  Object.assign(a,{label:'A',x:20,y:70});Object.assign(b,{label:'B',x:22,y:70});Object.assign(c,{label:'C',x:80,y:40});
+  play.ball.holderId=a.id;play.ball.receiverId=b.id;
+  play.routes=[{id:'group-route',playerId:a.id,kind:'route',points:[{x:20,y:70},{x:20,y:30}],color:a.color,smooth:false,endCap:'arrow',delay:0,duration:3,optional:false}];
+  play.annotations=[{id:'keyboard-note',text:'Read the safety',x:50,y:30}];
+  data.plays=[play];
+  win.localStorage.setItem(STORAGE_KEY,encodeWorkspace(data));
+  win.localStorage.setItem('playbook-studio:onboarding:v1',JSON.stringify({dismissed:true,completed:[]}));
+  win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
+  const names=['window','document','navigator','localStorage','location','history','Image','Blob','requestAnimationFrame','cancelAnimationFrame'];
+  const previous=Object.fromEntries(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
+  for(const name of names)Object.defineProperty(globalThis,name,{configurable:true,value:['requestAnimationFrame','cancelAnimationFrame'].includes(name)?win[name].bind(win):win[name]});
+  const q=selector=>win.document.querySelector(selector),saved=()=>decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0];
+  const player=id=>[...win.document.querySelectorAll('#field [data-player]')].find(node=>node.dataset.player===id);
+  const click=action=>{const node=q(`[data-action="${action}"]`);assert.ok(node,action);node.click();};
+  const clearSelection=()=>q('[data-action="clear-selection"]')?.click();
+  const geometry=()=>{q('#field .pitch-svg').getBoundingClientRect=()=>({left:0,top:0,x:0,y:0,width:1000,height:800,right:1000,bottom:800});};
+  const pointer=(node,type,at,extra={})=>{const v=project(at);node.dispatchEvent(new win.PointerEvent(type,{bubbles:true,button:0,pointerId:1,isPrimary:true,clientX:v.x,clientY:v.y,...extra}));};
+  const tap=(id,extra={})=>{geometry();const p=saved().players.find(item=>item.id===id);pointer(player(id),'pointerdown',p,extra);pointer(q('#field'),'pointerup',p,extra);};
+  try {
+    await import(`../web/app.js?selection-ux=${Date.now()}`);
+    geometry();tap(a.id);tap(b.id,{shiftKey:true});
+    assert.equal(win.document.querySelectorAll('#field [data-player][aria-pressed="true"]').length,2);
+    assert.match(q('.inspector').textContent,/2/);
+    const initial=saved();geometry();
+    pointer(player(a.id),'pointerdown',a);pointer(q('#field'),'pointermove',{x:25,y:65});pointer(q('#field'),'pointerup',{x:25,y:65});
+    const moved=saved();
+    assert.equal(moved.players[0].x,25);assert.equal(moved.players[1].x,27);
+    assert.equal(moved.players[0].y,65);assert.deepEqual(moved.players[2],initial.players[2]);
+    assert.deepEqual(moved.routes[0].points,[{x:25,y:65},{x:25,y:25}]);
+    click('undo');assert.deepEqual(saved(),initial);
+    click('redo');assert.deepEqual(saved(),moved);
+    clearSelection();tap(a.id);tap(b.id,{shiftKey:true});
+    click('selection-nudge:left');assert.equal(saved().players[0].x,24);assert.equal(saved().players[1].x,26);
+    click('undo');assert.deepEqual(saved(),moved);
+    clearSelection();tap(a.id);tap(b.id,{shiftKey:true});
+    const beforeCancel=saved();geometry();const start=beforeCancel.players[0];
+    pointer(player(a.id),'pointerdown',start);pointer(q('#field'),'pointermove',{x:start.x+7,y:start.y+3});
+    q('#field').dispatchEvent(new win.PointerEvent('pointercancel',{bubbles:true,pointerId:1}));
+    assert.deepEqual(saved(),beforeCancel);
+    click('delete-selection');
+    assert.deepEqual(saved().players.map(item=>item.id),[c.id]);assert.equal(saved().ball.holderId,c.id);assert.equal(saved().ball.receiverId,'');assert.equal(saved().routes.length,0);
+    click('undo');assert.deepEqual(saved(),beforeCancel);
+    clearSelection();tap(a.id);tap(b.id,{shiftKey:true});tap(c.id,{shiftKey:true});
+    const all=saved();click('delete-selection');assert.deepEqual(saved(),all,'delete-all is rejected without partially deleting the group');
+    clearSelection();
+    q('#field [data-annotation]').dispatchEvent(new win.KeyboardEvent('keydown',{key:' ',bubbles:true}));
+    assert.ok(q('[data-prop="text"]'),'keyboard selection opens annotation properties');
+    assert.equal(q('[data-prop="text"]').value,'Read the safety');
+    clearSelection();click('multi-select');
+    geometry();tap(a.id,{pointerType:'touch'});
+    assert.ok(q('.selection-candidates'),'dense touch positions offer explicit candidates');
+    click('pick-candidate:0');
+    geometry();tap(b.id,{pointerType:'touch'});click('pick-candidate:0');
+    assert.equal(win.document.querySelectorAll('#field [data-player][aria-pressed="true"]').length,2);
+    click('multi-select');
+    assert.match(q('#field-context').textContent,/拖动|Drag/);
+    const beforeContext=saved();geometry();player(a.id).dispatchEvent(new win.MouseEvent('contextmenu',{bubbles:true,cancelable:true,button:2,...(()=>{const at=project(beforeContext.players[0]);return {clientX:at.x,clientY:at.y};})()}));
+    assert.ok(q('#field-context [data-action="delete-selection"]'));
+    assert.deepEqual(saved(),beforeContext,'opening context actions never edits the play');
+  }finally{
+    win.dispatchEvent(new win.Event('pagehide'));await win.happyDOM.abort();
+    for(const name of names){if(previous[name])Object.defineProperty(globalThis,name,previous[name]);else delete globalThis[name];}
+  }
+});

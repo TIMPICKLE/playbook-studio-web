@@ -173,12 +173,12 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
       pointer(handle, 'pointerdown', 500, 640); pointer(handle, 'pointermove', 500, 740); await new Promise(resolve => win.requestAnimationFrame(resolve)); pointer(handle, 'pointercancel', 500, 740);
       assert.equal(Number(query('#board-height').value), initial + 140); assert.equal(doc.body.classList.contains('board-resizing'), false);
       const width = query('[data-board-resize="width"]'); pointer(width, 'pointerdown', 900, 500); pointer(width, 'pointerup', 840, 500);
-      assert.equal(width.getAttribute('aria-valuenow'), '310');
-      width.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); assert.equal(width.getAttribute('aria-valuenow'), '290');
+      assert.equal(width.getAttribute('aria-valuenow'), '380');
+      width.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); assert.equal(width.getAttribute('aria-valuenow'), '360');
       query('[data-board-action="expand"]').click(); assert.equal(query('.workspace').classList.contains('board-expanded'), true);
       assert.equal(query('#field svg'), svg); assert.equal(query('.context-player').textContent, points); assert.equal(win.localStorage.getItem(STORAGE_KEY), before);
       click('cancel-draft'); doc.body.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); assert.equal(query('.workspace').classList.contains('board-expanded'), false);
-      query('[data-board-action="reset"]').click(); assert.equal(Number(query('#board-height').value), initial); assert.equal(width.getAttribute('aria-valuenow'), '250');
+      query('[data-board-action="reset"]').click(); assert.equal(Number(query('#board-height').value), initial); assert.equal(width.getAttribute('aria-valuenow'), '320');
       assert.deepEqual(JSON.parse(win.localStorage.getItem('playbook-studio-board-layout-v1')), {}); click('clear-selection');
     });
     await t.test('editing persists a validated backup and undo restores the name', () => { change('[data-prop="title"]', 'Integration Test'); assert.match(query('h1').textContent, /Integration Test/); assert.equal(decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays[0].title, 'Integration Test'); click('undo'); assert.match(query('h1').textContent, /Mesh/); click('redo'); assert.match(query('h1').textContent, /Integration Test/); });

@@ -66,6 +66,11 @@ test('applying a group is one undoable edit; roster links follow renames and pre
   assert.deepEqual(board(), seed.plays[0]);
   click('[data-action=redo]');
 
+  const beforeMirror=geometry(board());
+  click('[data-action=mirror]');
+  const mirrored=geometry(board());
+  assert.notDeepEqual(mirrored,beforeMirror);
+
   click('[data-cloud-action=home]');
   click('[data-cloud-action=enter-roster]');
   click('[data-roster-tab=directory]');
@@ -76,12 +81,27 @@ test('applying a group is one undoable edit; roster links follow renames and pre
   assert.equal(board().players.find(p => p.label === 'QB').name, 'New QB');
   assert.equal(board().players.find(p => p.label === 'X').name, quarterback.name);
   click(edit);
-  win.confirm = () => true;
+  win.confirm = () => { throw Error('Roster deletion must use the native dialog confirmation'); };
   click('[data-roster=remove]');
+  assert.equal(board().players.find(p => p.label === 'QB').rosterId,quarterback.id,'opening confirmation does not mutate the roster');
+  click('[data-roster=confirm-remove]');
   const former = board().players.find(p => p.label === 'QB');
   assert.equal(former.name, 'New QB');
   assert.equal(former.rosterId, undefined);
   const qbDepth = data().depthChart.groups[0].slots.find(slot => slot.label === 'QB');
   const originalQB = seed.depthChart.groups[0].slots.find(slot => slot.label === 'QB');
   assert.deepEqual(qbDepth.playerIds, [null, ...originalQB.playerIds.slice(1)]);
+
+  click('[data-workspace-mode=editor]');
+  assert.equal(q('[data-action=undo]').disabled,false,'a roster change preserves diagram history');
+  click('[data-action=undo]');
+  assert.deepEqual(geometry(board()),beforeMirror,'undo restores the previous diagram');
+  assert.equal(board().players.find(p => p.label === 'QB').name,'New QB');
+  assert.equal(board().players.find(p => p.label === 'QB').rosterId,undefined,'undo cannot restore a removed roster binding');
+  assert.ok(!data().roster.some(player=>player.id===quarterback.id));
+  assert.deepEqual(data().depthChart.groups[0].slots.find(slot=>slot.label==='QB').playerIds,qbDepth.playerIds);
+  click('[data-action=redo]');
+  assert.deepEqual(geometry(board()),mirrored,'redo still reapplies the diagram operation');
+  assert.equal(board().players.find(p=>p.label==='QB').rosterId,undefined);
+  assert.ok(!data().roster.some(player=>player.id===quarterback.id));
 });

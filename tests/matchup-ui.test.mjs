@@ -46,7 +46,7 @@ test('signed-in players can choose providers and view scenarios without a consen
     q('[data-cloud-action="enter-analysis"]').click();await settle();
     assert.equal(q('#ai-matchup-root').hidden,false);assert.ok(q('.ai-board svg'));assert.equal(q('[data-ai-field="coverage"]').value,'unknown');
     assert.equal(q('[data-ai-field="model"]').value,'deepseek-flash');assert.equal(q('[data-ai-field="baseUrl"]'),null);assert.equal(q('[data-ai-field="consent"]'),null);
-    q('[data-ai-action="analyze"]').click();assert.match(q('.ai-error').textContent,/API Key/);assert.equal(calls.filter(c=>c.path.endsWith('/matchup-analysis')).length,0);
+    assert.equal(q('[data-ai-action="analyze"]').disabled,false,'Analysis should be enabled with two selected plays');assert.equal(q('[data-ai-field="apiKey"]').value,'','Key should start empty');q('[data-ai-action="analyze"]').click();assert.match(q('.ai-error').textContent,/API Key/);assert.equal(calls.filter(c=>c.path.endsWith('/matchup-analysis')).length,0);
     input('model','fake-model');input('apiKey','fake-key');q('[data-ai-action="analyze"]').click();await settle();
     const submitted=calls.find(c=>c.path.endsWith('/matchup-analysis'));assert.equal(submitted.body.model.apiKey,'fake-key');assert.equal(submitted.body.model.protocol,'openai');assert.equal(submitted.body.consent,undefined);
     assert.equal(win.localStorage.getItem('fake-key'),null);assert.doesNotMatch(JSON.stringify(win.localStorage),/fake-key/);
@@ -54,13 +54,13 @@ test('signed-in players can choose providers and view scenarios without a consen
     assert.match(q('.ai-result-badge').textContent,/信息有限/);assert.match(q('.ai-execution').textContent,/2 次模型请求/);
     assert.ok([...q('.ai-board').querySelectorAll('[data-route]')].some(n=>n.dataset.route===routeId&&n.classList.contains('ai-evidence-active')));
     q('[data-ai-scenario="1"]').click();assert.match(q('.ai-scenario').textContent,/短传可能/);assert.equal(q('.ai-board .ai-evidence-active'),null);
-    input('context','pending');assert.equal(q('.ai-scenario'),null);q('[data-ai-action="analyze"]').click();await settle();
+    input('context','pending');assert.ok(q('.ai-scenario'));assert.match(q('.ai-report-context').textContent,/输入已变化/);q('[data-ai-action="analyze"]').click();await settle();
     assert.equal(typeof finishDelayed,'function');assert.equal(q('[data-ai-action="cancel"]').hidden,false);
     const finishOld=finishDelayed;q('[data-ai-action="cancel"]').click();assert.match(q('.ai-error').textContent,/已取消/);
     q('[data-ai-action="analyze"]').click();await settle();assert.equal(q('[data-ai-action="analyze"]').disabled,true);
     finishOld();await settle();assert.equal(q('[data-ai-action="analyze"]').disabled,true);
     q('[data-cloud-action="home"]').click();await settle();q('[data-cloud-action="enter-analysis"]').click();await settle();
-    finishDelayed();await settle();assert.equal(q('.ai-scenario'),null);
+    finishDelayed();await settle();assert.ok(q('.ai-scenario'),'Leaving and canceling must retain the previous report');
     const provider=q('[data-ai-field="provider"]');provider.value='anthropic';provider.dispatchEvent(new win.Event('change',{bubbles:true}));
     assert.equal(q('[data-ai-field="model"]').value,'claude-sonnet-4-6');assert.equal(q('[data-ai-field="apiKey"]').value,'');assert.equal(q('[data-ai-field="baseUrl"]'),null);
     q('[data-cloud-action="home"]').click();await settle();assert.equal(q('#ai-matchup-root').hidden,true);

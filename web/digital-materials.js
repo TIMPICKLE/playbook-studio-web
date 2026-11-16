@@ -185,7 +185,8 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
       if(age<1)moving=true;
       item.group.scale.setScalar(.96+.04*(1-(1-age)**3));
       item.shadow.position.set(at.x+1,800-at.y-1,.22);item.shadow.scale.setScalar(1+item.lift*.025);item.shadow.material.opacity=.6-item.lift*.025;
-      item.ring.position.set(at.x,800-at.y,.35);item.ring.visible=item.group.visible&&(selected?.type==='player'&&selected.id===p.id||hoveredId===p.id);item.ring.material.opacity=selected?.id===p.id?.9:.35;
+      const active=selected?.type==='player'&&selected.id===p.id || selected?.type==='players'&&selected.ids?.includes(p.id);
+      item.ring.position.set(at.x,800-at.y,.35);item.ring.visible=item.group.visible&&(active||hoveredId===p.id);item.ring.material.opacity=active?.9:.35;
       if(item.nameLabel){item.nameLabel.visible=!!settings.showNames;item.nameLabel.material.color.set(settings.fieldTheme==='light'?'#696c70':'#ffffff');}
       item.head.material.time=materialTime;
     }

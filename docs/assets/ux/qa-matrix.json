@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-11-16T14:17:13.785Z",
+  "browser": "Isolated Chromium",
+  "realDeviceSafari": false,
+  "modelCalls": "Scripted protocol fixtures only; no external model request",
+  "seed": {
+    "plays": 8,
+    "players": 11
+  },
+  "baseline": "/workspace/scratch/b63588f66764/playbook-ux-before",
+  "cases": [
+    {
+      "id": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "laptop",
+      "width": 1280,
+      "height": 720,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "ipad-landscape",
+      "width": 1024,
+      "height": 768,
+      "touch": true,
+      "ipad": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "ipad-portrait",
+      "width": 768,
+      "height": 1024,
+      "touch": true,
+      "ipad": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "mobile",
+      "width": 390,
+      "height": 844,
+      "touch": true,
+      "mobile": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "small-mobile",
+      "width": 375,
+      "height": 667,
+      "touch": true,
+      "mobile": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "mobile-landscape",
+      "width": 844,
+      "height": 390,
+      "touch": true,
+      "mobile": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "desktop-en-reduced",
+      "width": 1440,
+      "height": 900,
+      "locale": "en",
+      "reduced": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    }
+  ],
+  "screenshots": [],
+  "status": "blocked",
+  "infrastructure": {
+    "phase": "browser-launch",
+    "reason": "browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /usr/bin/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --no-sandbox --disable-dev-shm-usage --user-data-dir=/tmp/playwright_chromiumdev_profile-JrFBTt --remote-debugging-pipe --no-startup-window\n<launched> pid=16\n[pid=16][err] /usr/bin/chromium: 9: [: 5225713664: unexpected operator\n[pid=16][err] [16:16:1116/231713.873276:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)\n[pid=16][err] [1116/231713.876166:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)",
+    "localHttpProbe": "Ephemeral 127.0.0.1 HTTP binding passed independently; Chromium process singleton socket was denied."
+  },
+  "summary": {
+    "cases": 8,
+    "passed": 0,
+    "failed": 0,
+    "blocked": 8,
+    "pageErrors": 0
+  }
+}

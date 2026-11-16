@@ -238,7 +238,7 @@ export async function handleApi(request, env, user) {
       request.signal.addEventListener('abort', abort, { once: true });
       if (request.signal.aborted) controller.abort();
       let result;
-      try { result = await runMatchupAgent(matchup, { model: body.model, perspective, context: body.context, mode: body.mode, locale: body.locale, reauthorize }, env, controller.signal); }
+      try { result = await runMatchupAgent(matchup, { model: body.model, perspective, context: body.context, mode: body.mode, locale: body.locale, reauthorize,followup:body.followup,offensePlayId:offense.id,defensePlayId:defense.id,revision:record.revision }, env, controller.signal); }
       finally { clearTimeout(timer); request.signal.removeEventListener('abort', abort); }
       await reauthorize();
       return json({ ...result, ...localizeMatchupAnnotations(matchup.evidence, matchup.warnings, body.locale), revision: record.revision });

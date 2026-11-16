@@ -57,18 +57,20 @@ function prepareEngine() {
   return engineReady;
 }
 async function applyMode() {
-  const ticket = ++generation, mode = effectiveMode();
+  const ticket = ++generation, mode = effectiveMode(), reduced = !!mq('(prefers-reduced-motion: reduce)')?.matches;
   document.documentElement.dataset.visualMode = visualMode();
   document.documentElement.dataset.effects = mode;
-  document.dispatchEvent(new window.CustomEvent('playbook:effects-changed',{detail:{mode, visualMode:visualMode()}}));
+  document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
+  document.dispatchEvent(new window.CustomEvent('playbook:effects-changed',{detail:{mode, visualMode:visualMode(), reducedMotion:reduced}}));
   document.querySelectorAll('[data-effects-mode]').forEach(n => n.setAttribute('aria-pressed', n.dataset.effectsMode === visualMode()));
   document.querySelectorAll('.effects-note').forEach(n => { n.textContent = modeNote(); });
   document.querySelectorAll('[data-effects-mode="digital"]').forEach(n => { n.disabled = deviceIsTraditional(); });
   instance?.destroy(); instance = null;
   document.querySelectorAll('.particle-burst,.press-wave').forEach(n => n.remove());
   if (mode === 'off') {
-    // Finish pending UI animations immediately when the preference changes.
-    document.getAnimations?.().forEach(animation => { try { animation.finish(); } catch { animation.cancel(); } });
+    // Turning decoration off must not terminate route morphs or task feedback.
+    // System reduced-motion does finish those transitions immediately.
+    if (reduced) document.getAnimations?.().forEach(animation => { try { animation.finish(); } catch { animation.cancel(); } });
     return;
   }
   // In non-canvas environments the complete interface still works without decoration.

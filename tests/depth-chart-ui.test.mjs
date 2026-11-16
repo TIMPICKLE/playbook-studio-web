@@ -84,7 +84,7 @@ test('cross-training is allowed but a backup cannot start twice for one personne
 });
 
 test('custom positions can be added, renamed and removed without modifying the directory', t => {
-  const { win, state, q, click, showMode, choose, submit, slots } = setup(t);
+  const { state, q, click, showMode, choose, submit, slots } = setup(t);
   showMode('table');
   click('add');
   q('[name="label"]').value = ' qb ';
@@ -106,11 +106,11 @@ test('custom positions can be added, renamed and removed without modifying the d
   submit();
   assert.equal(slot.label, 'Slot right');
   click('edit', target);
-  win.confirm = () => false;
   click('remove');
   assert.equal(state.data.depthChart.groups[0].slots.includes(slot), true);
-  win.confirm = () => true;
+  click('keep');
   click('remove');
+  click('confirm-remove');
   assert.equal(state.data.depthChart.groups[0].slots.includes(slot), false);
   assert.equal(state.data.roster.length, 3);
 });

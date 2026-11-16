@@ -1,6 +1,5 @@
 /* Shared motion language: immediate input, short context changes, staged arrivals. */
-:root{--ease-out:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.2,.9,.25,1.15)}
-button:not(:disabled):active,.button:not(:disabled):active{transform:scale(.97)}
+button:not(:disabled):active,.button:not(:disabled):active{transform:translateY(1px)}
 .play-header{padding-top:19px;padding-bottom:18px}
 .play-header h1{margin-top:6px}
 .play-card{transition:background-color .2s,box-shadow .2s,transform .24s var(--ease-out)}
@@ -13,7 +12,7 @@ button:not(:disabled):active,.button:not(:disabled):active{transform:scale(.97)}
 .draw-tools{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));position:relative;isolation:isolate;width:100%;overflow:visible;gap:0}
 .draw-tools .tool-button{position:relative;min-width:0;padding:0 7px;background:none;box-shadow:none}
 .draw-tools .tool-button.active{background:none;box-shadow:none}
-.tool-indicator{position:absolute;inset:4px auto 4px 4px;width:calc((100% - 8px)/7);border-radius:6px;background:#fff;box-shadow:0 2px 6px #32343613;transform:translateX(calc(var(--tool-index)*100%));transition:transform .3s var(--ease-spring);z-index:-1;pointer-events:none}
+.tool-indicator{position:absolute;inset:4px auto 4px 4px;width:calc((100% - 8px)/7);border-radius:6px;background:#fff;box-shadow:0 2px 6px #32343613;transform:translateX(calc(var(--tool-index)*100%));transition:transform var(--motion-normal,180ms) var(--ease-out);z-index:-1;pointer-events:none}
 .toolbar{transition:opacity .2s,filter .2s}
 .rehearsal-toolbar .draw-tools{opacity:.45}
 .rehearsal-toolbar:after{content:'演练中，选择工具可返回布阵';font-size:12px;color:var(--muted);white-space:nowrap}
@@ -60,7 +59,7 @@ button:not(:disabled):active,.button:not(:disabled):active{transform:scale(.97)}
 .play-button{transition:background-color .2s,transform .25s var(--ease-spring),box-shadow .2s}
 .play-button:hover{transform:scale(1.07);box-shadow:0 0 0 5px #37393c10}
 .add-object-menu[open]>div,.account-menu[open] .account-menu-panel{animation:menu-reveal .22s var(--ease-out);transform-origin:top right}
-.modal{animation:dialog-enter .32s var(--ease-out)}
+.modal{animation:dialog-enter var(--motion-panel,220ms) var(--ease-out)}
 .modal-backdrop{animation:backdrop-enter .2s ease-out}
 #toast{display:flex;align-items:center;gap:10px;pointer-events:auto;transition:opacity .22s,transform .3s var(--ease-spring),visibility .22s}
 #toast:not(.visible){pointer-events:none}

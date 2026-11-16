@@ -34,7 +34,7 @@ test('editor discovery exposes executable commands, authoritative schemas and re
   assert.deepEqual(overview.personnelGroups,data.depthChart.groups.map(({id,name,unit})=>({id,name,unit})));
   assert.deepEqual(overview.view,{theme:'light',grid:true,time:1.5});
   const playCommands=Object.values(EDITOR_PLAY_COMMANDS);
-  assert.equal(playCommands.length,16);
+  assert.equal(playCommands.length,18);
   for(const entry of [...playCommands,...Object.values(EDITOR_ACTIONS)]) {
     const capability=overview.capabilities.find(item=>item.id===entry.id);
     assert.ok(capability,entry.id);assert.equal(capability.available,true,entry.id);

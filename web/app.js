@@ -8,6 +8,7 @@ import { withDefense43 } from './defense-formation.js';
 import { LEAGUE_SIZES, getPlayLeague, isFlag5Play, formationOptions, defaultFormation } from './game-formats.js';
 import { runEditorPlayCommand } from './editor-play-commands.js';
 import { prepareEditorActions } from './editor-actions.js';
+import { selectedPlayerIds, playerSelection, togglePlayerSelection, moveSelectedPlayers } from './editor-selection.js';
 import { deviceIsTraditional } from './visual-mode.js';
 import { assistantPlayers } from './assistant-edit.js';
 import { stageEdit, StagedEditConflict } from './assistant-draft.js';
@@ -24,17 +25,20 @@ import { personnelMatches, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView, resolveHandoffContext } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
 import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, movePlayer, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
-import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor } from './field.js';
+import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor, syncFieldHitTargets, fieldHitCandidates } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
 import { effectsControl, initEffects, burstAt, setEffectsMode, visualMode } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
 import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
-import { createWorkspacePanels } from './workspace-panels.js';
+import { createWorkspacePanels,isCompactWorkspace } from './workspace-panels.js';
 import { createPlayThumbnails } from './play-thumbnails.js';
 import { createOnboarding } from './onboarding.js';
 import { onboardingSteps, onboardingLabels } from './onboarding-steps.js';
 import { patchEditorHTML } from './editor-render.js';
+import { EditorHistory } from './editor-history.js';
+import { workspaceNavigation, createWorkspaceSessions } from './workspace-ui.js';
+import { clearModelCredential } from './model-connection.js';
 
 const $ = selector => document.querySelector(selector);
 const icons = {
@@ -62,19 +66,69 @@ function readLocalWorkspace() {
 let { workspace, recovery: localRecovery } = cloudMode() ? { workspace: starterWorkspace(), recovery: null } : readLocalWorkspace();
 let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false;
+let multiSelectMode = false, selectionCandidates = [], candidateSelectionAdditive = false, selectionCandidateScope = '';
+let fieldHitObserver = null;
 let saveState = localRecovery ? t("editorExtra.recovery_required_autosave_paused") : t('editor.saved_locally'), frame = null, lastFrame = null, toastTimer = null;
-const history = new History();
+const history = new EditorHistory();
+const editorSessions = createWorkspaceSessions();
+let loadedWorkspaceId = null, assistantPanelOpen = false, localRevision=0, progressScope=null, guestRouter=null;
+let firstTask = {createdPlay:false,routeAdded:false,rehearsed:false,exported:false};
+let saveKind = localRecovery ? 'error' : 'saved';
+const uxCopy = (en,zh) => getLocale()==='en'?en:zh;
+function readFirstTask() {
+  const scope=shared?.current?.id||'local';
+  if(progressScope!==scope) {
+    progressScope=scope;firstTask={createdPlay:false,routeAdded:false,rehearsed:false,exported:false};
+    try {const saved=JSON.parse(localStorage.getItem(`playbook-ui-progress:v1:${scope}`)||'null');for(const key of Object.keys(firstTask))firstTask[key]=saved?.[key]===true;}catch{}
+  }
+  return {...firstTask};
+}
+function markFirstTask(key) {
+  readFirstTask();if(!Object.hasOwn(firstTask,key))return;firstTask[key]=true;
+  try {localStorage.setItem(`playbook-ui-progress:v1:${progressScope}`,JSON.stringify(firstTask));}catch{}
+}
+const homeContext = () => ({recentPlay:current(),...(canEdit()?{firstTask:readFirstTask()}:{})});
+function syncWorkspaceNavigation(mode) {
+  let node=$('#workspace-navigation');
+  if(!node){node=document.createElement('div');node.id='workspace-navigation';$('#cloud-root').after(node);}
+  node.hidden=!['editor','analysis','roster'].includes(mode);
+  if(!node.hidden) node.innerHTML=workspaceNavigation(mode);
+  document.body.dataset.workspaceMode=mode;
+}
+async function navigateWorkspace(mode) {
+  if(!['editor','analysis','roster'].includes(mode))return false;
+  if(document.body.dataset.workspaceMode===mode)return true;
+  if(rosterView.isEditing()) {toast(uxCopy('Save or cancel the player form before switching.','请先保存或取消正在编辑的球员表单。'),{type:'info'});return false;}
+  if(draft&&!confirmDraft(()=>navigateWorkspace(mode)))return false;
+  document.activeElement?.blur?.();
+  try {
+    if(cloudMode()) {
+      if(shared?.dirty)await shared.sync.flush();
+      if(shared?.dirty)throw Error(uxCopy('Changes have not synced. Retry or export a backup.','修改尚未同步，请重试同步或导出备份。'));
+      shared?.setMode(mode);
+    } else {
+      analysisView?.onData?.(state.data,{id:'demo',revision:localRevision,title:state.data.team.name});
+      if(guestRouter)guestRouter.open(mode,true);else window.location.hash=mode;
+    }
+    return document.body.dataset.workspaceMode===mode;
+  }catch(error){toast(error.message,{type:'error'});return false;}
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('button[data-workspace-mode]');
+  if(button?.closest('.workspace-nav')){event.preventDefault();navigateWorkspace(button.dataset.workspaceMode);}
+});
 let shared = null, digitalBoard = null, analysisView = null, demoAnalysisData = null;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
 let cancelFieldGesture = () => {};
 const drawingTools = ['route','block','motion','pass'];
-const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft });
+const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft,onChange:()=>boardAssistant?.refreshLayout?.() });
 const panels = createWorkspacePanels();
 const thumbnails = createPlayThumbnails();
 const viewSettings = () => ({ ...state.data.settings, ...viewOverrides });
 const canEdit = () => cloudMode() ? !!shared?.canEdit : !localRecovery;
 const editBlockedMessage = () => localRecovery ? recoveryMessage : shared?.sync?.viewError ? t("feedback.the_play_view_could_not_update_reload_before_editing") : t("feedback.you_have_read_only_access_and_cannot_edit_this_shared_p");
 const readActions = new Set(['madden-library','compare-source','choose','book','select-route','clear-selection','sidebar','inspector-panel','panel-field','close-panel','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode','local-recovery','download-original','retry-local-load','replace-local-workspace','confirm-replace-local-workspace']);
+for(const action of ['assistant-task','properties-task','multi-select','choose-hit','retry-save'])readActions.add(action);
 function protectReadOnly() {
   if (canEdit()) return;
   document.querySelectorAll('[data-prop],[data-ball],#apply-formation').forEach(n => { n.disabled = true; });
@@ -82,7 +136,7 @@ function protectReadOnly() {
 }
 const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
 const filtered = () => state.data.plays.filter(p => p.book === book && (!filter || (filter === 'favorite' ? p.favorite : p.category === filter)) && (!formationFilter || p.formation === formationFilter) && `${p.title} ${p.formation} ${p.category} ${p.notes}`.toLowerCase().includes(query.toLowerCase()));
-const selectedObject = () => !selection ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
+const selectedObject = () => !selection || selection.type === 'players' ? null : current()[{ player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[selection.type]]?.find(x => x.id === selection.id);
 const maddenLibrary = createMaddenLibrary({ canEdit, getPlays: () => state.data.plays, notify: toast, onImport(entry, {signal} = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
   if (draft || drag) return {ok:false,awaitingUser:true,message:maddenLoadingCopy(getLocale()).draft};
@@ -113,11 +167,11 @@ async function importMadden(entry, {adoptScope = false,signal} = {}) {
   if (state.data.plays.some(p => (hasEditableTrace(entry.id) ? p.diagramSource : p.reference)?.catalogId === entry.id)) { toast(t("feedback.this_play_is_already_in_the_current_playbook"), { type: 'success' }); return; }
   if (state.data.plays.length >= 500) return { ok: false, message: t("feedback.a_playbook_can_hold_at_most_500_plays_remove_some_befor") };
   const plan = prepareEditorActions({...editorSnapshot(),catalogRows:[entry]},[{kind:'catalog_import',catalogId:entry.id}],{idFactory:uid,locale:getLocale(),now:new Date().toISOString()});
-  commitEditorPlan(plan,{adoptScope});
+  const transaction=commitEditorPlan(plan,{adoptScope});
   const play = current();
   const checkpoint = history.past.at(-1);
-  return { ok: true, canUndo: () => canEdit() && history.past.at(-1) === checkpoint,
-    undo: () => { if (canEdit() && history.past.at(-1) === checkpoint) restore(history.undo(state)); },
+  return { ok: true,transactionId:transaction?.id, canUndo: () => canEdit() && history.past.at(-1) === checkpoint,
+    undo: () => { if (canEdit() && history.past.at(-1) === checkpoint) return restoreHistory('undo');return false; },
     view: () => { choose(play.id); const card = document.querySelector(`[data-action="choose:${play.id}"]`); card?.scrollIntoView?.({ block: 'nearest' }); $('#main-content')?.focus(); }
   };
 }
@@ -323,18 +377,26 @@ function applyPlayCommand(operation, {redraw = true, idFactory = uid} = {}) {
     if (!outcome) throw Error('Unknown editor command.');
     validatePlay(next);
   } catch (error) { toast(error.message, {type:'warning'}); return null; }
-  edit(play => Object.assign(play,next), {redraw});
+  const receipt=edit(play => Object.assign(play,next), {redraw,name:commandLabel(operation),source:'manual'});
+  if (!receipt) return null;
+  if (operation.kind==='route_add') markFirstTask('routeAdded');
   return outcome;
+}
+function commandLabel(operation) {
+  const labels={player_add:['Add player','添加球员'],player_update:['Edit player','调整球员'],object_remove:['Delete object','删除对象'],route_add:['Draw route','绘制路线'],route_update:['Edit route','修改路线'],zone_add:['Add coverage area','添加防守区域'],zone_update:['Edit coverage area','调整防守区域'],annotation_add:['Add annotation','添加标注'],annotation_update:['Edit annotation','修改标注'],ball_update:['Set ball movement','调整球权'],play_update:['Edit play details','修改战术信息'],play_mirror:['Mirror play','镜像战术'],formation_apply:['Replace formation','替换阵型'],opponents_set:['Change opponents','调整对方阵型'],personnel_apply:['Apply starters','应用首发'],line_space:['Adjust line spacing','调整锋线间距']};
+  return uxCopy(...(labels[operation.kind]||['Edit play','修改战术']));
 }
 function commitEditorPlan(plan, {adoptScope = false} = {}) {
   const existing = new Set(state.data.plays.map(play=>play.id));
   for (const play of plan.data.plays) if (!existing.has(play.id) && !play.createdAt) play.createdAt = new Date().toISOString();
   if (adoptScope) boardAssistant?.adoptScope(scopeFor(plan.selectedId));
   selection = null; tool = 'select'; query = ''; filter = ''; formationFilter = '';
-  edit((_play,data) => {
+  const receipt=edit((_play,data) => {
     Object.assign(data,plan.data); state.selectedId = plan.selectedId;
     book = current().book;
-  });
+  },{name:plan.summary,source:adoptScope?'assistant':'manual'});
+  if (receipt&&plan.actions?.some(action=>action.kind==='play_create')) markFirstTask('createdPlay');
+  return receipt;
 }
 function applyWorkspaceActions(commands) {
   try {
@@ -373,7 +435,8 @@ function executeEditorLocal(actionsToRun) {
       if (!canEdit()) throw Error(editBlockedMessage());
     }
     if (action.kind === 'selection_set') {
-      selection = action.objectType === 'none' ? null : {type:action.objectType,id:action.id};
+      selection = action.objectType === 'none' ? null : action.objectType==='players'?playerSelection(current(),action.ids):{type:action.objectType,id:action.id};
+      multiSelectMode=false;selectionCandidates=[];
       refreshSelection();
     } else if (action.kind === 'tool_set') setTool(action.tool);
     else if (action.kind === 'draft_action') {
@@ -385,8 +448,7 @@ function executeEditorLocal(actionsToRun) {
       actions[action.action === 'finish' ? 'finish-route' : action.action === 'cancel' ? 'cancel-draft' : 'undo-point']();
     } else if (action.kind === 'history_action') {
       if (!(action.action === 'undo' ? history.past : history.future).length) throw Error(getLocale()==='en'?'No history is available.':'当前没有可撤销或重做的修改。');
-      const next = action.action === 'undo' ? history.undo(state) : history.redo(state);
-      boardAssistant?.adoptScope(scopeFor(next.selectedId)); restore(next);
+      restoreHistory(action.action);
     } else if (action.kind === 'playback_set') {
       if (current().reference) throw Error(t('feedback.the_original_diagram_has_no_playable_route_data'));
       if (draft && (action.mode || action.reset || action.time!=null || action.playing!=null)) throw Error(t('assistant.finishDrawing'));
@@ -453,7 +515,7 @@ function editorInteractionReply(plan) {
             if (!reference || !hasEditableTrace(reference.catalogId)) throw Error(getLocale()==='en'?'This diagram has no verified editable reconstruction.':'这张原图暂无经过验证的可编辑重建。');
             const outcome=await convertReference({adoptScope:true});
             if (!outcome?.ok) throw Error(outcome?.message || t('assistant.boardChanged'));
-            return {kind:'edit',scope:assistantScope(),message:getLocale()==='en'?'Created an editable copy.':'已创建可编辑副本。',undo:outcome.undo};
+            return {kind:'edit',scope:assistantScope(),transactionId:outcome.transactionId,message:getLocale()==='en'?'Created an editable copy.':'已创建可编辑副本。',undo:outcome.undo};
           }
           else if (action.dialog === 'source' && !current().diagramSource) {
             const reference=current().reference;
@@ -476,7 +538,20 @@ function mountBoardAssistant() {
     let offered = new Map();
     boardAssistant = createBoardAssistant({
       host,
-      getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit(), serverProxy:cloudMode()}),
+      getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit(), serverProxy:cloudMode(),dockHost:boardLayout.getState().expanded||isCompactWorkspace()?null:$('#properties-panel')}),
+      onPanelChange({open,floating}) {
+        assistantPanelOpen=!!(open&&!floating);
+        const workspace=$('.workspace');
+        if (workspace) workspace.dataset.assistantOpen=String(assistantPanelOpen);
+        const inspectorNode=$('.inspector');
+        if (inspectorNode) inspectorNode.hidden=assistantPanelOpen;
+        if(open&&floating&&panels.active)panels.close({focus:false});
+        for(const button of document.querySelectorAll('.task-panel-tabs button'))button.setAttribute('aria-pressed',String(button.dataset.action===(assistantPanelOpen?'assistant-task':'properties-task')));
+      },
+      onSelectTarget(id) {
+        if (!current().players.some(player=>player.id===id)) return;
+        selection={type:'player',id};refreshSelection();showAssistantHighlights([id]);
+      },
       async onRequest({prompt, mode, previous, onTool, onEvent, provider, protocol, baseUrl, model, apiKey, signal, locale}) {
         document.querySelector('#field .assistant-highlights')?.remove();
         const scope = assistantScope();
@@ -499,6 +574,7 @@ function mountBoardAssistant() {
           instruction: prompt, mode, previous, onTool, onEvent, locale, signal, model: {provider, protocol, baseUrl, model, apiKey},
           board: {...play, play: clone(play), playId: play.id, players: assistantPlayers(play, state.data.roster),
             selectedPlayerId: selection?.type === 'player' ? selection.id : null,
+            selectedPlayerIds:selection?.type==='players'?selection.ids:selection?.type==='player'?[selection.id]:[],
             routes: play.routes},
           editor:requestEditorSnapshot, workspace: workspace ? {id: workspace.id, revision: workspace.revision} : undefined, request,
         });
@@ -532,12 +608,12 @@ function mountBoardAssistant() {
               if (!active || JSON.stringify(state.data)!==baseline) throw Error(t('assistant.boardChanged'));
               if (!canEdit()) throw Error(editBlockedMessage());
               if (draft || drag) throw Error(t('assistant.finishDrawing'));
-              commitEditorPlan(plan,{adoptScope:true}); active=false;
+              const transaction=commitEditorPlan(plan,{adoptScope:true}); active=false;
               const checkpoint = history.past.at(-1), appliedScope=assistantScope();
-              return {kind:'edit',scope:appliedScope,message:plan.summary,summary:plan.summary,actions:plan.actions,
+              return {kind:'edit',scope:appliedScope,transactionId:transaction?.id,message:plan.summary,summary:plan.summary,actions:plan.actions,
                 undo() {
                   if (!canEdit() || assistantScope()!==appliedScope || history.past.at(-1)!==checkpoint) return false;
-                  const previous=history.undo(state); boardAssistant?.adoptScope(scopeFor(previous.selectedId));restore(previous);return true;
+                  return restoreHistory('undo');
                 }};
             }};
         }
@@ -576,6 +652,15 @@ function mountBoardAssistant() {
             isVisible, rehearse: rehearseAssistantPreview,
             // Dropping the newest turn keeps the earlier ones staged.
             revert: staged.steps.length > 1 ? () => { guard(); const next = restage(staged.steps.slice(0,-1)); active = false; return present(next); } : undefined,
+            selectTurns(indices) {
+              guard();
+              if(!Array.isArray(indices)||!indices.length||indices.some(index=>!Number.isInteger(index)||index<0||index>=staged.steps.length))throw Error(uxCopy('Choose at least one existing change group.','请至少选择一个现有修改组。'));
+              const selected=new Set(indices);
+              let next;
+              try {next=restage(staged.steps.filter((_step,index)=>selected.has(index)));}
+              catch {throw Error(uxCopy('These changes depend on an earlier group. Keep the required group and update the preview again.','所选修改依赖前面的修改组，请保留相关组后重新预览。'));}
+              active=false;return present(next);
+            },
             async apply() {
               const wasVisible = isVisible();
               await shown.transition.finished;
@@ -591,18 +676,17 @@ function mountBoardAssistant() {
               active = false; stagedEdit = null;
               selection = staged.routeId ? {type: 'route', id: staged.routeId} : null;
               tool = 'select';
-              edit(p => Object.assign(p, staged.play), {redraw:false});
+              const transaction=edit(p => Object.assign(p, staged.play), {redraw:false,name:staged.summary,source:'assistant'});
               const inspectorNode = $('.inspector');
               inspectorNode.innerHTML = inspector();
               inspectorNode.dataset.context = `${selection?.type || 'play'}:${selection?.id || current().id}`;
               settleAssistantPreview(shown.svg);
               const checkpoint = history.past.at(-1);
-              return {kind: 'edit', message: staged.summary, summary: staged.summary, operations: staged.operations, turns: staged.turns,
+              return {kind: 'edit',transactionId:transaction?.id, message: staged.summary, summary: staged.summary, operations: staged.operations, turns: staged.turns,
                 routeIds: staged.routeIds, zoneIds: staged.zoneIds, playerIds: staged.playerIds,
                 undo() {
                   if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
-                  restore(history.undo(state));
-                  return true;
+                  return restoreHistory('undo');
                 }};
             }};
           stagedEdit = {scope, edit:staged, handle};
@@ -616,15 +700,11 @@ function mountBoardAssistant() {
         return present(restage([...(carried?.steps || []), requested]));
       },
       onHighlight: showAssistantHighlights,
-      onHandoff(result) {
+      async onHandoff(result) {
+        if(stagedEdit?.scope===assistantScope()){toast(t('assistant.commitStagedFirst'),{type:'info'});return;}
         const play = current();
-        if (demoAnalysisData) {
-          demoAnalysisData.plays = demoAnalysisData.plays.filter(item => item.id !== play.id);
-          demoAnalysisData.plays.push(clone(play));
-        }
-        analysisView?.selectPlay(play, resolveHandoffContext(state.data.plays, result?.context));
-        if (cloudMode()) shared?.setMode('analysis');
-        else window.location.hash = 'analysis';
+        if (!cloudMode()) analysisView?.onData?.(state.data,{id:'demo',revision:localRevision,title:state.data.team.name});
+        if(await navigateWorkspace('analysis'))analysisView?.selectPlay(play, resolveHandoffContext(state.data.plays, result?.context));
       },
       async onAdd(id) {
         const card = offered.get(id);
@@ -643,12 +723,12 @@ function protectReference() {
   document.querySelectorAll('[data-action="mirror"],[data-action="rehearse-mode"],[data-action="play"]').forEach(n => { n.disabled = true; n.title = t("feedback.the_original_diagram_has_no_editable_or_playable_coordi"); });
 }
 
-function toast(message, { type = 'info', action = '', label = '' } = {}) {
-  const node = $('#toast'), undoable = /可撤销|撤销恢复|Undo|undo/.test(message) && history.past.length && canEdit();
+function toast(message, { type = 'info', action = '', label = '', undo = false } = {}) {
+  const node = $('#toast'), transaction=history.info(), undoable = undo && !!transaction && canEdit();
   node.dataset.type = type; node.setAttribute('role', type === 'error' ? 'alert' : 'status');
   const glyph = { success: '<path d="m7.5 12.5 3 3 6-7"/>', error: '<path d="M12 7.5v5.5M12 16.5h.01"/>', warning: '<path d="M12 8v4.5M12 16h.01"/>', info: '<path d="M12 11v5M12 8h.01"/>' }[type] || '<path d="M12 11v5M12 8h.01"/>';
   const symbol = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${glyph}</svg>`;
-  node.innerHTML = `<span class="toast-icon" aria-hidden="true">${symbol}</span><span class="toast-message">${e(message)}</span>${undoable || action ? `<span class="toast-actions">${undoable ? `<button data-action="undo" class="toast-undo">${t("editorExtra.undo")}</button>` : ''}${action ? `<button data-action="${e(action)}" class="toast-action">${e(label)}</button>` : ''}</span>` : ''}<button class="toast-close" data-action="dismiss-toast" aria-label="${t("editorExtra.dismiss_notification")}">${icon('close')}</button>`;
+  node.innerHTML = `<span class="toast-icon" aria-hidden="true">${symbol}</span><span class="toast-message">${e(message)}</span>${undoable || action ? `<span class="toast-actions">${undoable ? `<button data-action="undo-transaction" data-transaction-id="${e(transaction.id)}" class="toast-undo">${t("editorExtra.undo")}</button>` : ''}${action ? `<button data-action="${e(action)}" class="toast-action">${e(label)}</button>` : ''}</span>` : ''}<button class="toast-close" data-action="dismiss-toast" aria-label="${t("editorExtra.dismiss_notification")}">${icon('close')}</button>`;
   node.classList.add('visible'); window.clearTimeout(toastTimer);
   if (type !== 'error') toastTimer = window.setTimeout(() => node.classList.remove('visible'), type === 'warning' ? 8000 : 5200);
 }
@@ -657,20 +737,58 @@ function save({ replaceUnreadable = false, data = state.data } = {}) {
   if (cloudMode()) { shared?.schedule(data); return; }
   if (localRecovery && !replaceUnreadable) { toast(recoveryMessage, { type: 'error', action: 'local-recovery', label: t("editorExtra.recovery_options") }); return false; }
   let saved = false;
-  try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(data)); saveState = t('editor.saved_locally'); saved = true; }
-  catch { saveState = t("feedback.not_saved"); toast(t("feedback.save_failed_browser_storage_is_unavailable_or_full_expo"), { type: 'error', action: 'download-json', label: t("feedback.export_backup") }); }
+  try { localStorage.setItem(STORAGE_KEY, encodeWorkspace(data)); saveState = t('editor.saved_locally');saveKind='saved'; saved = true;localRevision++; }
+  catch { saveState = t("feedback.not_saved");saveKind='error'; toast(t("feedback.save_failed_browser_storage_is_unavailable_or_full_expo"), { type: 'error', action: 'download-json', label: t("feedback.export_backup") }); }
   $('#save-state')?.replaceChildren(document.createTextNode(saveState));
+  syncSaveStatus();
   return saved;
+}
+function editorStatus() {
+  const kind=!canEdit()&&!localRecovery?'readonly':saveKind;
+  const label=kind==='readonly'?uxCopy('Read only','只读'):saveState;
+  return `<div class="editor-status" data-state="${kind}" role="status" aria-live="polite"><span aria-hidden="true">${kind==='error'?'!':kind==='saved'?'✓':kind==='readonly'?'◉':'◌'}</span><span data-save-label>${e(label)}</span>${kind==='error'?`<button type="button" data-action="retry-save">${uxCopy('Retry','重试')}</button><button type="button" data-action="download-json">${uxCopy('Export backup','导出备份')}</button>`:''}</div>`;
+}
+function syncSaveStatus() {
+  const status=$('.editor-status');
+  if(status) {const template=document.createElement('template');template.innerHTML=editorStatus();const next=template.content.firstElementChild;status.dataset.state=next.dataset.state;patchEditorHTML(status,next.innerHTML);}
+}
+document.addEventListener('input',event=>{
+  const input=event.target;
+  if(!input.closest?.('#app')||!input.matches('[data-prop],[data-ball]')||!canEdit())return;
+  const status=$('.editor-status');if(!status)return;
+  const value=input.dataset.ball?current().ball[input.dataset.ball]:(selectedObject()||current())[input.dataset.prop];
+  if(String(value??'')===input.value){syncSaveStatus();return;}
+  status.dataset.state='unsaved';
+  const label=status.querySelector('[data-save-label]');
+  if(label)label.textContent=uxCopy('Editing · finish this field to save','正在编辑 · 完成此输入后保存');
+});
+function historyLabel(action) {
+  const transaction=history.info(action==='redo'?history.future.at(-1):history.past.at(-1));
+  return `${uxCopy(action==='redo'?'Redo':'Undo',action==='redo'?'重做':'撤销')}${transaction?.name?` · ${transaction.name}`:''}`;
 }
 function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { stop(); time = 0; }
-function edit(fn, { redraw = true } = {}) {
-  if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
+function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
+  if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return null; }
   clearAssistantPreview();
-  resetAnimation(); rehearsal = false; draft = null; previewPoint = null; history.record(state); fn(current(), state.data); save(); if (redraw) render(); else refreshMetadata();
+  resetAnimation(); rehearsal = false; draft = null; previewPoint = null;
+  const before=clone(state);
+  try {fn(current(),state.data);} catch(error) {state=before;toast(error.message,{type:'error'});return null;}
+  const transaction=history.record(before,{name:name||uxCopy('Edit play','修改战术'),source,playId:state.selectedId});
+  save(); if (redraw) render(); else refreshMetadata();
+  return transaction;
 }
 function choose(id) { if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
 function restore(next) { if (!next || !canEdit()) return; clearAssistantPreview(); resetAnimation(); rehearsal=false; state = next; book = current().book; selection = null; draft = null; save(); render(); $('#toast').classList.remove('visible'); }
+function restoreHistory(action) {
+  if (!canEdit()) return false;
+  const next=action==='redo'?history.redo(state):history.undo(state);
+  if (!next) return false;
+  boardAssistant?.adoptScope(scopeFor(next.selectedId));
+  restore(next);
+  if (history.lastTransaction) boardAssistant?.notifyTransaction?.(history.lastTransaction);
+  return true;
+}
 
 function playCards(plays, selectedPlay) {
   return plays.length ? plays.map((play, i) => `<button data-action="choose:${e(play.id)}" class="play-card ${selectedPlay.id === play.id ? 'active' : ''}" aria-label="${t("editorExtra.open")}${e(play.title)}" aria-pressed="${selectedPlay.id === play.id}"><div class="play-thumb" data-thumbnail-index="${i}"></div><span class="play-card-info"><strong>${e(play.title)}</strong><small>${e(play.formation)} · ${e(play.category)}</small></span>${play.favorite ? '<span class="favorite-dot">★</span>' : ''}</button>`).join('') : `<div class="empty-list">${t("editorExtra.no_matching_plays_found")}<br>${t("editorExtra.try_another_search_or_clear_the_filters")}<button class="text-button" data-action="clear-filters">${t("editorExtra.clear_all_filters")}</button></div>`;
@@ -681,10 +799,11 @@ let renderedCardState = '';
 const cardState = () => {const play=current();return JSON.stringify([play.id,play.title,play.formation,play.category,play.favorite,play.book]);};
 const fieldState = () => JSON.stringify([current().reference ? [current().title,current().reference] :
   [current().players,current().routes,current().zones,current().annotations,current().ball],viewSettings(),selection,time,draft]);
-const inspectorContext = () => `${selection?.type || 'play'}:${selection?.id || current().id}`;
+const inspectorContext = () => `${selection?.type || 'play'}:${selection?.type === 'players' ? selectedPlayerIds(current(),selection).join(',') : selection?.id || current().id}`;
 
 function render() {
   const p = current(); if (!p) return;
+  editorSessions.save(shared?.current?.id||'local',{selectedId:state.selectedId,query,filter,formationFilter});
   clearAssistantPreview();
   const previousPlay=renderedPlayId, existingIds=new Set([...document.querySelectorAll('#field [data-player]')].map(n=>n.dataset.player));
   const restoreScroll=captureEditorScroll({samePlay:previousPlay===p.id});
@@ -693,7 +812,7 @@ function render() {
   document.title = `${p.title} · Playbook Studio`;
   const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
-  const html = `<div class="workspace ${p.reference ? 'reference-play' : ''}">
+  const html = `<div class="workspace ${p.reference ? 'reference-play' : ''}" data-assistant-open="${assistantPanelOpen}">
     <button class="sidebar-scrim" data-action="close-panel" aria-label="${t("editor.close_side_panel")}" tabindex="-1"></button><aside class="sidebar" id="plays-panel" aria-label="${t("editor.play_list")}">
       <button class="panel-close compact-only" data-action="close-panel" aria-label="${t("editor.close_play_list")}">${icon('close')}</button>
       <a class="brand" href="${cloudMode() ? './index.html' : '#home'}" aria-label="Playbook Studio"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="44" height="24" alt=""><span>Playbook<span>Studio</span></span><small title="${cloudMode() ? t("editor.saved_in_the_cloud_and_shared_by_member_permissions") : t("editor.saved_in_this_browser_only_export_backups_regularly")}">${cloudMode() ? t("editor.cloud") : t("editor.local")}</small></a>
@@ -712,16 +831,16 @@ function render() {
     </aside>
     <main class="main" id="main-content" tabindex="-1">
       <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', t("editor.toggle_play_list"), 'mobile-menu', `aria-expanded="${panels.active==='plays'}"`)}<span>${icon('book')} ${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')} ${t("editor.playbook")}</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="madden-library" aria-label="${t("editor.open_madden_play_library")}">${icon('ball')}<span>${t("editor.madden_library")}</span></button>${effectsControl()}<button class="button subtle" data-action="print" aria-label="${t("editor.print_playbook")}">${icon('print')}<span>${t("editor.print")}</span></button><button class="button primary" data-action="export" aria-label="${t("editor.export_playbook")}">${icon('export')}<span>${t("editor.export")}</span></button></div></header>
-      <section class="play-header"><div><div class="eyebrow">${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1><p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', t("editor.undo_ctrl_z"), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', t("editor.redo_ctrl_shift_z"), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
+      <section class="play-header"><div><div class="eyebrow"><span class="league-badge">${getPlayLeague(p)===5?uxCopy('5v5 Flag','5 人腰旗'):uxCopy(`${getPlayLeague(p)} per side`,`${getPlayLeague(p)} 人制`)}</span> <span>·</span> ${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1>${editorStatus()}<p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', historyLabel('undo'), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', historyLabel('redo'), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
       ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? t("editor.recovery_required") : shared?.sync?.viewError ? t("editor.view_recovery_required") : t("editor.read_only")}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : t("editor.you_can_view_rehearse_export_and_print_ask_an_administr")}</span>${localRecovery ? `<button class="button subtle" data-action="local-recovery">${t("editor.recovery_options")}</button>` : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="${t("editor.field_and_rehearsal")}">
-        <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button>${isFlag5Play(p) ? `<button data-action="opponents">${icon('team')}${t(p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? 'editor.flag5_remove_opponents' : 'editor.flag5_add_opponents')}<small>${t('editor.flag5')}</small></button>` : `<button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button>`}<button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
+        <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="selection-toolbar">${selectionControls()}</div><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button>${isFlag5Play(p) ? `<button data-action="opponents">${icon('team')}${t(p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? 'editor.flag5_remove_opponents' : 'editor.flag5_add_opponents')}<small>${t('editor.flag5')}</small></button>` : `<button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button>`}<button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
         <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
         <div class="stage-dock"><div class="editor-mode" role="group" aria-label="${t("editor.workspace_mode")}"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}${t("editor.design_play")}</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}${t("editor.rehearse")}</button></div><div class="toolbar" role="toolbar" aria-label="${t("editor.drawing_tools")}"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', t("editor.select_move_v")], ['route', 'route', t("editor.route_r")], ['block', 'block', t("editor.block_b")], ['motion', 'motion', t("editor.pre_snap_motion_m")], ['pass', 'pass', t("editor.pass_p")], ['zone', 'zone', t("editor.coverage_zone_z")], ['text', 'text', t("editor.text_t")]].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:t("editor.select"),route:t("editor.route"),block:t("editor.block"),motion:t("editor.motion"),pass:t("editor.pass"),zone:t("editor.zone"),text:t("editor.text")})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>${t("editor.rehearse")}</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">${t("editorExtra.speed")}<select id="speed" aria-label="${t("editor.playback_speed")}">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', t("editor.loop"), `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? t("editor.pause") : t("editor.play"), 'play-button')}${btn('reset', 'reset', t("editor.reset_animation"), 'icon-button')}<input type="range" id="timeline" aria-label="${t("editor.animation_time")}" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div></div>
         ${boardHeightHandle}
         <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
-      </section>${boardWidthHandle}<section class="inspector-panel" id="properties-panel" aria-label="${t("editor.play_properties")}"><header class="panel-heading compact-only"><strong>${t("editor.properties_and_settings")}</strong><button class="panel-close" data-action="close-panel" aria-label="${t("editor.close_properties")}">${icon('close')}</button></header><aside class="inspector" data-context="${e(inspectorContext())}" aria-label="${t("editor.play_properties")}">${inspector()}</aside></section></div>
+      </section>${boardWidthHandle}<section class="inspector-panel" id="properties-panel" aria-label="${t("editor.play_properties")}"><header class="panel-heading compact-only"><strong>${t("editor.properties_and_settings")}</strong><button class="panel-close" data-action="close-panel" aria-label="${t("editor.close_properties")}">${icon('close')}</button></header><div class="task-panel-tabs" role="group" aria-label="${uxCopy('Task panel','任务面板')}"><button type="button" data-action="properties-task" aria-pressed="${!assistantPanelOpen}">${uxCopy('Properties','属性')}</button><button type="button" data-action="assistant-task" aria-pressed="${assistantPanelOpen}">AI ${uxCopy('assistant','助手')}</button></div><aside class="inspector" ${assistantPanelOpen?'hidden':''} data-context="${e(inspectorContext())}" aria-label="${t("editor.play_properties")}">${inspector()}</aside></section></div>
       <footer class="app-footer"><span>PLAYBOOK STUDIO</span><span>${t("editor.draw_the_routes_understand_the_game")}</span><button data-action="help">${t("editorExtra.shortcuts_and_help")}${icon('chevron')}</button></footer>
-    </main><nav class="compact-nav" aria-label="${t("editor.workspace_panels")}"><button data-action="sidebar" aria-controls="plays-panel">${icon('book')}<span>${t("editor.playbook")}</span></button><button data-action="panel-field" aria-pressed="true">${icon('grid')}<span>${t("editor.field")}</span></button><button data-action="inspector-panel" aria-controls="properties-panel">${icon('select')}<span>${t("editor.properties")}</span></button></nav></div>`;
+    </main><nav class="compact-nav" aria-label="${t("editor.workspace_panels")}"><button data-action="sidebar" aria-controls="plays-panel">${icon('book')}<span>${t("editor.playbook")}</span></button><button data-action="panel-field" aria-pressed="true">${icon('grid')}<span>${t("editor.field")}</span></button><button type="button" data-action="undo" title="${e(historyLabel('undo'))}" aria-label="${e(historyLabel('undo'))}" ${history.past.length?'':'disabled'}>${icon('undo')}<span>${uxCopy('Undo','撤销')}</span></button><button type="button" data-action="redo" title="${e(historyLabel('redo'))}" aria-label="${e(historyLabel('redo'))}" ${history.future.length?'':'disabled'}>${icon('redo')}<span>${uxCopy('Redo','重做')}</span></button><button data-action="inspector-panel" aria-controls="properties-panel">${icon('select')}<span>${t("editor.properties")}</span></button></nav></div>`;
   // A same-play update patches only changed shell nodes; managed SVG, AI and
   // material surfaces stay connected. Switching plays keeps a fresh boundary.
   if (patchShell) {
@@ -739,14 +858,25 @@ function render() {
   renderedCardState=cardState();
   digitalBoard?.sync();
 }
+function selectionControls() {
+  if (!canEdit() || current().reference) return '';
+  const english=getLocale()==='en', count=selectedPlayerIds(current(),selection).length;
+  return `<button type="button" data-action="multi-select" aria-pressed="${multiSelectMode}" title="${english?'Shift-click players, or turn on multiple selection.':'按住 Shift 点选球员，或开启多选。'}">${icon('team')}<span>${multiSelectMode ? (english?'Finish selecting':'完成多选') : (english?'Select multiple':'多选球员')}</span></button>${count>1 ? `<span class="selection-count" role="status">${english?`${count} selected`:`已选 ${count} 人`}</span>` : ''}`;
+}
 function fieldContext() {
+  const english=getLocale()==='en';
+  if(selectionCandidates.length && selectionCandidateScope!==assistantScope())selectionCandidates=[];
+  if(selectionCandidates.length) return `<div class="selection-candidates" role="group" aria-label="${english?'Choose the intended object':'选择要操作的对象'}"><span>${english?'Choose a player or waypoint':'选择球员或路线节点'}</span>${selectionCandidates.map((candidate,index)=>`<button data-action="pick-candidate:${index}">${candidate.type==='player'?e(candidate.label):(english?`Waypoint ${candidate.index}`:`路线节点 ${candidate.index}`)}</button>`).join('')}<button data-action="dismiss-candidates" aria-label="${t('editorExtra.close')}">${icon('close')}</button></div>`;
   if(rehearsal) return `<span class="context-status"><i class="live-dot"></i>${playing?t("feedback.playing"):time>=animationLength(current())?t("editor.rehearsal_complete"):time?t("feedback.paused"):t("feedback.ready")}</span><button class="context-primary" data-action="play" aria-label="${playing?t("feedback.pause_rehearsal"):t("feedback.start_rehearsal")}">${icon(playing?'pause':'play')}${playing?t("feedback.pause"):time>=animationLength(current())?t("feedback.replay"):t("feedback.play")}</button><button data-action="reset" aria-label="${t("editorExtra.restart_rehearsal")}">${icon('reset')}</button><button data-action="edit-mode">${t("editor.back_to_design")}</button>`;
   if(draft) {
     const owner=current().players.find(p=>p.id===draft.playerId);
     return `<span class="context-player">${e(owner?.label)}<small>${draft.points.length-1}${t("editorExtra.route_points")}</small></span><button data-action="undo-point" ${draft.points.length<2?'disabled':''}>${icon('undo')}${t("editor.undo_point")}</button><button class="context-primary" data-action="finish-route" ${draft.points.length<2?'disabled':''}>${icon('check')}${t("editor.finish")}</button><button data-action="cancel-draft" aria-label="${t("editor.cancel_route")}">${icon('close')}</button>`;
   }
+  if(selection?.type==='players' && canEdit())return `<span class="context-player">${english?`${selectedPlayerIds(current(),selection).length} players selected`:`已选 ${selectedPlayerIds(current(),selection).length} 名球员`}<small>${multiSelectMode?(english?'Tap to add or remove':'点选增减球员'):(english?'Drag any selected player to move the group':'拖动任一已选球员移动整组')}</small></span>${multiSelectMode?`<button class="context-primary" data-action="multi-select">${icon('check')}${english?'Done':'完成选择'}</button>`:''}<button data-action="delete-selection">${icon('trash')}${t('editor.delete')}</button><button data-action="clear-selection" aria-label="${t('editor.clear_selection')}">${icon('close')}</button>`;
+  if(multiSelectMode && canEdit())return `<span class="context-player">${english?'Tap players to add or remove':'依次点选球员，可再次点选移除'}<small>${english?`${selectedPlayerIds(current(),selection).length} selected`:`已选 ${selectedPlayerIds(current(),selection).length} 人`}</small></span><button class="context-primary" data-action="multi-select">${icon('check')}${english?'Done':'完成选择'}</button><button data-action="clear-selection" aria-label="${t('editor.clear_selection')}">${icon('close')}</button>`;
   if(selection?.type==='player' && canEdit())return `<span class="context-player">${e(selectedObject()?.label)}<small>${t("editor.selected")}</small></span><button class="context-primary" data-action="tool:route">${icon('route')}${t("editor.draw_route")}</button><button data-action="delete-selection" aria-label="${t("editor.delete_selected_player")}">${icon('trash')}</button><button data-action="clear-selection" aria-label="${t("editor.clear_selection")}">${icon('close')}</button>`;
   if(selection?.type==='route' && canEdit())return `<span>${t("editor.drag_points_to_adjust_the_route")}</span><button data-action="delete-selection">${icon('trash')}${t("editor.delete")}</button><button data-action="clear-selection" aria-label="${t("editor.clear_selection")}">${icon('close')}</button>`;
+  if(['zone','annotation'].includes(selection?.type) && canEdit())return `<span>${selection.type==='zone'?t('editor.coverage_zone'):t('editor.text_annotation')}</span><button data-action="inspector-panel">${t('editor.properties')}</button><button data-action="delete-selection">${icon('trash')}${t('editor.delete')}</button><button data-action="clear-selection" aria-label="${t('editor.clear_selection')}">${icon('close')}</button>`;
   return '';
 }
 function canvasHint() {
@@ -759,6 +889,8 @@ function updateCanvasHint() {
   const n=$('.canvas-hint');if(n)n.innerHTML=canvasHint();
   const context=$('#field-context'), html=fieldContext();
   if(context && context.innerHTML!==html) {context.innerHTML=html; if(html)enterContext(context);}
+  const controls=$('.selection-toolbar'), controlsHTML=selectionControls();
+  if(controls && controls.innerHTML!==controlsHTML)controls.innerHTML=controlsHTML;
 }
 function playbackPhase() {
   return time===0?t("editor.ready"):time>=animationLength(current())?t("editor.rehearsal_complete"):current().ball.receiverId && time>=current().ball.passAt && time<current().ball.arriveAt?t("editor.passing"):time>=current().ball.arriveAt && current().ball.receiverId?t("editor.after_catch"):t("editor.routes_in_motion");
@@ -800,6 +932,7 @@ function setTool(next) {
   if(next===tool && draft)return;
   if(next!==tool && !confirmDraft(()=>setTool(next)))return;
   resetAnimation(); rehearsal=false; tool=next; draft=null;previewPoint=null;
+  multiSelectMode=false;selectionCandidates=[];
   if(drawingTools.includes(next)) {
     const player=selection?.type==='player'?selectedObject():current().players.find(p=>p.id===selectedObject()?.playerId);
     if(player) {selection={type:'player',id:player.id};draft={playerId:player.id,points:[{x:player.x,y:player.y}]};}
@@ -858,7 +991,10 @@ function inspector() {
   const p = current(), obj = selectedObject();
   let content;
   if (p.reference) return `${hasEditableTrace(p.reference.catalogId) ? `<button class="button primary full" data-action="convert-reference">${t("editorExtra.create_editable_copy")}</button>` : ''}<div class="madden-source-box"><strong>${e(p.reference.game)} · ${e(teamDisplayName(p.reference.team))}</strong><p>${e(p.formation)}</p><p>${t("editorExtra.the_original_diagram_retains_its_routes_and_w")}</p><a href="${e(p.reference.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("editorExtra.view_source_on_huddle_gg")}</a></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}<div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="8" aria-label="${t("editor.coach_notes")}" placeholder="${t("editorExtra.situations_reads_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button><div class="inspector-note">${icon('check')}${cloudMode() ? t("editor.uses_this_playbook_s_save_and_membership_permissions") : t("editor.autosaved_in_this_browser")}</div>`;
-  if (selection?.type === 'player' && obj) {
+  if (selection?.type === 'players') {
+    const english=getLocale()==='en', ids=selectedPlayerIds(p,selection), players=p.players.filter(player=>ids.includes(player.id));
+    content=`<div class="inspector-heading"><span>${english?'Selected players':'已选球员'}</span><span class="tag">${ids.length}</span></div><p class="muted small">${english?'Drag a selected player to move the whole group. Routes move with their owners. One Undo restores the group.':'拖动任一已选球员移动整组；关联路线一起移动，一次撤销恢复整组。'}</p><ul class="selection-player-list">${players.map(player=>`<li>${e(player.label)}${player.name?` · ${e(player.name)}`:''}<small> · ${player.side==='offense'?t('editor.offense'):t('editor.defense')}</small></li>`).join('')}</ul><div class="selection-nudge" role="group" aria-label="${english?'Move group by one board unit':'整组移动一个画板单位'}">${[['left','←'],['up','↑'],['down','↓'],['right','→']].map(([direction,label])=>`<button class="button subtle" data-action="selection-nudge:${direction}" aria-label="${english?`Move group ${direction}`:({left:'整组左移',up:'整组上移',down:'整组下移',right:'整组右移'})[direction]}">${label}</button>`).join('')}</div><button class="button danger full" data-action="delete-selection">${icon('trash')}${english?`Delete ${ids.length} players`:`删除 ${ids.length} 名球员`}</button>`;
+  } else if (selection?.type === 'player' && obj) {
     const assigned = obj.rosterId || '';
     content = `<div class="inspector-heading"><span>${t("editor.player_settings")}</span><span class="tag">${obj.side === 'offense' ? t("editor.offense") : t("editor.defense")}</span></div><div class="player-preview"><span style="background:${displayColor(obj.color, viewSettings().fieldTheme === 'light')};color:${displayColor(obj.color, viewSettings().fieldTheme === 'light') === '#eef0f3' ? '#111214' : ''}">${e(obj.label)}</span><div><strong>${e(obj.name || t("editor.unassigned"))}</strong><small>${t("editor.drag_the_marker_to_change_position")}</small></div></div>${fieldInput(t("editor.position_label"), 'label', obj.label, 'text', 'maxlength="10"')}<label class="form-field"><span>${t("editor.assign_roster_player")}</span><select data-prop="roster"><option value="">${t("editor.no_player_assigned")}</option>${state.data.roster.map(r => option(r.id, `#${r.number} ${r.name} · ${r.position}`, assigned)).join('')}</select></label>${fieldInput(t("editor.display_name"), 'name', obj.name, 'text', 'maxlength="80"')}<div class="form-row">${fieldInput(t("editor.marker_color"), 'color', displayColor(obj.color, viewSettings().fieldTheme === 'light'), 'color')}<label class="form-field"><span>${t("editor.shape")}</span><select data-prop="shape">${[['circle', t("editor.circle")], ['square', t("editor.square")], ['triangle', t("editor.triangle")]].map(([v, l]) => option(v, l, obj.shape)).join('')}</select></label></div><div class="inspector-divider"></div><div class="inspector-heading"><span>${t("editor.draw_a_route")}</span></div><div class="route-quick">${[['route', t("editor.route")], ['block', t("editor.block")], ['motion', t("editor.motion")], ['pass', t("editor.pass")]].map(([v, l]) => `<button data-action="tool:${v}" class="${tool === v ? 'active' : ''}">${icon(v)}${l}</button>`).join('')}</div><div class="route-list">${p.routes.filter(r => r.playerId === obj.id).map(r => `<button data-action="select-route:${e(r.id)}">${icon(r.kind)}<span>${r.optional ? t("editor.optional") : ''}${({ route: t("editor.route_2"), block: t("editor.block_2"), motion: t("editor.motion_2"), pass: t("editor.pass_2") })[r.kind]}</span>${icon('chevron')}</button>`).join('')}</div><button class="button danger full" data-action="delete-selection">${icon('trash')}${t("editor.remove_player")}</button>`;
   } else if (selection?.type === 'route' && obj) {
@@ -887,13 +1023,14 @@ function renderField({preservePreview = false} = {}) {
   svg.setAttribute('class',[next.getAttribute('class'),...readyClasses].join(' '));
   svg.replaceChildren(...next.childNodes);
   updateAnimation(svg,current(),time);
+  syncFieldHitTargets(svg,{pointerType:window.matchMedia?.('(any-pointer: coarse)').matches?'touch':'mouse'});
   if (preview) showAssistantPreview(preview.play, preview.original, {reuse:preview, refresh:false});
   digitalBoard?.sync({contentChanged:true});
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${t("editor.offense")} ${current().players.filter(p=>p.side==='offense').length} · ${t("editor.defense")} ${current().players.filter(p=>p.side==='defense').length}</span>`;
   renderedFieldState = fieldState();
 }
 function refreshSelection() {
-  const inspectorNode=$('.inspector'), context=inspectorNode.dataset.context, next=`${selection?.type||'play'}:${selection?.id||current().id}`;
+  const inspectorNode=$('.inspector'), context=inspectorNode.dataset.context, next=inspectorContext();
   if (context === next) patchEditorHTML(inspectorNode,inspector());
   else inspectorNode.innerHTML=inspector();
   inspectorNode.dataset.context=next;
@@ -908,13 +1045,16 @@ function refreshMetadata() {
   if (renderedCardState !== cardState()) {refreshPlayList();renderedCardState=cardState();}
   thumbnails.refresh(play);
   $('.eyebrow').innerHTML=`${e(play.personnel)} <span>·</span> ${e(play.category)}`;
-  $('[data-action="undo"]').disabled=!history.past.length;$('[data-action="redo"]').disabled=!history.future.length;
+  for(const action of ['undo','redo'])for(const node of document.querySelectorAll(`[data-action="${action}"]`)){
+    node.disabled=!(action==='undo'?history.past:history.future).length;
+    node.title=historyLabel(action);node.setAttribute('aria-label',historyLabel(action));
+  }
   if (renderedFieldState !== fieldState()) renderField();
   syncEditorChrome();protectReadOnly();
 }
 function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {
-  if(!event.target.closest('[data-point]')) { const spatial=digitalBoard?.pick(event); if(spatial)return spatial; }
+  if(Number.isFinite(event.clientX) && Number.isFinite(event.clientY) && !event.target.closest('[data-point]')) { const spatial=digitalBoard?.pick(event); if(spatial)return spatial; }
   const node = event.target.closest('[data-player],[data-route],[data-zone],[data-annotation]');
   if (!node) return null;
   for (const type of ['player', 'route', 'zone', 'annotation']) if (node.dataset[type]) return { type, id: node.dataset[type] };
@@ -925,6 +1065,10 @@ function bindField() {
   const field = $('#field');
   if (boundFields.has(field)) return;
   boundFields.add(field);
+  fieldHitObserver?.disconnect();
+  const syncTargets=()=>syncFieldHitTargets(field.querySelector('.pitch-svg'),{pointerType:window.matchMedia?.('(any-pointer: coarse)').matches?'touch':'mouse'});
+  if(typeof window.ResizeObserver==='function') {fieldHitObserver=new window.ResizeObserver(syncTargets);fieldHitObserver.observe(field.querySelector('.pitch-stage'));}
+  syncTargets();
   field.addEventListener('pointerdown', event => {
     if(event.target.closest('.field-context'))return;
     // One contact owns an edit until it finishes. A second finger belongs to
@@ -932,7 +1076,23 @@ function bindField() {
     if (event.button !== 0 || drag || (event.pointerType === 'touch' && !event.isPrimary)) return;
     clearAssistantPreview();
     if (rehearsal || playing || time) { toast(t("feedback.return_to_design_mode_to_adjust_players"), { type: 'info' }); return; }
-    const at = coordinates(event), hit = pick(event);
+    syncFieldHitTargets(field.querySelector('.pitch-svg'),{pointerType:event.pointerType});
+    const at = coordinates(event);
+    let hit = pick(event), point=event.target.closest('[data-point]');
+    selectionCandidates=[];
+    if(canEdit() && tool==='select' && ['touch','pen'].includes(event.pointerType)) {
+      const keepGroup=hit?.type==='player' && selectedPlayerIds(current(),selection).includes(hit.id) && !multiSelectMode && !event.shiftKey;
+      const candidates=keepGroup?[]:fieldHitCandidates(field.querySelector('.pitch-svg'),event);
+      if(candidates.length>1) {
+        event.preventDefault();selectionCandidates=candidates;candidateSelectionAdditive=multiSelectMode||event.shiftKey;selectionCandidateScope=assistantScope();updateCanvasHint();
+        $('#field-context [data-action^="pick-candidate:"]')?.focus({preventScroll:true});return;
+      }
+      if(candidates.length===1) {
+        const candidate=candidates[0];
+        if(candidate.type==='player')hit={type:'player',id:candidate.id};
+        else {point=candidate.element;hit=null;}
+      }
+    }
     if (!canEdit()) { selection = hit; refreshSelection(); return; }
     if (tool === 'text') { textModal(at); return; }
     if (drawingTools.includes(tool)) {
@@ -949,7 +1109,9 @@ function bindField() {
       if (draft.points.length < 200 && (!draft.points.at(-1) || Math.hypot(at.x - draft.points.at(-1).x, at.y - draft.points.at(-1).y) > .3)) draft.points.push(at);
       previewPoint=null;renderField(); updateCanvasHint(); return;
     }
-    const point = event.target.closest('[data-point]');
+    if(tool==='select' && hit?.type==='player' && (event.shiftKey || multiSelectMode)) {
+      event.preventDefault();selection=togglePlayerSelection(current(),selection,hit.id,{additive:true});refreshSelection();return;
+    }
     // Route handles are siblings of their route, so pick() correctly returns
     // no object for them. Resolve the handle before classifying empty turf.
     if (event.pointerType === 'touch' && tool === 'select' && !hit && !point) { selection=null;refreshSelection();return; }
@@ -957,8 +1119,13 @@ function bindField() {
     const gesture = { start: at, before: clone(state), pointerId: event.pointerId, selectionBefore: selection };
     if (tool === 'zone') { drag = { ...gesture, type: 'new-zone', zoneId: uid() }; return; }
     if (point) { drag = { ...gesture, type: 'point', routeId: point.dataset.routeId, index: Number(point.dataset.point) }; return; }
-    selection = hit;
-    if (hit) { drag = { ...gesture, ...hit, original: clone(selectedObject()), moved: false }; }
+    const group=selectedPlayerIds(current(),selection);
+    if(hit?.type==='player' && group.length>1 && group.includes(hit.id)) {
+      drag={...gesture,type:'players',ids:group,original:clone(current().players.find(player=>player.id===hit.id)),moved:false};
+    } else {
+      selection = hit;
+      if (hit) { drag = { ...gesture, ...hit, original: clone(selectedObject()), moved: false }; }
+    }
     refreshSelection();
   });
   field.addEventListener('pointermove', event => {
@@ -974,7 +1141,11 @@ function bindField() {
     const at=pendingPoint,p=current();pendingPoint=null;
     if(Math.hypot(at.x-drag.start.x,at.y-drag.start.y)<.2 && !drag.moved)return;
     drag.moved=true;field.classList.add('is-dragging');
-    if(drag.type==='player') {
+    if(drag.type==='players') {
+      const initial=drag.before.data.plays.find(play=>play.id===state.selectedId);
+      const result=moveSelectedPlayers(initial,drag.ids,at.x-drag.start.x,at.y-drag.start.y);
+      Object.assign(p,result.play);drag.delta=result.delta;
+    } else if(drag.type==='player') {
       const initial=drag.before.data.plays.find(p=>p.id===state.selectedId), original=drag.original;
       const player=p.players.find(v=>v.id===drag.id);player.x=original.x;player.y=original.y;
       for(const route of p.routes)if(route.playerId===drag.id)route.points=clone(initial.routes.find(r=>r.id===route.id).points);
@@ -1000,9 +1171,12 @@ function bindField() {
     if(moved){
       // Pointermove is an ephemeral visual preview. Commit its final intent
       // through the same reducer used by property forms and AI proposals.
-      const next=clone(before.data.plays.find(play=>play.id===state.selectedId));
+      let next=clone(before.data.plays.find(play=>play.id===state.selectedId));
       let command;
-      if(completed.type==='player') {
+      if(completed.type==='players') {
+        if(!completed.delta?.x && !completed.delta?.y){Object.assign(current(),next);render();return;}
+        command={kind:'players_move',playerIds:completed.ids,dx:completed.delta?.x||0,dy:completed.delta?.y||0};
+      } else if(completed.type==='player') {
         const player=current().players.find(item=>item.id===completed.id);
         command={kind:'player_update',playerId:player.id,patch:{x:player.x,y:player.y}};
       } else if(completed.type==='point') command={kind:'route_update',routeId:completed.routeId,patch:{points:clone(current().routes.find(route=>route.id===completed.routeId).points)}};
@@ -1018,7 +1192,7 @@ function bindField() {
       }
       try {
         if(command)runEditorPlayCommand(next,command,{idFactory:()=>completed.zoneId,roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart});
-        validatePlay(next);Object.assign(current(),next);history.record(before);save();render();
+        validatePlay(next);Object.assign(current(),next);history.record(before,{name:getLocale()==='en'?(completed.type==='players'?`Move ${completed.ids.length} players`:'Move object'):(completed.type==='players'?`移动 ${completed.ids.length} 名球员`:'移动对象'),source:'manual'});save();render();
       } catch(error) {state=before;selection=completed.selectionBefore;render();toast(error.message,{type:'warning'});}
     }
   };
@@ -1036,9 +1210,25 @@ function bindField() {
   field.addEventListener('lostpointercapture',cancelDrag);
   field.addEventListener('pointerleave',()=>{if(!drag)previewDraft(field.querySelector('svg'),draft,null);});
   field.addEventListener('dblclick', event => { if (draft) { event.preventDefault(); finishRoute(); } });
+  function contextMenu(event) {
+    if(draft || rehearsal || playing || time)return;
+    const hit=pick(event);if(!hit)return;
+    event.preventDefault();selectionCandidates=[];
+    if(!(hit.type==='player' && selectedPlayerIds(current(),selection).includes(hit.id)))selection=hit;
+    refreshSelection();$('#field-context button')?.focus({preventScroll:true});
+  }
+  field.addEventListener('contextmenu',contextMenu);
   field.addEventListener('keydown', event => {
-    if (!['Enter', ' '].includes(event.key) || !event.target.dataset.player && !event.target.dataset.route && !event.target.dataset.zone) return;
-    event.preventDefault(); event.stopPropagation(); selection = pick(event); refreshSelection();
+    if(selectionCandidates.length && event.key==='Escape'){event.preventDefault();event.stopPropagation();selectionCandidates=[];updateCanvasHint();field.querySelector('.pitch-svg')?.focus({preventScroll:true});return;}
+    if(event.key==='ContextMenu' || event.shiftKey&&event.key==='F10'){contextMenu(event);event.stopPropagation();return;}
+    if(selection?.type==='players' && !multiSelectMode && canEdit() && !rehearsal && !event.target.closest('button') && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) {
+      event.preventDefault();event.stopPropagation();nudgeSelection(({ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'})[event.key],event.shiftKey?5:1);return;
+    }
+    if (!['Enter', ' '].includes(event.key) || !event.target.dataset.player && !event.target.dataset.route && !event.target.dataset.zone && !event.target.dataset.annotation) return;
+    event.preventDefault(); event.stopPropagation();
+    const hit=pick(event);
+    selection = hit?.type==='player'?togglePlayerSelection(current(),selection,hit.id,{additive:event.shiftKey||multiSelectMode}):hit;
+    selectionCandidates=[];refreshSelection();
   });
 }
 function finishRoute() {
@@ -1050,7 +1240,7 @@ function finishRoute() {
   const {id:routeId,kind:routeKind,...properties}=route;
   applyPlayCommand({kind:'route_add',routeKind,...properties},{idFactory:()=>routeId});
   burstAt(document.querySelector('#field-context'));
-  toast(alreadyMoving&&!route.optional?t("editorExtra.new_route_set_as_main_the_old_route_remains_o"):route.optional?t("editorExtra.optional_route_saved_rehearsal_continues_to_u"):t("editorExtra.route_saved_drag_points_to_adjust_it_undo_ava"));
+  toast(alreadyMoving&&!route.optional?t("editorExtra.new_route_set_as_main_the_old_route_remains_o"):route.optional?t("editorExtra.optional_route_saved_rehearsal_continues_to_u"):t("editorExtra.route_saved_drag_points_to_adjust_it_undo_ava"),{type:'success',undo:true});
 }
 
 function openModal(title, body, footer = '', wide = false) {
@@ -1240,7 +1430,7 @@ function togglePlay() {
   if(draft && !confirmDraft(togglePlay))return;
   if(playing){stop();digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();return;}
   if(time>=animationLength(current()))time=0;
-  rehearsal=true;playing=true;draft=null;previewPoint=null;
+  rehearsal=true;playing=true;draft=null;previewPoint=null;markFirstTask('rehearsed');
   renderField();syncEditorChrome();
   const tick=stamp=>{
     if(!playing)return;
@@ -1256,7 +1446,34 @@ function togglePlay() {
   frame=requestAnimationFrame(tick);
 }
 
+function commitSelectionChange(operation, name, {clear=false}={}) {
+  if(!canEdit())return false;
+  const next=clone(current()),result=runEditorPlayCommand(next,operation);
+  if(!result || result.changed===false)return false;
+  validatePlay(next);
+  history.record(state,{name,source:'manual'});
+  Object.assign(current(),next);
+  if(clear){selection=null;multiSelectMode=false;selectionCandidates=[];}
+  save();render();return true;
+}
+function nudgeSelection(direction, amount=1) {
+  if(!canEdit() || draft || drag || rehearsal)return;
+  const delta=({left:[-amount,0],right:[amount,0],up:[0,-amount],down:[0,amount]})[direction];
+  if(!delta)return;
+  const ids=selectedPlayerIds(current(),selection);
+  try {commitSelectionChange({kind:'players_move',playerIds:ids,dx:delta[0],dy:delta[1]},getLocale()==='en'?`Move ${ids.length} players`:`移动 ${ids.length} 名球员`);}
+  catch(error){toast(error.message,{type:'warning'});}
+}
 function deleteSelected() {
+  if(!canEdit())return;
+  if(selection?.type==='players') {
+    const ids=selectedPlayerIds(current(),selection);
+    try {
+      const name=getLocale()==='en'?`Delete ${ids.length} players`:`删除 ${ids.length} 名球员`;
+      if(commitSelectionChange({kind:'players_remove',playerIds:ids},name,{clear:true}))toast(getLocale()==='en'?`${name}. Undo is available.`:`已${name}，可撤销恢复。`,{type:'success'});
+    }catch(error){toast(error.message,{type:'warning'});}
+    return;
+  }
   if (!selection || !selectedObject()) return;
   const selected = selection;
   const result = applyPlayCommand({kind:'object_remove',objectType:selected.type,objectId:selected.id});
@@ -1264,6 +1481,13 @@ function deleteSelected() {
 }
 
 const actions = {
+  'multi-select':()=>{
+    if(draft && !confirmDraft(()=>actions['multi-select']()))return;
+    resetAnimation();rehearsal=false;tool='select';draft=null;selectionCandidates=[];multiSelectMode=!multiSelectMode;
+    if(selection && !['player','players'].includes(selection.type))selection=null;
+    refreshSelection();syncEditorChrome();
+  },
+  'dismiss-candidates':()=>{selectionCandidates=[];updateCanvasHint();$('#field .pitch-svg')?.focus({preventScroll:true});},
   'apply-personnel': () => {
     const { group, changes } = chosenPersonnel();
     if (!changes.length) return;
@@ -1284,7 +1508,7 @@ const actions = {
   },
   'convert-reference': async () => {
     const outcome = await convertReference();
-    if (outcome?.ok) toast(t("feedback.editable_copy_created_the_original_is_retained_undo_is_"), { type: 'success' });
+    if (outcome?.ok) toast(t("feedback.editable_copy_created_the_original_is_retained_undo_is_"), { type: 'success',undo:true });
     else if (outcome?.message) toast(outcome.message, { type: 'warning' });
   },
   'compare-source': () => {
@@ -1300,7 +1524,7 @@ const actions = {
       return;
     }
     applyPlayCommand({kind:'line_space'});
-    toast(t("feedback.line_and_nearby_player_spacing_adjusted_undo_is_availab"), { type: 'success' });
+    toast(t("feedback.line_and_nearby_player_spacing_adjusted_undo_is_availab"), { type: 'success',undo:true });
   },
   'madden-library': () => { resetAnimation(); if (confirmDraft(() => {panels.close({focus:false});maddenLibrary.open();})) {panels.close({focus:false});maddenLibrary.open();} },
   'clear-filters': () => { query=''; filter=''; formationFilter=''; render(); },
@@ -1308,7 +1532,9 @@ const actions = {
   'discard-draft': () => { draft=null; const next=pendingNavigation; pendingNavigation=null; closeModal(); next?.(); },
   new: newModal, 'close-modal': closeModal, export: exportModal, help: helpModal, print: printModal,
   sidebar: () => panels.toggle('plays'),
-  'inspector-panel': () => panels.toggle('properties'),
+  'inspector-panel': () => {boardAssistant?.close();panels.toggle('properties');},
+  'properties-task': () => {boardAssistant?.close();if($('.inspector'))$('.inspector').hidden=false;},
+  'assistant-task': () => boardAssistant?.open(),
   'close-panel': () => panels.close(),
   'panel-field': () => { panels.close({focus:false});$('#field')?.scrollIntoView?.({block:'nearest'}); },
   'dismiss-toast': () => $('#toast').classList.remove('visible'),
@@ -1316,10 +1542,12 @@ const actions = {
   'edit-mode': () => {if(!confirmDraft(()=>actions['edit-mode']()))return;resetAnimation();rehearsal=false;renderField();syncEditorChrome();},
   'rehearse-mode': () => {if(!confirmDraft(()=>actions['rehearse-mode']()))return;clearAssistantPreview();rehearsal=true;draft=null;renderField();syncEditorChrome();},
   favorite: () => applyPlayCommand({kind:'play_update',patch:{favorite:!current().favorite}}),
-  undo: () => restore(history.undo(state)), redo: () => restore(history.redo(state)),
-  mirror: () => { applyPlayCommand({kind:'play_mirror'}); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success' }); },
+  undo: () => restoreHistory('undo'), redo: () => restoreHistory('redo'),
+  'undo-transaction': node => { if(node.dataset.transactionId===history.info()?.id)restoreHistory('undo');else toast(uxCopy('A later edit exists. Use the main Undo control to review it.','之后已有新修改，请使用主撤销按钮确认撤销范围。'),{type:'info'}); },
+  'retry-save': () => {if(cloudMode())shared?.sync?.flush();else save();},
+  mirror: () => { applyPlayCommand({kind:'play_mirror'}); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success',undo:true }); },
   duplicate: () => applyWorkspaceActions([{kind:'play_duplicate',playId:current().id,title:`${current().title} · 副本`.slice(0,120)}]),
-  'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';refreshSelection();syncEditorChrome();},
+  'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';multiSelectMode=false;selectionCandidates=[];refreshSelection();syncEditorChrome();},
   grid: () => executeEditorLocal([{kind:'view_set',grid:viewSettings().showGrid===false}]),
   theme: () => executeEditorLocal([{kind:'view_set',theme:viewSettings().fieldTheme==='light'?'dark':'light'}]),
   'finish-route': finishRoute, 'cancel-draft': () => { draft=null;previewPoint=null;tool='select';renderField();syncEditorChrome(); },
@@ -1357,7 +1585,7 @@ const actions = {
   import: () => $('#import-input').click(),
   'download-svg': async () => { const play = clone(current()); try { download(await standaloneSVG(play), `${safeName(play.title)}.svg`, 'image/svg+xml'); toast(t("feedback.svg_diagram_created"), { type: 'success' }); } catch { toast(t("feedback.could_not_load_the_source_diagram_try_again"), { type: 'error', action: 'download-svg', label: t("feedback.retry") }); } },
   'download-png': pngExport,
-  'download-json': () => { if (localRecovery) { downloadOriginal(); return; } download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json'); toast(t("feedback.full_playbook_exported"), { type: 'success' }); },
+  'download-json': () => { if (localRecovery) { downloadOriginal(); return; } download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json');markFirstTask('exported'); toast(t("feedback.full_playbook_exported"), { type: 'success' }); },
   'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast(t("feedback.current_play_exported"), { type: 'success' }); },
   'do-print': () => { if (!$('#print-root').children.length) { toast(t("feedback.no_plays_to_print"), { type: 'warning' }); return; } window.print(); },
   play: togglePlay, reset: () => {resetAnimation();clearAssistantPreview();updateAnimation($('#field svg'),current(),0);digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
@@ -1376,6 +1604,15 @@ document.addEventListener('click', event => {
   if (name === 'book') { executeEditorLocal([{kind:'filter_set',book:value}]); return; }
   if (name === 'tool') { setTool(value); return; }
   if (name === 'select-route') { selection = { type: 'route', id: value }; tool = 'select'; draft = null; refreshSelection(); return; }
+  if(name==='selection-nudge'){nudgeSelection(value);return;}
+  if(name==='pick-candidate') {
+    const candidate=selectionCandidates[Number(value)];
+    if(!candidate || selectionCandidateScope!==assistantScope()){selectionCandidates=[];updateCanvasHint();return;}
+    selection=candidate.type==='player'?togglePlayerSelection(current(),selection,candidate.id,{additive:candidateSelectionAdditive}):{type:'route',id:candidate.routeId};
+    selectionCandidates=[];refreshSelection();
+    const target=candidate.type==='player'?[...document.querySelectorAll('#field [data-player]')].find(node=>node.dataset.player===candidate.id):[...document.querySelectorAll('#field .point-hit')].find(node=>node.dataset.routeId===candidate.routeId && Number(node.dataset.point)===candidate.index);
+    (target?.matches('[tabindex]')?target:$('#field .pitch-svg'))?.focus({preventScroll:true});return;
+  }
   if (name === 'add-player') { const result=applyPlayCommand({kind:'player_add',side:value,label:value==='offense'?'WR':'DB',x:25,y:value==='offense'?75:45}); if(result){selection={type:'player',id:result.createdId};refreshSelection();} return; }
   actions[name]?.(node);
 });
@@ -1470,6 +1707,7 @@ $('#import-input').addEventListener('change', async event => {
   event.target.value = '';
 });
 document.addEventListener('keydown', event => {
+  if(event.defaultPrevented||event.isComposing||event.keyCode===229)return;
   const modal = $('.modal');
   if (modal) {
     // Enter/Escape also confirm or cancel CJK character conversion. Leave
@@ -1482,13 +1720,13 @@ document.addEventListener('keydown', event => {
     return;
   }
   if (maddenLibrary.isOpen) { if (event.key === 'Escape') maddenLibrary.close(); return; }
-  if ($('#app').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName) || event.target.isContentEditable) return;
+  if ($('#app').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName) || event.target.isContentEditable || event.target.closest('.board-ai,.workspace-nav,.task-panel-tabs,button,summary,a[href],dialog[open]')) return;
   const key = event.key.toLowerCase();
-  if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); restore(event.shiftKey ? history.redo(state) : history.undo(state)); return; }
-  if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); restore(history.redo(state)); return; }
+  if ((event.ctrlKey || event.metaKey) && key === 'z') { event.preventDefault(); restoreHistory(event.shiftKey?'redo':'undo'); return; }
+  if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); restoreHistory('redo'); return; }
   if (event.key === ' ') { event.preventDefault(); togglePlay(); }
   else if (event.key === 'Enter' && draft) { event.preventDefault(); finishRoute(); }
-  else if (event.key === 'Escape') { draft = null; selection = null; tool = 'select'; render(); }
+  else if (event.key === 'Escape') { draft = null; selection = null; tool = 'select'; multiSelectMode=false;selectionCandidates=[];render(); }
   else if (event.key==='Backspace' && draft) {event.preventDefault();actions['undo-point']();}
   else if (event.key === 'Delete' || event.key === 'Backspace') {event.preventDefault();if(!rehearsal)deleteSelected();}
   else if (key === '?') helpModal();
@@ -1500,15 +1738,24 @@ function showEditor(show) {
   if (app.hidden === !show) return;
   app.hidden = !show;
   if (show) {
+    syncWorkspaceNavigation('editor');
+    const remembered=editorSessions.get(shared?.current?.id||'local');
+    if(remembered) {
+      query=typeof remembered.query==='string'?remembered.query.slice(0,200):'';
+      filter=typeof remembered.filter==='string'?remembered.filter.slice(0,60):'';
+      formationFilter=typeof remembered.formationFilter==='string'?remembered.formationFilter.slice(0,100):'';
+      if(state.data.plays.some(play=>play.id===remembered.selectedId)){state.selectedId=remembered.selectedId;book=current().book;}
+    }
     digitalBoard = createDigitalBoard({
       getState: () => ({ play: current(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null, presentationMask:assistantPreview?.mask, presentationSettling:!!assistantSettling }),
       notify: message => toast(message, { type: 'warning' }),
     });
     render();
   } else {
+    editorSessions.save(shared?.current?.id||'local',{selectedId:state.selectedId,query,filter,formationFilter});
+    boardAssistant?.close({suspend:true});
     clearAssistantPreview();
     resetAnimation();
-    boardAssistant?.destroy(); boardAssistant = null;
     if (maddenLibrary.isOpen) maddenLibrary.close();
     panels.close({ focus: false });
     thumbnails.destroy();
@@ -1535,49 +1782,74 @@ const rosterView = createRosterView({
     if (save({ data }) === false) return false;
     state.data = data;
     // Older editor snapshots contain the roster from before this change.
-    history.past = []; history.future = [];
+    history.rebasePersonnel(data);
     return true;
   },
 });
+async function editAnalysisSuggestion(payload) {
+  const workspaceId=cloudMode()?shared?.current?.id:'demo';
+  const revision=cloudMode()?shared?.current?.revision:localRevision;
+  if(payload.workspaceId!==workspaceId||payload.revision!==revision)throw Error(uxCopy('This report uses an earlier playbook. Analyze the current version first.','此报告基于旧版战术本，请先对当前版本重新分析。'));
+  const play=state.data.plays.find(item=>item.id===payload.offensePlayId);
+  if(!play||!canEdit())throw Error(editBlockedMessage());
+  await navigateWorkspace('editor');
+  if($('#app').hidden)throw Error(uxCopy('Return to the editor before preparing a proposal.','请先返回编辑器再准备提案。'));
+  choose(play.id);
+  const latestWorkspace=cloudMode()?shared?.current?.id:'demo',latestRevision=cloudMode()?shared?.current?.revision:localRevision;
+  if(current().id!==play.id||latestWorkspace!==payload.workspaceId||latestRevision!==payload.revision||!canEdit())throw Error(uxCopy('The target changed. Finish the current drawing and prepare the suggestion again.','目标已变化，请先完成当前绘图，再重新准备这条建议。'));
+  boardAssistant?.compose?.(payload.instruction,{send:false});
+  toast(uxCopy('Suggestion is ready in the assistant. Send it to preview changes.','建议已带入助手，发送后将生成可确认的编辑提案。'),{type:'info'});
+  return {ok:true};
+}
 initViewportLayout();
 initEffects();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
 
 if (cloudMode()) {
   document.body.classList.add('cloud-enabled');
-  const matchupView = createMatchupView({ root: $('#ai-matchup-root'), request, getCurrent: () => shared?.current, getData: () => state.data, isDirty: () => !!shared?.dirty });
+  const matchupView = createMatchupView({ root: $('#ai-matchup-root'), request, getCurrent: () => shared?.current, getData: () => state.data, isDirty: () => !!shared?.dirty,onEditSuggestion:editAnalysisSuggestion });
   analysisView = matchupView;
   shared = new SharedWorkspace({
-    onData(data) {
+    onData(data,record) {
+      const changedBook=loadedWorkspaceId!==record?.id;
+      const sameData=JSON.stringify(state.data)===JSON.stringify(data);
+      loadedWorkspaceId=record?.id;
+      if(changedBook){history.clear();boardAssistant?.close({suspend:true});}
       resetAnimation(); selection = null; draft = null; drag = null;
       const selectedId = data.plays.some(p => p.id === state.selectedId) ? state.selectedId : data.plays[0].id;
-      state = { data, selectedId }; book = current().book; query = ''; filter = ''; formationFilter = '';
-      history.past = []; history.future = []; if (!$('#app').hidden) render();
+      state = { data, selectedId }; book = current().book;
+      if(changedBook){query='';filter='';formationFilter='';}
+      if(!changedBook&&!sameData){history.clear();toast(uxCopy('Team changes loaded. Earlier diagram undo history was reset to protect the new version.','已载入团队更新；旧图的撤销记录已重置，以保护新版本。'),{type:'info'});}
+      if (!$('#app').hidden) render();
     },
-    onStatus(value) { saveState = value; $('#save-state')?.replaceChildren(document.createTextNode(value)); },
+    onStatus(value) { saveState = value;saveKind=shared?.statusState?.()==='error'?'error':shared?.dirty?'saving':navigator.onLine===false?'offline':'saved'; $('#save-state')?.replaceChildren(document.createTextNode(value));syncSaveStatus(); },
     onAnalysisData(data, record) { matchupView.onData(data, record); },
-    onPermissionLost(error) { boardAssistant?.close({clear:true}); resetAnimation(); draft = null; drag = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
+    onPermissionLost(error) { clearModelCredential();boardAssistant?.close({clear:true}); resetAnimation(); draft = null; drag = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
+    onModeChange:syncWorkspaceNavigation,
+    getHomeContext:homeContext,
+    onLogout() {clearModelCredential();boardAssistant?.close({clear:true});history.clear();syncWorkspaceNavigation('login');},
     showEditor,
-    showRoster: visible => rosterView.show(visible),
+    showRoster: visible => {rosterView.show(visible);if(visible)syncWorkspaceNavigation('roster');},
     canLeaveRoster: () => !rosterView.isEditing(),
-    showAnalysis(show) { matchupView.show(show); },
+    showAnalysis(show) { matchupView.show(show);if(show)syncWorkspaceNavigation('analysis'); },
     isBusy: () => rosterView.isEditing() || !!drag || !!draft || playing || !!$('.modal') || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName),
     openModal, closeModal, toast, download
   });
   shared.init();
 } else {
-  const demoData = localizedStarterWorkspace();
-  demoAnalysisData = demoData;
+  demoAnalysisData = state.data;
   const demoRecord = { id: 'demo', revision: 0, title: getLocale() === 'en' ? 'Sample matchup' : '示例战术本' };
-  const demoView = createMatchupView({ root: $('#ai-matchup-root'), request: createDemoRequest(() => demoData), getCurrent: () => demoRecord, getData: () => demoData, isDirty: () => false, demo: true });
+  const demoView = createMatchupView({ root: $('#ai-matchup-root'), request: createDemoRequest(() => state.data), getCurrent: () => ({...demoRecord,revision:localRevision}), getData: () => state.data, isDirty: () => false, demo: true,onEditSuggestion:editAnalysisSuggestion });
   analysisView = demoView;
-  startGuestWorkspace({
+  guestRouter=startGuestWorkspace({
     showEditor,
-    showRoster: visible => rosterView.show(visible),
-    showAnalysis: visible => demoView.show(visible),
+    getHomeContext:homeContext,
+    showRoster: visible => {rosterView.show(visible);if(visible)syncWorkspaceNavigation('roster');},
+    showAnalysis: visible => {if(visible){demoView.onData(state.data,{...demoRecord,revision:localRevision});syncWorkspaceNavigation('analysis');}demoView.show(visible);},
     canLeave: () => !rosterView.isEditing() && !$('.modal') && (!draft || window.confirm(t('modal.switching_will_discard_the_route_points_being_draw'))),
     onLeaveEditor() { draft = null; drag = null; tool = 'select'; },
     onEnter(mode) {
+      syncWorkspaceNavigation(mode);
       if (localRecovery && (mode === 'editor' || mode === 'roster')) localRecoveryModal();
     },
   });

@@ -29,7 +29,7 @@ async function withView(run) {
     view.onData(data, record); view.show(true); input('apiKey', 'fake-test-key');
     await run({ win, root, view, calls, input, analyze, setResponder: fn => { respond = fn; }, setStorageFailure: value => { failWrites = value; } });
   } finally {
-    view.show(false); await win.happyDOM.abort();
+    view.destroy(); await win.happyDOM.abort();
     for (const name of names) { if (previous[name]) Object.defineProperty(globalThis, name, previous[name]); else delete globalThis[name]; }
   }
 }
@@ -47,7 +47,8 @@ test('successful import invalidates a report generated while the file was being 
     assert.match(root.querySelector('.ai-scenario').textContent, /Report from previous knowledge/);
     delayed.finish('Mesh crossing team reminder: check the low-hole defender.'); await pending;
     assert.ok(JSON.parse(win.localStorage.getItem(KNOWLEDGE_STORAGE_PREFIX + 'functional-team')).cards.length);
-    assert.equal(root.querySelector('.ai-scenario'), null, 'the adopted knowledge must invalidate the earlier report');
+    assert.ok(root.querySelector('.ai-scenario'), 'The adopted knowledge marks the previous report stale without erasing it');
+    assert.match(root.querySelector('.ai-report-context').textContent,/输入已变化/);
     assert.equal(root.querySelector('.ai-model-waiting'), null);
     assert.equal(root.querySelector('[data-ai-action="analyze"]').disabled, false);
   });

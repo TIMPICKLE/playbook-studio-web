@@ -3,11 +3,13 @@ import { COLORS, FORMATIONS, clone, formationPlayers, mirrorPlay, movePlayer, ui
 import { spaceMaddenLine } from './madden-model.js';
 import { linkRosterPlayer, personnelMatches } from './board-personnel.js';
 import { LEAGUE_SIZES, defaultFormation, getPlayLeague, resolveFormation } from './game-formats.js';
+import { movePlayerGroup, removePlayerGroup } from './player-group.js';
 
 const id = z.string().min(1).max(100);
 const color = z.string().regex(/^#[0-9a-f]{6}$/i);
 const coordinate = z.number().min(0).max(100);
 const point = z.strictObject({ x: coordinate, y: coordinate });
+const playerIds = z.array(id).min(1).max(40).refine(values=>new Set(values).size===values.length,'Choose each player only once.');
 const points = z.array(point).min(2).max(200);
 const side = z.enum(['offense', 'defense']);
 const shape = z.enum(['circle', 'square', 'triangle']);
@@ -19,7 +21,7 @@ const zoneFields = { x: coordinate, y: coordinate, rx: z.number().min(1).max(50)
 const annotationFields = { x: coordinate, y: coordinate, text: z.string().max(200) };
 const patch = fields => z.strictObject(fields).partial().refine(value => Object.keys(value).length > 0, 'An update must include at least one field.');
 const bindings = {
-  player_add:['add-player'],player_update:['player:props','field:drag-player'],object_remove:['delete-selection'],
+  player_add:['add-player'],player_update:['player:props','field:drag-player'],object_remove:['delete-selection'],players_move:['field:drag-players','selection-nudge'],players_remove:['delete-selection'],
   route_add:['field:draw-route'],route_update:['route:props','field:drag-point'],zone_add:['field:draw-zone'],zone_update:['zone:props','field:drag-zone'],
   annotation_add:['create-text'],annotation_update:['annotation:props','field:drag-annotation'],ball_update:['ball:props'],play_update:['play:props','favorite'],
   play_mirror:['mirror'],formation_apply:['apply-formation'],opponents_set:['opponents'],line_space:['space-madden-line'],personnel_apply:['apply-personnel'],
@@ -30,6 +32,8 @@ const command = (id, schema, description, destructive = false) => ({ id, schema,
 export const EDITOR_PLAY_COMMANDS = [
   command('player_add', z.strictObject({ kind: z.literal('player_add'), ...z.strictObject(playerFields).partial().shape, side, as: id.optional() }), 'Add one player marker, optionally linked to an existing roster player.'),
   command('player_update', z.strictObject({ kind: z.literal('player_update'), playerId: id, patch: patch(playerFields) }), 'Update a player. Moving coordinates translates attached routes; a manual name change clears the roster link.'),
+  command('players_move', z.strictObject({kind:z.literal('players_move'),playerIds,dx:z.number().min(-100).max(100),dy:z.number().min(-100).max(100)}), 'Move a real group by one shared delta in board units (2 board units = 1 yard). Attached routes and motion links move together. The whole group stops at the nearest field edge; relative spacing is preserved.'),
+  command('players_remove', z.strictObject({kind:z.literal('players_remove'),playerIds}), 'Remove a real group and its routes in one transaction. Cleans ball and blocking references and retains at least one player.', true),
   command('object_remove', z.strictObject({ kind: z.literal('object_remove'), objectType: z.enum(['player', 'route', 'zone', 'annotation']), objectId: id }), 'Remove an object, clean its references, and retain a valid ball carrier.', true),
   command('route_add', z.strictObject({ kind: z.literal('route_add'), playerId: id, routeKind, points, color: color.optional(), smooth: z.boolean().optional(), endCap: routeFields.endCap.optional(), optional: z.boolean().optional(), delay: routeFields.delay.optional(), duration: routeFields.duration.optional(), as: id.optional() }), 'Draw a complete route, block, motion or pass path. Points include the starting point at its owner or active motion endpoint.'),
   command('route_update', z.strictObject({ kind: z.literal('route_update'), routeId: id, patch: patch(routeFields) }), 'Update route geometry, timing or styling. Points include the start; linked motion routes remain coherent.'),
@@ -77,13 +81,7 @@ function relinkMotion(play, before, after) {
 }
 
 function removePlayers(play, ids) {
-  const retained = play.players.filter(player => !ids.has(player.id));
-  if (!retained.length) fail('A play must retain at least one player.');
-  play.players = retained;
-  play.routes = play.routes.filter(route => !ids.has(route.playerId)).map(route => route.blockTargets
-    ? { ...route, blockTargets: route.blockTargets.map(target => ids.has(target) ? null : target) } : route);
-  if (ids.has(play.ball.holderId)) play.ball.holderId = retained.find(player => player.side === 'offense' && player.label === 'QB')?.id || retained[0].id;
-  if (ids.has(play.ball.receiverId)) play.ball.receiverId = '';
+  return removePlayerGroup(play,[...ids]);
 }
 
 function bindRoster(play, marker, patch, roster) {
@@ -136,6 +134,10 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
     const rosterPatch = { ...op.patch };
     if (!has(op.patch, 'rosterId') && sameName) delete rosterPatch.name;
     bindRoster(play, marker, rosterPatch, roster);
+  } else if(op.kind==='players_move') {
+    Object.assign(result,movePlayerGroup(play,op.playerIds,op.dx,op.dy));
+  } else if(op.kind==='players_remove') {
+    Object.assign(result,removePlayerGroup(play,op.playerIds));
   } else if (op.kind === 'object_remove') {
     const key = { player: 'players', route: 'routes', zone: 'zones', annotation: 'annotations' }[op.objectType];
     const object = find(play[key], op.objectId, op.objectType);
@@ -220,6 +222,7 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
 
 const labels = {
   player_add: ['添加球员', 'Add player'], player_update: ['修改球员', 'Update player'], object_remove: ['删除对象', 'Remove object'],
+  players_move:['整组移动球员','Move player group'],players_remove:['整组删除球员','Remove player group'],
   route_add: ['绘制路线', 'Draw route'], route_update: ['修改路线', 'Update route'], zone_add: ['添加区域', 'Add zone'], zone_update: ['修改区域', 'Update zone'],
   annotation_add: ['添加文字', 'Add annotation'], annotation_update: ['修改文字', 'Update annotation'], ball_update: ['修改球权与传球', 'Update ball'],
   play_update: ['修改战术信息', 'Update play'], play_mirror: ['镜像战术', 'Mirror play'], formation_apply: ['替换阵型', 'Replace formation'],
@@ -245,5 +248,7 @@ export function describeEditorPlayCommand(op, locale = 'zh') {
   if (op.kind === 'formation_apply') details.push(op.formation || (index ? 'Saved formation' : '已存阵型'));
   if (op.kind === 'opponents_set') details.push(index ? (op.enabled ? 'show opponents' : 'remove opponents') : (op.enabled ? '显示对手' : '移除对手'));
   if (op.kind === 'route_add') details.push(op.routeKind, `${op.points.length} ${index ? 'waypoints' : '个节点'}`);
+  if(['players_move','players_remove'].includes(op.kind))details.push(`${op.playerIds.length} ${index?'players':'名球员'}`);
+  if(op.kind==='players_move')details.push(`ΔX ${op.dx}, ΔY ${op.dy}`);
   return [label,...details.filter(Boolean)].join(' · ');
 }

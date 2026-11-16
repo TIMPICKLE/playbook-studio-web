@@ -2,7 +2,7 @@
 
 [简体中文](AI_GUIDE.md) · **English** · [Back to README](../README.en.md)
 
-Playbook Studio has two AI entry points. The board assistant edits and operates the editor. Matchup analysis uses diagrams and coaching references to discuss conditional situations. Both concern **American football**, but their settings, inputs and execution differ.
+Playbook Studio has two AI entry points. The board assistant edits and operates the editor. Matchup analysis uses diagrams and coaching references to discuss conditional situations. Both concern **American football** and share model-connection settings, with different inputs and workflows.
 
 This guide describes the current repository implementation. The version available online depends on the actual deployment.
 
@@ -58,11 +58,13 @@ Some services use the name “Claude Code Messages.” Here this means the **Ant
 
 Changing API format within one provider retains the model ID, key and custom address; the actual endpoint is resolved for the new format when sending. Switching providers selects the new provider's default model and format, and clears the key and custom address to avoid reusing another provider's credentials.
 
-Settings remain in current page memory. Re-enter the key after refreshing; requests consume your selected provider's credits. The application handles stateless OpenAI Responses history and tool results. You do not need to manage `response_id` or provide a previous response ID.
+The two AI entry points share the provider, API format, model, custom address and current-session key. Confirming connection settings in one makes them available in the other. Non-secret preferences persist in this browser; **the key stays in current page memory and must be re-entered after refresh**. It is not stored in plays, exports or persistent storage. Signing out or losing access clears credentials.
+
+Requests consume your selected provider's credits. The application handles stateless OpenAI Responses history and tool results. You do not need to manage `response_id` or provide a previous response ID.
 
 ## Board assistant: from instruction to result
 
-1. Open the play you want to work on and select **AI**. Type an instruction, or dictate it if the browser supports speech recognition. Review dictated text before sending.
+1. Open the play you want to work on and select **AI**. On desktop, AI and properties share a task area, with an optional floating panel. Touch users can collapse the panel to inspect the field. Type an instruction, or dictate it if the browser supports speech recognition. Review dictated text before sending.
 2. Describe the goal, such as “Add a complete 4-3 defense to this Mesh diagram while retaining the offense and its routes.” You do not need internal IDs or manually placed new players.
 3. Inspect the response. Data edits show a diagram preview or change list; view and rehearsal controls report the executed state; file workflows show **Continue**.
 4. For data edits, rehearse the preview when available, then **Apply** or **Discard**. An applied group can be undone together.
@@ -111,7 +113,16 @@ A 4-3 describes personnel and starting alignment. **It does not automatically as
 
 `awaiting_user` means a workflow is prepared or waiting for input. It does not mean a file has been imported, a download saved, or a page printed. Check browser downloads after export starts. Opening the print panel still requires printing. For “edit, then export,” apply the edit before sending the export instruction.
 
-A pending preview does not save the play. The assistant's dedicated undo can expire after other edits; use the editor's undo/redo history then. The current play retains five recent structured context entries. Do not rely on that conversation to identify objects after refreshing or switching plays.
+A pending preview does not save the play. The assistant's dedicated undo can expire after other edits; use the editor's labeled undo/redo history then.
+
+### Continuous conversation and drafts
+
+- Before applying, continue with “Two yards deeper” or “Move that receiver left.” Changes accumulate in the same draft and still require confirmation. Collapsing the assistant does not discard the proposal.
+- Select whole conversational change groups, choose **Update preview**, then apply. If a later group depends on an excluded earlier step, retain the required group rather than committing an incomplete edit. You can also revert the latest step or discard the proposal.
+- History distinguishes pending, applied, undone and failed turns. Execution shows factual stages; failures retain recoverable input and valid proposals. Ambiguous targets can be checked through candidate choices.
+- Conversations are isolated by workspace and play. Returning to a play restores its in-page history. Switching plays or changing relevant objects requires a fresh preview; proposals cannot be applied to a different diagram. Conversations remain in page memory and do not survive refresh.
+
+Recent exchanges and valid targets are supplied to the model, but this does not guarantee reliable pronoun resolution by every provider. Check the highlighted target and preview. See the [UX report](UX_REDESIGN.md) for validation limits.
 
 ### Progress checks and process details
 
@@ -138,7 +149,13 @@ The brief describes visible markers, paths and zones. Drawn blocking lines do no
 
 For example: “Third-and-six, confirmed Cover 3 spot. From Y's perspective on Mesh, who should be observed? Separate visible diagram facts from unconfirmed team rules.” If coverage is not confirmed, describe it as unknown instead.
 
-Changing the plays, coverage, context or knowledge invalidates the old report and cancels related pending requests. An old report is not a conclusion about a newly selected matchup.
+Changing the plays, coverage, context or knowledge marks the previous report as outdated and cancels related requests. The report and its original diagram snapshot remain available for reference. Connection changes do not change tactical facts, and a failed or canceled replacement does not clear the previous valid report.
+
+### Follow up and use a suggestion
+
+Ask follow-up questions about the selected scenario using the same matchup, version and previous valid answer. Changed tactical input requires a fresh analysis first. Failed follow-ups retain the question; analysis sessions are isolated by playbook.
+
+To edit a play, send a suggestion to the editor. This opens the corresponding offensive play and prepares an assistant prompt; **it does not modify the diagram**. Review and send the instruction, inspect the preview, then apply the complete proposal or selected change groups. Viewers can discuss reports but cannot prepare write proposals.
 
 ### Cloud and no-sign-in analysis
 
@@ -195,7 +212,7 @@ Pages and figure regions preserve provenance. **Being on the same page does not 
 | Entry point | Possible request data |
 |---|---|
 | Board assistant | Current diagram and notes, player names or numbers, and tool-read outlines of plays, roster, formations and personnel groups used to identify and edit objects |
-| Separate matchup analysis | Selected offensive and defensive diagram objects, coverage assumptions, game context and selected reference excerpts; complete roster, player names, image pixels and coach notes are excluded by default |
+| Separate matchup analysis | Selected offensive and defensive diagram objects, coverage assumptions, game context and selected reference excerpts; follow-ups also carry the previous valid report, scenario and question. Complete roster, player names, image pixels and coach notes are excluded by default |
 | Opt-in coach notes in analysis | Up to the first 3,000 characters per play in cloud analysis, or 2,000 per play in the no-sign-in demo |
 
 Keys remain in current page memory. The no-sign-in version requests the provider from the browser; the cloud version calls from the server, which receives model configuration and the key for that request. Do not paste keys into instructions or knowledge documents.
@@ -208,6 +225,9 @@ Keys remain in current page memory. The no-sign-in version requests the provider
 | A player is missing or the wrong repeated role is selected | Add offensive/defensive side, left/right, name or number. Check the actual marker in the preview |
 | The play is only a source image | Use a reconstructed editable entry or the existing conversion workflow. Opening conversion does not mean all images have been recognized |
 | Applying says the play has changed | Relevant objects, personnel or formations changed. Regenerate and inspect the preview |
+| Continue after collapsing the panel | Reopen the assistant, inspect the pending proposal and continue. Only an explicit discard cancels the draft |
+| Selected groups require an earlier step | Keep the group that creates the target or prerequisite, then update the preview; do not bypass validation |
+| The report is marked outdated | Review its original diagram for reference; analyze the current input before following up or preparing edits |
 | No references match | Check concept terms, coverage assumptions and query words, or import relevant material. Missing references must not be fabricated |
 | A teammate cannot see imported knowledge | Packs are local to a browser and playbook. Export the pack for the teammate to import on their device |
 | Incompatible format, or HTTP 400 / 404 | Check model support for the chosen format, the address prefix and final endpoint. Custom gateways do not gain `/v1` automatically. Messages is not a Claude Code login |
@@ -221,6 +241,7 @@ Keys remain in current page memory. The no-sign-in version requests the provider
 ## Further reading
 
 - [Board tool flow and maintenance](BOARD_ASSISTANT.md) · [Shared commands and full feature mapping](EDITOR_COMMAND_ARCHITECTURE.md)
+- [UX changes and validation](UX_REDESIGN.md) · [Interaction and design system](UX_DESIGN_SYSTEM.md)
 - [Analysis research and evaluation](ai-analysis/README.md) · [Local PDF preprocessing](ai-analysis/pdf-ingestion.md)
 - [Multimodal knowledge design](ai-analysis/knowledge-architecture.md) · [Real-model evaluation cases](../evals/board-assistant/README.md)
 

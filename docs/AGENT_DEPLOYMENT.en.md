@@ -142,14 +142,14 @@ Open **[http://127.0.0.1:8787/editor/index.html](http://127.0.0.1:8787/editor/in
 
 **A working deployment does not automatically connect a model.** Without an API key you can still edit, rehearse, manage players, import/export, use the Madden catalog, and read diagram briefs and retrieved knowledge. Sending AI assistant instructions or generating model analysis requires a model configuration.
 
-### Configure each entry separately
+### Shared connection settings for both entries
 
 | Entry | Settings location | Main use |
 |---|---|---|
 | Board assistant | Workbench → **Edit playbook** → field-edge **AI** → settings | Add defenses, edit routes, and operate the board using natural language |
 | Matchup analysis | Workbench → **AI matchup analysis** → left step **02 Connect model** | Analyze diagrams together with knowledge sources |
 
-For each entry, choose **provider → API format → model ID → API key**. Preset providers need no manual URL. Use a model ID actually available from your provider that supports the required tool calls.
+In either entry, choose **provider → API format → model ID → API key**; the confirmed connection settings are shared by both. Preset providers need no manual URL. Use a model ID actually available from your provider that supports the required tool calls.
 
 | Provider | Supported API formats |
 |---|---|
@@ -159,7 +159,7 @@ For each entry, choose **provider → API format → model ID → API key**. Pre
 | OpenRouter | OpenAI Chat Completions, OpenAI Responses |
 | Custom compatible service | All three formats; also supply an HTTPS URL |
 
-Each entry keeps its settings in **that page's memory**. Enter the API key again after refreshing; switching providers also clears it. Preset providers do not require a shared server-side `OPENAI_API_KEY`. “Claude Code Messages” here means the Anthropic Messages API format with API credentials, rather than CLI sign-in or a subscription account.
+Both entries share the model connection. Non-secret preferences persist in this browser; **the API key stays only in current page memory**. Enter the key again after refreshing; switching providers also clears it. Preset providers do not require a shared server-side `OPENAI_API_KEY`. “Claude Code Messages” here means the Anthropic Messages API format with API credentials, rather than CLI sign-in or a subscription account.
 
 In the complete local version, your local API sends the model requests. The provider still needs network access and available credits. **Complete local deployment does not include offline model inference.**
 
@@ -250,6 +250,6 @@ Inspect Node, Git, the current branch, and uncommitted changes; preserve existin
 Install dependencies, build frontend/backend output, initialize a new local D1 database, and provision team accounts. For an existing database, apply only missing migrations.
 Handle account credentials and the one-time setup key only in ignored local files, not chat, logs, or Git. Close initialization when finished.
 Use /editor/index.html to verify sign-in, autosave, persistence after restart, Madden assets, rehearsal, and JSON export.
-Explain the separate model settings for both AI entries. Test with authorized API credentials if available; otherwise record that AI is not connected.
+Explain the shared model connection and the page-memory-only key used by both AI entries. Test with authorized API credentials if available; otherwise record that AI is not connected.
 Report the actual URL, source revision, data location, maintenance steps, and verification results.
 ```

@@ -144,12 +144,14 @@ test('delete confirmation, roster cap and search handle legacy names and jersey 
     assert.equal(q('.roster-results th[scope=row]').textContent, name);
   }
   click('edit');
-  win.confirm = () => false;
   click('remove');
   assert.equal(view.isEditing(), true);
   assert.equal(state.writes, 0);
-  win.confirm = () => true;
+  assert.equal(q('.roster-confirm').hidden, false);
+  click('keep');
+  assert.equal(q('.roster-confirm').hidden, true);
   click('remove');
+  click('confirm-remove');
   assert.equal(state.data.roster.some(player => player.name === name), false);
   assert.ok(q('[data-roster=clear]'));
   click('clear');

@@ -1,0 +1,56 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { Window } from 'happy-dom';
+import { STORAGE_KEY, starterWorkspace, encodeWorkspace, decodeWorkspace } from '../web/model.js';
+import { ONBOARDING_STORAGE_KEY } from '../web/onboarding.js';
+
+test('first-play progress follows real actions while module navigation preserves the working play', {timeout:15000}, async t => {
+  const win=new Window({url:'http://localhost:3000/local.html',width:1440,height:1000});
+  win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
+  win.localStorage.setItem(STORAGE_KEY,encodeWorkspace(starterWorkspace()));
+  win.localStorage.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify({dismissed:true,completed:[]}));
+  const names=['window','document','navigator','localStorage','location','history','Image','Blob','requestAnimationFrame','cancelAnimationFrame'];
+  const prior=Object.fromEntries(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
+  for(const name of names)Object.defineProperty(globalThis,name,{configurable:true,value:['requestAnimationFrame','cancelAnimationFrame'].includes(name)?win[name].bind(win):win[name]});
+  const oldCreate=URL.createObjectURL,oldRevoke=URL.revokeObjectURL,oldClick=win.HTMLAnchorElement.prototype.click;
+  URL.createObjectURL=()=> 'blob:workflow-export';URL.revokeObjectURL=()=>{};win.HTMLAnchorElement.prototype.click=()=>{};
+  t.after(async()=>{
+    win.dispatchEvent(new win.Event('pagehide'));await win.happyDOM.abort();
+    URL.createObjectURL=oldCreate;URL.revokeObjectURL=oldRevoke;win.HTMLAnchorElement.prototype.click=oldClick;
+    for(const name of names){if(prior[name])Object.defineProperty(globalThis,name,prior[name]);else delete globalThis[name];}
+  });
+  const q=selector=>win.document.querySelector(selector);
+  const click=action=>{const node=q(`[data-action="${action}"]`);assert.ok(node,action);node.click();};
+  const progress=()=>JSON.parse(win.localStorage.getItem('playbook-ui-progress:v1:local')||'{}');
+  const navigate=mode=>{const node=q(`.workspace-nav button[data-workspace-mode="${mode}"]`);assert.ok(node);node.click();};
+  await import(`../web/app.js?home-workflow-integration=${Date.now()}`);
+  assert.equal(win.document.body.dataset.workspaceMode,'editor');
+  assert.equal(progress().createdPlay,undefined,'opening a sample is not a completed creation task');
+  click('new');q('#new-title').value='First Workflow';q('#new-count').value='5';
+  q('#new-count').dispatchEvent(new win.Event('change',{bubbles:true}));click('create-play');
+  assert.equal(progress().createdPlay,true);assert.notEqual(progress().routeAdded,true);
+  const title=q('#main-content h1').textContent;
+  const raw=win.localStorage.getItem(STORAGE_KEY);
+  navigate('roster');assert.equal(win.document.body.dataset.workspaceMode,'roster');
+  assert.equal(win.localStorage.getItem(STORAGE_KEY),raw,'module navigation cannot mutate football data');
+  navigate('analysis');assert.equal(win.document.body.dataset.workspaceMode,'analysis');
+  navigate('editor');assert.equal(win.document.body.dataset.workspaceMode,'editor');
+  assert.equal(q('#main-content h1').textContent,title);
+  const play=decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)).plays.find(item=>item.title==='First Workflow');
+  const marker=play.players.find(player=>player.label==='X');
+  q(`#field [data-player="${marker.id}"]`).dispatchEvent(new win.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+  click('tool:route');
+  q('#field .pitch-svg').getBoundingClientRect=()=>({left:0,top:0,right:1000,bottom:800,width:1000,height:800});
+  q('#field').dispatchEvent(new win.PointerEvent('pointerdown',{bubbles:true,button:0,clientX:550,clientY:300,pointerId:1}));
+  click('finish-route');assert.equal(progress().routeAdded,true);
+  click('play');click('play');assert.equal(progress().rehearsed,true);
+  assert.notEqual(progress().exported,true);
+  click('export');click('download-play');
+  assert.notEqual(progress().exported,true,'a single-play export is not a full playbook backup');
+  click('download-json');assert.equal(progress().exported,true);click('close-modal');
+  q('[data-cloud-action="home"]').click();
+  assert.match(q('.studio-choice-editor p').textContent,/First Workflow/);
+  assert.match(q('.home-first-task summary').textContent,/4 \/ 4/);
+  assert.equal(q('.home-first-task').open,false);
+});

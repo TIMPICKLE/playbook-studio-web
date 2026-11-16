@@ -20,6 +20,7 @@ export default {
   'roster.save': 'Save',
   'roster.remove': 'Remove player',
   'roster.confirmRemove': 'Remove {name} from this playbook’s roster?',
+  'roster.removeImpact': 'This clears their personnel assignments and play bindings. Other players and plays stay in place.',
   'roster.required': 'Enter the player’s name.',
   'roster.teamRequired': 'Enter the team name.',
   'roster.workspaceChanged': 'The active playbook changed. Copy any edits you want to keep, then close this dialog.',

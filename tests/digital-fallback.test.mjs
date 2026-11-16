@@ -16,6 +16,17 @@ function fixture(markup='<svg class="pitch-svg" xmlns="http://www.w3.org/2000/sv
   return {win,doc,stage,svg,renderer};
 }
 
+test('fallback selection rings represent the same multiple-player selection as the traditional field',()=>{
+  const f=fixture(),play=starterWorkspace().plays[0],ids=play.players.slice(0,2).map(player=>player.id);
+  try {
+    f.renderer.draw({play,settings:{},time:0,selected:{type:'players',ids}});
+    const active=[...f.doc.querySelectorAll('[data-vector-player]')].filter(node=>node.querySelector('path[opacity="0.9"]')).map(node=>node.dataset.vectorPlayer);
+    assert.deepEqual(new Set(active),new Set(ids));
+    f.renderer.draw({play,settings:{},time:0,selected:null});
+    assert.equal(f.doc.querySelectorAll('path[opacity="0.9"]').length,0);
+  }finally{f.renderer.destroy();f.win.happyDOM.abort();}
+});
+
 test('preview masks hide and restore fallback pieces without rebuilding or mutating them',()=>{
   const f=fixture(),play=starterWorkspace().plays[0],before=JSON.stringify(play),player=play.players[0];
   try{

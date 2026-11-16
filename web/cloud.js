@@ -44,22 +44,27 @@ export class SharedWorkspace {
   }
   renderHome() {
     document.title = t('cloud.workspaceTitle');
-    document.querySelector('#cloud-root').innerHTML = studioHome({ user: this.user, bookCount: this.books.length });
+    document.querySelector('#cloud-root').innerHTML = studioHome({ user: this.user, bookCount: this.books.length,...this.hooks.getHomeContext?.() });
   }
   setMode(mode) {
     if (this.dirty) throw new Error(t('cloud.unsyncedChanges'));
     if (this.rosterFormOpen) return;
     const previous = this.mode;
     this.mode = mode;
-    this.hooks.showEditor(mode === 'editor' && !!this.current);
-    this.hooks.showAnalysis?.(mode === 'analysis');
-    this.hooks.showRoster?.(mode === 'roster' && !!this.current && !this.accessError);
+    this.hooks.onModeChange?.(mode);
+    if(mode!=='editor')this.hooks.showEditor(false);
+    if(mode!=='analysis')this.hooks.showAnalysis?.(false);
+    if(mode!=='roster')this.hooks.showRoster?.(false);
+    if(mode==='editor')this.hooks.showEditor(!!this.current);
+    if(mode==='analysis')this.hooks.showAnalysis?.(true);
+    if(mode==='roster')this.hooks.showRoster?.(!!this.current&&!this.accessError);
     this.renderBar();
     if (mode === 'home') document.querySelector(`[data-cloud-action="enter-${previous}"]`)?.focus({ preventScroll: true });
     window.scrollTo?.(0, 0);
   }
   statusState() { return /冲突|失败|失效|不可用|尚未|未保存|变更/.test(this.status) ? 'error' : /离线|等待|正在|恢复/.test(this.status) ? 'pending' : 'saved'; }
   renderLogin() {
+    this.hooks.onModeChange?.('login');
     this.cardPicker?.destroy(); this.cardPicker = null;
     document.title = t('cloud.loginPageTitle');
     const returnTo = `${location.pathname}${location.search}`;
@@ -189,7 +194,7 @@ export class SharedWorkspace {
       if (!input.value.trim() || !pass.value) { (input.value.trim() ? pass : input).setAttribute('aria-invalid','true'); (input.value.trim() ? pass : input).focus(); throw new Error(t('cloud.selectAccountPassword')); }
       await request('/api/auth/login', { method: 'POST', body: { username: input.value.trim(), password: pass.value } }); pass.value = ''; location.reload(); return;
     }
-    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen) return; if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
+    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen) return;this.hooks.onLogout?.(); if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
     if (action === 'toggle-password') { const input = document.getElementById(node.dataset.target); input.type = input.type === 'password' ? 'text' : 'password'; node.textContent = t(input.type === 'password' ? 'cloud.show' : 'cloud.hide'); node.setAttribute('aria-pressed',String(input.type === 'text')); node.setAttribute('aria-label', t(input.type === 'text' ? 'cloud.hidePassword' : 'cloud.showPassword')); return; }
     if (action === 'privacy') return this.hooks.openModal(t('cloud.privacyTitle'), `<p>${t('cloud.privacyStorage')}</p><p>${t('cloud.privacyPermissions')}</p><p>${t('cloud.privacySecurity')}</p>`, `<button class="button primary" data-action="close-modal">${t('cloud.close')}</button>`);
     if (action === 'save-now') { if (this.sync?.viewError) throw this.sync.viewError; if (!this.sync?.pending) return this.hooks.toast(t('cloud.savedCloud')); await this.sync.flush(); if (!this.sync.dirty) this.hooks.toast(t('cloud.savedShared')); return; }

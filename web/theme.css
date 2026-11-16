@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Playbook Studio 5 · "Stage"
+   Playbook Studio · Field-first workspace
    --------------------------------------------------------------------------
    The field is the product. It sits centre stage under a soft floodlight
    on graphite turf; everything else is a control that floats around it.
@@ -12,8 +12,8 @@
    4. Type with conviction: a condensed athletic face for names and numbers,
       the system face for everything you read.
 
-   Loaded last; it owns palette, type, shape and surface rules. Earlier
-   sheets keep layout mechanics and behaviour.
+   Owns shared design tokens and control appearance. Domain sheets keep their
+   structures; component-layout.css owns workspace allocation and containers.
    ========================================================================== */
 
 @font-face {
@@ -27,24 +27,24 @@
 
 :root {
   /* Graphite stage: true neutrals, a hair cool. */
-  --night-0: #0e0f11;   /* the stage */
-  --night-1: #16171a;   /* floating islands */
-  --night-2: #1e2024;   /* fills inside islands */
-  --night-3: #282a2f;   /* hover */
-  --night-4: #34373d;   /* pressed / neutral selection */
-  --hairline: #ffffff10;
-  --hairline-strong: #ffffff1f;
+  --night-0: #14171b;
+  --night-1: #1c2026;
+  --night-2: #252a32;
+  --night-3: #303741;
+  --night-4: #3d4652;
+  --hairline: #ffffff14;
+  --hairline-strong: #ffffff30;
 
   --text-1: #f3f4f6;
-  --text-2: #b4b8c0;
-  --text-3: #81868f;
+  --text-2: #c3c9d2;
+  --text-3: #a0a9b7;
 
   /* Accent: polished silver. White is the loudest thing in the interface. */
   --accent-main: #e4e7eb;
   --accent-strong: #ffffff;
   --on-accent: #111214;
   --accent-soft: #ffffff14;
-  --accent-sheen: linear-gradient(180deg, #fbfcfd 0%, #dfe3e8 55%, #c9ced5 100%);
+  --accent-sheen: #e4e7eb;
   --turf: #1a1c20;
   --focus: #a9c1ff;
   --focus-soft: #a9c1ff33;
@@ -54,18 +54,47 @@
   /* Type */
   --font-ui: system-ui, -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Microsoft YaHei', 'Segoe UI', sans-serif;
   --font-display: 'Big Shoulders Display', 'Arial Narrow', var(--font-ui);
-  --t-xs: 12px; --t-sm: 13px; --t-md: 14px; --t-lg: 16px; --t-xl: 20px; --t-2xl: 28px; --t-3xl: 40px; --t-hero: 60px;
+  --t-xs: 12px; --t-sm: 13px; --t-md: 14px; --t-lg: 16px; --t-xl: 20px; --t-2xl: 28px; --t-3xl: 32px; --t-hero: 36px;
 
   /* Shape: four radii, chosen by role. Islands are the roundest thing on screen. */
-  --r-inset: 8px; --r-control: 12px; --r-island: 24px; --r-pill: 999px;
+  --r-inset: 6px; --r-control: 8px; --r-island: 14px; --r-pill: 999px;
   --ui-radius-panel: var(--r-island); --ui-radius-card: var(--r-control);
   --ui-radius-control: var(--r-control); --ui-radius-inset: var(--r-inset);
 
-  --island-shadow: 0 1px 0 #ffffff0a inset, 0 24px 48px -24px #000000e6;
-  --dock-shadow: 0 1px 0 #ffffff14 inset, 0 0 0 1px #ffffff12, 0 18px 40px -10px #000000f2;
+  --island-shadow: 0 8px 24px #00000024;
+  --dock-shadow: 0 1px 0 #ffffff0a inset, 0 3px 12px #00000024;
   --ease-out: cubic-bezier(.22, 1, .36, 1);
 
+  --ui-bg: var(--night-0);
+  --ui-surface: var(--night-1);
+  --ui-surface-raised: var(--night-2);
+  --ui-surface-hover: var(--night-3);
+  --ui-text: var(--text-1);
+  --ui-text-muted: var(--text-2);
+  --ui-text-subtle: var(--text-3);
+  --ui-border: var(--hairline);
+  --ui-border-strong: var(--hairline-strong);
+  --ui-accent: var(--accent-main);
+  --ui-on-accent: var(--on-accent);
+  --ui-focus: var(--focus);
+  --ui-focus-ring: 0 0 0 3px var(--focus-soft);
+  --ui-success: #8fe0b2;
+  --ui-warning: #f2cf89;
+  --ui-danger: var(--danger-1);
+  --ui-info: #a7ccfa;
+  --ui-preview: #b4d4ff;
+  --ui-preview-soft: #b4d4ff18;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px;
+  --motion-fast: 120ms; --motion-normal: 180ms; --motion-panel: 220ms;
+  --z-header: 20; --z-drawer: 45; --z-assistant: 76; --z-modal: 80; --z-toast: 90;
+
   /* Legacy names consumed by older sheets, remapped onto the system. */
+  --paper:var(--ui-bg); --surface:var(--ui-surface); --surface-soft:var(--ui-surface-raised);
+  --glass:var(--ui-surface); --glass-raised:var(--ui-surface-raised);
+  --glass-edge:var(--ui-border-strong); --glass-shadow:var(--island-shadow);
+  --radius:var(--r-control); --cloud-height:0px;
+  --ease-spring:var(--ease-out);
   --font: var(--font-ui);
   --mono: var(--font-ui);
   --ink: var(--text-1);
@@ -86,7 +115,7 @@
    -------------------------------------------------------------------------- */
 html[data-visual-mode] { font-family: var(--font-ui); }
 html[data-visual-mode] body { font-family: var(--font-ui); font-size: var(--t-md); letter-spacing: 0; font-feature-settings: 'tnum' 1; }
-html[data-visual-mode] :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+html[data-visual-mode] :focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 3px; }
 html[data-visual-mode] ::selection { background: var(--focus-soft); color: var(--text-1); }
 html[data-visual-mode] small { font-size: var(--t-xs); }
 html[data-visual-mode] kbd {
@@ -101,12 +130,7 @@ html[data-visual-mode=traditional] {
   background: var(--night-0); color-scheme: dark;
 }
 /* A static floodlight over the stage: depth without motion. */
-html[data-visual-mode=traditional] .atmosphere {
-  background:
-    radial-gradient(1100px 520px at 58% -120px, #80869033, transparent 70%),
-    radial-gradient(700px 400px at 100% 100%, #30333814, transparent 70%),
-    var(--night-0);
-}
+html[data-visual-mode=traditional] .atmosphere { background: var(--ui-bg); }
 
 /* --------------------------------------------------------------------------
    Islands (traditional): solid, rounded, one hairline, deep soft shadow.
@@ -162,7 +186,6 @@ html[data-visual-mode] .madden-launch b { color: var(--text-3); font-weight: 400
 html[data-visual-mode] .side-divider { background: var(--hairline); margin: 18px 4px; }
 
 html[data-visual-mode=traditional] .search-box { background: var(--night-2); border: 1px solid transparent; border-radius: var(--r-control); }
-html[data-visual-mode=traditional] .search-box:focus-within { border-color: var(--focus); box-shadow: 0 0 0 3px var(--focus-soft); }
 html[data-visual-mode] .search-box input { font-size: var(--t-sm); height: 38px; }
 html[data-visual-mode] .search-box svg { color: var(--text-3); }
 html[data-visual-mode=traditional] .filters select { background-color: var(--night-2); border: 1px solid transparent; border-radius: 10px; font-size: var(--t-xs); height: 32px; color: var(--text-2); }
@@ -196,9 +219,9 @@ html[data-visual-mode] .local-status i { background: #6ee7a8; box-shadow: 0 0 0 
 html[data-visual-mode] .breadcrumbs { font-size: var(--t-sm); color: var(--text-2); }
 html[data-visual-mode] .crumb-slash { color: var(--text-3); }
 
-html[data-visual-mode] .button { font-size: var(--t-sm); font-weight: 600; border-radius: var(--r-pill); min-height: 36px; padding: 8px 16px; letter-spacing: .01em; }
+html[data-visual-mode] .button { font-size: var(--t-sm); font-weight: 600; border-radius: var(--r-control); min-height: 36px; padding: 8px 14px; letter-spacing: 0; }
 html[data-visual-mode=traditional] :is(.button.primary, .play-button) {
-  background: var(--accent-sheen); color: var(--on-accent); border: 1px solid transparent; box-shadow: 0 8px 20px -10px #989ea699; text-shadow: none; filter: none;
+  background: var(--ui-accent); color: var(--ui-on-accent); border: 1px solid transparent; box-shadow: none; text-shadow: none; filter: none;
 }
 html[data-visual-mode=traditional] :is(.button.primary, .play-button):hover:not(:disabled) { background: var(--accent-strong); color: var(--on-accent); }
 html[data-visual-mode=traditional] :is(.button.subtle, .effects-menu > summary) { background: var(--night-1); border: 1px solid var(--hairline-strong); color: var(--text-1); box-shadow: none; }
@@ -219,8 +242,8 @@ html[data-visual-mode] .vertical-rule { background: var(--hairline-strong); }
    -------------------------------------------------------------------------- */
 html[data-visual-mode] .play-header .eyebrow { font-size: var(--t-sm); color: var(--text-3); font-weight: 500; letter-spacing: 0; text-shadow: none; }
 html[data-visual-mode] .play-header h1 {
-  font-family: var(--font-display); font-size: var(--t-3xl); font-weight: 800; line-height: .95;
-  letter-spacing: .005em; color: var(--text-1); margin: 10px 0 10px; text-shadow: none;
+  font-family: var(--font-ui); font-size: var(--t-2xl); font-weight: 700; line-height: 1.25;
+  letter-spacing: -.02em; color: var(--text-1); margin: 4px 0; text-shadow: none;
 }
 html[data-visual-mode] .play-header p { font-size: var(--t-sm); color: var(--text-2); text-shadow: none; }
 html[data-visual-mode] .favorite-button { color: var(--text-3); }
@@ -255,13 +278,13 @@ html[data-visual-mode] .add-object-menu > div button small { color: var(--text-3
    The field — the one lit object.
    -------------------------------------------------------------------------- */
 html[data-visual-mode=traditional] .field-wrap {
-  background: radial-gradient(120% 90% at 50% 40%, #31343833, transparent 70%), #121314;
+  background: #191c21;
   border: 0; border-radius: var(--r-island);
-  box-shadow: 0 0 0 1px var(--hairline) inset, 0 40px 80px -40px #000;
+  box-shadow: 0 0 0 1px var(--hairline-strong) inset;
 }
 html[data-visual-mode=traditional] .pitch-viewport { background: none; }
 html[data-visual-mode] .pitch-stage > .pitch-svg { border-radius: 14px; }
-html[data-visual-mode=traditional] .pitch-stage:not(.is-perspective) > .pitch-svg { box-shadow: 0 0 0 1px #ffffff14, 0 0 80px -20px #80869066, 0 30px 60px -30px #000; }
+html[data-visual-mode=traditional] .pitch-stage:not(.is-perspective) > .pitch-svg { box-shadow: 0 0 0 1px #ffffff14; }
 html[data-visual-mode] .field-tag, html[data-visual-mode] .drag-readout {
   font-family: var(--font-ui); font-size: var(--t-xs); color: var(--text-2);
   background: #0c0d0ecc; border: 0; box-shadow: none; border-radius: var(--r-pill); padding: 4px 10px;
@@ -319,12 +342,9 @@ html[data-visual-mode] .tag { font-size: var(--t-xs); font-weight: 600; border-r
 html[data-visual-mode] .form-field { margin-bottom: 14px; }
 html[data-visual-mode] .form-field > span, html[data-visual-mode] .form-field > label { font-size: var(--t-xs); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
 html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input:not([type=checkbox]):not([type=radio]):not([type=range]), .modal select, .modal textarea) {
-  background-color: var(--night-2); border: 1px solid transparent; border-radius: var(--r-control); box-shadow: none; color: var(--text-1); font-size: var(--t-md);
+  background-color: var(--night-2); border: 1px solid var(--ui-border-strong); border-radius: var(--r-control); box-shadow: none; color: var(--text-1); font-size: var(--t-md);
 }
 html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input, .modal select, .modal textarea):hover { background-color: var(--night-3); }
-html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input, .modal select, .modal textarea):focus {
-  border-color: var(--focus); box-shadow: 0 0 0 3px var(--focus-soft); background-color: var(--night-2);
-}
 html[data-visual-mode] .inspector textarea { line-height: 1.65; }
 html[data-visual-mode] .inspector-divider { background: var(--hairline); margin: 22px 0; }
 html[data-visual-mode] .formation-actions button { font-size: var(--t-sm); color: var(--text-1); }
@@ -347,34 +367,33 @@ html[data-visual-mode] .modal h2 { font-size: var(--t-xl); font-weight: 650; let
    Desktop stage layout: floating islands around the field.
    -------------------------------------------------------------------------- */
 @media screen and (min-width:1181px) and ((min-width:1401px) or (not (any-pointer:coarse))) {
-  html[data-visual-mode] .workspace:not(.board-expanded) { grid-template-columns: 284px minmax(0, 1fr); max-width: none; }
+  html[data-visual-mode] .workspace:not(.board-expanded) { grid-template-columns: 248px minmax(0, 1fr); max-width: none; }
 
   html[data-visual-mode] .workspace .sidebar {
-    position: sticky; top: calc(12px + var(--cloud-height, 0px));
-    height: calc(100dvh - 24px - var(--cloud-height, 0px));
-    margin: 12px 0 12px 12px; padding: 20px 14px 14px;
+    position: sticky; top: calc(8px + var(--cloud-height, 0px));
+    height: calc(100dvh - 16px - var(--cloud-height, 0px));
+    margin: 8px 0 8px 8px; padding: 16px 12px 12px;
     border-radius: var(--r-island); border: 1px solid var(--hairline);
   }
   html[data-visual-mode=traditional] .workspace .sidebar { background: var(--night-1); box-shadow: var(--island-shadow); border-color: var(--hairline); }
 
-  html[data-visual-mode] .topbar { min-height: 64px; padding: 14px 28px 0 32px; }
-  html[data-visual-mode] .play-header { padding: 14px 28px 26px 32px; align-items: flex-end; }
-  html[data-visual-mode] .play-header h1 { font-size: var(--t-hero); margin: 12px 0 12px; }
-  html[data-visual-mode] .play-actions { padding-bottom: 6px; }
+  html[data-visual-mode] .topbar { min-height: 52px; padding: 8px 20px; }
+  html[data-visual-mode] .play-header { padding: 8px 20px 16px; align-items: center; }
+  html[data-visual-mode] .play-actions { padding-bottom: 0; }
 
-  html[data-visual-mode] .workspace .editor-layout { padding: 0 12px 0 32px; column-gap: 4px; }
+  html[data-visual-mode] .workspace .editor-layout { padding: 0 16px 0 20px; column-gap: 4px; }
 
   html[data-visual-mode] .workspace .inspector {
     position: sticky; top: calc(12px + var(--cloud-height, 0px));
     max-height: calc(100dvh - 24px - var(--cloud-height, 0px)); overflow: auto;
-    padding: 22px 20px 24px; border-radius: var(--r-island);
+    padding: 16px; border-radius: var(--r-island);
   }
   html[data-visual-mode=traditional] .workspace .inspector { background: var(--night-1); border: 1px solid var(--hairline); box-shadow: var(--island-shadow); }
 
-  /* The dock rides over the bottom edge of the field. */
-  html[data-visual-mode] .workspace:not(.reference-play) .pitch-viewport { padding-bottom: 46px; }
-  html[data-visual-mode] .workspace:not(.reference-play) .stage-dock { position: relative; z-index: 6; margin-top: -32px; }
-  html[data-visual-mode] .workspace:not(.reference-play) .field-wrap .field-tag { bottom: 58px; }
+  /* Tools stay outside the pitch; no overlay steals a route endpoint. */
+  html[data-visual-mode] .workspace:not(.reference-play) .pitch-viewport { padding-bottom: 0; }
+  html[data-visual-mode] .workspace:not(.reference-play) .stage-dock { position: relative; z-index: 6; margin-top: 8px; }
+  html[data-visual-mode] .workspace:not(.reference-play) .field-wrap .field-tag { bottom: 12px; }
 
   html[data-visual-mode] .draw-tools { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
   html[data-visual-mode] .draw-tools .tool-button { padding: 0 14px; }
@@ -405,10 +424,8 @@ html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true
   html[data-visual-mode] .stage-dock .editor-mode::before, html[data-visual-mode] .stage-dock .editor-mode button { border-radius: 14px; }
   html[data-visual-mode] .stage-dock .draw-tools .tool-button { border-radius: 14px; }
   html[data-visual-mode] .canvas-heading { flex-wrap: wrap; }
-  html[data-visual-mode] .play-header h1 { font-size: 36px; }
 }
 @media screen and (max-width: 600px) {
-  html[data-visual-mode] .play-header h1 { font-size: 30px; }
   html[data-visual-mode] .play-header { padding-top: 18px; padding-bottom: 14px; }
 }
 
@@ -475,7 +492,6 @@ html[data-visual-mode=traditional] .madden-drop-target { border-color: var(--acc
   html[data-visual-mode] .canvas-actions { margin-left: auto; }
 }
 @media screen and (max-width: 600px) {
-  html[data-visual-mode] .play-header h1 { font-size: 26px; }
 }
 /* In the dock, rehearsal is shown by the mode switch; tools simply dim. */
 html[data-visual-mode] .stage-dock .rehearsal-toolbar::after { display: none; }
@@ -592,26 +608,13 @@ html[data-visual-mode] .brand > small { cursor: help; }
 
 
 /* ==========================================================================
-   v5.3 polish: material header, quiet focus, toast, dark studio home
+   Shared app chrome, focus, notification and home surfaces
    ========================================================================== */
 
-/* Frozen header = a real material, never a transparent strip. The traditional
-   mode switches blur off for everything; the header gets it back on purpose. */
+/* Solid headers keep context readable without expensive background blur. */
 html[data-visual-mode] .cloud-bar {
-  background: color-mix(in srgb, var(--night-0) 78%, transparent);
-  border-bottom: 1px solid var(--hairline);
-  box-shadow: 0 10px 30px -18px #000;
-}
-html[data-visual-mode] .cloud-bar,
-html[data-visual-mode=traditional] .cloud-bar {
-  -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
-  backdrop-filter: blur(22px) saturate(160%) !important;
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  html[data-visual-mode] .cloud-bar { background: var(--night-0); }
-}
-@media (prefers-reduced-transparency: reduce) {
-  html[data-visual-mode] .cloud-bar { background: var(--night-0); }
+  background:var(--ui-bg); border-bottom:1px solid var(--ui-border);
+  box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none;
 }
 /* One brand per screen: in the cloud the bar carries it. */
 
@@ -627,16 +630,23 @@ html[data-visual-mode] .cloud-bar-actions > button { border-radius: var(--r-pill
 html[data-visual-mode] .cloud-bar-actions > button:hover { background: var(--night-2); color: var(--text-1); }
 html[data-visual-mode] .account-avatar { background: var(--accent-sheen); color: var(--on-accent); }
 
-/* Focus: one quiet ring, drawn by the field itself. No browser outline stacked on top. */
-html[data-visual-mode] :is(input, select, textarea):focus-visible { outline: none; }
-html[data-visual-mode=traditional] .search-box:focus-within {
-  border-color: var(--hairline-strong); box-shadow: none; background: var(--night-3);
+/* Focus is a persistent outline, independent of the material or input type. */
+html[data-visual-mode] :is(input,select,textarea):focus-visible {
+  outline:2px solid var(--ui-focus); outline-offset:2px; box-shadow:var(--ui-focus-ring);
 }
-html[data-visual-mode] .search-box input:focus, html[data-visual-mode] .search-box input:focus-visible { outline: none; box-shadow: none; border: 0; background: transparent; }
-html[data-visual-mode] .search-box:focus-within svg { color: var(--text-1); }
-html[data-visual-mode=traditional] :is(.form-field input, .form-field select, .form-field textarea, .inspector textarea, .login-form-wrap input, .modal input, .modal select, .modal textarea, .madden-filterbar input, .madden-filterbar select, .ai-field input, .ai-field select, .ai-field textarea):focus {
-  border-color: #ffffff38; box-shadow: 0 0 0 4px #ffffff0a; background-color: var(--night-3);
+html[data-visual-mode] .search-box:focus-within {
+  border-color:var(--ui-focus); box-shadow:var(--ui-focus-ring); background:var(--night-2);
 }
+html[data-visual-mode] .search-box input:focus {
+  box-shadow:none; border:0; background:transparent;
+}
+html[data-visual-mode] .search-box input:focus-visible { outline-offset:0; }
+html[data-visual-mode] .search-box:focus-within svg { color:var(--text-1); }
+html[data-visual-mode=traditional] :is(.form-field input,.form-field select,.form-field textarea,.inspector textarea,.login-form-wrap input,.modal input,.modal select,.modal textarea,.madden-filterbar input,.madden-filterbar select):focus {
+  border-color:var(--ui-focus); background-color:var(--night-2);
+}
+/* Evidence pages own light reading surfaces and therefore a darker focus. */
+html[data-visual-mode] .ai-page { --ui-focus:#245a9c; --focus-soft:#245a9c24; }
 
 /* Toast: a single capsule under the header, with an icon disc and one action. */
 html[data-visual-mode] #toast {
@@ -645,16 +655,15 @@ html[data-visual-mode] #toast {
   display: flex; align-items: center; gap: 10px;
   min-width: 0; max-width: min(560px, calc(100vw - 32px));
   padding: 8px 8px 8px 10px;
-  background: color-mix(in srgb, var(--night-3) 88%, transparent);
-  color: var(--text-1); border: 1px solid var(--hairline-strong); border-radius: 22px;
+  background: var(--ui-surface-raised);
+  color: var(--text-1); border: 1px solid var(--hairline-strong); border-radius: var(--r-control);
   box-shadow: 0 1px 0 #ffffff12 inset, 0 24px 48px -16px #000000d9;
   font-size: var(--t-sm); line-height: 1.45; letter-spacing: 0;
 }
 html[data-visual-mode] #toast,
 html[data-visual-mode=traditional] #toast {
-  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-  backdrop-filter: blur(20px) saturate(150%) !important;
-  transition: opacity .22s var(--ease-out), transform .32s var(--ease-out), visibility .22s !important;
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+  transition:opacity var(--motion-normal),transform var(--motion-panel) var(--ease-out),visibility var(--motion-normal);
 }
 html[data-visual-mode] #toast.visible { transform: translate(-50%, 0); }
 html[data-visual-mode] #toast .toast-icon {
@@ -694,7 +703,7 @@ html[data-visual-mode] .studio-home-brand > span small { color: var(--text-2); }
 html[data-visual-mode] .studio-home-account { color: var(--text-2); font-size: var(--t-sm); }
 html[data-visual-mode] .studio-home-account button { color: var(--text-1); text-decoration: none; border: 1px solid var(--hairline-strong); border-radius: var(--r-pill); padding: 0 14px; min-height: 34px; font-size: var(--t-sm); }
 html[data-visual-mode] .studio-home-account button:hover { background: var(--night-2); }
-html[data-visual-mode] .studio-home-main { padding-top: 80px; }
+html[data-visual-mode] .studio-home-main { padding-top: 48px; }
 html[data-visual-mode] .studio-home-intro h1 { font-weight: 800; letter-spacing: -.03em; color: var(--text-1); font-size: clamp(34px, 4.4vw, 56px); }
 html[data-visual-mode] .studio-home-intro p { color: var(--text-2); font-size: var(--t-lg); }
 html[data-visual-mode] .studio-choice {
@@ -719,7 +728,7 @@ html[data-visual-mode] .studio-eyebrow { color: var(--text-3); letter-spacing: .
 /* Login: fields sit on a darker well so they read as inputs on the panel. */
 html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]) { background-color: var(--night-0); border: 1px solid var(--hairline-strong); min-height: 46px; }
 html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]):hover { background-color: var(--night-1); }
-html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]):focus { background-color: var(--night-0); border-color: #ffffff4d; box-shadow: 0 0 0 4px #ffffff0d; }
+html[data-visual-mode] #cloud-root .login-panel input:not([type=checkbox]):focus { background-color:var(--night-0); border-color:var(--ui-focus); }
 html[data-visual-mode] .login-heading h1 { font-weight: 800; letter-spacing: -.03em; }
 html[data-visual-mode] .login-form-wrap h2 { font-weight: 800; letter-spacing: -.02em; }
 

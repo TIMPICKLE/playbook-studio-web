@@ -71,6 +71,20 @@ test('background handoff waits for the newest decoded texture to be presented',a
   }finally{await f.close();}
 });
 
+test('Three selection rings represent every selected player and clear without remounting',async()=>{
+  const f=await sceneFixture(),ids=f.play.players.slice(0,2).map(player=>player.id);
+  try {
+    f.engine.mount(f.svg,f.play,f.settings);
+    const view={play:f.play,settings:f.settings,time:0,animated:false,selected:{type:'players',ids}};
+    f.engine.draw(view);
+    const selectedRings=()=>{const rings=[];f.renders.at(-1).scene.traverse(item=>{if(item.geometry?.type==='TorusGeometry' && item.geometry.parameters.radius===24 && item.geometry.parameters.tube===1.05 && item.visible)rings.push(item);});return rings;};
+    assert.equal(selectedRings().length,2);
+    assert.ok(selectedRings().every(item=>item.material.opacity===.9));
+    f.engine.draw({...view,selected:null});
+    assert.equal(selectedRings().length,0);
+  }finally{await f.close();}
+});
+
 test('preview masks hide existing Three pieces, shadows, rings and ball until cleared',async()=>{
   const f=await sceneFixture(),before=JSON.stringify(f.play),player=f.play.players[0];
   try{

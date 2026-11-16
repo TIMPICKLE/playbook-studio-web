@@ -26,7 +26,7 @@ function motionFixture() {
 }
 
 test('the shared registry exposes strict, bounded operations and only additions accept aliases', () => {
-  assert.equal(new Set(EDITOR_PLAY_COMMANDS.map(item => item.id)).size, 16);
+  assert.equal(new Set(EDITOR_PLAY_COMMANDS.map(item => item.id)).size, 18);
   assert.ok(EDITOR_PLAY_COMMANDS.every(item => item.undoable && item.description));
   assert.ok(EDITOR_PLAY_COMMANDS.find(item => item.id === 'formation_apply').destructive);
   assert.doesNotThrow(() => z.toJSONSchema(EditorPlayOperationSchema, { io: 'input', target: 'draft-7' }));

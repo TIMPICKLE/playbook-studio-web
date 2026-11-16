@@ -1,4 +1,12 @@
 export default {
+  'depth.promoteNamed': '{label}：将第 {rank} 替补换上首发',
+  'depth.upNamed': '{label}：将第 {rank} 替补上移一位',
+  'depth.downNamed': '{label}：将第 {rank} 替补下移一位',
+  'depth.rankUpdated': '{label} 的首发／替补顺序已更新。',
+  'depth.undoChange': '撤销这次调整',
+  'depth.undone': '已撤销人员顺序调整。',
+  'depth.changedRetry': '这个位置刚刚发生变化，请检查最新名单后重试。',
+  'depth.undoChanged': '名单已变化，无法直接撤销。请在最新名单中调整。',
   'depth.viewLabel': '显示方式',
   'depth.viewFormation': '阵型图',
   'depth.viewRanks': '顺位表',

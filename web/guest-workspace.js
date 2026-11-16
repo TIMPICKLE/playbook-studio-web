@@ -4,7 +4,7 @@ import { t } from './i18n.js';
 
 const destinations = { home: 'home', 'enter-editor': 'editor', 'enter-roster': 'roster', 'enter-analysis': 'analysis' };
 
-export function startGuestWorkspace({ showEditor, showRoster, showAnalysis, canLeave, onLeaveEditor, onEnter }) {
+export function startGuestWorkspace({ showEditor, showRoster, showAnalysis, canLeave, onLeaveEditor, onEnter,getHomeContext }) {
   const header = document.querySelector('#cloud-root');
   let current;
   function routeFromURL() {
@@ -23,17 +23,23 @@ export function startGuestWorkspace({ showEditor, showRoster, showAnalysis, canL
     if (previous === 'editor') onLeaveEditor();
     current = mode;
     if (push) window.history.pushState(null, '', '#' + mode);
-    header.hidden = mode === 'analysis' || mode === 'roster';
+    header.hidden = mode !== 'home';
     if (mode === 'home') {
-      header.innerHTML = studioHome({ cloudUrl: CLOUD_SITE + '/editor/' });
+      header.innerHTML = studioHome({ cloudUrl: CLOUD_SITE + '/editor/',...getHomeContext?.() });
     } else if (mode === 'editor') {
       header.innerHTML = `<div class="cloud-local-entry"><button type="button" class="button subtle" data-cloud-action="home">${t('cloud.workspaceBack')}</button><span>${t('editor.local_offline_preview_changes_stay_in_this_browser')}</span></div>`;
     } else {
       header.replaceChildren();
     }
-    showEditor(mode === 'editor');
-    showAnalysis(mode === 'analysis');
-    showRoster(mode === 'roster');
+    // Hide the previous surface before the destination measures its layout.
+    // Otherwise an editor opened below a still-visible report measures a
+    // document-sized offset and incorrectly shrinks to its minimum height.
+    if(mode!=='editor')showEditor(false);
+    if(mode!=='analysis')showAnalysis(false);
+    if(mode!=='roster')showRoster(false);
+    if(mode==='editor')showEditor(true);
+    if(mode==='analysis')showAnalysis(true);
+    if(mode==='roster')showRoster(true);
     if (mode !== 'editor') {
       const title = { home: 'cloud.demoTitle', roster: 'roster.title', analysis: 'cloud.aiAnalysis' }[mode];
       document.title = t(title) + ' · Playbook Studio';
@@ -59,4 +65,5 @@ export function startGuestWorkspace({ showEditor, showRoster, showAnalysis, canL
   window.addEventListener('popstate', () => open(routeFromURL()));
   window.addEventListener('hashchange', () => open(routeFromURL()));
   open(routeFromURL());
+  return {open};
 }
