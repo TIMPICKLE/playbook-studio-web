@@ -189,13 +189,16 @@ test('the local process log shows only bounded tool evidence and clears with the
   f.assistant.destroy(); await f.win.happyDOM.abort();
 });
 
-test('touch assistant escapes the clipped pitch and returns to its current host on close', async () => {
+test('an open assistant is a page-level window; touch docks it and close returns the launcher to its host', async () => {
   const f = fixture(() => ({kind:'search',items:[]}));
   const root = f.q('.board-ai'), panel = f.q('.ba-panel');
-  assert.equal(root.parentElement, f.host);
+  // Desktop: the open panel leaves the clipped pitch but stays freely movable.
+  assert.equal(root.parentElement, f.win.document.body);
+  assert.equal(root.classList.contains('ba-floating'),true);
+  assert.equal(root.classList.contains('ba-docked'),false);
   f.win.happyDOM.setWindowSize({width:390,height:844});
   f.win.dispatchEvent(new f.win.Event('resize'));
-  assert.equal(root.classList.contains('ba-floating'),true);
+  assert.equal(root.classList.contains('ba-docked'),true);
   assert.equal(root.parentElement,f.win.document.body);
   assert.equal(f.q('[data-ba-key]').value,'test-opaque-value');
   const nextHost=f.win.document.createElement('div');f.win.document.body.append(nextHost);
@@ -207,11 +210,77 @@ test('touch assistant escapes the clipped pitch and returns to its current host 
   f.win.happyDOM.setWindowSize({width:1366,height:1024});
   f.win.matchMedia=query=>({matches:query==='(any-pointer: coarse)'});
   f.win.dispatchEvent(new f.win.Event('resize'));
-  assert.equal(root.classList.contains('ba-floating'),true);
+  assert.equal(root.classList.contains('ba-docked'),true);
   panel.classList.add('ba-collapsed');f.win.dispatchEvent(new f.win.Event('resize'));
   assert.equal(panel.classList.contains('ba-collapsed'),false);
   f.win.matchMedia=()=>({matches:false});f.win.dispatchEvent(new f.win.Event('resize'));
-  assert.equal(root.parentElement,nextHost);assert.equal(panel.hidden,false);
+  assert.equal(root.parentElement,f.win.document.body);assert.equal(panel.hidden,false);
+  assert.equal(root.classList.contains('ba-docked'),false);
   assert.equal(f.q('[data-ba-key]').value,'test-opaque-value');
   f.assistant.destroy();assert.equal(f.q('.board-ai'),null);await f.win.happyDOM.abort();
+});
+
+test('the desktop panel drags across the whole viewport and keeps its place when reopened', async () => {
+  const f = fixture(() => ({kind:'search',items:[]}));
+  const root = f.q('.board-ai'), panel = f.q('.ba-panel'), grip = f.q('[data-ba-drag]');
+  // The layer spans the page, far beyond a 300 x 200 pitch in the corner.
+  Object.defineProperties(root,{clientWidth:{value:1440},clientHeight:{value:900}});
+  Object.defineProperties(panel,{offsetWidth:{value:365},offsetHeight:{value:300}});
+  f.host.getBoundingClientRect = () => ({left:900,top:100,right:1200,bottom:300,width:300,height:200});
+  const pointer = (type,x,y) => grip.dispatchEvent(Object.assign(new f.win.Event(type,{bubbles:true}),{button:0,isPrimary:true,pointerId:1,clientX:x,clientY:y}));
+  pointer('pointerdown',10,10); pointer('pointermove',60,640); pointer('pointerup',60,640);
+  assert.equal(panel.style.left,'50px'); assert.equal(panel.style.top,'596px');
+  pointer('pointerdown',60,640); pointer('pointermove',5000,5000); pointer('pointerup',5000,5000);
+  assert.equal(panel.style.left,'1071px'); assert.equal(panel.style.top,'596px');
+  f.click('close'); assert.equal(root.parentElement,f.host);
+  f.click('open'); assert.equal(root.parentElement,f.win.document.body);
+  assert.equal(panel.style.left,'1071px'); assert.equal(panel.style.top,'596px');
+  // Double-click returns it to the board's corner.
+  grip.dispatchEvent(new f.win.Event('dblclick',{bubbles:true}));
+  assert.equal(panel.style.left,'825px'); assert.equal(panel.style.top,'110px');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('follow-up turns build on the staged preview; later answers and errors do not drop it', async () => {
+  const requests = []; let applied = 0, discarded = 0, reverted = 0;
+  const handle = turns => ({kind:'preview',stackable:true,message:turns.at(-1).summary,changes:turns.map(turn=>turn.summary),turns,
+    discard() {discarded++;}, apply() {applied++; return {kind:'edit',message:'Applied',turns};},
+    revert: turns.length > 1 ? () => {reverted++; return handle(turns.slice(0,-1));} : undefined});
+  const first = {summary:'Add 4-3',operations:[{kind:'defense_formation'}],routeIds:[],zoneIds:[],playerIds:['d1']};
+  const second = {summary:'X slant',operations:[{kind:'route',playerId:'x'}],routeIds:['r-x'],zoneIds:[],playerIds:['x']};
+  const third = {summary:'X post',operations:[{kind:'route',playerId:'x'}],routeIds:['r-x'],zoneIds:[],playerIds:['x']};
+  const replies = [() => handle([first]), () => handle([first,second]), () => ({kind:'answer',message:'X is the first read.'}),
+    () => { throw Error('Unknown object'); }, () => handle([first,second,third])];
+  const f = fixture(request => { requests.push(request); return replies[requests.length - 1](); });
+  const say = async text => { f.type('[data-ba-prompt]',text); f.click('send'); await flush(); };
+  await say('add a 4-3'); await say('X slant');
+  assert.equal(discarded,0,'sending a follow-up keeps the pending preview');
+  assert.deepEqual(requests[1].previous.map(turn=>turn.status),['pending']);
+  assert.deepEqual([...f.q('.ba-output ul').children].map(node=>node.textContent),['Add 4-3','X slant']);
+  await say('who is first?');
+  assert.match(f.q('.ba-output').textContent,/X is the first read[\s\S]*待应用的修改 · 2/);
+  assert.ok(f.q('[data-ba=apply]'));
+  await say('make it deeper');
+  assert.match(f.q('.ba-status').textContent,/Unknown object/); assert.ok(f.q('[data-ba=apply]'));
+  await say('X');
+  assert.deepEqual(requests[4].previous.map(turn=>[turn.instruction,turn.status]),
+    [['add a 4-3','pending'],['X slant','pending'],['who is first?',undefined],['make it deeper','failed']]);
+  f.click('revert');
+  assert.equal(reverted,1); assert.equal(f.q('.ba-output ul').children.length,2);
+  f.click('apply'); await flush();
+  assert.equal(applied,1); assert.equal(discarded,0); assert.ok(!f.q('[data-ba=apply]'));
+  await say('next');
+  const statuses = Object.fromEntries(requests[5]?.previous.map(turn=>[turn.instruction,turn.status]) || []);
+  assert.equal(statuses['X slant'],'applied'); assert.equal(statuses['X'],'discarded');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
+});
+
+test('a pending playbook transaction is confirmed or dropped before the next instruction', async () => {
+  let calls = 0, discarded = 0;
+  const f = fixture(() => { calls++; return {kind:'preview',message:'Create play',changes:['New play'],actions:[{kind:'play_create'}],discard() {discarded++;},apply:() => ({kind:'edit',message:'Created'})}; });
+  f.type('[data-ba-prompt]','new play'); f.click('send'); await flush();
+  f.type('[data-ba-prompt]','rename it'); f.click('send'); await flush();
+  assert.equal(calls,1); assert.equal(discarded,0);
+  assert.match(f.q('.ba-status').textContent,/先应用或放弃/); assert.equal(f.q('[data-ba-prompt]').value,'rename it');
+  f.assistant.destroy(); await f.win.happyDOM.abort();
 });

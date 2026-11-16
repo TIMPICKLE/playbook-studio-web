@@ -3,6 +3,7 @@ import { escapeHTML as e } from './model.js';
 import en from './locales/board-assistant.en.js';
 import zh from './locales/board-assistant.zh-CN.js';
 import { MODEL_PROVIDER_PRESETS, PROTOCOL_OPTIONS } from './model-protocol.js';
+import { createConversation, TURN_STATUS } from './assistant-session.js';
 
 const symbols = {
   spark: '<path d="m11 2 2.1 6.6L20 11l-6.9 2.3L11 20l-2.2-6.7L2 11l6.8-2.4zM19 2v4m-2-2h4"/>',
@@ -55,14 +56,36 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   syncModelOptions();
   const Speech = win.SpeechRecognition || win.webkitSpeechRecognition;
   let scope, locale, pending, recognition, reply, applying, clarification = '', selectedMode = 'auto', destroyed = false;
-  let previous = [], requestInstruction = '', trace = [], runNumber = 0;
-  const remember = record => { previous = [...previous, record].slice(-5); };
-  function clearPreview(keepRecord = true) {
-    if (reply?.kind !== 'preview') return;
-    if (keepRecord) remember({instruction:requestInstruction, kind:'edit', status:'discarded',
-      summary:reply.summary || reply.message || '', operations:reply.operations || [],
-      routeIds:reply.routeIds || [], zoneIds:reply.zoneIds || [], playerIds:reply.playerIds || []});
-    reply.discard?.();
+  let trace = [], runNumber = 0;
+  // `reply` is the latest answer on screen. `staged` is the uncommitted preview
+  // handle of this conversation; it outlives later answers, errors and turns
+  // until the coach applies or discards it. `stagedTurns` are its thread records.
+  const thread = createConversation();
+  let staged = null, stagedTurns = [];
+  const turnsOf = handle => Array.isArray(handle.turns) && handle.turns.length ? handle.turns : [handle];
+  const describe = (turn, fallback) => ({summary:turn.summary || turn.message || fallback?.message || '', operations:turn.operations || fallback?.operations || [],
+    routeIds:turn.routeIds || [], zoneIds:turn.zoneIds || [], playerIds:turn.playerIds || []});
+  function stage(handle, instruction) {
+    const turns = turnsOf(handle);
+    for (const dropped of stagedTurns.slice(turns.length)) thread.settle(dropped, TURN_STATUS.discarded);
+    stagedTurns = turns.map((turn, index) => stagedTurns[index]
+      ? thread.settle(stagedTurns[index], TURN_STATUS.pending, describe(turn))
+      : thread.add({instruction:turn.instruction || instruction || '', kind:'edit', status:TURN_STATUS.pending, ...describe(turn)}));
+    if (staged && reply === staged) reply = handle;
+    staged = handle;
+  }
+  function settleStaged(status, result) {
+    const turns = result ? turnsOf(result) : [];
+    stagedTurns.forEach((record, index) => thread.settle(record, status, turns[index] ? describe(turns[index], staged) : {}));
+    stagedTurns = [];
+  }
+  function discardStaged(keepRecord = true) {
+    if (!staged) return;
+    if (keepRecord) settleStaged(TURN_STATUS.discarded); else stagedTurns = [];
+    const handle = staged;
+    staged = null;
+    if (reply === handle) reply = null;
+    handle.discard?.();
   }
   function safeTraceValue(value, depth = 0) {
     if (depth > 5) return '…';
@@ -128,55 +151,50 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     button('settings').setAttribute('aria-expanded', String(!config.hidden));
     prompt.readOnly = running;
   }
+  function pill(action, text, disabled = false) {
+    const control = doc.createElement('button');
+    control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = action;
+    control.textContent = text; control.disabled = disabled;
+    return control;
+  }
+  function stagedView(lang) {
+    const visible = staged.isVisible?.() !== false, busy = !!pending || applying === staged;
+    const message = doc.createElement('p');
+    if (reply === staged) message.textContent = staged.message || lang.change;
+    else { message.className = 'ba-staged-title'; message.textContent = `${lang.pendingTitle} · ${stagedTurns.length}`; }
+    output.append(message);
+    if (Array.isArray(staged.changes)) { const list = doc.createElement('ul'); for (const change of staged.changes) { const li = doc.createElement('li'); li.textContent = String(change); list.append(li); } output.append(list); }
+    output.append(pill('apply', visible ? lang.apply : lang.repreview, busy), pill('discard', lang.discard, busy));
+    if (staged.revert) output.append(pill('revert', lang.revert, busy));
+    if (visible && staged.rehearse) output.append(pill('rehearse', lang.rehearse));
+  }
   function outputView() {
     const lang = copy();
     traceView();
     output.replaceChildren();
-    output.hidden = !reply || !config.hidden;
-    q('.ba-welcome').hidden = !!reply || !config.hidden;
-    if (!reply) return;
-    if (reply.kind !== 'search') {
+    output.hidden = (!reply && !staged) || !config.hidden;
+    q('.ba-welcome').hidden = !!reply || !!staged || !config.hidden;
+    if (reply?.kind === 'search') {
+      const items = reply.items || [];
+      output.innerHTML = '<p class="ba-results-title">' + (items.length ? lang.matches + ' · ' + items.length : lang.empty) + '</p>';
+      for (const [i, item] of items.entries()) {
+        const card = doc.createElement('article');
+        card.className = 'ba-card';
+        const image = /^\.?\/?data\/huddle-art\/[\w.-]+$/.test(item.image || '') ? '<img loading="lazy" draggable="false" src="' + e(item.image) + '" alt="">' : '';
+        const details = [item.team, item.formation, item.editable ? lang.editable : lang.reference].filter(Boolean).join(' · ');
+        card.innerHTML = `<div class="ba-card-top">${image}<div><small>${e(details)}</small><strong>${e(item.title)}</strong></div><button class="ba-pill" type="button" data-ba="add" data-index="${i}" ${item.added || getContext().readOnly ? 'disabled' : ''}>${item.added ? lang.added : lang.add}</button></div>
+        <p><small class="ba-why">${e(lang.reason)}</small> ${e(item.reason || '')}</p>`;
+        output.append(card);
+      }
+    } else if (reply && reply !== staged) {
       const message = doc.createElement('p');
       message.textContent = reply.message || lang.change;
       output.append(message);
-      if (reply.action?.run) {
-        const control = doc.createElement('button');
-        control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = 'continue';
-        control.textContent = reply.action.label;
-        output.append(control);
-      }
-      if (reply.kind === 'preview') {
-        const visible = reply.isVisible?.() !== false;
-        if (Array.isArray(reply.changes)) { const list = doc.createElement('ul'); for (const change of reply.changes) { const li = doc.createElement('li'); li.textContent = String(change); list.append(li); } output.append(list); }
-        for (const action of ['apply','discard','rehearse']) {
-          if (action === 'rehearse' && (!visible || !reply.rehearse)) continue;
-          const control = doc.createElement('button');
-          control.type = 'button'; control.className = 'ba-pill'; control.dataset.ba = action;
-          control.textContent = action === 'apply' && !visible ? lang.repreview : lang[action];
-          control.disabled = action === 'apply' && applying === reply;
-          output.append(control);
-        }
-      }
-      if (reply.kind === 'handoff' && onHandoff) { const go = doc.createElement('button'); go.type = 'button'; go.className = 'ba-pill'; go.dataset.ba = 'handoff'; go.textContent = lang.handoff; output.append(go); }
-      if (reply.undo) {
-        const undo = doc.createElement('button');
-        undo.type = 'button'; undo.className = 'ba-pill'; undo.dataset.ba = 'undo';
-        undo.textContent = lang.undo;
-        output.append(undo);
-      }
-      return;
+      if (reply.action?.run) output.append(pill('continue', reply.action.label));
+      if (reply.kind === 'handoff' && onHandoff) output.append(pill('handoff', lang.handoff));
+      if (reply.undo) output.append(pill('undo', lang.undo));
     }
-    const items = reply.items || [];
-    output.innerHTML = '<p class="ba-results-title">' + (items.length ? lang.matches + ' · ' + items.length : lang.empty) + '</p>';
-    for (const [i, item] of items.entries()) {
-      const card = doc.createElement('article');
-      card.className = 'ba-card';
-      const image = /^\.?\/?data\/huddle-art\/[\w.-]+$/.test(item.image || '') ? '<img loading="lazy" draggable="false" src="' + e(item.image) + '" alt="">' : '';
-      const details = [item.team, item.formation, item.editable ? lang.editable : lang.reference].filter(Boolean).join(' · ');
-      card.innerHTML = `<div class="ba-card-top">${image}<div><small>${e(details)}</small><strong>${e(item.title)}</strong></div><button class="ba-pill" type="button" data-ba="add" data-index="${i}" ${item.added || getContext().readOnly ? 'disabled' : ''}>${item.added ? lang.added : lang.add}</button></div>
-        <p><small class="ba-why">${e(lang.reason)}</small> ${e(item.reason || '')}</p>`;
-      output.append(card);
-    }
+    if (staged) stagedView(lang);
   }
   function stopSpeech() {
     const instance = recognition;
@@ -191,7 +209,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     stopSpeech(); updateButtons(); announce();
   }
   function reset() {
-    cancel(); clearPreview(false); clarification = ''; selectedMode = 'auto'; reply = null; previous = []; trace = []; runNumber = 0;
+    cancel(); discardStaged(false); clarification = ''; selectedMode = 'auto'; reply = null; thread.clear(); trace = []; runNumber = 0;
     q('.ba-trace').open = false;
     prompt.value = ''; prompt.placeholder = copy().prompt;
     outputView(); updateButtons();
@@ -201,20 +219,28 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     config.hidden = !show; outputView(); updateButtons();
     if (show) key.focus();
   }
-  // The field is clipped and may be shorter than the software keyboard. A
-  // modeless viewport layer keeps the composer reachable without blocking turf.
+  // An open panel is a window of the whole page, not of the pitch: it lives in a
+  // viewport layer so it can be moved anywhere and is never clipped by the board.
+  // Phones and touch tablets dock it above the software keyboard instead.
+  let position = null;
+  function placePanel() {
+    if (position) return positionPanel(position.x, position.y);
+    const anchor = host.getBoundingClientRect(), layer = root.getBoundingClientRect();
+    positionPanel(anchor.right - layer.left - panel.offsetWidth - 10, anchor.top - layer.top + 10);
+  }
   function syncPanelLayout() {
-    const floating = !panel.hidden && (win.innerWidth <= 600 || win.matchMedia?.('(any-pointer: coarse)').matches);
+    const floating = !panel.hidden;
+    const docked = floating && (win.innerWidth <= 600 || !!win.matchMedia?.('(any-pointer: coarse)').matches);
     root.classList.toggle('ba-floating', floating);
+    root.classList.toggle('ba-docked', docked);
     if (win.innerWidth > 600) panel.classList.remove('ba-collapsed');
     const parent = floating ? doc.body : host;
     if (root.parentElement !== parent) parent.append(root);
-    if (floating) {
-      panel.style.left = ''; panel.style.top = ''; panel.style.right = '';
-    }
+    if (docked || !floating) { panel.style.left = ''; panel.style.top = ''; panel.style.right = ''; }
+    else placePanel();
   }
   function close({clear = false} = {}) {
-    if (reply?.kind === 'preview') { clearPreview(); reply = null; outputView(); }
+    if (staged) { discardStaged(); outputView(); }
     cancel(); panel.hidden = true; button('open').hidden = false;
     button('open').setAttribute('aria-expanded', 'false'); config.hidden = true; syncPanelLayout();
     if (clear) { key.value = ''; reset(); }
@@ -240,7 +266,6 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   function mount(next) {
     if (destroyed || !next) return;
     host = next;
-    if (root.parentElement !== next) next.append(root);
     refresh(); syncPanelLayout();
   }
   function open() {
@@ -253,17 +278,18 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     if (!text || recognition) return;
     if (!key.value.trim() || !model.value.trim()) { showConfig(true); announce(lang.configure); return; }
     if (provider.value === 'custom' && !baseUrl.value.trim()) { showConfig(true); announce(lang.customUrlRequired,true); baseUrl.focus(); return; }
+    // A playbook transaction cannot be built upon; it is confirmed or dropped first.
+    if (staged && !staged.stackable) { announce(lang.resolveFirst, true); return; }
     const requestScope = getContext().scope;
     const control = new AbortController();
     pending = control;
     const instruction = text;
-    clearPreview(); requestInstruction = instruction;
     runNumber++;
     const progress = [];
     config.hidden = true; reply = null; outputView(); updateButtons(); announce(lang.loading);
     try {
       const result = await onRequest({prompt:instruction, mode:selectedMode, provider:provider.value, protocol:protocol.value, baseUrl:provider.value === 'custom' ? baseUrl.value.trim() : '', model:model.value.trim(),
-        apiKey:key.value.trim(), signal:control.signal, locale:getLocale(), previous:previous.slice(),
+        apiKey:key.value.trim(), signal:control.signal, locale:getLocale(), previous:thread.records(),
         onEvent(event) { if (pending === control && !control.signal.aborted && requestScope === getContext().scope) recordEvent(event); },
         onTool(name, args) {
           if (pending !== control || control.signal.aborted) return;
@@ -274,9 +300,12 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
           announce(progress.slice(-10).join(' → '));
         }});
       if (pending !== control || destroyed || (requestScope !== getContext().scope && result.scope !== getContext().scope)) return;
-      reply = result;
       clarification = result.kind === 'clarify' ? result.message : '';
-      if (result.kind !== 'preview') remember({instruction, kind:result.kind, summary:result.summary || result.message || '', message:result.message, operations:result.operations});
+      if (result.kind === 'preview') {
+        if (staged && !result.stackable) discardStaged();
+        stage(result, instruction);
+      } else thread.add({instruction, kind:result.kind, summary:result.summary || result.message || '', message:result.message, operations:result.operations});
+      reply = result;
       if (result.kind === 'answer' && result.highlights) onHighlight?.(result.highlights);
       if (result.kind === 'preview' && win.matchMedia?.('(max-width: 600px)').matches) panel.classList.add('ba-collapsed');
       prompt.value = '';
@@ -285,9 +314,13 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       announce(result.kind === 'search' ? lang.matches + ' · ' + result.items.length : result.message || lang.change, false, true);
       if (clarification) prompt.focus();
     } catch (error) {
-      if (pending === control && !control.signal.aborted) announce(error?.message || lang.error, true);
+      if (pending === control && !control.signal.aborted) {
+        // A failed turn stays in the thread: the next message usually completes it.
+        thread.add({instruction, kind:'error', status:TURN_STATUS.failed, message:String(error?.message || lang.error).slice(0, 400)});
+        announce(error?.message || lang.error, true);
+      }
     } finally {
-      if (pending === control) { pending = null; updateButtons(); }
+      if (pending === control) { pending = null; updateButtons(); outputView(); }
     }
   }
   function dictate() {
@@ -343,18 +376,24 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
         }).catch(error => announce(error?.message || copy().error, true)).finally(() => { if (b.isConnected) b.disabled = false; });
       } catch (error) { b.disabled = false; announce(error?.message || copy().error, true); }
     }
-    else if (action === 'discard' && reply?.kind === 'preview') { clearPreview(); reply = null; panel.classList.remove('ba-collapsed'); outputView(); announce(copy().discarded); }
-    else if (action === 'rehearse' && reply?.kind === 'preview') reply.rehearse?.();
-    else if (action === 'apply' && reply?.kind === 'preview' && applying !== reply) {
-      const preview = reply; applying = preview; b.disabled = true;
+    else if (action === 'discard' && staged) { discardStaged(); panel.classList.remove('ba-collapsed'); outputView(); announce(copy().discarded); }
+    else if (action === 'rehearse' && staged) staged.rehearse?.();
+    else if (action === 'revert' && staged?.revert && !pending) {
+      try { stage(staged.revert()); outputView(); announce(copy().reverted); }
+      catch (error) { announce(error?.message || copy().error, true); }
+    }
+    else if (action === 'apply' && staged && applying !== staged && !pending) {
+      const preview = staged; applying = preview; b.disabled = true;
       Promise.resolve().then(() => preview.apply()).then(result => {
-        if (reply !== preview) return;
-        reply = result; panel.classList.remove('ba-collapsed');
-        if (result.kind !== 'preview') remember({instruction:requestInstruction, kind:'edit', status:'applied', summary:result.summary || result.message || preview.message, operations:result.operations || preview.operations, routeIds:result.routeIds || [], zoneIds:result.zoneIds || [], playerIds:result.playerIds || []});
-        outputView(); announce(result.message || copy().change);
-      }).catch(error => { if (reply === preview) announce(error?.message || copy().error, true); }).finally(() => {
+        if (staged !== preview) return;
+        panel.classList.remove('ba-collapsed');
+        // A rebased proposal comes back as a fresh preview and waits for another confirmation.
+        if (result.kind === 'preview') stage(result);
+        else { settleStaged(TURN_STATUS.applied, result); staged = null; reply = result; }
+        announce(result.message || copy().change);
+      }).catch(error => { if (staged === preview) announce(error?.message || copy().error, true); }).finally(() => {
         if (applying === preview) applying = null;
-        if (reply === preview) outputView();
+        if (!destroyed) outputView();
       });
     }
     else if (action === 'undo' && reply?.undo) {
@@ -377,7 +416,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   const grip = q('[data-ba-drag]');
   let drag;
   grip.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || event.isPrimary === false || root.classList.contains('ba-floating')) return;
+    if (event.button !== 0 || event.isPrimary === false || root.classList.contains('ba-docked')) return;
     const bounds = panel.getBoundingClientRect();
     drag = {x:event.clientX - bounds.left, y:event.clientY - bounds.top};
     grip.setPointerCapture?.(event.pointerId);
@@ -386,27 +425,32 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     if (!drag) return;
     const bounds = root.getBoundingClientRect();
     positionPanel(event.clientX - bounds.left - drag.x, event.clientY - bounds.top - drag.y);
+    position = {x:parseFloat(panel.style.left), y:parseFloat(panel.style.top)};
   });
   grip.addEventListener('lostpointercapture', () => { drag = null; });
   grip.addEventListener('pointerup', () => { drag = null; });
-  grip.addEventListener('dblclick', () => { panel.style.left = ''; panel.style.top = ''; panel.style.right = ''; });
+  grip.addEventListener('dblclick', () => { position = null; syncPanelLayout(); });
   function positionPanel(x, y) {
     const clamp = (value, max) => Math.max(4, Math.min(value, max - 4));
-    panel.style.left = clamp(x, root.clientWidth - panel.offsetWidth) + 'px';
-    panel.style.top = clamp(y, root.clientHeight - panel.offsetHeight) + 'px';
-    panel.style.right = 'auto';
+    // Unchanged values are not rewritten, so a size observer cannot re-trigger itself.
+    const next = {left:clamp(x, root.clientWidth - panel.offsetWidth) + 'px', top:clamp(y, root.clientHeight - panel.offsetHeight) + 'px', right:'auto'};
+    for (const [name, value] of Object.entries(next)) if (panel.style[name] !== value) panel.style[name] = value;
   }
   // A dragged panel must remain reachable when results arrive or the board shrinks.
   const resize = win.ResizeObserver && new win.ResizeObserver(() => {
-    if (!panel.hidden && panel.style.left) positionPanel(parseFloat(panel.style.left), parseFloat(panel.style.top));
+    if (!panel.hidden && panel.style.left && !root.classList.contains('ba-docked')) positionPanel(parseFloat(panel.style.left), parseFloat(panel.style.top));
   });
   resize?.observe(root); resize?.observe(panel);
   win.addEventListener('resize', syncPanelLayout);
   function destroy() { destroyed = true; resize?.disconnect(); win.removeEventListener('resize', syncPanelLayout); close({clear:true}); root.remove(); }
   mount(host);
-  function refreshPreview() { if (reply?.kind === 'preview') outputView(); }
+  function refreshPreview() { if (staged) outputView(); }
   // Only the trusted editor host may adopt a scope after its own navigation or
   // transaction. Unrelated user navigation still resets/cancels the request.
-  function adoptScope(next) { scope = next; previous = []; clarification = ''; }
+  function adoptScope(next) {
+    // The transaction being applied is what moved the scope; it settles itself.
+    if (scope !== next && applying !== staged) discardStaged(false);
+    scope = next; thread.clear(); clarification = '';
+  }
   return {mount, refresh, refreshPreview, open, close, destroy, adoptScope};
 }

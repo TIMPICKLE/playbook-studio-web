@@ -61,12 +61,16 @@ export function resolveBoardPlayer(players, selector) {
   if (!formationRelation && Boolean(relativeToId) !== Boolean(relation)) return empty('invalid');
   if (fieldSide && !['left', 'right'].includes(fieldSide)) return empty('invalid');
   if (relation === 'receiver_number' && (!receiverNumber || !fieldSide)) return empty('invalid');
-  let candidates = players.filter(player =>
+  const matching = byLabel => players.filter(player =>
     (!role || roleMatches(player, norm(role))) &&
-    (!name || nameMatches(player.name, name)) &&
+    (!name || (byLabel ? norm(player.label) === norm(name) : nameMatches(player.name, name))) &&
     (!number || normalizedNumber(player.number) === normalizedNumber(number)) &&
     (!side || player.side === side)
   );
+  let candidates = matching(false);
+  // Coaches and models call an unnamed marker by its label ("X", "H"). Only a
+  // search that found no roster name falls back to the exact label.
+  if (!candidates.length && name && !role) candidates = matching(true);
   if (formationRelation) {
     const centers = players.filter(player => player.side === 'offense' && roleMatches(player, 'c'));
     if (centers.length !== 1) return empty('invalid');

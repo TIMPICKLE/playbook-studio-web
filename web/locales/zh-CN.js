@@ -14,6 +14,8 @@ export default {
   "editor.formation_replace_effect": "这会清除 {routes} 条路线、{zones} 个区域及 {annotations} 条标注。{opponents}球队名单与其他战术不变，可撤销。",
   "assistant.boardChanged": "战术已变更，请对当前战术重新发送指令。",
   "assistant.finishDrawing": "请先完成当前画线或拖动，再执行改图。",
+  "assistant.stagedConflict": "待应用的修改与战术的最新改动冲突。请先放弃这些修改，再重新发送指令。",
+  "assistant.commitStagedFirst": "这项操作会改动战术本。请先应用或放弃下方待应用的修改，再重新发送。",
   "editor.chart_starters": "从 DEPTH CHART 应用首发",
   "editor.chart_group": "人员组",
   "editor.chart_choose": "选择人员组",

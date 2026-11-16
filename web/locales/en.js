@@ -14,6 +14,8 @@ export default {
   "editor.formation_replace_effect": "Clears {routes} routes, {zones} zones and {annotations} annotations. {opponents}The roster and other plays stay unchanged. Undo available.",
   "assistant.boardChanged": "The play changed. Send your request again for the current play.",
   "assistant.finishDrawing": "Finish the active drawing or drag before changing the play.",
+  "assistant.stagedConflict": "The pending changes conflict with newer edits to this play. Discard them, then send your request again.",
+  "assistant.commitStagedFirst": "This changes the playbook. Apply or discard the pending changes below, then send it again.",
   "editor.chart_starters": "Use starters from the DEPTH CHART",
   "editor.chart_group": "Personnel group",
   "editor.chart_choose": "Choose a group",

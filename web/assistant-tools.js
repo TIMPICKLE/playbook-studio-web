@@ -5,6 +5,7 @@ import { EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
 import { parseEditorActions, prepareEditorActions, getEditorOverview } from './editor-actions.js';
 import { editorCapabilities, editorCommandSchema } from './editor-capabilities.js';
 import { loadEditableEntries } from './madden-model.js';
+import { conversationContext } from './assistant-session.js';
 import { FLAG5_FORMATIONS, defaultFormation, formationOptions, getPlayLeague, isFlag5Play } from './game-formats.js';
 
 const string = { type: 'string' };
@@ -29,7 +30,10 @@ function validValue(schema, value) {
 const validArgs = (schema, value) => !!validValue(schema, value);
 
 export function createBoardTools(input, searchCatalog) {
-  const resolved = new Set();
+  // Players this conversation already worked with, and the coach's selection,
+  // are host-verified against the current board. Requiring the model to look
+  // them up again only turned a follow-up without a subject into an error.
+  const resolved = new Set(conversationContext(input).known);
   const candidates = new Map();
   let searched = false;
   let similarRanks = null;
