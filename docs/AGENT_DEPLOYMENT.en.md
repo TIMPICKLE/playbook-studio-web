@@ -1,87 +1,255 @@
-# AI Agent deployment guide
+# Deployment guide · Complete local setup first
 
-[简体中文](AGENT_DEPLOYMENT.md) · **English** · [Back to README](../README.en.md)
+[简体中文](AGENT_DEPLOYMENT.md) · **English** · [Back to README](../README.en.md) · [AI guide](AI_GUIDE.en.md)
 
-Give this section to an AI coding agent that can inspect files and run commands. Select the target first:
+Start with the **complete application on your own computer**: frontend, API, database, and team accounts all run locally. It supports play editing, autosave, roster management, rehearsal, and AI features. No ChatGPT sign-in or remote database is required. **AI requires a separate provider, model ID, and API key**; deploying the application does not include model credits.
 
-| Target | Current support | Storage and capabilities |
-|---|---|---|
-| Local demo | Node.js static workspace | Browser-local storage, roster management, editing, rehearsal, import/export and sample AI demo; no accounts or cloud sharing |
-| GitHub Pages / static hosting | Included build script and Pages workflow | Same static capabilities; each visitor's data stays in their browser |
-| Cloud collaboration | Current implementation uses ChatGPT Sites + Worker + D1 | Accounts, shared playbooks and AI analysis require your own Site, database and platform access |
+Follow this guide yourself or give it to an AI agent that can operate files and a terminal. Run every command from the project root.
 
-**Before distributing a copy:** the `project_id` in `.openai/hosting.json` belongs to the original project. Do not use it to create another person's Site or overwrite the original. Cloud links in `web/landing.html` and `web/cloud.js` point to the original deployment. Replace them with your own URL, or remove/clearly label them when publishing a static-only copy. The MIT license does not cover the original Madden / Huddle.gg images; verify their terms before public redistribution.
+**Quick navigation:** [Choose a setup](#choose-a-setup) · [Complete local setup](#complete-local-setup-in-six-steps) · [Configure AI](#ai-configuration) · [Acceptance checks](#deployment-acceptance-checks) · [Maintenance](#restart-upgrade-and-back-up) · [Troubleshooting](#troubleshooting) · [Other deployments](#appendix-other-deployment-options)
 
-### Prompt for your agent
+## Choose a setup
 
-```text
-Deploy Playbook Studio following docs/AGENT_DEPLOYMENT.en.md.
+| Setup | Best for | Accounts and storage | AI requests |
+|---|---|---|---|
+| **Complete local setup, recommended** | Personal use, development, full feature access | Local team accounts; persistent local D1 database | Local API connects to the selected provider |
+| Lightweight static version | Quick trials, GitHub Pages | No sign-in; data in the current browser | Browser connects directly; provider must allow CORS |
+| Public collaboration site | Remote teams and access across devices | Separate site, database, and runtime configuration | Deployed API connects to the provider |
 
-Target: [local demo / GitHub Pages static version / my own ChatGPT Sites cloud version]
-Repository or hosting account: [provide the destination; omit for local use]
-Audience: [local only / specified audience / public]
+The complete local setup has this structure. Cloning the repository, installing dependencies, and calling external models require network access. The build restores bundled Madden assets locally.
 
-Read the README, package.json, docs/CLOUD.md and relevant deployment configuration first.
-Inspect the current branch and uncommitted changes; preserve existing files and data.
-Choose the appropriate path for my target. Do not reuse the original owner's Site ID, database, cloud URL or credentials.
-If the target, platform access or audience is unclear, ask me. Use the platform's secure authentication flow; do not ask me to paste passwords or API keys into chat.
-Configure, build and validate, then publish to the destination I authorized. Verify the actual entry point, core operations, data persistence and capability boundaries.
-Report the URL, deployed version, verification results, data location and any unfinished work. State blockers honestly; do not claim unverified features work.
+```mermaid
+flowchart TD
+  browser["Browser · local workbench"] --> api["Local Worker API · 127.0.0.1:8787"]
+  api --> db["Local D1 · .wrangler/state"]
+  api -->|"Optional: configured API key"| model["External model provider · HTTPS"]
 ```
 
-### Web checks before development and release
+## Complete local setup in six steps
 
-Agents changing interactions or loading behavior can use the pinned **modern-web-guidance 1.0.0** `search` → `retrieve` workflow to inspect relevant browser capabilities before implementing them in the existing code. This is a development reference, not football knowledge or a browser runtime dependency; bulk skill installation is unnecessary. Run from the project root:
+### 1. Prepare Git and Node.js
+
+Use **Node.js 24** (recommended; minimum **22.13.0**). Check the tools, then clone the repository. If you already have a checkout, use it and inspect its branch and uncommitted changes first.
 
 ```bash
-npm run audit:web                         # legacy-scan web --json; telemetry off by default
-npm run audit:startup                     # Static module graph and raw source bytes
-npm run audit:startup -- --ref acb803e      # Compare with a Git revision
-npm run check
-npm run typecheck
-npm test
+node --version
+git --version
+git clone https://github.com/TIMPICKLE/playbook-studio-web.git
+cd playbook-studio-web
+```
+
+### 2. Install dependencies and build the complete application
+
+```bash
+npm run install:ci
 npm run build
 ```
 
-Review scanner findings manually. The byte report describes static source-module dependencies, not actual transfer size or page timing. Before release, check iPhone / iPad Safari and Chrome, plus desktop browsers: CJK input-method confirmation, dialog focus and return behavior, asynchronous Madden imports, repeated search, and narrow field/property panels. Record the devices, browsers and gaps actually tested; DOM tests do not replace browser acceptance. See [Web platform optimization and regression notes](WEB_PLATFORM_OPTIMIZATION.md) (Chinese) for implementation details.
+The build prepares the editor and Madden assets, and generates frontend/backend output plus `dist/server/wrangler.json`. The following commands use this generated configuration. You do not need to sign in to Cloudflare or create a remote D1 database.
 
-**Madden assets and offline limits:** publish every `web/data/madden-editable-*.js` geometry shard. Browsing and search do not load these large files; adding an editable play requests its required shard. The Service Worker does not precache all geometry. Successfully fetched same-origin resources can enter the runtime cache, but the first offline import from an unfetched shard is unavailable and needs an online load. Offline availability also depends on cache retention. Once imported, players and routes are stored in the playbook, so editing that saved play does not need its source shard again; cloud sign-in and synchronization still require a connection. Opening the home page does not make every Madden play available for offline import.
+### 3. Initialize the local database, once on an empty database
 
-### Path A: local static demo
-
-Requires Git and **Node.js 24** (minimum 22.13.0). Inspect the branch and working tree before using an existing checkout.
+Run these SQL scripts in order, using the `DB` binding:
 
 ```bash
-git clone https://github.com/TIMPICKLE/playbook-studio-web.git
-cd playbook-studio-web
+npx --no-install wrangler d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_curved_toad_men.sql
+npx --no-install wrangler d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_optimal_turbo.sql
+```
+
+**Do not rerun both commands against an existing database.** They create tables, so repeating them causes “table already exists” errors. `.wrangler/state/` contains your actual data; deleting it is not a migration fix. See [maintenance](#restart-upgrade-and-back-up) for upgrades.
+
+### 4. Create a one-time setup key and start the server
+
+After building, create `dist/server/.dev.vars` with the following command. It writes a random key locally without printing it. If the file already exists, the command refuses to overwrite it; edit the existing file and preserve its settings instead.
+
+```bash
+node --input-type=module -e "import { randomBytes } from 'node:crypto'; import { writeFileSync } from 'node:fs'; writeFileSync('dist/server/.dev.vars', 'PLAYBOOK_SETUP_KEY=' + randomBytes(32).toString('hex') + '\n', { flag: 'wx', mode: 0o600 });"
+npm start -- --port 8787
+```
+
+Leave this terminal running. The server runs in local mode on `127.0.0.1` and keeps its database in `.wrangler/state/`. Accounts have not been created yet; complete the next step in a **second terminal**.
+
+> Place runtime settings in `dist/server/.dev.vars`, beside the generated configuration, rather than in a root-level `.dev.vars`. `dist/` is ignored by Git, but rebuilding regenerates it. Keep your custom runtime settings separately and restore them after a build.
+
+### 5. Create local team accounts
+
+In the second terminal, enter the same project root and create the temporary configuration directory:
+
+```bash
+node --input-type=module -e "import { mkdirSync } from 'node:fs'; mkdirSync('.sites-runtime', { recursive: true });"
+```
+
+Create `.sites-runtime/local-accounts.json` in an editor with the following content. **Replace the example password with your own password**:
+
+```json
+{
+  "accounts": [
+    {
+      "username": "coach",
+      "password": "REPLACE_WITH_YOUR_OWN_STRONG_PASSWORD",
+      "name": "Coach",
+      "role": "owner"
+    }
+  ]
+}
+```
+
+Usernames must contain 3–32 lowercase letters, digits, or underscores and start with a letter. Passwords must contain 8–128 characters. You can provision 1–10 accounts at once: the first must be `owner`, and additional accounts must be `editor` or `viewer`. This temporary directory is ignored by Git.
+
+Run the initialization request below. It reads the key and account configuration from local files without putting either value in command arguments or printing them.
+
+```bash
+node --env-file=dist/server/.dev.vars --input-type=module -e "
+import { readFile } from 'node:fs/promises';
+const origin = 'http://127.0.0.1:8787';
+const accounts = JSON.parse(await readFile('.sites-runtime/local-accounts.json', 'utf8'));
+if (accounts.accounts.some(account => account.password === 'REPLACE_WITH_YOUR_OWN_STRONG_PASSWORD')) {
+  throw new Error('Replace the example password first');
+}
+const response = await fetch(origin + '/api/auth/bootstrap', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: origin,
+    'X-Playbook-Setup-Key': process.env.PLAYBOOK_SETUP_KEY
+  },
+  body: JSON.stringify(accounts)
+});
+const result = await response.json();
+if (response.ok === false) throw new Error(result.error || 'Account initialization failed');
+console.log('Accounts created. Sign in at ' + origin + '/editor/index.html');
+"
+```
+
+This endpoint provisions the first accounts only. A `409` response means initialization is already complete; it cannot be used to provision accounts again or reset passwords. See [architecture and operations](CLOUD.md) for account and permission details.
+
+### 6. Close initialization and sign in
+
+1. Return to the first terminal and stop the server with `Ctrl+C`.
+2. Edit `dist/server/.dev.vars` and remove its `PLAYBOOK_SETUP_KEY` line, preserving other runtime settings.
+3. Delete the temporary `.sites-runtime/local-accounts.json` and keep your account credentials in an appropriate place.
+4. Restart the server:
+
+   ```bash
+   npm start -- --port 8787
+   ```
+
+Open **[http://127.0.0.1:8787/editor/index.html](http://127.0.0.1:8787/editor/index.html)** and sign in with the team account you just created. For subsequent use, start the server and visit this address.
+
+**Use `/editor/index.html` or `/editor/` for the complete application.** `/editor/local.html` uses the static browser-storage mode even when served by the same server. Keep initialization and browsing on `127.0.0.1` to avoid origin and session confusion.
+
+## AI configuration
+
+**A working deployment does not automatically connect a model.** Without an API key you can still edit, rehearse, manage players, import/export, use the Madden catalog, and read diagram briefs and retrieved knowledge. Sending AI assistant instructions or generating model analysis requires a model configuration.
+
+### Configure each entry separately
+
+| Entry | Settings location | Main use |
+|---|---|---|
+| Board assistant | Workbench → **Edit playbook** → field-edge **AI** → settings | Add defenses, edit routes, and operate the board using natural language |
+| Matchup analysis | Workbench → **AI matchup analysis** → left step **02 Connect model** | Analyze diagrams together with knowledge sources |
+
+For each entry, choose **provider → API format → model ID → API key**. Preset providers need no manual URL. Use a model ID actually available from your provider that supports the required tool calls.
+
+| Provider | Supported API formats |
+|---|---|
+| DeepSeek | OpenAI Chat Completions, Anthropic Messages |
+| Anthropic / Claude | Anthropic Messages |
+| OpenAI | OpenAI Chat Completions, OpenAI Responses |
+| OpenRouter | OpenAI Chat Completions, OpenAI Responses |
+| Custom compatible service | All three formats; also supply an HTTPS URL |
+
+Each entry keeps its settings in **that page's memory**. Enter the API key again after refreshing; switching providers also clears it. Preset providers do not require a shared server-side `OPENAI_API_KEY`. “Claude Code Messages” here means the Anthropic Messages API format with API credentials, rather than CLI sign-in or a subscription account.
+
+In the complete local version, your local API sends the model requests. The provider still needs network access and available credits. **Complete local deployment does not include offline model inference.**
+
+### Use a custom model gateway
+
+In addition to the page settings, add permitted **hostnames** to `dist/server/.dev.vars`, separated by commas, and restart the server:
+
+```dotenv
+AI_ALLOWED_HOSTS="gateway.example.com,api.example.net"
+```
+
+In the page, enter the full HTTPS base path or endpoint required by the provider. The allowlist contains hostnames only, without a scheme, path, or port. The server requires the standard HTTPS port and rejects URL credentials, query strings, and fragments, as well as `localhost`, names ending in `.localhost` / `.local` / `.internal`, and IP-address hosts. It cannot connect directly to Ollama at `http://localhost:11434`.
+
+See the **[AI feature guide](AI_GUIDE.en.md)** for endpoint path handling, tool calls, the knowledge base, and document imports.
+
+## Deployment acceptance checks
+
+The local migration, account provisioning, sign-in, permissions, saving, and restart-persistence flow has been exercised. Verify real model calls separately using your own API key; a page loading successfully does not establish that AI is connected.
+
+| Check | Action | Expected result |
+|---|---|---|
+| API and database | Open `http://127.0.0.1:8787/api/health` | HTTP 200 with `ready: true` in the JSON |
+| Team account | Sign in through the complete entry | Your playbook opens; anonymous requests cannot read its data |
+| Editing and saving | Move a player, edit a route, wait for saving, and refresh | Changes return without save errors |
+| Persistence | Stop with `Ctrl+C`, restart, and sign in again | Accounts and saved plays remain |
+| Common features | Open a Madden image, add an editable play, rehearse, and export JSON | Assets load and the exported data is correct |
+| AI assistant | Configure a model and request “Add a complete 4–3 defense, keeping the offense” | A reviewable preview appears; applying it adds the full defense |
+| AI analysis | Select offense and defense, inspect the brief, and run model analysis | Brief and sources work without a key; model analysis works with one |
+
+If you provisioned multiple roles, check `editor` and `viewer` permissions as well. Record the source revision, actual URL, and any checks you did not perform.
+
+## Restart, upgrade, and back up
+
+| Situation | Action |
+|---|---|
+| Start normally | Run `npm start -- --port 8787` from the project root; do not recreate tables or accounts |
+| Stop | Press `Ctrl+C` in the server terminal |
+| Back up data | Stop the server, then copy all of `.wrangler/state/`; also export playbook JSON for portability |
+| Back up runtime settings | Keep custom `.dev.vars` settings separately; do not commit secrets or copy them into public logs |
+| Upgrade code | Back up, inspect uncommitted changes, pull code, run `npm run install:ci` and `npm run build`, restore required runtime settings, and start |
+| Future database changes | Follow the new version's migration instructions and apply only unapplied migrations; do not replay initial table-creation scripts |
+
+The local database depends on this project's `.wrangler/state/` directory and database binding configuration. A different persistence directory can make existing data appear missing. Stop the server before restoring a backup and use matching configuration. Browser preferences may still live in the browser; a database backup does not replace playbook exports.
+
+## Troubleshooting
+
+| Symptom | What to check |
+|---|---|
+| Missing `dist/server/wrangler.json` | Finish `npm run build` before database and server commands |
+| `table already exists` | Tables already exist. Stop repeating initialization and inspect applied scripts; do not delete the database |
+| Health endpoint errors or returns `ready: false` | Use `npm start`, verify the SQL scripts succeeded, and use the same `--persist-to` path for migration and serving |
+| Initialization returns `404` | Check `PLAYBOOK_SETUP_KEY` in the built `dist/server/.dev.vars`, restart after changes, and ensure the client reads that same file |
+| Initialization returns `403` | Match the request `Origin` to the site origin; this guide consistently uses `http://127.0.0.1:8787` |
+| Initialization returns `409` | Accounts already exist. Sign in; this endpoint does not reset passwords |
+| Data still looks like the demo | Check for `/editor/local.html` in the URL and use `/editor/index.html` instead |
+| AI reports no key, authentication failure, or unavailable model | Check each entry's provider, format, real model ID, key, and credits; re-enter the key after refreshing |
+| Custom AI URL is rejected | Check `AI_ALLOWED_HOSTS`, HTTPS path, and port; use a hostname meeting the restrictions above and restart after changes |
+| Custom gateway stops working after a build | Restore `AI_ALLOWED_HOSTS` and other runtime settings in the rebuilt `dist/` before starting |
+| Other devices cannot connect | The server listens on local loopback by default. On a phone or iPad, `127.0.0.1` refers to that device. Access across devices needs separate network configuration or a public deployment |
+
+## Appendix: other deployment options
+
+### Lightweight static version and GitHub Pages
+
+For a quick trial without sign-in:
+
+```bash
 npm run start:local
 ```
 
-Open `http://localhost:3000/`. The script restores bundled Madden images; stop the server with `Ctrl+C`. This is a development static server, not a public production service. Data is stored in the current browser: export a JSON backup before clearing it or changing devices.
+Open `http://localhost:3000/`. This is a static server with data in the current browser, without accounts, database APIs, or cross-device sync. AI connects directly from the browser and requires provider CORS support. Export JSON before clearing browser data.
 
-Verify that the page and Madden images load, player movement and route drawing work, both languages are selectable, edits survive refresh, and JSON export works. `/api/*` is not supplied by this static server.
+For GitHub Pages, use the existing `.github/workflows/pages.yml` and select **GitHub Actions** in **Settings → Pages → Source**. Alternatively, run `node scripts/prepare-pages.mjs` and publish the entire generated `github-pages/` directory to a static host. Do not copy only `web/` or omit generated resources. Automatic Pages runs depend on the workflow's branch and path filters.
 
-### Path B: GitHub Pages / static hosting
+Madden geometry assets load on demand. A previously unfetched shard cannot be imported on its first offline visit; imported plays remain editable. Visiting the homepage does not cache every Madden asset for offline use.
 
-1. Fork or prepare a repository you can publish from and resolve the original cloud links as described above.
-2. Ensure GitHub Actions can run in the repository. In **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**. The included `.github/workflows/pages.yml` publishes the static build. If your default branch is not `main`, adjust its branch condition first.
-3. Changes to `web/**`, `scripts/prepare-pages.mjs` or the workflow on `main` trigger the workflow. You can also run **Deploy GitHub Pages** manually; README-only changes do not trigger it. Check the run and the actual URL in Pages settings.
-4. For another static host, generate and publish the entire `github-pages/` directory:
+### Public team collaboration
 
-   ```bash
-   node scripts/prepare-pages.mjs
-   ```
+The existing public collaboration implementation uses ChatGPT Sites, Worker, and D1. An independent deployment needs its own site and database, `DB` binding, migrations, trusted identity configuration, and runtime settings. Publish only after configuring the target, then verify HTTPS, sign-in, permissions, and saving. Do not reuse the original Site ID in `.openai/hosting.json`; replace links to the original cloud site as well.
 
-   `index.html` opens the card workspace, `local.html` opens the editor directly, and `landing.html` retains the migration guide. Include the generated image assets. See [GitHub's publishing-source documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+`npm start` runs a local Worker rather than a public production service. The repository does not offer a universal one-command VPS deployment; public configuration, migrations, and platform identity checks must be completed for the target environment. See [architecture and operations](CLOUD.md). For checks after changing the web application, see [Web platform optimization and regression](WEB_PLATFORM_OPTIMIZATION.md).
 
-Open all three cards from the deployed root without signing in. Add a player, refresh, search for that player, and return to the workspace. Verify the `local.html` editor shortcut, language switching, editing, refresh persistence, Madden images, JSON export and workflow status. Static storage does not sync across users or devices and does not provide cloud accounts or sharing; verify the AI demo entry, sample matchup overlay and missing-key message. Browser data and language preferences are separate across origins.
+### Ready-to-use agent prompt
 
-### Path C: your own cloud collaboration Site
-
-The current cloud implementation needs **Vinext / Cloudflare Worker, D1 bound as `DB`, database migrations, and a platform-verified identity entry point**. For ChatGPT Sites, an authorized deployer must create **their own new Site and database**; use the Sites workflow available in that environment to configure the new project, build, apply migrations, publish and check status. Do not initialize, reset or migrate an existing Site or database without identifying the target.
-
-To initialize team accounts, configure a one-time `PLAYBOOK_SETUP_KEY` as a secure runtime secret. `POST /api/auth/bootstrap` requires `X-Playbook-Setup-Key` and a JSON `accounts` list: the first account is an `owner`, subsequent accounts are `editor` or `viewer`; each account includes `username`, `password`, `role`, and an optional display `name`. Usernames contain 3–32 lowercase letters, digits or underscores and start with a letter; passwords are 8–128 characters. The request's `Origin` must exactly match the Site origin. Initialization succeeds only once and is not a password-reset mechanism. Remove the setup secret afterward. Use secure platform inputs; never put credentials in the repository, logs, command arguments or chat. See `server/auth.mjs` and [cloud operations](CLOUD.md) for the implementation.
-
-Verify HTTPS login, `/api/health`, anonymous denial of playbook access, and authenticated creation/read, autosave, refresh recovery and language switching. Where needed, test membership permissions with two authorized accounts. AI analysis requires separate provider/model credentials and validation. Report the Site URL, source version, database and checks without disclosing credentials.
-
-`npm run build && npm start` starts a local Worker / Wrangler environment; it is **not** an already configured public production deployment. A turnkey VPS cloud deployment is not currently provided. Other Worker / D1 platforms require their own deployment configuration, migrations and verified authentication; never trust externally supplied Sites identity headers. If platform access is missing, report the blocker rather than presenting the static version as a complete cloud deployment.
+```text
+Deploy the complete Playbook Studio application locally using docs/AGENT_DEPLOYMENT.en.md. Do not publish publicly by default.
+Inspect Node, Git, the current branch, and uncommitted changes; preserve existing files and databases.
+Install dependencies, build frontend/backend output, initialize a new local D1 database, and provision team accounts. For an existing database, apply only missing migrations.
+Handle account credentials and the one-time setup key only in ignored local files, not chat, logs, or Git. Close initialization when finished.
+Use /editor/index.html to verify sign-in, autosave, persistence after restart, Madden assets, rehearsal, and JSON export.
+Explain the separate model settings for both AI entries. Test with authorized API credentials if available; otherwise record that AI is not connected.
+Report the actual URL, source revision, data location, maintenance steps, and verification results.
+```
