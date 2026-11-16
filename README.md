@@ -65,28 +65,31 @@ Madden 战术可通过筛选后点击加入，或拖入战术本。**可编辑�
 
 [云端协作与旧数据迁移](docs/USER_GUIDE.md#云端协作与数据保存) · [触摸设备说明](docs/TOUCH_WORKSPACE.md) · [数字化战术板](docs/DIGITAL_BOARD.md)
 
-## 本地开发与部署
+## 本地完整部署（推荐）
 
-推荐 **Node.js 24**（最低 22.13.0）。
+推荐在本机运行完整的前端、API、持久数据库和团队账号。使用 **Node.js 24**（最低 22.13.0）：
 
 ```bash
 git clone https://github.com/TIMPICKLE/playbook-studio-web.git
 cd playbook-studio-web
-npm ci --ignore-scripts
-npm run start:local
+npm run install:ci
+npm run build
 ```
 
-打开 `http://localhost:3000/`。静态版不提供云端账号和共享 API。
+接着按 **[部署手册的六步流程](docs/AGENT_DEPLOYMENT.md)** 初始化本地数据库和账号，再启动服务，打开 `http://127.0.0.1:8787/editor/`。手册含可直接交给 AI Agent 的完整指令。
+
+**AI 功能需另行配置服务商、模型和 API Key；本地部署不会自动提供模型。** 两个 AI 入口的配置见[详细说明](docs/AGENT_DEPLOYMENT.md#ai-功能配置)。
+
+只需免登录静态体验时，运行 `npm run start:local` 并打开 `http://localhost:3000/`；该模式不含账号和共享 API。
 
 ```bash
 npm run check       # JavaScript 语法检查
 npm run typecheck   # TypeScript 检查
 npm test            # 自动化测试
 npm run dev         # Vinext 开发环境
-npm run build       # 构建 Worker
 ```
 
-**[AI Agent 部署手册 →](docs/AGENT_DEPLOYMENT.md)** 包含可直接交给 Agent 的指令、本机体验、GitHub Pages 和自建云端三条路径。云端依赖 Worker / D1；本地构建不等于已经公开发布。
+GitHub Pages 与公网部署方式见[手册附录](docs/AGENT_DEPLOYMENT.md)。
 
 ## 文档导航
 
@@ -94,7 +97,7 @@ npm run build       # 构建 Worker
 |---|---|
 | [使用指南](docs/USER_GUIDE.md) | 图解教程、人员组、演练、Madden 与协作 |
 | [AI 功能详解](docs/AI_GUIDE.md) | 两个 AI 入口的配置、用法、知识库与问题排查 |
-| [部署手册](docs/AGENT_DEPLOYMENT.md) | 本机、静态托管与云端部署 |
+| [部署手册](docs/AGENT_DEPLOYMENT.md) | 本地完整部署、AI 配置与托管附录 |
 | [Web 平台优化](docs/WEB_PLATFORM_OPTIMIZATION.md) | 按需加载、局部渲染、原生弹窗与可重复审计 |
 | [AI 命令架构](docs/EDITOR_COMMAND_ARCHITECTURE.md) / [工具流程](docs/BOARD_ASSISTANT.md) | 手动与 AI 的共享执行器、预览和撤销 |
 | [AI 分析研究](docs/ai-analysis/README.md) | 竞品、知识库架构、实施与评估记录 |

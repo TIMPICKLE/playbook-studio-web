@@ -1,86 +1,255 @@
-# AI Agent 部署手册
+# 部署手册 · 本地完整部署优先
 
-**简体中文** · [English](AGENT_DEPLOYMENT.en.md) · [返回 README](../README.md)
+**简体中文** · [English](AGENT_DEPLOYMENT.en.md) · [返回 README](../README.md) · [AI 使用指南](AI_GUIDE.md)
 
-把本节交给 Codex、Claude Code 或其他能操作文件和终端的 AI Agent，即可按目标环境执行部署。**先确定需要哪一种版本**：
+推荐先在自己的电脑上运行**完整版本**：前端、API、数据库和团队账号都在本机，支持战术编辑、自动保存、球员管理、演练和 AI 功能。无需 ChatGPT 登录，也无需创建云端数据库。**AI 模型需要另外配置服务商、模型 ID 和 API Key**；本地部署本身不会附送模型额度。
 
-| 目标 | 当前支持 | 数据和功能 |
-|---|---|---|
-| 本机体验 | Node.js 静态工作台 | 浏览器本地保存，支持球员管理、画图、演练、导入导出与 AI 分析演示，不提供账号或云端共享 |
-| GitHub Pages / 静态托管 | 仓库已有构建脚本与 Pages 工作流 | 与本机静态版相同，数据属于访问者自己的浏览器 |
-| 云端协作 | 当前实现运行在 ChatGPT Sites + Worker + D1 | 支持账号、战术本共享及 AI 对位分析；部署者需要自己的站点、数据库和平台授权 |
+本文既可手动执行，也可交给能操作终端与文件的 AI Agent。所有命令均在项目根目录运行。
 
-> **分发前必读：** `.openai/hosting.json` 中的 `project_id` 属于原项目，不能用于创建他人的站点或覆盖原站。`web/landing.html` 和 `web/cloud.js` 的云端入口目前指向原项目；发布独立副本前，Agent 应替换为部署者自己的云端地址。没有自建云端时，应按部署者意愿移除入口，或清楚标注该入口会前往原项目。不要把本项目 MIT 许可误认为涵盖 Madden / Huddle.gg 原图；公开分发前需核实素材许可。
+**快速导航：** [部署方式](#选择部署方式) · [本地完整部署](#本地完整部署六步完成) · [配置 AI](#ai-功能配置) · [验收](#部署验收) · [日常维护](#重启升级与备份) · [常见问题](#常见问题) · [其他部署](#附录其他部署方式)
 
-### 一段可以直接发给 Agent 的指令
+## 选择部署方式
 
-```text
-请根据 docs/AGENT_DEPLOYMENT.md 部署 Playbook Studio。
+| 方式 | 适合用途 | 账号与数据 | AI 请求路径 |
+|---|---|---|---|
+| **本地完整部署，推荐** | 自用、开发、完整功能体验 | 本机团队账号；本机 D1 数据库持久化 | 本机 API 连接所选模型服务 |
+| 轻量静态版 | 快速体验、GitHub Pages | 免登录；数据保存在当前浏览器 | 浏览器直连，服务商需允许 CORS |
+| 公网协作站点 | 跨设备访问、团队远程协作 | 独立站点、数据库与运行时配置 | 已部署的 API 连接模型服务 |
 
-我的目标：[本机体验 / GitHub Pages 静态版 / 我自己的 ChatGPT Sites 云端版]
-目标仓库或部署平台：[填写地址或账户；本机体验可留空]
-公开范围：[仅本机 / 指定范围 / 公开]
+本地完整部署的结构如下。拉取源码、安装依赖和调用外部模型需要网络；已打包的 Madden 素材由构建流程在本机还原。
 
-先读取 README、package.json、docs/CLOUD.md 和相关配置，检查当前分支及未提交改动。
-按我的目标选择部署方式，保留现有数据；不要复用仓库中原作者的 Site ID、数据库、云端地址或凭据。
-如果目标、平台权限或是否公开尚不明确，先向我确认；需要登录或密钥时，使用平台的安全授权方式，不要让我把密码或 API Key 发到对话中。
-完成配置、构建和必要的检查后，在我授权的目标发布；验证实际入口、核心操作、数据保存和能力边界。
-最后告诉我访问地址、部署版本、验证结果、数据保存位置，以及未完成的事项；遇到阻碍时说明真实原因，不要声称未验证的功能已可用。
+```mermaid
+flowchart TD
+  browser["浏览器 · 本机工作台"] --> api["本机 Worker API · 127.0.0.1:8787"]
+  api --> db["本机 D1 · .wrangler/state"]
+  api -->|"可选：配置 Key 后调用"| model["外部模型服务 · HTTPS"]
 ```
 
-### 开发与发布前的 Web 检查
+## 本地完整部署：六步完成
 
-修改网页交互或加载方式的 Agent，可按需使用固定版本 **modern-web-guidance 1.0.0** 的 `search` → `retrieve` 流程查找相关浏览器能力，再结合现有代码实施。它是开发参考工具，不是战术知识库，也不进入浏览器运行时；无需批量安装技能。项目检查入口：
+### 1. 准备 Git 和 Node.js
+
+推荐 **Node.js 24**，项目最低要求为 **22.13.0**。确认工具可用后拉取源码；已有仓库可直接进入原目录，先检查分支和未提交改动。
 
 ```bash
-npm run audit:web                         # legacy-scan web --json，默认关闭遥测
-npm run audit:startup                     # 当前静态模块依赖与原始字节
-npm run audit:startup -- --ref acb803e      # 与指定 Git 提交比较
-npm run check
-npm run typecheck
-npm test
+node --version
+git --version
+git clone https://github.com/TIMPICKLE/playbook-studio-web.git
+cd playbook-studio-web
+```
+
+### 2. 安装依赖并构建完整应用
+
+```bash
+npm run install:ci
 npm run build
 ```
 
-静态扫描结果需要人工核对；字节报告统计源码的静态模块依赖，不代表实际传输量或页面耗时。发布前分别检查 iPhone / iPad 的 Safari、Chrome 与桌面浏览器：中文输入法确认选词、弹窗焦点与返回、Madden 异步导入、连续搜索和缩窄画板／属性栏。记录实测设备、浏览器和未覆盖情况，不以 DOM 测试替代真实浏览器验收。[Web 平台优化与回归方法](WEB_PLATFORM_OPTIMIZATION.md) 说明实现和检查细节。
+构建会准备编辑器和 Madden 资源，并生成前后端产物与 `dist/server/wrangler.json`。后续命令使用这份生成的配置，不需要登录 Cloudflare 或创建远程 D1。
 
-**Madden 资源与离线边界：**部署产物必须包含完整的 `web/data/madden-editable-*.js` 几何分片。浏览与搜索不加载这些大文件，真正加入可编辑战术时才请求所需分片；Service Worker 不预缓存全部几何，成功获取的同源资源可写入运行时缓存。尚未获取的分片在首次离线导入时不可用，需联网加载；离线可用性还取决于缓存是否成功保留。已导入战术的球员和路线保存在战术本中，继续编辑无需重新读取来源分片；云端登录与同步仍需要网络。不要把打开过首页描述为全部 Madden 战术均可离线导入。
+### 3. 初始化本机数据库，仅首次空库执行
 
-### 路径 A：本机静态体验
-
-需要 **Node.js 24**（项目最低要求 22.13.0）和 Git。若已有检出，请先检查分支和未提交改动；不要覆盖其他人的文件。
+按顺序执行两份数据库脚本，绑定名为 `DB`：
 
 ```bash
-git clone https://github.com/TIMPICKLE/playbook-studio-web.git
-cd playbook-studio-web
+npx --no-install wrangler d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_curved_toad_men.sql
+npx --no-install wrangler d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_optimal_turbo.sql
+```
+
+**已有数据库不要重复执行这两条命令。**它们包含建表语句，重复执行会提示表已存在。`.wrangler/state/` 是实际的数据目录，不能通过删除它来解决迁移报错；升级方式见[日常维护](#重启升级与备份)。
+
+### 4. 创建一次性初始化密钥，启动服务
+
+构建完成后，用以下命令创建 `dist/server/.dev.vars`。密钥只写入本机文件，不显示在终端中；若文件已存在，命令会拒绝覆盖，应编辑原文件并保留现有设置。
+
+```bash
+node --input-type=module -e "import { randomBytes } from 'node:crypto'; import { writeFileSync } from 'node:fs'; writeFileSync('dist/server/.dev.vars', 'PLAYBOOK_SETUP_KEY=' + randomBytes(32).toString('hex') + '\n', { flag: 'wx', mode: 0o600 });"
+npm start -- --port 8787
+```
+
+保持这个终端运行。启动命令以本地模式监听 `127.0.0.1`，并持续使用 `.wrangler/state/` 保存数据库。首次启动时账号尚未创建，下一步在**第二个终端**完成初始化。
+
+> 运行时配置放在生成配置旁的 `dist/server/.dev.vars`，不是项目根目录的 `.dev.vars`。`dist/` 已被 Git 忽略，但重新构建会重建它；自定义运行时配置需另行保留并在构建后恢复。
+
+### 5. 创建本机团队账号
+
+第二个终端也进入同一项目根目录，创建存放临时配置的目录：
+
+```bash
+node --input-type=module -e "import { mkdirSync } from 'node:fs'; mkdirSync('.sites-runtime', { recursive: true });"
+```
+
+用编辑器创建 `.sites-runtime/local-accounts.json`，填写以下内容，**把示例密码替换为自己的密码**：
+
+```json
+{
+  "accounts": [
+    {
+      "username": "coach",
+      "password": "REPLACE_WITH_YOUR_OWN_STRONG_PASSWORD",
+      "name": "Coach",
+      "role": "owner"
+    }
+  ]
+}
+```
+
+用户名为 3–32 位小写字母、数字或下划线，且以字母开头；密码为 8–128 个字符。可一次配置 1–10 个账号，第一个必须是 `owner`，其余只能是 `editor` 或 `viewer`。该临时目录已被 Git 忽略。
+
+执行下面的初始化请求。脚本从本机文件读取密钥和账号配置，不把它们放进命令参数，也不打印出来。
+
+```bash
+node --env-file=dist/server/.dev.vars --input-type=module -e "
+import { readFile } from 'node:fs/promises';
+const origin = 'http://127.0.0.1:8787';
+const accounts = JSON.parse(await readFile('.sites-runtime/local-accounts.json', 'utf8'));
+if (accounts.accounts.some(account => account.password === 'REPLACE_WITH_YOUR_OWN_STRONG_PASSWORD')) {
+  throw new Error('请先替换示例密码');
+}
+const response = await fetch(origin + '/api/auth/bootstrap', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Origin: origin,
+    'X-Playbook-Setup-Key': process.env.PLAYBOOK_SETUP_KEY
+  },
+  body: JSON.stringify(accounts)
+});
+const result = await response.json();
+if (response.ok === false) throw new Error(result.error || '账号初始化失败');
+console.log('账号已创建，请登录：' + origin + '/editor/index.html');
+"
+```
+
+此接口只用于首次创建账号。返回 `409` 表示已初始化，不能用它重复创建账号或重置密码。团队账号与权限详情见[云端架构与运维](CLOUD.md)。
+
+### 6. 关闭初始化入口并登录
+
+1. 回到第一个终端，按 `Ctrl+C` 停止服务。
+2. 编辑 `dist/server/.dev.vars`，删除 `PLAYBOOK_SETUP_KEY` 这一行；保留其他运行时设置。
+3. 删除临时的 `.sites-runtime/local-accounts.json`，将自己的账号密码保存在合适的位置。
+4. 重新启动：
+
+   ```bash
+   npm start -- --port 8787
+   ```
+
+浏览器打开 **[http://127.0.0.1:8787/editor/index.html](http://127.0.0.1:8787/editor/index.html)**，使用刚创建的团队账号登录。以后只需启动服务、访问这个地址。
+
+**完整版本入口是 `/editor/index.html` 或 `/editor/`。**`/editor/local.html` 是浏览器本地数据的静态模式，即使通过同一个服务打开，也不会因此变成账号与数据库模式。为避免会话和同源校验混淆，初始化与访问统一使用 `127.0.0.1`。
+
+## AI 功能配置
+
+**部署成功不等于已经连接模型。**没有 API Key 时，仍可编辑战术、演练、管理球员、导入导出、使用 Madden 目录，以及查看攻防图面简报和检索资料；发送 AI 助手指令或生成模型分析时才需要配置模型。
+
+### 两个入口分别设置
+
+| 入口 | 设置位置 | 主要用途 |
+|---|---|---|
+| 战术板助手 | 工作台 → **编辑战术本** → 球场边缘 **AI** → 设置 | 用自然语言添加防守、改路线、操作战术板 |
+| 攻防对位分析 | 工作台 → **AI分析战局** → 左侧 **02 连接模型** | 结合图面和知识资料生成分析 |
+
+在每个入口依次选择**服务商 → API 格式 → 模型 ID → API Key**。预设服务商无需手填 URL；使用服务商实际开放、且支持所需工具调用的模型 ID。
+
+| 服务商 | 当前支持的 API 格式 |
+|---|---|
+| DeepSeek | OpenAI Chat Completions、Anthropic Messages |
+| Anthropic / Claude | Anthropic Messages |
+| OpenAI | OpenAI Chat Completions、OpenAI Responses |
+| OpenRouter | OpenAI Chat Completions、OpenAI Responses |
+| 自定义兼容服务 | 以上三种格式；另填 HTTPS 地址 |
+
+两个入口的设置各自保存在**当前页面内存**中；刷新后需要重新输入密钥，切换服务商也会清空密钥。不需要为预设服务商设置统一的服务器 `OPENAI_API_KEY`。这里的「Claude Code Messages」指 Anthropic Messages API 格式，需要相应 API 凭据，不等同于 CLI 登录或订阅账号。
+
+本地完整版本由本机 API 转发模型请求。模型服务仍需联网，按所选服务商额度计费；本地完整部署**不包含离线大模型推理**。
+
+### 使用自定义模型网关
+
+除页面内的模型设置外，还需在 `dist/server/.dev.vars` 加入允许访问的**主机名**，多个主机用逗号分隔，并重启服务：
+
+```dotenv
+AI_ALLOWED_HOSTS="gateway.example.com,api.example.net"
+```
+
+页面中填写服务商要求的完整 HTTPS 基础路径或端点；允许列表只填主机名，不含协议、路径或端口。服务器仅接受标准 HTTPS 端口，不接受 URL 中的账号密码、查询参数或片段；也拒绝 `localhost`、以 `.localhost` / `.local` / `.internal` 结尾的主机名及 IP 地址。因此不能直接填写 `http://localhost:11434` 来连接 Ollama。
+
+API 路径拼接、工具调用、知识库与资料导入的完整说明见 **[AI 功能使用指南](AI_GUIDE.md)**。
+
+## 部署验收
+
+本地迁移、账号初始化、登录、权限、保存和重启持久化流程已实测。真实模型调用仍需使用部署者自己的 API Key 单独验证，不能仅凭页面能打开判断 AI 已连接。
+
+| 检查 | 操作 | 预期结果 |
+|---|---|---|
+| API 与数据库 | 打开 `http://127.0.0.1:8787/api/health` | HTTP 200，JSON 中 `ready: true` |
+| 团队账号 | 从完整入口使用新账号登录 | 进入自己的战术本，未登录时不能读取战术本数据 |
+| 编辑与保存 | 移动球员、修改路线，等待保存后刷新 | 改动恢复，保存无报错 |
+| 数据持久化 | `Ctrl+C` 后重新启动，再登录 | 账号和已保存战术仍存在 |
+| 常用功能 | 打开 Madden 图、添加可编辑战术、演练、导出 JSON | 资源能加载，导出文件内容正确 |
+| AI 助手 | 配置模型，发送「添加完整 4–3 防守，保留进攻」 | 生成可检查的预览；应用后新增完整防守 |
+| AI 分析 | 选一攻一守，检查图面简报，再连接模型分析 | 无 Key 可读图面与资料；有 Key 可生成分析 |
+
+如初始化了多个角色，再用 `editor`、`viewer` 账号核对权限。验收记录应注明源码版本、实际访问地址和未验证项目。
+
+## 重启、升级与备份
+
+| 场景 | 操作 |
+|---|---|
+| 日常启动 | 在项目根目录运行 `npm start -- --port 8787`；无需重建表或重新初始化账号 |
+| 停止 | 服务终端按 `Ctrl+C` |
+| 数据备份 | 先停止服务，再备份整个 `.wrangler/state/`；另导出战术本 JSON，便于迁移 |
+| 运行时配置备份 | 单独保留自定义 `.dev.vars` 设置；不要提交密钥或复制到公开日志 |
+| 升级代码 | 先备份，检查未提交改动，再拉取代码、执行 `npm run install:ci` 与 `npm run build`；恢复所需运行时配置后启动 |
+| 后续数据库变化 | 对照新版本迁移说明，仅执行尚未应用的迁移；不要重放首次建表脚本 |
+
+本地数据库依赖当前项目的 `.wrangler/state/` 和数据库绑定配置。不要改到另一个持久化目录后误以为原数据丢失；恢复备份时也应停止服务，并使用匹配的配置。浏览器显示偏好等仍可能保存在浏览器中，数据库备份不替代战术本导出。
+
+## 常见问题
+
+| 现象 | 排查与处理 |
+|---|---|
+| 找不到 `dist/server/wrangler.json` | 先完成 `npm run build`，再执行数据库与启动命令 |
+| `table already exists` | 当前数据库已有表。停止重复初始化；检查已应用的脚本，不要删除数据库 |
+| `/api/health` 报错或 `ready: false` | 确认启动的是 `npm start`，数据库脚本执行成功，且迁移与服务使用同一 `--persist-to` 路径 |
+| 初始化接口返回 `404` | 检查构建后的 `dist/server/.dev.vars` 是否有 `PLAYBOOK_SETUP_KEY`，设置后是否已重启，客户端是否读到同一文件 |
+| 初始化返回 `403` | 检查请求 `Origin` 与访问地址是否一致；本文统一使用 `http://127.0.0.1:8787` |
+| 初始化返回 `409` | 账号已创建，直接登录；此接口不提供密码重置 |
+| 登录后似乎仍是演示数据 | 检查是否误用了 `/editor/local.html`；改用 `/editor/index.html` |
+| AI 提示缺少 Key、认证失败或模型不可用 | 分别检查两个入口的设置、协议、真实模型 ID、API Key 与服务商额度；刷新后需重新输入 Key |
+| 自定义 AI 地址被拒绝 | 核对 `AI_ALLOWED_HOSTS`、HTTPS 路径与端口；使用符合上述限制的主机名，修改配置后重启 |
+| 重建后自定义 AI 网关失效 | `dist/` 已重建，恢复 `.dev.vars` 中的 `AI_ALLOWED_HOSTS` 等设置后再启动 |
+| 其他设备无法访问 | 默认只监听本机回环地址；手机或 iPad 上的 `127.0.0.1` 指向设备自身。跨设备访问需另行配置网络或使用公网版 |
+
+## 附录：其他部署方式
+
+### 轻量静态版与 GitHub Pages
+
+只需免登录体验时，可运行：
+
+```bash
 npm run start:local
 ```
 
-浏览器打开 `http://localhost:3000/`。启动脚本会从仓库内的打包资源还原 Madden 图片；终止服务可按 `Ctrl+C`。这是开发用静态服务，不应当作为公开生产服务；数据存在当前浏览器，清理数据或换设备前请导出 JSON。
+访问 `http://localhost:3000/`。这是静态服务，数据保存在当前浏览器，不提供账号、数据库 API 或跨设备同步；AI 由浏览器直连，需要服务商允许 CORS。清理浏览器数据前先导出 JSON。
 
-**Agent 验收：**确认页面和一张 Madden 图片可加载，尝试移动球员、画线、切换中英文、刷新后读取本地改动，并导出 JSON。静态服务不提供 `/api/*`，不要把接口 404 描述为云端部署成功。
+GitHub Pages 使用仓库已有的 `.github/workflows/pages.yml`，在仓库 **Settings → Pages → Source** 选择 **GitHub Actions**。也可运行 `node scripts/prepare-pages.mjs`，将生成的整个 `github-pages/` 目录发布到静态托管平台。不要只复制 `web/` 或漏掉生成资源；Pages 工作流是否自动触发，以工作流中的分支和路径条件为准。
 
-### 路径 B：GitHub Pages / 静态托管
+Madden 几何资源按需加载，首次离线访问尚未获取的分片无法导入；已导入战术可继续编辑。打开过首页不代表全部 Madden 资源均已离线缓存。
 
-1. Fork 或准备一个**自己有发布权限**的仓库。先处理上面提到的原项目云端链接，不要把它们误当作自己部署的后端。
-2. 确认仓库允许 GitHub Actions 运行；在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。已有的 `.github/workflows/pages.yml` 会部署静态产物；若仓库的默认分支不是 `main`，先调整工作流中的分支条件。
-3. 工作流在 `main` 的 `web/**`、`scripts/prepare-pages.mjs` 或该工作流文件变化时自动运行；也可在 Actions 手动运行 **Deploy GitHub Pages**。仅修改 README 不会触发该工作流。查看运行状态和 Pages 配置中的实际地址。
-4. 无需 GitHub Pages 时，也可在本机生成静态文件，再由用户选择的静态托管服务发布整个 `github-pages/` 目录：
+### 公网团队协作
 
-   ```bash
-   node scripts/prepare-pages.mjs
-   ```
+当前已有的公网协作实现使用 ChatGPT Sites、Worker 和 D1。部署独立副本时，需要创建自己的站点与数据库，配置 `DB`、迁移、可信身份与运行时变量，再发布并验证 HTTPS、登录、权限和保存。不要复用仓库中原项目的 `.openai/hosting.json` Site ID，也要替换原项目云端入口链接。
 
-   产物的 `index.html` 是卡片工作台，`local.html` 可直达编辑器，`landing.html` 保留旧版迁移指南。不要只复制 `web/` 或漏掉生成的图片资源。Pages 的具体仓库权限与设置见 [GitHub 官方说明](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
+`npm start` 是本地 Worker 运行方式，不是公网生产服务。仓库没有一条可直接套用的通用 VPS 部署命令；公网配置、迁移和平台身份验证需按目标环境完成。详见[云端架构与运维](CLOUD.md)。修改网页后的发布检查见 [Web 平台优化与回归方法](WEB_PLATFORM_OPTIMIZATION.md)。
 
-**Agent 验收：**从 Pages 根地址免登录进入三张卡片，新增球员后刷新并搜索该球员，再返回工作台。验证 `local.html` 可直达编辑器、中英文切换、战术编辑、刷新保存、Madden 图片和 JSON 导出；查看 Actions 是否成功。说明浏览器数据不会自动同步到其他用户或设备，也没有云端账号和云端共享；验证 AI 演示入口、默认攻防叠图与空 Key 的提示。语言与数据在不同域名之间互不共享。
+### 可直接交给 Agent 的指令
 
-### 路径 C：自己的云端协作站点
-
-当前云端依赖 **Vinext / Cloudflare Worker、D1 数据库（绑定名 `DB`）、数据库迁移，以及经过平台验证的身份入口**。使用 ChatGPT Sites 时，应由有权操作的部署者创建**自己的新 Site 和新数据库**，并让 Agent 按该环境提供的 Sites 工作流读取新项目配置、构建、应用迁移、发布和检查状态。不要在没有核实目标的情况下对已有站点或数据库执行初始化、重置或迁移。
-
-初始化团队账号需要在目标站点的安全运行时配置一次性 `PLAYBOOK_SETUP_KEY`。`POST /api/auth/bootstrap` 使用 `X-Playbook-Setup-Key` 和 JSON `accounts` 列表：首个账号为 `owner`，后续为 `editor` 或 `viewer`；账号对象包含 `username`、`password`、`role` 和可选显示名称 `name`；用户名为 3–32 位，以字母开头，只能包含小写字母、数字和下划线；密码为 8–128 个字符。该接口还要求请求的 `Origin` 与站点源完全一致；成功后不可再次初始化或当作密码重置使用。初始化完成后移除一次性密钥。凭据应通过平台安全入口提供，不要写进仓库、日志、终端命令参数或聊天记录。具体约束以 `server/auth.mjs` 和 [云端架构与运维](CLOUD.md) 为准。
-
-**Agent 验收：**访问 HTTPS 登录页，检查 `/api/health`，确认匿名用户无法读取战术本；再使用授权账号验证登录、创建或读取战术本、自动保存、刷新恢复及中英文切换。按需要用两个授权账号验证成员权限；AI 分析使用各自服务商的模型与 API Key，需单独验证。报告 Site 地址、源码版本、数据库和测试结果，不要输出账号密码或密钥。
-
-> `npm run build && npm start` 启动的是本地 Worker / Wrangler 环境，**不是**已经配置好的公网生产部署。仓库目前没有可直接运行的通用 VPS 自托管云端方案；迁移到其他 Worker / D1 平台需要另行完成部署配置、迁移和可信身份验证，不能直接信任公网请求中的 Sites 身份头。平台缺失或权限不足时，应如实报告，不能以静态页面冒充完整云端版。
+```text
+请按 docs/AGENT_DEPLOYMENT.md 在本机完整部署 Playbook Studio，默认不发布公网。
+先检查 Node、Git、分支及未提交改动，保留现有文件与数据库。
+完成依赖安装、前后端构建、本地 D1 首次迁移和团队账号初始化；已有数据库只补尚未应用的迁移。
+账号与初始化密钥仅通过本机受忽略文件处理，不写进聊天、日志或 Git；完成后关闭初始化入口。
+从 /editor/index.html 验证登录、自动保存、重启持久化、Madden、演练和 JSON 导出。
+说明两个 AI 入口各自的模型配置；有授权 API 凭据时实测，没有时明确记录 AI 尚未连接。
+最后提供实际访问地址、源码版本、数据保存位置、维护方法和验证结果。
+```

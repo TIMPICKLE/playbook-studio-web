@@ -65,28 +65,31 @@ Open **Player management → DEPTH CHART** for starters and backups in each pers
 
 [Collaboration and migration](docs/USER_GUIDE.en.md#cloud-collaboration-and-storage) · [Touch devices](docs/TOUCH_WORKSPACE.md) · [Digital board](docs/DIGITAL_BOARD.md)
 
-## Local development and deployment
+## Full local deployment (recommended)
 
-**Node.js 24** is recommended (minimum 22.13.0).
+Run the frontend, API, persistent database and team accounts on your computer. Use **Node.js 24** (minimum 22.13.0):
 
 ```bash
 git clone https://github.com/TIMPICKLE/playbook-studio-web.git
 cd playbook-studio-web
-npm ci --ignore-scripts
-npm run start:local
+npm run install:ci
+npm run build
 ```
 
-Open `http://localhost:3000/`. The static version does not supply cloud accounts or shared APIs.
+Follow the **[six deployment steps](docs/AGENT_DEPLOYMENT.en.md)** to initialize the local database and accounts, then start the service and open `http://127.0.0.1:8787/editor/`. The guide includes a complete prompt for your coding agent.
+
+**AI requires a separate provider, model and API key configuration; deploying locally does not supply a model.** See [AI setup](docs/AGENT_DEPLOYMENT.en.md#ai-configuration) for both entry points.
+
+For a no-sign-in static preview, run `npm run start:local` and open `http://localhost:3000/`. This mode does not include accounts or shared APIs.
 
 ```bash
 npm run check       # JavaScript syntax checks
 npm run typecheck   # TypeScript checks
 npm test            # Automated tests
 npm run dev         # Vinext development environment
-npm run build       # Build the Worker
 ```
 
-**[AI Agent deployment guide →](docs/AGENT_DEPLOYMENT.en.md)** includes a ready-to-use agent prompt and separate paths for local use, GitHub Pages and your own cloud app. Cloud operation requires Worker / D1; a local build is not a public deployment.
+See the [guide appendix](docs/AGENT_DEPLOYMENT.en.md) for GitHub Pages and public hosting options.
 
 ## Documentation
 
@@ -94,7 +97,7 @@ npm run build       # Build the Worker
 |---|---|
 | [User guide](docs/USER_GUIDE.en.md) | Visual walkthrough, personnel groups, rehearsal, Madden and collaboration |
 | [AI feature guide](docs/AI_GUIDE.en.md) | Both AI entry points, configuration, knowledge and troubleshooting |
-| [Deployment guide](docs/AGENT_DEPLOYMENT.en.md) | Local, static-hosted and cloud deployment |
+| [Deployment guide](docs/AGENT_DEPLOYMENT.en.md) | Full local deployment, AI setup and hosting appendix |
 | [Web platform optimization](docs/WEB_PLATFORM_OPTIMIZATION.md) | Lazy geometry, stable rendering, native dialogs and repeatable audits |
 | [AI command architecture](docs/EDITOR_COMMAND_ARCHITECTURE.md) / [Tool flow](docs/BOARD_ASSISTANT.md) | Shared manual/AI execution, previews and undo |
 | [AI analysis research](docs/ai-analysis/README.md) | Competitors, knowledge architecture, implementation and evaluations |
