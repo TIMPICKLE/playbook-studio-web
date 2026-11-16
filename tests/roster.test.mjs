@@ -87,6 +87,22 @@ test('player and team forms patch the latest data and preserve other fields, ros
   assert.equal(state.writes, 2);
 });
 
+test('selecting the flag default preserves the complete roster, existing plays and depth charts', t => {
+  const { state, q, click, save } = setup(t);
+  const before = structuredClone({ roster: state.data.roster, plays: state.data.plays, depthChart: state.data.depthChart });
+  click('team');
+  const league = q('.roster-page > .roster-dialog [name=league]');
+  const flag = [...league.options].find(option => option.value === '5');
+  assert.ok(flag);
+  assert.match(flag.textContent, /腰旗|flag/i);
+  league.value = '5';
+  save();
+  assert.equal(state.data.settings.league, 5);
+  assert.match(q('.roster-team-meta').textContent, /腰旗|flag/i);
+  assert.deepEqual({ roster: state.data.roster, plays: state.data.plays, depthChart: state.data.depthChart }, before);
+  assert.equal(state.writes, 1);
+});
+
 test('stale rows, active playbook changes and revoked permissions cannot overwrite another edit', t => {
   const { state, view, q, click, save, openDirectory } = setup(t);
   openDirectory();

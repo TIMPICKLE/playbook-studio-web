@@ -128,3 +128,27 @@ test('editing the field template preserves concurrent rank changes and prevents 
   assert.equal(state.writes, 1);
   assert.equal(view.isEditing(), true);
 });
+
+test('flag defaults recommend five-player personnel templates without replacing existing tackle groups', t => {
+  const { state, view, q, action, save } = setup(t);
+  const legacy = structuredClone(state.data.depthChart.groups);
+  state.data.settings.league = 5;
+  view.refresh();
+  assert.match(q('.personnel-note').textContent, /Flag 5/);
+  action('new');
+  assert.equal(q('[name=template]').value, 'flag5-offense');
+  q('[name=name]').value = 'Flag game day';
+  save();
+  const offense = state.data.depthChart.groups.find(group => group.id === view.getSelectedId());
+  assert.equal(offense.slots.length, 5);
+  assert.equal(offense.templateId, 'flag5-offense');
+  assert.deepEqual(state.data.depthChart.groups.slice(0, legacy.length), legacy);
+  q('[data-personnel-unit=defense]').click();
+  action('new');
+  assert.equal(q('[name=template]').value, 'flag5-defense');
+  q('[name=name]').value = 'Flag defense';
+  save();
+  const defense = state.data.depthChart.groups.find(group => group.id === view.getSelectedId());
+  assert.deepEqual(defense.slots.map(slot => slot.label), ['R', 'LCB', 'RCB', 'S', 'DB']);
+  assert.deepEqual(state.data.depthChart.groups.slice(0, legacy.length), legacy);
+});

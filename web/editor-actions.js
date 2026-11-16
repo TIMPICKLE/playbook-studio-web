@@ -1,10 +1,11 @@
 import { z } from './vendor/assistant-zod.js';
 import { clone, decodeWorkspace, encodeWorkspace, FORMATIONS, makePlay } from './model.js';
 import { hasEditableTrace, makeMaddenPlay } from './madden-model.js';
+import { LEAGUE_SIZES, getPlayLeague, isFlag5Play } from './game-formats.js';
 
 const id = z.string().trim().min(1).max(100);
 const book = z.enum(['offense', 'defense', 'special']);
-const count = z.union([6, 7, 8, 9, 11, 12].map(value => z.literal(value)));
+const count = z.union(LEAGUE_SIZES.map(value => z.literal(value)));
 const action = (kind, fields = {}) => z.strictObject({kind:z.literal(kind), ...fields});
 const changing = (kind, fields) => action(kind, fields).refine(value => Object.keys(value).length > 1, {message:'Specify at least one setting.'});
 const definitions = [
@@ -142,6 +143,7 @@ export function prepareEditorActions({data, selectedId, catalogRows} = {}, value
         throw new Error('The saved formation player count does not match the requested league size.');
       let play = makePlay({...action, formation:custom?.name || name});
       if (custom) {
+        play.formation = custom.name;
         play.players = clone(custom.players);
         play.ball.holderId = play.players.find(player => player.label === 'QB')?.id || play.players[0].id;
       }
@@ -149,7 +151,7 @@ export function prepareEditorActions({data, selectedId, catalogRows} = {}, value
       play.createdAt = now;
       if (english(locale)) {
         play.category = action.book === 'defense' ? 'Zone defense' : 'Pass';
-        if (action.count !== 11) play.personnel = `${action.count} players`;
+        if (action.count !== 11) play.personnel = action.count === 5 ? '5v5 Flag' : `${action.count} players`;
       }
       next.plays.push(play); nextId = play.id; next.settings.league = action.count;
       changes.push(words(locale, `Create play · ${play.title}`, `新建战术 · ${play.title}`));
@@ -169,7 +171,7 @@ export function prepareEditorActions({data, selectedId, catalogRows} = {}, value
     } else if (action.kind === 'formation_save') {
       const play = requirePlay(next, nextId);
       if (play.reference) throw new Error('A reference diagram has no editable starting positions.');
-      next.formations.push({id:makeId(), name:action.name, book:play.book, players:clone(play.players)});
+      next.formations.push({id:makeId(), name:action.name, book:play.book, league:getPlayLeague(play), players:clone(play.players)});
       play.formation = action.name;
       changes.push(words(locale, `Save formation · ${action.name}`, `保存阵型 · ${action.name}`));
     } else if (action.kind === 'catalog_import') {
@@ -201,8 +203,8 @@ export function getEditorOverview(data, current) {
   const play = typeof current === 'string' ? findPlay(data, current) : current || data?.plays?.[0];
   return {
     selectedPlayId:play?.id,
-    plays:(data?.plays || []).map(({id, title, book, formation, favorite}) => ({id, title, book, formation, favorite})),
-    formations:{builtIn:[...FORMATIONS], saved:(data?.formations || []).map(({id, name, book}) => ({id, name, book}))},
+    plays:(data?.plays || []).map(item => ({id:item.id, title:item.title, book:item.book, formation:item.formation, favorite:item.favorite, league:getPlayLeague(item), flag5:isFlag5Play(item)})),
+    formations:{builtIn:[...FORMATIONS], saved:(data?.formations || []).map(item => ({id:item.id, name:item.name, book:item.book, league:getPlayLeague(item)}))},
     roster:(data?.roster || []).map(({id, name, number, position}) => ({id, name, number, position})),
     personnelGroups:(data?.depthChart?.groups || []).map(({id, name, unit}) => ({id, name, unit})),
     settings:clone(data?.settings || {}),

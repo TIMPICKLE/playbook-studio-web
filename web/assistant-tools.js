@@ -5,6 +5,7 @@ import { EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
 import { parseEditorActions, prepareEditorActions, getEditorOverview } from './editor-actions.js';
 import { editorCapabilities, editorCommandSchema } from './editor-capabilities.js';
 import { loadEditableEntries } from './madden-model.js';
+import { FLAG5_FORMATIONS, defaultFormation, formationOptions, getPlayLeague, isFlag5Play } from './game-formats.js';
 
 const string = { type: 'string' };
 const object = properties => ({ type: 'object', properties, additionalProperties: false });
@@ -85,10 +86,19 @@ export function createBoardTools(input, searchCatalog) {
         actionPreviews.set(JSON.stringify(actions),evidence);
         return evidence;
       }},
-    read_board: { schema: noArgs, description: 'Read the current diagram, marker IDs, positions, sides, selection, existing primary routes and available editing capabilities. Local 4-3 defense can be added to an offensive diagram without searching Madden.',
+    read_board: { schema: noArgs, description: 'Read the current diagram, player format, IDs, positions, sides, selection, routes and editing capabilities. In 5v5 flag use formation_apply for the current side or opponents_set for the opposing side. The dedicated 4-3 operation always adds eleven tackle defenders.',
       run: () => { boardRead = true; for (const route of input.board.routes) if (route.id) routeIds.add(route.id); const {play, ...board} = input.board;
-        return {...board, capabilities: {defenseFormations: (play || board).reference ? [] : ['4-3'],
-          defenseFormationModes: ['add', 'reset'], defensePlayerCount: 11, requiresEmptyDefenseForAdd: true, assignsCoverage: false}}; } },
+        const diagram = play || board, count = getPlayLeague(diagram), flag5 = isFlag5Play(diagram), editable = !diagram.reference;
+        const opposingSide = diagram.book === 'defense' ? 'offense' : 'defense';
+        return {...board, playersPerSide:count, gameFormat:flag5 ? 'flag5' : 'unspecified', capabilities: {
+          defenseFormations: editable ? (flag5 ? [...FLAG5_FORMATIONS.defense] : ['4-3']) : [],
+          defenseFormationCommand: flag5 ? (diagram.book === 'defense' ? 'formation_apply' : 'opponents_set') : 'defense_formation',
+          defenseFormationModes: flag5 ? [] : ['add', 'reset'], defensePlayerCount: flag5 ? 5 : 11, requiresEmptyDefenseForAdd: true, assignsCoverage: false,
+          currentSideFormations: editable ? formationOptions(diagram.book, count) : [],
+          formationCommand:'formation_apply', opponentsCommand:'opponents_set', opponentsCount:count, defaultOpponentFormation:defaultFormation(opposingSide, count),
+          ...(flag5 ? { flag5Formations:FLAG5_FORMATIONS, tackleDefense:{command:'defense_formation',formation:'4-3',count:11},
+            addOpponents:{kind:'opponents_set',enabled:true,count:5},
+            formatNote:'Flag templates describe alignment only. Use formation_apply for your current side; opponents_set adds the default opposing formation. The center can receive. Do not default to blocking, tackling or kicking; competition rushing, QB-run and field rules remain unconfirmed.' } : {})}}; } },
     resolve_player: { schema: fields, description: 'Find the exact marker by label/role, explicit roster name, number or side. For relative positioning pass relation and relativeToId of a resolved anchor. Returns found, missing or ambiguous. Resolve every edit actor and block target before editing.',
       run(args) {
         if (args.relativeToId && !resolved.has(args.relativeToId)) return { error: 'Resolve the anchor first.' };

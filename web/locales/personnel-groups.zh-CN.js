@@ -17,6 +17,7 @@ export default {
   'personnel.currentLayout': '场地图模板',
   'personnel.noLayout': '暂不设置场地图',
   'personnel.layoutMatchHint': '按已有分工或同名位置放置到场上。其余位置及所有首发、替补顺位都会保留。',
+  'personnel.flag5Hint': '5 人制腰旗可新建 Flag 5 进攻／防守人员组。默认人数的改变不会裁剪已有人员组或球员名单。',
   'personnel.blank': '自定义 · 从空白开始',
   'personnel.instructions': '比赛日说明',
   'personnel.notePlaceholder': '写下何时使用这个组，或上场前要换哪些人',

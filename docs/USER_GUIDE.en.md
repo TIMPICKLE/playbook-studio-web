@@ -12,7 +12,20 @@ Detailed instructions for editing, rehearsal, roster management, Madden imports 
 4. Switch to **战术演练** (Rehearsal) to play, pause, or scrub the timeline. The space bar also toggles playback.
 5. Save in the current browser or export a JSON backup. For team sharing, sign in to the [cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) and create a playbook.
 
-Eight teaching examples are included: Mesh, Four Verticals, Flood, Slants, Inside Zone, Cover 3, Nickel Blitz, and Field Goal. Formation tools support 6-, 7-, 8-, 9-, 11-, and 12-player formats, plus custom templates.
+Eight teaching examples are included: Mesh, Four Verticals, Flood, Slants, Inside Zone, Cover 3, Nickel Blitz, and Field Goal. Formation tools support **5v5 flag football**, plus 6-, 7-, 8-, 9-, 11-, and 12-player formats and custom templates.
+
+## 5v5 flag football
+
+![Five-player flag offense and defense alongside existing eleven-player plays](assets/readme/flag5-board.jpg)
+
+1. Select **New play**, set **Players per side** to **5v5 flag football**, and choose offense or defense.
+2. Offense offers Spread, Trips and Bunch with C, QB, X, Y and Z. Defense offers Zone and Man with R, LCB, RCB, S and DB. The center can receive; templates do not create blocking assignments.
+3. Use **Add objects → Add 5-player opponents**, or the properties panel, to create a 5-on-5 diagram. Routes, mirroring, rehearsal, exports and printing work as usual.
+4. In **Player management → DEPTH CHART**, create a **Flag 5 Offense / Flag 5 Defense** group, assign starters, then apply matching positions from play properties.
+
+The default player count affects new plays. Each play retains its own format. Changing the default does not trim existing plays, rosters or personnel groups; Madden imports retain their original 11 players. Saved formations are filtered by home-side count, and backups preserve format metadata.
+
+This is a five-player diagram mode using the existing diagram grid, rather than a regulation field or officiating simulator for a particular event. Confirm rush distance, QB running, timing and other competition-specific rules. The non-contact, no-blocking defaults draw on [NFL FLAG rules](https://nflflag.com/coaches/flag-football-rules) and [USA Football's rules overview](https://usafootball.com/national-team/rules).
 
 ## Quick tour
 

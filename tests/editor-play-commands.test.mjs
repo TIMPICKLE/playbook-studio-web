@@ -150,7 +150,7 @@ test('custom zones, annotations, ball settings and details preserve unrelated ge
   assert.equal(play.zones.length, 0); assert.equal(play.annotations.length, 0);
 });
 
-test('mirroring is reversible and built-in or saved formations replace the complete board deterministically', () => {
+test('mirroring is reversible and built-in or saved formations replace the home formation deterministically', () => {
   const original = mesh();
   const mirrored = execute(original, { kind: 'play_mirror' }).play;
   assert.deepEqual(execute(mirrored, { kind: 'play_mirror' }).play, original);

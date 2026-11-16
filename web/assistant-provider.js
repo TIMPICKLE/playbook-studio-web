@@ -3,6 +3,7 @@ import { providerMessages } from './locales/assistant-provider.js';
 import { validatePlay, COLORS, clone, decodeWorkspace, encodeWorkspace } from './model.js';
 import { submitResultTool } from './assistant-schema.js';
 import { buildModelRequest, parseModelResponse, resolveModelEndpoint } from './model-protocol.js';
+import { getPlayLeague, isFlag5Play } from './game-formats.js';
 
 export const DEFAULT_BOARD_MODEL = 'gpt-6.1-terra';
 const words = locale => providerMessages[locale === 'en' ? 'en' : 'zh-CN'];
@@ -21,9 +22,10 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
     formation:source.formation || 'Custom', category:source.category || 'Custom', personnel:source.personnel || 'Custom', notes:source.notes || '', createdAt:source.createdAt || '',
     players, routes, zones:source.zones || [], annotations:source.annotations || [],
     ball:source.ball || {holderId:players[0]?.id || '',receiverId:'',passAt:2,arriveAt:3}});
+  const flag5 = isFlag5Play(play);
   const compactPlayers = play.players.map(p => {
     const original = (board?.players || rawPlayers).find(item => item.id === p.id) || p;
-    return {...p, name:text(original.name || p.name,100), position:text(original.position || p.label,40), ...(original.number != null ? {number:text(String(original.number),12)} : {})};
+    return {...p, name:text(original.name || p.name,100), position:text(original.position || p.label,40), ...(original.number != null ? {number:text(String(original.number),12)} : {}), ...(flag5 ? { gameFormat: 'flag5' } : {})};
   });
   const selected = board?.selectedPlayerId;
   let editorContext;
@@ -41,8 +43,8 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
   return {instruction:instruction.trim(),locale:locale === 'en' ? 'en' : 'zh-CN',mode:['edit','search'].includes(mode) ? mode : 'auto',
     ...(editorContext ? {editor:editorContext} : {}),
     previous:Array.isArray(previous) ? previous.slice(-5) : [],
-    board:{...play, playId:play.id, players:compactPlayers, play,
-      geometry:{losY:67,xUnitsPerYard:1.875,yUnitsPerYard:2,offenseDirection:'decreasing_y'},
+    board:{...play, playId:play.id, players:compactPlayers, play, playersPerSide:getPlayLeague(play), gameFormat:flag5 ? 'flag5' : 'unspecified',
+      geometry:{losY:67,xUnitsPerYard:1.875,yUnitsPerYard:2,offenseDirection:'decreasing_y', ...(flag5 ? { scale:'diagram_grid', regulationFieldVerified:false } : {})},
       ...(play.players.some(p => p.id === selected) ? {selectedPlayerId:selected} : {})}};
 }
 

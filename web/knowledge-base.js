@@ -285,17 +285,18 @@ function compiledKnowledge(imported) {
   return result;
 }
 
-export function retrieveKnowledge({ query = '', coverage = 'unknown', packs = [], limit = 6, locale = 'zh-CN' } = {}) {
+export function retrieveKnowledge({ query = '', coverage = 'unknown', packs = [], limit = 6, locale = 'zh-CN', includeBuiltin = true } = {}) {
   if (typeof query !== 'string') invalid('检索问题须为文本');
   if (!COVERAGES.has(coverage)) invalid('不支持的覆盖类型');
   if (!Array.isArray(packs) || packs.length > KNOWLEDGE_LIMITS.sources) invalid('知识库数量超出限制');
+  if (typeof includeBuiltin !== 'boolean') invalid('内置知识开关须为布尔值');
   if (!Number.isInteger(limit) || limit < 0 || limit > KNOWLEDGE_LIMITS.retrievedCards) invalid('一次最多检索 6 张卡片');
   if (!limit) return [];
   const imported = packs.length ? mergeKnowledgePacks(packs) : EMPTY_KNOWLEDGE_PACK;
   const { all, frequencies, allByKey } = compiledKnowledge(imported);
   const boundedQuery = query.slice(0, KNOWLEDGE_LIMITS.queryChars);
   const q = terms(boundedQuery), hints = conceptHints(boundedQuery);
-  const eligible = item => (coverage === 'unknown' || !item.card.coverages.length || item.card.coverages.includes(coverage))
+  const eligible = item => (!item.builtin || includeBuiltin) && (coverage === 'unknown' || !item.card.coverages.length || item.card.coverages.includes(coverage))
     && (!item.builtin || !item.card.retrievalConcepts?.length || item.card.retrievalConcepts.some(concept => hints.has(concept)));
   const candidates = all.filter(eligible).map(item => {
     const title = item.titleTerms, tags = item.tagTerms, body = item.bodyTerms;

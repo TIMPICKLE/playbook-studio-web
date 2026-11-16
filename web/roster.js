@@ -2,8 +2,9 @@ import { t } from './i18n.js';
 import { escapeHTML as e, uid } from './model.js';
 import { createPersonnelGroups } from './personnel-groups.js';
 import { createDepthChartView } from './depth-chart.js';
+import { LEAGUE_SIZES } from './game-formats.js';
 
-const leagues = [6, 7, 8, 9, 11, 12];
+const leagueName = count => t(count === 5 ? 'roster.flag5' : 'roster.league', { count });
 const teamValues = data => ({ ...data.team, league: data.settings.league });
 
 function playerRow(player, editable) {
@@ -24,7 +25,7 @@ function editorFields(type, values) {
     return `${input('modal.team_name', 'name', values.name, 'maxlength="80" required autofocus')}
       ${input('modal.season_subtitle', 'subtitle', values.subtitle, 'maxlength="80"')}
       <div class="roster-pair">${input('modal.team_color', 'accent', values.accent, 'type="color"')}
-      <label>${t('modal.default_players')}<select name="league">${leagues.map(n => `<option value="${n}" ${n === values.league ? 'selected' : ''}>${t('roster.league', { count: n })}</option>`).join('')}</select></label></div>`;
+      <label>${t('modal.default_players')}<select name="league">${LEAGUE_SIZES.map(n => `<option value="${n}" ${n === values.league ? 'selected' : ''}>${leagueName(n)}</option>`).join('')}</select></label></div>`;
   }
   return `${input('modal.player_name', 'name', values.name, 'maxlength="80" required autofocus')}
     <div class="roster-pair">${input('modal.jersey_number', 'number', values.number, 'maxlength="5"')}
@@ -55,7 +56,7 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     if (root.hidden) return;
     const data = getData(), editable = canEdit();
     find('.roster-team-name').textContent = data.team.name;
-    find('.roster-team-meta').textContent = [data.team.subtitle, t('roster.league', { count: data.settings.league })].filter(Boolean).join(' · ');
+    find('.roster-team-meta').textContent = [data.team.subtitle, leagueName(data.settings.league)].filter(Boolean).join(' · ');
     find('.roster-team').style.setProperty('--roster-accent', data.team.accent);
     find('[data-roster="team"]').hidden = !editable;
     const add = find('[data-roster="add"]');

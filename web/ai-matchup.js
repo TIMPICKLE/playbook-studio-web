@@ -6,6 +6,7 @@ import { parseKnowledgeText, retrieveKnowledge, validateKnowledgePack, safeSourc
 import { createKnowledgeStore, emptyKnowledgePack } from './knowledge-store.js';
 import { knowledgePanelHTML, knowledgeCardHTML, localBriefHTML } from './knowledge-panel.js';
 import { matchupKnowledgeQuery } from './analysis-evidence.js';
+import { isFlag5Play } from './game-formats.js';
 import { MODEL_PROVIDER_PRESETS, PROTOCOL_OPTIONS } from './model-protocol.js';
 
 const ref = (side, type, id) => `${side}:${type}:${id}`;
@@ -77,7 +78,7 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
   function retrievedKnowledge() {
     const { offense, defense } = selected();
     const query = matchupKnowledgeQuery(offense || {}, defense || {}, { context: state.context, knowledgeQuery: state.knowledgeQuery });
-    return retrieveKnowledge({ query, coverage: state.coverage, packs: knowledgePack.cards.length ? [knowledgePack] : [], limit: 6, locale: getLocale() });
+    return retrieveKnowledge({ query, coverage: state.coverage, packs: knowledgePack.cards.length ? [knowledgePack] : [], limit: 6, locale: getLocale(), includeBuiltin: !isFlag5Play(offense) && !isFlag5Play(defense) });
   }
   function requestKnowledgePack() {
     const cards = retrievedKnowledge().filter(card => card.source?.kind === 'team').map(({ source, evidenceId, matchReasons, applicability, score, ...card }) => card);

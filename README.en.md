@@ -18,7 +18,7 @@ An American football workspace for drawing plays, rehearsal, AI-assisted analysi
 
 | Feature | Capabilities |
 |---|---|
-| **Edit plays** | Players, routes, blocks, motion, passes, coverage zones and text; mirroring, templates, undo and redo |
+| **Edit plays** | 5v5 flag football and other player counts; players, routes, blocks, motion, passes, coverage zones and text; mirroring, templates, undo and redo |
 | **Quick tour** | First-visit highlights with step-by-step tips; skip anytime or replay beside the language selector |
 | **Rehearse** | Playback, looping, speed and timeline controls; route and pass timing |
 | **Playbooks and players** | Offense, defense and special teams; favorites, notes, formations and personnel-group DEPTH CHARTs |
