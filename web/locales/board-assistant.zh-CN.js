@@ -1,6 +1,6 @@
 export default {
   viewProcess: '查看过程', traceTool: '工具', traceValidation: '校验修正', traceResult: '结果',
-  clearMode: '清除模式', apply: '应用', repreview: '重新预览', discard: '放弃', rehearse: '预览演练', discarded: '已放弃预览。', expand: '展开预览', handoff: '前往战局分析',
+  clearMode: '清除模式', apply: '应用', repreview: '重新预览', discard: '放弃', rehearse: '预览演练', discarded: '已放弃预览。', pendingTitle: '待应用的修改', revert: '撤回上一步', reverted: '已撤回上一步，其余修改仍待应用。', resolveFirst: '请先应用或放弃上面的战术本变更，再发送下一条指令。', expand: '展开预览', handoff: '前往战局分析',
   toolProgress: {read_editor:'正在读取编辑器状态…',list_capabilities:'正在检查可用功能…',get_command_schema:'正在核对操作参数…',preview_actions:'正在准备操作预览…',read_board:'正在读取战术板…', resolve_player:'正在定位', resolve_players:'正在定位球员组', search_madden:'正在检索 Madden 战术…', build_preview:'正在生成改图预览…'},
   title: '战术板助手', open: '打开 AI 战术板助手', close: '收起助手', settings: '模型设置', move: '移动浮窗',
   guide: '编辑战术、调整视图，或开始演练。', edit: '添加防守阵型', search: '找 Madden 战术', editExample: '在这张战术图上添加完整的 4–3 防守，保留进攻和路线。',

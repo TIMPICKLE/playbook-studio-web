@@ -1,6 +1,6 @@
 export default {
   viewProcess: 'View process', traceTool: 'Tool', traceValidation: 'Validation repair', traceResult: 'Result',
-  clearMode: 'Clear mode', apply: 'Apply', repreview: 'Preview again', discard: 'Discard', rehearse: 'Preview rehearsal', discarded: 'Preview discarded.', expand: 'Show preview', handoff: 'Analyze matchup',
+  clearMode: 'Clear mode', apply: 'Apply', repreview: 'Preview again', discard: 'Discard', rehearse: 'Preview rehearsal', discarded: 'Preview discarded.', pendingTitle: 'Pending changes', revert: 'Undo last step', reverted: 'Last step removed. Earlier changes are still pending.', resolveFirst: 'Apply or discard the playbook change above before sending another instruction.', expand: 'Show preview', handoff: 'Analyze matchup',
   toolProgress: {read_editor:'Reading editor state…',list_capabilities:'Checking available features…',get_command_schema:'Checking action parameters…',preview_actions:'Preparing action preview…',read_board:'Reading the board…', resolve_player:'Finding', resolve_players:'Finding players', search_madden:'Searching the Madden library…', build_preview:'Preparing the preview…'},
   title: 'Board assistant', open: 'Open AI board assistant', close: 'Collapse assistant', settings: 'Model settings', move: 'Move panel',
   guide: 'Edit a play, adjust the view, or start rehearsal.', edit: 'Add a defensive front', search: 'Find a Madden play', editExample: 'Add a complete 4-3 defense to this diagram while retaining the offense and its routes.',

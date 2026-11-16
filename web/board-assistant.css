@@ -131,25 +131,29 @@
   .board-ai .ba-panel.ba-collapsed .ba-expand { display: inline-flex; flex: 1; }
 }
 
-/* The modeless touch layer lives outside the clipped/zoomed pitch while open. */
+/* An open panel lives in a viewport layer outside the clipped/zoomed pitch, so it
+   can be moved anywhere on the page. Touch devices dock it above the keyboard. */
 .board-ai.ba-floating {
   position:fixed; inset:var(--visible-top,0px) 0 auto;
   height:var(--visible-height,100dvh); z-index:76;
 }
-.board-ai.ba-floating .ba-panel {
+.board-ai.ba-floating .ba-panel { width:min(365px,calc(100% - 20px)); }
+.board-ai.ba-docked .ba-panel {
   left:auto!important; right:max(8px,env(safe-area-inset-right,0px))!important;
   top:auto!important; bottom:max(8px,env(safe-area-inset-bottom,0px));
   width:min(440px,calc(100% - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));
   max-height:calc(100% - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
 }
-.board-ai.ba-floating .ba-heading { cursor:default; touch-action:pan-y; }
-.board-ai.ba-floating :is(.ba-icon,.ba-pill,.ba-fab) { min-height:44px; }
-.board-ai.ba-floating .ba-icon { width:44px; height:44px; }
-.board-ai.ba-floating .ba-config :is(input,select),.board-ai.ba-floating textarea { font-size:16px; }
-.board-ai.ba-floating .ba-config :is(input,select) { min-height:44px; }
-.board-ai.ba-floating .ba-panel.ba-collapsed { max-height:64px; }
+.board-ai.ba-docked .ba-heading { cursor:default; touch-action:pan-y; }
+.board-ai.ba-docked :is(.ba-icon,.ba-pill,.ba-fab) { min-height:44px; }
+.board-ai.ba-docked .ba-icon { width:44px; height:44px; }
+.board-ai.ba-docked .ba-config :is(input,select),.board-ai.ba-docked textarea { font-size:16px; }
+.board-ai.ba-docked .ba-config :is(input,select) { min-height:44px; }
+.board-ai.ba-docked .ba-panel.ba-collapsed { max-height:64px; }
 @media screen and (max-width:600px) {
-  .board-ai.ba-floating .ba-panel { left:max(8px,env(safe-area-inset-left,0px))!important; width:auto; }
-  .board-ai.ba-floating .ba-panel.ba-collapsed .ba-expand { min-width:0; }
+  .board-ai.ba-docked .ba-panel { left:max(8px,env(safe-area-inset-left,0px))!important; width:auto; }
+  .board-ai.ba-docked .ba-panel.ba-collapsed .ba-expand { min-width:0; }
 }
 body:is(.compact-panel-open,.madden-open,.modal-open) > .board-ai.ba-floating { visibility:hidden; }
+.board-ai .ba-staged-title { margin-top: 10px; padding-top: 9px; border-top: 1px solid #ffffff22; color: #bfcddd; font-weight: 650; }
+.board-ai .ba-output > .ba-staged-title:first-child { margin-top: 0; padding-top: 0; border-top: 0; }

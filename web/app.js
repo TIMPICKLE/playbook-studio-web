@@ -10,8 +10,7 @@ import { runEditorPlayCommand } from './editor-play-commands.js';
 import { prepareEditorActions } from './editor-actions.js';
 import { deviceIsTraditional } from './visual-mode.js';
 import { assistantPlayers } from './assistant-edit.js';
-import { proposeEdit } from './assistant-proposal.js';
-import { proposalConflicts } from './assistant-conflicts.js';
+import { stageEdit, StagedEditConflict } from './assistant-draft.js';
 import { requestBoardAssistant } from './assistant-provider.js';
 import { loadAssistantCatalog, resolveMaddenResults } from './assistant-search.js';
 import { hasEditableTrace, getEditableEntry, loadEditableEntries, spaceMaddenLine, teamDisplayName } from './madden-model.js';
@@ -137,6 +136,8 @@ async function convertReference({adoptScope = false} = {}) {
 // autosave and the undo checkpoint. A late response cannot modify another play.
 let boardAssistant = null;
 let assistantPreview = null;
+// Uncommitted turns of the current assistant conversation: {scope, edit, handle}.
+let stagedEdit = null;
 let assistantPreviewFrame = null;
 let assistantSettling = null;
 // A route morph explains an edit, even in traditional mode where decoration is off.
@@ -477,12 +478,23 @@ function mountBoardAssistant() {
       host,
       getContext: () => ({scope: assistantScope(), title: current().title, readOnly: !canEdit(), serverProxy:cloudMode()}),
       async onRequest({prompt, mode, previous, onTool, onEvent, provider, protocol, baseUrl, model, apiKey, signal, locale}) {
-        clearAssistantPreview();
         document.querySelector('#field .assistant-highlights')?.remove();
-        const play = clone(current()), scope = assistantScope();
-        const requestEditorSnapshot=editorSnapshot(), requestWorkspaceState=JSON.stringify(requestEditorSnapshot.data);
+        const scope = assistantScope();
         const workspace = cloudMode() ? shared?.current : null;
         if (cloudMode() && !workspace) throw Error(editBlockedMessage());
+        const editOptions = () => ({roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale});
+        const restage = (steps, conflict = 'assistant.boardChanged') => {
+          try { return stageEdit(clone(current()), steps, editOptions()); }
+          catch (error) { throw error instanceof StagedEditConflict ? Error(t(conflict)) : error; }
+        };
+        // A conversation keeps editing its staged working copy: the next turn
+        // reads the pending result, not the committed play it is waiting on.
+        const pendingEdit = stagedEdit?.scope === scope ? stagedEdit : null;
+        if (!pendingEdit) { stagedEdit = null; clearAssistantPreview(); }
+        else if (workspace) await shared.sync.refreshForProposal();
+        const carried = pendingEdit && (JSON.stringify(current()) === JSON.stringify(pendingEdit.edit.base) ? pendingEdit.edit : restage(pendingEdit.edit.steps, 'assistant.stagedConflict'));
+        const play = clone(carried ? carried.play : current());
+        const requestEditorSnapshot=editorSnapshot(), requestWorkspaceState=JSON.stringify(requestEditorSnapshot.data);
         const result = await requestBoardAssistant({
           instruction: prompt, mode, previous, onTool, onEvent, locale, signal, model: {provider, protocol, baseUrl, model, apiKey},
           board: {...play, play: clone(play), playId: play.id, players: assistantPlayers(play, state.data.roster),
@@ -505,6 +517,8 @@ function mountBoardAssistant() {
           const plan = prepareEditorActions(snapshot,result.actions,{locale});
           if (plan.lane === 'local') return executeEditorLocal(plan.actions);
           if (plan.lane === 'interaction') return editorInteractionReply(plan);
+          // Playbook transactions run on committed data, so staged edits are a commit boundary.
+          if (pendingEdit) return {kind:'answer',scope,message:t('assistant.commitStagedFirst')};
           if (JSON.stringify(state.data)!==requestWorkspaceState) throw Error(t('assistant.boardChanged'));
           if (!canEdit()) throw Error(editBlockedMessage());
           if (draft || drag) throw Error(t('assistant.finishDrawing'));
@@ -542,55 +556,64 @@ function mountBoardAssistant() {
         if (!canEdit()) throw Error(editBlockedMessage());
         if (draft || drag) throw Error(t('assistant.finishDrawing'));
         const operations = result.operations || [result.operation];
-        const initial = proposeEdit(play, operations, {roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale});
-        const preview = (baseline, proposal) => {
+        // The agent worked on `play`. Record what it proposed there, then replay
+        // the whole stack on the latest committed play before showing it.
+        const requested = stageEdit(play, [{instruction:prompt, operations}], editOptions()).steps[0];
+        const present = staged => {
           let active = true;
-          const externalContext = operationContext(operations);
-          const playerIds = [...new Set([...proposal.playerIds, ...proposal.effects.flatMap(effect => effect.playerIds)])];
-          const shown = showAssistantPreview(proposal.play, baseline);
+          const externalContext = operationContext(staged.operations);
+          const shown = showAssistantPreview(staged.play, staged.base);
           const isVisible = () => assistantPreview === shown && shown.svg.isConnected;
-          return {kind: 'preview', message: proposal.summary, summary: proposal.summary, changes: proposal.changes,
-            operations, routeIds: proposal.routeIds, zoneIds: proposal.zoneIds, playerIds,
-            discard() { active = false; clearAssistantPreview({notify:false}); }, isVisible, rehearse: rehearseAssistantPreview,
+          const guard = () => {
+            checkScope();
+            if (!active || operationContext(staged.operations)!==externalContext) throw Error(t('assistant.boardChanged'));
+            if (!canEdit()) throw Error(editBlockedMessage());
+            if (draft || drag) throw Error(t('assistant.finishDrawing'));
+          };
+          const handle = {kind: 'preview', stackable: true, message: staged.summary, summary: staged.summary, changes: staged.changes, turns: staged.turns,
+            operations: staged.operations, routeIds: staged.routeIds, zoneIds: staged.zoneIds, playerIds: staged.playerIds,
+            discard() { active = false; if (stagedEdit?.handle === handle) stagedEdit = null; clearAssistantPreview({notify:false}); },
+            isVisible, rehearse: rehearseAssistantPreview,
+            // Dropping the newest turn keeps the earlier ones staged.
+            revert: staged.steps.length > 1 ? () => { guard(); const next = restage(staged.steps.slice(0,-1)); active = false; return present(next); } : undefined,
             async apply() {
               const wasVisible = isVisible();
               await shown.transition.finished;
               if (workspace) await shared.sync.refreshForProposal();
-              checkScope();
-              if (operationContext(operations)!==externalContext) throw Error(t('assistant.boardChanged'));
-              if (!active) throw Error(t('assistant.boardChanged'));
-              if (!canEdit()) throw Error(editBlockedMessage());
-              if (draft || drag) throw Error(t('assistant.finishDrawing'));
-              if (proposalConflicts(baseline, current(), operations, proposal)) throw Error(t('assistant.boardChanged'));
-              if (!wasVisible || !isVisible() || JSON.stringify(current()) !== JSON.stringify(baseline)) {
-                const latest = clone(current());
-                return preview(latest, proposeEdit(latest, operations, {roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale}));
+              guard();
+              if (!wasVisible || !isVisible() || JSON.stringify(current()) !== JSON.stringify(staged.base)) {
+                const next = restage(staged.steps);
+                active = false;
+                return present(next);
               }
               shown.resetRehearsal();
               clearAssistantPreview({keepLayer:true,refresh:false});
-              selection = proposal.routeId ? {type: 'route', id: proposal.routeId} : null;
+              active = false; stagedEdit = null;
+              selection = staged.routeId ? {type: 'route', id: staged.routeId} : null;
               tool = 'select';
-              edit(p => Object.assign(p, proposal.play), {redraw:false});
+              edit(p => Object.assign(p, staged.play), {redraw:false});
               const inspectorNode = $('.inspector');
               inspectorNode.innerHTML = inspector();
               inspectorNode.dataset.context = `${selection?.type || 'play'}:${selection?.id || current().id}`;
               settleAssistantPreview(shown.svg);
               const checkpoint = history.past.at(-1);
-              return {kind: 'edit', message: proposal.summary, summary: proposal.summary, operations,
-                routeIds: proposal.routeIds, zoneIds: proposal.zoneIds, playerIds,
+              return {kind: 'edit', message: staged.summary, summary: staged.summary, operations: staged.operations, turns: staged.turns,
+                routeIds: staged.routeIds, zoneIds: staged.zoneIds, playerIds: staged.playerIds,
                 undo() {
                   if (!canEdit() || assistantScope() !== scope || history.past.at(-1) !== checkpoint) return false;
                   restore(history.undo(state));
                   return true;
                 }};
             }};
+          stagedEdit = {scope, edit:staged, handle};
+          return handle;
         };
         if (workspace) await shared.sync.refreshForProposal();
         checkScope();
-        if (proposalConflicts(play, current(), operations, initial)) throw Error(t('assistant.boardChanged'));
+        // The coach may have applied or dropped the staged turns while the model was working.
+        if (pendingEdit && stagedEdit !== pendingEdit) throw Error(t('assistant.boardChanged'));
         onTool?.('build_preview');
-        const latest = clone(current());
-        return preview(latest, proposeEdit(latest, operations, {roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart,locale}));
+        return present(restage([...(carried?.steps || []), requested]));
       },
       onHighlight: showAssistantHighlights,
       onHandoff(result) {
