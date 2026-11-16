@@ -1,5 +1,6 @@
 import { routeCenterX } from './assistant-operations.js';
 import { routeBreak } from './assistant-schema.js';
+import { getPlayLeague, isFlag5Play } from './game-formats.js';
 
 const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 
@@ -7,6 +8,9 @@ const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 // the proposal remain dependencies, including a block target's live assignment.
 export function proposalConflicts(before, current, operations, proposal) {
   if (before.id !== current.id || before.book !== current.book || !equal(before.reference, current.reference)) return true;
+  // Even an untouched opponent can have a different assignment when the play's
+  // format changes. Formation replacement intentionally preserves those IDs.
+  if (getPlayLeague(before) !== getPlayLeague(current) || isFlag5Play(before) !== isFlag5Play(current)) return true;
   const players = new Set();
   const routes = new Set();
   let usesBall = false;

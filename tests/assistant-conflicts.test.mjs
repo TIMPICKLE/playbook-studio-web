@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { makePlay, movePlayer, validatePlay } from '../web/model.js';
 import { proposeEdit } from '../web/assistant-proposal.js';
 import { proposalConflicts } from '../web/assistant-conflicts.js';
+import { runEditorPlayCommand } from '../web/editor-play-commands.js';
 
 const setup = () => {
   const play = makePlay({formation:'Gun Trips'});
@@ -68,4 +69,34 @@ test('moving a referenced block target conflicts while unrelated defenders remai
   assert.equal(proposalConflicts(play,current,operations,proposal),false);
   current.players.find(player=>player.id==='dt').y-=1;
   assert.equal(proposalConflicts(play,current,operations,proposal),true);
+});
+
+test('a pending opponent route conflicts when the home formation changes from flag to eleven players', () => {
+  const before = makePlay({ count:5, formation:'Flag 5 Spread' });
+  runEditorPlayCommand(before, {kind:'opponents_set', enabled:true});
+  const rusher = before.players.find(player => player.side === 'defense' && player.label === 'R');
+  const operations = [{kind:'route_add', playerId:rusher.id, routeKind:'route', points:[
+    {x:rusher.x,y:rusher.y}, {x:rusher.x,y:rusher.y + 5},
+  ]}];
+  const proposal = proposeEdit(before, operations), current = structuredClone(before);
+  runEditorPlayCommand(current, {kind:'formation_apply', formation:'Gun Doubles', count:11});
+  assert.deepEqual(current.players.filter(player => player.side === 'defense'), before.players.filter(player => player.side === 'defense'), 'opponent IDs and positions remain unchanged');
+  assert.equal(proposalConflicts(before,current,operations,proposal),true, 'the proposal was generated for a different game format');
+});
+
+test('explicit flag rules context is a dependency, while equivalent legacy metadata can be rebased', () => {
+  const before = makePlay({count:5, formation:'Flag 5 Spread'});
+  const actor = before.players.find(player => player.label === 'X');
+  const operations = [{kind:'route', playerId:actor.id, concept:'go', depthYards:8}];
+  const proposal = proposeEdit(before,operations), current = structuredClone(before);
+  current.formation = 'Custom five-marker drill';
+  delete current.league;
+  assert.equal(proposalConflicts(before,current,operations,proposal),true, 'five markers alone do not establish flag rules');
+
+  const oldPlay = makePlay(); delete oldPlay.league;
+  const oldActor = oldPlay.players.find(player => player.label === 'X');
+  const oldOperations = [{kind:'route',playerId:oldActor.id,concept:'go',depthYards:8}];
+  const oldProposal = proposeEdit(oldPlay,oldOperations), enriched = structuredClone(oldPlay);
+  enriched.league = 11; enriched.title = 'Renamed legacy play';
+  assert.equal(proposalConflicts(oldPlay,enriched,oldOperations,oldProposal),false, 'adding equivalent format metadata does not block an otherwise unrelated rebase');
 });

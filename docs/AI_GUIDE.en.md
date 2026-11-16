@@ -16,6 +16,14 @@ This guide describes the current repository implementation. The version availabl
 
 Start with the [no-sign-in demo](https://timpickle.github.io/playbook-studio-web/), which uses browser-local data and sample matchups. Use the [cloud editor](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) for shared team playbooks.
 
+## 5v5 flag football and AI
+
+Create a **5v5 flag football** play first, or ask the assistant to “Create a five-player flag Trips offense.” Then request “Add five opponents, keeping the offense” or “Have center C run a receiving route.” The assistant, diagram brief and model analysis receive the explicit flag format. The center is not assumed to be a blocking lineman, and eleven-player protection, tackling or contact coaching is not treated as flag rules.
+
+Flag analysis currently excludes the built-in eleven-player coaching corpus that has not been adapted. Import your own flag knowledge pack to supplement diagram analysis. Supply event-specific rush, QB-running and field-distance rules; matching a flag play against an eleven-player formation produces a format warning.
+
+An explicit **4–3 defense** request still creates the complete eleven players. Madden remains an eleven-player source. Changing the default count does not convert existing plays. See the [flag workflow](USER_GUIDE.en.md#5v5-flag-football).
+
 ## Connect a model
 
 Both AI entry points use the same provider and API-format settings in cloud and no-sign-in versions: **choose the provider, choose the API format, then enter the model ID and API key**. Preset providers do not require a URL.

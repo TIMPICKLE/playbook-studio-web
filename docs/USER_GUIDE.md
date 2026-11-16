@@ -12,7 +12,20 @@
 4. 切换到 **「战术演练」**，使用工具栏播放、暂停或调整进度；按空格也可播放 / 暂停。
 5. 保存到当前浏览器，或导出 JSON 备份。需要团队共享时，使用[云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/)登录并创建战术本。
 
-内置 Mesh、Four Verticals、Flood、Slants、Inside Zone、Cover 3、Nickel Blitz 和 Field Goal 八个教学示例。阵型支持 6、7、8、9、11、12 人制，并可另存自定义模板。
+内置 Mesh、Four Verticals、Flood、Slants、Inside Zone、Cover 3、Nickel Blitz 和 Field Goal 八个教学示例。阵型支持 **5 人制腰旗**以及 6、7、8、9、11、12 人制，并可另存自定义模板。
+
+## 5 人制腰旗
+
+![5 人腰旗进攻与五名对手同场，保留已有 11 人战术](assets/readme/flag5-board.jpg)
+
+1. 点击 **「新建战术」**，将 **「人数 / 每方」** 设为 **「5 人制腰旗」**，再选择进攻或防守。
+2. 进攻可选 Spread、Trips、Bunch，位置为 C、QB、X、Y、Z；防守可选 Zone、Man，位置为 R、LCB、RCB、S、DB。中锋可以画接球路线，模板不自动添加阻挡。
+3. 在 **「添加对象」→「添加 5 人对方阵型」** 或右侧属性中加入对手，形成 5 对 5；继续使用画线、镜像、演练、导出和打印。
+4. 在 **「球员管理」→「DEPTH CHART」** 创建 **Flag 5 Offense / Flag 5 Defense** 人员组，安排首发后可在战术属性中按位置应用。
+
+默认人数只决定后续新建战术；每张战术保留自己的制式。切换默认人数不会裁剪已有战术、名单或人员组，Madden 导入仍是原有 11 人战术。自定义阵型按本方人数筛选，备份会保留人数信息。
+
+当前支持的是五人腰旗战术图，球场沿用现有图示网格，不是特定赛事的标准场地或裁判模拟。冲传距离、QB 跑球、计时等应按所属赛事规则确认。非接触、无阻挡的默认设计参考 [NFL FLAG 规则入口](https://nflflag.com/coaches/flag-football-rules) 与 [USA Football 规则说明](https://usafootball.com/national-team/rules)。
 
 ## 新手引导
 

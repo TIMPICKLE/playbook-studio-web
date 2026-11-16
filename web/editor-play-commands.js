@@ -2,6 +2,7 @@ import { z } from './vendor/assistant-zod.js';
 import { COLORS, FORMATIONS, clone, formationPlayers, mirrorPlay, movePlayer, uid } from './model.js';
 import { spaceMaddenLine } from './madden-model.js';
 import { linkRosterPlayer, personnelMatches } from './board-personnel.js';
+import { LEAGUE_SIZES, defaultFormation, getPlayLeague, resolveFormation } from './game-formats.js';
 
 const id = z.string().min(1).max(100);
 const color = z.string().regex(/^#[0-9a-f]{6}$/i);
@@ -11,7 +12,7 @@ const points = z.array(point).min(2).max(200);
 const side = z.enum(['offense', 'defense']);
 const shape = z.enum(['circle', 'square', 'triangle']);
 const routeKind = z.enum(['route', 'block', 'motion', 'pass']);
-const count = z.number().int().min(6).max(12);
+const count = z.union(LEAGUE_SIZES.map(value => z.literal(value)));
 const playerFields = { label: z.string().max(10), name: z.string().max(80), x: coordinate, y: coordinate, side, color, shape, rosterId: z.string().max(100) };
 const routeFields = { kind: routeKind, color, smooth: z.boolean(), endCap: z.enum(['arrow', 'bar', 'dot']), optional: z.boolean(), delay: z.number().min(0).max(10), duration: z.number().min(.2).max(10), points };
 const zoneFields = { x: coordinate, y: coordinate, rx: z.number().min(1).max(50), ry: z.number().min(1).max(50), color, label: z.string().max(80) };
@@ -42,7 +43,7 @@ export const EDITOR_PLAY_COMMANDS = [
   command('formation_apply', z.union([
     z.strictObject({ kind: z.literal('formation_apply'), formation: z.enum(FORMATIONS), count: count.optional() }),
     z.strictObject({ kind: z.literal('formation_apply'), formationId: id, count: count.optional() }),
-  ]), 'Replace all markers with a built-in or saved formation. This clears routes, zones and annotations and resets ball assignments.', true),
+  ]), 'Replace home-side markers with a built-in or saved formation, using the current play league unless count is supplied. Clears replaced players\' routes and resets their ball assignments; existing opponents and their routes remain.', true),
   command('opponents_set', z.strictObject({ kind: z.literal('opponents_set'), enabled: z.boolean(), count: count.optional() }), 'Ensure the opposing formation is present or absent. Existing opposing players are retained when enabling.', true),
   command('line_space', z.strictObject({ kind: z.literal('line_space') }), 'Use the existing safe spacing adjustment for an editable Madden offensive line.'),
   command('personnel_apply', z.strictObject({ kind: z.literal('personnel_apply'), groupId: id }), 'Apply matching starters from an existing depth-chart group without moving role markers.'),
@@ -170,17 +171,37 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
   else if (op.kind === 'formation_apply') {
     const custom = op.formationId ? formations.find(item => item.id === op.formationId) || fail('Saved formation not found.') : null;
     if (custom && custom.book !== play.book) fail('The saved formation belongs to another playbook.');
-    const players = (custom ? clone(custom.players) : formationPlayers(op.formation, op.count ?? 11, play.book === 'defense' ? 'defense' : 'offense')).map(player => ({ ...player, id: idFactory() }));
+    const side = play.book === 'defense' ? 'defense' : 'offense';
+    const previousLeague = getPlayLeague(play);
+    const league = op.count ?? (custom ? getPlayLeague(custom, previousLeague) : previousLeague);
+    if (custom && op.count !== undefined && custom.players.filter(player => player.side === side).length !== league) fail('The saved formation player count does not match the requested league size.');
+    const formation = custom?.name || resolveFormation(op.formation, play.book, league);
+    const source = custom ? clone(custom.players) : formationPlayers(formation, league, side);
+    const home = source.filter(player => player.side === side);
+    // Legacy books allow a defensive template inside the offense category.
+    // Keep their explicit whole-board replacement instead of doubling that side.
+    const retained = home.length ? play.players.filter(player => player.side !== side) : [];
+    const positions = custom && retained.length ? home : source;
+    const players = positions.map(player => ({ ...player, id: idFactory() }));
     if (!players.length || players.length > 40) fail('A formation must contain 1–40 players.');
-    play.players = players; play.formation = custom?.name || op.formation;
-    play.routes = []; play.zones = []; play.annotations = [];
-    play.ball.holderId = players.find(player => player.label === 'QB')?.id || players[0].id; play.ball.receiverId = '';
+    if (retained.length + players.length > 40) fail('Player limit reached.');
+    const retainedIds = new Set(retained.map(player => player.id));
+    play.players = [...players, ...retained]; play.formation = formation; play.league = league;
+    if (league !== previousLeague) play.personnel = league === 11 ? '11 personnel' : league === 5 ? '5v5 Flag' : `${league} players`;
+    play.routes = play.routes.filter(route => retainedIds.has(route.playerId)).map(route => route.blockTargets
+      ? { ...route, blockTargets: route.blockTargets.map(target => retainedIds.has(target) ? target : null) } : route);
+    if (!retained.length || side === 'defense') play.zones = [];
+    if (!retained.length) play.annotations = [];
+    if (!retainedIds.has(play.ball.holderId)) play.ball.holderId = players.find(player => player.label === 'QB')?.id || players[0].id;
+    if (!retainedIds.has(play.ball.receiverId)) play.ball.receiverId = '';
   } else if (op.kind === 'opponents_set') {
     const opposingSide = play.book === 'defense' ? 'offense' : 'defense';
     const existing = play.players.filter(player => player.side === opposingSide);
     if (!op.enabled && existing.length) removePlayers(play, new Set(existing.map(player => player.id)));
     if (op.enabled && !existing.length) {
-      const players = formationPlayers(opposingSide === 'offense' ? 'Gun Doubles' : '4–3', op.count ?? 11, opposingSide).map(player => ({ ...player, id: idFactory() }));
+      const league = op.count ?? getPlayLeague(play);
+      const formation = league === 5 ? defaultFormation(opposingSide, league) : opposingSide === 'offense' ? 'Gun Doubles' : '4–3';
+      const players = formationPlayers(formation, league, opposingSide).map(player => ({ ...player, id: idFactory() }));
       if (play.players.length + players.length > 40) fail('Player limit reached.');
       play.players.push(...players);
     }

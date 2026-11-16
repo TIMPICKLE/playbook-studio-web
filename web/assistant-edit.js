@@ -1,4 +1,5 @@
 import { proposeEdit } from './assistant-proposal.js';
+import { isFlag5Play } from './game-formats.js';
 
 const norm = value => String(value ?? '').normalize('NFKC').trim().toLowerCase();
 const positionGroups = new Map([
@@ -9,6 +10,8 @@ const positionGroups = new Map([
   ['ol', ['lt', 'lg', 'c', 'rg', 'rt', 'center', 'guard', 'tackle']],
   ['dl', ['dt', 'ldt', 'rdt', 'de', 'le', 're', 'nt']],
   ['db', ['cb', 'lcb', 'rcb', 'fs', 'ss', 's', 'safety', 'nickel']],
+  ['cb', ['lcb', 'rcb', 'corner', 'cornerback']],
+  ['r', ['rusher', 'blitzer']],
   ['s', ['fs', 'ss', 'safety']],
   ['rb', ['hb', 'fb', 'tb', 'halfback', 'fullback', 'tailback']],
   ['te', ['tight end']],
@@ -17,16 +20,18 @@ const positionGroups = new Map([
 
 export function assistantPlayers(play, roster = []) {
   const byId = new Map(roster.map(person => [person.id, person]));
+  const flag5 = isFlag5Play(play);
   return play.players.map(({ id, label, name, side, x, y, rosterId }) => {
     const person = byId.get(rosterId);
-    return { id, label, name: person?.name || name || '', number: person?.number || '', position: person?.position || label, side, x, y };
+    return { id, label, name: person?.name || name || '', number: person?.number || '', position: person?.position || label, side, x, y, ...(flag5 ? { gameFormat:'flag5' } : {}) };
   });
 }
 
 function roleMatches(player, role) {
   if (norm(player.label) === role) return true;
-  const aliases = { '安全卫': 's', '进攻锋线': 'ol', '防守锋线': 'dl', '线卫': 'lb', '角卫': 'cb', '跑卫': 'rb', '外接手': 'wr', '近端锋': 'te' };
+  const aliases = { '安全卫': 's', '进攻锋线': 'ol', '防守锋线': 'dl', '线卫': 'lb', '角卫': 'cb', '跑卫': 'rb', '外接手': 'wr', '近端锋': 'te', '中锋':'c', '冲传手':'r', '冲传人':'r', 'rusher':'r', 'blitzer':'r' };
   role = aliases[role] || role;
+  if (player.gameFormat === 'flag5' && role === 'ol') return false;
   if (positionGroups.get(role)?.includes(norm(player.position))) return true;
   const positions = norm([player.position, player.label].filter(Boolean).join('/')).split(/[/,\s]+/);
   return positions.some(position => position === role || positionGroups.get(role)?.includes(position));

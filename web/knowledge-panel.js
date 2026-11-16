@@ -1,6 +1,7 @@
-import { t } from './i18n.js';
+import { t, getLocale } from './i18n.js';
 import { escapeHTML as e } from './model.js';
 import { safeSourceUrl } from './knowledge-base.js';
+import { matchupFormatNotes } from './analysis-evidence.js';
 
 const list = (title, values) => values?.length ? `<div class="ai-source-section"><strong>${e(title)}</strong><ul>${values.map(value => `<li>${e(value)}</li>`).join('')}</ul></div>` : '';
 
@@ -25,5 +26,6 @@ export function localBriefHTML(offense, defense, coverage, coverageLabel) {
     ['analysis.receivingRoutes', routes.filter(route => route.kind === 'route').length],
     ['analysis.defensiveZones', defense?.zones?.length || 0],
   ];
-  return `<div class="ai-local-brief"><div class="ai-brief-heading"><span class="ai-observed-mark"></span><strong>${t('analysis.observed')}</strong><small>${t('analysis.local')}</small></div><div class="ai-fact-grid">${facts.map(([label, count]) => `<div><strong>${count.toString().padStart(2, '0')}</strong><span>${t(label)}</span></div>`).join('')}</div><p class="ai-coverage-note">${e(coverage === 'unknown' ? t('analysis.unknownCoverage') : coverage === 'cover2' ? t('analysis.cover2Unknown') : t('analysis.coverageAssumption', { coverage: coverageLabel }))}</p><small class="ai-brief-footnote">${t('analysis.countNote')}</small></div>`;
+  const formatNotes = matchupFormatNotes(offense, defense, getLocale());
+  return `<div class="ai-local-brief"><div class="ai-brief-heading"><span class="ai-observed-mark"></span><strong>${t('analysis.observed')}</strong><small>${t('analysis.local')}</small></div><div class="ai-fact-grid">${facts.map(([label, count]) => `<div><strong>${count.toString().padStart(2, '0')}</strong><span>${t(label)}</span></div>`).join('')}</div><p class="ai-coverage-note">${e(coverage === 'unknown' ? t('analysis.unknownCoverage') : coverage === 'cover2' ? t('analysis.cover2Unknown') : t('analysis.coverageAssumption', { coverage: coverageLabel }))}</p>${formatNotes.map(note => `<p class="ai-coverage-note" data-game-format-note>${e(note)}</p>`).join('')}<small class="ai-brief-footnote">${t('analysis.countNote')}</small></div>`;
 }

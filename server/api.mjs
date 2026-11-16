@@ -53,6 +53,15 @@ function preserveStoredLayouts(groups, storedJSON) {
     }
   }
 }
+function requireFlagFormatMetadata(data, storedJSON) {
+  const stored = JSON.parse(storedJSON);
+  for (const collection of ['plays', 'formations']) {
+    if (!Array.isArray(data?.[collection])) continue;
+    const flagIds = new Set((stored[collection] || []).filter(item => item.league === 5).map(item => item.id));
+    if (data[collection].some(item => flagIds.has(item?.id) && item.league === undefined))
+      fail(422, '请刷新页面加载新版五人腰旗功能，再同步本机草稿。');
+  }
+}
 async function writeWorkspace(db, workspaceId, user, data, expected, action = 'saved', ownerOnly = false) {
   const record = await access(db, workspaceId, user.userId, ownerOnly ? 'owner' : 'write');
   // An already-open older editor strips unknown fields when reading a cloud book.
@@ -60,7 +69,10 @@ async function writeWorkspace(db, workspaceId, user, data, expected, action = 's
   if (legacyWrite && JSON.parse(record.data_json).depthChart) {
     fail(422, '请刷新页面加载新版球员管理，再同步本机草稿。');
   }
-  if (action === 'saved') preserveStoredLayouts(data?.depthChart?.groups, record.data_json);
+  if (action === 'saved') {
+    requireFlagFormatMetadata(data, record.data_json);
+    preserveStoredLayouts(data?.depthChart?.groups, record.data_json);
+  }
   const validated = checkedData(data);
   if (legacyWrite) delete validated.depthChart;
   const encoded = JSON.stringify(validated); if (new TextEncoder().encode(encoded).length > MAX_BODY - 1000) fail(413, '战术本过大，请拆分或先导出备份');

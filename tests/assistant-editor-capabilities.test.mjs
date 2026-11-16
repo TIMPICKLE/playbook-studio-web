@@ -29,7 +29,8 @@ test('editor discovery exposes executable commands, authoritative schemas and re
   assert.equal(overview.selectedPlayId,play.id);
   assert.deepEqual(overview.plays.map(item=>item.id),data.plays.map(item=>item.id));
   assert.deepEqual(overview.roster,data.roster);
-  assert.deepEqual(overview.formations.saved,[{id:'saved-offense',name:'Practice Spread',book:'offense'}]);
+  assert.deepEqual(overview.formations.saved,[{id:'saved-offense',name:'Practice Spread',book:'offense',league:11}]);
+  assert.ok(overview.plays.every(play=>play.league===11 && play.flag5===false),'existing plays retain eleven-player context when discovered');
   assert.deepEqual(overview.personnelGroups,data.depthChart.groups.map(({id,name,unit})=>({id,name,unit})));
   assert.deepEqual(overview.view,{theme:'light',grid:true,time:1.5});
   const playCommands=Object.values(EDITOR_PLAY_COMMANDS);

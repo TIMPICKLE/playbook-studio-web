@@ -8,6 +8,7 @@ const unitName = unit => t(`personnel.${unit}`);
 export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, commit, onSelect }) {
   const q = selector => root.querySelector(selector);
   const groups = () => getData().depthChart.groups;
+  const flag5 = () => getData().settings.league === 5;
   let unit = 'offense', workspace = getWorkspaceId(), draft = null;
   const selected = new Map();
   const getSelectedId = () => selected.get(unit) || null;
@@ -20,7 +21,9 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
       workspace = getWorkspaceId(); selected.clear(); unit = 'offense'; notice.textContent = '';
     }
     const entries = groups(), choices = entries.filter(group => group.unit === unit);
-    const current = choices.find(group => group.id === getSelectedId()) || choices[0];
+    const current = choices.find(group => group.id === getSelectedId())
+      || choices.find(group => flag5() && DEPTH_TEMPLATES.some(template => template.id === group.templateId && template.league === 5))
+      || choices[0];
     selected.set(unit, current?.id);
     const editable = canEdit(), full = entries.length >= DEPTH_LIMITS.groups;
     controls.innerHTML = `<div class="personnel-units" role="group" aria-label="${t('personnel.units')}">${units.map(key =>
@@ -35,6 +38,7 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
           <button type="button" data-personnel-action="copy" ${full ? 'disabled' : ''}>${t('personnel.copy')}</button>
           <button type="button" data-personnel-action="remove">${t('personnel.remove')}</button></div></details>` : ''}</div>` : ''}
     </div>${editable && full ? `<p class="personnel-note">${t('personnel.limit', { count: DEPTH_LIMITS.groups })}</p>` : ''}
+    ${flag5() && unit !== 'special' ? `<p class="personnel-note">${t('personnel.flag5Hint')}</p>` : ''}
     ${current?.notes ? `<p class="personnel-note"><strong>${t('personnel.instructions')}</strong> ${e(current.notes)}</p>` : ''}`;
     if (draft) {
       const message = blocked();
@@ -57,7 +61,8 @@ export function createPersonnelGroups({ root, getData, getWorkspaceId, canEdit, 
     if ((action === 'new' || action === 'copy') && groups().length >= DEPTH_LIMITS.groups) return;
     draft = { action, book: workspace, unit, before: current && action !== 'new' ? clone(current) : null };
     const name = action === 'copy' ? t('personnel.copyName', { name: current.name }).slice(0, DEPTH_LIMITS.name) : current?.name;
-    const options = action === 'edit' ? DEPTH_TEMPLATES : DEPTH_TEMPLATES.filter(template => template.unit === unit);
+    const options = [...(action === 'edit' ? DEPTH_TEMPLATES : DEPTH_TEMPLATES.filter(template => template.unit === unit))]
+      .sort((a, b) => Number((b.league === 5) === flag5()) - Number((a.league === 5) === flag5()));
     const isRemoval = action === 'remove';
     dialog.innerHTML = `<form><h2 id="personnel-form-title">${t(`personnel.${action}`)}</h2>
       ${isRemoval ? `<p>${e(t('personnel.removePrompt', { name: current.name }))}</p>` : `

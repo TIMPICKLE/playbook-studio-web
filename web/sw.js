@@ -1,9 +1,9 @@
-const CACHE = 'playbook-studio-v6.9-platform-optimization';
+const CACHE = 'playbook-studio-v7.0-flag-five';
 // Heavy graph and Madden geometry modules are fetched and cached on first use.
 const FILES = [
   './assistant-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
   './assistant-schema.js', './assistant-proposal.js', './assistant-conflicts.js', './vendor/assistant-zod.js',
-  './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',
+  './game-formats.js', './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',
   './model-protocol.js', './editor-render.js', './editor-dialog.css', './component-layout.css',
   './madden-traces.js', './data/madden-trace-index.js', './data/madden-trace-evidence.js', './locales/madden-loading.js',
   './onboarding.js', './onboarding-steps.js', './onboarding.css', './locales/onboarding.en.js', './locales/onboarding.zh-CN.js', './vendor/driver-1.14.0.js', './vendor/driver-1.14.0.css',

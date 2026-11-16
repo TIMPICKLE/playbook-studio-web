@@ -1,6 +1,7 @@
 import { orientDefense } from '../web/matchup-model.js';
 import { fail } from './http.mjs';
-import { ANALYSIS_COVERAGES, retrieveMatchupKnowledge, knowledgeEvidence, diagramFacts, diagramIntersections } from '../web/analysis-evidence.js';
+import { ANALYSIS_COVERAGES, retrieveMatchupKnowledge, knowledgeEvidence, diagramFacts, diagramIntersections, matchupFormatNotes } from '../web/analysis-evidence.js';
+import { getPlayLeague, isFlag5Play } from '../web/game-formats.js';
 import { resolveModelEndpoint } from '../web/model-protocol.js';
 export { segmentHitsZone } from '../web/analysis-evidence.js';
 
@@ -11,7 +12,8 @@ function selectedPlay(play, side, includeNotes) {
   const players = play.players.filter(p => p.side === side);
   const ids = new Set(players.map(p => p.id));
   return {
-    title: text(play.title, 120), formation: text(play.formation, 100), category: text(play.category, 60),
+    title: text(play.title, 120), formation: text(play.formation, 100), category: text(play.category, 60), personnel: text(play.personnel, 80),
+    ...(play.league != null ? {league:play.league} : {}), playersPerSide:getPlayLeague(play), gameFormat:isFlag5Play(play) ? 'flag5' : 'unspecified',
     referenceOnly: !!play.reference,
     players: players.map(p => ({ id: ref(side, 'player', p.id), label: p.label, x: p.x, y: p.y })),
     routes: play.routes.filter(r => ids.has(r.playerId)).map(r => ({ id: ref(side, 'route', r.id), playerId: ref(side, 'player', r.playerId), kind: r.kind, optional: r.optional, points: r.points, smooth: r.smooth, ...(r.intent ? { intent: r.intent } : {}) })),
@@ -52,6 +54,7 @@ export function buildMatchup(offense, defense, options = {}) {
   if (!knowledge.length) warnings.push('当前知识库没有相关命中；只能依据图面事实进行有限推演。');
   if (options.mirrorDefense) warnings.push('防守图已左右镜像；文字笔记不会自动镜像，请确认方位。');
   warnings.push('图上重叠不代表同一时刻到达；演示时长不是实战时序。');
+  warnings.push(...matchupFormatNotes(offense, defense));
   return { offense: off, defense: def, intersections, evidence, coverage, mirrorDefense: options.mirrorDefense === true, knowledge, facts, warnings };
 }
 

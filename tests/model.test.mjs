@@ -36,7 +36,7 @@ test('boundary dragging stops the whole route without clipping or changing its s
   assert.ok(p.routes[0].points.every(v => v.x >= 0 && v.x <= 100 && v.y >= 0 && v.y <= 100));
 });
 test('all supported league sizes produce the requested number of usable positions', () => {
-  for (const side of ['offense', 'defense']) for (const count of [6, 7, 8, 9, 11, 12]) {
+  for (const side of ['offense', 'defense']) for (const count of [5, 6, 7, 8, 9, 11, 12]) {
     const players = formationPlayers(side === 'offense' ? 'Gun Trips' : '4–3', count, side);
     assert.equal(players.length, count); assert.equal(new Set(players.map(p => p.id)).size, count);
     if (side === 'offense') assert.ok(players.some(p => p.label === 'QB'));

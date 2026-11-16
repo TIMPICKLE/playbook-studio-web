@@ -1,5 +1,6 @@
 import { array, choice, fail, id, text, uid, unique } from './model-values.js';
 import { appendDepthGroups, defaultDepthChart, validateDepthChart } from './depth-model.js';
+import { BUILT_IN_FORMATIONS, LEAGUE_SIZES, resolveFormation } from './game-formats.js';
 export { uid };
 
 export const VERSION = 1;
@@ -12,10 +13,26 @@ export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => 
 export const colorOK = value => /^#[0-9a-f]{6}$/i.test(value);
 
 const player = (label, x, y, side = 'offense') => ({ id: uid(), label, x, y, side, name: '', color: COLORS[side], shape: side === 'defense' ? 'square' : 'circle' });
-export const FORMATIONS = ['Gun Trips', 'Gun Doubles', 'I Formation', 'Singleback', '4–3', '3–4', 'Nickel', 'Field Goal'];
+export const FORMATIONS = BUILT_IN_FORMATIONS;
+
+const flag5Points = {
+  'Flag 5 Spread': [['C', 50, 67], ['QB', 50, 79], ['X', 16, 67], ['Y', 34, 70], ['Z', 84, 67]],
+  'Flag 5 Trips': [['C', 50, 67], ['QB', 50, 79], ['X', 68, 67], ['Y', 77, 72], ['Z', 88, 67]],
+  'Flag 5 Bunch': [['C', 50, 67], ['QB', 50, 79], ['X', 70, 69], ['Y', 77, 74], ['Z', 84, 69]],
+  'Flag 5 Zone': [['R', 50, 49], ['LCB', 20, 49], ['RCB', 80, 49], ['S', 38, 31], ['DB', 64, 31]],
+  'Flag 5 Man': [['R', 50, 49], ['LCB', 18, 57], ['RCB', 82, 57], ['S', 36, 55], ['DB', 64, 55]],
+};
 
 export function formationPlayers(formation = 'Gun Trips', count = 11, side) {
-  const defense = side === 'defense' || ['4–3', '3–4', 'Nickel'].includes(formation);
+  // Low-level callers may create partial diagrams; selectable league formats
+  // remain the explicit shared list used by workspace and command validation.
+  if (!Number.isInteger(count) || count < 1 || count > 12) fail('不支持的人数制');
+  const defense = side === 'defense' || ['4–3', '3–4', 'Nickel', '4-3', '3-4', 'Flag 5 Zone', 'Flag 5 Man'].includes(formation);
+  formation = resolveFormation(formation, defense ? 'defense' : 'offense', count);
+  if (count === 5) {
+    const points = flag5Points[formation] || flag5Points[defense ? 'Flag 5 Zone' : 'Flag 5 Spread'];
+    return points.map(p => player(...p, defense ? 'defense' : 'offense'));
+  }
   let points;
   if (defense) {
     points = formation === '3–4'
@@ -38,8 +55,9 @@ export function formationPlayers(formation = 'Gun Trips', count = 11, side) {
 }
 
 export function makePlay({ title = '新战术', formation = 'Gun Trips', book = 'offense', count = 11 } = {}) {
+  formation = resolveFormation(formation, book, count);
   const players = formationPlayers(formation, count, book === 'defense' ? 'defense' : 'offense');
-  return { id: uid(), title, book, formation, category: book === 'defense' ? '区域防守' : '传球', personnel: count === 11 ? '11 personnel' : `${count} 人制`, notes: '', favorite: false, players, routes: [], zones: [], annotations: [], ball: { holderId: players.find(p => p.label === 'QB')?.id || players[0].id, receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString() };
+  return { id: uid(), title, book, formation, ...(LEAGUE_SIZES.includes(count) ? { league: count } : {}), category: book === 'defense' ? '区域防守' : '传球', personnel: count === 11 ? '11 personnel' : count === 5 ? '5 人腰旗' : `${count} 人制`, notes: '', favorite: false, players, routes: [], zones: [], annotations: [], ball: { holderId: players.find(p => p.label === 'QB')?.id || players[0].id, receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString() };
 }
 
 export function addRoute(play, label, waypoints, kind = 'route', options = {}) {
@@ -290,7 +308,7 @@ export function validatePlay(p) {
   if (!p.ball || (reference ? p.ball.holderId !== '' || p.ball.receiverId !== '' : !playerIds.has(p.ball.holderId) || p.ball.receiverId && !playerIds.has(p.ball.receiverId))) fail('持球人或接球人不存在');
   const passAt = num(p.ball.passAt, 0, 10, '传球时间'), arriveAt = num(p.ball.arriveAt, .1, 15, '接球时间');
   if (arriveAt <= passAt) fail('接球时间须晚于传球时间');
-  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}), ...(diagramSource ? { diagramSource } : {}) };
+  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), ...(p.league === undefined ? {} : { league: choice(p.league, LEAGUE_SIZES, '人数') }), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}), ...(diagramSource ? { diagramSource } : {}) };
 }
 export function validateReference(r) {
   for (const key of ['provider', 'catalogId', 'team', 'game', 'sourceUrl', 'image']) text(r[key], 600, '战术来源');
@@ -313,11 +331,11 @@ export function decodeWorkspace(raw) {
   const roster = unique(array(d.roster, 200, '名单').map(r => ({ id: id(r.id), name: text(r.name, 80, '姓名'), number: text(r.number, 5, '号码'), position: text(r.position, 15, '位置') })), '名单');
   const formations = unique(array(d.formations, 100, '阵型模板').map(f => {
     const players = validatePlayers(f.players); if (!players.length) fail('阵型至少需要一个球员');
-    return { id: id(f.id), name: text(f.name, 100, '模板名称'), book: choice(f.book, Object.keys(BOOKS), '模板类型'), players };
+    return { id: id(f.id), name: text(f.name, 100, '模板名称'), book: choice(f.book, Object.keys(BOOKS), '模板类型'), ...(f.league === undefined ? {} : { league: choice(f.league, LEAGUE_SIZES, '人数') }), players };
   }), '模板');
-  const settings = { league: choice(d.settings.league, [6, 7, 8, 9, 11, 12], '人数'), fieldTheme: choice(d.settings.fieldTheme, ['dark', 'light'], '球场主题'), showGrid: !!d.settings.showGrid, showNames: !!d.settings.showNames };
+  const settings = { league: choice(d.settings.league, LEAGUE_SIZES, '人数'), fieldTheme: choice(d.settings.fieldTheme, ['dark', 'light'], '球场主题'), showGrid: !!d.settings.showGrid, showNames: !!d.settings.showNames };
   const rosterById = new Map(roster.map(player => [player.id, player]));
-  const depthChart = validateDepthChart(d.depthChart, rosterById);
+  const depthChart = validateDepthChart(d.depthChart, rosterById, settings.league);
   // Earlier books stored only the name chosen from the player selector.
   const legacyNames = new Map();
   if (d.depthChart === undefined) {

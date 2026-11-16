@@ -19,7 +19,7 @@ export function makeMaddenPlay(entry) {
   const trace = getEditableEntry(entry.id);
   if (trace) return makeTracedPlay(entry, trace);
   return {
-    id: uid(), title: entry.name, book: 'offense', formation: `${entry.group} ${entry.formation}`,
+    id: uid(), title: entry.name, book: 'offense', league: 11, formation: `${entry.group} ${entry.formation}`,
     category: 'Madden 原图', personnel: `${teamDisplayName(entry.team, entry.teamName)} · ${entry.game}`,
     notes: '', favorite: false, players: [], routes: [], zones: [], annotations: [],
     ball: { holderId: '', receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString(),
@@ -83,7 +83,7 @@ function makeTracedPlay(entry, trace) {
   const players = trace.players.map(p => ({ id: uid(), label: p.label, name: '', ...convert(p.at), side: 'offense', color: '#ffdc42', shape: p.label === 'C' ? 'square' : 'circle' }));
   const routes = trace.routes.map(r => ({ id: uid(), playerId: players.find(p => p.label === r.owner).id, points: r.points.map(convert), kind: r.kind, color: r.ink === 'white' && r.kind === 'motion' ? '#b8eff5' : INKS[r.ink], smooth: false, endCap: r.kind === 'block' && r.ink === 'white' ? 'bar' : 'arrow', delay: 0, duration: 3, optional: r.optional }));
   const play = {
-    id: uid(), title: entry.name, book: 'offense', formation: `${entry.group} ${entry.formation}`,
+    id: uid(), title: entry.name, book: 'offense', league: 11, formation: `${entry.group} ${entry.formation}`,
     category: 'Madden 可编辑', personnel: `${teamDisplayName(entry.team, entry.teamName)} · ${entry.game}`,
     notes: [entry.personalNotes || '', '根据原图识别并校核的站位和可见路线，可拖动球员、编辑节点、镜像与演练。为防遮挡，锋线及附近球员的水平间距已适度整理。', '位置标签按图中站位分配。图外路线长度、接球目标和时序无法从静态图确认；默认不自动传球，路线时长为可调整的演示值。阻挡线用于图示，不模拟防守对抗。', ...trace.reviewNotes].filter(Boolean).join('\n').slice(0, 10000),
     favorite: !!entry.personalFavorite, players, routes, zones: [], annotations: [],

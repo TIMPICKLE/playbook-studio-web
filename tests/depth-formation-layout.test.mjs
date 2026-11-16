@@ -14,7 +14,7 @@ const positions = id => Object.fromEntries(formationLayout(templateGroup(id)).ma
 test('each preset role occupies a distinct field position even when no player is assigned', () => {
   for (const template of DEPTH_TEMPLATES) {
     const { markers, unmapped } = formationLayout(templateGroup(template.id));
-    assert.equal(markers.length, 11, template.id);
+    assert.equal(markers.length, template.labels.length, template.id);
     assert.deepEqual(unmapped, [], template.id);
     assert.equal(new Set(markers.map(({ x, y }) => `${x}:${y}`)).size, markers.length, template.id);
     for (const point of markers) assert.ok(point.x > 0 && point.x < 100 && point.y > 0 && point.y < 100);

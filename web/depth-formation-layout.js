@@ -3,6 +3,16 @@
 const offenseLine = { LT: 5, LG: 6, C: 7, RG: 8, RT: 9 };
 const defensiveFront = { WDE: 4, DT: 5, NT: 6, SDE: 7 };
 const layouts = {
+  'flag5-offense': [9, [
+    [33, { X: 1, C: 5, Z: 9 }],
+    [53, { Y: 3 }],
+    [78, { QB: 5 }],
+  ]],
+  'flag5-defense': [7, [
+    [20, { S: 4 }],
+    [46, { LCB: 1, DB: 4, RCB: 7 }],
+    [80, { R: 4 }],
+  ]],
   spread: [13, [
     [33, { X: 1, Y: 3, ...offenseLine, F: 11, Z: 13 }],
     [78, { QB: 7, H: 9 }],

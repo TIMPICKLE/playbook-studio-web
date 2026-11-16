@@ -12,6 +12,8 @@ export const DEPTH_TEMPLATES = [
   { id: 'punt', unit: 'special', name: 'Punt', labels: ['X', 'LT Contain', 'LG', 'C', 'RG', 'RT Contain', 'Z', 'TB', 'RB', 'PP', 'P'] },
   { id: 'punt-return', unit: 'special', name: 'Punt Return', labels: [...defense.slice(0, -1), 'Returner'] },
   { id: 'field-goal', unit: 'special', name: 'Field Goal', labels: ['LW', 'LE', 'LT', 'LG', 'C', 'RG', 'RT', 'RE', 'RW', 'Holder', 'Kicker'] },
+  { id: 'flag5-offense', unit: 'offense', name: 'Flag 5 Offense', league: 5, labels: ['C', 'QB', 'X', 'Y', 'Z'] },
+  { id: 'flag5-defense', unit: 'defense', name: 'Flag 5 Defense', league: 5, labels: ['R', 'LCB', 'RCB', 'S', 'DB'] },
 ];
 
 const findTemplate = id => DEPTH_TEMPLATES.find(template => template.id === id);
@@ -43,8 +45,8 @@ export function copyDepthGroup(group, name) {
 }
 
 // Deterministic IDs let independent clients migrate and merge the same legacy book.
-export function defaultDepthChart() {
-  const groups = DEPTH_TEMPLATES.map(template => ({
+export function defaultDepthChart(league = 11) {
+  const groups = DEPTH_TEMPLATES.filter(template => (template.league === 5) === (league === 5)).map(template => ({
     id: template.id, name: template.name, unit: template.unit, templateId: template.id, notes: '',
     slots: template.labels.map((label, index) => ({ id: `${template.id}-${index + 1}`, label, templateRole: label, playerIds: [] })),
   }));
@@ -57,8 +59,8 @@ function ensureDistinct(values, field) {
   if (new Set(values).size !== values.length) fail(`${field}不能重复`);
 }
 
-export function validateDepthChart(chart, rosterIds) {
-  if (chart === undefined) return defaultDepthChart();
+export function validateDepthChart(chart, rosterIds, league = 11) {
+  if (chart === undefined) return defaultDepthChart(league);
   const groups = unique(array(chart?.groups, DEPTH_LIMITS.groups, '人员组').map(group => {
     // v1 charts used these deterministic IDs for presets. Older custom copies
     // only have random IDs, and Spread and Bunch share the same role labels.

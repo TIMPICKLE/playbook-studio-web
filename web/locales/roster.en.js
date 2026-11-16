@@ -5,6 +5,7 @@ export default {
   'roster.depthTab': 'DEPTH CHART',
   'roster.teamSettings': 'Team settings',
   'roster.league': '{count} players per side',
+  'roster.flag5': '5v5 flag football',
   'roster.directory': 'Player roster',
   'roster.search': 'Search name, number or position',
   'roster.add': 'Add player',

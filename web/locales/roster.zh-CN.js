@@ -5,6 +5,7 @@ export default {
   'roster.depthTab': 'DEPTH CHART',
   'roster.teamSettings': '球队设置',
   'roster.league': '{count} 人制',
+  'roster.flag5': '5 人制腰旗',
   'roster.directory': '球员名单',
   'roster.search': '搜索姓名、号码或位置',
   'roster.add': '添加球员',

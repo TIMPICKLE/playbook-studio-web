@@ -17,6 +17,7 @@ export default {
   'personnel.currentLayout': 'Field diagram template',
   'personnel.noLayout': 'No field diagram',
   'personnel.layoutMatchHint': 'Existing roles and matching position labels appear on the diagram. Other positions stay in the group with their full depth order.',
+  'personnel.flag5Hint': 'Create a Flag 5 offense or defense group for 5v5 flag football. Changing the default size keeps existing groups and the full roster.',
   'personnel.blank': 'Custom · start without positions',
   'personnel.instructions': 'Game-day notes',
   'personnel.notePlaceholder': 'When to use this group or which substitutions to make',
