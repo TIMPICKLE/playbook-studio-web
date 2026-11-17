@@ -21,7 +21,7 @@ import { SharedWorkspace, cloudMode, request } from './cloud.js';
 import { startGuestWorkspace } from './guest-workspace.js';
 import { createRosterView } from './roster.js';
 import { clearDepthPlayer } from './depth-model.js';
-import { personnelMatches, refreshRosterBindings } from './board-personnel.js';
+import { personnelAssignments, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView, resolveHandoffContext } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
 import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, movePlayer, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
@@ -66,7 +66,7 @@ function readLocalWorkspace() {
 let { workspace, recovery: localRecovery } = cloudMode() ? { workspace: starterWorkspace(), recovery: null } : readLocalWorkspace();
 let state = { data: workspace, selectedId: workspace.plays[0].id };
 let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '', tool = 'select', selection = null, draft = null, drag = null, playing = false, time = 0, speed = 1, loop = false;
-let multiSelectMode = false, selectionCandidates = [], candidateSelectionAdditive = false, selectionCandidateScope = '';
+let multiSelectMode = false, selectionCandidates = [], candidateSelectionAdditive = false, selectionCandidateScope = '', confirmedFieldTarget = null;
 let fieldHitObserver = null;
 let saveState = localRecovery ? t("editorExtra.recovery_required_autosave_paused") : t('editor.saved_locally'), frame = null, lastFrame = null, toastTimer = null;
 const history = new EditorHistory();
@@ -100,6 +100,7 @@ async function navigateWorkspace(mode) {
   if(document.body.dataset.workspaceMode===mode)return true;
   if(rosterView.isEditing()) {toast(uxCopy('Save or cancel the player form before switching.','请先保存或取消正在编辑的球员表单。'),{type:'info'});return false;}
   if(draft&&!confirmDraft(()=>navigateWorkspace(mode)))return false;
+  cancelFieldGesture();
   document.activeElement?.blur?.();
   try {
     if(cloudMode()) {
@@ -118,7 +119,7 @@ document.addEventListener('click',event=>{
   if(button?.closest('.workspace-nav')){event.preventDefault();navigateWorkspace(button.dataset.workspaceMode);}
 });
 let shared = null, digitalBoard = null, analysisView = null, demoAnalysisData = null;
-let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
+let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false, editorViewEpoch = 0, importReadSequence = 0;
 let cancelFieldGesture = () => {};
 const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft,onChange:()=>boardAssistant?.refreshLayout?.() });
@@ -752,11 +753,28 @@ function syncSaveStatus() {
   const status=$('.editor-status');
   if(status) {const template=document.createElement('template');template.innerHTML=editorStatus();const next=template.content.firstElementChild;status.dataset.state=next.dataset.state;patchEditorHTML(status,next.innerHTML);}
 }
+function editorFieldValue(input) {
+  const key=input.dataset.prop;
+  if(input.dataset.ball)return current().ball[input.dataset.ball];
+  if(key?.startsWith('ball.'))return current().ball[key.slice(5)];
+  const value=(selectedObject()||current())[key==='roster'?'rosterId':key];
+  if(key==='color')return String(['player','route'].includes(selection?.type)?displayColor(value,viewSettings().fieldTheme==='light'):value).toLowerCase();
+  return value;
+}
+function hasEditorFieldDraft() {
+  if($('#app')?.hidden)return false;
+  return [...document.querySelectorAll('#app [data-prop],#app [data-ball]')].some(input=>!input.disabled && !input.closest('[hidden],[inert]') && (input.type==='checkbox'?!!editorFieldValue(input)!==input.checked:String(editorFieldValue(input)??'')!==input.value));
+}
+window.addEventListener('beforeunload',event=>{
+  const unsavedLocal=!cloudMode() && saveKind==='error' && !localRecovery;
+  const unfinished=canEdit() && (draft?.points.length>1 || rosterView.isEditing() || hasEditorFieldDraft());
+  if(unsavedLocal||unfinished){event.preventDefault();event.returnValue='';}
+});
 document.addEventListener('input',event=>{
   const input=event.target;
   if(!input.closest?.('#app')||!input.matches('[data-prop],[data-ball]')||!canEdit())return;
   const status=$('.editor-status');if(!status)return;
-  const value=input.dataset.ball?current().ball[input.dataset.ball]:(selectedObject()||current())[input.dataset.prop];
+  const value=editorFieldValue(input);
   if(String(value??'')===input.value){syncSaveStatus();return;}
   status.dataset.state='unsaved';
   const label=status.querySelector('[data-save-label]');
@@ -770,6 +788,7 @@ function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame
 function resetAnimation() { stop(); time = 0; }
 function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return null; }
+  cancelFieldGesture();
   clearAssistantPreview();
   resetAnimation(); rehearsal = false; draft = null; previewPoint = null;
   const before=clone(state);
@@ -778,10 +797,11 @@ function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
   save(); if (redraw) render(); else refreshMetadata();
   return transaction;
 }
-function choose(id) { if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
+function choose(id) { cancelFieldGesture(); if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
 function restore(next) { if (!next || !canEdit()) return; clearAssistantPreview(); resetAnimation(); rehearsal=false; state = next; book = current().book; selection = null; draft = null; save(); render(); $('#toast').classList.remove('visible'); }
 function restoreHistory(action) {
   if (!canEdit()) return false;
+  cancelFieldGesture();
   const next=action==='redo'?history.redo(state):history.undo(state);
   if (!next) return false;
   boardAssistant?.adoptScope(scopeFor(next.selectedId));
@@ -928,6 +948,7 @@ function syncEditorChrome() {
   updateCanvasHint();syncPlayback();
 }
 function setTool(next) {
+  cancelFieldGesture();
   if (current().reference) { if (next !== 'select') toast(t("feedback.this_original_diagram_supports_notes_but_has_no_editabl"), { type: 'warning' }); return; }
   if(next===tool && draft)return;
   if(next!==tool && !confirmDraft(()=>setTool(next)))return;
@@ -961,7 +982,7 @@ function ballSummary(play) {
 function personnelPicker(play) {
   if (!canEdit()) return '';
   const groups = state.data.depthChart.groups.filter(group => group.unit === play.book);
-  const choices = groups.filter(group => group.slots.some(slot => slot.playerIds[0]));
+  const choices = groups.filter(group => group.slots.length);
   return `<details class="inspector-section"><summary class="inspector-heading"><span>${t('editor.chart_starters')}</span></summary>
     ${choices.length ? `<label class="form-field"><span>${t('editor.chart_group')}</span><select id="personnel-group">
       <option value="">${t('editor.chart_choose')}</option>${choices.map(group => option(group.id, group.name, '')).join('')}</select></label>
@@ -972,8 +993,8 @@ function personnelPicker(play) {
 }
 function chosenPersonnel() {
   const group = state.data.depthChart.groups.find(item => item.id === $('#personnel-group')?.value);
-  const matches = personnelMatches(current(), group, state.data.roster);
-  return { group, matches, changes: matches.filter(({ marker, player }) => marker.rosterId !== player.id || marker.name !== player.name) };
+  const matches = personnelAssignments(current(), group, state.data.roster);
+  return { group, matches, changes: matches.filter(({ marker, player }) => player ? marker.rosterId !== player.id || marker.name !== player.name : !!marker.rosterId) };
 }
 function previewPersonnel() {
   const { group, matches, changes } = chosenPersonnel();
@@ -981,9 +1002,10 @@ function previewPersonnel() {
   if (!group) preview.textContent = t('editor.chart_hint');
   else {
     const total = group.slots.filter(slot => slot.playerIds[0]).length;
-    const labels = matches.map(({ marker, player }) => `${marker.label} · ${player.name}`).join(' / ');
-    preview.textContent = [t('editor.chart_match_count', { count: matches.length, total }), labels,
-      matches.length < total ? t('editor.chart_skipped') : '', matches.length && !changes.length ? t('editor.chart_current') : ''].filter(Boolean).join(' ');
+    const assigned=matches.filter(({player})=>player).length,cleared=changes.filter(({player})=>!player).length;
+    const labels = matches.map(({ marker, player }) => `${marker.label} · ${player?.name||t('depth.vacant')}`).join(' / ');
+    preview.textContent = [t('editor.chart_match_count', { count: assigned, total }), labels,
+      cleared ? t('editor.chart_clear_bindings',{count:cleared}) : '',assigned < total ? t('editor.chart_skipped') : '', matches.length && !changes.length ? t('editor.chart_current') : ''].filter(Boolean).join(' ');
   }
   $('[data-action="apply-personnel"]').disabled = !canEdit() || !changes.length;
 }
@@ -1044,13 +1066,17 @@ function refreshMetadata() {
   // search/filter. Geometry-only edits do not need to revisit the entire list.
   if (renderedCardState !== cardState()) {refreshPlayList();renderedCardState=cardState();}
   thumbnails.refresh(play);
-  $('.eyebrow').innerHTML=`${e(play.personnel)} <span>·</span> ${e(play.category)}`;
+  $('.eyebrow').innerHTML=`<span class="league-badge">${getPlayLeague(play)===5?uxCopy('5v5 Flag','5 人腰旗'):uxCopy(`${getPlayLeague(play)} per side`,`${getPlayLeague(play)} 人制`)}</span> <span>·</span> ${e(play.personnel)} <span>·</span> ${e(play.category)}`;
   for(const action of ['undo','redo'])for(const node of document.querySelectorAll(`[data-action="${action}"]`)){
     node.disabled=!(action==='undo'?history.past:history.future).length;
     node.title=historyLabel(action);node.setAttribute('aria-label',historyLabel(action));
   }
   if (renderedFieldState !== fieldState()) renderField();
   syncEditorChrome();protectReadOnly();
+}
+function refreshGestureCommit() {
+  const restoreScroll=captureEditorScroll({samePlay:true});
+  refreshSelection();refreshMetadata();restoreScroll();
 }
 function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {
@@ -1079,16 +1105,20 @@ function bindField() {
     syncFieldHitTargets(field.querySelector('.pitch-svg'),{pointerType:event.pointerType});
     const at = coordinates(event);
     let hit = pick(event), point=event.target.closest('[data-point]');
+    const confirmed=confirmedFieldTarget;confirmedFieldTarget=null;
     selectionCandidates=[];
     if(canEdit() && tool==='select' && ['touch','pen'].includes(event.pointerType)) {
       const keepGroup=hit?.type==='player' && selectedPlayerIds(current(),selection).includes(hit.id) && !multiSelectMode && !event.shiftKey;
       const candidates=keepGroup?[]:fieldHitCandidates(field.querySelector('.pitch-svg'),event);
-      if(candidates.length>1) {
+      const confirmedSelection=confirmed?.type==='point'?selection?.type==='route'&&selection.id===confirmed.routeId:selection?.type==='player'&&selection.id===confirmed?.id;
+      const resolved=confirmed?.scope===assistantScope() && confirmedSelection && !multiSelectMode && !event.shiftKey
+        ? candidates.find(candidate=>candidate.type===confirmed.type && candidate.id===confirmed.id && (candidate.type!=='point'||candidate.index===confirmed.index)) : null;
+      if(candidates.length>1 && !resolved) {
         event.preventDefault();selectionCandidates=candidates;candidateSelectionAdditive=multiSelectMode||event.shiftKey;selectionCandidateScope=assistantScope();updateCanvasHint();
         $('#field-context [data-action^="pick-candidate:"]')?.focus({preventScroll:true});return;
       }
-      if(candidates.length===1) {
-        const candidate=candidates[0];
+      if(resolved || candidates.length===1) {
+        const candidate=resolved||candidates[0];
         if(candidate.type==='player')hit={type:'player',id:candidate.id};
         else {point=candidate.element;hit=null;}
       }
@@ -1174,7 +1204,7 @@ function bindField() {
       let next=clone(before.data.plays.find(play=>play.id===state.selectedId));
       let command;
       if(completed.type==='players') {
-        if(!completed.delta?.x && !completed.delta?.y){Object.assign(current(),next);render();return;}
+        if(!completed.delta?.x && !completed.delta?.y){Object.assign(current(),next);refreshGestureCommit();return;}
         command={kind:'players_move',playerIds:completed.ids,dx:completed.delta?.x||0,dy:completed.delta?.y||0};
       } else if(completed.type==='player') {
         const player=current().players.find(item=>item.id===completed.id);
@@ -1192,11 +1222,12 @@ function bindField() {
       }
       try {
         if(command)runEditorPlayCommand(next,command,{idFactory:()=>completed.zoneId,roster:state.data.roster,formations:state.data.formations,depthChart:state.data.depthChart});
-        validatePlay(next);Object.assign(current(),next);history.record(before,{name:getLocale()==='en'?(completed.type==='players'?`Move ${completed.ids.length} players`:'Move object'):(completed.type==='players'?`移动 ${completed.ids.length} 名球员`:'移动对象'),source:'manual'});save();render();
+        validatePlay(next);Object.assign(current(),next);history.record(before,{name:getLocale()==='en'?(completed.type==='players'?`Move ${completed.ids.length} players`:'Move object'):(completed.type==='players'?`移动 ${completed.ids.length} 名球员`:'移动对象'),source:'manual'});save();refreshGestureCommit();
       } catch(error) {state=before;selection=completed.selectionBefore;render();toast(error.message,{type:'warning'});}
     }
   };
   const cancelDrag = event => {
+    confirmedFieldTarget=null;
     if (!drag || event && event.pointerId !== drag.pointerId) return;
     if (gestureFrame) cancelAnimationFrame(gestureFrame);
     gestureFrame=null;pendingPoint=null;
@@ -1466,6 +1497,7 @@ function nudgeSelection(direction, amount=1) {
 }
 function deleteSelected() {
   if(!canEdit())return;
+  cancelFieldGesture();
   if(selection?.type==='players') {
     const ids=selectedPlayerIds(current(),selection);
     try {
@@ -1487,12 +1519,13 @@ const actions = {
     if(selection && !['player','players'].includes(selection.type))selection=null;
     refreshSelection();syncEditorChrome();
   },
-  'dismiss-candidates':()=>{selectionCandidates=[];updateCanvasHint();$('#field .pitch-svg')?.focus({preventScroll:true});},
+  'dismiss-candidates':()=>{confirmedFieldTarget=null;selectionCandidates=[];updateCanvasHint();$('#field .pitch-svg')?.focus({preventScroll:true});},
   'apply-personnel': () => {
     const { group, changes } = chosenPersonnel();
     if (!changes.length) return;
-    applyPlayCommand({kind:'personnel_apply',groupId:group.id});
-    toast(t('editor.chart_applied', { count: changes.length, name: group.name }), { type: 'success' });
+    if(!applyPlayCommand({kind:'personnel_apply',groupId:group.id}))return;
+    const assigned=changes.filter(({player})=>player).length,cleared=changes.length-assigned;
+    toast(t(cleared?'editor.chart_applied_changes':'editor.chart_applied', { count: assigned,assigned,cleared, name: group.name }), { type: 'success',undo:true });
   },
   'local-recovery': localRecoveryModal,
   'download-original': downloadOriginal,
@@ -1544,7 +1577,7 @@ const actions = {
   favorite: () => applyPlayCommand({kind:'play_update',patch:{favorite:!current().favorite}}),
   undo: () => restoreHistory('undo'), redo: () => restoreHistory('redo'),
   'undo-transaction': node => { if(node.dataset.transactionId===history.info()?.id)restoreHistory('undo');else toast(uxCopy('A later edit exists. Use the main Undo control to review it.','之后已有新修改，请使用主撤销按钮确认撤销范围。'),{type:'info'}); },
-  'retry-save': () => {if(cloudMode())shared?.sync?.flush();else save();},
+  'retry-save': () => {if(cloudMode())shared?.sync?.flush();else if(save())toast(t('editor.saved_locally'),{type:'success'});},
   mirror: () => { applyPlayCommand({kind:'play_mirror'}); toast(t("modal.players_routes_zones_and_annotations_mirrored"), { type: 'success',undo:true }); },
   duplicate: () => applyWorkspaceActions([{kind:'play_duplicate',playId:current().id,title:`${current().title} · 副本`.slice(0,120)}]),
   'clear-selection': () => {if(!confirmDraft(()=>actions['clear-selection']()))return; selection=null;draft=null;tool='select';multiSelectMode=false;selectionCandidates=[];refreshSelection();syncEditorChrome();},
@@ -1610,6 +1643,7 @@ document.addEventListener('click', event => {
     if(!candidate || selectionCandidateScope!==assistantScope()){selectionCandidates=[];updateCanvasHint();return;}
     selection=candidate.type==='player'?togglePlayerSelection(current(),selection,candidate.id,{additive:candidateSelectionAdditive}):{type:'route',id:candidate.routeId};
     selectionCandidates=[];refreshSelection();
+    confirmedFieldTarget={scope:assistantScope(),type:candidate.type,id:candidate.id,routeId:candidate.routeId,index:candidate.index};
     const target=candidate.type==='player'?[...document.querySelectorAll('#field [data-player]')].find(node=>node.dataset.player===candidate.id):[...document.querySelectorAll('#field .point-hit')].find(node=>node.dataset.routeId===candidate.routeId && Number(node.dataset.point)===candidate.index);
     (target?.matches('[tabindex]')?target:$('#field .pitch-svg'))?.focus({preventScroll:true});return;
   }
@@ -1691,20 +1725,26 @@ document.addEventListener('change', event => {
 });
 $('#import-input').addEventListener('change', async event => {
   const file = event.target.files[0]; if (!file) return;
+  const requestId=++importReadSequence;
+  const target={workspaceId:shared?.current?.id||'local',epoch:editorViewEpoch};
+  const isCurrentTarget=()=>requestId===importReadSequence && target.workspaceId===(shared?.current?.id||'local') && target.epoch===editorViewEpoch && document.body.dataset.workspaceMode==='editor' && canEdit();
   try {
     if (file.size > 5_000_000) throw new Error(t("editorExtra.import_a_file_under_5_mb"));
-    const imported = decodeWorkspace(await file.text());
+    const raw=await file.text();
+    if(!isCurrentTarget())return;
+    const imported = decodeWorkspace(raw);
     if (state.data.plays.length + imported.plays.length > 500) throw new Error(t("editorExtra.the_playbook_cannot_exceed_500_plays"));
     openModal(t("editorExtra.import_playbook_2"), `<p>${t("editorExtra.the_validated_file_contains")}<strong>${imported.plays.length}${t("editorExtra.plays_2")}</strong>、${imported.formations.length}${t("editorExtra.custom_formations_and")}${imported.roster.length}${t("editorExtra.roster_members")}</p><p class="muted small">${t("editorExtra.import_appends_plays_formations_and_roster_me")}</p>`, `<button class="button subtle" data-action="close-modal">取消</button><button class="button primary" data-action="confirm-import">${t("editorExtra.append_import")}</button>`);
     actions['confirm-import'] = () => {
+      if(!isCurrentTarget()){toast(uxCopy('The import target changed. Choose the file again in the intended playbook.','导入目标已变化，请在目标战术本中重新选择文件。'),{type:'warning'});return;}
       if (state.data.formations.length + imported.formations.length > 100 || state.data.roster.length + imported.roster.length > 200) { toast(t("editorExtra.import_would_exceed_the_formation_or_roster_l"), { type: 'info' }); return; }
       const batch = prepareWorkspaceAppend(state.data, imported);
       if (!batch) { toast(t('editor.chart_import_limit'), { type: 'warning' }); return; }
       const { plays, formations: forms, roster, depthChart } = batch;
       closeModal(); selection = null; book = plays[0].book; query = ''; filter = ''; formationFilter = ''; edit((p, d) => { d.plays.push(...plays); d.formations.push(...forms); d.roster.push(...roster); d.depthChart = depthChart; state.selectedId = plays[0].id; }); toast(`${t("editorExtra.imported")}${plays.length}${t("editorExtra.plays_3")}`); delete actions['confirm-import'];
     };
-  } catch (error) { toast(`${t("editorExtra.import_failed")}${error.message}`, { type: 'error' }); }
-  event.target.value = '';
+  } catch (error) { if(isCurrentTarget())toast(`${t("editorExtra.import_failed")}${error.message}`, { type: 'error' }); }
+  finally { if(requestId===importReadSequence)event.target.value = ''; }
 });
 document.addEventListener('keydown', event => {
   if(event.defaultPrevented||event.isComposing||event.keyCode===229)return;
@@ -1726,7 +1766,7 @@ document.addEventListener('keydown', event => {
   if ((event.ctrlKey || event.metaKey) && key === 'y') { event.preventDefault(); restoreHistory('redo'); return; }
   if (event.key === ' ') { event.preventDefault(); togglePlay(); }
   else if (event.key === 'Enter' && draft) { event.preventDefault(); finishRoute(); }
-  else if (event.key === 'Escape') { draft = null; selection = null; tool = 'select'; multiSelectMode=false;selectionCandidates=[];render(); }
+  else if (event.key === 'Escape') { cancelFieldGesture(); draft = null; selection = null; tool = 'select'; multiSelectMode=false;selectionCandidates=[];render(); }
   else if (event.key==='Backspace' && draft) {event.preventDefault();actions['undo-point']();}
   else if (event.key === 'Delete' || event.key === 'Backspace') {event.preventDefault();if(!rehearsal)deleteSelected();}
   else if (key === '?') helpModal();
@@ -1734,8 +1774,10 @@ document.addEventListener('keydown', event => {
 });
 function showEditor(show) {
   const app = $('#app');
+  if(!show && !app.hidden)cancelFieldGesture();
   $('.skip-link').hidden = !show;
   if (app.hidden === !show) return;
+  editorViewEpoch++;
   app.hidden = !show;
   if (show) {
     syncWorkspaceNavigation('editor');

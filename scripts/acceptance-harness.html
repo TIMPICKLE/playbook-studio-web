@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><title>非 AI 实际布局验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e9edf2;color:#152334;font:14px system-ui}header{padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:white;border-bottom:1px solid #aeb9c6}button,select{font:inherit;min-height:36px;padding:6px 10px}h1{font-size:16px;margin:0 14px 0 0}#stage{margin:14px;position:relative}iframe{box-sizing:content-box;border:1px solid #667990;background:white;transform-origin:top left}#readout{font:12px ui-monospace;white-space:pre-wrap;padding:10px;background:white;margin:12px;max-height:250px;overflow:auto}#label{padding:8px 14px}button:focus-visible,select:focus-visible{outline:3px solid #2265c1;outline-offset:2px}
+</style>
+<header><h1>非 AI 验收台</h1><label>版本 <select id="source" aria-label="验收版本"><option value="current">当前修复</option><option value="baseline">PR50 基线</option></select></label><label>CSS 视口 <select id="viewport" aria-label="验收视口">
+<option value="1440,900">桌面 1440 × 900</option><option value="1280,720">笔记本 1280 × 720</option><option value="1024,768">平板横屏 1024 × 768</option><option value="768,1024">平板竖屏 768 × 1024</option><option value="390,844">手机竖屏 390 × 844</option><option value="375,667">小屏手机 375 × 667</option><option value="844,390">手机横屏 844 × 390</option>
+</select></label><button id="fit">适应显示</button><button id="actual">原尺寸显示</button><button id="inspect">记录布局</button><button id="frames">采样当前帧间隔</button><button id="drag">记录下一次拖动</button></header>
+<div id="label">真实 Chromium iframe CSS 视口。指针仍为桌面鼠标，不等于触摸模拟、Safari 或真机。</div>
+<div id="stage"><iframe id="subject" title="被验收的战术编辑器" src="../local.html#editor"></iframe></div><pre id="readout" aria-live="polite">等待页面加载。</pre>
+<script type="module">
+import {sampleFrames,armFieldDragSample} from './acceptance-performance.js';
+const q=s=>document.querySelector(s),frame=q('#subject'),records=[];let fitted=true;
+const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
+function resize(){const [w,h]=q('#viewport').value.split(',').map(Number);frame.style.width=w+'px';frame.style.height=h+'px';const scale=fitted?Math.min(1,(innerWidth-32)/w,Math.max(300,innerHeight-210)/h):1;frame.style.transform=`scale(${scale})`;q('#stage').style.height=Math.ceil(h*scale)+'px';q('#stage').style.width=Math.ceil(w*scale)+'px';}
+function show(data){records.push(data);q('#readout').textContent=JSON.stringify({records},null,2);}
+function inspect(){const w=frame.contentWindow,d=w.document;const field=d.querySelector('#field'),tools=d.querySelector('.stage-dock');show({kind:'layout',timestamp:new Date().toISOString(),requested:q('#viewport').value,viewport:{width:w.innerWidth,height:w.innerHeight},documentWidth:d.documentElement.scrollWidth,clientWidth:d.documentElement.clientWidth,bodyWidth:d.body.scrollWidth,mode:d.body.dataset.workspaceMode,field:rect(field),tools:rect(tools),navigation:rect(d.querySelector('.workspace-nav')),openDialog:rect(d.querySelector('dialog[open]')),compactNavigation:rect(d.querySelector('.compact-nav')),focus:d.activeElement?.getAttribute('aria-label')||d.activeElement?.textContent?.slice(0,80),reducedMotion:w.matchMedia('(prefers-reduced-motion: reduce)').matches,touch:w.matchMedia('(pointer: coarse)').matches});}
+q('#viewport').addEventListener('change',resize);q('#fit').onclick=()=>{fitted=true;resize();};q('#actual').onclick=()=>{fitted=false;resize();};q('#inspect').onclick=inspect;
+q('#source').onchange=()=>{frame.src=q('#source').value==='baseline'?'../acceptance-baseline/local.html#editor':'../local.html#editor';};
+q('#frames').onclick=async()=>{q('#readout').textContent='采样中…';show({kind:'idle-frame-sample',result:await sampleFrames(frame.contentWindow).promise});};
+q('#drag').onclick=async()=>{const result=await armFieldDragSample(frame.contentWindow,{onState:s=>q('#readout').textContent=s});show({kind:'board-pointer-sample',result});};
+frame.addEventListener('load',()=>{resize();q('#readout').textContent='已加载。通过真实控件操作后记录布局。';});window.addEventListener('resize',resize);resize();
+</script></html>

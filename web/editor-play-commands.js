@@ -1,7 +1,7 @@
 import { z } from './vendor/assistant-zod.js';
 import { COLORS, FORMATIONS, clone, formationPlayers, mirrorPlay, movePlayer, uid } from './model.js';
 import { spaceMaddenLine } from './madden-model.js';
-import { linkRosterPlayer, personnelMatches } from './board-personnel.js';
+import { linkRosterPlayer, personnelAssignments } from './board-personnel.js';
 import { LEAGUE_SIZES, defaultFormation, getPlayLeague, resolveFormation } from './game-formats.js';
 import { movePlayerGroup, removePlayerGroup } from './player-group.js';
 
@@ -213,7 +213,7 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
   } else if (op.kind === 'personnel_apply') {
     const group = depthChart?.groups?.find(group => group.id === op.groupId) || fail('Depth-chart group not found.');
     if (group.unit !== play.book) fail('The depth-chart group belongs to another playbook.');
-    const matches = personnelMatches(play, group, roster);
+    const matches = personnelAssignments(play, group, roster);
     if (!matches.length) fail('No uniquely matching starter assignments are available for this play.');
     for (const { marker, player } of matches) linkRosterPlayer(marker, player);
   }

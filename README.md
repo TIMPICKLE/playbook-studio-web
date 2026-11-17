@@ -32,6 +32,8 @@
 
 **工作流更新**：AI 连续草稿可追问、分组预览和应用；支持多球员选择与整组编辑，属性／AI 共用任务区，跨模块返回保留当前战术与浏览位置。[UX 改造与验证记录 →](docs/UX_REDESIGN.md)
 
+[非 AI 严格验收：补修、浏览器证据及未放行项](docs/acceptance/README.md)
+
 ## 快速开始
 
 1. 打开[免登录工作台](https://timpickle.github.io/playbook-studio-web/)，进入 **「编辑战术本」**。

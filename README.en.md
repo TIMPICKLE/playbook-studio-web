@@ -32,6 +32,8 @@ English and Simplified Chinese are supported. Phones and iPads use the tradition
 
 **Workflow update:** refine a continuous AI draft, preview selected change groups, and apply them; select and edit multiple players, share one properties/AI task area, and retain the current play and browsing position across modules. [UX changes and validation →](docs/UX_REDESIGN.md)
 
+[Non-AI acceptance: fixes, browser evidence, and remaining blockers](docs/acceptance/README.md)
+
 ## Quick start
 
 1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/) and choose **Edit playbook**.

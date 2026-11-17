@@ -20,6 +20,14 @@ function patch(parent, source) {
       if (!node.matches('.madden-detail-slot,.madden-result-bar,.madden-results')) patch(node, next);
       if (node.tagName === 'INPUT' && node.type === 'checkbox') node.checked = next.checked;
       if (node.tagName === 'INPUT' && node.value !== next.value) node.value = next.value;
+      // Reusing option nodes preserves their user-selected state independently
+      // of selected attributes. Synchronize the controlled value after patching.
+      if (node.tagName === 'SELECT') {
+        if (node.multiple) {
+          const values = new Set([...next.options].filter(option => option.selected).map(option => option.value));
+          for (const option of node.options) option.selected = values.has(option.value);
+        } else if (node.value !== next.value) node.value = next.value;
+      }
     }
     retained.add(node);
     const current = [...parent.childNodes].filter(child=>!child.matches?.('.liquid-surface-canvas'))[i];

@@ -6,6 +6,21 @@ function playerName(player) {
   return player ? [player.number && `#${player.number}`, player.name].filter(Boolean).join(' ') : t('depth.vacant');
 }
 
+export function depthDragSource(playerId, slotId = '', index = 0) {
+  return playerId ? `draggable="true" data-depth-source="${e(playerId)}" data-source-slot="${e(slotId)}" data-source-index="${index}"` : '';
+}
+
+export function depthPlayerPicker(players, playerId = '', editable = false, assigning = false) {
+  const player = players.get(playerId);
+  return players.size ? `<div class="df-find"><label><span>${t('formationDetail.find')}</span>
+    <select data-formation-player aria-label="${t('formationDetail.find')}"><option value="">${t('formationDetail.allPlayers')}</option>${[...players.values()].map(p =>
+      `<option value="${e(p.id)}" ${p.id === playerId ? 'selected' : ''}>${e(playerName(p))}${p.position ? ' · ' + e(p.position) : ''}</option>`
+    ).join('')}</select></label>
+    ${editable && player ? `<button type="button" class="roster-secondary depth-assign-player" data-depth-chart="pick-player" ${depthDragSource(player.id)}>${e(t('depth.assignPlayer', { name: playerName(player) }))}</button>` : ''}
+    ${assigning ? `<button type="button" class="roster-text" data-depth-chart="cancel-assignment">${t('modal.cancel')}</button>` : ''}
+  </div>` : '';
+}
+
 export function depthRankActions(slot, index, groupId, editable) {
   if (!editable || !index || !slot.playerIds[index]) return '';
   const attrs = `data-slot="${e(slot.id)}" data-group="${e(groupId)}" data-player="${e(slot.playerIds[index])}" data-ranks="${e(JSON.stringify(slot.playerIds))}"`;
@@ -16,7 +31,7 @@ export function depthRankActions(slot, index, groupId, editable) {
   </span>`;
 }
 
-function roleButton(slot, players, selected, playerId, style = '') {
+function roleButton(slot, players, selected, playerId, style = '', editable = false, assigning = false) {
   const starter = players.get(slot.playerIds[0]);
   const name = playerName(starter);
   const ranks = slot.playerIds.slice(1).map((id, index) => `${t('depth.backup', { rank: index + 1 })} ${playerName(players.get(id))}`);
@@ -26,18 +41,19 @@ function roleButton(slot, players, selected, playerId, style = '') {
   const visibleName = match >= 0 ? playerName(players.get(playerId)) : name;
   return `<button type="button" class="df-node" data-depth-chart="inspect" data-slot="${e(slot.id)}"
     ${match >= 0 ? `data-formation-rank="${match}"` : ''} data-filled="${Boolean(starter)}" aria-pressed="${selected}" aria-controls="depth-formation-detail"
-    aria-label="${e(description)}" title="${e(description)}" ${style}>
+    aria-label="${e(assigning ? t('depth.assignToRole', { label: slot.label }) : description)}" title="${e(description)}" ${style}
+    ${editable ? `data-depth-drop-slot="${e(slot.id)}" data-depth-drop-index="0" ${depthDragSource(match >= 0 ? playerId : starter?.id, slot.id, match >= 0 ? match : 0)}` : ''}>
     <span class="df-role">${e(slot.label)}</span><span class="df-name">${e(visibleName)}</span>
     <span class="df-found-rank"${match < 0 ? ' aria-hidden="true"' : ''}>${match < 0 ? '' : matchLabel}</span></button>`;
 }
 
-function pitchMarker(marker, markers, players, selected, playerId) {
+function pitchMarker(marker, markers, players, selected, playerId, editable, assigning) {
   // Wide splits can display longer names. Adjacent linemen share the row.
   const { x, y, slot } = marker;
   const nearby = markers.filter(other => other !== marker && Math.abs(other.y - y) < 15);
   const width = Math.min(2 * x, 2 * (100 - x), ...nearby.map(other => Math.abs(other.x - x))) - 1;
   const style = `style="--df-x:${x}%;--df-y:${y}%;--df-width:${width}%"`;
-  return roleButton(slot, players, selected === slot.id, playerId, style);
+  return roleButton(slot, players, selected === slot.id, playerId, style, editable, assigning);
 }
 
 function selectedRole(slot, players, editable, groupId) {
@@ -47,12 +63,12 @@ function selectedRole(slot, players, editable, groupId) {
       ${editable ? `<button type="button" class="roster-text" data-depth-chart="edit" data-slot="${e(slot.id)}"
          aria-label="${e(t('depth.editLabel', { label: slot.label }))}">${t('depth.edit')}</button>` : ''}</div>
     <dl class="df-ranks">${ids.map((id, rank) => `<div><dt>${rank ? t('depth.backup', { rank }) : t('depth.starter')}</dt>
-      <dd>${e(playerName(players.get(id)))}${depthRankActions(slot, rank, groupId, editable)}</dd></div>`).join('')}</dl>
+      <dd ${editable ? `data-depth-drop-slot="${e(slot.id)}" data-depth-drop-index="${rank}"` : ''}><span ${editable ? depthDragSource(id, slot.id, rank) : ''}>${e(playerName(players.get(id)))}</span>${depthRankActions(slot, rank, groupId, editable)}</dd></div>`).join('')}</dl>
     <div data-depth-feedback="${e(slot.id)}"></div>
     ${ids.length === 1 ? `<p class="df-no-backups">${t('depth.noBackups')}</p>` : ''}</section>`;
 }
 
-export function renderDepthFormation(group, players, selectedSlotId, editable, playerId = '') {
+export function renderDepthFormation(group, players, selectedSlotId, editable, playerId = '', assigning = false) {
   if (!group.slots.length) return `<p class="depth-empty">${t('depth.noSlots')}</p>`;
   const { templateId, markers, unmapped } = formationLayout(group);
   const selected = group.slots.find(slot => slot.id === selectedSlotId) || group.slots[0];
@@ -60,11 +76,8 @@ export function renderDepthFormation(group, players, selectedSlotId, editable, p
   const player = players.get(playerId);
   const matches = player ? group.slots.filter(slot => slot.playerIds.includes(playerId)).length : 0;
   return `<div class="df-formation">
-    ${players.size ? `<div class="df-find"><label><span>${t('formationDetail.find')}</span>
-      <select data-formation-player aria-label="${t('formationDetail.find')}"><option value="">${t('formationDetail.allPlayers')}</option>${[...players.values()].map(p =>
-        `<option value="${e(p.id)}" ${p.id === playerId ? 'selected' : ''}>${e(playerName(p))}${p.position ? ' · ' + e(p.position) : ''}</option>`
-      ).join('')}</select></label>
-      <p data-formation-results role="status">${player ? e(t(matches ? 'formationDetail.matches' : 'formationDetail.noMatch', { name: playerName(player), count: matches })) : ''}</p></div>` : ''}
+    ${depthPlayerPicker(players, playerId, editable, assigning)}
+    <p data-formation-results role="status">${player ? e(t(matches ? 'formationDetail.matches' : 'formationDetail.noMatch', { name: playerName(player), count: matches })) : ''}</p>
     ${markers.length ? `<figure class="df-card">
       <figcaption class="df-caption">
         <div><strong>${groupName}</strong><span>${t(`personnel.${group.unit}`)}</span></div>
@@ -72,13 +85,13 @@ export function renderDepthFormation(group, players, selectedSlotId, editable, p
       </figcaption>
       <div class="df-pitch" role="group" aria-label="${e(t('formationDetail.pitch', { group: group.name }))}">
         <div class="df-hashes" aria-hidden="true"></div>
-        ${markers.map(marker => pitchMarker(marker, markers, players, selected.id, playerId)).join('')}
+        ${markers.map(marker => pitchMarker(marker, markers, players, selected.id, playerId, editable, assigning)).join('')}
       </div>
-      <p class="df-instruction">${t(player && matches ? 'formationDetail.filterHint' : 'formationDetail.selectRole')} <span class="df-portrait-hint">${t('formationDetail.rotated')}</span></p>
+      <p class="df-instruction">${t(assigning ? 'depth.selectTarget' : player && matches ? 'formationDetail.filterHint' : 'formationDetail.selectRole')} <span class="df-portrait-hint">${t('formationDetail.rotated')}</span></p>
       ${templateId === 'punt-return' ? `<p class="df-note">${t('formationDetail.returnNote')}</p>` : ''}
     </figure>` : `<p class="df-unplaced-hint">${t('formationDetail.noLayout')}</p>`}
     ${unmapped.length ? `<section class="df-extra"><h4>${t('formationDetail.unplaced')}</h4><div class="df-extra-roles">
-      ${unmapped.map(slot => roleButton(slot, players, slot.id === selected.id, playerId)).join('')}</div></section>` : ''}
+      ${unmapped.map(slot => roleButton(slot, players, slot.id === selected.id, playerId, '', editable, assigning)).join('')}</div></section>` : ''}
     ${selectedRole(selected, players, editable, group.id)}
   </div>`;
 }

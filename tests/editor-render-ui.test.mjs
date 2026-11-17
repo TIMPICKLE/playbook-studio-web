@@ -6,10 +6,11 @@ import { clone, starterWorkspace, STORAGE_KEY, encodeWorkspace, decodeWorkspace 
 
 test('large playbooks keep live editor nodes through search and edits; switching plays scopes the next drag correctly',async()=>{
   const win=new Window({url:'http://localhost:3000/local.html#editor',width:1440,height:1000});
+  const thumbnailObservers={created:0,observed:0,disconnected:0};
   win.IntersectionObserver=class {
-    constructor(callback){this.callback=callback;}
-    observe(node){if(node.hasAttribute('data-thumbnail-index')&&Number(node.dataset.thumbnailIndex)<12)this.callback([{target:node,isIntersecting:true}]);}
-    disconnect(){}
+    constructor(callback,options){this.callback=callback;this.thumbnails=!!options?.root?.matches('.sidebar');if(this.thumbnails)thumbnailObservers.created++;}
+    observe(node){if(node.hasAttribute('data-thumbnail-index')){thumbnailObservers.observed++;if(Number(node.dataset.thumbnailIndex)<12)this.callback([{target:node,isIntersecting:true}]);}}
+    disconnect(){if(this.thumbnails)thumbnailObservers.disconnected++;}
   };
   const data=starterWorkspace(),first=data.plays[0];
   data.plays=Array.from({length:200},(_,index)=>({...clone(first),id:`practice-${index}`,title:`Practice ${index}`}));
@@ -46,9 +47,21 @@ test('large playbooks keep live editor nodes through search and edits; switching
     assert.ok(q('#field [data-player]')===player,'non-geometric edits do not rebuild player nodes');
     assert.ok(doc.activeElement===title);assert.equal(title.selectionStart,2);assert.equal(title.selectionEnd,6);
     assert.equal(saved().plays[0].title,'Renamed practice');
+    search('Practice');input.focus();input.setSelectionRange(1,4);
+    const stableSurfaces=Object.fromEntries(['.workspace','.sidebar','.play-list','#search','#field','.pitch-stage','#field .pitch-svg','.inspector-panel'].map(selector=>[selector,q(selector)]));
+    const beforeThumbs=new Map([...doc.querySelectorAll('.play-card')].filter(card=>card.dataset.action!=='choose:practice-0'&&card.querySelector('svg')).map(card=>[card.dataset.action,card.querySelector('svg')]));
+    const currentThumb=q('[data-action="choose:practice-0"] svg');
+    q('.sidebar').scrollTop=170;q('.play-list').scrollTop=210;q('.pitch-viewport').scrollLeft=12;q('.pitch-viewport').scrollTop=34;
+    const observersBefore={...thumbnailObservers};
     const before=saved();geometry();
     pointer(player,'pointerdown',400,500);pointer(field,'pointermove',460,530);pointer(field,'pointerup',460,530);
     assert.notDeepEqual(saved().plays[0].players,before.plays[0].players);
+    for(const [selector,node]of Object.entries(stableSurfaces))assert.ok(q(selector)===node,`${selector} stays connected during gesture commit`);
+    assert.deepEqual(thumbnailObservers,observersBefore,'a geometry commit does not recreate the list observer or observe all 200 cards again');
+    for(const [action,svg]of beforeThumbs)assert.ok(q(`[data-action="${action}"] svg`)===svg,'other plays retain their already-rendered thumbnails');
+    assert.notEqual(q('[data-action="choose:practice-0"] svg'),currentThumb,'the current thumbnail is refreshed from the committed geometry');
+    assert.ok(doc.activeElement===input,'local commit does not steal an unrelated search caret');assert.equal(input.selectionStart,1);assert.equal(input.selectionEnd,4);
+    assert.equal(q('.sidebar').scrollTop,170);assert.equal(q('.play-list').scrollTop,210);assert.equal(q('.pitch-viewport').scrollLeft,12);assert.equal(q('.pitch-viewport').scrollTop,34);
     click('undo');assert.deepEqual(saved().plays[0].players,before.plays[0].players,'one undo restores one drag after repeated same-play renders');
     click('choose:practice-1');
     assert.ok(q('#field')!==field,'a play switch creates a new editing boundary');

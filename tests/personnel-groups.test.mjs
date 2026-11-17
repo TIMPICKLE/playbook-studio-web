@@ -7,10 +7,10 @@ import { createPersonnelGroups } from '../web/personnel-groups.js';
 function setup(t) {
   const win = new Window();
   t.after(() => win.happyDOM.abort());
-  const root = win.document.body, state = { book: 'one', editable: true, data: starterWorkspace(), selected: [], writes: 0 };
+  const root = win.document.body, state = { book: 'one', editable: true, data: starterWorkspace(), selected: [], writes: 0, fail: false };
   const view = createPersonnelGroups({
     root, getData: () => state.data, getWorkspaceId: () => state.book, canEdit: () => state.editable,
-    commit(mutate) { mutate(state.data); state.writes++; }, onSelect(id) { state.selected.push(id); }
+    commit(mutate) { if (state.fail) return false; mutate(state.data); state.writes++; }, onSelect(id) { state.selected.push(id); }
   });
   const q = selector => root.querySelector(selector);
   const action = key => q(`[data-personnel-action="${key}"]`).click();
@@ -151,4 +151,25 @@ test('flag defaults recommend five-player personnel templates without replacing 
   const defense = state.data.depthChart.groups.find(group => group.id === view.getSelectedId());
   assert.deepEqual(defense.slots.map(slot => slot.label), ['R', 'LCB', 'RCB', 'S', 'DB']);
   assert.deepEqual(state.data.depthChart.groups.slice(0, legacy.length), legacy);
+});
+
+test('failed personnel copy retains the name, notes and destination and retries without duplicate creation', t => {
+  const { state, view, q, action, save } = setup(t);
+  const count = state.data.depthChart.groups.length;
+  action('copy');
+  q('[name=name]').value = 'Game-day copy';
+  q('[name=notes]').value = 'Keep this draft';
+  q('[name=unit]').value = 'special';
+  state.fail = true; save();
+  assert.equal(state.data.depthChart.groups.length, count);
+  assert.equal(view.isEditing(), true);
+  assert.equal(q('[name=name]').value, 'Game-day copy');
+  assert.equal(q('[name=notes]').value, 'Keep this draft');
+  assert.equal(q('[name=unit]').value, 'special');
+  assert.ok(q('[role=alert]').textContent);
+  state.fail = false; save();
+  assert.equal(state.data.depthChart.groups.length, count + 1);
+  assert.equal(state.data.depthChart.groups.at(-1).unit, 'special');
+  assert.equal(state.writes, 1);
+  assert.equal(view.isEditing(), false);
 });

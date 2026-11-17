@@ -26,6 +26,8 @@ export default {
   "editor.chart_skipped": "Check position labels and players already assigned elsewhere.",
   "editor.chart_current": "These starters are already on the field.",
   "editor.chart_applied": "Applied {count} starters from {name}. Undo available.",
+  "editor.chart_clear_bindings": "Will clear {count} assignments.",
+  "editor.chart_applied_changes": "Applied {assigned} starters and cleared {cleared} assignments from {name}. Undo available.",
   "editor.chart_import_limit": "Import would exceed the personnel group limit.",
   "editor.close_side_panel": "Close side panel",
   "editor.play_list": "Play list",

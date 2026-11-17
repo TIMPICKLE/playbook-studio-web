@@ -1,0 +1,656 @@
+{
+  "environment": "Foreground Chromium iframe CSS viewports; desktop mouse, not touch or Safari",
+  "records": [
+    {
+      "bodyWidth": 1430,
+      "clientWidth": 1430,
+      "compactNavigation": {
+        "bottom": 0,
+        "height": 0,
+        "right": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "documentWidth": 1430,
+      "field": {
+        "bottom": 740.390625,
+        "height": 442,
+        "right": 1090,
+        "width": 822,
+        "x": 268,
+        "y": 298.390625
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 53,
+        "height": 53,
+        "right": 1430,
+        "width": 1430,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "1440,900",
+      "timestamp": "2026-11-16T16:19:42.844Z",
+      "tools": {
+        "bottom": 864.390625,
+        "height": 112,
+        "right": 1090,
+        "width": 822,
+        "x": 268,
+        "y": 752.390625
+      },
+      "touch": false,
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 116.28125
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 116.28125
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 116.28125
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 116.296875
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 116.28125
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 116.28125
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 116.28125
+        }
+      ]
+    },
+    {
+      "bodyWidth": 1270,
+      "clientWidth": 1270,
+      "compactNavigation": {
+        "bottom": 0,
+        "height": 0,
+        "right": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "documentWidth": 1270,
+      "field": {
+        "bottom": 578.390625,
+        "height": 280,
+        "right": 930,
+        "width": 662,
+        "x": 268,
+        "y": 298.390625
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 53,
+        "height": 53,
+        "right": 1270,
+        "width": 1270,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "1280,720",
+      "timestamp": "2026-11-16T16:19:43.560Z",
+      "tools": {
+        "bottom": 702.390625,
+        "height": 112,
+        "right": 930,
+        "width": 662,
+        "x": 268,
+        "y": 590.390625
+      },
+      "touch": false,
+      "viewport": {
+        "height": 720,
+        "width": 1280
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 93.421875
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 93.421875
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 93.4375
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 93.421875
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 93.4375
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 93.421875
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 93.4375
+        }
+      ]
+    },
+    {
+      "bodyWidth": 1014,
+      "clientWidth": 1014,
+      "compactNavigation": {
+        "bottom": 768,
+        "height": 66,
+        "right": 1014,
+        "width": 1014,
+        "x": 0,
+        "y": 702
+      },
+      "documentWidth": 1014,
+      "field": {
+        "bottom": 542,
+        "height": 270,
+        "right": 996,
+        "width": 978,
+        "x": 18,
+        "y": 272
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 57,
+        "height": 57,
+        "right": 1014,
+        "width": 1014,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "1024,768",
+      "timestamp": "2026-11-16T16:19:44.217Z",
+      "tools": {
+        "bottom": 666,
+        "height": 112,
+        "right": 996,
+        "width": 978,
+        "x": 18,
+        "y": 554
+      },
+      "touch": false,
+      "viewport": {
+        "height": 768,
+        "width": 1024
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 138.5625
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 138.578125
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 138.5625
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 138.578125
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 138.5625
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 138.578125
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 138.5625
+        }
+      ]
+    },
+    {
+      "bodyWidth": 758,
+      "clientWidth": 758,
+      "compactNavigation": {
+        "bottom": 1024,
+        "height": 66,
+        "right": 758,
+        "width": 758,
+        "x": 0,
+        "y": 958
+      },
+      "documentWidth": 758,
+      "field": {
+        "bottom": 797.59375,
+        "height": 408,
+        "right": 740,
+        "width": 722,
+        "x": 18,
+        "y": 389.59375
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 57,
+        "height": 57,
+        "right": 758,
+        "width": 758,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "768,1024",
+      "timestamp": "2026-11-16T16:19:44.765Z",
+      "tools": {
+        "bottom": 921.59375,
+        "height": 112,
+        "right": 740,
+        "width": 722,
+        "x": 18,
+        "y": 809.59375
+      },
+      "touch": false,
+      "viewport": {
+        "height": 1024,
+        "width": 768
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 102
+        }
+      ]
+    },
+    {
+      "bodyWidth": 380,
+      "clientWidth": 380,
+      "compactNavigation": {
+        "bottom": 844,
+        "height": 66,
+        "right": 380,
+        "width": 380,
+        "x": 0,
+        "y": 778
+      },
+      "documentWidth": 380,
+      "field": {
+        "bottom": 577,
+        "height": 290,
+        "right": 368,
+        "width": 356,
+        "x": 12,
+        "y": 287
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 57,
+        "height": 57,
+        "right": 380,
+        "width": 380,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "390,844",
+      "timestamp": "2026-11-16T16:19:45.492Z",
+      "tools": {
+        "bottom": 687,
+        "height": 98,
+        "right": 368,
+        "width": 356,
+        "x": 12,
+        "y": 589
+      },
+      "touch": false,
+      "viewport": {
+        "height": 844,
+        "width": 390
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 50.84375
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 50.859375
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 50.859375
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 50.859375
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 50.859375
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 50.859375
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 50.859375
+        }
+      ]
+    },
+    {
+      "bodyWidth": 365,
+      "clientWidth": 365,
+      "compactNavigation": {
+        "bottom": 667,
+        "height": 66,
+        "right": 365,
+        "width": 365,
+        "x": 0,
+        "y": 601
+      },
+      "documentWidth": 365,
+      "field": {
+        "bottom": 487,
+        "height": 200,
+        "right": 353,
+        "width": 341,
+        "x": 12,
+        "y": 287
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 57,
+        "height": 57,
+        "right": 365,
+        "width": 365,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "375,667",
+      "timestamp": "2026-11-16T16:19:46.056Z",
+      "tools": {
+        "bottom": 597,
+        "height": 98,
+        "right": 353,
+        "width": 341,
+        "x": 12,
+        "y": 499
+      },
+      "touch": false,
+      "viewport": {
+        "height": 667,
+        "width": 375
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 48.703125
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 48.71875
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 48.71875
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 48.703125
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 48.71875
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 48.71875
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 48.71875
+        }
+      ]
+    },
+    {
+      "bodyWidth": 844,
+      "clientWidth": 844,
+      "compactNavigation": {
+        "bottom": 390,
+        "height": 54,
+        "right": 844,
+        "width": 844,
+        "x": 0,
+        "y": 336
+      },
+      "documentWidth": 844,
+      "field": {
+        "bottom": 282,
+        "height": 223,
+        "right": 600,
+        "width": 588,
+        "x": 12,
+        "y": 59
+      },
+      "focus": "\n  跳转到战术编辑区\n  ← 工作台本地离线预览 · 修改仅保存在此浏览器←战术编辑AI 战局分析球员 · DEPTH CHART球员\n  \n  \n  \n  ",
+      "kind": "layout",
+      "mode": "editor",
+      "navigation": {
+        "bottom": 53,
+        "height": 53,
+        "right": 844,
+        "width": 844,
+        "x": 0,
+        "y": 0
+      },
+      "openDialog": null,
+      "reducedMotion": false,
+      "requested": "844,390",
+      "timestamp": "2026-11-16T16:19:46.595Z",
+      "tools": {
+        "bottom": 282,
+        "height": 0,
+        "right": 600,
+        "width": 588,
+        "x": 12,
+        "y": 282
+      },
+      "touch": false,
+      "viewport": {
+        "height": 390,
+        "width": 844
+      },
+      "drawingTargets": [
+        {
+          "action": "tool:select",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        },
+        {
+          "action": "tool:route",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        },
+        {
+          "action": "tool:block",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        },
+        {
+          "action": "tool:motion",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        },
+        {
+          "action": "tool:pass",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        },
+        {
+          "action": "tool:zone",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        },
+        {
+          "action": "tool:text",
+          "height": 44,
+          "hit": true,
+          "width": 55
+        }
+      ]
+    }
+  ]
+}

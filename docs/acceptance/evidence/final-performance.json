@@ -1,0 +1,51 @@
+{
+  "environment": "Foreground Chromium, 1440x900 iframe, 11 players / 10 routes; native Sky pointer",
+  "idle": {
+    "kind": "idle-frame-sample",
+    "result": {
+      "durationMs": 1600.300000000745,
+      "environment": "Current browser / iframe; not a physical-device benchmark",
+      "frameIntervalMaxMs": 49.90000000002328,
+      "frameIntervalMedianMs": 16.699999999953434,
+      "frameIntervalP95Ms": 16.79999999998836,
+      "frameIntervals": 93,
+      "intervalsOver50Ms": 0,
+      "longTaskMaxMs": 0,
+      "longTaskSupported": true,
+      "longTasks": 0,
+      "players": 11,
+      "routes": 10,
+      "validation": "sampled",
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "visible": true
+    }
+  },
+  "drag": {
+    "kind": "board-pointer-sample",
+    "result": {
+      "durationMs": 149.09999999776483,
+      "environment": "Current browser / iframe; not a physical-device benchmark",
+      "frameIntervalMaxMs": 16.79999999998836,
+      "frameIntervalMedianMs": 16.600000000034925,
+      "frameIntervalP95Ms": 16.79999999998836,
+      "frameIntervals": 8,
+      "intervalsOver50Ms": 0,
+      "longTaskMaxMs": 0,
+      "longTaskSupported": true,
+      "longTasks": 0,
+      "players": 11,
+      "routes": 10,
+      "validation": "insufficient-samples",
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "visible": true
+    }
+  },
+  "baselineDragValidForPercentile": false,
+  "warning": "Single-gesture measurements; not a physical-device benchmark or proof of a percentage improvement"
+}

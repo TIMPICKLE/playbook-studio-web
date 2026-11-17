@@ -104,7 +104,7 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport }) {
     root.addEventListener('keydown', event => {
       // Keep editor shortcuts from operating on the play behind the library.
       event.stopPropagation();
-      if (event.key === 'Tab' && compact()) {
+      if (event.key === 'Tab' && (compact() || preview)) {
         const controls = focusable(), first = controls[0], last = controls.at(-1);
         if (!controls.length) { event.preventDefault(); return; }
         if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) { event.preventDefault(); last.focus(); }
@@ -186,6 +186,11 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport }) {
     bar.hidden = !result;
     if (result) reconcileHTML(bar, `<span class="madden-result-message" tabindex="-1" role="${result.type === 'error' ? 'alert' : 'status'}">${e(result.message)}</span>${result.retryId ? `<button type="button" data-madden="retry-add">${e(copy.retryAdd)}</button>` : ''}${result.canUndo?.() ? ("<button data-madden=\"undo-result\">" + t("extra.undo") + "</button>") : ''}${result.view ? ("<button data-madden=\"view-result\">" + t("extra.view") + "</button>") : ''}`);
     if (result) bar.dataset.type = result.type;
+    // The preview covers the list on every screen size. Hidden list controls
+    // must not remain keyboard or screen-reader destinations behind that view.
+    for (const child of root.querySelector('.madden-panel')?.children || []) {
+      if (!child.matches('.madden-detail-slot,.madden-result-bar')) child.toggleAttribute('inert', !!preview);
+    }
     root.querySelector('.madden-panel')?.setAttribute('aria-busy', String(!!importing));
     root.querySelectorAll('[data-madden="add"]').forEach(button => { button.disabled = !!importing || !canEdit() || imported().has(button.dataset.id); });
     root.querySelectorAll('[data-madden-card]').forEach(card => { card.draggable = !importing && canEdit() && !imported().has(card.dataset.maddenCard); });

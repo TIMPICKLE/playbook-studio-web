@@ -3,16 +3,19 @@ import { isCompactWorkspace } from './workspace-panels.js';
 // Device-local layout preferences. This module never edits the shared playbook.
 export const BOARD_LAYOUT_KEY = 'playbook-studio-board-layout-v1';
 const bound = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)));
-const heightMin = 280, heightMax = 1400;
+const heightMax = 1400;
+const heightMin = () => isCompactWorkspace() ? 200 : 280;
+const dimensionsMode = () => window.innerWidth <= 600 || (isCompactWorkspace() && window.innerHeight <= 500)
+  ? `popover-${window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'}` : 'inline';
 
 export function createBoardLayout({ notify = () => {}, hasDraft = () => false,onChange=()=>{} } = {}) {
   const q = selector => document.querySelector(selector);
   let prefs = {}, expanded = false, zoom = 1, gesture = null, frame = null, pending = null;
-  let smallScreen = window.innerWidth <= 600, dimensionsOpen = !smallScreen;
+  let dimensionsLayout = dimensionsMode(), dimensionsOpen = dimensionsLayout === 'inline';
   try {
     const saved = JSON.parse(localStorage.getItem(BOARD_LAYOUT_KEY));
-    if (Number.isFinite(saved?.height)) prefs.height = bound(saved.height, heightMin, heightMax);
-    if (Number.isFinite(saved?.expandedHeight)) prefs.expandedHeight = bound(saved.expandedHeight, heightMin, heightMax);
+    if (Number.isFinite(saved?.height)) prefs.height = bound(saved.height, heightMin(), heightMax);
+    if (Number.isFinite(saved?.expandedHeight)) prefs.expandedHeight = bound(saved.expandedHeight, heightMin(), heightMax);
     if (Number.isFinite(saved?.inspector)) prefs.inspector = bound(saved.inspector, 220, 480);
   } catch { /* A denied or invalid preference must not block the editor. */ }
 
@@ -20,17 +23,25 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
     const field=q('#field'), top=field ? field.getBoundingClientRect().top+(window.scrollY||0) : 0;
     const dock=q('.stage-dock')?.getBoundingClientRect().height||56;
     const compact=q('.compact-nav')?.getBoundingClientRect().height||0;
+    if (isCompactWorkspace() && window.innerWidth > 600 && window.innerHeight <= 500) {
+      // Short landscape gives the board its own column. Its tools live beside
+      // it, so their stacked height must not be subtracted from the board.
+      const navigation=q('.workspace-nav')?.getBoundingClientRect().bottom || 53;
+      const chrome=navigation+(window.scrollY||0);
+      const mode=q('.editor-mode')?.getBoundingClientRect().height || 44;
+      return bound(window.innerHeight-chrome-compact-mode-16,heightMin(),820);
+    }
     // Size the initial pitch around real controls, rather than making the
     // coach scroll to discover drawing/transport controls below a tall pitch.
     const available=window.innerHeight-top-Math.max(56,dock)-compact-48;
     const preferred=window.innerWidth<=720 ? Math.min((window.innerWidth-28)*.8,window.innerHeight*.7)
       : isCompactWorkspace()?Math.min((window.innerWidth-36)*.8,window.innerHeight*.5):window.innerHeight*.62;
-    return bound(Math.min(preferred,available),heightMin,820);
+    return bound(Math.min(preferred,available),heightMin(),820);
   };
-  const height = () => expanded
-    ? prefs.expandedHeight ?? bound((window.innerWidth - 48) * .8, heightMin, 1100)
-    : prefs.height ?? defaultHeight();
-  const setHeight = value => { prefs[expanded ? 'expandedHeight' : 'height'] = bound(value, heightMin, heightMax); };
+  const height = () => bound(expanded
+    ? prefs.expandedHeight ?? bound((window.innerWidth - 48) * .8, heightMin(), 1100)
+    : prefs.height ?? defaultHeight(),heightMin(),heightMax);
+  const setHeight = value => { prefs[expanded ? 'expandedHeight' : 'height'] = bound(value, heightMin(), heightMax); };
   const maxInspector = () => bound((q('.editor-layout')?.clientWidth || window.innerWidth) * .4, 220, 480);
   const inspector = () => bound(prefs.inspector ?? 320, 220, maxInspector());
   function persist() {
@@ -40,7 +51,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
   const getState = () => ({zoom, expanded, height:height(), inspectorWidth:inspector(), panX:q('.pitch-viewport')?.scrollLeft || 0, panY:q('.pitch-viewport')?.scrollTop || 0});
   function setState(next = {}) {
     finish(true);
-    if (next.reset) { prefs = {}; expanded = false; zoom = 1; dimensionsOpen = !smallScreen; }
+    if (next.reset) { prefs = {}; expanded = false; zoom = 1; dimensionsOpen = dimensionsLayout === 'inline'; }
     if (next.expanded != null) expanded = !!next.expanded;
     if (next.zoom != null) zoom = Math.min(3, Math.max(1, next.zoom));
     if (next.fit) zoom = 1;
@@ -59,7 +70,14 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
   function apply() {
     const workspace = q('.workspace');
     if (!workspace) return;
+    const nextDimensionsLayout = dimensionsMode();
+    if (nextDimensionsLayout !== dimensionsLayout) {
+      dimensionsLayout = nextDimensionsLayout; dimensionsOpen = dimensionsLayout === 'inline';
+    }
     workspace.classList.toggle('board-expanded', expanded);
+    const navigation=q('.workspace-nav')?.getBoundingClientRect();
+    workspace.style.setProperty('--workspace-document-top',`${Math.max(0,(navigation?.bottom||0)+(window.scrollY||0))}px`);
+    workspace.style.setProperty('--compact-nav-height',`${q('.compact-nav')?.getBoundingClientRect().height||0}px`);
     const dimensions = q('.board-advanced'); if (dimensions && dimensions.open !== dimensionsOpen) dimensions.open = dimensionsOpen;
     workspace.style.setProperty('--board-height', `${height()}px`);
     workspace.style.setProperty('--inspector-width', `${inspector()}px`);
@@ -74,11 +92,12 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
     for (const node of document.querySelectorAll('[data-board-action="zoom-in"]')) node.disabled = zoom >= 3;
     for (const node of document.querySelectorAll('[data-board-action="zoom-out"]')) node.disabled = zoom <= 1;
     const slider = q('#board-height');
-    if (slider) slider.value = height();
+    if (slider) { slider.min=heightMin(); slider.value = height(); }
     if (q('#board-size-value')) q('#board-size-value').textContent = `${height()} px`;
     for (const handle of document.querySelectorAll('[data-board-resize]')) {
       const vertical = handle.dataset.boardResize === 'height';
       handle.setAttribute('aria-valuenow', vertical ? height() : inspector());
+      handle.setAttribute('aria-valuemin', vertical ? heightMin() : 220);
       handle.setAttribute('aria-valuemax', vertical ? heightMax : maxInspector());
       handle.setAttribute('aria-valuetext', vertical ? `画板高度 ${height()} 像素` : `属性栏宽度 ${inspector()} 像素`);
     }
@@ -136,11 +155,11 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
   document.addEventListener('lostpointercapture', event => { if (event.pointerId === gesture?.pointerId) finish(true); });
   window.addEventListener('blur', () => finish(true));
   window.addEventListener('resize', () => {
-    const next = window.innerWidth <= 600;
-    if (next !== smallScreen) { smallScreen = next; dimensionsOpen = !next; }
     finish(true); apply();
   });
-  document.addEventListener('toggle', event => { if (event.target.matches?.('.board-advanced')) dimensionsOpen = event.target.open; }, { capture: true });
+  document.addEventListener('toggle', event => {
+    if (event.target === q('.board-advanced')) dimensionsOpen = event.target.open;
+  }, { capture: true });
   document.addEventListener('playbook:effects-changed', apply);
 
   document.addEventListener('input', event => {
@@ -150,6 +169,10 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
   });
   document.addEventListener('change', event => { if (event.target.id === 'board-height') persist(); });
   document.addEventListener('click', event => {
+    const dimensions = q('.board-advanced');
+    if (dimensionsLayout !== 'inline' && dimensions?.open && !dimensions.contains(event.target)) {
+      dimensionsOpen = false; dimensions.open = false;
+    }
     const action = event.target.closest('[data-board-action]')?.dataset.boardAction;
     if (!action) return;
     if (action === 'expand') setState({expanded:!expanded});
@@ -159,6 +182,12 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
     if (action === 'reset') { setState({reset:true,fit:true}); notify(t("controls.restored_default_board_size_and_side_panels")); }
   });
   document.addEventListener('keydown', event => {
+    const dimensions = q('.board-advanced');
+    if (event.key === 'Escape' && dimensionsLayout !== 'inline' && dimensions?.open) {
+      event.preventDefault(); event.stopImmediatePropagation();
+      dimensionsOpen = false; dimensions.open = false; dimensions.querySelector('summary')?.focus({preventScroll:true});
+      return;
+    }
     if (event.key === 'Escape' && (gesture || (expanded && !hasDraft() && !q('.modal')))) {
       event.preventDefault(); event.stopImmediatePropagation();
       if (gesture) finish(true); else { expanded = false; apply(); }
@@ -169,7 +198,7 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
       event.preventDefault(); event.stopImmediatePropagation();
       const step = event.shiftKey ? 80 : 20;
       if (handle.dataset.boardResize === 'height') {
-        setHeight(event.key === 'Home' ? heightMin : event.key === 'End' ? heightMax
+        setHeight(event.key === 'Home' ? heightMin() : event.key === 'End' ? heightMax
           : height() + (['ArrowUp','ArrowLeft'].includes(event.key) ? -step : step));
       } else {
         prefs.inspector = event.key === 'Home' ? maxInspector() : event.key === 'End' ? 220

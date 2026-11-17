@@ -1,0 +1,30 @@
+▶ perspective stage zoom keeps its fitted dimensions and rectangular scroll footprint
+  ✔ 100% through 300% retains width, aspect ratio and fixed 12px padding (1092.841956ms)
+  ✔ return to 100% exactly restores original fit (99.619089ms)
+  ✔ changing modes and reference images does not inherit digital padding or the wrong aspect ratio (178.929392ms)
+  ✔ all four projected field corners remain inside the untransformed stage (0.321386ms)
+✔ perspective stage zoom keeps its fitted dimensions and rectangular scroll footprint (1429.526915ms)
+✔ compact height fits real chrome, short landscape budgets the side controls, and manual sizes survive (51.875731ms)
+✔ advanced size defaults closed in short landscape and closes through rotation, Escape and outside interaction (37.240226ms)
+▶ touch workspace panels, zoom and orientation preserve editable play data
+  ✔ drawers are isolated, focus returns on close, and properties remain editable (92.719945ms)
+  ✔ opening and dismissing a panel never discards unfinished route points (423.00715ms)
+  ✔ zoom and fit preserve SVG, drafts and saved data while clamping to 100–300 percent (269.991589ms)
+  ✔ touch dragging at 2x zoom uses SVG coordinates and empty turf stays scrollable (339.649057ms)
+  ✔ a touch can adjust a route endpoint without being mistaken for empty turf (236.125041ms)
+  ✔ a second finger cannot move, finish or cancel the first finger’s edit (186.182992ms)
+  ✔ a secondary contact during a pan cannot start a new player edit (28.268751ms)
+  ✔ normal capture release commits even when capture loss is dispatched synchronously (216.552821ms)
+  ✔ cancel, capture loss, app blur and rotation roll back unsaved movement and allow another gesture (1498.611468ms)
+  ✔ phone, iPad and desktop transitions update panel access without remounting the pitch (147.713923ms)
+✔ touch workspace panels, zoom and orientation preserve editable play data (3860.782879ms)
+✔ side panel offsets follow the sticky header through wrapping, replacement and mobile layouts (80.726554ms)
+✔ module navigation never intercepts ordinary editor clicks or steals a form caret (1134.121595ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4430.512911
