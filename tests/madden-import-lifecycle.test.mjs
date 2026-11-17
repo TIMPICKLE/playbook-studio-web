@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
-import { STORAGE_KEY, decodeWorkspace, encodeWorkspace, starterWorkspace } from '../web/model.js';
+import { STORAGE_KEY, decodeWorkspace, encodeWorkspace, starterWorkspace, formationPlayers } from '../web/model.js';
 import { getEditableEntry } from '../web/madden-model.js';
 import { TRACE_SHARDS } from '../web/data/madden-trace-index.js';
 import { ONBOARDING_STORAGE_KEY } from '../web/onboarding.js';
@@ -148,5 +148,56 @@ test('a still-open library cannot apply a late import over an actively edited un
     assert.equal(f.q('#madden-root').hidden,false);
   } finally {
     geometry.release();await tick();geometry.restore();
+  }
+});
+
+test('an imported editable offense adds the explicit default 4-3 opponent without changing its source assignments',async t=>{
+  const entry=entryFor('seed'),f=await fixture(t);
+  (await f.openEntry(entry)).click();
+  await until(()=>f.q('.madden-result-bar')?.dataset.type==='success','the editable offense is imported');
+  const imported=f.saved().plays.find(play=>play.diagramSource?.catalogId===entry.id);
+  assert.ok(imported);
+  f.q('[data-madden="close"]').click();
+  f.q('[data-action="add-defense-43"]').click();
+  const combined=f.saved().plays.find(play=>play.id===imported.id),defense=combined.players.filter(player=>player.side==='defense');
+  const shape=players=>players.map(({label,x,y,side})=>({label,x,y,side}));
+  assert.deepEqual(shape(defense),shape(formationPlayers('4–3',11,'defense')));
+  assert.deepEqual(combined.players.filter(player=>player.side==='offense'),imported.players);
+  assert.deepEqual(combined.routes,imported.routes,'adding opponents cannot rewrite the reviewed offensive assignments');
+  f.q('[data-action="undo"]').click();
+  assert.deepEqual(f.saved().plays.find(play=>play.id===imported.id),imported,'one undo removes only the added defense');
+  f.q('[data-action="undo"]').click();
+  assert.deepEqual(f.saved(),decodeWorkspace(f.original),'a second undo removes only the catalog import');
+});
+
+test('cross-team preview import and undo close every overlay through either normal close context',async t=>{
+  const f=await fixture(t);
+  for(const context of ['list','preview']) {
+    const opener=f.q('[data-action="madden-library"]');opener.focus();opener.click();
+    await until(()=>f.q('#madden-search'),'the catalog has loaded');
+    f.q('[data-madden="scope"][data-scope="all"]').click();
+    const search=f.q('#madden-search');search.value='mesh';search.dispatchEvent(new f.win.Event('input',{bubbles:true}));
+    const launcher=f.q('.madden-card [data-madden="preview"]');assert.ok(launcher);
+    launcher.click();assert.ok(f.q('.madden-detail'));
+    f.q('.madden-detail [data-madden="add"]').click();
+    await until(()=>f.q('.madden-result-bar')?.dataset.type==='success','preview import finishes with success');
+    assert.equal(f.saved().plays.length,decodeWorkspace(f.original).plays.length+1);
+    f.q('[data-madden="undo-result"]').click();
+    assert.deepEqual(f.saved(),decodeWorkspace(f.original),'undo preserves the complete original playbook');
+    assert.ok(f.q('.madden-detail'),'undo feedback does not silently dismiss the source preview');
+    if(context==='list') {
+      f.q('.madden-detail [data-madden="back"]').click();
+      assert.equal(f.q('.madden-detail'),null);
+      assert.equal(f.q('.madden-header').hasAttribute('inert'),false,'list header is interactive only in its normal list context');
+    } else assert.equal(f.q('.madden-header').hasAttribute('inert'),true,'preview leaves the covered header intentionally inert');
+    f.q(context==='list'?'.madden-header [data-madden="close"]':'.madden-detail [data-madden="close"]').click();
+    assert.equal(f.q('#madden-root').hidden,true);
+    assert.equal(f.q('#madden-root').childElementCount,0,'closing removes the entire overlay subtree, including inert areas and preview');
+    assert.equal(f.q('.madden-panel'),null);assert.equal(f.q('.madden-detail'),null);
+    assert.equal(f.win.document.querySelectorAll('[data-madden="close"]').length,0);
+    assert.equal(f.win.document.body.classList.contains('madden-open'),false);
+    assert.equal(f.win.document.body.classList.contains('madden-dragging'),false);
+    assert.equal(f.q('#app').hidden,false);assert.ok(f.q('#field .pitch-svg'));
+    assert.equal(f.win.document.activeElement?.dataset.action,'madden-library','focus returns to a current editor library launcher');
   }
 });

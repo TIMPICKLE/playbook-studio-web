@@ -1,0 +1,74 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { Window } from 'happy-dom';
+import { starterWorkspace, encodeWorkspace, decodeWorkspace, STORAGE_KEY } from '../web/model.js';
+
+test('a depth-chart starter transfer persists and applies atomically to the editor with undo and redo', async t => {
+  const win = new Window({ url: 'http://localhost:3000/local.html#editor', width: 1440, height: 1000 });
+  win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
+  const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'history', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame'];
+  const previous = Object.fromEntries(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
+  for (const name of names) Object.defineProperty(globalThis, name, { configurable: true, value: ['requestAnimationFrame', 'cancelAnimationFrame'].includes(name) ? win[name].bind(win) : win[name] });
+  t.after(async () => {
+    win.dispatchEvent(new win.Event('pagehide')); await win.happyDOM.abort();
+    for (const name of names) { if (previous[name]) Object.defineProperty(globalThis, name, previous[name]); else delete globalThis[name]; }
+  });
+  const seed = starterWorkspace({ demoDepth: true });
+  win.localStorage.setItem(STORAGE_KEY, encodeWorkspace(seed));
+  win.localStorage.setItem('playbook-studio:onboarding:v1', JSON.stringify({ dismissed: true, completed: [] }));
+  const q = selector => { const node = win.document.querySelector(selector); assert.ok(node, selector); return node; };
+  const click = selector => q(selector).click();
+  const choose = (selector, value) => { q(selector).value = value; q(selector).dispatchEvent(new win.Event('change', { bubbles: true })); };
+  const data = () => decodeWorkspace(win.localStorage.getItem(STORAGE_KEY));
+  const play = () => data().plays[0];
+  const geometry = diagram => ({ ...diagram, players: diagram.players.map(({ rosterId, name, ...marker }) => marker) });
+  await import(`../web/app.js?roster-editor-acceptance=${Date.now()}`);
+  choose('#personnel-group', 'spread'); click('[data-action=apply-personnel]');
+  const assigned = play(), qb = assigned.players.find(player => player.label === 'QB');
+  const originalX = assigned.players.find(player => player.label === 'X').rosterId;
+  assert.ok(qb.rosterId);
+  click('.workspace-nav button[data-workspace-mode=roster]');
+  const transfer = new win.DataTransfer();
+  const dispatchDrag = (selector, type) => { const event = new win.Event(type, { bubbles: true, cancelable: true }); Object.defineProperty(event, 'dataTransfer', { value: transfer }); q(selector).dispatchEvent(event); };
+  dispatchDrag(`.df-node[data-depth-source="${qb.rosterId}"]`, 'dragstart');
+  const group = data().depthChart.groups.find(item => item.id === 'spread');
+  const target = group.slots.find(slot => slot.label === 'X').id;
+  dispatchDrag(`.df-node[data-depth-drop-slot="${target}"]`, 'dragover');
+  dispatchDrag(`.df-node[data-depth-drop-slot="${target}"]`, 'drop');
+  const newDepth = data().depthChart;
+  assert.equal(newDepth.groups.find(item => item.id === 'spread').slots.find(item => item.label === 'QB').playerIds[0], null);
+  assert.equal(play().players.find(player => player.label === 'QB').rosterId, qb.rosterId, 'changing the lineup does not silently change an already drawn play');
+  click('.workspace-nav button[data-workspace-mode=editor]');
+  choose('#personnel-group', 'spread');
+  assert.match(q('#personnel-preview').textContent, /清空 1/);
+  click('[data-action=apply-personnel]');
+  assert.equal(play().players.find(player => player.label === 'QB').rosterId, undefined);
+  assert.equal(play().players.find(player => player.label === 'X').rosterId, qb.rosterId);
+  assert.deepEqual(geometry(play()), geometry(assigned));
+  click('[data-action=undo]');
+  assert.equal(play().players.find(player => player.label === 'QB').rosterId, qb.rosterId);
+  assert.equal(play().players.find(player => player.label === 'X').rosterId, originalX);
+  assert.deepEqual(data().depthChart, newDepth, 'diagram undo cannot revert the newly saved roster lineup');
+  click('[data-action=redo]');
+  assert.equal(play().players.find(player => player.label === 'QB').rosterId, undefined);
+  assert.equal(play().players.find(player => player.label === 'X').rosterId, qb.rosterId);
+  assert.deepEqual(decodeWorkspace(encodeWorkspace(data())), data(), 'persisted data remains valid through a complete encode/decode reload');
+  const beforeClear = play();
+  click('.workspace-nav button[data-workspace-mode=roster]');
+  click('[data-mode=table]');
+  for (const slot of data().depthChart.groups.find(item => item.id === 'spread').slots) {
+    click(`[data-depth-chart=edit][data-slot="${slot.id}"]`);
+    for (let rank = 0; rank < Math.max(1, slot.playerIds.length); rank++) choose(`.depth-dialog [data-rank="${rank}"]`, '');
+    click('.depth-dialog [type=submit]');
+  }
+  click('.workspace-nav button[data-workspace-mode=editor]');
+  assert.ok([...q('#personnel-group').options].some(option => option.value === 'spread'), 'an explicitly empty group remains selectable for clearing old bindings');
+  choose('#personnel-group', 'spread');
+  assert.match(q('#personnel-preview').textContent, /清空/);
+  click('[data-action=apply-personnel]');
+  assert.ok(play().players.every(player => !player.rosterId));
+  assert.deepEqual(geometry(play()), geometry(beforeClear));
+  click('[data-action=undo]');
+  assert.deepEqual(play(), beforeClear, 'one undo restores a complete explicit clearing operation');
+});

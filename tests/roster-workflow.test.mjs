@@ -11,10 +11,10 @@ function rosterHost(t) {
   t.after(() => win.happyDOM.abort());
   const root = win.document.createElement('div'); root.hidden = true; win.document.body.append(root);
   const dataA = starterWorkspace(), dataB = starterWorkspace();
-  const state = { data: dataA, book: 'a', editable: true, writes: 0, scrolls: [] };
+  const state = { data: dataA, book: 'a', editable: true, writes: 0, scrolls: [], fail: false };
   win.scrollTo = options => state.scrolls.push(options.top);
   const view = createRosterView({ root, getData: () => state.data, getWorkspaceId: () => state.book,
-    canEdit: () => state.editable, commit(mutate) { mutate(state.data); state.writes++; } });
+    canEdit: () => state.editable, commit(mutate) { if (state.fail) return false; mutate(state.data); state.writes++; } });
   const q = selector => root.querySelector(selector);
   const click = selector => { assert.ok(q(selector), selector); q(selector).click(); };
   const change = (selector, value) => { q(selector).value = value; q(selector).dispatchEvent(new win.Event('change', { bubbles: true })); };
@@ -95,6 +95,25 @@ test('player removal uses the existing native dialog and cancelling confirmation
   assert.equal(f.state.writes, 0);
 });
 
+test('failed player saves preserve the form, retry once and suppress a second submit after success', t => {
+  const f = rosterHost(t), before = structuredClone(f.state.data.roster);
+  f.click('[data-roster-tab=directory]'); f.click('[data-roster=add]');
+  f.q('.roster-dialog [name=name]').value = 'Retry player';
+  f.q('.roster-dialog [name=number]').value = '87';
+  f.state.fail = true;
+  f.click('.roster-page > .roster-dialog [type=submit]');
+  assert.deepEqual(f.state.data.roster, before);
+  assert.equal(f.view.isEditing(), true);
+  assert.equal(f.q('.roster-dialog [name=name]').value, 'Retry player');
+  assert.match(f.q('.roster-dialog [role=alert]').textContent, /保存/);
+  f.state.fail = false;
+  f.click('.roster-page > .roster-dialog [type=submit]');
+  assert.equal(f.state.data.roster.filter(player => player.name === 'Retry player').length, 1);
+  f.q('.roster-page > .roster-dialog form').dispatchEvent(new f.win.Event('submit', { bubbles: true, cancelable: true }));
+  assert.equal(f.state.writes, 1);
+  assert.equal(f.win.document.activeElement.dataset.id, f.state.data.roster.at(-1).id);
+});
+
 function depthHost(t) {
   const win = new Window(); t.after(() => win.happyDOM.abort());
   const root = win.document.body;
@@ -170,4 +189,20 @@ test('position removal confirmation preserves ranks on cancel and rechecks remot
   f.click('[data-depth-chart=confirm-remove]');
   assert.equal(f.state.writes, 0); assert.equal(f.q('dialog').open, true);
   assert.match(f.q('[role=alert]').textContent, /变更/);
+});
+
+test('failed position saves preserve chosen ranks and a later retry commits the exact same draft', t => {
+  const f = depthHost(t), before = [...f.slot.playerIds];
+  f.click('[data-depth-chart=edit]');
+  f.q('[data-rank="1"]').value = 'p3';
+  f.q('[data-rank="1"]').dispatchEvent(new f.win.Event('change', { bubbles: true }));
+  f.state.fail = true;
+  f.click('[type=submit]');
+  assert.deepEqual(f.slot.playerIds, before);
+  assert.equal(f.q('dialog').open, true);
+  assert.equal(f.q('[data-rank="1"]').value, 'p3');
+  f.state.fail = false;
+  f.click('[type=submit]');
+  assert.deepEqual(f.slot.playerIds, ['p0', 'p3', 'p2']);
+  assert.equal(f.state.writes, 1);
 });

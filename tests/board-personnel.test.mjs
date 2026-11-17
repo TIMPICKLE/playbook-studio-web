@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
-import { linkRosterPlayer, personnelMatches } from '../web/board-personnel.js';
+import { linkRosterPlayer, personnelMatches, personnelAssignments } from '../web/board-personnel.js';
 import { decodeWorkspace, encodeWorkspace, starterWorkspace, STORAGE_KEY } from '../web/model.js';
 
 test('personnel application skips ambiguous/opposing roles, backups and occupied unmatched players; swaps are safe', () => {
@@ -26,6 +26,32 @@ test('personnel application skips ambiguous/opposing roles, backups and occupied
   assert.equal(personnelMatches(special, returnGroup, roster)[0].marker.id, 'returner');
   special.players.push(player('X', 'kicker-unit'));
   assert.equal(personnelMatches(special, returnGroup, roster)[0].marker.id, 'kicker-unit');
+});
+
+test('a complete personnel plan releases an explicitly vacant role before a starter moves to another role', () => {
+  const roster = [{ id: 'a', name: 'Alex' }, { id: 'b', name: 'Blake' }];
+  const qb = { id: 'qb', label: 'QB', side: 'offense', rosterId: 'a', name: 'Alex' };
+  const x = { id: 'x', label: 'X', side: 'offense', rosterId: 'b', name: 'Blake' };
+  const play = { book: 'offense', players: [qb, x] };
+  const group = { unit: 'offense', slots: [{ label: 'QB', playerIds: [null, 'b'] }, { label: 'X', playerIds: ['a'] }] };
+  assert.deepEqual(personnelMatches(play, group, roster), [], 'legacy partial matcher cannot make a cross-role release');
+  const assignments = personnelAssignments(play, group, roster);
+  assert.equal(assignments.length, 2);
+  assert.equal(assignments[0].player, null);
+  for (const { marker, player } of assignments) linkRosterPlayer(marker, player);
+  assert.equal(qb.rosterId, undefined); assert.equal(qb.name, '');
+  assert.equal(x.rosterId, 'a'); assert.equal(x.name, 'Alex');
+});
+
+test('unmapped, opposing, malformed and ambiguous empty roles never release a board player', () => {
+  const roster = [{ id: 'a', name: 'Alex' }];
+  const player = (id, label, side = 'offense') => ({ id, label, side, rosterId: 'a' });
+  const plan = (players, slots) => personnelAssignments({ book: 'offense', players }, { unit: 'offense', slots }, roster);
+  assert.deepEqual(plan([player('qb', 'QB')], [{ label: 'X', playerIds: [] }]), []);
+  assert.deepEqual(plan([player('one', 'QB'), player('two', 'QB')], [{ label: 'QB', playerIds: [] }]), []);
+  assert.deepEqual(plan([player('qb', 'QB')], [{ label: 'QB', playerIds: [] }, { label: 'qb', playerIds: [null] }]), []);
+  assert.deepEqual(plan([player('qb', 'QB', 'defense')], [{ label: 'QB', playerIds: [] }]), []);
+  assert.deepEqual(plan([player('qb', 'QB')], [{ label: 'QB', playerIds: ['deleted-roster-id'] }]), []);
 });
 
 test('applying a group is one undoable edit; roster links follow renames and preserve the last name on removal', async t => {

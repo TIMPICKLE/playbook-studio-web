@@ -1,5 +1,7 @@
 # Playbook Studio 全局 UX 改造报告
 
+> 本文记录 PR #50 阶段交付。用户随后明确排除 AI 和 GitHub Pages，并要求其余部分严格验收；最新复现、补修、822 项回归、真实浏览器证据和未放行项见[非 AI 严格验收记录](acceptance/README.md)。不要将本文阶段结果视为全量验收通过。
+
 本轮围绕战术编辑、AI 提案和跨模块操作的连续性实施改造。审查与实现基于 `feature/ux-workflow-redesign`，开发基线为 `36c9be7`（包含 PR #49 的连续 AI 草稿基础）。本报告记录交付行为、代码边界和验证证据；最终测试数量、浏览器检查及发布结果统一记录在文末。
 
 先阅读 [统一交互与设计规范](UX_DESIGN_SYSTEM.md)。使用方法见 [AI 功能指南](AI_GUIDE.md)、[使用指南](USER_GUIDE.md)；已有按需加载和原生弹窗优化见 [Web 平台优化](WEB_PLATFORM_OPTIMIZATION.md)。

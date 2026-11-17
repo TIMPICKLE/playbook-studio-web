@@ -1,0 +1,50 @@
+✔ Escape during a player drag rolls back the live preview and a late release never commits it (1059.965754ms)
+▶ Escape cancels group, waypoint, new-zone and annotation gestures before late pointer events
+  ✔ group (559.857604ms)
+  ✔ waypoint (369.269987ms)
+  ✔ new-zone (456.051466ms)
+  ✔ annotation (375.837723ms)
+✔ Escape cancels group, waypoint, new-zone and annotation gestures before late pointer events (1763.003122ms)
+✔ keyboard undo during a live drag cancels that preview before restoring the last committed edit (531.061212ms)
+✔ draft Escape, context-menu keyboard access and JSON restore preserve the current play (383.139392ms)
+✔ a touch-selected overlapping waypoint can be dragged after explicit candidate confirmation (286.856953ms)
+▶ an explicit overlapping waypoint choice expires after cancellation, another location or a screen change
+  ✔ Escape (249.035245ms)
+  ✔ elsewhere (220.966253ms)
+  ✔ play (300.916181ms)
+  ✔ roster (331.679143ms)
+✔ an explicit overlapping waypoint choice expires after cancellation, another location or a screen change (1103.941967ms)
+✔ an explicitly chosen player wins over a later-painted overlapping marker for exactly the next gesture (267.898927ms)
+▶ switching play or leaving the editor cancels a live drag before late release and preserves the next edit
+  ✔ play (490.376677ms)
+  ✔ roster (627.400518ms)
+✔ switching play or leaving the editor cancels a live drag before late release and preserves the next edit (1118.736886ms)
+✔ recovery read-only mode rejects injected movement, drawing and deletion without overwriting original bytes (191.226261ms)
+▶ a new editor page restores saved metadata and geometry rather than reverting to the starter example
+  ✔ write through the editor (258.657729ms)
+  ✔ reload into a fresh page (117.460895ms)
+✔ a new editor page restores saved metadata and geometry rather than reverting to the starter example (376.863842ms)
+✔ a successful local save retry resolves the failure feedback and retains the in-memory edits (135.16856ms)
+✔ local storage failure prevents silent page exit until the edited document is saved successfully (142.207326ms)
+▶ committed player and route fields are clean in each palette while uncommitted edits protect page exit
+  ✔ dark #ffdc42 (195.87143ms)
+  ✔ dark #ABCDEF (219.819315ms)
+  ✔ light #ffdc42 (221.381216ms)
+  ✔ light #ABCDEF (216.688581ms)
+✔ committed player and route fields are clean in each palette while uncommitted edits protect page exit (855.253639ms)
+✔ a route draft protects page exit until it is cancelled, then a clean editor can leave normally (273.573888ms)
+✔ a committed new zone refreshes its SVG and selected properties and remains one reversible edit (333.93062ms)
+✔ committing a motion waypoint redraws the reanchored follow-up route and the current handle (317.253208ms)
+▶ metadata edits and subsequent gesture commits retain the correct 11-player or flag league badge
+  ✔ 11 per side (399.983569ms)
+  ✔ 5 per side (312.369223ms)
+✔ metadata edits and subsequent gesture commits retain the correct 11-player or flag league badge (713.031248ms)
+✔ large playbooks keep live editor nodes through search and edits; switching plays scopes the next drag correctly (14563.280437ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15244.424701

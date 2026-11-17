@@ -1,0 +1,86 @@
+{
+  "bodyWidth": 365,
+  "clientWidth": 365,
+  "compactNavigation": {
+    "bottom": 667,
+    "height": 66,
+    "right": 365,
+    "width": 365,
+    "x": 0,
+    "y": 601
+  },
+  "documentWidth": 365,
+  "field": {
+    "bottom": 487,
+    "height": 200,
+    "right": 353,
+    "width": 341,
+    "x": 12,
+    "y": 287
+  },
+  "focus": "\n  跳转到战术编辑区\n  ← WorkspaceLocal offline preview · Changes stay in this browser←Pl",
+  "kind": "layout",
+  "mode": "editor",
+  "navigation": {
+    "bottom": 57,
+    "height": 57,
+    "right": 365,
+    "width": 365,
+    "x": 0,
+    "y": 0
+  },
+  "openDialog": null,
+  "reducedMotion": false,
+  "requested": "375,667",
+  "timestamp": "2026-11-16T16:30:08.514Z",
+  "tools": [
+    {
+      "action": "tool:select",
+      "height": 44,
+      "hit": true,
+      "width": 48.703125
+    },
+    {
+      "action": "tool:route",
+      "height": 44,
+      "hit": true,
+      "width": 48.71875
+    },
+    {
+      "action": "tool:block",
+      "height": 44,
+      "hit": true,
+      "width": 48.71875
+    },
+    {
+      "action": "tool:motion",
+      "height": 44,
+      "hit": true,
+      "width": 48.703125
+    },
+    {
+      "action": "tool:pass",
+      "height": 44,
+      "hit": true,
+      "width": 48.71875
+    },
+    {
+      "action": "tool:zone",
+      "height": 44,
+      "hit": true,
+      "width": 48.71875
+    },
+    {
+      "action": "tool:text",
+      "height": 44,
+      "hit": true,
+      "width": 48.71875
+    }
+  ],
+  "touch": false,
+  "viewport": {
+    "height": 667,
+    "width": 375
+  },
+  "lang": "en"
+}

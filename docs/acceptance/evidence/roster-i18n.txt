@@ -1,0 +1,18 @@
+✔ editor language dictionaries have matching keys (4.18695ms)
+✔ cloud. language dictionaries have matching keys (2.075959ms)
+✔ roster. language dictionaries have matching keys (0.938078ms)
+✔ depth-chart. language dictionaries have matching keys (0.921463ms)
+✔ depth-formation. language dictionaries have matching keys (0.878628ms)
+✔ personnel-groups. language dictionaries have matching keys (1.444073ms)
+✔ madden-ai. language dictionaries have matching keys (2.146004ms)
+✔ support. language dictionaries have matching keys (0.916095ms)
+✔ landing. language dictionaries have matching keys (1.176198ms)
+✔ the player management tab preserves the DEPTH CHART name in every language (0.578895ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111.240756

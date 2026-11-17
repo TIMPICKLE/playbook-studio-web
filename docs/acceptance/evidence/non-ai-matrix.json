@@ -1,0 +1,113 @@
+{
+  "generatedAt": "2026-11-16T16:02:42.522Z",
+  "scope": "Non-AI editor, roster, catalog and responsive acceptance",
+  "excluded": [
+    "All AI functionality",
+    "GitHub Pages"
+  ],
+  "realDeviceSafari": false,
+  "browser": "Isolated Chromium",
+  "input": "Browser mouse / emulated touch; not physical touch hardware",
+  "seed": {
+    "plays": 8,
+    "players": 11,
+    "roster": 12
+  },
+  "cases": [
+    {
+      "id": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "laptop",
+      "width": 1280,
+      "height": 720,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "ipad-landscape",
+      "width": 1024,
+      "height": 768,
+      "touch": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "ipad-portrait",
+      "width": 768,
+      "height": 1024,
+      "touch": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "mobile",
+      "width": 390,
+      "height": 844,
+      "touch": true,
+      "mobile": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "small-mobile",
+      "width": 375,
+      "height": 667,
+      "touch": true,
+      "mobile": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "mobile-landscape",
+      "width": 844,
+      "height": 390,
+      "touch": true,
+      "mobile": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    },
+    {
+      "id": "desktop-en-reduced",
+      "width": 1440,
+      "height": 900,
+      "locale": "en",
+      "reduced": true,
+      "status": "not-run",
+      "checks": [],
+      "errors": [],
+      "measurements": null
+    }
+  ],
+  "screenshots": [],
+  "status": "blocked",
+  "infrastructure": {
+    "phase": "previously-observed-browser-launch",
+    "reason": "Root independently attempted the normal isolated Chromium launch in this acceptance round; Chromium singleton socket failed with Operation not permitted. This script records the observed infrastructure blocker without retrying or bypassing it."
+  },
+  "summary": {
+    "viewports": 8,
+    "passed": 0,
+    "failed": 0,
+    "blockedViewports": 8,
+    "pageErrors": 0
+  }
+}

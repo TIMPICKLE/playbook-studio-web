@@ -1,0 +1,50 @@
+{
+  "source": "PR50 2239aec",
+  "environment": "Foreground Chromium, 1440x900 iframe, native Sky pointer, 11 players / 10 routes",
+  "idle": {
+    "kind": "idle-frame-sample",
+    "result": {
+      "durationMs": 1600.7000000029802,
+      "environment": "Current browser / iframe; not a physical-device benchmark",
+      "frameIntervalMaxMs": 49.900000000000546,
+      "frameIntervalMedianMs": 16.69999999999891,
+      "frameIntervalP95Ms": 16.700000000000728,
+      "frameIntervals": 93,
+      "intervalsOver50Ms": 0,
+      "longTaskMaxMs": 0,
+      "longTaskSupported": true,
+      "longTasks": 0,
+      "players": 11,
+      "routes": 10,
+      "validation": "sampled",
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "visible": true
+    }
+  },
+  "drag": {
+    "kind": "board-pointer-sample",
+    "result": {
+      "durationMs": 314.80000000074506,
+      "environment": "Current browser / iframe; not a physical-device benchmark",
+      "frameIntervalMaxMs": 149.90000000000146,
+      "frameIntervalMedianMs": 16.69999999999709,
+      "frameIntervalP95Ms": 149.90000000000146,
+      "frameIntervals": 7,
+      "intervalsOver50Ms": 1,
+      "longTaskMaxMs": 166,
+      "longTaskSupported": true,
+      "longTasks": 1,
+      "players": 11,
+      "routes": 10,
+      "validation": "insufficient-samples",
+      "viewport": {
+        "height": 900,
+        "width": 1440
+      },
+      "visible": true
+    }
+  }
+}

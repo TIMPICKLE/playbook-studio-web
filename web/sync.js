@@ -47,7 +47,7 @@ export class CloudSync {
     Object.assign(this, { request, onData, onStatus, onConflict, onAccessLost, storage, userId, isBusy, delay });
     this.current = null; this.base = null; this.pending = null; this.saving = false; this.conflict = null; this.conflictReason = ''; this.timer = null; this.generation = 0;
     this.storageError = null; this.draftSaved = false; this.viewError = null;
-    this.savePromise = null; this.refreshPromise = null;
+    this.savePromise = null; this.refreshPromise = null; this.loadEpoch = 0;
   }
   get canEdit() { return !this.viewError && ['owner', 'editor'].includes(this.current?.role); }
   get dirty() { return !!this.pending || this.saving || !!this.conflict; }
@@ -92,7 +92,7 @@ export class CloudSync {
     }
     clearTimeout(this.timer); this.current = { ...record, data }; this.base = clone(data); this.pending = pending;
     this.conflictReason = conflictReason; this.conflict = conflictReason ? this.current : null;
-    this.storageError = storageError; this.draftSaved = draftSaved; this.viewError = null; this.generation++;
+    this.storageError = storageError; this.draftSaved = draftSaved; this.viewError = null; this.generation++; this.loadEpoch++;
     if (draft?.data && editable) this.persist();
     if (!this.showData(this.pending || this.base)) return false;
     if (this.conflict) { this.status('本机草稿与云端冲突'); this.onConflict(this.conflict, clone(this.pending), this.conflictReason); }
@@ -118,16 +118,16 @@ export class CloudSync {
     if (equal(this.pending, this.base)) { this.pending = null; this.persist(); this.status('云端已同步'); return; }
     if (this.storageError) this.persist();
     this.saving = true; this.status('正在同步');
-    const documentId = this.current.id, revision = this.current.revision, sent = clone(this.pending), generation = this.generation; let retry = true;
+    const documentId = this.current.id, revision = this.current.revision, sent = clone(this.pending), generation = this.generation, loadEpoch = this.loadEpoch; let retry = true;
     try {
       const response = await this.request(`/api/workspaces/${documentId}`, { method: 'PUT', body: { revision, data: sent } });
-      if (this.current?.id !== documentId) return;
+      if (this.current?.id !== documentId || this.loadEpoch !== loadEpoch) return;
       if (!Number.isSafeInteger(response?.revision) || response.revision !== revision + 1) throw Object.assign(new Error('云端未返回有效的保存确认，请重试同步'), { code: 'invalid_response' });
       this.current.revision = response.revision; this.base = sent;
       if (this.generation === generation) this.pending = null;
       this.persist(); this.status(this.pending ? '等待同步' : '云端已同步');
     } catch (error) {
-      if (this.current?.id !== documentId) return;
+      if (this.current?.id !== documentId || this.loadEpoch !== loadEpoch) return;
       if (error.code === 'invalid_response' || error.status >= 400 && error.status < 500 && error.status !== 409) retry = false;
       if (error.status === 409 && error.payload?.latest) {
         let latest;
@@ -180,11 +180,11 @@ export class CloudSync {
   }
   async poll() {
     if (!this.current || this.current.role === 'removed' || this.dirty || this.isBusy() || this.refreshPromise) return;
-    const documentId = this.current.id;
+    const documentId = this.current.id, loadEpoch = this.loadEpoch;
     let record;
     try { record = await this.request(`/api/workspaces/${documentId}?after=${this.current.revision}`); }
-    catch (error) { if ([401, 403, 404].includes(error.status)) this.onAccessLost?.(error); else this.status(error.status || error.code ? `云端更新失败：${error.message}` : '网络离线 · 等待重新连接'); return; }
-    if (this.current?.id !== documentId) return;
+    catch (error) { if (this.current?.id !== documentId || this.loadEpoch !== loadEpoch) return; if ([401, 403, 404].includes(error.status)) this.onAccessLost?.(error); else this.status(error.status || error.code ? `云端更新失败：${error.message}` : '网络离线 · 等待重新连接'); return; }
+    if (this.current?.id !== documentId || this.loadEpoch !== loadEpoch) return;
     try {
       if (record.unchanged) {
         if (this.current.role !== record.role) {

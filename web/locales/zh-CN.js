@@ -26,6 +26,8 @@ export default {
   "editor.chart_skipped": "请检查位置标签，以及球员是否已占用其他位置。",
   "editor.chart_current": "这些首发已经在场上。",
   "editor.chart_applied": "已应用「{name}」的 {count} 名首发，可撤销。",
+  "editor.chart_clear_bindings": "将清空 {count} 个位置绑定。",
+  "editor.chart_applied_changes": "已应用「{name}」的 {assigned} 名首发，并清空 {cleared} 个位置绑定，可撤销。",
   "editor.chart_import_limit": "导入后人员组将超出上限。",
   "editor.close_side_panel": "关闭侧面板",
   "editor.play_list": "战术列表",

@@ -88,6 +88,48 @@ test('edits made during an in-flight request remain pending and save against the
   assert.equal(sync.pending.plays[0].title, 'Second'); assert.equal(sync.base.plays[0].title, 'First');
   await sync.flush(); assert.equal(sync.dirty, false); assert.equal(sync.current.revision, 3);
 });
+
+test('a late save acknowledgement cannot roll back a newer reload of the same playbook', async t => {
+  let finish;
+  const {sync,data}=harness(t,async()=>new Promise(resolve=>{finish=resolve;}));
+  const local=clone(data);local.plays[0].notes='Local note still pending';sync.schedule(local);
+  const saving=sync.flush();
+  const remote=clone(data);remote.plays[1].title='Newer team update';
+  sync.load({...sync.current,revision:4,data:remote});
+  finish({revision:2});await saving;
+  assert.equal(sync.current.revision,4,'an old acknowledgement cannot regress the loaded revision');
+  assert.equal(sync.base.plays[1].title,'Newer team update','the newer cloud baseline remains authoritative');
+  assert.equal(sync.pending.plays[0].notes,'Local note still pending');
+  assert.equal(sync.pending.plays[1].title,'Newer team update');
+});
+
+test('a late conflict response cannot replace a newer reload of the same playbook', async t => {
+  let reject;
+  const {sync,data,events}=harness(t,async()=>new Promise((_resolve,fail)=>{reject=fail;}));
+  const local=clone(data);local.plays[0].notes='Retain this note';sync.schedule(local);
+  const saving=sync.flush(),newer=clone(data);newer.plays[1].title='Latest remote title';
+  sync.load({...sync.current,revision:5,data:newer});
+  const outdated=clone(data);outdated.plays[1].title='Old remote title';
+  reject(Object.assign(new Error('stale conflict'),{status:409,payload:{latest:{...sync.current,revision:2,data:outdated}}}));
+  await saving;
+  assert.equal(sync.current.revision,5);assert.equal(sync.base.plays[1].title,'Latest remote title');
+  assert.equal(sync.pending.plays[0].notes,'Retain this note');assert.equal(events.conflicts.length,0);
+});
+
+test('an older poll cannot replace data or permissions after a same-book reload', async t => {
+  for(const kind of ['full response','unchanged role response','denied request'])await t.test(kind,async t=>{
+    let finish,reject;
+    const {sync,data,events}=harness(t,async()=>new Promise((resolve,fail)=>{finish=resolve;reject=fail;}));
+    const polling=sync.poll(),newer=clone(data);newer.plays[0].title='Loaded newer version';
+    sync.load({...sync.current,revision:7,role:'editor',data:newer});
+    if(kind==='denied request')reject(Object.assign(new Error('Old access denial'),{status:403}));
+    else finish(kind==='unchanged role response'?{unchanged:true,revision:1,role:'viewer'}:{...sync.current,revision:2,role:'viewer',data});
+    await polling;
+    assert.equal(sync.current.revision,7);assert.equal(sync.current.role,'editor');
+    assert.equal(sync.base.plays[0].title,'Loaded newer version');
+    assert.equal(events.access.length,0,'an old access result cannot revoke a new loaded session');
+  });
+});
 test('stale saves merge disjoint cloud changes then retry; conflicting changes stay recoverable until resolution', async t => {
   let remote, first = true;
   const { sync, data, events } = harness(t, async () => { if (first) { first = false; throw Object.assign(new Error('Conflict'), { status: 409, payload: { latest: remote } }); } return { revision: 3 }; });

@@ -105,6 +105,44 @@ export function clearDepthPlayer(chart, playerId) {
   }
 }
 
+// Plan both pointer drops and button rank moves without mutating the chart.
+// A moved starter leaves a vacancy; promoting a backup must stay explicit.
+export function planDepthPlayerMove(group, rosterIds, source, target) {
+  const destination = group?.slots.find(slot => slot.id === target?.slotId);
+  const origin = source?.slotId ? group?.slots.find(slot => slot.id === source.slotId) : null;
+  if (!destination || !source?.playerId || !rosterIds.has(source.playerId)
+      || !Number.isInteger(target.index) || target.index < 0 || target.index > Math.max(1, destination.playerIds.length)
+      || (source.slotId && (!origin || !Number.isInteger(source.index) || origin.playerIds[source.index] !== source.playerId))) return { error: 'changedRetry' };
+  const before = new Map(group.slots.map(slot => [slot.id, [...slot.playerIds]]));
+  const next = new Map([...before].map(([key, ids]) => [key, [...ids]]));
+  let fromIndex = origin?.id === destination.id ? source.index : -1;
+  // Choosing a roster entry already present in this position means reordering it.
+  if (!origin) fromIndex = destination.playerIds.indexOf(source.playerId);
+  if (origin && origin.id !== destination.id && destination.playerIds.includes(source.playerId)) return { error: 'duplicate' };
+  if (fromIndex >= 0) next.get(destination.id).splice(fromIndex, 1);
+  else if (origin) {
+    if (source.index === 0) {
+      const ids = next.get(origin.id);
+      ids[0] = null;
+      if (ids.length === 1) ids.length = 0;
+    } else next.get(origin.id).splice(source.index, 1);
+  }
+  const ids = next.get(destination.id);
+  if (target.index === 1 && ids.length === 0) ids.push(null);
+  if (ids.length >= DEPTH_LIMITS.ranks) return { error: 'rankLimit' };
+  ids.splice(Math.min(target.index, ids.length), 0, source.playerId);
+  const starters = new Map();
+  for (const slot of group.slots) {
+    const starter = next.get(slot.id)[0];
+    if (!starter) continue;
+    if (starters.has(starter)) return { error: 'starterTaken', label: starters.get(starter) };
+    starters.set(starter, slot.label);
+  }
+  return { playerId: source.playerId, slotId: destination.id,
+    changes: group.slots.filter(slot => JSON.stringify(before.get(slot.id)) !== JSON.stringify(next.get(slot.id)))
+      .map(slot => ({ id: slot.id, before: before.get(slot.id), after: next.get(slot.id) })) };
+}
+
 function isUnusedTemplate(group) {
   const template = DEPTH_TEMPLATES.find(t => t.id === group.id);
   return template && group.templateId === template.id && group.unit === template.unit && group.name === template.name && !group.notes

@@ -192,6 +192,23 @@ test('depth-chart starters and Madden line spacing reuse their existing domain b
   assert.deepEqual(execute(spaced, { kind: 'line_space' }).play, spaced);
 });
 
+test('applying depth-chart vacancies and transferred starters is one command that leaves geometry unchanged', () => {
+  const workspace = starterWorkspace({ demoDepth: true });
+  const assigned = execute(workspace.plays[0], { kind: 'personnel_apply', groupId: 'spread' }, workspace).play;
+  const group = workspace.depthChart.groups.find(item => item.id === 'spread');
+  const qb = group.slots.find(item => item.label === 'QB'), receiver = group.slots.find(item => item.label === 'X');
+  const id = qb.playerIds[0];
+  qb.playerIds[0] = null;
+  receiver.playerIds.unshift(id);
+  const before = structuredClone(assigned);
+  const updated = execute(assigned, { kind: 'personnel_apply', groupId: 'spread' }, workspace).play;
+  assert.equal(updated.players.find(player => player.label === 'QB').rosterId, undefined);
+  assert.equal(updated.players.find(player => player.label === 'X').rosterId, id);
+  assert.deepEqual(assigned, before, 'command execution never mutates its input snapshot');
+  const geometry = play => ({ ...play, players: play.players.map(({ rosterId, name, ...marker }) => marker) });
+  assert.deepEqual(geometry(updated), geometry(before));
+});
+
 test('limits and reference restrictions fail without changing the caller-owned play', () => {
   const play = mesh();
   while (play.players.length < 40) play.players.push({ ...play.players[0], id: `p-${play.players.length}` });

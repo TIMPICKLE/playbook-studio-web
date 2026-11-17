@@ -1,0 +1,45 @@
+✔ scroll restoration is instant and atomic even when the digital theme enables smooth scrolling (19.253966ms)
+▶ zoomed editor retains the viewport through deletion and history operations
+  ✔ the replaceable editor subtree cannot become a browser scroll anchor (3.448774ms)
+  ✔ delete button preserves the live viewport, both pitch axes and the page (334.879331ms)
+  ✔ undo and redo restore route data without moving the zoomed view (717.514678ms)
+  ✔ keyboard deletion and repeated theme changes retain the same offsets (907.165069ms)
+  ✔ choosing a different play starts its field at the origin while preserving panel positions (101.248045ms)
+✔ zoomed editor retains the viewport through deletion and history operations (2844.094478ms)
+✔ editor multiselect moves and deletes one group, supports touch choices, cancellation and annotation keyboard activation (2457.434342ms)
+▶ 5v5 flag UI carries its format through creation, opponents, formations, rehearsal and mixed playbooks
+  ✔ five-player selection offers flag formations and changes with the selected unit (668.575247ms)
+  ✔ five-player offense and a formation change preserve the five opposing markers (1074.523697ms)
+  ✔ the center can receive a drawn route, rehearse, print and export as a five-player play (444.924018ms)
+  ✔ saved flag templates can create fresh five-player plays (338.630801ms)
+  ✔ a five-player default does not resize an existing eleven-player play (385.420588ms)
+  ✔ an eleven-player default does not resize a saved flag play (310.383941ms)
+  ✔ refresh restores the flag format and English exposes the same five-player choices (465.562201ms)
+✔ 5v5 flag UI carries its format through creation, opponents, formations, rehearsal and mixed playbooks (4304.048447ms)
+✔ unreadable local data stays intact, exports verbatim and resumes editing only after a valid reload (1118.98698ms)
+✔ replacing an unreadable local file requires confirmation and a successful write (627.123786ms)
+✔ temporary storage read denial cannot replace the original with examples (337.883277ms)
+✔ recovering a local playbook while viewing its roster refreshes the roster in place (94.350713ms)
+✔ a delayed local import cannot interrupt another module after leaving the editor (157.53336ms)
+✔ returning to the editor cannot reactivate a file read started before leaving (314.739806ms)
+✔ an earlier slow file cannot replace a newer import confirmation (149.133362ms)
+▶ touch workspace panels, zoom and orientation preserve editable play data
+  ✔ drawers are isolated, focus returns on close, and properties remain editable (120.043257ms)
+  ✔ opening and dismissing a panel never discards unfinished route points (493.791389ms)
+  ✔ zoom and fit preserve SVG, drafts and saved data while clamping to 100–300 percent (367.944765ms)
+  ✔ touch dragging at 2x zoom uses SVG coordinates and empty turf stays scrollable (322.961284ms)
+  ✔ a touch can adjust a route endpoint without being mistaken for empty turf (313.077563ms)
+  ✔ a second finger cannot move, finish or cancel the first finger’s edit (313.865945ms)
+  ✔ a secondary contact during a pan cannot start a new player edit (39.431378ms)
+  ✔ normal capture release commits even when capture loss is dispatched synchronously (260.641286ms)
+  ✔ cancel, capture loss, app blur and rotation roll back unsaved movement and allow another gesture (1356.264794ms)
+  ✔ phone, iPad and desktop transitions update panel access without remounting the pitch (180.099063ms)
+✔ touch workspace panels, zoom and orientation preserve editable play data (4300.37618ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4926.864672

@@ -1,0 +1,39 @@
+✔ IME candidate confirmation never saves a new play, custom formation or text annotation (1909.03588ms)
+✔ native cancel and close share cleanup, keep browser modality, and restore the original opener (269.556191ms)
+✔ a delayed close event from a replaced recovery step cannot dismiss the new step (137.107181ms)
+✔ closing a native dialog inside a mobile drawer preserves drawer focus and inert state (109.025772ms)
+✔ without showModal the fallback isolates all background roots and restores their prior inert state (130.488256ms)
+✔ large playbooks keep live editor nodes through search and edits; switching plays scopes the next drag correctly (10791.214927ms)
+✔ scroll restoration is instant and atomic even when the digital theme enables smooth scrolling (21.303397ms)
+▶ zoomed editor retains the viewport through deletion and history operations
+  ✔ the replaceable editor subtree cannot become a browser scroll anchor (41.62933ms)
+  ✔ delete button preserves the live viewport, both pitch axes and the page (428.729273ms)
+  ✔ undo and redo restore route data without moving the zoomed view (559.994269ms)
+  ✔ keyboard deletion and repeated theme changes retain the same offsets (686.417391ms)
+  ✔ choosing a different play starts its field at the origin while preserving panel positions (176.579252ms)
+✔ zoomed editor retains the viewport through deletion and history operations (2826.954379ms)
+✔ editor multiselect moves and deletes one group, supports touch choices, cancellation and annotation keyboard activation (2698.441141ms)
+✔ unreadable local data stays intact, exports verbatim and resumes editing only after a valid reload (1110.742367ms)
+✔ replacing an unreadable local file requires confirmation and a successful write (461.480824ms)
+✔ temporary storage read denial cannot replace the original with examples (278.721414ms)
+✔ recovering a local playbook while viewing its roster refreshes the roster in place (41.128668ms)
+▶ touch workspace panels, zoom and orientation preserve editable play data
+  ✔ drawers are isolated, focus returns on close, and properties remain editable (176.555542ms)
+  ✔ opening and dismissing a panel never discards unfinished route points (568.094582ms)
+  ✔ zoom and fit preserve SVG, drafts and saved data while clamping to 100–300 percent (341.969349ms)
+  ✔ touch dragging at 2x zoom uses SVG coordinates and empty turf stays scrollable (331.700495ms)
+  ✔ a touch can adjust a route endpoint without being mistaken for empty turf (351.733128ms)
+  ✔ a second finger cannot move, finish or cancel the first finger’s edit (402.408408ms)
+  ✔ a secondary contact during a pan cannot start a new player edit (41.431734ms)
+  ✔ normal capture release commits even when capture loss is dispatched synchronously (237.606745ms)
+  ✔ cancel, capture loss, app blur and rotation roll back unsaved movement and allow another gesture (1247.601495ms)
+  ✔ phone, iPad and desktop transitions update panel access without remounting the pitch (149.341911ms)
+✔ touch workspace panels, zoom and orientation preserve editable play data (4478.308858ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11482.749793

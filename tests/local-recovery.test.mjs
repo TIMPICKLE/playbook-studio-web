@@ -9,13 +9,14 @@ async function editor(t, raw, { readFails = false, path = '/local.html' } = {}) 
   const win = new Window({ url: new URL(path, 'http://localhost:3000').href, width: 1440, height: 1000 });
   win.document.body.innerHTML = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8').split('<body>')[1].split('</body>')[0];
   win.localStorage.setItem(STORAGE_KEY, raw);
+  win.localStorage.setItem('playbook-studio:onboarding:v1',JSON.stringify({dismissed:true,completed:[]}));
   const failure = { read: readFails, write: false };
   const storage = {
     getItem(key) { if (key === STORAGE_KEY && failure.read) throw new Error('Storage access denied'); return win.localStorage.getItem(key); },
     setItem(key, value) { if (key === STORAGE_KEY && failure.write) throw new Error('QuotaExceededError'); win.localStorage.setItem(key, value); },
     removeItem(key) { win.localStorage.removeItem(key); },
   };
-  const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame'];
+  const names = ['window', 'document', 'navigator', 'localStorage', 'location', 'history', 'Image', 'Blob', 'requestAnimationFrame', 'cancelAnimationFrame'];
   const previous = Object.fromEntries(names.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]));
   for (const name of names) Object.defineProperty(globalThis, name, {
     configurable: true,
@@ -117,4 +118,46 @@ test('recovering a local playbook while viewing its roster refreshes the roster 
   assert.equal(f.query('#app').hidden, true);
   assert.equal(f.query('#field'), null);
   assert.equal(f.saved(), raw);
+});
+
+test('a delayed local import cannot interrupt another module after leaving the editor', async t => {
+  const raw=encodeWorkspace(starterWorkspace()),f=await editor(t,raw);
+  const imported=starterWorkspace();imported.plays[0].title='Delayed import';
+  const incoming=encodeWorkspace(imported);let finish;
+  const input=f.query('#import-input');
+  Object.defineProperty(input,'files',{configurable:true,value:[{size:incoming.length,text:()=>new Promise(resolve=>{finish=resolve;})}]});
+  input.dispatchEvent(new f.win.Event('change',{bubbles:true}));
+  assert.equal(typeof finish,'function');
+  f.query('.workspace-nav [data-workspace-mode="roster"]').click();
+  assert.equal(f.query('#roster-root').hidden,false);
+  finish(incoming);for(let i=0;i<4;i++)await new Promise(resolve=>setImmediate(resolve));
+  assert.ok(!f.query('.modal'),'a completed read cannot open an import dialog over another module');
+  assert.equal(f.saved(),raw,'a late import never writes data');
+});
+
+test('returning to the editor cannot reactivate a file read started before leaving', async t => {
+  const raw=encodeWorkspace(starterWorkspace()),f=await editor(t,raw);let finish;
+  const input=f.query('#import-input');
+  Object.defineProperty(input,'files',{configurable:true,value:[{size:raw.length,text:()=>new Promise(resolve=>{finish=resolve;})}]});
+  input.dispatchEvent(new f.win.Event('change',{bubbles:true}));
+  f.query('.workspace-nav [data-workspace-mode="roster"]').click();
+  f.query('.workspace-nav [data-workspace-mode="editor"]').click();
+  assert.equal(f.query('#app').hidden,false);
+  finish(raw);for(let i=0;i<4;i++)await new Promise(resolve=>setImmediate(resolve));
+  assert.ok(!f.query('.modal'),'the old read remains cancelled after returning');
+  assert.equal(f.saved(),raw);
+});
+
+test('an earlier slow file cannot replace a newer import confirmation', async t => {
+  const initial=starterWorkspace(),raw=encodeWorkspace(initial),f=await editor(t,raw);let finish;
+  const first=starterWorkspace();first.plays=first.plays.slice(0,1);
+  const second=starterWorkspace();second.plays=second.plays.slice(0,2);
+  const input=f.query('#import-input'),start=file=>{Object.defineProperty(input,'files',{configurable:true,value:[file]});input.dispatchEvent(new f.win.Event('change',{bubbles:true}));};
+  start({size:raw.length,text:()=>new Promise(resolve=>{finish=resolve;})});
+  start({size:raw.length,text:async()=>encodeWorkspace(second)});
+  for(let i=0;i<4;i++)await new Promise(resolve=>setImmediate(resolve));
+  assert.ok(f.query('[data-action="confirm-import"]'),'the newer file has a confirmation');
+  finish(encodeWorkspace(first));for(let i=0;i<4;i++)await new Promise(resolve=>setImmediate(resolve));
+  f.click('confirm-import');
+  assert.equal(decodeWorkspace(f.saved()).plays.length,initial.plays.length+2,'only the latest selected file is appended');
 });

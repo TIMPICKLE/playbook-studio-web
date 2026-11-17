@@ -1,0 +1,36 @@
+✔ Escape during a player drag rolls back the live preview and a late release never commits it (994.843416ms)
+▶ Escape cancels group, waypoint, new-zone and annotation gestures before late pointer events
+  ✔ group (340.440284ms)
+  ✔ waypoint (273.34426ms)
+  ✔ new-zone (367.982485ms)
+  ✔ annotation (328.242922ms)
+✔ Escape cancels group, waypoint, new-zone and annotation gestures before late pointer events (1311.355665ms)
+✔ keyboard undo during a live drag cancels that preview before restoring the last committed edit (402.40484ms)
+✔ draft Escape, context-menu keyboard access and JSON restore preserve the current play (340.400894ms)
+✔ a touch-selected overlapping waypoint can be dragged after explicit candidate confirmation (315.253049ms)
+▶ an explicit overlapping waypoint choice expires after cancellation, another location or a screen change
+  ✔ Escape (212.773596ms)
+  ✔ elsewhere (132.784728ms)
+  ✔ play (273.528579ms)
+  ✔ roster (287.226699ms)
+✔ an explicit overlapping waypoint choice expires after cancellation, another location or a screen change (907.480657ms)
+✔ an explicitly chosen player wins over a later-painted overlapping marker for exactly the next gesture (307.268925ms)
+▶ switching play or leaving the editor cancels a live drag before late release and preserves the next edit
+  ✔ play (515.146724ms)
+  ✔ roster (587.007466ms)
+✔ switching play or leaving the editor cancels a live drag before late release and preserves the next edit (1103.01413ms)
+✔ recovery read-only mode rejects injected movement, drawing and deletion without overwriting original bytes (217.380809ms)
+▶ a new editor page restores saved metadata and geometry rather than reverting to the starter example
+  ✔ write through the editor (249.789545ms)
+  ✔ reload into a fresh page (122.285479ms)
+✔ a new editor page restores saved metadata and geometry rather than reverting to the starter example (373.010638ms)
+✔ a successful local save retry resolves the failure feedback and retains the in-memory edits (97.50653ms)
+✔ local storage failure prevents silent page exit until the edited document is saved successfully (97.811844ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7348.414939
