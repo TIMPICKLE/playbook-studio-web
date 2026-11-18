@@ -59,25 +59,54 @@ const find = (items, value, name) => items.find(item => item.id === value) || fa
 const has = (value, key) => Object.hasOwn(value, key);
 const close = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) <= .01;
 
+function translatedPoints(points, anchor) {
+  const dx = anchor.x - points[0].x, dy = anchor.y - points[0].y;
+  return points.map(point => ({ x: point.x + dx, y: point.y + dy }));
+}
+
 function translateRoute(route, anchor) {
-  const dx = anchor.x - route.points[0].x, dy = anchor.y - route.points[0].y;
-  const translated = route.points.map(point => ({ x: point.x + dx, y: point.y + dy }));
+  const first = route.points[0];
+  const translated = translatedPoints(route.points, anchor);
   if (translated.some(point => point.x < 0 || point.x > 100 || point.y < 0 || point.y > 100)) fail('Moving the route would put a waypoint outside the field.');
   route.points = translated;
-  if (dx || dy) delete route.intent;
+  if (first.x !== anchor.x || first.y !== anchor.y) delete route.intent;
+}
+
+function motionFollowers(play, before) {
+  if (before.kind !== 'motion' || before.optional) return [];
+  const end = before.points.at(-1);
+  return play.routes.filter(route => route.id !== before.id && route.playerId === before.playerId &&
+    route.kind !== 'motion' && close(route.points[0], end));
 }
 
 function relinkMotion(play, before, after) {
   if (before.kind !== 'motion' || before.optional) return;
   const owner = find(play.players, before.playerId, 'Player');
-  const oldEnd = before.points.at(-1), remainsActive = after?.kind === 'motion' && !after.optional;
+  const remainsActive = after?.kind === 'motion' && !after.optional;
   const anchor = remainsActive ? after.points.at(-1) : owner;
   const oldFinish = before.delay + before.duration, newFinish = remainsActive ? after.delay + after.duration : 0;
-  for (const route of play.routes) {
-    if (route.id === before.id || route.playerId !== before.playerId || route.kind === 'motion' || !close(route.points[0], oldEnd)) continue;
+  for (const route of motionFollowers(play, before)) {
     translateRoute(route, anchor);
     route.delay = Math.max(0, route.delay - oldFinish) + newFinish;
   }
+}
+
+// Work against a detached gesture preview. The command validates the complete
+// translation at release, including any follower that would cross a boundary.
+export function prepareWaypointMove(play, routeId, index) {
+  const route = find(play.routes, routeId, 'Route');
+  const followers = index === route.points.length - 1 ? motionFollowers(play, route) : [];
+  const origins = followers.map(follower => ({ follower, points: follower.points }));
+  delete route.intent;
+  delete route.blockTargets;
+  delete route.stagedBlock;
+  return {
+    routeIds: [route.id, ...followers.map(follower => follower.id)],
+    move(at) {
+      route.points[index] = at;
+      for (const { follower, points } of origins) follower.points = translatedPoints(points, at);
+    }
+  };
 }
 
 function removePlayers(play, ids) {

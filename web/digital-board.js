@@ -107,7 +107,7 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async inval
   doc.addEventListener('playbook:effects-changed',changed);doc.addEventListener('visibilitychange',visibility);doc.addEventListener('pointermove',move,{passive:true});
   win.addEventListener('resize',invalidate);
   const hide=()=>{generation++;clear();},show=()=>sync();win.addEventListener('pagehide',hide);win.addEventListener('pageshow',show);
-  return {sync,
+  return {sync,invalidate,
     get backgroundReady(){
       if(!allowed())return true;
       if(pending||!svg||backgroundChanged)return false;

@@ -6,6 +6,20 @@ function personnel(data) {
   return { roster: data.roster, depthChart: data.depthChart, team: data.team, league: data.settings.league };
 }
 
+// Snapshots can include imports and independent personnel changes. A geometry
+// refresh is safe only when every other part of the mounted workspace agrees.
+export function canRefreshHistoryField(current, next) {
+  if (current.selectedId !== next.selectedId) return false;
+  const {plays, ...workspace} = current.data;
+  const {plays: restored, ...nextWorkspace} = next.data;
+  if (plays.length !== restored.length || !equal(workspace, nextWorkspace)) return false;
+  const index = plays.findIndex(play => play.id === current.selectedId);
+  if (index < 0 || plays[index].reference || restored[index].id !== current.selectedId) return false;
+  const fieldMetadata = ({players, routes, zones, annotations, ball, ...metadata}) => metadata;
+  if (!equal(fieldMetadata(plays[index]), fieldMetadata(restored[index]))) return false;
+  return plays.every((play, i) => i === index || equal(play, restored[i]));
+}
+
 export class PersonnelHistoryConflict extends Error {}
 
 // Diagram snapshots own their plays and formations. A command that also edits

@@ -1,0 +1,67 @@
+{
+  "baseline": "d948017",
+  "renderer": "traditional",
+  "runtime": "happy-dom (synthetic pointer input and animation frames)",
+  "fixture": {
+    "players": 22,
+    "routes": 10,
+    "zones": 1,
+    "annotations": 1
+  },
+  "baselineResults": {
+    "version": "base",
+    "environment": "happy-dom",
+    "fixture": {
+      "players": 22,
+      "routes": 10,
+      "zones": 1,
+      "annotations": 1
+    },
+    "rows": [
+      {
+        "case": "single X",
+        "steps": 96,
+        "svgWrites": 5088,
+        "unrelatedWrites": 4800,
+        "childList": 0,
+        "commitAndUndo": true
+      },
+      {
+        "case": "group X+Z",
+        "steps": 96,
+        "svgWrites": 5088,
+        "unrelatedWrites": 4512,
+        "childList": 0,
+        "commitAndUndo": true
+      }
+    ]
+  },
+  "candidateResults": {
+    "version": "candidate",
+    "environment": "happy-dom",
+    "fixture": {
+      "players": 22,
+      "routes": 10,
+      "zones": 1,
+      "annotations": 1
+    },
+    "rows": [
+      {
+        "case": "single X",
+        "steps": 96,
+        "svgWrites": 288,
+        "unrelatedWrites": 0,
+        "childList": 0,
+        "commitAndUndo": true
+      },
+      {
+        "case": "group X+Z",
+        "steps": 96,
+        "svgWrites": 576,
+        "unrelatedWrites": 0,
+        "childList": 0,
+        "commitAndUndo": true
+      }
+    ]
+  }
+}

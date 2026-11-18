@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { starterWorkspace, clone, encodeWorkspace, decodeWorkspace } from '../web/model.js';
-import { EditorHistory, PersonnelHistoryConflict } from '../web/editor-history.js';
+import { canRefreshHistoryField, EditorHistory, PersonnelHistoryConflict } from '../web/editor-history.js';
 import { refreshRosterBindings } from '../web/board-personnel.js';
 
 test('undoing a diagram edit preserves a later roster rename and depth chart', () => {
@@ -137,4 +137,24 @@ test('undo after a roster rename and deletion keeps the last display name on a h
   const restored = history.undo(after);
   assert.equal(restored.data.plays[0].players[0].name, removed.name);
   assert.equal(restored.data.plays[0].players[0].rosterId, undefined);
+});
+
+
+test('local history refresh excludes changes outside the mounted play geometry', () => {
+  const data=starterWorkspace(), state={data,selectedId:data.plays[0].id};
+  const geometry=clone(state);
+  geometry.data.plays[0].routes[0].points[0].x+=4;
+  assert.equal(canRefreshHistoryField(state,geometry),true);
+  for (const [description,change] of [
+    ['current play metadata',next=>{next.data.plays[0].notes+=' changed';}],
+    ['different play',next=>{next.selectedId=next.data.plays[1].id;}],
+    ['other play geometry',next=>{next.data.plays[1].players[0].x+=1;}],
+    ['play order',next=>{next.data.plays.reverse();}],
+    ['roster',next=>{next.data.roster[0].name+=' new';}],
+    ['settings',next=>{next.data.settings.showGrid=!next.data.settings.showGrid;}],
+    ['formations',next=>{next.data.formations.push(clone(next.data.plays[0]));}],
+  ]) {
+    const next=clone(geometry);change(next);
+    assert.equal(canRefreshHistoryField(state,next),false,description);
+  }
 });

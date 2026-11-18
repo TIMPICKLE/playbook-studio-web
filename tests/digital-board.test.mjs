@@ -117,6 +117,11 @@ test('a still board sleeps and coalesces drag updates into one draw and texture 
     f.step(1016);
     assert.equal(f.controller.backgroundReady,true);assert.equal(f.frames.size,0);
     assert.equal(draws.length,3);assert.equal(draws.at(-1).refreshTexture,false,'presenting the decoded texture must not request another one');
+    f.controller.invalidate();f.controller.invalidate();
+    assert.equal(f.frames.size,1);
+    f.step(1032);
+    assert.equal(draws.length,4);assert.equal(draws.at(-1).refreshTexture,false,'mesh-only edits wake the renderer without baking the field');
+    assert.equal(f.controller.backgroundReady,true);assert.equal(f.frames.size,0);
   }finally{await f.close();}
 });
 

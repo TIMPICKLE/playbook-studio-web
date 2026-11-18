@@ -1,0 +1,107 @@
+{
+  "runtime": "Managed cloud Chromium, traditional 2D editor, one synthetic pointermove per native requestAnimationFrame",
+  "baseline": "d948017c37af82d534eb3836121d493164d7990a",
+  "candidateWebTree": "48226c4d1a8d81ff2288e1a59bc4676915d9aa50",
+  "fixture": {
+    "players": 22,
+    "routes": 10,
+    "zones": 1,
+    "annotations": 1
+  },
+  "single": {
+    "base": {
+      "case": "single X",
+      "steps": 96,
+      "svgWrites": 5088,
+      "unrelatedWrites": 4800,
+      "childList": 0,
+      "commitAndUndo": true,
+      "flushMs": {
+        "count": 96,
+        "p50": 1.6,
+        "p95": 14.5,
+        "max": 37.7,
+        "total": 341.1
+      },
+      "frameIntervalMs": {
+        "p50": 1016.4,
+        "p95": 1016.5,
+        "max": 1133.1,
+        "over25ms": 86
+      }
+    },
+    "candidate": {
+      "case": "single X",
+      "steps": 96,
+      "svgWrites": 288,
+      "unrelatedWrites": 0,
+      "childList": 0,
+      "commitAndUndo": true,
+      "flushMs": {
+        "count": 96,
+        "p50": 0.5,
+        "p95": 3.3,
+        "max": 13,
+        "total": 95.8
+      },
+      "frameIntervalMs": {
+        "p50": 1016.4,
+        "p95": 1016.5,
+        "max": 1016.6,
+        "over25ms": 84
+      }
+    }
+  },
+  "viewport": [
+    1363,
+    936
+  ],
+  "group": {
+    "base": {
+      "case": "group X+Z",
+      "steps": 96,
+      "svgWrites": 5088,
+      "unrelatedWrites": 4512,
+      "childList": 0,
+      "commitAndUndo": true,
+      "flushMs": {
+        "count": 96,
+        "p50": 1.9,
+        "p95": 10.2,
+        "max": 53.3,
+        "total": 346.4
+      },
+      "frameIntervalMs": {
+        "p50": 1016.4,
+        "p95": 1016.5,
+        "max": 1049.8,
+        "over25ms": 87
+      }
+    },
+    "candidate": {
+      "case": "group X+Z",
+      "steps": 96,
+      "svgWrites": 576,
+      "unrelatedWrites": 0,
+      "childList": 0,
+      "commitAndUndo": true,
+      "flushMs": {
+        "count": 96,
+        "p50": 0.6,
+        "p95": 7.7,
+        "max": 13.6,
+        "total": 129.7
+      },
+      "frameIntervalMs": {
+        "p50": 1016.4,
+        "p95": 1016.5,
+        "max": 1116.4,
+        "over25ms": 80
+      }
+    }
+  },
+  "limits": [
+    "One sample per version and gesture. The cloud browser reported visible at completion; foreground attention was shared during group runs.",
+    "Frame intervals clustered near 1 s in this environment. The measurements do not establish physical-device refresh rate or perceived smoothness."
+  ]
+}

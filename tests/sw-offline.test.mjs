@@ -28,6 +28,8 @@ test('the service worker installs the editor shell and caches geometry only afte
   assert.ok(installed.includes('./madden-traces.js'));
   assert.ok(installed.includes('./editor-dialog.css'));
   assert.ok(installed.includes('./component-layout.css'));
+  assert.ok(installed.includes('./history-transition.js'));
+  assert.ok(installed.includes('./depth-chart-motion.js'));
   assert.ok(!installed.some(name=>/madden-editable(?:-[^/]+)?\.js$/.test(name)), 'install must not eagerly download geometry');
   for(const name of installed) assert.ok(existsSync(new URL('../web/'+name,import.meta.url)),`precache asset exists: ${name}`);
   const request=async file=>{

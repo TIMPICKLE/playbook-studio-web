@@ -1,8 +1,8 @@
-const CACHE = 'playbook-studio-v8-ux-workflow';
+const CACHE = 'playbook-studio-v9-editor-motion';
 // Heavy graph and Madden geometry modules are fetched and cached on first use.
 const FILES = [
   './editor-history.js', './workspace-merge.js', './player-group.js', './editor-selection.js', './model-connection.js', './workspace-ui.js', './locales/madden-workflow.js',
-  './assistant-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
+  './assistant-transition.js', './history-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
   './assistant-schema.js', './assistant-proposal.js', './assistant-conflicts.js', './assistant-draft.js', './assistant-session.js', './vendor/assistant-zod.js',
   './game-formats.js', './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',
   './model-protocol.js', './editor-render.js', './editor-dialog.css', './component-layout.css',
@@ -12,7 +12,7 @@ const FILES = [
   './assistant-provider.js', './assistant-harness.js', './assistant-tools.js', './locales/assistant-edit.js',
   './locales/assistant-provider.js', './locales/board-assistant.en.js', './locales/board-assistant.zh-CN.js',
   './depth-formation.js', './depth-formation-layout.js', './depth-formation.css', './locales/depth-formation.zh-CN.js', './locales/depth-formation.en.js',
-  './depth-model.js', './model-values.js', './board-personnel.js', './depth-chart.js', './depth-chart.css',
+  './depth-model.js', './model-values.js', './board-personnel.js', './depth-chart.js', './depth-chart-motion.js', './depth-chart.css',
   './personnel-groups.js', './personnel-groups.css', './locales/depth-chart.zh-CN.js', './locales/depth-chart.en.js',
   './locales/personnel-groups.zh-CN.js', './locales/personnel-groups.en.js',
   './studio-home.js', './studio-home.css', './guest-workspace.js', './roster.js', './roster.css', './locales/roster.zh-CN.js', './locales/roster.en.js', './i18n.js', './locales/zh-CN.js', './locales/en.js', './locales/cloud.zh-CN.js', './locales/cloud.en.js', './locales/madden-ai.zh-CN.js', './locales/madden-ai.en.js', './locales/support.zh-CN.js', './locales/support.en.js', './locales/landing.zh-CN.js', './locales/landing.en.js', './theme.css', './vendor/big-shoulders-display-5.3.0/big-shoulders-display-latin-wght-normal.woff2', './matchup-model.js', './ai-matchup.js', './ai-demo.js', './ai-matchup.css', './digital-piece-geometry.js', './digital-fallback.js', './digital-export.js', './layout-polish.css', './field-coordinates.js', './digital-projection.js', './visual-mode.js', './visual-mode.css', './digital-board.js', './digital-routes.js', './digital-materials.js', './liquid.css', './liquid-materials.js', './liquid-optics.js', './liquid-canvas.js', './vendor/paper-shaders-0.0.82/paper-liquid-metal-0.0.82.js', './book-switcher.js', './book-switcher.css', './vendor/embla-carousel-8.6.0/embla-carousel.esm.js', './responsive.css', './workspace-panels.js', './viewport-layout.js', './data/madden-team-trace-aliases.js', './data/madden-trace-status.js', './reconcile.js', './madden.js', './madden-model.js', './madden.css', './data/huddle-catalog.json', './index.html', './styles.css', './cloud.css', './interaction.css', './glass.css', './board-layout.css', './board-layout.js', './effects.js', './vendor/tsparticles.slim-4.4.0.min.js', './app.js', './play-thumbnails.js', './model.js', './field.js', './motion.js', './cloud.js', './sync.js', './ui.js', './icon.svg', './assets/brand/playbook-studio-icon.svg', './assets/brand/icon-32.png', './assets/brand/icon-180.png', './assets/brand/icon-192.png', './assets/brand/icon-512.png', './assets/brand/icon-maskable-512.png', './manifest.webmanifest'];

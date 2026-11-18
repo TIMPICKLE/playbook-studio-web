@@ -100,6 +100,8 @@ test('dragging a filtered backup marker moves the visible backup, never the hidd
   f.drop('[data-depth-drop-slot=x][data-depth-chart=inspect]');
   assert.deepEqual(f.group.slots[0].playerIds, ['p0', 'p2']);
   assert.deepEqual(f.group.slots[1].playerIds, ['p1', 'p3']);
+  assert.equal(f.q('[data-depth-move=from]').dataset.slot, 'qb');
+  assert.equal(f.q('[data-depth-move=to]').dataset.slot, 'x');
 });
 
 test('explicit pick and place supplies a touch and keyboard button path, with cancel and Escape preserving data', t => {
@@ -223,4 +225,66 @@ test('rank insertion stops at an open rank and never fills an empty starter when
   assert.equal(ranks[0], null);
   assert.equal(ranks.length, DEPTH_LIMITS.ranks);
   assert.equal(ranks.at(-1), 'p4');
+});
+
+function recordMoves(f, reduced = false) {
+  const animations = [];
+  f.win.matchMedia = () => ({ matches: reduced });
+  f.win.HTMLElement.prototype.getBoundingClientRect = function () {
+    const rank = this.closest('[data-depth-drop-slot]');
+    const slot = f.group.slots.findIndex(item => item.id === rank?.dataset.depthDropSlot);
+    const x = 100 * (slot + 1);
+    const y = 30 + 40 * Number(rank?.dataset.depthDropIndex || 0);
+    return { left: x, right: x + 50, top: y, bottom: y + 18, width: 50, height: 18 };
+  };
+  f.win.HTMLElement.prototype.animate = function (frames, options) {
+    const animation = { node: this, frames, options, cancelled: false, cancel() { this.cancelled = true; } };
+    animations.push(animation);
+    return animation;
+  };
+  return animations;
+}
+
+test('a tap move and immediate undo follow the selected assignment even when the same reserve appears in two slots', t => {
+  const f = host(t);
+  f.group.slots[2].playerIds = [null, 'p1'];
+  const animations = recordMoves(f);
+  f.click('[data-mode=table]');
+  f.root.scrollTop = 150;
+  f.click('[data-depth-chart=pick-rank][data-source-slot=y][data-source-index="1"]');
+  f.click('[data-depth-chart=place-player][data-slot=x][data-index="0"]');
+  const playerFocus = () => [f.win.document.activeElement.dataset.depthSource, f.win.document.activeElement.dataset.sourceSlot];
+  assert.deepEqual(playerFocus(), ['p1', 'x']);
+  assert.equal(f.q('[data-depth-move=to]').dataset.depthDropSlot, 'x');
+  assert.equal(f.q('[data-depth-move=from]').dataset.depthDropSlot, 'y');
+  assert.match(f.q('.depth-status').textContent, /p1.*Y.*第 1 替补.*X.*首发/);
+  assert.equal(animations[0].node.dataset.depthLabel, 'p1');
+  assert.equal(animations[0].frames[0].translate, '100px 40px');
+  f.click('[data-depth-chart=undo-ranks]');
+  assert.match(f.q('.depth-status').textContent, /已撤销.*p1.*X.*首发.*Y.*第 1 替补/);
+  assert.deepEqual(playerFocus(), ['p1', 'y']);
+  assert.equal(f.root.scrollTop, 150);
+  assert.equal(animations[0].cancelled, true);
+  assert.equal(animations[1].frames[0].translate, '-100px -40px');
+  assert.equal(f.q('[data-depth-source=p1][data-source-slot=qb]').closest('[data-depth-move]'), null);
+  f.view.destroy();
+  assert.equal(animations[1].cancelled, true);
+});
+
+test('reduced motion keeps receipts and focus for directory placement and reverse across every depth view', t => {
+  for (const mode of ['field', 'table', 'starters']) {
+    const f = host(t), animations = recordMoves(f, true);
+    f.click(`[data-mode="${mode}"]`);
+    f.choose('p4');
+    f.click('[data-depth-chart=pick-player]');
+    f.click(mode === 'field' ? '[data-depth-chart=inspect][data-slot=y]' : '[data-depth-chart=place-player][data-slot=y][data-index="0"]');
+    assert.equal(f.win.document.activeElement.dataset.depthSource, 'p4');
+    assert.equal(f.win.document.activeElement.dataset.sourceSlot, 'y');
+    assert.match(f.q('.depth-status').textContent, /p4.*球员名单.*Y.*首发/);
+    f.click('[data-depth-chart=undo-ranks]');
+    assert.equal(f.win.document.activeElement, f.q('[data-depth-chart=pick-player]'));
+    assert.match(f.q('.depth-status').textContent, /已撤销.*p4.*Y.*首发.*球员名单/);
+    assert.equal(animations.length, 0);
+    assert.equal(f.state.writes, 2);
+  }
 });

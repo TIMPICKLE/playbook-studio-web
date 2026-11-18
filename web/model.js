@@ -139,18 +139,33 @@ export function mirrorPlay(play) {
   return p;
 }
 
+// All offsets are relative to the same starting position, including after a
+// drag reverses at the field edge. The caller owns the play being translated.
+export function preparePlayerTranslation(play, ids) {
+  const selected = new Set(ids);
+  const players = play.players.filter(player => selected.has(player.id));
+  const routes = play.routes.filter(route => selected.has(route.playerId));
+  const origins = [...players, ...routes.flatMap(route => route.points)].map(point => ({ point, x: point.x, y: point.y }));
+  const left = -Math.min(...origins.map(p => p.x)), right = 100 - Math.max(...origins.map(p => p.x));
+  const top = -Math.min(...origins.map(p => p.y)), bottom = 100 - Math.max(...origins.map(p => p.y));
+  const intents = routes.filter(route => route.intent).map(route => ({ route, intent: route.intent }));
+  return (dx, dy) => {
+    const x = clamp(dx, left, right), y = clamp(dy, top, bottom);
+    for (const origin of origins) {
+      origin.point.x = origin.x + x;
+      origin.point.y = origin.y + y;
+    }
+    for (const entry of intents) {
+      if (x || y) delete entry.route.intent;
+      else entry.route.intent = entry.intent;
+    }
+    return { x, y };
+  };
+}
+
 export function movePlayer(play, id, x, y) {
-  const p = play.players.find(p => p.id === id); if (!p) return;
-  let dx = clamp(x) - p.x, dy = clamp(y) - p.y;
-  // Keep the entire attached route in bounds; never shear or clip its geometry.
-  const all = [{ x: p.x, y: p.y }, ...play.routes.filter(r => r.playerId === id).flatMap(r => r.points)];
-  dx = clamp(dx, -Math.min(...all.map(v => v.x)), 100 - Math.max(...all.map(v => v.x)));
-  dy = clamp(dy, -Math.min(...all.map(v => v.y)), 100 - Math.max(...all.map(v => v.y)));
-  p.x += dx; p.y += dy;
-  play.routes.filter(r => r.playerId === id).forEach(r => {
-    r.points.forEach(v => { v.x += dx; v.y += dy; });
-    if (dx || dy) delete r.intent;
-  });
+  const player = play.players.find(p => p.id === id);
+  if (player) preparePlayerTranslation(play, [id])(x - player.x, y - player.y);
 }
 
 // Both drawing and animation use the same Catmull–Rom cubic segments.
@@ -228,6 +243,7 @@ export function animatedPlayer(play, player, time, visiting = new Set()) {
   const routes = play.routes.filter(r => r.playerId === player.id && !r.optional && r.kind !== 'pass');
   const route = routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind === 'route') || routes.find(r => r.kind === 'block') || routes[0];
   if (!route) return { x: player.x, y: player.y };
+  if (time <= route.delay) return { ...route.points[0] };
   const currentRoute = dynamicBlockRoute(play, route, time, next);
   const contact = blockContact(currentRoute, time);
   const samples = sampledRoute(currentRoute);
@@ -257,7 +273,7 @@ export function animatedBall(play, time) {
   const holder = play.players.find(p => p.id === play.ball.holderId);
   if (!holder) return null;
   const receiver = play.players.find(p => p.id === play.ball.receiverId);
-  if (!receiver || time < play.ball.passAt) return animatedPlayer(play, holder, time);
+  if (!receiver || time <= play.ball.passAt) return animatedPlayer(play, holder, time);
   if (time >= play.ball.arriveAt) return animatedPlayer(play, receiver, time);
   const a = animatedPlayer(play, holder, play.ball.passAt), b = animatedPlayer(play, receiver, play.ball.arriveAt);
   const t = (time - play.ball.passAt) / (play.ball.arriveAt - play.ball.passAt);

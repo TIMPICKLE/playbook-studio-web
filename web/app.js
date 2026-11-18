@@ -4,11 +4,12 @@ import { composeDigitalExport, pngExportDescription } from './digital-export.js'
 import { createMaddenLibrary } from './madden.js';
 import { createBoardAssistant } from './board-assistant.js';
 import { animateAssistantLayer } from './assistant-transition.js';
+import { captureHistoryFrame, presentHistoryFrame } from './history-transition.js';
 import { withDefense43 } from './defense-formation.js';
 import { LEAGUE_SIZES, getPlayLeague, isFlag5Play, formationOptions, defaultFormation } from './game-formats.js';
-import { competingMainRoutes, runEditorPlayCommand } from './editor-play-commands.js';
+import { competingMainRoutes, prepareWaypointMove, runEditorPlayCommand } from './editor-play-commands.js';
 import { prepareEditorActions } from './editor-actions.js';
-import { selectedPlayerIds, playerSelection, togglePlayerSelection, moveSelectedPlayers } from './editor-selection.js';
+import { selectedPlayerIds, playerSelection, togglePlayerSelection } from './editor-selection.js';
 import { deviceIsTraditional } from './visual-mode.js';
 import { assistantPlayers } from './assistant-edit.js';
 import { stageEdit, StagedEditConflict } from './assistant-draft.js';
@@ -24,8 +25,8 @@ import { clearDepthPlayer } from './depth-model.js';
 import { personnelAssignments, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView, resolveHandoffContext } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
-import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, movePlayer, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
-import { fieldSVG, updateAnimation, updateGeometry, previewDraft, displayColor, syncFieldHitTargets, fieldHitCandidates } from './field.js';
+import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, preparePlayerTranslation, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
+import { fieldSVG, updateAnimation, bindGestureGeometry, previewDraft, displayColor, syncFieldHitTargets, fieldHitCandidates } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
 import { effectsControl, initEffects, burstAt, setEffectsMode, visualMode } from './effects.js';
@@ -36,7 +37,7 @@ import { createPlayThumbnails } from './play-thumbnails.js';
 import { createOnboarding } from './onboarding.js';
 import { onboardingSteps, onboardingLabels } from './onboarding-steps.js';
 import { patchEditorHTML } from './editor-render.js';
-import { EditorHistory, PersonnelHistoryConflict } from './editor-history.js';
+import { canRefreshHistoryField, EditorHistory, PersonnelHistoryConflict } from './editor-history.js';
 import { workspaceNavigation, createWorkspaceSessions } from './workspace-ui.js';
 import { clearModelCredential } from './model-connection.js';
 
@@ -103,6 +104,7 @@ async function navigateWorkspace(mode) {
   if(document.body.dataset.workspaceMode===mode)return true;
   if(rosterView.isEditing()) {toast(uxCopy('Save or cancel the player form before switching.','请先保存或取消正在编辑的球员表单。'),{type:'info'});return false;}
   if(draft&&!confirmDraft(()=>navigateWorkspace(mode)))return false;
+  clearHistoryTransition();
   cancelFieldGesture();
   document.activeElement?.blur?.();
   try {
@@ -122,7 +124,7 @@ document.addEventListener('click',event=>{
   if(button?.closest('.workspace-nav')){event.preventDefault();navigateWorkspace(button.dataset.workspaceMode);}
 });
 let shared = null, digitalBoard = null, analysisView = null, demoAnalysisData = null;
-let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingPoint = null, previewPoint = null, rehearsal = false;
+let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingFieldPointer = null, previewPoint = null, rehearsal = false;
 let importReadSequence = 0, pendingFileImport = null;
 let cancelFieldGesture = () => {};
 const drawingTools = ['route','block','motion','pass'];
@@ -197,6 +199,45 @@ async function convertReference({adoptScope = false} = {}) {
 // The agent returns proposals only. The editor owns the active play, edit rights,
 // autosave and the undo checkpoint. A late response cannot modify another play.
 let boardAssistant = null;
+let historyTransition = null;
+function clearHistoryTransition({sync = true} = {}) {
+  if (!historyTransition) return;
+  const active = historyTransition;
+  historyTransition = null;
+  if (active.frame != null) cancelAnimationFrame(active.frame);
+  active.cancel();
+  if (sync) digitalBoard?.sync({contentChanged:true});
+}
+function showHistoryTransition(svg, frame) {
+  const ready = () => !svg.closest('.is-three') || digitalBoard?.backgroundReady !== false;
+  const active = presentHistoryFrame(svg, current(), frame, {ready});
+  if (!active) return;
+  historyTransition = active;
+  active.finished.then(() => {
+    if (historyTransition !== active) return;
+    active.unmask();
+    active.mask = null;
+    digitalBoard?.sync({contentChanged:true});
+    if (svg.closest('.is-three')) {
+      for (const node of active.layer.querySelectorAll('[data-history-player],[data-history-ball]')) node.remove();
+    }
+    // Keep the final vector frame until its 3D field texture has been presented.
+    const started = performance.now();
+    const release = () => {
+      if (historyTransition !== active) return;
+      if (!document.hidden && !assistantMotionReduced() && digitalBoard?.backgroundReady === false && performance.now() - started < 500) {
+        active.frame = requestAnimationFrame(release);
+        return;
+      }
+      active.layer.remove();
+      historyTransition = null;
+    };
+    release();
+  });
+}
+document.addEventListener('pointerdown', event => {
+  if (historyTransition && event.target.closest?.('#field')) clearHistoryTransition();
+}, true);
 let assistantPreview = null;
 // Uncommitted turns of the current assistant conversation: {scope, edit, handle}.
 let stagedEdit = null;
@@ -254,6 +295,7 @@ function showAssistantHighlights(ids) {
   stage.append(svg);
 }
 function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
+  clearHistoryTransition();
   const source = document.createElement('template');
   source.innerHTML = fieldSVG(original, viewSettings(), {prefix:'assistant-before'});
   // A rebased proposal starts at the currently displayed shape if it is still on screen.
@@ -355,13 +397,14 @@ function rehearseAssistantPreview() {
   assistantPreviewFrame = requestAnimationFrame(step);
 }
 document.addEventListener('playbook:effects-changed', () => {
+  clearHistoryTransition();
   if (assistantMotionReduced()) assistantPreview?.transition.finish();
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { assistantPreview?.transition.finish(); cancelFieldGesture(); }
+  if (document.hidden) { clearHistoryTransition(); assistantPreview?.transition.finish(); cancelFieldGesture(); }
 });
 window.addEventListener('blur', () => cancelFieldGesture());
-window.addEventListener('pagehide', () => cancelFieldGesture());
+window.addEventListener('pagehide', () => { clearHistoryTransition(); cancelFieldGesture(); });
 window.addEventListener('resize', () => cancelFieldGesture());
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
 const scopeFor = selectedId => JSON.stringify([shared?.current?.id || 'local', selectedId]);
@@ -814,7 +857,7 @@ function historyLabel(action) {
   return `${uxCopy(action==='redo'?'Redo':'Undo',action==='redo'?'重做':'撤销')}${transaction?.name?` · ${transaction.name}`:''}`;
 }
 function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
-function resetAnimation() { stop(); time = 0; }
+function resetAnimation() { clearHistoryTransition(); stop(); time = 0; }
 function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return null; }
   cancelFieldGesture();
@@ -827,7 +870,33 @@ function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
   return transaction;
 }
 function choose(id) { cancelFieldGesture(); if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
-function restore(next) { if (!next || !canEdit()) return; clearAssistantPreview(); resetAnimation(); rehearsal=false; state = next; book = current().book; selection = null; draft = null; save(); render(); $('#toast').classList.remove('visible'); }
+function restore(next) {
+  const previous = current(), field = $('#field .pitch-svg');
+  const localField = field && renderedPlayId === previous.id && canRefreshHistoryField(state, next);
+  const focused = field?.contains(document.activeElement) ? document.activeElement : null;
+  const focusedType = focused && ['player','route','zone','annotation'].find(type => focused.hasAttribute('data-' + type));
+  clearAssistantPreview();
+  const frame = previous.id === next.selectedId && !assistantMotionReduced()
+    ? captureHistoryFrame(field, previous, historyTransition) : null;
+  clearHistoryTransition({sync:false});
+  resetAnimation(); rehearsal = false; state = next; book = current().book;
+  selection = null; draft = null;
+  const saved = save();
+  if (localField) {
+    refreshGestureCommit({restoringHistory:true});
+    showHistoryTransition(field, frame);
+    digitalBoard?.sync({contentChanged:true});
+    boardAssistant?.refresh();
+    if (maddenLibrary.isOpen) maddenLibrary.refresh();
+  } else render({restoringHistory:true, historyFrame:frame});
+  if (focused && !focused.isConnected) {
+    const board = $('#field .pitch-svg');
+    const replacement = focusedType && previous.id === current().id && [...board.querySelectorAll('[data-' + focusedType + ']')]
+      .find(node => node.dataset[focusedType] === focused.dataset[focusedType]);
+    (replacement || board)?.focus({preventScroll:true});
+  }
+  return saved;
+}
 function restoreHistory(action) {
   if (!canEdit()) return false;
   cancelFieldGesture();
@@ -841,7 +910,9 @@ function restoreHistory(action) {
   }
   if (!next) return false;
   boardAssistant?.adoptScope(scopeFor(next.selectedId));
-  restore(next);
+  const saved = restore(next);
+  const result = action === 'undo' ? uxCopy('Undone','已撤销') : uxCopy('Redone','已重做');
+  if (saved !== false) toast([result, history.lastTransaction?.name].filter(Boolean).join(' · '), {type:'success'});
   if (history.lastTransaction) boardAssistant?.notifyTransaction?.(history.lastTransaction);
   return true;
 }
@@ -857,7 +928,8 @@ const fieldState = () => JSON.stringify([current().reference ? [current().title,
   [current().players,current().routes,current().zones,current().annotations,current().ball],viewSettings(),selection,time,draft]);
 const inspectorContext = () => `${selection?.type || 'play'}:${selection?.type === 'players' ? selectedPlayerIds(current(),selection).join(',') : selection?.id || current().id}`;
 
-function render() {
+function render({restoringHistory = false, historyFrame = null} = {}) {
+  clearHistoryTransition();
   const p = current(); if (!p) return;
   editorSessions.save(shared?.current?.id||'local',{selectedId:state.selectedId,query,filter,formationFilter});
   clearAssistantPreview();
@@ -902,19 +974,20 @@ function render() {
   // material surfaces stay connected. Switching plays keeps a fresh boundary.
   if (patchShell) {
     patchEditorHTML($('#app'),html);
-    if (renderedFieldState !== fieldState()) renderField();
+    if (renderedFieldState !== fieldState()) renderField({syncDigital:!restoringHistory});
   } else { $('#app').innerHTML = html; renderedFieldState = fieldState(); }
   thumbnails.mount($('.play-list'), plays);
   bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh(); mountBoardAssistant();
   if ($('#personnel-group')?.value) previewPersonnel();
   restoreScroll();
-  if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
+  if (restoringHistory) showHistoryTransition($('#field .pitch-svg'), historyFrame);
+  else if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
   if(!previousPlay) enterWorkbench(document.querySelector('.workspace'));
   renderedPlayId=p.id;
   renderedCardState=cardState();
   if (editingField) syncSaveStatus();
-  digitalBoard?.sync();
+  digitalBoard?.sync({contentChanged:restoringHistory});
 }
 function selectionControls() {
   if (!canEdit() || current().reference) return '';
@@ -1070,7 +1143,8 @@ function inspector() {
   }
   return `${content}${selection ? `<button class="back-details" data-action="clear-selection">${t("editorExtra.back_to_play_details")}</button>` : ''}<div class="inspector-note">${icon('check')}${localRecovery || shared?.sync?.viewError ? t("editor.editing_and_autosave_are_paused_until_recovery_complete") : cloudMode() ? (canEdit() ? t("editor.all_changes_sync_to_the_shared_playbook") : t("editor.you_have_read_only_access")) : t("editor.all_changes_are_saved_in_this_browser")}</div>`;
 }
-function renderField({preservePreview = false} = {}) {
+function renderField({preservePreview = false, syncDigital = true} = {}) {
+  clearHistoryTransition();
   const field=$('#field');if(!field)return;
   const preview = preservePreview ? assistantPreview : null;
   if (assistantPreview || assistantSettling) clearAssistantPreview({refresh:false, notify:!preview});
@@ -1084,19 +1158,23 @@ function renderField({preservePreview = false} = {}) {
   const readyClasses=['digital-ready','digital-fallback-ready'].filter(name=>svg.classList.contains(name));
   svg.setAttribute('class',[next.getAttribute('class'),...readyClasses].join(' '));
   svg.replaceChildren(...next.childNodes);
+  if (drag) drag.paintGeometry = null;
   updateAnimation(svg,play,time);
   syncFieldHitTargets(svg,{pointerType:window.matchMedia?.('(any-pointer: coarse)').matches?'touch':'mouse'});
   if (preview) showAssistantPreview(preview.play, preview.original, {reuse:preview, refresh:false});
-  digitalBoard?.sync({contentChanged:true});
+  if (syncDigital) digitalBoard?.sync({contentChanged:true});
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${t("editor.offense")} ${current().players.filter(p=>p.side==='offense').length} · ${t("editor.defense")} ${current().players.filter(p=>p.side==='defense').length}</span>`;
   renderedFieldState = fieldState();
 }
-function refreshSelection() {
+function refreshInspector(animateContext = true) {
   const inspectorNode=$('.inspector'), context=inspectorNode.dataset.context, next=inspectorContext();
   if (context === next) patchEditorHTML(inspectorNode,inspector());
   else inspectorNode.innerHTML=inspector();
   inspectorNode.dataset.context=next;
-  if(context!==next)enterContext(inspectorNode);
+  if(animateContext && context!==next)enterContext(inspectorNode);
+}
+function refreshSelection() {
+  refreshInspector();
   renderField();updateCanvasHint();protectReadOnly();
 }
 function refreshMetadata() {
@@ -1114,9 +1192,12 @@ function refreshMetadata() {
   if (renderedFieldState !== fieldState()) renderField();
   syncEditorChrome();protectReadOnly();
 }
-function refreshGestureCommit() {
+function refreshGestureCommit({restoringHistory = false} = {}) {
   const restoreScroll=captureEditorScroll({samePlay:true});
-  refreshSelection();refreshMetadata();restoreScroll();
+  refreshInspector(!restoringHistory);
+  renderField({syncDigital:!restoringHistory});
+  refreshMetadata();
+  restoreScroll();
 }
 function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {
@@ -1203,26 +1284,27 @@ function bindField() {
     if (drag && (drag.field !== field || event.pointerId !== drag.pointerId) || event.pointerType === 'touch' && !event.isPrimary) return;
     if(draft && !drag) {previewPoint=coordinates(event); if(!gestureFrame)gestureFrame=requestAnimationFrame(()=>{gestureFrame=null;previewDraft(field.querySelector('svg'),draft,previewPoint);});return;}
     if (!drag || !canEdit()) return;
-    pendingPoint=coordinates(event);
+    pendingFieldPointer=event;
     if(!gestureFrame)gestureFrame=requestAnimationFrame(flushGesture);
   });
   function flushGesture() {
     if(gestureFrame)cancelAnimationFrame(gestureFrame);gestureFrame=null;
-    if(!drag || !pendingPoint)return;
-    const at=pendingPoint;
-    pendingPoint=null;
+    if(!drag || !pendingFieldPointer)return;
+    const at=coordinates(pendingFieldPointer);
+    pendingFieldPointer=null;
+    if (drag.lastPoint?.x === at.x && drag.lastPoint.y === at.y) return;
+    drag.lastPoint = at;
     if(Math.hypot(at.x-drag.start.x,at.y-drag.start.y)<.2 && !drag.moved)return;
+    if (drag.type === 'route') return;
     const p=drag.preview ??= clone(drag.base);
     drag.moved=true;field.classList.add('is-dragging');
-    if(drag.type==='players') {
-      const result=moveSelectedPlayers(drag.base,drag.ids,at.x-drag.start.x,at.y-drag.start.y);
-      Object.assign(p,result.play);drag.delta=result.delta;
-    } else if(drag.type==='player') {
-      const initial=drag.base, original=drag.original;
-      const player=p.players.find(v=>v.id===drag.id);player.x=original.x;player.y=original.y;
-      for(const route of p.routes)if(route.playerId===drag.id)route.points=clone(initial.routes.find(r=>r.id===route.id).points);
-      movePlayer(p,drag.id,original.x+at.x-drag.start.x,original.y+at.y-drag.start.y);
-    } else if(drag.type==='point') { const route = p.routes.find(r=>r.id===drag.routeId); route.points[drag.index]=at; delete route.blockTargets; delete route.intent; }
+    if (drag.type === 'players' || drag.type === 'player') {
+      drag.translate ??= preparePlayerTranslation(p, drag.ids ?? [drag.id]);
+      drag.delta = drag.translate(at.x - drag.start.x, at.y - drag.start.y);
+    } else if (drag.type === 'point') {
+      drag.waypoint ??= prepareWaypointMove(p, drag.routeId, drag.index);
+      drag.waypoint.move(at);
+    }
     else if(drag.type==='new-zone') {
       let zone=p.zones.find(v=>v.id===drag.zoneId);
       if(!zone){zone={id:drag.zoneId,x:50,y:40,rx:1,ry:1,color:COLORS.zone,label:'ZONE'};p.zones.push(zone);selection={type:'zone',id:zone.id};renderField();}
@@ -1233,8 +1315,9 @@ function bindField() {
       object.x = clamp(drag.original.x + at.x - drag.start.x);
       object.y = clamp(drag.original.y + at.y - drag.start.y);
     }
-    updateGeometry(field.querySelector('svg'),p);
-    digitalBoard?.refreshBackground();
+    drag.paintGeometry ??= bindGestureGeometry(field.querySelector('.pitch-svg'), p, drag);
+    if (drag.paintGeometry()) digitalBoard?.refreshBackground();
+    else digitalBoard?.invalidate();
     const readout=field.querySelector('.drag-readout');readout.hidden=false;readout.textContent=`${drag.original?.label||t("editorExtra.adjust_position")} · X ${at.x.toFixed(1)} / Y ${at.y.toFixed(1)}`;
   }
   function releaseDrag() {
@@ -1242,7 +1325,7 @@ function bindField() {
     drag = null;
     if (gestureFrame) cancelAnimationFrame(gestureFrame);
     gestureFrame = null;
-    pendingPoint = null;
+    pendingFieldPointer = null;
     field.classList.remove('is-dragging');
     field.querySelector('.drag-readout').hidden = true;
     // lostpointercapture may fire synchronously. Ownership has already ended.
@@ -1260,11 +1343,16 @@ function bindField() {
   const endDrag = event => {
     if (drag?.field !== field || event.pointerId !== drag.pointerId) return;
     if (!canEdit() || drag.base !== current()) { cancelDrag(event); return; }
-    pendingPoint = coordinates(event);
+    pendingFieldPointer = event;
     flushGesture();
     const completed = releaseDrag();
     if (!completed.moved) return;
     const preview = completed.preview;
+    const samePosition = (a, b) => Math.abs(a.x-b.x) < 1e-9 && Math.abs(a.y-b.y) < 1e-9;
+    if (completed.type !== 'new-zone' && samePosition(completed.start, completed.lastPoint)) {
+      refreshSelection();
+      return;
+    }
     let command;
     if (completed.type === 'players') {
       const { x: dx, y: dy } = completed.delta;
@@ -1272,18 +1360,23 @@ function bindField() {
       command = { kind: 'players_move', playerIds: completed.ids, dx, dy };
     } else if (completed.type === 'player') {
       const player = preview.players.find(item => item.id === completed.id);
+      if (samePosition(player, completed.original)) { refreshSelection(); return; }
       command = { kind: 'player_update', playerId: player.id, patch: { x: player.x, y: player.y } };
     } else if (completed.type === 'point') {
       const route = preview.routes.find(item => item.id === completed.routeId);
+      const original = completed.base.routes.find(item => item.id === completed.routeId);
+      if (!original.blockTargets && samePosition(route.points[completed.index], original.points[completed.index])) { refreshSelection(); return; }
       command = { kind: 'route_update', routeId: route.id, patch: { points: route.points } };
     } else if (completed.type === 'new-zone') {
       const zone = preview.zones.find(item => item.id === completed.zoneId);
       command = { kind: 'zone_add', x: zone.x, y: zone.y, rx: zone.rx, ry: zone.ry, color: zone.color, label: zone.label };
     } else if (completed.type === 'zone') {
       const zone = preview.zones.find(item => item.id === completed.id);
+      if (samePosition(zone, completed.original)) { refreshSelection(); return; }
       command = { kind: 'zone_update', zoneId: zone.id, patch: { x: zone.x, y: zone.y } };
     } else if (completed.type === 'annotation') {
       const annotation = preview.annotations.find(item => item.id === completed.id);
+      if (samePosition(annotation, completed.original)) { refreshSelection(); return; }
       command = { kind: 'annotation_update', annotationId: annotation.id, patch: { x: annotation.x, y: annotation.y } };
     } else return;
 
@@ -1346,6 +1439,7 @@ function finishRoute() {
 }
 
 function openModal(title, body, footer = '', wide = false) {
+  clearHistoryTransition();
   if (drag) cancelFieldGesture();
   const root = $('#modal-root');
   // Replacing a recovery/confirmation step keeps the original opener rather
@@ -1530,6 +1624,7 @@ async function pngExport() {
   img.onerror = () => { URL.revokeObjectURL(url); toast(t("feedback.image_generation_failed_try_exporting_svg"), { type: 'error' }); }; img.src = url;
 }
 function togglePlay() {
+  clearHistoryTransition();
   if (drag) cancelFieldGesture();
   clearAssistantPreview();
   if (current().reference) { toast(t("feedback.the_original_diagram_has_no_playable_route_data"), { type: 'info' }); return; }
@@ -1943,7 +2038,7 @@ function showEditor(show) {
       if(state.data.plays.some(play=>play.id===remembered.selectedId)){state.selectedId=remembered.selectedId;book=current().book;}
     }
     digitalBoard = createDigitalBoard({
-      getState: () => ({ play: fieldPlay(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null, presentationMask:assistantPreview?.mask, presentationSettling:!!assistantSettling }),
+      getState: () => ({ play: fieldPlay(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null, presentationMask:assistantPreview?.mask || historyTransition?.mask, presentationSettling:!!assistantSettling || !!historyTransition }),
       notify: message => toast(message, { type: 'warning' }),
     });
     render();

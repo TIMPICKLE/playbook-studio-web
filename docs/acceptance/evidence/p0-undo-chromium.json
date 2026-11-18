@@ -1,0 +1,44 @@
+{
+  "runtime": "Managed Chromium, foreground, 1363x936, traditional mode",
+  "action": "Undo the X route endpoint edit in the same play",
+  "originalEndpoint": [
+    259,
+    194.8
+  ],
+  "restoredEndpoint": [
+    143.32,
+    156.8
+  ],
+  "wholeEditorRefresh": {
+    "synchronousMs": 269,
+    "forcedStyleLayoutMs": 210,
+    "frameOffsetsMs": [
+      0,
+      694,
+      1712
+    ]
+  },
+  "localRefreshRuns": [
+    {
+      "synchronousMs": 97,
+      "frameOffsetsMs": [
+        0,
+        917,
+        1932
+      ]
+    },
+    {
+      "synchronousMs": 65,
+      "frameOffsetsMs": [
+        0,
+        965,
+        1971
+      ]
+    }
+  ],
+  "otherPlayersChecked": 11,
+  "otherRoutesChecked": 9,
+  "finalHitGeometryCorrect": true,
+  "nativeIntermediateFrameObserved": false,
+  "notes": "Local refresh runs did not return an attributable forced style/layout duration. The browser sampled more slowly than the 280 ms animation."
+}

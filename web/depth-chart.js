@@ -1,4 +1,5 @@
 import { t } from './i18n.js';
+import { createDepthMoveFeedback, depthSurface, describeDepthMove } from './depth-chart-motion.js';
 import { escapeHTML as e } from './model.js';
 import { bindDepthTemplate, createDepthSlot, DEPTH_LIMITS, planDepthPlayerMove } from './depth-model.js';
 import { renderDepthFormation, depthRankActions, depthDragSource, depthPlayerPicker } from './depth-formation.js';
@@ -13,7 +14,7 @@ const playerLabel = player => [player.number && `#${player.number}`, player.name
 
 function playerChip(player, move = null) {
   if (!player) return `<span class="depth-open">${t('depth.vacant')}</span>`;
-  const name = `${player.number ? `<b class="depth-jersey">#${e(player.number)}</b>` : ''}<span>${e(player.name)}</span>`;
+  const name = `${player.number ? `<b class="depth-jersey">#${e(player.number)}</b>` : ''}<span data-depth-label="${e(player.id)}">${e(player.name)}</span>`;
   if (!move) return `<span class="depth-athlete">${name}</span>`;
   const { slot, index } = move;
   const label = t('depth.moveAssignment', { name: player.name, label: slot.label, rank: rankLabel(index) });
@@ -79,6 +80,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
   root.innerHTML = `<p class="depth-status" role="status"></p><div class="depth-sheet"></div>
     <dialog class="roster-dialog depth-dialog" aria-labelledby="depth-editor-title"></dialog>`;
   const sheet = root.querySelector('.depth-sheet');
+  const motion = createDepthMoveFeedback(sheet);
   const dialog = root.querySelector('.depth-dialog');
   const notice = root.querySelector('.depth-status');
   const group = () => getData().depthChart?.groups.find(item => item.id === getSelectedId());
@@ -95,6 +97,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
   };
 
   function refresh() {
+    motion.cancel();
     // Preserve the live receipt while replacing the sheet that currently hosts it.
     if (notice.parentElement !== root) root.insertBefore(notice, sheet);
     if (workspace !== getWorkspaceId()) {
@@ -186,9 +189,8 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     if (other) { rankFeedback(t('depth.starterTaken', { label: other.label, name: getData().roster.find(player => player.id === slot.playerIds[index])?.name || '' }), false, true, slot.id); return; }
     const before = [...slot.playerIds], after = [...before];
     [after[index], after[targetIndex]] = [after[targetIndex], after[index]];
-    if (!applyRanks([{ id: slot.id, before, after }], slot.id)) return;
-    ([...sheet.querySelectorAll('[data-depth-chart]')].find(item => item.dataset.slot === slot.id && item.dataset.player === button.dataset.player && item.dataset.depthChart === action)
-      || [...sheet.querySelectorAll('[data-depth-chart="edit"]')].find(item => item.dataset.slot === slot.id))?.focus({ preventScroll: true });
+    const surface = depthSurface(button);
+    applyRanks([{ id: slot.id, before, after }], { playerId: button.dataset.player, slotId: slot.id, surface }, slot.id, surface, action);
   }
 
   function commitRanks(changes) {
@@ -198,15 +200,27 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     });
   }
 
-  function applyRanks(changes, slotId) {
+  function moveMessage(move, undone) {
+    const place = point => {
+      const slot = group().slots.find(item => item.id === point.slotId);
+      return slot ? `${slot.label} · ${rankLabel(point.index)}` : t('roster.directory');
+    };
+    const name = getData().roster.find(player => player.id === move.playerId)?.name || '';
+    return t(undone ? 'depth.moveUndone' : 'depth.moveDone', { name, from: place(move.from), to: place(move.to) });
+  }
+
+  function applyRanks(changes, source, slotId, surface, action) {
     if (!changes.length) return false;
+    const move = describeDepthMove(changes, source, slotId, surface);
+    const before = motion.capture(move);
     if (commitRanks(changes) === false) { rankFeedback(t('roster.saveFailed'), false, true, slotId); return false; }
-    lastRankChange = { workspace: getWorkspaceId(), groupId: group().id,
+    lastRankChange = { workspace: getWorkspaceId(), groupId: group().id, move,
       changes: changes.map(change => ({ id: change.id, before: [...change.before], after: [...change.after] })) };
     selectedSlotId = slotId;
     assignment = null;
     onChange?.(); refresh();
-    rankFeedback(t('depth.rankUpdated', { label: group().slots.find(item => item.id === slotId).label }), true, false, slotId);
+    rankFeedback(moveMessage(move, false), true, false, slotId);
+    motion.present(move, before, action);
     return true;
   }
 
@@ -216,7 +230,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     return value.workspace === getWorkspaceId() && value.groupId === getSelectedId() && value.ranks === ranksSnapshot(group());
   }
 
-  function placePlayer(value, slotId, index) {
+  function placePlayer(value, slotId, index, target) {
     if (draft || !value) return;
     if (!canEdit() || !stampMatches(value)) {
       assignment = null; refresh(); rankFeedback(t(canEdit() ? 'depth.changedRetry' : 'roster.permissionChanged'), false, true); return;
@@ -226,7 +240,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       rankFeedback(t('depth.' + plan.error, { label: plan.label || '', name: getData().roster.find(player => player.id === value.source.playerId)?.name || '' }), false, true, slotId); return;
     }
     if (!plan.changes.length) { assignment = null; refresh(); return; }
-    applyRanks(plan.changes, slotId);
+    applyRanks(plan.changes, value.source, slotId, depthSurface(target));
   }
 
   function clearDropTargets() {
@@ -236,7 +250,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
 
   function sourceFrom(element) {
     const { depthSource: playerId, sourceSlot: slotId, sourceIndex } = element.dataset;
-    return slotId ? { playerId, slotId, index: Number(sourceIndex) } : { playerId };
+    return { playerId, slotId, index: Number(sourceIndex), surface: depthSurface(element) };
   }
 
   function dragStart(event) {
@@ -262,7 +276,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     if (!target || !dragging) return;
     event.preventDefault();
     const value = dragging; dragging = null; clearDropTargets();
-    placePlayer(value, target.dataset.depthDropSlot, Number(target.dataset.depthDropIndex));
+    placePlayer(value, target.dataset.depthDropSlot, Number(target.dataset.depthDropIndex), target);
   }
 
   function dragEnd() { dragging = null; clearDropTargets(); }
@@ -284,10 +298,15 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       || new Set(restoredStarters).size !== restoredStarters.length) {
       lastRankChange = null; refresh(); rankFeedback(t('depth.undoChanged'), false, true); return;
     }
-    const slotId = changed.at(-1).id;
+    const move = { playerId: change.move.playerId, from: change.move.to, to: change.move.from };
+    const before = motion.capture(move);
+    const slotId = move.to.slotId || move.from.slotId;
     const ok = commitRanks(changed.map(item => ({ ...item, after: item.before })));
     if (ok === false) { rankFeedback(t('roster.saveFailed'), true, true, slotId); return; }
-    lastRankChange = null; onChange?.(); refresh(); rankFeedback(t('depth.undone'), false, false, slotId);
+    selectedSlotId = slotId;
+    lastRankChange = null; onChange?.(); refresh();
+    rankFeedback(moveMessage(move, true), false, false, slotId);
+    motion.present(move, before);
   }
 
   function rankEditor() {
@@ -404,7 +423,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       sheet.querySelector('button[data-depth-chart="place-player"], button[data-depth-chart="inspect"][data-depth-drop-slot]')?.focus({ preventScroll: true }); return;
     }
     if (action === 'cancel-assignment') { assignment = null; refresh(); rankFeedback(t('depth.assignmentCanceled')); return; }
-    if (action === 'place-player') { placePlayer(assignment, button.dataset.slot, Number(button.dataset.index)); return; }
+    if (action === 'place-player') { placePlayer(assignment, button.dataset.slot, Number(button.dataset.index), button); return; }
     if (action === 'mode' && Object.hasOwn(views, button.dataset.mode)) {
       mode = button.dataset.mode;
       refresh();
@@ -412,7 +431,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
       return;
     }
     if (action === 'inspect') {
-      if (assignment) { placePlayer(assignment, button.dataset.slot, 0); return; }
+      if (assignment) { placePlayer(assignment, button.dataset.slot, 0, button); return; }
       selectedSlotId = button.dataset.slot;
       refresh();
       [...sheet.querySelectorAll('[data-depth-chart="inspect"]')].find(el => el.dataset.slot === selectedSlotId)?.focus({ preventScroll: true });
@@ -498,6 +517,7 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
   return {
     refresh, isEditing: () => Boolean(draft),
     destroy() {
+      motion.cancel();
       remember();
       root.removeEventListener('click', click);
       root.removeEventListener('change', change);
