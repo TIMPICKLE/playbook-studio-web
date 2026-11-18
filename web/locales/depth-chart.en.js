@@ -1,4 +1,6 @@
 export default {
+  'depth.moveDone': 'Moved {name} from {from} to {to}.',
+  'depth.moveUndone': 'Undone. Returned {name} from {from} to {to}.',
   'depth.placeAtBackup': 'Place at backup {rank}',
   'depth.moveAssignment': 'Move {name} from {label}, {rank}',
   'depth.assignPlayer': 'Assign {name}',

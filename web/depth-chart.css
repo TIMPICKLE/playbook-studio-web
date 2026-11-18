@@ -29,6 +29,9 @@
 .depth-position { font: 700 17px/1.35 var(--font-display); letter-spacing: .015em; }
 .depth-mobile-label { display: none; }
 .depth-athlete, .depth-backups li { display: inline-flex; align-items: baseline; gap: 6px; max-width: 100%; }
+.df-ranks [data-depth-label], .depth-assign-player [data-depth-label] { display: inline-block; }
+[data-depth-move="from"] { box-shadow: inset 0 -2px var(--hairline-strong); }
+[data-depth-move="to"] { box-shadow: inset 0 -2px var(--ui-focus); }
 .depth-athlete { font-size: 14px; font-weight: 550; }
 .depth-athlete, .depth-athlete > span, .depth-backups li { min-width: 0; }
 .depth-jersey, .depth-rank { font-variant-numeric: tabular-nums; white-space: nowrap; }

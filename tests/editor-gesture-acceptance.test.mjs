@@ -42,6 +42,32 @@ test('Escape during a player drag rolls back the live preview and a late release
   assert.ok(Math.abs(f.data().plays[0].players.find(p=>p.id===actor.id).x-(actor.x+1))<1e-9,'another gesture can start after cancellation');
 });
 
+test('returning to the starting point preserves Redo and a staged waypoint’s target metadata', async t => {
+  const seed = starterWorkspace(), play = seed.plays[0];
+  const actor = play.players.find(player => player.label === 'X');
+  const block = play.routes.find(route => route.playerId !== actor.id);
+  Object.assign(block, { kind: 'block', stagedBlock: true, blockTargets: block.points.slice(1).map(() => actor.id), endCap: 'bar' });
+  const f = await host(t, { raw: encodeWorkspace(seed) }), before = f.data();
+  const field = f.q('#field'), marker = () => f.q(`#field [data-player="${actor.id}"]`);
+  f.pointer(marker(), 'pointerdown', actor);
+  f.pointer(field, 'pointerup', { x: actor.x + 2, y: actor.y - 1 });
+  f.action('undo');
+  const roundTrip = async (target, start) => {
+    f.pointer(target, 'pointerdown', start);
+    f.pointer(field, 'pointermove', { x: start.x + 3, y: start.y - 3 });
+    await new Promise(resolve => f.win.requestAnimationFrame(resolve));
+    f.pointer(field, 'pointerup', start);
+    assert.deepEqual(f.data(), before);
+    assert.equal(f.q('[data-action="undo"]').disabled, true);
+    assert.equal(f.q('[data-action="redo"]').disabled, false);
+  };
+  await roundTrip(marker(), actor);
+  f.key(f.q(`#field [data-route="${block.id}"]`), 'Enter');
+  const handle = f.q(`#field .point-hit[data-route-id="${block.id}"][data-point="1"]`);
+  const start = { x: (Number(handle.getAttribute('cx')) - 18) / 9.64, y: (Number(handle.getAttribute('cy')) - 20) / 7.6 };
+  await roundTrip(handle, start);
+});
+
 test('a preselected player drag can be cancelled from a focused search input without consuming IME Escape',async t=>{
   const f=await host(t),before=f.data(),actor=before.plays[0].players.find(p=>p.label==='X');
   const player=()=>f.q(`#field [data-player="${actor.id}"]`);
@@ -403,8 +429,11 @@ test('committing a motion waypoint redraws the reanchored follow-up route and th
   const oldPath=path().getAttribute('d'),start=motion.points[1],end={x:35,y:63};
   f.pointer(f.q('#field [data-route-id="acceptance-motion"][data-point="1"]'),'pointerdown',start);
   f.pointer(f.q('#field'),'pointermove',end);await new Promise(resolve=>f.win.requestAnimationFrame(resolve));
+  const previewPath = path().getAttribute('d');
+  assert.notEqual(previewPath, oldPath, 'the linked route follows the motion endpoint in the drag frame');
   f.pointer(f.q('#field'),'pointerup',end);
   const edited=f.data(),next=edited.plays[0].routes.find(route=>route.id==='acceptance-follow');
+  assert.equal(path().getAttribute('d'), previewPath, 'a validated motion edit has no release jump');
   assert.ok(Math.abs(next.points[0].x-35)<1e-9&&Math.abs(next.points[0].y-63)<1e-9);
   assert.ok(Math.abs(next.points[1].x-35)<1e-9&&Math.abs(next.points[1].y-36)<1e-9);assert.equal(next.delay,2);
   assert.equal(f.q('#field .pitch-svg'),svg);
@@ -414,6 +443,14 @@ test('committing a motion waypoint redraws the reanchored follow-up route and th
   assert.equal(f.q('.inspector').dataset.context,'route:acceptance-motion');assert.equal(Number(f.q('[data-prop="duration"]').value),2);
   f.action('undo');assert.deepEqual(f.data(),before);assert.equal(path().getAttribute('d'),oldPath);
   f.action('redo');assert.deepEqual(f.data(),edited);assert.equal(path().getAttribute('d'),routePath(next));
+  f.key(f.q('#field [data-route="acceptance-motion"]'),'Enter');
+  f.pointer(f.q('#field .point-hit[data-route-id="acceptance-motion"][data-point="1"]'),'pointerdown',end);
+  const outside = { x: end.x, y: 1 };
+  f.pointer(f.q('#field'),'pointermove',outside);await new Promise(resolve=>f.win.requestAnimationFrame(resolve));
+  f.pointer(f.q('#field'),'pointerup',outside);
+  assert.deepEqual(f.data(),edited,'an out-of-bounds follower rejects the entire motion edit');
+  assert.equal(path().getAttribute('d'),routePath(next),'the rejected preview rolls back the follower');
+  f.action('undo');assert.deepEqual(f.data(),before);
 });
 
 test('metadata edits and subsequent gesture commits retain the correct 11-player or flag league badge',async t=>{
@@ -451,4 +488,36 @@ test('a landscape editor can add an optional route beside Finish without changin
   assert.deepEqual(after.routes.filter(route=>route.id!==added.id),before.routes);
   assert.deepEqual(atTime(after),atTime(before));
   f.action('undo');assert.deepEqual(f.data().plays[0],before);
+});
+
+test('history feedback uses the final hit position for an immediate drag and keeps keyboard focus on the real player', async t => {
+  const f=await host(t), before=f.data(), actor=before.plays[0].players.find(p=>p.label==='X');
+  const marker=()=>f.q('#field [data-player="' + actor.id + '"]');
+  const field=f.q('#field'), end={x:actor.x+3,y:actor.y-2};
+  f.pointer(marker(),'pointerdown',actor);
+  f.pointer(field,'pointerup',end);
+  const moved=f.data();
+  marker().focus();
+  f.key(marker(),'z',{ctrlKey:true});
+  assert.deepEqual(f.data(),before);
+  const overlay=f.q('#field .history-transition');
+  assert.ok(overlay?.querySelector('[data-history-player]'));
+  assert.equal(f.win.document.activeElement,marker());
+  assert.equal(f.q('#toast').getAttribute('role'),'status');
+  f.action('redo');
+  assert.deepEqual(f.data(),moved);
+  assert.equal(overlay.isConnected,false);
+  assert.ok(f.q('#field .history-transition'));
+  f.pointer(marker(),'pointerdown',end,{pointerType:'touch'});
+  assert.equal(f.q('#field .history-transition'),null);
+  const next={x:end.x+2,y:end.y-1};
+  f.pointer(field,'pointerup',next,{pointerType:'touch'});
+  const result=f.data().plays[0].players.find(p=>p.id===actor.id);
+  assert.ok(Math.abs(result.x-next.x)<1e-9 && Math.abs(result.y-next.y)<1e-9);
+  const matchMedia=f.win.matchMedia.bind(f.win);
+  f.win.matchMedia=query=>query.includes('prefers-reduced-motion')?{...matchMedia(query),matches:true}:matchMedia(query);
+  f.action('undo');
+  assert.deepEqual(f.data(),moved);
+  assert.equal(f.q('#field .history-transition'),null);
+  assert.match(f.q('#toast').textContent,/Undone|已撤销/);
 });

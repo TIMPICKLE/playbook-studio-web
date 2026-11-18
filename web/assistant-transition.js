@@ -71,7 +71,7 @@ function pathChanges(target, source, updates, restores) {
   }
 }
 
-function drawNewRoute(node, updates, restores) {
+function drawNewRoute(node, updates, restores, start = 0) {
   for (const path of node.querySelectorAll('.route-stroke')) {
     // Optional/pass routes keep their own dash pattern. They enter through alpha.
     if (path.hasAttribute('stroke-dasharray')) continue;
@@ -80,25 +80,28 @@ function drawNewRoute(node, updates, restores) {
     path.setAttribute('pathLength', '1');
     path.setAttribute('stroke-dasharray', '1 1');
     updates.push(progress => {
-      path.setAttribute('stroke-dashoffset', String(1 - progress));
-      if (marker && progress > .92) path.setAttribute('marker-end', marker);
+      const drawn = start + (1 - start) * progress;
+      path.setAttribute('stroke-dashoffset', String(1 - drawn));
+      if (marker && drawn > .92) path.setAttribute('marker-end', marker);
       else path.removeAttribute('marker-end');
     });
   }
 }
 
-function tweenObject(target, source) {
+function tweenObject({node: target, source, type, removing, fadeChange}) {
   const updates = [], restores = [];
   const targetOpacity = number(target.getAttribute('opacity') ?? '1');
-  if (target.hasAttribute('data-removing')) {
+  if (removing) {
     opacity(target, targetOpacity, 0, updates, restores);
     return { updates, restores };
   }
   if (!source) {
     opacity(target, 0, targetOpacity, updates, restores);
-    if (target.hasAttribute('data-route')) drawNewRoute(target, updates, restores);
+    if (type === 'route') drawNewRoute(target, updates, restores);
     return { updates, restores };
   }
+  const partial = type === 'route' && source.querySelector('.route-stroke[stroke-dasharray="1 1"][stroke-dashoffset]');
+  if (partial) drawNewRoute(target, updates, restores, 1 - clamp(number(partial.getAttribute('stroke-dashoffset'))));
   pathChanges(target, source, updates, restores);
   const from = translate(source.getAttribute('transform'));
   const to = translate(target.getAttribute('transform'));
@@ -114,22 +117,32 @@ function tweenObject(target, source) {
       numericAttributes(child, old, selector === 'ellipse' ? ['cx', 'cy', 'rx', 'ry'] : ['x', 'y'], updates, restores);
     }
   }
-  if (source.textContent !== target.textContent && target.hasAttribute('data-annotation')) opacity(target, 0, targetOpacity, updates, restores);
+  const startOpacity = number(source.getAttribute('opacity') ?? '1');
+  if (startOpacity !== targetOpacity) opacity(target, startOpacity, targetOpacity, updates, restores);
+  else if ((source.textContent !== target.textContent && type === 'annotation') || (fadeChange && !updates.length))
+    opacity(target, 0, targetOpacity, updates, restores);
   return { updates, restores };
 }
 
 /** Animate a presentation layer only. Canonical play data and undo belong to the editor. */
-export function animateAssistantLayer({ layer, beforeSvg, reducedMotion = false, duration = 620, win = layer?.ownerDocument?.defaultView }) {
+export function animateAssistantLayer({ layer, beforeSvg, ...options }) {
+  const selector = objectAttributes.map(type => '[data-' + type + ']').join(',');
+  const originals = new Map([...(beforeSvg?.querySelectorAll(selector) || [])].map(node => [objectKey(node), node]));
+  const objects = [...(layer?.querySelectorAll(selector) || [])].map(node => ({
+    node, source: originals.get(objectKey(node)), type: objectAttributes.find(type => node.hasAttribute('data-' + type)),
+    removing: node.hasAttribute('data-removing'),
+  }));
+  return animateFieldObjects({layer, objects, ...options});
+}
+
+export function animateFieldObjects({ layer, objects, reducedMotion = false, duration = 620, stagger = 22, ready, win = layer?.ownerDocument?.defaultView }) {
   const motionPreference = win?.matchMedia?.('(prefers-reduced-motion: reduce)');
   let resolveFinished;
   const finished = new Promise(resolve => { resolveFinished = resolve; });
   let frame = null, complete = false;
-  const selector = objectAttributes.map(type => '[data-' + type + ']').join(',');
-  const originals = new Map([...(beforeSvg?.querySelectorAll(selector) || [])].map(node => [objectKey(node), node]));
-  const objects = [...(layer?.querySelectorAll(selector) || [])].map(node => ({ node, ...tweenObject(node, originals.get(objectKey(node))) }));
-  const active = objects.filter(object => object.updates.length);
+  const active = objects.map(tweenObject).filter(object => object.updates.length);
   const length = Math.min(760, Math.max(0, Number.isFinite(duration) ? duration : 620));
-  let started = null;
+  let started = null, waitingSince = null;
   function stop() {
     if (frame !== null) win?.cancelAnimationFrame(frame);
     frame = null;
@@ -164,10 +177,18 @@ export function animateAssistantLayer({ layer, beforeSvg, reducedMotion = false,
     frame = null;
     if (complete) return;
     if (!layer?.isConnected) { cancel(); return; }
+    if (started === null && ready && !ready()) {
+      // A 3D field retains the previous texture until its replacement decodes.
+      // Keep the source still so an old path never underlies a moving one.
+      waitingSince ??= now;
+      if (now - waitingSince >= 500) finish();
+      else frame = win.requestAnimationFrame(step);
+      return;
+    }
     if (started === null) started = now;
     let allDone = true;
     active.forEach((object, index) => {
-      const delay = Math.min(index * 22, 110);
+      const delay = Math.min(index * stagger, 110);
       const progress = length ? clamp((now - started - delay) / length) : 1;
       if (progress < 1) allDone = false;
       for (const update of object.updates) update(ease(progress));

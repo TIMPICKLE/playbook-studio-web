@@ -1,4 +1,4 @@
-import { clamp, movePlayer } from './model.js';
+import { preparePlayerTranslation } from './model.js';
 
 // Shared domain mutations. Both manual gestures and AI commands execute these
 // against a caller-owned draft, then validate and commit the complete group.
@@ -14,11 +14,8 @@ export function movePlayerGroup(play, ids, dx, dy) {
   const selected=groupIds(play,ids);
   if(!Number.isFinite(dx)||!Number.isFinite(dy))throw new Error('Group movement must use finite coordinates.');
   if(!selected.length)return {ids:selected,delta:{x:0,y:0},changed:false};
-  const chosen=new Set(selected),geometry=[...play.players.filter(player=>chosen.has(player.id)),...play.routes.filter(route=>chosen.has(route.playerId)).flatMap(route=>route.points)];
-  const x=clamp(dx,-Math.min(...geometry.map(point=>point.x)),100-Math.max(...geometry.map(point=>point.x)));
-  const y=clamp(dy,-Math.min(...geometry.map(point=>point.y)),100-Math.max(...geometry.map(point=>point.y)));
-  if(x||y)for(const id of selected){const player=play.players.find(player=>player.id===id);movePlayer(play,id,player.x+x,player.y+y);}
-  return {ids:selected,delta:{x,y},changed:!!(x||y)};
+  const delta = preparePlayerTranslation(play, selected)(dx, dy);
+  return {ids:selected,delta,changed:!!(delta.x||delta.y)};
 }
 
 export function removePlayerGroup(play, ids) {

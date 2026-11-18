@@ -38,3 +38,9 @@ html[data-digital-board=loading] .field-tag::after{content:'材质加载中';fon
   html[data-visual-mode=digital] #field .route-stroke {filter:drop-shadow(0 1px .5px #0a0a0b80)}
 }
 @media print{.digital-scene-canvas,.digital-token-overlay{display:none!important}.pitch-stage>.pitch-svg{transform:none!important}}
+
+/* The history overlay shares the board's camera; only committed SVG nodes receive input. */
+.pitch-stage > .history-transition {position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible}
+.pitch-stage.is-perspective > .history-transition {transform:var(--board-projection);transform-origin:0 0;transform-box:border-box}
+.pitch-stage.is-fallback .history-transition :is(.player-body,.player-label) {opacity:1}
+@media print {.history-transition{display:none}}

@@ -1,4 +1,6 @@
 export default {
+  'depth.moveDone': '已将 {name} 从{from}调至{to}。',
+  'depth.moveUndone': '已撤销。{name} 从{from}回到{to}。',
   'depth.placeAtBackup': '放入第 {rank} 替补',
   'depth.moveAssignment': '移动 {label} 的{rank}球员 {name}',
   'depth.assignPlayer': '分配 {name}',

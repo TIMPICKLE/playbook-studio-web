@@ -134,10 +134,11 @@ test('coaches promote and reorder backups without opening a dialog and can undo 
   f.click('[data-depth-chart=quick-promote][data-player=p1]');
   assert.deepEqual(f.slot.playerIds, ['p1', 'p0', 'p2']);
   assert.equal(f.q('dialog').open, false);
-  assert.match(f.q('.depth-status').textContent, /更新/);
+  assert.match(f.q('.depth-status').textContent, /B.*QB.*第 1 替补.*QB.*首发/);
   assert.equal(f.q('.depth-status').closest('[data-depth-feedback]')?.dataset.depthFeedback, f.slot.id);
   f.click('[data-depth-chart=undo-ranks]');
   assert.deepEqual(f.slot.playerIds, ['p0', 'p1', 'p2']);
+  assert.match(f.q('.depth-status').textContent, /已撤销.*B.*QB.*首发.*QB.*第 1 替补/);
   f.click('[data-depth-chart=mode][data-mode=table]');
   f.click('[data-depth-chart=quick-up][data-player=p2]');
   assert.deepEqual(f.slot.playerIds, ['p0', 'p2', 'p1']);

@@ -2,9 +2,9 @@ import { burstAt } from './effects.js';
 // Motion describes a change of context. Direct manipulation never waits for it.
 // Rendering and decoration are device preferences. Functional transitions only
 // follow the user's motion preference, so flat editing keeps clear feedback.
-export const reducedMotion = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+export const reducedMotion = (view = globalThis.window) => !!view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 export function animate(node, frames, options = {}) {
-  if (!node?.animate || reducedMotion()) return null;
+  if (!node?.animate || reducedMotion(node.ownerDocument?.defaultView)) return null;
   return node.animate(frames, { duration: 180, easing: 'cubic-bezier(.22,1,.36,1)', ...options });
 }
 export function enterContext(node) {
@@ -14,7 +14,7 @@ export function enterPlayers(field, ids) {
   let index = 0;
   for (const node of field?.querySelectorAll('[data-player]') || []) {
     if (!ids.has(node.dataset.player)) continue;
-    if (!reducedMotion()) burstAt(node, 5);
+    if (!reducedMotion(node.ownerDocument?.defaultView)) burstAt(node, 5);
     // Animate the symbol inside the positioned group; leave its SVG transform intact.
     animate(node.querySelector('.player-symbol'), [
       { opacity: 0, transform: 'translateY(-18px) scale(.5)' },

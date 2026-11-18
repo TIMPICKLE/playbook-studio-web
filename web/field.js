@@ -108,29 +108,100 @@ export function updateAnimation(svg, play, time, prefix = 'pitch') {
   if (v) svg.querySelector(`#${prefix}-ball`)?.setAttribute('transform', `translate(${n(v.x + 23)} ${n(v.y - 11)})`);
 }
 
-// Preserve the SVG, focus, and pointer capture during a gesture. No markup replacement.
-export function updateGeometry(svg, play) {
-  updateAnimation(svg, play, 0);
-  const routes = new Map(play.routes.map(route => [route.id,route]));
-  for (const node of svg.querySelectorAll('[data-route]')) {
-    const route = routes.get(node.dataset.route); if (!route) continue;
-    const d = route.kind === 'motion' ? motionPath(route) : routePath(dynamicBlockRoute(play, route, 0));
-    for (const path of node.querySelectorAll('path')) path.setAttribute('d', d);
+// Bind changing model objects to the current SVG children once per gesture.
+// Route handles are siblings of the route, and a block can belong to another
+// player while depending on a defender in the moving group.
+export function bindGestureGeometry(svg, play, gesture) {
+  let backgroundChanged = false;
+  function set(node, name, value) {
+    if (!node || node.getAttribute(name) === value) return false;
+    node.setAttribute(name, value);
+    return true;
   }
-  for (const node of svg.querySelectorAll('[data-point]')) {
-    const route = routes.get(node.dataset.routeId);
-    const point = route && dynamicBlockRoute(play, route, 0).points[Number(node.dataset.point)];
-    if (point) { const v=project(point); node.setAttribute('cx',n(v.x)); node.setAttribute('cy',n(v.y)); }
+  function setBackground(node, name, value) {
+    if (set(node, name, value)) backgroundChanged = true;
   }
-  for (const node of svg.querySelectorAll('[data-zone]')) {
-    const zone=play.zones.find(z=>z.id===node.dataset.zone); if (!zone) continue;
-    const v=project(zone), ellipse=node.querySelector('ellipse'), text=node.querySelector('text');
-    ellipse.setAttribute('cx',n(v.x)); ellipse.setAttribute('cy',n(v.y)); ellipse.setAttribute('rx',n(zone.rx*9.64)); ellipse.setAttribute('ry',n(zone.ry*7.6)); text.setAttribute('x',n(v.x)); text.setAttribute('y',n(v.y+4));
+  if (gesture.type === 'zone' || gesture.type === 'new-zone' || gesture.type === 'annotation') {
+    const isZone = gesture.type !== 'annotation';
+    const kind = isZone ? 'zone' : 'annotation';
+    const id = gesture.type === 'new-zone' ? gesture.zoneId : gesture.id;
+    const object = (isZone ? play.zones : play.annotations).find(item => item.id === id);
+    const node = [...svg.querySelectorAll(`[data-${kind}]`)].find(item => item.dataset[kind] === id);
+    const ellipse = node?.querySelector('ellipse'), text = node?.querySelector('text');
+    return () => {
+      backgroundChanged = false;
+      const v = project(object);
+      if (ellipse) {
+        setBackground(ellipse, 'cx', n(v.x));
+        setBackground(ellipse, 'cy', n(v.y));
+        setBackground(ellipse, 'rx', n(object.rx * 9.64));
+        setBackground(ellipse, 'ry', n(object.ry * 7.6));
+      }
+      setBackground(text, 'x', n(v.x));
+      setBackground(text, 'y', n(v.y + (isZone ? 4 : 0)));
+      return backgroundChanged;
+    };
   }
-  for (const node of svg.querySelectorAll('[data-annotation]')) {
-    const annotation=play.annotations.find(a=>a.id===node.dataset.annotation); if(!annotation)continue;
-    const v=project(annotation), text=node.querySelector('text'); text.setAttribute('x',n(v.x)); text.setAttribute('y',n(v.y));
+
+  const ids = new Set(gesture.type === 'players' ? gesture.ids : gesture.type === 'player' ? [gesture.id] : []);
+  const players = new Map(play.players.filter(p => ids.has(p.id)).map(p => [p.id, p]));
+  const changedRoutes = new Set(gesture.waypoint?.routeIds);
+  const affected = play.routes.filter(route => ids.has(route.playerId) || route.blockTargets?.some(id => ids.has(id)) || changedRoutes.has(route.id));
+  const routes = new Map(affected.map(route => [route.id, { route, paths: [], handles: [] }]));
+  const markers = [];
+  if (players.size) for (const node of svg.querySelectorAll('[data-player]')) {
+    const player = players.get(node.dataset.player);
+    if (player) markers.push({ player, node });
   }
+  if (routes.size) {
+    for (const node of svg.querySelectorAll('[data-route]')) {
+      const binding = routes.get(node.dataset.route);
+      if (binding) {
+        binding.paths = node.querySelectorAll('path');
+        if (gesture.type === 'point' && binding.route.id === gesture.routeId && !binding.route.stagedBlock) {
+          binding.stagedStroke = node.querySelector('[marker-mid]');
+        }
+      }
+    }
+    for (const node of svg.querySelectorAll('[data-point]')) {
+      routes.get(node.dataset.routeId)?.handles.push({ node, index: Number(node.dataset.point) });
+    }
+  }
+  const ball = ids.has(play.ball.holderId) || ids.has(play.ball.receiverId) ? svg.querySelector('#pitch-ball') : null;
+  return () => {
+    backgroundChanged = false;
+    for (const { player, node } of markers) {
+      const v = project(animatedPlayer(play, player, 0));
+      set(node, 'transform', `translate(${n(v.x)} ${n(v.y)})`);
+    }
+    for (const binding of routes.values()) {
+      const { route, paths, handles } = binding;
+      const display = dynamicBlockRoute(play, route, 0);
+      const d = display.kind === 'motion' ? motionPath(display) : routePath(display);
+      for (const path of paths) setBackground(path, 'd', d);
+      if (binding.stagedStroke) {
+        binding.stagedStroke.removeAttribute('marker-mid');
+        binding.stagedStroke = null;
+        backgroundChanged = true;
+      }
+      for (const { node, index } of handles) {
+        const v = project(display.points[index]);
+        set(node, 'cx', n(v.x));
+        set(node, 'cy', n(v.y));
+      }
+    }
+    if (ball) {
+      const point = animatedBall(play, 0);
+      if (point) {
+        const v = project(point);
+        const moved = set(ball, 'transform', `translate(${n(v.x + 23)} ${n(v.y - 11)})`);
+        // Player and ball meshes are separate from the WebGL field texture.
+        // At time zero an immediate pass can already show a trail on the turf.
+        if (moved && play.ball.passAt === 0 && play.ball.receiverId) backgroundChanged = true;
+      }
+    }
+    return backgroundChanged;
+  };
 }
 export function previewDraft(svg, drawing, point) {
   const path=svg?.querySelector('.draft-preview'), cursor=svg?.querySelector('.draft-cursor');
