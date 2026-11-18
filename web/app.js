@@ -37,7 +37,7 @@ import { createPlayThumbnails } from './play-thumbnails.js';
 import { createOnboarding } from './onboarding.js';
 import { onboardingSteps, onboardingLabels } from './onboarding-steps.js';
 import { patchEditorHTML } from './editor-render.js';
-import { EditorHistory, PersonnelHistoryConflict } from './editor-history.js';
+import { canRefreshHistoryField, EditorHistory, PersonnelHistoryConflict } from './editor-history.js';
 import { workspaceNavigation, createWorkspaceSessions } from './workspace-ui.js';
 import { clearModelCredential } from './model-connection.js';
 
@@ -872,6 +872,7 @@ function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
 function choose(id) { cancelFieldGesture(); if(id===state.selectedId){panels.close();return;} if (!confirmDraft(() => choose(id))) return; resetAnimation(); draft = null; selection = null; state.selectedId = id; panels.close({focus:false}); tool = 'select'; render(); }
 function restore(next) {
   const previous = current(), field = $('#field .pitch-svg');
+  const localField = field && renderedPlayId === previous.id && canRefreshHistoryField(state, next);
   const focused = field?.contains(document.activeElement) ? document.activeElement : null;
   const focusedType = focused && ['player','route','zone','annotation'].find(type => focused.hasAttribute('data-' + type));
   clearAssistantPreview();
@@ -881,7 +882,13 @@ function restore(next) {
   resetAnimation(); rehearsal = false; state = next; book = current().book;
   selection = null; draft = null;
   const saved = save();
-  render({restoringHistory:true, historyFrame:frame});
+  if (localField) {
+    refreshGestureCommit({restoringHistory:true});
+    showHistoryTransition(field, frame);
+    digitalBoard?.sync({contentChanged:true});
+    boardAssistant?.refresh();
+    if (maddenLibrary.isOpen) maddenLibrary.refresh();
+  } else render({restoringHistory:true, historyFrame:frame});
   if (focused && !focused.isConnected) {
     const board = $('#field .pitch-svg');
     const replacement = focusedType && previous.id === current().id && [...board.querySelectorAll('[data-' + focusedType + ']')]
@@ -1159,12 +1166,15 @@ function renderField({preservePreview = false, syncDigital = true} = {}) {
   const tag=field.querySelector('.field-tag');if(tag)tag.innerHTML=`${icon('ball')}<span>${t("editor.offense")} ${current().players.filter(p=>p.side==='offense').length} · ${t("editor.defense")} ${current().players.filter(p=>p.side==='defense').length}</span>`;
   renderedFieldState = fieldState();
 }
-function refreshSelection() {
+function refreshInspector(animateContext = true) {
   const inspectorNode=$('.inspector'), context=inspectorNode.dataset.context, next=inspectorContext();
   if (context === next) patchEditorHTML(inspectorNode,inspector());
   else inspectorNode.innerHTML=inspector();
   inspectorNode.dataset.context=next;
-  if(context!==next)enterContext(inspectorNode);
+  if(animateContext && context!==next)enterContext(inspectorNode);
+}
+function refreshSelection() {
+  refreshInspector();
   renderField();updateCanvasHint();protectReadOnly();
 }
 function refreshMetadata() {
@@ -1182,9 +1192,12 @@ function refreshMetadata() {
   if (renderedFieldState !== fieldState()) renderField();
   syncEditorChrome();protectReadOnly();
 }
-function refreshGestureCommit() {
+function refreshGestureCommit({restoringHistory = false} = {}) {
   const restoreScroll=captureEditorScroll({samePlay:true});
-  refreshSelection();refreshMetadata();restoreScroll();
+  refreshInspector(!restoringHistory);
+  renderField({syncDigital:!restoringHistory});
+  refreshMetadata();
+  restoreScroll();
 }
 function coordinates(event) { return fieldCoordinates($('#field .pitch-svg'),event); }
 function pick(event) {

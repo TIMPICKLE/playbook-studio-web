@@ -2,6 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
 
 const baseline = 'd948017c37af82d534eb3836121d493164d7990a';
 const root = new URL('../../', import.meta.url);
@@ -30,7 +31,13 @@ for (const directory of [original, candidate]) {
   for (const name of ['sample.js', 'run.js']) {
     await cp(new URL(name, import.meta.url), new URL(name, directory));
   }
+  // Keep the same unminified application code, with fewer module requests through the preview relay.
+  await build({
+    entryPoints: [fileURLToPath(new URL('run.js', directory))],
+    outdir: fileURLToPath(directory), entryNames: 'bench-[name]', chunkNames: 'bench-[name]-[hash]',
+    bundle: true, splitting: true, format: 'esm', platform: 'browser', treeShaking: false,
+  });
   const html = await readFile(new URL('index.html', directory), 'utf8');
-  await writeFile(new URL('local.html', directory), html.replace('src="./app.js"', 'src="./run.js"'));
+  await writeFile(new URL('local.html', directory), html.replace('src="./app.js"', 'src="./bench-run.js"'));
 }
 console.log('On the development preview open /editor/acceptance-drag/base/local.html#editor, then /editor/acceptance-drag/candidate/local.html#editor.');

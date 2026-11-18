@@ -62,7 +62,18 @@ test('large playbooks keep live editor nodes through search and edits; switching
     assert.notEqual(q('[data-action="choose:practice-0"] svg'),currentThumb,'the current thumbnail is refreshed from the committed geometry');
     assert.ok(doc.activeElement===input,'local commit does not steal an unrelated search caret');assert.equal(input.selectionStart,1);assert.equal(input.selectionEnd,4);
     assert.equal(q('.sidebar').scrollTop,170);assert.equal(q('.play-list').scrollTop,210);assert.equal(q('.pitch-viewport').scrollLeft,12);assert.equal(q('.pitch-viewport').scrollTop,34);
+    const moved=saved().plays[0].players;
+    const navigation=q('.workspace-nav'), originalBounds=navigation.getBoundingClientRect.bind(navigation);
+    let layoutMeasurements=0;
+    navigation.getBoundingClientRect=()=>{layoutMeasurements++;return originalBounds();};
     click('undo');assert.deepEqual(saved().plays[0].players,before.plays[0].players,'one undo restores one drag after repeated same-play renders');
+    click('redo');assert.deepEqual(saved().plays[0].players,moved);
+    click('undo');
+    assert.deepEqual(thumbnailObservers,observersBefore,'local undo/redo must not remount the 200-card observer');
+    assert.equal(layoutMeasurements,0,'local history does not remeasure the workbench navigation');
+    for(const [action,svg]of beforeThumbs)assert.equal(q(`[data-action="${action}"] svg`),svg);
+    assert.equal(doc.activeElement,input);assert.equal(input.selectionStart,1);assert.equal(input.selectionEnd,4);
+    assert.equal(q('.play-list').scrollTop,210);assert.equal(q('.pitch-viewport').scrollTop,34);
     click('choose:practice-1');
     assert.ok(q('#field')!==field,'a play switch creates a new editing boundary');
     const switched=saved();geometry();
