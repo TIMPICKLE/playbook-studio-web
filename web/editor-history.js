@@ -1,49 +1,78 @@
-import { History, clone, uid } from './model.js';
+import { History, clone, decodeWorkspace, encodeWorkspace, uid } from './model.js';
 import { refreshRosterBindings } from './board-personnel.js';
+import { equal, mergeWorkspaces } from './workspace-merge.js';
 
-// Keep the existing snapshot API while attaching transaction identity outside
-// the document. UI and AI observe the same undo/redo receipt.
+function personnel(data) {
+  return { roster: data.roster, depthChart: data.depthChart, team: data.team, league: data.settings.league };
+}
+
+export class PersonnelHistoryConflict extends Error {}
+
+// Diagram snapshots own their plays and formations. A command that also edits
+// personnel (e.g. a JSON import) owns only its changes in that shared domain.
 export class EditorHistory extends History {
-  constructor(limit = 50) { super(limit); this.metadata = new WeakMap(); this.lastTransaction = null; }
-  record(state, details = {}) {
+  constructor(limit = 50) {
+    super(limit);
+    this.entries = new WeakMap();
+    this.lastTransaction = null;
+  }
+  record(state, details = {}, afterData = state.data) {
+    const before = personnel(state.data);
+    const after = personnel(afterData);
+    const base = afterData !== state.data && !equal(before, after) ? clone(after) : null;
     super.record(state);
-    const transaction = {id:uid(), name:'', playId:state.selectedId, ...details};
-    this.metadata.set(this.past.at(-1), transaction);
-    this.lastTransaction = {...transaction, status:'applied'};
+    const transaction = { id: uid(), name: '', playId: state.selectedId, ...details };
+    this.entries.set(this.past.at(-1), { transaction, base });
+    this.lastTransaction = { ...transaction, status: 'applied' };
     return transaction;
   }
-  info(snapshot = this.past.at(-1)) { return snapshot ? this.metadata.get(snapshot) : null; }
-  undo(state) {
-    const transaction = this.info();
-    const next = super.undo(state);
-    if (next && transaction) {
-      this.metadata.set(this.future.at(-1), transaction);
-      this.lastTransaction = {...transaction, status:'undone'};
+  info(snapshot = this.past.at(-1)) { return this.entries.get(snapshot)?.transaction ?? null; }
+  undo(state) { return this.restoreEntry(state, this.past, this.future, 'undone'); }
+  redo(state) { return this.restoreEntry(state, this.future, this.past, 'redone'); }
+
+  restoreEntry(state, from, to, status) {
+    const target = from.at(-1);
+    if (!target) return null;
+    const entry = this.entries.get(target);
+    const live = personnel(state.data);
+    let restored;
+    if (entry.base) {
+      const { data, conflicts } = mergeWorkspaces(entry.base, personnel(target.data), live);
+      if (conflicts.length) throw new PersonnelHistoryConflict();
+      restored = data;
+      // Independent edits can combine into an invalid lineup: a later group
+      // might use a player that undoing the import would remove.
+      if (!equal(live, entry.base)) {
+        try { decodeWorkspace(encodeWorkspace(withPersonnel(target.data, restored))); }
+        catch (cause) { throw new PersonnelHistoryConflict('Invalid combined workspace', { cause }); }
+      }
+    } else {
+      restored = clone(live);
     }
-    return next;
+
+    // Only move the stacks after the whole transaction is known to be valid.
+    const previousRoster = target.data.roster;
+    target.data = withPersonnel(target.data, restored);
+    refreshRosterBindings(target.data, previousRoster);
+    to.push(clone(state));
+    // Redo reverses what this undo actually changed. A roster member already
+    // deleted independently must stay deleted on the return trip.
+    const base = entry.base && !equal(restored, live) ? clone(restored) : null;
+    this.entries.set(to.at(-1), { transaction: entry.transaction, base });
+    this.lastTransaction = { ...entry.transaction, status };
+    return from.pop();
   }
-  redo(state) {
-    const transaction = this.info(this.future.at(-1));
-    const next = super.redo(state);
-    if (next && transaction) {
-      this.metadata.set(this.past.at(-1), transaction);
-      this.lastTransaction = {...transaction, status:'redone'};
-    }
-    return next;
-  }
-  // Roster/DEPTH CHART and team settings are a separate domain. Carry their
-  // latest state through diagram snapshots, including historical markers and formations.
-  // Simply retaining the old whole-workspace snapshots would resurrect names,
-  // deleted players and depth assignments on the next route undo.
-  rebasePersonnel(data) {
+
+  detachRemovedPlayers(removedPlayers) {
+    if (!removedPlayers.length) return;
     for (const snapshot of [...this.past, ...this.future]) {
-      const previousRoster = snapshot.data.roster;
-      snapshot.data.roster = clone(data.roster);
-      snapshot.data.depthChart = clone(data.depthChart);
-      snapshot.data.team = clone(data.team);
-      snapshot.data.settings.league = data.settings.league;
-      refreshRosterBindings(snapshot.data, previousRoster);
+      refreshRosterBindings(snapshot.data, removedPlayers, []);
     }
   }
+
   clear() { this.past = []; this.future = []; this.lastTransaction = null; }
+}
+
+function withPersonnel(data, { roster, depthChart, team, league }) {
+  return { ...data, roster, depthChart, team, settings: { ...data.settings, league } };
 }

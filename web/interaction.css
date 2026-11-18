@@ -45,8 +45,7 @@ button:not(:disabled):active,.button:not(:disabled):active{transform:translateY(
 .drawing-steps{gap:12px;padding:2px 0}
 .drawing-steps span{transition:color .2s}
 .drawing-steps .current b{background:var(--green);color:#fff}
-.draft-behavior{display:flex;align-items:center;gap:8px;width:100%;font-size:12px;color:var(--muted)}
-.draft-behavior select{min-width:0;max-width:100%;flex:1;height:32px;font-size:12px;background:#eeeeef;border-color:#d3d4d5;padding:4px 7px}
+.field-context #draft-mode{width:auto;max-width:100%;min-height:36px;padding:4px 8px;border-radius:6px;font:inherit;color:inherit;background:var(--ui-surface);border:1px solid var(--ui-border-strong)}
 .playback{padding:13px 16px;transition:background-color .25s,border-color .25s}
 .playback.is-playing{background:#e4e5e7;border-color:#b5b7b9}
 .playback-top{margin-bottom:9px}

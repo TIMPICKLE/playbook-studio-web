@@ -61,7 +61,7 @@
   .pitch-zoomed .touch-board-help { display:block; width:100%; color:var(--muted); font-size:12px; }
   .field-context { max-width:calc(100% - 16px); flex-wrap:wrap; }
   .field-wrap { scroll-margin-top:12px; scroll-margin-bottom:calc(84px + env(safe-area-inset-bottom,0px)); }
-  .field-context button { min-height:44px; }
+  .field-context button, .field-context #draft-mode { min-height:44px; }
   .field-context .context-player small { font-size:12px; }
   .board-height-resizer { min-height:44px; }
   .playback .play-button,.playback .icon-button { width:44px; height:44px; }

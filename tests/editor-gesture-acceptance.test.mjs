@@ -42,6 +42,63 @@ test('Escape during a player drag rolls back the live preview and a late release
   assert.ok(Math.abs(f.data().plays[0].players.find(p=>p.id===actor.id).x-(actor.x+1))<1e-9,'another gesture can start after cancellation');
 });
 
+test('a preselected player drag can be cancelled from a focused search input without consuming IME Escape',async t=>{
+  const f=await host(t),before=f.data(),actor=before.plays[0].players.find(p=>p.label==='X');
+  const player=()=>f.q(`#field [data-player="${actor.id}"]`);
+  const field=f.q('#field'),search=f.q('#search'),end={x:actor.x+3,y:actor.y-2};
+  f.key(player(),'Enter');search.focus();
+  const original=player().getAttribute('transform');
+  for(const interruption of ['pointercancel','Escape']){
+    f.pointer(player(),'pointerdown',actor);f.pointer(field,'pointermove',end);
+    await new Promise(resolve=>f.win.requestAnimationFrame(resolve));
+    const preview=player().getAttribute('transform');
+    assert.notEqual(preview,original);
+    assert.equal(f.win.document.activeElement,search);
+    assert.equal(f.key(search,'Escape',{isComposing:true}),true,'IME owns composition cancellation');
+    assert.equal(player().getAttribute('transform'),preview);
+    if(interruption==='Escape')assert.equal(f.key(search,'Escape'),false,'an active gesture handles ordinary Escape');
+    else f.pointer(field,interruption,end);
+    assert.equal(player().getAttribute('transform'),original);
+    assert.equal(player().getAttribute('aria-pressed'),'true');
+    f.pointer(field,'pointerup',end);
+    assert.deepEqual(f.data(),before);assert.equal(f.q('[data-action="undo"]').disabled,true);
+  }
+});
+
+test('committing a property while dragging does not copy preview geometry into the edit',async t=>{
+  const f=await host(t),before=f.data(),actor=before.plays[0].players.find(p=>p.label==='X');
+  const player=()=>f.q(`#field [data-player="${actor.id}"]`);
+  const end={x:actor.x+2,y:actor.y-3};
+  f.key(player(),'Enter');
+  f.pointer(player(),'pointerdown',actor);f.pointer(f.q('#field'),'pointermove',end);
+  await new Promise(resolve=>f.win.requestAnimationFrame(resolve));
+  const name=f.q('[data-prop="name"]');
+  name.value='Independent rename';name.dispatchEvent(new f.win.Event('change',{bubbles:true}));
+  f.pointer(f.q('#field'),'pointerup',end);
+  const expected=structuredClone(before);
+  expected.plays[0].players.find(p=>p.id===actor.id).name=name.value;
+  assert.equal(name.value,'Independent rename');
+  assert.deepEqual(f.data(),expected);
+  f.action('undo');assert.deepEqual(f.data(),before);assert.equal(f.q('[data-action="undo"]').disabled,true);
+});
+
+test('entering export or rehearsal during a drag presents committed geometry and ignores a late release',async t=>{
+  for(const destination of ['export','rehearsal'])await t.test(destination,async t=>{
+    const f=await host(t),before=f.data(),actor=before.plays[0].players.find(p=>p.label==='X');
+    const marker=()=>f.q(`#field [data-player="${actor.id}"]`);
+    const original=marker().getAttribute('transform'),end={x:actor.x+3,y:actor.y-4};
+    f.pointer(marker(),'pointerdown',actor);f.pointer(f.q('#field'),'pointermove',end);
+    await new Promise(resolve=>f.win.requestAnimationFrame(resolve));
+    assert.notEqual(marker().getAttribute('transform'),original);
+    if(destination==='export')f.action('export');else f.key(f.win.document.body,' ');
+    assert.equal(marker().getAttribute('transform'),original);
+    f.pointer(f.q('#field'),'pointerup',end);
+    assert.equal(f.q('[data-action="undo"]').disabled,true);
+    assert.deepEqual(f.data(),before);
+    if(destination==='rehearsal')f.key(f.win.document.body,' ');
+  });
+});
+
 test('Escape cancels group, waypoint, new-zone and annotation gestures before late pointer events',async t=>{
   for(const kind of ['group','waypoint','new-zone','annotation'])await t.test(kind,async t=>{
     const seed=starterWorkspace(),play=seed.plays[0];
@@ -159,18 +216,32 @@ test('an explicitly chosen player wins over a later-painted overlapping marker f
 });
 
 test('switching play or leaving the editor cancels a live drag before late release and preserves the next edit',async t=>{
-  for(const destination of ['play','roster'])await t.test(destination,async t=>{
+  for(const destination of ['play','roster','history'])await t.test(destination,async t=>{
     const f=await host(t),before=f.data(),actor=before.plays[0].players.find(p=>p.label==='X');
     const oldField=f.q('#field');
     f.pointer(f.q(`#field [data-player="${actor.id}"]`),'pointerdown',actor);
     f.pointer(oldField,'pointermove',{x:actor.x+2,y:actor.y-2});
     await new Promise(resolve=>f.win.requestAnimationFrame(resolve));
+    const historyRoute=hash=>{
+      f.win.history.pushState(null,'','#'+hash);
+      f.win.dispatchEvent(new f.win.Event('popstate'));
+    };
     if(destination==='play')f.action(`choose:${before.plays[1].id}`);
-    else f.q('.workspace-nav [data-workspace-mode="roster"]').click();
+    else if(destination==='roster')f.q('.workspace-nav [data-workspace-mode="roster"]').click();
+    else historyRoute('roster');
     // A release may arrive after capture ownership was lost to a new screen.
     const at=project({x:actor.x+2,y:actor.y-2});
     oldField.dispatchEvent(new f.win.PointerEvent('pointerup',{bubbles:true,pointerId:1,isPrimary:true,clientX:at.x,clientY:at.y}));
     if(destination==='roster')f.q('.workspace-nav [data-workspace-mode="editor"]').click();
+    if(destination==='history'){
+      assert.equal(f.q('#app').hidden,true);
+      historyRoute('editor');
+      const title=f.q('[data-prop="title"]');
+      title.value='Only a new title';title.dispatchEvent(new f.win.Event('change',{bubbles:true}));
+      const expected=structuredClone(before);expected.plays[0].title=title.value;
+      assert.deepEqual(f.data(),expected,'a later save cannot capture the interrupted drag');
+      f.action('undo');
+    }
     assert.deepEqual(f.data(),before,'switching screens cannot save a gesture preview');
     const id=destination==='play'?before.plays[1].id:before.plays[0].id;
     const active=f.data().plays.find(p=>p.id===id),next=active.players[0];
@@ -359,4 +430,25 @@ test('metadata edits and subsequent gesture commits retain the correct 11-player
     assert.match(f.q('.league-badge').textContent,expected,'geometry commit keeps the format visible');
     f.action('undo');assert.match(f.q('.league-badge').textContent,expected);
   });
+});
+
+test('a landscape editor can add an optional route beside Finish without changing rehearsal',async t=>{
+  const f=await host(t);
+  f.win.happyDOM.setWindowSize({width:844,height:390});
+  const before=f.data().plays[0],actor=before.players.find(player=>player.label==='X');
+  const {animatedPlayer}=await import('../web/model.js');
+  const atTime=play=>[1,2,4].map(time=>animatedPlayer(play,actor,time));
+  f.key(f.q(`#field [data-player="${actor.id}"]`),'Enter');f.action('tool:route');
+  f.pointer(f.q('#field'),'pointerdown',{x:actor.x+4,y:actor.y-10});
+  const purpose=f.q('#field-context #draft-mode');
+  assert.ok(purpose,'route purpose belongs to the active drafting controls');
+  purpose.focus();purpose.value='optional';
+  purpose.dispatchEvent(new f.win.Event('change',{bubbles:true}));
+  assert.equal(f.win.document.activeElement,purpose,'selecting a purpose keeps keyboard focus');
+  f.action('finish-route');
+  const after=f.data().plays[0],added=after.routes.find(route=>!before.routes.some(item=>item.id===route.id));
+  assert.equal(added.optional,true);
+  assert.deepEqual(after.routes.filter(route=>route.id!==added.id),before.routes);
+  assert.deepEqual(atTime(after),atTime(before));
+  f.action('undo');assert.deepEqual(f.data().plays[0],before);
 });

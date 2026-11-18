@@ -11,21 +11,34 @@ const views = {
 const rankLabel = index => index ? t('depth.backup', { rank: index }) : t('depth.starter');
 const playerLabel = player => [player.number && `#${player.number}`, player.name, player.position].filter(Boolean).join(' · ');
 
-function playerChip(player, source = '') {
+function playerChip(player, move = null) {
   if (!player) return `<span class="depth-open">${t('depth.vacant')}</span>`;
-  return `<span class="depth-athlete" ${source}>${player.number ? `<b class="depth-jersey">#${e(player.number)}</b>` : ''}<span>${e(player.name)}</span></span>`;
+  const name = `${player.number ? `<b class="depth-jersey">#${e(player.number)}</b>` : ''}<span>${e(player.name)}</span>`;
+  if (!move) return `<span class="depth-athlete">${name}</span>`;
+  const { slot, index } = move;
+  const label = t('depth.moveAssignment', { name: player.name, label: slot.label, rank: rankLabel(index) });
+  return `<button type="button" class="depth-athlete roster-text" data-depth-chart="pick-rank" aria-label="${e(label)}" title="${e(label)}"
+    ${depthDragSource(player.id, slot.id, index)}>${name}</button>`;
 }
 
 function slotRow(slot, players, editable, groupId, assigning) {
   const backups = slot.playerIds.slice(1);
+  const drop = index => editable ? `data-depth-drop-slot="${e(slot.id)}" data-depth-drop-index="${index}"` : '';
+  const place = (index, label) => `<button type="button" class="roster-text" data-depth-chart="place-player" data-slot="${e(slot.id)}" data-index="${index}"
+    aria-label="${e(slot.label)} · ${e(label)}">${e(label)}</button>`;
+  function rank(index) {
+    const chip = playerChip(players.get(slot.playerIds[index]), editable && !assigning ? { slot, index } : null);
+    if (!assigning) return chip + depthRankActions(slot, index, groupId, editable);
+    return chip + place(index, index ? t('depth.placeAtBackup', { rank: index }) : t('depth.placeStarter'));
+  }
+  const append = Math.max(1, slot.playerIds.length);
   return `<tr>
     <th scope="row" class="depth-position">${e(slot.label)}</th>
-    <td class="depth-starter" ${editable ? `data-depth-drop-slot="${e(slot.id)}" data-depth-drop-index="0"` : ''}><span class="depth-mobile-label" aria-hidden="true">${t('depth.starter')}</span>${playerChip(players.get(slot.playerIds[0]), editable ? depthDragSource(slot.playerIds[0], slot.id, 0) : '')}
-      ${assigning ? `<button type="button" class="roster-text" data-depth-chart="place-player" data-slot="${e(slot.id)}" data-index="0">${t('depth.placeStarter')}</button>` : ''}</td>
+    <td class="depth-starter" ${drop(0)}><span class="depth-mobile-label" aria-hidden="true">${t('depth.starter')}</span>${rank(0)}</td>
     <td class="depth-backups"><span class="depth-mobile-label" aria-hidden="true">${t('depth.backups')}</span>${backups.length
-      ? `<ol>${backups.map((id, index) => `<li ${editable ? `data-depth-drop-slot="${e(slot.id)}" data-depth-drop-index="${index + 1}"` : ''}><span class="depth-rank" aria-hidden="true">${index + 1}</span>${playerChip(players.get(id), editable ? depthDragSource(id, slot.id, index + 1) : '')}${depthRankActions(slot, index + 1, groupId, editable)}</li>`).join('')}</ol>`
+      ? `<ol>${backups.map((_, i) => `<li ${drop(i + 1)}><span class="depth-rank" aria-hidden="true">${i + 1}</span>${rank(i + 1)}</li>`).join('')}</ol>`
       : `<span class="depth-muted">${t('depth.noBackups')}</span>`}
-      ${editable ? `<span class="depth-backup-drop" data-depth-drop-slot="${e(slot.id)}" data-depth-drop-index="${Math.max(1, slot.playerIds.length)}">${assigning ? `<button type="button" class="roster-text" data-depth-chart="place-player" data-slot="${e(slot.id)}" data-index="${Math.max(1, slot.playerIds.length)}">${t('depth.placeBackup')}</button>` : t('depth.dropBackup')}</span>` : ''}<div data-depth-feedback="${e(slot.id)}"></div></td>
+      ${editable ? `<span class="depth-backup-drop" ${drop(append)}>${assigning ? place(append, t('depth.placeBackup')) : t('depth.dropBackup')}</span>` : ''}<div data-depth-feedback="${e(slot.id)}"></div></td>
     ${editable ? `<td class="depth-edit-cell"><button type="button" class="roster-text" data-depth-chart="edit" data-slot="${e(slot.id)}" aria-label="${e(t('depth.editLabel', { label: slot.label }))}">${t('depth.edit')}</button></td>` : ''}
   </tr>`;
 }
@@ -221,11 +234,15 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     root.classList.remove('depth-dragging');
   }
 
+  function sourceFrom(element) {
+    const { depthSource: playerId, sourceSlot: slotId, sourceIndex } = element.dataset;
+    return slotId ? { playerId, slotId, index: Number(sourceIndex) } : { playerId };
+  }
+
   function dragStart(event) {
     const element = event.target.closest('[data-depth-source]');
     if (!element || !canEdit() || draft || !event.dataTransfer) return;
-    const source = { playerId: element.dataset.depthSource, ...(element.dataset.sourceSlot ? { slotId: element.dataset.sourceSlot, index: Number(element.dataset.sourceIndex) } : {}) };
-    dragging = stamp(source);
+    dragging = stamp(sourceFrom(element));
     event.dataTransfer.setData('application/x-playbook-depth-player', JSON.stringify(dragging));
     event.dataTransfer.effectAllowed = 'move';
     root.classList.add('depth-dragging');
@@ -380,11 +397,11 @@ export function createDepthChartView({ root, getData, getWorkspaceId, getSelecte
     const action = button.dataset.depthChart;
     if (action.startsWith('quick-')) { quickRank(button); return; }
     if (action === 'undo-ranks') { undoRanks(); return; }
-    if (action === 'pick-player') {
+    if (action === 'pick-player' || action === 'pick-rank') {
       if (!canEdit() || draft || !getData().roster.some(player => player.id === button.dataset.depthSource)) return;
-      assignment = stamp({ playerId: button.dataset.depthSource });
+      assignment = stamp(sourceFrom(button));
       refresh(); rankFeedback(t('depth.assignmentReady', { name: getData().roster.find(player => player.id === assignment.source.playerId).name }));
-      sheet.querySelector('[data-depth-drop-slot]')?.focus({ preventScroll: true }); return;
+      sheet.querySelector('button[data-depth-chart="place-player"], button[data-depth-chart="inspect"][data-depth-drop-slot]')?.focus({ preventScroll: true }); return;
     }
     if (action === 'cancel-assignment') { assignment = null; refresh(); rankFeedback(t('depth.assignmentCanceled')); return; }
     if (action === 'place-player') { placePlayer(assignment, button.dataset.slot, Number(button.dataset.index)); return; }

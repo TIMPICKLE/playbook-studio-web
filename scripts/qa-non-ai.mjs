@@ -1,20 +1,22 @@
 // Non-AI browser acceptance. Uses disposable test data, never a user's account.
 // UX_QA_CASES=desktop node scripts/qa-non-ai.mjs
-// All 8 cases: node scripts/qa-non-ai.mjs
+// All viewports: node scripts/qa-non-ai.mjs
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { starterWorkspace, encodeWorkspace, decodeWorkspace, STORAGE_KEY } from '../web/model.js';
+import { animatedPlayer, starterWorkspace, encodeWorkspace, decodeWorkspace, STORAGE_KEY } from '../web/model.js';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const output = resolve(process.env.UX_QA_OUTPUT || `${root}/docs/acceptance/evidence`);
 const definitions = [
   { id:'desktop', width:1440, height:900 },
+  { id:'wide-desktop', width:1920, height:1080 },
   { id:'laptop', width:1280, height:720 },
   { id:'ipad-landscape', width:1024, height:768, touch:true },
   { id:'ipad-portrait', width:768, height:1024, touch:true },
+  { id:'ipad-split', width:507, height:768, touch:true },
   { id:'mobile', width:390, height:844, touch:true, mobile:true },
   { id:'small-mobile', width:375, height:667, touch:true, mobile:true },
   { id:'mobile-landscape', width:844, height:390, touch:true, mobile:true },
@@ -137,10 +139,28 @@ async function runCase(browser,base,entry) {
       await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
     } finally { await cdp.detach(); }
   };
-  const reachable = async selector => {
-    const node=page.locator(selector).filter({visible:true}).first(); await node.scrollIntoViewIfNeeded();
-    const found=await node.evaluate(element => { const r=element.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);return {inside:x>=0&&y>=0&&x<innerWidth&&y<innerHeight,hit:!!hit&&(hit===element||element.contains(hit)),width:r.width,height:r.height}; });
-    assert.ok(found.inside&&found.hit&&found.width>0&&found.height>0,`${selector} unreachable: ${JSON.stringify(found)}`);
+  const reachable = async (selector,{scroll=true,minSize=0}={}) => {
+    const node=page.locator(selector).filter({visible:true}).first();
+    if(scroll)await node.scrollIntoViewIfNeeded();
+    const target=await node.evaluate(element => {
+      const {left,right,top,bottom,width,height}=element.getBoundingClientRect();
+      const hit=document.elementFromPoint(left+width/2,top+height/2);
+      return {left,right,top,bottom,width,height,hit:!!hit&&element.contains(hit),
+        inside:left>=0&&top>=0&&right<=innerWidth+0.01&&bottom<=innerHeight+0.01};
+    });
+    assert.ok(target.inside&&target.hit&&target.width>0&&target.height>0&&target.width>=minSize&&target.height>=minSize,
+      `${selector} does not provide a reachable ${minSize}px target: ${JSON.stringify(target)}`);
+    return target;
+  };
+  const measureInitialTools = async () => {
+    const tools={};
+    for(const kind of ['select','route','block','motion','pass','zone','text']) {
+      tools[kind]=await reachable(`.stage-dock [data-action="tool:${kind}"]`,{scroll:false,minSize:44});
+    }
+    return tools;
+  };
+  const assertSelectionCleared = async () => {
+    assert.equal(await page.locator('#field [data-player][aria-pressed="true"], [data-action="clear-selection"]').count(),0,'Undo should clear the selection');
   };
   try {
     await ready();
@@ -153,9 +173,8 @@ async function runCase(browser,base,entry) {
       const m=result.measurements; assert.ok(m.documentWidth<=entry.width+1,'Horizontal document overflow');
       assert.ok(m.field.height>=200&&m.field.width>200,'Board lost usable dimensions');
       assert.ok(m.navigation.top>=0&&m.navigation.bottom<=entry.height,'Workspace navigation not visible');
-      await reachable('.editor-status');
-      if(entry.height>=667)assert.ok(m.tools.bottom<=entry.height+1,'Initial drawing tools below the viewport');
-      for(const kind of ['select','route','block','zone'])await reachable(`.stage-dock [data-action="tool:${kind}"]`);
+      result.measurements.drawingTools=await measureInitialTools();
+      await reachable('.editor-status',{scroll:false});
     });
     await check('size-popover-recovery',async()=>{
       const summary=page.locator('.board-advanced > summary'),panel=page.locator('.board-advanced');
@@ -169,7 +188,7 @@ async function runCase(browser,base,entry) {
       if(entry.id==='desktop'){
         await page.setViewportSize({width:375,height:667});await page.waitForFunction(()=>!document.querySelector('.board-advanced').open);
         await summary.click();await page.setViewportSize({width:844,height:390});await page.waitForFunction(()=>!document.querySelector('.board-advanced').open);
-        for(const kind of ['select','route','block','zone'])await reachable(`.stage-dock [data-action="tool:${kind}"]`);
+        await measureInitialTools();
         await page.setViewportSize({width:entry.width,height:entry.height});
       }
     });
@@ -181,7 +200,7 @@ async function runCase(browser,base,entry) {
       assert.ok(changed.x!==original.x||changed.y!==original.y,'Wrong player moved');
       await visibleUndo(); assert.deepEqual((await persisted()).plays[0],before);
       await visibleRedo(); assert.deepEqual((await persisted()).plays[0],moved);
-      await visibleUndo(); await click('[data-action="clear-selection"]');
+      await visibleUndo(); await assertSelectionCleared();
     });
     await check('group-drag-single-undo',async()=>{
       const before=(await persisted()).plays[0];await click('[data-action="multi-select"]');await tapPlayer('X');await tapPlayer('Z');
@@ -189,14 +208,24 @@ async function runCase(browser,base,entry) {
       const from=await playerPoint(actor('X').id);await drag(from,{x:from.x+14,y:from.y-14});
       const moved=(await persisted()).plays[0];
       for(const label of ['X','Z']){const id=actor(label).id;assert.notDeepEqual(moved.players.find(p=>p.id===id),before.players.find(p=>p.id===id));}
-      await visibleUndo();assert.deepEqual((await persisted()).plays[0],before);await click('[data-action="clear-selection"]');
+      await visibleUndo();assert.deepEqual((await persisted()).plays[0],before);await assertSelectionCleared();
     });
     await check('route-cancel-and-complete',async()=>{
       const before=(await persisted()).plays[0];await tapPlayer('X');await click('.stage-dock [data-action="tool:route"]');
       const from=await playerPoint(actor('X').id);await tap({x:from.x+45,y:from.y-45});
       await click('[data-action="cancel-draft"]');assert.deepEqual((await persisted()).plays[0],before,'Canceled route changed persisted data');
-      await tapPlayer('X');await click('.stage-dock [data-action="tool:route"]');await tap({x:from.x+45,y:from.y-45});await click('[data-action="finish-route"]');
-      assert.equal((await persisted()).plays[0].routes.length,before.routes.length+1);await visibleUndo();assert.deepEqual((await persisted()).plays[0],before);await click('[data-action="clear-selection"]');
+      await tapPlayer('X');await click('.stage-dock [data-action="tool:route"]');
+      const origin=await playerPoint(actor('X').id);
+      await tap({x:origin.x+45,y:origin.y-45});
+      await reachable('#field-context #draft-mode',{scroll:false,minSize:entry.touch?44:0});
+      await page.locator('#draft-mode').selectOption('optional');
+      await click('[data-action="finish-route"]');
+      const after=(await persisted()).plays[0],added=after.routes.filter(route=>!before.routes.some(old=>old.id===route.id));
+      assert.equal(added.length,1);assert.equal(added[0].optional,true);
+      assert.deepEqual(after.routes.filter(route=>route.id!==added[0].id),before.routes);
+      const runner=actor('X');
+      for(const time of [1,2,4])assert.deepEqual(animatedPlayer(after,runner,time),animatedPlayer(before,runner,time));
+      await visibleUndo();assert.deepEqual((await persisted()).plays[0],before);await assertSelectionCleared();
     });
     await check('context-menu-and-escape',async()=>{
       const before=(await persisted()).plays[0],id=actor('X').id,node=page.locator(`#field [data-player="${id}"]`);

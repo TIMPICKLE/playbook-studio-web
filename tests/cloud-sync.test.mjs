@@ -278,3 +278,127 @@ test('a draft from before depth charts resumes alongside remote lineup edits', t
   assert.equal(sync.pending.team.name, 'Offline team');
   assert.deepEqual(sync.pending.depthChart, remote.depthChart);
 });
+
+test('a poll belongs to the confirmed revision, including a save accepted after a conflict', async t => {
+  for (const response of ['full', 'unchanged', 'denied']) await t.test(response, async t => {
+    let resolvePoll, rejectPoll, peer;
+    const { sync, data, events } = harness(t, async (_path, options = {}) => {
+      if (!options.method) return new Promise((resolve, reject) => { resolvePoll = resolve; rejectPoll = reject; });
+      if (options.body.revision === 1) throw Object.assign(new Error('Conflict'), { status: 409, payload: { latest: peer } });
+      return { revision: 3 };
+    });
+    const remote = clone(data);
+    remote.plays[1].title = 'Peer play';
+    peer = { ...sync.current, revision: 2, data: remote };
+    const polling = sync.poll();
+    const edit = clone(data);
+    edit.plays[0].notes = 'Confirmed note';
+    sync.schedule(edit);
+    await sync.flush();
+    await sync.flush();
+    if (response === 'denied') rejectPoll(Object.assign(new Error('Old denial'), { status: 403 }));
+    else resolvePoll(response === 'full' ? { ...peer, role: 'viewer' } : { unchanged: true, revision: 1, role: 'viewer' });
+    await polling;
+    assert.equal(sync.current.revision, 3);
+    assert.equal(sync.current.data.plays[0].notes, 'Confirmed note');
+    assert.equal(sync.base.plays[1].title, 'Peer play');
+    assert.equal(sync.canEdit, true);
+    assert.equal(events.access.length, 0);
+    assert.equal(sync.dirty, false);
+  });
+});
+
+test('an idle poll defers its response until editing has ended and polls share a single read', async t => {
+  let finish, busy = false, reads = 0;
+  const { sync, data, events } = harness(t, () => {
+    reads++;
+    return new Promise(resolve => { finish = resolve; });
+  });
+  const peer = clone(data);
+  peer.plays[0].title = 'Peer play';
+  const record = { ...sync.current, revision: 2, data: peer };
+  sync.isBusy = () => busy;
+  const first = sync.poll(), second = sync.poll();
+  assert.equal(reads, 1);
+  busy = true;
+  finish(record);
+  await Promise.all([first, second]);
+  assert.equal(events.data.length, 1);
+  assert.equal(sync.current.revision, 1);
+  busy = false;
+  const next = sync.poll();
+  finish(record);
+  await next;
+  assert.equal(sync.base.plays[0].title, 'Peer play');
+  assert.equal(events.data.length, 2);
+});
+
+test('permission loss freezes the captured draft for export and read-only reload cannot discard it', async t => {
+  for (const writable of [true, false]) await t.test(writable ? 'durable draft' : 'memory only', async t => {
+    let release, busy = false, puts = 0;
+    const disk = writable ? storage() : { ...storage(), setItem() { throw new Error('Quota exceeded'); } };
+    const { sync, data, events } = harness(t, (_path, options = {}) => {
+      if (options.method === 'PUT') { puts++; throw new Error('Unexpected write'); }
+      return new Promise(resolve => { release = resolve; });
+    }, disk);
+    sync.isBusy = () => busy;
+    const polling = sync.poll();
+    busy = true;
+    const local = clone(data), remote = clone(data);
+    local.plays[0].notes = 'Last field edit';
+    remote.plays[1].title = 'Peer play';
+    sync.onBeforeAccessLoss = () => sync.schedule(local);
+    const record = { ...sync.current, role: 'viewer', revision: 2, data: remote };
+    release(record);
+    await polling;
+    assert.equal(sync.canEdit, false);
+    assert.equal(sync.dirty, true);
+    assert.equal(events.access.length, 1);
+    assert.equal(sync.pending.plays[0].notes, 'Last field edit');
+    assert.equal(sync.draftSaved, writable);
+    await sync.flush();
+    sync.load(record);
+    assert.equal(sync.pending.plays[0].notes, 'Last field edit');
+    assert.equal(sync.pending.plays[1].title, 'Peer play');
+    assert.deepEqual(events.data.at(-1).data, remote, 'read-only board displays confirmed data; the draft stays separately exportable');
+    assert.equal(sync.draftSaved, writable);
+    assert.match(events.statuses.at(-1), /导出/);
+    await sync.flush();
+    assert.equal(puts, 0);
+    assert.equal(sync.useRemote(), true, 'only an explicit choice discards the unsynced draft');
+    assert.equal(sync.dirty, false);
+    assert.equal(sync.canEdit, false);
+    assert.equal(disk.getItem(sync.key()), undefined);
+  });
+});
+
+test('conflict rebases the latest local state after the current gesture, before retrying the save', async t => {
+  let rejectSave, busy = false;
+  const writes = [];
+  const { sync, data, events } = harness(t, (_path, options) => {
+    writes.push(options.body);
+    if (writes.length === 1) return new Promise((_resolve, reject) => { rejectSave = reject; });
+    return { revision: 3 };
+  });
+  sync.isBusy = () => busy;
+  const committed = clone(data), peer = clone(data);
+  committed.plays[0].title = 'First edit';
+  peer.plays[1].title = 'Peer play';
+  sync.schedule(committed);
+  const saving = sync.flush();
+  busy = true;
+  rejectSave(Object.assign(new Error('Conflict'), { status: 409, payload: { latest: { ...sync.current, revision: 2, data: peer } } }));
+  await saving;
+  assert.equal(events.data.length, 1, 'the conflict does not reset the active editor');
+  await sync.flush();
+  assert.equal(writes.length, 1, 'a known stale write is not retried during the gesture');
+  committed.plays[0].notes = 'Edit completed during conflict';
+  sync.schedule(committed);
+  busy = false;
+  await sync.flush();
+  assert.equal(writes.length, 2);
+  assert.equal(writes[1].revision, 2);
+  assert.equal(writes[1].data.plays[0].notes, 'Edit completed during conflict');
+  assert.equal(writes[1].data.plays[1].title, 'Peer play');
+  assert.equal(sync.dirty, false);
+});

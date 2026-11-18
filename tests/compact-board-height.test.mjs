@@ -43,12 +43,19 @@ test('advanced size defaults closed in short landscape and closes through rotati
   for(const name of names)Object.defineProperty(globalThis,name,{configurable:true,value:name==='window'?win:name==='document'?doc:win.localStorage});
   try {
     doc.body.innerHTML=`<div class="workspace">${boardSizeControls()}<div class="pitch-viewport"><div class="pitch-stage"></div></div><button id="outside">Drawing tool</button></div>`;
+    win.localStorage.setItem(BOARD_LAYOUT_KEY,JSON.stringify({height:200,expandedHeight:210}));
     const layout=createBoardLayout();layout.mount();
     const panel=()=>doc.querySelector('.board-advanced');
     const open=()=>{panel().open=true;panel().dispatchEvent(new win.Event('toggle'));};
     const rotate=(width,height)=>{win.happyDOM.setWindowSize({width,height});win.dispatchEvent(new win.Event('resize'));};
     assert.equal(panel().open,true,'desktop dimensions remain inline');
+    doc.querySelector('[data-board-action="zoom-in"]').click();
+    assert.equal(layout.getState().height,280,'desktop clamps the displayed height');
+    assert.deepEqual(JSON.parse(win.localStorage.getItem(BOARD_LAYOUT_KEY)),{height:200,expandedHeight:210},'zoom after a desktop reload preserves stored narrow dimensions');
     rotate(375,667);assert.equal(panel().open,false);
+    assert.equal(layout.getState().height,200);
+    layout.setState({expanded:true});assert.equal(layout.getState().height,210);
+    layout.setState({expanded:false});
     open();assert.equal(panel().open,true);layout.mount();assert.equal(panel().open,true,'an explicit opening survives an ordinary rerender');
     rotate(844,390);assert.equal(panel().open,false,'portrait open state must not cover the landscape tools');
     open();panel().querySelector('summary').focus();

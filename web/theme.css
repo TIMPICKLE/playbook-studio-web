@@ -314,7 +314,7 @@ html[data-visual-mode=traditional] .editor-mode::before { background: var(--nigh
 html[data-visual-mode] .draw-tools { border-radius: var(--r-pill); padding: 4px; min-height: 48px; }
 html[data-visual-mode] .draw-tools .tool-indicator { inset: 4px auto 4px 4px; width: calc((100% - 8px) / 7); border-radius: var(--r-pill); }
 html[data-visual-mode=traditional] .tool-indicator { background: var(--night-4); border: 0; box-shadow: none; }
-html[data-visual-mode] .draw-tools .tool-button { border-radius: var(--r-pill); font-size: var(--t-sm); color: var(--text-2); gap: 7px; height: 40px; }
+html[data-visual-mode] .draw-tools .tool-button { border-radius: var(--r-pill); font-size: var(--t-sm); color: var(--text-2); gap: 7px; min-height: 44px; min-width: 44px; }
 html[data-visual-mode] .draw-tools .tool-button:hover { background: transparent; color: var(--text-1); }
 html[data-visual-mode] .draw-tools .tool-button.active { color: var(--text-1) !important; font-weight: 600; text-shadow: none; background: transparent; box-shadow: none; }
 html[data-visual-mode] .draw-tools .tool-button.active svg { color: var(--accent-main); }

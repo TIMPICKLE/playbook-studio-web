@@ -105,42 +105,72 @@ export function clearDepthPlayer(chart, playerId) {
   }
 }
 
-// Plan both pointer drops and button rank moves without mutating the chart.
-// A moved starter leaves a vacancy; promoting a backup must stay explicit.
+// An empty rank represents an intentional vacancy. Filling it never pushes
+// unrelated backups down. Inserting on an occupied rank shifts players only
+// as far as the next vacancy.
+function placeAtRank(current, playerId, index) {
+  const ranks = [...current];
+  const previous = ranks.indexOf(playerId);
+  if (ranks[index] === null) {
+    if (previous >= 0) ranks[previous] = null;
+    ranks[index] = playerId;
+    return ranks;
+  }
+  if (previous >= 0) {
+    ranks.splice(previous, 1);
+  } else {
+    let vacancy = ranks.indexOf(null, index);
+    // At capacity an earlier open backup rank can make room. Never fill an
+    // empty starter implicitly when the requested destination is a backup.
+    if (vacancy < 0 && ranks.length === DEPTH_LIMITS.ranks) {
+      vacancy = ranks.lastIndexOf(null);
+      if (vacancy < 1) return null;
+    }
+    if (vacancy >= 0) ranks.splice(vacancy, 1);
+  }
+  if (index === 1 && !ranks.length) ranks.push(null);
+  ranks.splice(Math.min(index, ranks.length), 0, playerId);
+  return ranks;
+}
+
+// A directory pick assigns a player to a rank. Only a starter assignment
+// implies leaving another position: reserves may cross-train. A drag or a
+// move from a specific rank always identifies the exact assignment to move.
 export function planDepthPlayerMove(group, rosterIds, source, target) {
   const destination = group?.slots.find(slot => slot.id === target?.slotId);
-  const origin = source?.slotId ? group?.slots.find(slot => slot.id === source.slotId) : null;
   if (!destination || !source?.playerId || !rosterIds.has(source.playerId)
-      || !Number.isInteger(target.index) || target.index < 0 || target.index > Math.max(1, destination.playerIds.length)
-      || (source.slotId && (!origin || !Number.isInteger(source.index) || origin.playerIds[source.index] !== source.playerId))) return { error: 'changedRetry' };
-  const before = new Map(group.slots.map(slot => [slot.id, [...slot.playerIds]]));
-  const next = new Map([...before].map(([key, ids]) => [key, [...ids]]));
-  let fromIndex = origin?.id === destination.id ? source.index : -1;
-  // Choosing a roster entry already present in this position means reordering it.
-  if (!origin) fromIndex = destination.playerIds.indexOf(source.playerId);
-  if (origin && origin.id !== destination.id && destination.playerIds.includes(source.playerId)) return { error: 'duplicate' };
-  if (fromIndex >= 0) next.get(destination.id).splice(fromIndex, 1);
-  else if (origin) {
-    if (source.index === 0) {
-      const ids = next.get(origin.id);
-      ids[0] = null;
-      if (ids.length === 1) ids.length = 0;
-    } else next.get(origin.id).splice(source.index, 1);
+      || !Number.isInteger(target.index) || target.index < 0 || target.index > Math.max(1, destination.playerIds.length)) return { error: 'changedRetry' };
+  const playerId = source.playerId;
+  let origin;
+  let originIndex = source.index;
+  if (source.slotId) {
+    origin = group.slots.find(slot => slot.id === source.slotId);
+    if (!origin || !Number.isInteger(originIndex) || origin.playerIds[originIndex] !== playerId) return { error: 'changedRetry' };
+  } else if (target.index === 0) {
+    origin = group.slots.find(slot => slot.playerIds[0] === playerId);
+    originIndex = 0;
   }
-  const ids = next.get(destination.id);
-  if (target.index === 1 && ids.length === 0) ids.push(null);
-  if (ids.length >= DEPTH_LIMITS.ranks) return { error: 'rankLimit' };
-  ids.splice(Math.min(target.index, ids.length), 0, source.playerId);
-  const starters = new Map();
-  for (const slot of group.slots) {
-    const starter = next.get(slot.id)[0];
-    if (!starter) continue;
-    if (starters.has(starter)) return { error: 'starterTaken', label: starters.get(starter) };
-    starters.set(starter, slot.label);
+  const changes = [];
+  if (origin && origin !== destination) {
+    // A starter can transfer to a position where they already train as a
+    // reserve. Their existing destination entry will simply be promoted.
+    if (destination.playerIds.includes(playerId) && !(originIndex === 0 && target.index === 0)) return { error: 'duplicate' };
+    const after = [...origin.playerIds];
+    if (originIndex === 0 && after.length > 1) after[0] = null;
+    else after.splice(originIndex, 1);
+    changes.push({ id: origin.id, before: [...origin.playerIds], after });
   }
-  return { playerId: source.playerId, slotId: destination.id,
-    changes: group.slots.filter(slot => JSON.stringify(before.get(slot.id)) !== JSON.stringify(next.get(slot.id)))
-      .map(slot => ({ id: slot.id, before: before.get(slot.id), after: next.get(slot.id) })) };
+  const after = placeAtRank(destination.playerIds, playerId, target.index);
+  if (!after) return { error: 'rankLimit' };
+  if (JSON.stringify(after) !== JSON.stringify(destination.playerIds)) {
+    changes.push({ id: destination.id, before: [...destination.playerIds], after });
+  }
+  // Only the destination can gain a starter. Other positions either retain
+  // theirs or vacate it as part of this same transaction.
+  const occupied = after[0] && group.slots.find(slot => slot !== destination &&
+    (changes.find(change => change.id === slot.id)?.after ?? slot.playerIds)[0] === after[0]);
+  if (occupied) return { error: 'starterTaken', label: occupied.label };
+  return { playerId, slotId: destination.id, changes };
 }
 
 function isUnusedTemplate(group) {

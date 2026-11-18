@@ -206,3 +206,23 @@ test('failed position saves preserve chosen ranks and a later retry commits the 
   assert.deepEqual(f.slot.playerIds, ['p0', 'p3', 'p2']);
   assert.equal(f.state.writes, 1);
 });
+
+test('permission recovery captures only changed roster forms, including selected rank names and personnel notes', t => {
+  const f = rosterHost(t);
+  const change = f.state.data.roster[0];
+  f.click('[data-depth-chart=edit]');
+  assert.equal(f.view.captureFormText(), '');
+  f.change('[data-rank="0"]', change.id);
+  assert.ok(f.view.captureFormText().split('\n').some(line => line.startsWith('首发 — ') && line.includes(change.name)));
+  f.change('[data-rank="0"]', '');
+  assert.equal(f.view.captureFormText(), '');
+  f.click('[data-depth-chart=close]');
+  f.click('[data-personnel-action=edit]');
+  assert.equal(f.view.captureFormText(), '');
+  f.q('.personnel-dialog [name=notes]').value = 'Rotate Casey at halftime';
+  assert.ok(f.view.captureFormText().includes('Rotate Casey at halftime'));
+  f.state.editable = false;
+  f.view.refresh();
+  assert.ok(f.view.captureFormText().includes('Rotate Casey at halftime'));
+  assert.equal(f.state.writes, 0);
+});
