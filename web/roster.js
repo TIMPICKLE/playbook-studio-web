@@ -263,5 +263,27 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
     if (draft.removing) { find('[data-roster="keep"]').click(); return; }
     closeEditor(draft.before.id);
   }, true);
-  return { show, refresh, isEditing: () => !!(dialog()?.open || groups?.isEditing() || chart?.isEditing()) };
+  // Include the values currently on screen, even incomplete or invalid ones.
+  // This is a readable copy of a form; it never runs a roster command.
+  const initialForms = new WeakMap();
+  function formText(form) {
+    const fields = [...form.querySelectorAll('input, select, textarea')].map(field => {
+      const label = [...(field.closest('label')?.childNodes || [])]
+        .filter(node => node !== field).map(node => node.textContent).join('').trim();
+      const value = field.tagName === 'SELECT' ? field.selectedOptions[0]?.textContent ?? field.value : field.value;
+      return `${label || field.name} — ${value}`;
+    });
+    return fields.length ? [form.querySelector('h2')?.textContent, ...fields].join('\n') : '';
+  }
+  root.addEventListener('focusin', event => {
+    const form = event.target.closest('dialog form');
+    if (form && !initialForms.has(form)) initialForms.set(form, formText(form));
+  });
+  function captureFormText() {
+    const form = find('dialog[open] form');
+    if (!form) return '';
+    const text = formText(form);
+    return text === initialForms.get(form) ? '' : text;
+  }
+  return { show, refresh, captureFormText, isEditing: () => !!(dialog()?.open || groups?.isEditing() || chart?.isEditing()) };
 }

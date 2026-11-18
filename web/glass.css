@@ -84,7 +84,7 @@ button:disabled{opacity:.45}
 .player-preview>span{color:#252628}
 .canvas-hint{font-size:12px;min-height:45px;padding:10px 2px;color:#bfc0c2}.hint-dot{background:#9a9fa7}
 .drawing-steps{color:#bfc0c2}.drawing-steps .current{color:#dcdee0}.drawing-steps b{background:#9a9fa718;color:#9a9fa7}
-.drawing-steps .current b{background:#9a9fa7;color:#252628}.draft-behavior select{background:#1c1d1f;color:var(--ink);border-color:#8a909a44}
+.drawing-steps .current b{background:#9a9fa7;color:#252628}
 .playback{border-radius:14px;padding:12px 15px}.playback.is-playing{background:linear-gradient(120deg,#bfc2c618,#26282b88);border-color:#bfc2c655}
 .playback-title{font-size:12px}.playback-title svg{color:var(--accent)}#playback-phase{font-size:12px;color:#c3c4c6;letter-spacing:0}
 .playback .speed-label select{background:#1011134d;color:var(--ink);border-color:#e1e2e426}

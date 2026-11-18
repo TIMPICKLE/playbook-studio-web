@@ -44,16 +44,17 @@ export function linkRosterPlayer(marker, player) {
   else delete marker.rosterId;
 }
 
-export function refreshRosterBindings(workspace, previousRoster) {
-  const current = new Map(workspace.roster.map(player => [player.id, player]));
-  const changed = new Set(previousRoster.filter(player => player.name !== current.get(player.id)?.name).map(player => player.id));
+export function refreshRosterBindings(workspace, previousRoster, roster = workspace.roster) {
+  const current = new Map(roster.map(player => [player.id, player]));
+  const changed = new Map(previousRoster.filter(player => player.name !== current.get(player.id)?.name)
+    .map(player => [player.id, player.name]));
   if (!changed.size) return;
   for (const diagram of [...workspace.plays, ...workspace.formations]) {
     for (const marker of diagram.players) {
       if (!changed.has(marker.rosterId)) continue;
       const player = current.get(marker.rosterId);
-      if (player) marker.name = player.name;
-      else delete marker.rosterId; // Keep the historical display name on the play.
+      marker.name = player?.name ?? changed.get(marker.rosterId);
+      if (!player) delete marker.rosterId; // Keep the last display name even on a historical diagram.
     }
   }
 }

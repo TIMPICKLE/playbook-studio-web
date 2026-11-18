@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
-import { planDepthPlayerMove, DEPTH_LIMITS } from '../web/depth-model.js';
+import { planDepthPlayerMove, validateDepthChart, DEPTH_LIMITS } from '../web/depth-model.js';
 import { createDepthChartView } from '../web/depth-chart.js';
 
 const fixture = () => ({ id: 'g', unit: 'offense', name: 'Practice', templateId: 'spread', notes: '', slots: [
@@ -33,7 +33,9 @@ test('stale or missing sources, duplicate starters and full destination ranks ar
   const group = fixture(), before = JSON.stringify(group);
   assert.equal(planDepthPlayerMove(group, ids, { slotId: 'qb', index: 1, playerId: 'p2' }, { slotId: 'x', index: 0 }).error, 'changedRetry');
   assert.equal(planDepthPlayerMove(group, ids, { playerId: 'gone' }, { slotId: 'x', index: 0 }).error, 'changedRetry');
-  assert.equal(planDepthPlayerMove(group, ids, { playerId: 'p0' }, { slotId: 'x', index: 0 }).error, 'starterTaken');
+  group.slots[2].playerIds = ['p1']; // A cross-trained reserve is starting elsewhere.
+  assert.equal(planDepthPlayerMove(group, ids, { slotId: 'qb', index: 1, playerId: 'p1' }, { slotId: 'x', index: 0 }).error, 'starterTaken');
+  group.slots[2].playerIds = [];
   assert.equal(JSON.stringify(group), before);
   group.slots[1].playerIds = Array.from({ length: DEPTH_LIMITS.ranks }, (_, i) => `p${i + 3}`);
   assert.equal(planDepthPlayerMove(group, ids, { slotId: 'qb', index: 1, playerId: 'p1' }, { slotId: 'x', index: 1 }).error, 'rankLimit');
@@ -151,16 +153,74 @@ test('a failed drop preserves the source and retries successfully; later changes
   assert.equal(f.state.writes, 1);
 });
 
-test('roster assignment rejects duplicate starters and canceled drafts never make a hidden roster write', t => {
+test('directory starter transfer matches a formation drag with one commit and one undo', t => {
   const f = host(t), before = structuredClone(f.group.slots);
   f.choose('p0'); f.click('[data-depth-chart=pick-player]');
   f.click('[data-depth-chart=inspect][data-slot=x]');
-  assert.deepEqual(f.group.slots, before); assert.equal(f.state.writes, 0);
-  assert.match(f.q('.depth-status').textContent, /首发/);
-  f.click('[data-depth-chart=cancel-assignment]');
+  assert.deepEqual(f.group.slots.map(slot => slot.playerIds), [[null, 'p1', 'p2'], ['p0', 'p3'], []]);
+  assert.equal(f.state.writes, 1);
+  f.click('[data-depth-chart=undo-ranks]');
+  assert.deepEqual(f.group.slots, before);
+  assert.equal(f.state.writes, 2);
   f.choose('p4'); f.click('[data-depth-chart=pick-player]');
   f.state.book = 'other'; f.view.refresh();
   assert.equal(f.root.classList.contains('depth-assigning'), false);
   f.click('[data-depth-chart=inspect][data-slot=x]');
-  assert.equal(f.state.writes, 0);
+  assert.equal(f.state.writes, 2);
+});
+
+test('filling an open starter preserves every reserve rank through save, reload and undo', t => {
+  const f = host(t);
+  const reserves = Array.from({ length: DEPTH_LIMITS.ranks - 1 }, (_, i) => `p${i + 5}`);
+  f.group.slots[0].playerIds = [null, ...reserves];
+  f.view.refresh(); f.choose('p4'); f.click('[data-depth-chart=pick-player]');
+  f.click('[data-depth-chart=inspect][data-slot=qb]');
+  const persisted = JSON.stringify(f.state.data.depthChart);
+  f.state.data.depthChart = validateDepthChart(JSON.parse(persisted), ids);
+  f.view.refresh();
+  assert.deepEqual(f.state.data.depthChart.groups[0].slots[0].playerIds, ['p4', ...reserves]);
+  f.click('[data-depth-chart=undo-ranks]');
+  assert.deepEqual(f.state.data.depthChart.groups[0].slots[0].playerIds, [null, ...reserves]);
+  assert.equal(f.state.writes, 2);
+});
+
+test('moving a rank using buttons identifies the exact reserve assignment and fills its open target', t => {
+  const f = host(t);
+  f.group.slots[1].playerIds = ['p3', null, 'p5'];
+  f.group.slots[2].playerIds = [null, 'p1']; // The same reserve trains at two positions.
+  const before = structuredClone(f.group.slots);
+  f.click('[data-mode=table]');
+  f.click('[data-depth-chart=pick-rank][data-source-slot=qb][data-source-index="1"]');
+  assert.equal(f.win.document.activeElement.dataset.depthChart, 'place-player');
+  f.click('[data-depth-chart=place-player][data-slot=x][data-index="1"]');
+  assert.deepEqual(f.group.slots.map(slot => slot.playerIds), [['p0', 'p2'], ['p3', 'p1', 'p5'], [null, 'p1']]);
+  f.click('[data-depth-chart=undo-ranks]');
+  assert.deepEqual(f.group.slots, before);
+  assert.equal(f.state.writes, 2);
+});
+
+test('directory assignments preserve cross-training and use an existing destination reserve when transferring a starter', () => {
+  const group = fixture();
+  const backupPlan = planDepthPlayerMove(group, ids, { playerId: 'p0' }, { slotId: 'x', index: 1 });
+  assert.deepEqual(backupPlan.changes, [{ id: 'x', before: ['p3'], after: ['p3', 'p0'] }]);
+  group.slots[1].playerIds = backupPlan.changes[0].after;
+  const move = target => planDepthPlayerMove(group, ids, target, { slotId: 'x', index: 0 });
+  const transfer = move({ playerId: 'p0' });
+  assert.deepEqual(transfer, move({ playerId: 'p0', slotId: 'qb', index: 0 }));
+  assert.deepEqual(transfer.changes.map(change => change.after), [[null, 'p1', 'p2'], ['p0', 'p3']]);
+});
+
+test('rank insertion stops at an open rank and never fills an empty starter when adding a reserve', () => {
+  const group = fixture();
+  group.slots[0].playerIds = ['p0', 'p1', null, 'p2'];
+  const into = (index, playerId) => planDepthPlayerMove(group, ids, { playerId }, { slotId: 'qb', index });
+  assert.deepEqual(into(0, 'p4').changes[0].after, ['p4', 'p0', 'p1', 'p2']);
+  assert.deepEqual(into(2, 'p0').changes[0].after, [null, 'p1', 'p0', 'p2']);
+  group.slots[0].playerIds = [null, ...Array.from({ length: DEPTH_LIMITS.ranks - 1 }, (_, i) => `p${i + 5}`)];
+  assert.equal(into(DEPTH_LIMITS.ranks, 'p4').error, 'rankLimit');
+  group.slots[0].playerIds[1] = null;
+  const ranks = into(DEPTH_LIMITS.ranks, 'p4').changes[0].after;
+  assert.equal(ranks[0], null);
+  assert.equal(ranks.length, DEPTH_LIMITS.ranks);
+  assert.equal(ranks.at(-1), 'p4');
 });

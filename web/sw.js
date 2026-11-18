@@ -1,7 +1,7 @@
 const CACHE = 'playbook-studio-v8-ux-workflow';
 // Heavy graph and Madden geometry modules are fetched and cached on first use.
 const FILES = [
-  './editor-history.js', './player-group.js', './editor-selection.js', './model-connection.js', './workspace-ui.js', './locales/madden-workflow.js',
+  './editor-history.js', './workspace-merge.js', './player-group.js', './editor-selection.js', './model-connection.js', './workspace-ui.js', './locales/madden-workflow.js',
   './assistant-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
   './assistant-schema.js', './assistant-proposal.js', './assistant-conflicts.js', './assistant-draft.js', './assistant-session.js', './vendor/assistant-zod.js',
   './game-formats.js', './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',

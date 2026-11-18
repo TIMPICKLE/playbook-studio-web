@@ -3,8 +3,8 @@ import { isCompactWorkspace } from './workspace-panels.js';
 // Device-local layout preferences. This module never edits the shared playbook.
 export const BOARD_LAYOUT_KEY = 'playbook-studio-board-layout-v1';
 const bound = (n, min, max) => Math.round(Math.min(max, Math.max(min, n)));
-const heightMax = 1400;
-const heightMin = () => isCompactWorkspace() ? 200 : 280;
+const compactHeightMin = 200, heightMax = 1400;
+const heightMin = () => isCompactWorkspace() ? compactHeightMin : 280;
 const dimensionsMode = () => window.innerWidth <= 600 || (isCompactWorkspace() && window.innerHeight <= 500)
   ? `popover-${window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'}` : 'inline';
 
@@ -14,8 +14,8 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
   let dimensionsLayout = dimensionsMode(), dimensionsOpen = dimensionsLayout === 'inline';
   try {
     const saved = JSON.parse(localStorage.getItem(BOARD_LAYOUT_KEY));
-    if (Number.isFinite(saved?.height)) prefs.height = bound(saved.height, heightMin(), heightMax);
-    if (Number.isFinite(saved?.expandedHeight)) prefs.expandedHeight = bound(saved.expandedHeight, heightMin(), heightMax);
+    if (Number.isFinite(saved?.height)) prefs.height = bound(saved.height, compactHeightMin, heightMax);
+    if (Number.isFinite(saved?.expandedHeight)) prefs.expandedHeight = bound(saved.expandedHeight, compactHeightMin, heightMax);
     if (Number.isFinite(saved?.inspector)) prefs.inspector = bound(saved.inspector, 220, 480);
   } catch { /* A denied or invalid preference must not block the editor. */ }
 

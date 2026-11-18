@@ -15,7 +15,7 @@
   .editor-status > :is(span,strong) { min-width:0; overflow-wrap:anywhere; }
   .editor-status :is(button,a) { flex:none; min-height:32px; padding:4px 8px; color:inherit; border:1px solid var(--ui-border-strong); border-radius:var(--r-inset); text-underline-offset:3px; }
   .editor-status[data-state=saved] > :is(svg,[aria-hidden=true]) { color:var(--ui-success); }
-  .editor-status:is([data-state=offline],[data-state=saving]) > :is(svg,[aria-hidden=true]) { color:var(--ui-warning); }
+  .editor-status:is([data-state=pending],[data-state=unsaved],[data-state=offline],[data-state=saving]) > :is(svg,[aria-hidden=true]) { color:var(--ui-warning); }
   .editor-status[data-state=error] { color:var(--ui-danger); }
   .editor-status[data-state=error] :is(button,a) { border-color:currentColor; }
   .task-panel-tabs { display:flex; flex:none; gap:4px; padding:8px; border-bottom:1px solid var(--ui-border); background:var(--ui-bg); }

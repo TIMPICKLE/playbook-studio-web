@@ -94,6 +94,23 @@ function bindRoster(play, marker, patch, roster) {
   if (marker.rosterId && play.players.some(other => other.id !== marker.id && other.side === marker.side && other.rosterId === marker.rosterId)) fail('This roster player is already assigned to another marker on the same side.');
 }
 
+const isMovement = kind => kind === 'route' || kind === 'motion';
+
+// These are the routes the coach would replace by selecting this movement as main.
+export function competingMainRoutes(play, {playerId, kind, id}) {
+  if (!isMovement(kind)) return [];
+  return play.routes.filter(route => route.id !== id && route.playerId === playerId && !route.optional && isMovement(route.kind));
+}
+
+function applyRoutePurpose(play, route) {
+  if (route.optional) return;
+  for (const other of competingMainRoutes(play, route)) {
+    const before = clone(other);
+    other.optional = true;
+    relinkMotion(play, before, other);
+  }
+}
+
 function updateRoute(play, route, fields) {
   const before = clone(route);
   Object.assign(route, clone(fields));
@@ -102,14 +119,7 @@ function updateRoute(play, route, fields) {
   }
   if (before.kind !== route.kind && route.kind === 'block' && !has(fields, 'endCap')) route.endCap = 'bar';
   relinkMotion(play, before, route);
-  // Making a route the main movement follows the manual editor's replacement rule.
-  if (!route.optional && ['route', 'motion'].includes(route.kind) && (has(fields, 'optional') || has(fields, 'kind'))) {
-    for (const other of play.routes) {
-      if (other.id === route.id || other.playerId !== route.playerId || other.optional || !['route', 'motion'].includes(other.kind)) continue;
-      const previous = clone(other); other.optional = true;
-      relinkMotion(play, previous, other);
-    }
-  }
+  if (has(fields, 'optional') || has(fields, 'kind')) applyRoutePurpose(play, route);
 }
 
 /** Mutates a caller-owned draft; callers clone before execution and validate the complete group. */
@@ -147,9 +157,7 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
     if (play.routes.length >= 100) fail('Route limit reached.');
     const owner = find(play.players, op.playerId, 'Player');
     const route = { id: idFactory(), playerId: owner.id, kind: op.routeKind, points: clone(op.points), color: op.color ?? (op.routeKind === 'pass' ? COLORS.pass : owner.color), smooth: op.smooth ?? false, endCap: op.endCap ?? (op.routeKind === 'block' ? 'bar' : 'arrow'), optional: op.optional ?? false, delay: op.delay ?? 0, duration: op.duration ?? (op.routeKind === 'block' ? 2 : 4) };
-    if (!route.optional && ['route', 'motion'].includes(route.kind)) {
-      for (const other of play.routes) if (other.playerId === owner.id && !other.optional && ['route', 'motion'].includes(other.kind)) { const before = clone(other); other.optional = true; relinkMotion(play, before, other); }
-    }
+    applyRoutePurpose(play, route);
     play.routes.push(route); result.createdId = route.id;
   } else if (op.kind === 'route_update') updateRoute(play, find(play.routes, op.routeId, 'Route'), op.patch);
   else if (op.kind === 'zone_add') {

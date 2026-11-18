@@ -1,5 +1,8 @@
 // Cloud workspace and account UI messages.
 export default {
+  "cloud.accessFormDraft": "未提交表单，请在继续前复制或下载。",
+  "cloud.downloadFormDraft": "下载表单文本",
+  "cloud.finishFormRecovery": "完成表单恢复并重新打开战术本",
   "cloud.roleOwner": "管理员",
   "cloud.roleEditor": "编辑者",
   "cloud.roleViewer": "只读成员",

@@ -24,3 +24,14 @@ dialog.editor-dialog .modal {min-height:0;max-height:calc(var(--visible-height,1
 @media(max-width:600px) {
   dialog.editor-dialog .modal {max-height:calc(var(--visible-height,100dvh) - max(16px,env(safe-area-inset-top,0px) + env(safe-area-inset-bottom,0px)));}
 }
+
+.import-notice:not(:empty) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+}
+.import-notice span { overflow-wrap: anywhere; }
+.import-notice button { min-height: 44px; }
+.import-notice:empty { display: none; }

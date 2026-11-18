@@ -33,12 +33,32 @@ export class SharedWorkspace {
   get current() { return this.sync?.current; }
   get dirty() { return !!this.sync?.dirty; }
   get rosterFormOpen() { return this.mode === 'roster' && this.hooks.canLeaveRoster?.() === false; }
-  setStatus(value) { this.status = value; this.hooks.onStatus(displayStatus(value)); const node = document.querySelector('#cloud-status'); if (node) { node.innerHTML = `<i></i><span>${e(displayStatus(value))}</span>`; node.dataset.state = this.statusState(); } queueMicrotask(() => this.updateBookCards()); }
+  visibleStatus() {
+    const kind = this.statusState();
+    const label = displayStatus(this.status);
+    const field = this.mode === 'editor' && this.canEdit && this.hooks.getFieldDraftLabel?.();
+    if (!field) return { kind, label };
+    return kind === 'error' ? { kind, label: field + ' · ' + label } : { kind: 'unsaved', label: field };
+  }
+  updateStatusBadge() {
+    const node = document.querySelector('#cloud-status');
+    if (!node) return;
+    const { kind, label } = this.visibleStatus();
+    node.dataset.state = kind;
+    node.querySelector('span').textContent = label;
+  }
+  setStatus(value) {
+    this.status = value;
+    this.hooks.onStatus(displayStatus(value));
+    this.updateStatusBadge();
+    queueMicrotask(() => this.updateBookCards());
+  }
   renderBar() {
     const root = document.querySelector('#cloud-root');
     if (!this.user) { this.renderLogin(); return; }
     if (this.mode === 'home') { this.renderHome(); return; }
-    reconcileHTML(root, `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="40" height="22" alt=""><span>Playbook Studio<small>${t('cloud.teamPlays')}</small></span></a>${currentBookCard(this.books, this.current)}<div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="${t('cloud.syncDetails')}" data-state="${this.statusState()}"><i></i><span>${e(displayStatus(this.status))}</span></button>${this.current && this.canEdit ? `<button class="save-now" data-cloud-action="save-now">${t('cloud.saveNow')}</button>` : ''}</div><nav class="cloud-bar-actions" aria-label="${t('cloud.collaborationAndAccount')}"><button data-cloud-action="home">${t('cloud.workspaceBack')}</button><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? `<button data-cloud-action="members">${t('cloud.membersPermissions')}</button>` : ''}${this.current ? `<button data-cloud-action="history">${t('cloud.versionHistory')}</button>` : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? `<button data-cloud-action="password">${t('cloud.changePassword')}</button>` : ''}<button data-cloud-action="new">${t('cloud.newBook')}</button><button data-cloud-action="migrate">${t('cloud.importBackup')}</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? t('cloud.logoutSwitch') : t('cloud.switchTeamAccount')}</button></div></details></nav></header>`);
+    const status = this.visibleStatus();
+    reconcileHTML(root, `<header class="cloud-bar"><a class="cloud-brand" href="/editor/"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="40" height="22" alt=""><span>Playbook Studio<small>${t('cloud.teamPlays')}</small></span></a>${currentBookCard(this.books, this.current)}<div class="cloud-sync"><button id="cloud-status" class="cloud-status" data-cloud-action="sync-status" title="${t('cloud.syncDetails')}" data-state="${status.kind}"><i></i><span>${e(status.label)}</span></button>${this.current && this.canEdit ? `<button class="save-now" data-cloud-action="save-now">${t('cloud.saveNow')}</button>` : ''}</div><nav class="cloud-bar-actions" aria-label="${t('cloud.collaborationAndAccount')}"><button data-cloud-action="home">${t('cloud.workspaceBack')}</button><span class="cloud-role" data-role="${this.current?.role || ''}">${roleName(this.current?.role)}</span>${this.current?.role === 'owner' ? `<button data-cloud-action="members">${t('cloud.membersPermissions')}</button>` : ''}${this.current ? `<button data-cloud-action="history">${t('cloud.versionHistory')}</button>` : ''}<details class="account-menu"><summary><span class="account-avatar">${e((this.user.name || this.user.username || 'T').slice(0,1))}</span><span>${e(this.user.name || this.user.username)}</span><span aria-hidden="true">⌄</span></summary><div class="account-menu-panel"><strong>${e(this.user.username || this.user.email)}</strong>${this.user.authMode === 'password' ? `<button data-cloud-action="password">${t('cloud.changePassword')}</button>` : ''}<button data-cloud-action="new">${t('cloud.newBook')}</button><button data-cloud-action="migrate">${t('cloud.importBackup')}</button><button class="cloud-danger" data-cloud-action="logout">${this.user.authMode === 'password' ? t('cloud.logoutSwitch') : t('cloud.switchTeamAccount')}</button></div></details></nav></header>`);
     this.updateBookCards();
     if (!this.books.length && (this.mode === 'editor' || this.mode === 'roster')) root.insertAdjacentHTML('beforeend', `<section class="cloud-empty"><div class="empty-illustration">${fieldSVG(starterWorkspace().plays[0], {}, { thumbnail: true, prefix: 'empty' })}</div><div><span class="section-kicker">${t('cloud.startBook')}</span><h1>${t(this.mode === 'roster' ? 'roster.title' : 'cloud.shareIdeas')}</h1><p>${t(this.mode === 'roster' ? 'cloud.rosterNeedsBook' : 'cloud.inviteDescription')}</p><div class="empty-actions"><button class="button primary" data-cloud-action="new">${t('cloud.newTeamBook')} ${arrowIcon}</button><button class="button subtle" data-cloud-action="migrate">${t('cloud.importExisting')}</button></div><small>${this.user.authMode === 'password' ? t('cloud.missingTeam') : t('cloud.chatgptTeam')}</small>${this.user.authMode !== 'password' ? `<button class="text-button" data-cloud-action="logout">${t('cloud.switchTeamAccount')} →</button>` : ''}</div></section>`);
   }
@@ -47,7 +67,8 @@ export class SharedWorkspace {
     document.querySelector('#cloud-root').innerHTML = studioHome({ user: this.user, bookCount: this.books.length,...this.hooks.getHomeContext?.() });
   }
   setMode(mode) {
-    if (this.dirty) throw new Error(t('cloud.unsyncedChanges'));
+    if (this.accessError) return this.accessLost(this.accessError);
+    if (this.dirty && this.current?.role !== 'viewer') throw new Error(t('cloud.unsyncedChanges'));
     if (this.rosterFormOpen) return;
     const previous = this.mode;
     this.mode = mode;
@@ -62,7 +83,7 @@ export class SharedWorkspace {
     if (mode === 'home') document.querySelector(`[data-cloud-action="enter-${previous}"]`)?.focus({ preventScroll: true });
     window.scrollTo?.(0, 0);
   }
-  statusState() { return /冲突|失败|失效|不可用|尚未|未保存|变更/.test(this.status) ? 'error' : /离线|等待|正在|恢复/.test(this.status) ? 'pending' : 'saved'; }
+  statusState() { return /冲突|失败|失效|不可用|尚未|未保存|变更/.test(this.status) ? 'error' : /离线|等待|正在|恢复|已合并/.test(this.status) ? 'pending' : 'saved'; }
   renderLogin() {
     this.hooks.onModeChange?.('login');
     this.cardPicker?.destroy(); this.cardPicker = null;
@@ -92,8 +113,8 @@ export class SharedWorkspace {
     document.querySelector('#cloud-root').innerHTML = `<div class="loading-workspace" aria-busy="true"><div></div><div></div><p>${t('cloud.loadingTeam')}</p></div>`;
     try {
       this.user = (await request('/api/session')).user; this.renderBar(); if (!this.user) return;
-      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onStatus: value => this.setStatus(value), onData: (data, record) => { this.hooks.onData(data, record); this.hooks.onAnalysisData?.(data, record); if (this.mode === 'roster') this.hooks.showRoster?.(true); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); }, onConflict: (remote, local, reason) => this.conflictModal(remote, local, reason), onAccessLost: error => this.accessLost(error) });
-      window.addEventListener('beforeunload', event => { if (this.dirty || this.rosterFormOpen) { event.preventDefault(); event.returnValue = ''; } });
+      this.sync = new CloudSync({ request, userId: this.user.id, isBusy: this.hooks.isBusy, onBeforeAccessLoss: this.hooks.onBeforeAccessLoss, onStatus: value => this.setStatus(value), onData: (data, record) => { this.hooks.onData(data, record); this.hooks.onAnalysisData?.(data, record); if (this.mode === 'roster') this.hooks.showRoster?.(true); this.hooks.showEditor(this.mode === 'editor'); this.renderBar(); }, onConflict: (remote, local, reason) => this.conflictModal(remote, local, reason), onAccessLost: error => this.accessLost(error) });
+      window.addEventListener('beforeunload', event => { if (this.dirty || this.rosterFormOpen || this.accessFormDraft) { event.preventDefault(); event.returnValue = ''; } });
       await this.refreshBooks();
       const invite = new URLSearchParams(location.search).get('invite');
       if (invite) {
@@ -163,27 +184,36 @@ export class SharedWorkspace {
       this.hooks.openModal(t('cloud.playViewFailed'), `<p>${e(this.sync.viewError.message)}</p><p>${t('cloud.reloadFirst')}</p>`, `${this.sync.pending ? `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraftShort')}</button>` : ''}<button class="button primary" data-cloud-action="reload-cloud">${t('cloud.reloadView')}</button>`);
       return;
     }
+    if (this.current?.role === 'viewer' && this.sync?.pending) {
+      this.hooks.openModal(t('cloud.unsyncedChangesTitle'), `<p>${e(displayStatus(this.status))}</p><p class="muted small">${t(this.sync.draftSaved ? 'cloud.draftRetained' : 'cloud.backendDraftError')}</p>`, `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraft')}</button><button class="button primary" data-cloud-action="use-remote">${t('cloud.cloudVersion')}</button>`);
+      return;
+    }
     if (this.sync?.conflict) return this.conflictModal(this.sync.conflict, this.sync.pending);
     if (this.sync?.pending) {
       const recovery = this.sync.draftSaved ? t('cloud.loadingDraft') : t('cloud.backendSaveError');
       this.hooks.openModal(t('cloud.unsyncedChangesTitle'), `<p>${e(displayStatus(this.status))}</p><p class="muted small">${recovery}</p>`, `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraftShort')}</button><button class="button primary" data-cloud-action="retry-sync">${t('cloud.retrySync')}</button>`);
       return;
     }
-    return this.hooks.toast(displayStatus(this.status));
+    return this.hooks.toast(this.visibleStatus().label);
   }
   conflictModal(remote, local, reason = this.sync?.conflictReason) {
     this.conflictLocal = local;
     this.hooks.openModal(t('cloud.syncConflict'), `<p>${e(formatConflictReason(reason))} ${this.sync.draftSaved ? t('cloud.draftCloudSafe') : t('cloud.memoryOnlyBackup')}</p><p class="muted small">${t('cloud.conflictHelp')}</p>`, `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadMyVersion')}</button><button class="button subtle" data-cloud-action="use-remote">${t('cloud.cloudVersion')}</button><button class="button primary" data-cloud-action="fork-conflict">${t('cloud.saveAsNewBook')}</button>`, true);
   }
   accessLost(error) {
+    this.accessFormDraft ||= this.hooks.getRosterFormText?.();
     this.accessError = error;
-    this.sync.current.role = error.status === 403 ? 'viewer' : 'removed';
-    this.sync.dispose(); this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.hooks.showRoster?.(false); this.renderBar();
-    this.hooks.openModal(t('cloud.accessChanged'), `<p>${e(error.message)}</p><p class="muted small">${this.sync.draftSaved ? t('cloud.draftRetained') : this.sync.pending ? t('cloud.backendDraftError') : t('cloud.reloadPermissions')}</p>`, `${this.sync.pending ? `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraft')}</button>` : ''}${error.status === 403 ? `<button class="button primary" data-cloud-action="reload-cloud">${t('cloud.readonlyReload')}</button>` : `<a class="button primary" href="/editor/index.html" target="_top">${t('cloud.openBookAgain')}</a>`}`, true);
+    this.hooks.onPermissionLost(error); this.mode = 'home'; this.hooks.showEditor(false); this.hooks.showAnalysis?.(false); this.hooks.showRoster?.(false); this.renderBar();
+    const form = this.accessFormDraft ? `<label class="form-field"><span>${t('cloud.accessFormDraft')}</span><textarea readonly rows="5" data-access-form-draft>${e(this.accessFormDraft)}</textarea></label>` : '';
+    const exportForm = this.accessFormDraft ? `<button class="button subtle" data-cloud-action="export-form-draft">${t('cloud.downloadFormDraft')}</button>` : '';
+    const resume = t(this.accessFormDraft ? 'cloud.finishFormRecovery' : error.status === 403 ? 'cloud.readonlyReload' : 'cloud.openBookAgain');
+    const reload = error.status === 403 ? `<button class="button primary" data-cloud-action="reload-cloud">${resume}</button>`
+      : `<a class="button primary" href="/editor/index.html" target="_top">${resume}</a>`;
+    this.hooks.openModal(t('cloud.accessChanged'), `<p>${e(error.message)}</p><p class="muted small">${this.sync.draftSaved ? t('cloud.draftRetained') : this.sync.pending ? t('cloud.backendDraftError') : t('cloud.reloadPermissions')}</p>${form}`, `${this.sync.pending ? `<button class="button subtle" data-cloud-action="export-conflict">${t('cloud.downloadDraft')}</button>` : ''}${exportForm}${reload}`, true);
   }
   async handleAction(node) {
     const action = node.dataset.cloudAction;
-    if (action === 'enter-roster') { if (this.accessError) return this.accessLost(this.accessError); return this.setMode('roster'); }
+    if (action === 'enter-roster') return this.setMode('roster');
     if (action === 'enter-editor') return this.setMode('editor');
     if (action === 'enter-analysis') return this.setMode('analysis');
     if (action === 'home') return this.setMode('home');
@@ -194,10 +224,10 @@ export class SharedWorkspace {
       if (!input.value.trim() || !pass.value) { (input.value.trim() ? pass : input).setAttribute('aria-invalid','true'); (input.value.trim() ? pass : input).focus(); throw new Error(t('cloud.selectAccountPassword')); }
       await request('/api/auth/login', { method: 'POST', body: { username: input.value.trim(), password: pass.value } }); pass.value = ''; location.reload(); return;
     }
-    if (action === 'logout') { if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen) return;this.hooks.onLogout?.(); if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
+    if (action === 'logout') { if (this.accessFormDraft) return this.accessLost(this.accessError); if (this.dirty) throw new Error(t('cloud.unsyncedLogout')); if (this.rosterFormOpen) return;this.hooks.onLogout?.(); if (this.user.authMode === 'password') { await request('/api/auth/logout', { method: 'POST', body: {} }); location.reload(); } else location.href = '/signout-with-chatgpt?return_to=%2Feditor%2F'; return; }
     if (action === 'toggle-password') { const input = document.getElementById(node.dataset.target); input.type = input.type === 'password' ? 'text' : 'password'; node.textContent = t(input.type === 'password' ? 'cloud.show' : 'cloud.hide'); node.setAttribute('aria-pressed',String(input.type === 'text')); node.setAttribute('aria-label', t(input.type === 'text' ? 'cloud.hidePassword' : 'cloud.showPassword')); return; }
     if (action === 'privacy') return this.hooks.openModal(t('cloud.privacyTitle'), `<p>${t('cloud.privacyStorage')}</p><p>${t('cloud.privacyPermissions')}</p><p>${t('cloud.privacySecurity')}</p>`, `<button class="button primary" data-action="close-modal">${t('cloud.close')}</button>`);
-    if (action === 'save-now') { if (this.sync?.viewError) throw this.sync.viewError; if (!this.sync?.pending) return this.hooks.toast(t('cloud.savedCloud')); await this.sync.flush(); if (!this.sync.dirty) this.hooks.toast(t('cloud.savedShared')); return; }
+    if (action === 'save-now') { if (this.sync?.viewError) throw this.sync.viewError; if (!this.sync?.pending) return this.hooks.toast(this.visibleStatus().label); await this.sync.flush(); if (!this.sync.dirty) this.hooks.toast(this.visibleStatus().label); return; }
     if (action === 'password') return this.passwordModal();
     if (action === 'change-password') { const currentPassword = document.querySelector('#account-current-password').value, newPassword = document.querySelector('#account-new-password').value; if (newPassword.length < 8) throw new Error(t('cloud.passwordTooShort')); if (newPassword !== document.querySelector('#account-confirm-password').value) throw new Error(t('cloud.passwordMismatch')); await request('/api/auth/password', { method: 'POST', body: { currentPassword, newPassword } }); this.hooks.closeModal(); this.hooks.toast(t('cloud.passwordUpdated')); return; }
     if (action === 'add-existing-account') return this.hooks.openModal(t('cloud.teamAccount'), `<p class="muted">${t('cloud.addExistingDescription', { title: e(this.current.title) })}</p><label class="form-field"><span>${t('cloud.existingAccount')}</span><input id="existing-account-username" placeholder="${t('cloud.accountExample')}" maxlength="32" autocomplete="off"></label><label class="form-field"><span>${t('cloud.currentBookRole')}</span><select id="existing-account-role"><option value="editor">${t('cloud.editorCanEdit')}</option><option value="viewer">${t('cloud.viewerCanView')}</option></select></label>`, `<button class="button subtle" data-cloud-action="members">${t('cloud.cancel')}</button><button class="button primary" data-cloud-action="confirm-add-existing-account">${t('cloud.addToBook')}</button>`);
@@ -210,7 +240,15 @@ export class SharedWorkspace {
 
     if (action === 'sync-status') return this.showSyncStatus();
     if (action === 'retry-sync') { this.hooks.closeModal(); return this.sync.flush(); }
-    if (action === 'reload-cloud') { const record = await request(`/api/workspaces/${this.current.id}`); this.accessError = null; this.hooks.closeModal(); this.loadRecord(record); return; }
+    if (action === 'reload-cloud') {
+      const record = await request(`/api/workspaces/${this.current.id}`);
+      const accessError = this.accessError;
+      this.accessError = null; this.hooks.closeModal();
+      try { this.loadRecord(record); }
+      catch (error) { if (accessError) this.accessLost(accessError); throw error; }
+      this.accessFormDraft = '';
+      return;
+    }
     if (action === 'new') return this.showCreate();
     if (action === 'migrate') { const raw = localStorage.getItem(STORAGE_KEY); return this.showCreate(raw ? decodeWorkspace(raw) : null, t('cloud.switchLegacy')); }
     if (action === 'create') { const file = document.querySelector('#cloud-new-file')?.files?.[0]; if (file?.size > 5_000_000) throw new Error(t('cloud.backupTooLarge')); const data = file ? decodeWorkspace(await file.text()) : this.createData; const record = await request('/api/workspaces', { method: 'POST', body: { title: document.querySelector('#cloud-new-title').value, ...(data ? { data } : {}) } }); this.hooks.closeModal(); await this.refreshBooks(); this.loadRecord(record); this.hooks.toast(t('cloud.createSuccess')); return; }
@@ -226,6 +264,7 @@ export class SharedWorkspace {
     if (action === 'download-version') { const record = await request(`/api/workspaces/${this.current.id}/history/${node.dataset.revision}`); return this.hooks.download(encodeWorkspace(record.data), `playbook-version-${node.dataset.revision}.json`, 'application/json'); }
     if (action === 'restore-version') { if (this.dirty) return this.hooks.toast(t('cloud.syncFirst')); this.restoreRevision = node.dataset.revision; this.hooks.openModal(t('cloud.restoreVersion'), `<p>${t('cloud.restorePrompt', { revision: e(this.restoreRevision) })}</p>`, `<button class="button primary" data-cloud-action="confirm-restore">${t('cloud.restoreSync')}</button>`); return; }
     if (action === 'confirm-restore') { await request(`/api/workspaces/${this.current.id}/history/${this.restoreRevision}/restore`, { method: 'POST', body: { revision: this.current.revision } }); const record = await request(`/api/workspaces/${this.current.id}`); this.hooks.closeModal(); this.loadRecord(record); return; }
+    if (action === 'export-form-draft' && this.accessFormDraft) return this.hooks.download(this.accessFormDraft, 'unsaved-roster-form.txt', 'text/plain;charset=utf-8');
     if (action === 'export-conflict') return this.hooks.download(encodeWorkspace(this.sync.pending || this.conflictLocal), 'my-unsynced-playbook.json', 'application/json');
     if (action === 'use-remote') { this.hooks.closeModal(); if (this.sync.useRemote() === false) throw this.sync.viewError; return; }
     if (action === 'fork-conflict') { const record = await request('/api/workspaces', { method: 'POST', body: { title: `${this.current.title} · 我的副本`.slice(0, 80), data: this.sync.pending || this.conflictLocal } }); this.sync.pending = null; this.sync.persist(); this.hooks.closeModal(); await this.refreshBooks(); this.loadRecord(record); return; }

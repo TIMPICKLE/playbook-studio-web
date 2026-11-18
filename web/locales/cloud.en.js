@@ -1,5 +1,8 @@
 // Cloud workspace and account UI messages.
 export default {
+  "cloud.accessFormDraft": "Unsubmitted form — copy or download it before continuing.",
+  "cloud.downloadFormDraft": "Download form text",
+  "cloud.finishFormRecovery": "Finish form recovery and reopen the playbook",
   "cloud.roleOwner": "Owner",
   "cloud.roleEditor": "Editor",
   "cloud.roleViewer": "Viewer",
