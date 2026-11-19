@@ -140,7 +140,13 @@ test('AI editor actions use the real host for workspace transactions, local cont
       for(const [key,value] of Object.entries({zoom:1.4,expanded:true,height:800,inspectorWidth:350}))assert.equal(inspection.editor.view.layout[key],value);
       assert.deepEqual(inspection.editor.view.playback,{playing:false,time:1,speed:1.5,loop:true,mode:'rehearse'});
       assert.deepEqual(saved(),original,'device controls do not mutate playbook content');
-      await send([{kind:'playback_set',mode:'edit',reset:true,playing:false,speed:1,loop:false}],'local');
+      await send([{kind:'playback_set',mode:'edit',reset:true,playing:false,speed:1,loop:false}],'local',{
+        beforeSubmit() {
+          const range=q('#timeline');range.value='2.75';
+          range.dispatchEvent(new win.Event('input',{bubbles:true}));
+        },
+      });
+      await new Promise(resolve=>win.requestAnimationFrame(resolve));
       assert.equal(Number(q('#timeline').value),0);
       assert.equal(q('.editor-mode [data-action="edit-mode"]').getAttribute('aria-pressed'),'true');
       const defensive=original.plays.find(play=>play.book==='defense');

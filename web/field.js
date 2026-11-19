@@ -1,6 +1,8 @@
 import { t } from './i18n.js';
 import { COLORS, escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute, dynamicBlockRoute } from './model.js';
 import { projectBoardPoint } from './digital-projection.js';
+import { digitalFieldPalette } from './digital-field-palette.js';
+export { digitalFieldChrome } from './digital-field-palette.js';
 export const project = p => ({ x: 18 + p.x * 9.64, y: 20 + p.y * 7.6 });
 const n = x => Number(x).toFixed(2);
 const xy = p => { const v = project(p); return `${n(v.x)},${n(v.y)}`; };
@@ -36,21 +38,6 @@ const LIGHT_DISPLAY = { '#ffdc42': '#2b2f36', '#c4a5f5': '#5d7491', '#ffd166': '
 const inkOn = color => { const h = String(color).replace('#', ''); const v = h.length === 3 ? h.split('').map(c => c + c).join('') : h.slice(0, 6); const [r, g, b] = [0, 2, 4].map(i => parseInt(v.slice(i, i + 2), 16) / 255); return Number.isNaN(r) || .2126 * r + .7152 * g + .0722 * b > .55 ? '#111214' : '#ffffff'; };
 export const displayColor = (color, light = false) => (light ? LIGHT_DISPLAY : DARK_DISPLAY)[String(color).toLowerCase()] || color;
 export const displayZoneColor = (color, light = false) => light && String(color).toLowerCase() === COLORS.zone ? '#235477' : color;
-
-// All field paint lives inside the SVG. The GPU texture, vector fallback and
-// compatibility PNG can each render the same drawing without a stylesheet.
-const ENAMEL = {
-  dark: {
-    top: '#30493e', middle: '#253c35', bottom: '#1c2d29', edge: '#172622',
-    major: '#6b8375', minor: '#455f54', hash: '#526c60', yard: '#a6b8aa',
-    los: '#dce2bf', ink: '#e1e9dc', innerRim: '#90a092', outerRim: '#41534a',
-  },
-  light: {
-    top: '#e5ebe0', middle: '#dce5da', bottom: '#cad7cd', edge: '#becdc1',
-    major: '#91a497', minor: '#b7c6b9', hash: '#9caf9e', yard: '#495f50',
-    los: '#465b46', ink: '#30483b', innerRim: '#edf2e9', outerRim: '#95a99b',
-  },
-};
 
 function enamelSurface(paint, prefix, showGrid) {
   const wash = `${prefix}-enamel-wash`;
@@ -116,7 +103,7 @@ export function fieldSVG(play, settings = {}, options = {}) {
   const { thumbnail = false, selected = null, selectedPlayerIds = [], time = 0, drawing = null, print = false, prefix = 'pitch' } = options;
   const selectedPlayers = new Set([...selectedPlayerIds, ...(selected?.type === 'players' ? selected.ids || [] : selected?.type === 'player' ? [selected.id] : [])]);
   const light = settings.fieldTheme === 'light' || print;
-  const enamel = !thumbnail && !print && settings.visualMode === 'digital' ? ENAMEL[light ? 'light' : 'dark'] : null;
+  const enamel = !thumbnail && !print && settings.visualMode === 'digital' ? digitalFieldPalette(settings.fieldTheme) : null;
   const bg = enamel?.middle || (light ? '#f4f5f7' : '#1a1c20');
   const ink = enamel?.ink || (light ? '#4a4f57' : '#dfe2e7');
   const showGrid = settings.showGrid !== false;
@@ -142,12 +129,13 @@ export function fieldSVG(play, settings = {}, options = {}) {
     if (active && !thumbnail && !print && time === 0) path += displayRoute.points.slice(1).map((p, j) => { const v = project(p), attributes = `data-point="${j + 1}" data-route-id="${e(r.id)}" cx="${n(v.x)}" cy="${n(v.y)}"`; return `<circle ${attributes} r="16" fill="transparent" class="point-hit"/><circle ${attributes} r="6" fill="${stroke}" stroke="${bg}" stroke-width="2" class="point-handle" pointer-events="none"/>`; }).join('');
     return path;
   }).join('');
+  const draftInk=enamel?.ink || '#ffffff', draftKeyline=enamel?.middle || '#111214';
   if (drawing?.points?.length) {
-    defs += marker(`${prefix}-draft`, '#ffffff');
+    defs += marker(`${prefix}-draft`, draftInk);
   }
-  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="#ffffff" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="#ffffff" stroke="#111214" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="#ffffff" stroke="#111214" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="#ffffff" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
+  const draft = drawing?.points?.length ? `<g class="draft-layer" pointer-events="none"><path d="${routePath({ points: drawing.points, smooth: false })}" stroke="${draftInk}" stroke-width="3" fill="none" marker-end="url(#${prefix}-draft-arrow)"/><path class="draft-preview" stroke="${draftInk}" stroke-width="2.5" stroke-dasharray="7 6" fill="none" opacity=".65"/><circle class="draft-cursor" r="6" fill="${draftInk}" stroke="${draftKeyline}" stroke-width="2" visibility="hidden"/>${drawing.points.slice(1).map((point, i) => { const v=project(point); return `<circle cx="${n(v.x)}" cy="${n(v.y)}" r="5" fill="${draftInk}" stroke="${draftKeyline}" stroke-width="2"/><text x="${n(v.x+11)}" y="${n(v.y-9)}" fill="${draftInk}" font-size="14">${i+1}</text>`; }).join('')}</g>` : '';
   const ringFinish = enamel
-    ? `pathLength="100" stroke-dasharray="21 4" stroke-dashoffset="10.5" stroke="${light ? '#435748' : '#e1e7df'}"`
+    ? `pathLength="100" stroke-dasharray="21 4" stroke-dashoffset="10.5" stroke="${enamel.focus}"`
     : `stroke="${light ? '#17191c' : '#ffffff'}"`;
   const players = play.players.map(p => {
     const v = project(animatedPlayer(play, p, time)), active = selectedPlayers.has(p.id);

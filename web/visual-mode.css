@@ -19,11 +19,11 @@ html[data-digital-board=loading] .field-tag::after{content:'材质加载中';fon
 /* Perspective stage: the WebGL scene and projected SVG input share one camera. */
 @media screen {
   html[data-visual-mode=digital] .workspace:not(.reference-play) .field-wrap {
-    isolation:isolate;background:radial-gradient(ellipse at 46% 27%,#343e39 0%,#232b28 48%,#181d1b 88%);
-    border:1px solid #8090874d;box-shadow:inset 0 1px #eef4ed19,0 12px 28px #10171226;
+    isolation:isolate;background:radial-gradient(ellipse at 46% 27%,var(--field-stage-lit) 0%,var(--field-stage-mid) 52%,var(--field-stage-shade) 100%);
+    border:1px solid #c3c9d24d;box-shadow:inset 0 1px #ffffff19,0 12px 28px #10111426;
   }
   html[data-visual-mode=digital] .workspace:not(.reference-play) .pitch-viewport {padding:12px;box-sizing:border-box}
-  .pitch-stage.is-perspective > .pitch-svg {transform:var(--board-projection);transform-origin:0 0;transform-box:border-box;overflow:visible;box-shadow:0 0 0 2px #849087,0 3px 0 2px #4d5b52,0 9px 0 2px #26312c,0 17px 20px #070e0a66;border-radius:12px;background:#26362e}
+  .pitch-stage.is-perspective > .pitch-svg {transform:var(--board-projection);transform-origin:0 0;transform-box:border-box;overflow:visible;box-shadow:0 0 0 2px var(--field-frame),0 3px 0 2px var(--field-rim),0 9px 0 2px var(--field-plinth),0 17px 20px #090b0e66;border-radius:12px;background:var(--field-edge)}
   .pitch-stage.is-three > .pitch-svg {box-shadow:none;background:none}
   .pitch-stage.is-perspective > :is(.assistant-preview,.assistant-highlights) {box-shadow:none;background:none}
   .pitch-stage.is-three > .pitch-svg.digital-ready > :not(defs):not(.draft-layer):not(.point-handle) {opacity:0}
@@ -34,7 +34,7 @@ html[data-digital-board=loading] .field-tag::after{content:'材质加载中';fon
   .pitch-stage.is-fallback > .pitch-svg[data-field-surface] .selection-ring {visibility:hidden}
   .pitch-stage .digital-scene-canvas,.pitch-stage .digital-token-overlay {position:absolute;inset:0;width:100%;height:100%;pointer-events:none!important;z-index:1}
   .pitch-stage.is-perspective .player-label {transform:none}
-  html[data-visual-mode=digital] #field .route-stroke {filter:drop-shadow(0 1px .5px #0a0a0b80)}
+  html[data-visual-mode=digital] #field .route-stroke {filter:drop-shadow(0 1px .5px #0b0c0f80)}
 }
 @media print{.digital-scene-canvas,.digital-token-overlay{display:none!important}.pitch-stage>.pitch-svg{transform:none!important}}
 

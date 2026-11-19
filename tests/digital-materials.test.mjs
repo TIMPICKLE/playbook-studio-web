@@ -5,7 +5,9 @@ import {Window} from 'happy-dom';
 import * as THREE from '../web/vendor/three-0.186.0/three.module.js';
 import {starterWorkspace,animatedPlayer} from '../web/model.js';
 import {fieldSVG,project} from '../web/field.js';
-import {PIECE_HEIGHT, puckPalette} from '../web/digital-puck.js';
+import {createDigitalBoard} from '../web/digital-board.js';
+import {PIECE_HEIGHT, focusInk, puckPalette} from '../web/digital-puck.js';
+import {DIGITAL_FIELD_LIGHT, digitalFieldPalette} from '../web/digital-field-palette.js';
 import {projectBoardPoint} from '../web/digital-projection.js';
 
 // Exercise the production scene with actual Three geometry, materials, matrices
@@ -56,7 +58,9 @@ test('background handoff waits for the newest decoded texture to be presented',a
     f.engine.mount(f.svg,f.play,f.settings);draw();
     assert.equal(f.engine.backgroundReady,false);
     const beforeDecode=f.invalidations;
-    while(f.images.length)f.images.shift().onload();
+    assert.equal(f.images.length,1);
+    f.images.shift().onload();
+    assert.equal(f.images.length,0,'presenting the mounted timeline must not enqueue the same field again');
     assert.ok(f.invalidations>beforeDecode,'a completed texture wakes an idle board');
     assert.equal(f.engine.backgroundReady,false,'decoded work has not reached the canvas yet');
     draw();assert.equal(f.engine.backgroundReady,true);
@@ -72,6 +76,44 @@ test('background handoff waits for the newest decoded texture to be presented',a
   }finally{await f.close();}
 });
 
+test('mounting a paused timeline bakes one field and subsequent focus and seeks publish the latest SVG',async()=>{
+  const f=await sceneFixture();
+  const state={play:f.play,settings:f.settings,time:f.play.ball.passAt+.1,playing:false,rehearsal:true};
+  f.stage.id='field';
+  f.win.CanvasRenderingContext2D=function(){};
+  f.doc.documentElement.dataset.visualMode='digital';
+  const board=createDigitalBoard({doc:f.doc,getState:()=>state,makeEngine:async()=>f.engine});
+  try{
+    await board.sync();
+    assert.equal(f.images.length,1);
+    const mounted=f.images.shift();
+    assert.match(await (await fetch(mounted.url)).text(),/data-ball-cue="release"/);
+    mounted.onload();board.presentTimeline();
+    assert.equal(f.images.length,0,'a nonzero mounting time is already represented by its texture');
+    assert.equal(board.backgroundReady,true);
+
+    const route=f.play.routes[0];
+    state.selected={type:'route',id:route.id};
+    board.presentTimeline();
+    const focus=f.images.shift();
+    const focusedSvg=await (await fetch(focus.url)).text();
+    const doc=new f.win.DOMParser().parseFromString(focusedSvg,'image/svg+xml');
+    assert.equal(doc.querySelector(`[data-feedback-route="${route.id}"] [data-route-focus]`).getAttribute('opacity'),'0.34');
+    for(const time of [0,f.play.ball.passAt,f.play.ball.arriveAt+.1]){
+      state.time=time;board.presentTimeline();
+    }
+    assert.equal(f.images.length,0,'the current decode coalesces intermediate seeks');
+    focus.onload();
+    assert.equal(f.images.length,1);
+    const latest=f.images.shift();
+    assert.match(await (await fetch(latest.url)).text(),/data-ball-cue="catch"/);
+    latest.onload();board.presentTimeline();
+    assert.equal(f.contexts.get(f.fieldTexture().image).image,latest);
+    assert.equal(board.backgroundReady,true);
+    assert.equal(f.images.length,0);
+  }finally{board.destroy();await f.close();}
+});
+
 test('Three selection rings represent every selected player and clear without remounting',async()=>{
   const f=await sceneFixture(),ids=f.play.players.slice(0,2).map(player=>player.id);
   try {
@@ -82,9 +124,47 @@ test('Three selection rings represent every selected player and clear without re
     assert.equal(selectedRings().length,2);
     assert.ok(selectedRings().every(item=>item.material.opacity===.9));
     f.engine.draw({...view,settings:{...view.settings,fieldTheme:'light'}});
-    assert.ok(selectedRings().every(item=>item.material.color.getHexString()==='435748'));
+    assert.ok(selectedRings().every(item=>'#'+item.material.color.getHexString()===focusInk('light')));
     f.engine.draw({...view,selected:null});
     assert.equal(selectedRings().length,0);
+  }finally{await f.close();}
+});
+
+test('field textures and trim share a palette through first paint, theme change and capture',async()=>{
+  const f=await sceneFixture();
+  const hex=color=>'#'+color.getHexString();
+  let previous=null,svg=f.svg;
+  try{
+    for(const theme of ['dark','light','dark']){
+      const settings={...f.settings,fieldTheme:theme,visualMode:'digital'},palette=digitalFieldPalette(theme);
+      const holder=f.doc.createElement('div');holder.innerHTML=fieldSVG(f.play,settings);
+      const next=holder.firstElementChild;svg.replaceWith(next);svg=next;
+      f.engine.mount(svg,f.play,settings);
+      const draw=()=>f.engine.draw({play:f.play,settings,time:0,animated:false});
+      draw();
+      const scene=f.renders.at(-1).scene,hemisphere=scene.children.find(n=>n.isHemisphereLight);
+      const lights=scene.children.filter(n=>n.isDirectionalLight);
+      assert.deepEqual([hemisphere.color,hemisphere.groundColor,lights.find(n=>n.castShadow).color,lights.find(n=>!n.castShadow).color].map(hex),
+        [DIGITAL_FIELD_LIGHT.sky,DIGITAL_FIELD_LIGHT.ground,DIGITAL_FIELD_LIGHT.key,DIGITAL_FIELD_LIGHT.fill]);
+      const trim=[];
+      scene.traverse(n=>{if(n.geometry?.type==='ExtrudeGeometry')trim.push(n);});
+      const frame=trim.find(n=>n.geometry.parameters.options.depth===1.5);
+      const plinth=trim.find(n=>n.geometry.parameters.options.depth===12);
+      const trimColors=()=>[hex(frame.material.color),hex(plinth.material.color)];
+      if(previous)assert.deepEqual(trimColors(),[previous.frame,previous.plinth],'pending updates retain a coherent complete board');
+      else assert.equal(f.renderer.canvas.style.visibility,'hidden','the current SVG is visible before the first texture');
+      assert.equal(f.images.length,1);
+      const image=f.images.shift(),xml=await (await fetch(image.url)).text();
+      assert.ok(xml.includes(palette.middle),'the GPU receives the same field color as the SVG');
+      image.onload();draw();
+      assert.deepEqual(trimColors(),[palette.frame,palette.plinth]);
+      assert.equal(f.contexts.get(f.fieldTexture().image).image,image);
+      assert.equal(f.engine.backgroundReady,true);
+      assert.equal(f.renderer.canvas.style.visibility,'visible');
+      assert.equal(f.engine.capture(),'data:image/png;base64,c2NlbmU=');
+      assert.equal(f.images.length,0,'capture reuses the displayed field');
+      previous=palette;
+    }
   }finally{await f.close();}
 });
 
@@ -204,7 +284,9 @@ test('the opaque scene presents the field and all puck labels in one render, pic
     let body;scene.traverse(n=>{if(n.userData.playerId===player.id)body=n.parent;});
     const moved=project(animatedPlayer(f.play,player,2));assert.equal(body.position.x,moved.x);assert.equal(body.position.y,800-moved.y);assert.ok(body.position.z>0);
     assert.equal(JSON.stringify(f.play),before);
+    const pending=f.images.shift();
     f.engine.destroy();assert.equal(f.doc.querySelector('.digital-scene-canvas'),null);assert.equal(f.svg.classList.contains('digital-ready'),false);assert.equal(f.stage.classList.contains('is-three'),false);
+    assert.equal(pending.onload,null);assert.equal(pending.onerror,null);await assert.rejects(fetch(pending.url),TypeError);
     assert.equal(f.renderer.disposed,true);assert.equal(f.renderer.lost,true);assert.equal(f.environment.disposed,true);
     assert.equal(f.engine.pick(100,100),null);f.engine.destroy();
   }finally{await f.close();}
@@ -221,12 +303,19 @@ test('the SVG stays visible until the first complete field texture has been pres
     draw();assert.equal(f.svg.classList.contains('digital-ready'),true);
     while(f.images.length)f.images.shift().onload?.();
     const lastImage=f.fieldTexture().image;
+    f.engine.refreshBackground();
+    const obsolete=f.images.shift(),lateDecode=obsolete.onload,lateError=obsolete.onerror;
     const nextPlay=starterWorkspace().plays[1],holder=f.doc.createElement('div');holder.innerHTML=fieldSVG(nextPlay,f.settings);const next=holder.firstElementChild;f.svg.replaceWith(next);
     f.engine.mount(next,nextPlay,f.settings);
     f.engine.draw({play:nextPlay,settings:f.settings,time:0,animated:false});
     assert.equal(next.classList.contains('digital-ready'),false,'a different play must not present old routes as its own');
     assert.equal(f.fieldTexture().image,lastImage,'changing plays keeps the last good texture until decoding succeeds');
     f.images.shift().onload();f.engine.draw({play:nextPlay,settings:f.settings,time:0,animated:false});assert.equal(next.classList.contains('digital-ready'),true);
+    const replacement=f.fieldTexture().image;
+    lateDecode();lateError();
+    assert.equal(f.fieldTexture().image,replacement);
+    assert.equal(f.engine.backgroundReady,true);
+    await assert.rejects(fetch(obsolete.url),TypeError);
   }finally{await f.close();}
 });
 
@@ -236,6 +325,7 @@ test('same-play full rerenders retain the ready frame and ignore cancelled image
     const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
     f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();draw();
     const texture=f.fieldTexture(),completeCanvas=texture.image,version=texture.version,canvas=f.renderer.canvas;
+    f.engine.refreshBackground();
     const oldPending=f.images.shift(),oldCompletion=oldPending.onload,oldFailure=oldPending.onerror;
     f.doc.body.innerHTML=`<div class="pitch-stage">${fieldSVG(f.play,f.settings)}</div>`;
     const next=f.doc.querySelector('svg'),nextStage=f.doc.querySelector('.pitch-stage');f.engine.mount(next,f.play,f.settings);

@@ -12,7 +12,7 @@
 
 </div>
 
-![银灰工作台：左侧战术本、中央球场与右侧属性面板](docs/assets/readme/editor-silver.jpg)
+![传统模式的银灰工作台，左侧为战术本，中央为平面球场，右侧为属性面板](docs/assets/readme/editor-silver.jpg)
 
 ## 能做什么
 
@@ -46,12 +46,13 @@
 
 ## 数字化战术板
 
-在桌面编辑器里选择 **显示模式 → 数字化模式**。下图是同一套 11 对 11 Mesh 战术。右图的棋子降低后，中锋身后的封堵横杠清晰可见。棋子顶面显示位置缩写，侧边保留球员自选色。
+在桌面编辑器选择 **显示模式 → 数字化模式**。点击球场上方的太阳按钮「切换球场明暗」，即可在石墨深色（左）与冷银浅色（右）之间切换。下图是同一机位的 Mesh 浅交叉。钢灰色码线衬出战术路线，棋子顶面标出位置，侧边嵌条保留球员颜色。
 
-![同机位 Mesh 战术的浏览器兼容视图，左为 v57，右为 v58 的低矮棋子与珐琅球场](docs/acceptance/evidence/digital-board-comparison.webp)
+![同一 Mesh 布阵在深色与浅色数字球场上的浏览器画面](docs/assets/readme/digital-field-themes.webp)
 
-- **改线**　让 AI 把 X 的 Go 改为 Post，可以看到两条路线重合的起跑段保持原位。预览中按下鼠标即可接管，应用后可以撤销。[观看编辑演示](docs/acceptance/evidence/digital-edit-continuity.mp4)
-- **演练**　切到「战术演练」，拖动时间轴查看四分卫出手和接球时刻。暂停后导出 PNG 会保留当时的球位和路线。WebGL 场景就绪时导出透视图，兼容视图导出平面图。[观看同机位演练对照](docs/acceptance/evidence/digital-rehearsal-compare.mp4)
+- **改线**　让 AI 把 X 的 Go 改为 Post，可以看到两条路线重合的起跑段保持原位。预览中按下鼠标即可接管，应用后可以撤销。
+- **演练**　切到「战术演练」，拖动时间轴查看四分卫出手和接球时刻。暂停后导出 PNG 会保留当时的球位和路线。WebGL 场景就绪时导出透视图，兼容视图导出平面图。
+- **拖动与回看**　拖动球员时，棋子与关联路线在同一次刷新中移动。快速来回拖动时间轴时，每次刷新显示最新位置，松手后停在最终选定时刻。兼容视图会复用移动棋子的表面几何。
 
 [验收画面与导出样例](docs/DIGITAL_BOARD_ACCEPTANCE.md) · [性能实测与设备条件](docs/DIGITAL_BOARD_PERFORMANCE.md)
 

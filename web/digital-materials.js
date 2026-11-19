@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three-0.186.0/three.module.js';
 import { FOCUS_RADIUS, PIECE_HEIGHT, focusInk, puckPalette } from './digital-puck.js';
+import { DIGITAL_FIELD_LIGHT, digitalFieldPalette } from './digital-field-palette.js';
 import { animatedPlayer, animatedBall } from './model.js';
 import { project } from './field.js';
 import { createBoardCamera } from './digital-projection.js';
@@ -10,7 +11,7 @@ import { createPieceGeometries, roundedRectangle } from './digital-piece-geometr
 export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
   const win=doc.defaultView,canvas=doc.createElement('canvas');
   canvas.className='digital-scene-canvas';canvas.setAttribute('aria-hidden','true');
-  canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none';
+  canvas.style.cssText='position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;visibility:hidden';
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,preserveDrawingBuffer:true});
   renderer.setPixelRatio(1);renderer.setSize(1000,800,false);
   renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -18,11 +19,11 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
   renderer.debug.onShaderError=()=>{throw new Error('The 3D material shader could not compile');};
   const scene=new THREE.Scene(),camera=createBoardCamera(THREE),board=new THREE.Group();scene.add(board);
-  const ambient=new THREE.HemisphereLight('#f8f2df','#32433c',1.10);scene.add(ambient);
-  const key=new THREE.DirectionalLight('#fff8e9',2.25);key.position.set(-180,-180,1150);key.target.position.set(500,400,0);scene.add(key,key.target);
+  const ambient=new THREE.HemisphereLight(DIGITAL_FIELD_LIGHT.sky,DIGITAL_FIELD_LIGHT.ground,1.10);scene.add(ambient);
+  const key=new THREE.DirectionalLight(DIGITAL_FIELD_LIGHT.key,2.25);key.position.set(-180,-180,1150);key.target.position.set(500,400,0);scene.add(key,key.target);
   key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-800,right:800,top:760,bottom:-760,near:50,far:2400});key.shadow.camera.updateProjectionMatrix();
   key.shadow.bias=-.00015;key.shadow.normalBias=.5;key.shadow.radius=3;
-  const fill=new THREE.DirectionalLight('#c1d5d1',.68);fill.position.set(1100,850,700);scene.add(fill);
+  const fill=new THREE.DirectionalLight(DIGITAL_FIELD_LIGHT.fill,.68);fill.position.set(1100,850,700);scene.add(fill);
   const envCanvas=doc.createElement('canvas');envCanvas.width=1024;envCanvas.height=512;
   const ec=envCanvas.getContext('2d');if(!ec){renderer.dispose();throw new Error('Canvas material unavailable');}
   ec.fillStyle='#222324';ec.fillRect(0,0,1024,512);
@@ -39,11 +40,12 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
   const fieldTexture=new THREE.CanvasTexture(textureCanvas);fieldTexture.colorSpace=THREE.SRGBColorSpace;fieldTexture.anisotropy=renderer.capabilities.getMaxAnisotropy();
   const surface=new THREE.Mesh(new THREE.PlaneGeometry(1000,800),new THREE.MeshStandardMaterial({map:fieldTexture,roughness:.96,metalness:0,envMapIntensity:.12}));
   surface.position.set(500,400,.1);surface.receiveShadow=true;board.add(surface);
+  let materialPalette=digitalFieldPalette();
   const plinthGeometry=new THREE.ExtrudeGeometry(roundedRectangle(-11,-11,1022,822,20),{depth:12,bevelEnabled:true,bevelSize:3,bevelThickness:3,bevelSegments:5,steps:1,curveSegments:20});
   plinthGeometry.translate(0,0,-17);
-  const plinth=new THREE.Mesh(plinthGeometry,new THREE.MeshStandardMaterial({color:'#26312f',metalness:.45,roughness:.54,envMapIntensity:.65}));plinth.castShadow=true;plinth.receiveShadow=true;board.add(plinth);
+  const plinth=new THREE.Mesh(plinthGeometry,new THREE.MeshStandardMaterial({color:materialPalette.plinth,metalness:.45,roughness:.54,envMapIntensity:.65}));plinth.castShadow=true;plinth.receiveShadow=true;board.add(plinth);
   const frameShape=roundedRectangle(-9,-9,1018,818,20);frameShape.holes.push(roundedRectangle(-.5,-.5,1001,801,12));
-  const frame=new THREE.Mesh(new THREE.ExtrudeGeometry(frameShape,{depth:1.5,bevelEnabled:true,bevelSize:.65,bevelThickness:.65,bevelSegments:3,steps:1,curveSegments:20}),new THREE.MeshStandardMaterial({color:'#787f74',metalness:.76,roughness:.46,envMapIntensity:.65}));frame.position.z=-1;frame.receiveShadow=true;board.add(frame);
+  const frame=new THREE.Mesh(new THREE.ExtrudeGeometry(frameShape,{depth:1.5,bevelEnabled:true,bevelSize:.65,bevelThickness:.65,bevelSegments:3,steps:1,curveSegments:20}),new THREE.MeshStandardMaterial({color:materialPalette.frame,metalness:.76,roughness:.46,envMapIntensity:.65}));frame.position.z=-1;frame.receiveShadow=true;board.add(frame);
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(1900,1600),new THREE.ShadowMaterial({color:'#050506',opacity:.26}));ground.position.set(500,400,-21);ground.receiveShadow=true;scene.add(ground);
   const labelGeometry=new THREE.PlaneGeometry(1,1);
   const shadowGeometry=new THREE.PlaneGeometry(57,55);
@@ -111,7 +113,7 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
     let nameLabel=null,nameMap=null;
     if(p.name){nameMap=labelTexture(p.name,'#ffffff');nameLabel=new THREE.Sprite(new THREE.SpriteMaterial({map:nameMap,transparent:true,depthWrite:false,toneMapped:false}));nameLabel.scale.set(42,18,1);nameLabel.position.set(0,-32,3);nameLabel.renderOrder=4;group.add(nameLabel);}
     const shadow=new THREE.Mesh(shadowGeometry,new THREE.MeshBasicMaterial({map:shadowTexture,transparent:true,opacity:.6,depthWrite:false,toneMapped:false}));shadow.position.z=.22;
-    const ring=new THREE.Mesh(focusGeometry,new THREE.MeshBasicMaterial({color:'#ccd3c7',toneMapped:false,transparent:true,opacity:.9}));ring.position.z=.35;ring.visible=false;ring.name='puck-focus';
+    const ring=new THREE.Mesh(focusGeometry,new THREE.MeshBasicMaterial({color:focusInk(lastTheme),toneMapped:false,transparent:true,opacity:.9}));ring.position.z=.35;ring.visible=false;ring.name='puck-focus';
     board.add(group,shadow,ring);
     return {group,nameLabel,shadow,ring,labelMap,nameMap,born:now,lift:0,shape:p.shape,color:p.color,side:p.side,labelText:p.label,name:p.name};
   }
@@ -119,7 +121,7 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
     board.remove(item.group,item.shadow,item.ring);const materials=new Set();item.group.traverse(n=>{if(n.material)materials.add(n.material);const index=pickMeshes.indexOf(n);if(index>=0)pickMeshes.splice(index,1);});materials.forEach(m=>m.dispose());item.labelMap.dispose();item.nameMap?.dispose();
     item.shadow.material.dispose();item.ring.material.dispose();
   }
-  function mount(next,play,settings){
+  function mount(next,play,settings,time=0){
     const nextStage=next.closest('.pitch-stage');if(!nextStage)throw new Error('3D board stage is unavailable');
     if(svg!==next)svg?.classList.remove('digital-ready');
     if(stage!==nextStage){resizeObserver?.disconnect();stage?.classList.remove('is-three');}
@@ -131,14 +133,16 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
     // decoded. Removing ready or filling the live texture exposes a flat/blank
     // board for a frame whenever the inspector changes a route.
     svg.classList.toggle('digital-ready',presentedPlayId===mountedPlayId&&texturePlayId===mountedPlayId);
+    canvas.style.visibility=ready()?'visible':'hidden';
     snapshotGeneration++;
     if(pendingImage){pendingImage.image.onload=null;pendingImage.image.onerror=null;URL.revokeObjectURL(pendingImage.url);pendingImage=null;}
     lastTheme=settings.fieldTheme;
-    lastTextureTime=-1;refreshBackground();
+    // The initial SVG already contains the feedback for this timeline position.
+    lastTextureTime=time;refreshBackground();
   }
   function refreshBackground(){
     if(!svg||disposed)return;if(pendingImage){backgroundDirty=true;return;}backgroundDirty=false;
-    const generation=++snapshotGeneration,playId=mountedPlayId,clone=svg.cloneNode(true);
+    const generation=++snapshotGeneration,playId=mountedPlayId,palette=digitalFieldPalette(lastTheme),clone=svg.cloneNode(true);
     clone.querySelectorAll('.digital-scene-canvas,[data-player],#pitch-ball,.point-handle,.draft-layer').forEach(n=>n.remove());
     clone.removeAttribute('class');clone.removeAttribute('style');clone.setAttribute('width','2000');clone.setAttribute('height','1600');
     const url=URL.createObjectURL(new Blob([new win.XMLSerializer().serializeToString(clone)],{type:'image/svg+xml'})),image=new win.Image(),job={url,image};pendingImage=job;
@@ -165,6 +169,12 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
           stagingContext.clearRect(0,0,2000,1600);stagingContext.drawImage(image,0,0,2000,1600);
           [textureCanvas,stagingCanvas]=[stagingCanvas,textureCanvas];[textureContext,stagingContext]=[stagingContext,textureContext];
           fieldTexture.image=textureCanvas;fieldTexture.needsUpdate=true;texturePlayId=playId;backgroundError=null;textureGeneration=generation;
+          // Present the new trim and surface together after the complete field is available.
+          if(materialPalette!==palette){
+            plinth.material.color.set(palette.plinth);
+            frame.material.color.set(palette.frame);
+            materialPalette=palette;
+          }
         }
       }catch(error){fail(error);}
       finally{finish();}

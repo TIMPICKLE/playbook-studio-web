@@ -1,17 +1,19 @@
+import { digitalFieldPalette } from './digital-field-palette.js';
+
 // World units shared by the perspective GPU scene and the lightweight SVG renderer.
 export const PIECE_HEIGHT = 10;
 export const PUCK_RADIUS = 21;
 export const FOCUS_RADIUS = 26;
-export const focusInk = theme => theme === 'light' ? '#435748' : '#ccd3c7';
+export const focusInk = theme => digitalFieldPalette(theme).focus;
 
 export function puckPalette(player) {
   const defense = player.side === 'defense';
   return {
-    foot: '#273432',
-    rim: '#a8aaa0',
+    foot: '#292d33',
+    rim: '#a6abb2',
     band: player.color,
-    face: defense ? '#303b3b' : '#e8e1cb',
-    ink: defense ? '#fff9e8' : '#192723',
+    face: defense ? '#303741' : '#e4e7eb',
+    ink: defense ? '#f3f4f6' : '#1c2026',
   };
 }
 

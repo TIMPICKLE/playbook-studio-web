@@ -1,5 +1,6 @@
 import { t, getLocale, setLocale } from './i18n.js';
 import { createDigitalBoard } from './digital-board.js';
+import { digitalFieldPalette, digitalFieldChrome } from './digital-field-palette.js';
 import { pngFrameSVG, pngExportDescription } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
 import { createBoardAssistant } from './board-assistant.js';
@@ -70,6 +71,10 @@ let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '
 let multiSelectMode = false, selectionCandidates = [], candidateSelectionAdditive = false, selectionCandidateScope = '', confirmedFieldTarget = null;
 let fieldHitObserver = null;
 let frame = null, lastFrame = null, toastTimer = null;
+let pendingTimelineSeek = null;
+let lastSeekPresented = -Infinity;
+// Allow a normal refresh opportunity before a continuously dragged slider uses its deadline.
+const seekPresentationDeadline = 2 * (1000 / 60);
 const history = new EditorHistory();
 const editorSessions = createWorkspaceSessions();
 let loadedWorkspaceId = null, assistantPanelOpen = false, localRevision=0, progressScope=null, guestRouter=null;
@@ -303,7 +308,9 @@ function showAssistantHighlights(ids) {
   const stage = document.querySelector('#field .pitch-stage');
   if (!stage) return;
   const template = document.createElement('template');
-  template.innerHTML = fieldSVG(current(), viewSettings(), { prefix: 'assistant-highlight' });
+  const settings=viewSettings();
+  const focusColor=settings.visualMode==='digital' ? digitalFieldPalette(settings.fieldTheme).focus : settings.fieldTheme==='light' ? '#37494a' : '#dae8e4';
+  template.innerHTML = fieldSVG(current(), settings, { prefix: 'assistant-highlight' });
   const svg = template.content.firstElementChild;
   svg.querySelectorAll(':scope > rect, :scope > .yard-lines, :scope > text, [data-zone], [data-annotation], #assistant-highlight-ball').forEach(node => node.remove());
   svg.querySelectorAll('[data-player], [data-route]').forEach(node => {
@@ -312,7 +319,7 @@ function showAssistantHighlights(ids) {
       const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       ring.setAttribute('r','29');
       ring.setAttribute('fill','none');
-      ring.setAttribute('stroke',viewSettings().fieldTheme === 'light' ? '#37494a' : '#dae8e4');
+      ring.setAttribute('stroke',focusColor);
       ring.setAttribute('stroke-width','2.5');
       ring.setAttribute('stroke-dasharray','34 11.55');
       node.replaceChildren(ring);
@@ -445,9 +452,11 @@ document.addEventListener('playbook:effects-changed', () => {
 });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { clearHistoryTransition(); assistantPreview?.transition.finish(); cancelFieldGesture(); }
+  // The board's visibility listener presents its renderer after the editable SVG is current.
+  else presentTimelineSeek(undefined, false);
 });
 window.addEventListener('blur', () => cancelFieldGesture());
-window.addEventListener('pagehide', () => { clearHistoryTransition(); cancelFieldGesture(); });
+window.addEventListener('pagehide', () => { presentTimelineSeek(); clearHistoryTransition(); cancelFieldGesture(); });
 window.addEventListener('resize', () => cancelFieldGesture());
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
 const scopeFor = selectedId => JSON.stringify([shared?.current?.id || 'local', selectedId]);
@@ -550,6 +559,7 @@ function executeEditorLocal(actionsToRun) {
     } else if (action.kind === 'playback_set') {
       if (current().reference) throw Error(t('feedback.the_original_diagram_has_no_playable_route_data'));
       if (draft && (action.mode || action.reset || action.time!=null || action.playing!=null)) throw Error(t('assistant.finishDrawing'));
+      cancelTimelineSeek();
       if (action.mode || action.reset || action.time != null || action.playing != null) clearAssistantPreview();
       if (action.mode === 'edit' || action.reset) { resetAnimation(); rehearsal = action.mode === 'rehearse'; }
       if (action.mode === 'rehearse') rehearsal = true;
@@ -899,11 +909,61 @@ function historyLabel(action) {
   const transaction=history.info(action==='redo'?history.future.at(-1):history.past.at(-1));
   return `${uxCopy(action==='redo'?'Redo':'Undo',action==='redo'?'重做':'撤销')}${transaction?.name?` · ${transaction.name}`:''}`;
 }
-function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
+function cancelTimelineSeek() {
+  if (pendingTimelineSeek?.frame != null) cancelAnimationFrame(pendingTimelineSeek.frame);
+  if (pendingTimelineSeek?.timer != null) window.clearTimeout(pendingTimelineSeek.timer);
+  pendingTimelineSeek = null;
+}
+function stop() { cancelTimelineSeek(); playing = false; if (frame !== null) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { clearHistoryTransition(); stop(); time = 0; }
-function paintPlayback(stamp) {
+function paintPlayback(stamp, syncDigital = true) {
   updateAnimation($('#field svg'), current(), time);
-  digitalBoard?.presentTimeline(stamp);
+  if (syncDigital) digitalBoard?.presentTimeline(stamp);
+}
+function presentTimelineSeek(stamp, syncDigital = true) {
+  if (!pendingTimelineSeek || document.hidden) return;
+  const { previousTime } = pendingTimelineSeek;
+  cancelTimelineSeek();
+  paintPlayback(stamp, syncDigital);
+  const length = animationLength(current());
+  syncTimeline(length);
+  if (pausedStatus(previousTime, length) !== pausedStatus(time, length)) updateCanvasHint();
+  lastSeekPresented = window.performance.now();
+}
+function queueTimelineSeek(previousTime) {
+  const seek = { previousTime, frame: null, timer: null };
+  pendingTimelineSeek = seek;
+  if (document.hidden) return;
+  // A superseded microtask or a losing frame/deadline must never deliver the next batch.
+  const deliver = stamp => { if (pendingTimelineSeek === seek) presentTimelineSeek(stamp); };
+  const remaining = lastSeekPresented + seekPresentationDeadline - window.performance.now();
+  if (remaining <= 0) {
+    // After an idle gap, show the latest value at the end of this input task.
+    queueMicrotask(deliver);
+  } else {
+    // During a drag, follow display refreshes. A delayed foreground rAF cannot
+    // indefinitely postpone the latest position, even as more inputs arrive.
+    seek.frame = requestAnimationFrame(deliver);
+    seek.timer = window.setTimeout(deliver, remaining);
+  }
+}
+function seekTimeline(input, final = false) {
+  const play = current();
+  if (draft || play.reference) { input.value = time; return; }
+  const requestedTime = Number(input.value);
+  const nextTime = clamp(requestedTime, 0, animationLength(play)), modeChanged = !rehearsal || playing;
+  if (nextTime !== requestedTime) input.value = nextTime;
+  if (modeChanged || time !== nextTime) {
+    if (playing) stop();
+    if (!pendingTimelineSeek) clearAssistantPreview();
+    const previousTime = time;
+    time = nextTime;
+    rehearsal = true;
+    if (modeChanged) { syncRehearsalMode(); updateCanvasHint(); syncPlayback(); }
+    // Keep command reads and exports current while presenting only the last input per frame.
+    if (!pendingTimelineSeek) queueTimelineSeek(modeChanged ? time : previousTime);
+  }
+  if (final) presentTimelineSeek();
 }
 function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return null; }
@@ -987,6 +1047,8 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
   document.title = `${p.title} · Playbook Studio`;
   const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
+  const settings=viewSettings();
+  const chrome=!p.reference&&settings.visualMode==='digital' ? ` style="${digitalFieldChrome(settings.fieldTheme)}"` : '';
   const html = `<div class="workspace ${p.reference ? 'reference-play' : ''}" data-assistant-open="${assistantPanelOpen}">
     <button class="sidebar-scrim" data-action="close-panel" aria-label="${t("editor.close_side_panel")}" tabindex="-1"></button><aside class="sidebar" id="plays-panel" aria-label="${t("editor.play_list")}">
       <button class="panel-close compact-only" data-action="close-panel" aria-label="${t("editor.close_play_list")}">${icon('close')}</button>
@@ -1010,7 +1072,7 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
       <section class="play-header"><div><div class="eyebrow"><span class="league-badge">${getPlayLeague(p)===5?uxCopy('5v5 Flag','5 人腰旗'):uxCopy(`${getPlayLeague(p)} per side`,`${getPlayLeague(p)} 人制`)}</span> <span>·</span> ${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1>${editorStatus()}<p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', historyLabel('undo'), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', historyLabel('redo'), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
       ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? t("editor.recovery_required") : shared?.sync?.viewError ? t("editor.view_recovery_required") : t("editor.read_only")}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : t("editor.you_can_view_rehearse_export_and_print_ask_an_administr")}</span>${localRecovery ? `<button class="button subtle" data-action="local-recovery">${t("editor.recovery_options")}</button>` : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="${t("editor.field_and_rehearsal")}">
         <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="selection-toolbar">${selectionControls()}</div><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button>${isFlag5Play(p) ? `<button data-action="opponents">${icon('team')}${t(p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? 'editor.flag5_remove_opponents' : 'editor.flag5_add_opponents')}<small>${t('editor.flag5')}</small></button>` : `<button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button>`}<button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
-        <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
+        <div id="field"${chrome} class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, settings, { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
         <div class="stage-dock"><div class="editor-mode" role="group" aria-label="${t("editor.workspace_mode")}"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}${t("editor.design_play")}</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}${t("editor.rehearse")}</button></div><div class="toolbar" role="toolbar" aria-label="${t("editor.drawing_tools")}"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', t("editor.select_move_v")], ['route', 'route', t("editor.route_r")], ['block', 'block', t("editor.block_b")], ['motion', 'motion', t("editor.pre_snap_motion_m")], ['pass', 'pass', t("editor.pass_p")], ['zone', 'zone', t("editor.coverage_zone_z")], ['text', 'text', t("editor.text_t")]].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:t("editor.select"),route:t("editor.route"),block:t("editor.block"),motion:t("editor.motion"),pass:t("editor.pass"),zone:t("editor.zone"),text:t("editor.text")})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>${t("editor.rehearse")}</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">${t("editorExtra.speed")}<select id="speed" aria-label="${t("editor.playback_speed")}">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', t("editor.loop"), `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? t("editor.pause") : t("editor.play"), 'play-button')}${btn('reset', 'reset', t("editor.reset_animation"), 'icon-button')}<input type="range" id="timeline" aria-label="${t("editor.animation_time")}" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div></div>
         ${boardHeightHandle}
         <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
@@ -1045,7 +1107,7 @@ function fieldContext() {
   const english=getLocale()==='en';
   if(selectionCandidates.length && selectionCandidateScope!==assistantScope())selectionCandidates=[];
   if(selectionCandidates.length) return `<div class="selection-candidates" role="group" aria-label="${english?'Choose the intended object':'选择要操作的对象'}"><span>${english?'Choose a player or waypoint':'选择球员或路线节点'}</span>${selectionCandidates.map((candidate,index)=>`<button data-action="pick-candidate:${index}">${candidate.type==='player'?e(candidate.label):(english?`Waypoint ${candidate.index}`:`路线节点 ${candidate.index}`)}</button>`).join('')}<button data-action="dismiss-candidates" aria-label="${t('editorExtra.close')}">${icon('close')}</button></div>`;
-  if(rehearsal) return `<span class="context-status"><i class="live-dot"></i>${playing?t("feedback.playing"):time>=animationLength(current())?t("editor.rehearsal_complete"):time?t("feedback.paused"):t("feedback.ready")}</span><button class="context-primary" data-action="play" aria-label="${playing?t("feedback.pause_rehearsal"):t("feedback.start_rehearsal")}">${icon(playing?'pause':'play')}${playing?t("feedback.pause"):time>=animationLength(current())?t("feedback.replay"):t("feedback.play")}</button><button data-action="reset" aria-label="${t("editorExtra.restart_rehearsal")}">${icon('reset')}</button><button data-action="edit-mode">${t("editor.back_to_design")}</button>`;
+  if(rehearsal) return `<span class="context-status"><i class="live-dot"></i>${t(playing?'feedback.playing':pausedStatus(time,animationLength(current())))}</span><button class="context-primary" data-action="play" aria-label="${playing?t("feedback.pause_rehearsal"):t("feedback.start_rehearsal")}">${icon(playing?'pause':'play')}${playing?t("feedback.pause"):time>=animationLength(current())?t("feedback.replay"):t("feedback.play")}</button><button data-action="reset" aria-label="${t("editorExtra.restart_rehearsal")}">${icon('reset')}</button><button data-action="edit-mode">${t("editor.back_to_design")}</button>`;
   if(draft) {
     const owner=current().players.find(p=>p.id===draft.playerId);
     const hasMain = competingMainRoutes(current(), {playerId:draft.playerId, kind:tool}).length > 0;
@@ -1064,22 +1126,42 @@ function canvasHint() {
   const drawing = drawingTools.includes(tool), active = draft ? (draft.points.length > 1 ? 3 : 2) : selection?.type === 'player' ? 2 : 1;
   return `<span><i class="hint-dot"></i>${canEdit() ? hint() : t("feedback.read_only_select_a_player_or_route_to_inspect_it_or_pla")}</span><span class="shortcut-hint">${draft?t("feedback.click_to_add_points_backspace_to_undo_enter_to_finish"):selection?t("feedback.esc_to_clear_selection_delete_to_remove_undo_available"):t("feedback.v_select_r_route_space_play")}</span>${drawing && canEdit() ? `<div class="drawing-steps">${[t("feedback.select_a_player"),t("feedback.click_route_endpoints_turns"),t("feedback.finish_and_save")].map((v,i)=>`<span class="${active === i+1 ? 'current' : ''}"><b>${i+1}</b>${v}</span>`).join('')}</div>` : ''}`;
 }
-function updateCanvasHint() {
-  const n=$('.canvas-hint');if(n)n.innerHTML=canvasHint();
-  const context=$('#field-context'), html=fieldContext();
-  if(context && context.innerHTML!==html) {context.innerHTML=html; if(html)enterContext(context);}
-  const controls=$('.selection-toolbar'), controlsHTML=selectionControls();
-  if(controls && controls.innerHTML!==controlsHTML)controls.innerHTML=controlsHTML;
+// Compare the editor's markup, since the live DOM also contains material
+// canvases and playback controls with independently updated attributes.
+const renderedHintMarkup = new WeakMap();
+function syncHintRegion(node, html, animate = false) {
+  if (!node) return;
+  const previous = renderedHintMarkup.get(node);
+  if (previous === html) return;
+  patchEditorHTML(node, html);
+  renderedHintMarkup.set(node, html);
+  if (animate && previous !== undefined && html) enterContext(node);
 }
-function playbackPhase() {
-  return time===0?t("editor.ready"):time>=animationLength(current())?t("editor.rehearsal_complete"):current().ball.receiverId && time>=current().ball.passAt && time<current().ball.arriveAt?t("editor.passing"):time>=current().ball.arriveAt && current().ball.receiverId?t("editor.after_catch"):t("editor.routes_in_motion");
+function updateCanvasHint() {
+  syncHintRegion($('.canvas-hint'), canvasHint());
+  syncHintRegion($('#field-context'), fieldContext(), true);
+  syncHintRegion($('.selection-toolbar'), selectionControls());
+}
+function pausedStatus(at, length) {
+  return at >= length ? 'editor.rehearsal_complete' : at ? 'feedback.paused' : 'feedback.ready';
+}
+function playbackPhase(play = current(), length = animationLength(play)) {
+  const { receiverId, passAt, arriveAt } = play.ball;
+  return time===0?t("editor.ready"):time>=length?t("editor.rehearsal_complete"):receiverId && time>=passAt && time<arriveAt?t("editor.passing"):receiverId && time>=arriveAt?t("editor.after_catch"):t("editor.routes_in_motion");
+}
+function syncTimeline(length = animationLength(current())) {
+  const timeline=$('#timeline');if(!timeline)return;
+  if (Number(timeline.max) !== length) timeline.max = length;
+  if (Number(timeline.value) !== time) timeline.value = time;
+  timeline.style.setProperty('--progress',`${time/length*100}%`);
+  const label=$('#time-label'), phase=$('#playback-phase'), phaseText=playbackPhase(current(), length);
+  const stamp=`${time.toFixed(1)} <span>/ ${length.toFixed(1)}s</span>`;
+  if(label.innerHTML!==stamp)label.innerHTML=stamp;
+  if(phase.textContent!==phaseText)phase.textContent=phaseText;
 }
 function syncPlayback() {
-  const timeline=$('#timeline');if(!timeline)return;
-  timeline.value=time; timeline.style.setProperty('--progress',`${time/animationLength(current())*100}%`);
-  const stamp=`${time.toFixed(1)} <span>/ ${animationLength(current()).toFixed(1)}s</span>`;
-  if($('#time-label').innerHTML!==stamp)$('#time-label').innerHTML=stamp;
-  if($('#playback-phase').textContent!==playbackPhase())$('#playback-phase').textContent=playbackPhase();
+  if (!$('#timeline')) return;
+  syncTimeline();
   for(const button of document.querySelectorAll('[data-action="play"]')){
     const contextual=!!button.closest('.field-context'),label=contextual?(playing?t("feedback.pause_rehearsal"):t("feedback.start_rehearsal")):(playing?t("editor.pause"):t("editor.play"));
     if(button.getAttribute('aria-label')!==label){button.innerHTML=icon(playing?'pause':'play')+(contextual?(playing?t("feedback.pause"):t("feedback.play")):'');button.setAttribute('aria-label',label);button.title=label;}
@@ -1091,18 +1173,22 @@ function syncPlayback() {
     button.classList.toggle('enabled',loop);button.setAttribute('aria-pressed',String(loop));
   }
 }
+function syncRehearsalMode() {
+  $('#field').classList.toggle('is-rehearsal',rehearsal);
+  $('.toolbar')?.classList.toggle('rehearsal-toolbar',rehearsal);
+  for(const action of ['edit-mode','rehearse-mode']) {const button=$(`.editor-mode [data-action="${action}"]`);if(button){const active=action==='rehearse-mode'?rehearsal:!rehearsal;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);}}
+}
 function syncEditorChrome() {
   const field=$('#field');if(!field)return;
   field.className=`field-wrap tool-${tool} ${rehearsal?'is-rehearsal':''} ${playing?'is-running':''}`;
   for(const button of document.querySelectorAll('[data-action^="tool:"]')) {const active=button.dataset.action===`tool:${tool}`;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);}
   $('.draw-tools')?.style.setProperty('--tool-index',['select','route','block','motion','pass','zone','text'].indexOf(tool));
-  $('.toolbar')?.classList.toggle('rehearsal-toolbar',rehearsal);
+  syncRehearsalMode();
   const gridButton=$('[data-action="grid"]'), gridVisible=viewSettings().showGrid!==false;
   gridButton?.classList.toggle('enabled',gridVisible);
   gridButton?.setAttribute('aria-pressed',String(gridVisible));
   $('[data-action="theme"]')?.setAttribute('aria-pressed',String(viewSettings().fieldTheme==='light'));
   if ($('#show-names')) $('#show-names').checked=!!viewSettings().showNames;
-  for(const action of ['edit-mode','rehearse-mode']) {const button=$(`.editor-mode [data-action="${action}"]`);if(button){const active=action==='rehearse-mode'?rehearsal:!rehearsal;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);}}
   panels.mount();
   updateCanvasHint();syncPlayback();
 }
@@ -1197,7 +1283,12 @@ function renderField({preservePreview = false, syncDigital = true} = {}) {
   const preview = preservePreview ? assistantPreview : null;
   if (assistantPreview || assistantSettling) clearAssistantPreview({refresh:false, notify:!preview});
   const play=fieldPlay();
-  const template=document.createElement('template');template.innerHTML=fieldSVG(play,viewSettings(),{selected:selection,time,drawing:draft});
+  const settings=viewSettings();
+  const chrome=!play.reference&&settings.visualMode==='digital' ? digitalFieldChrome(settings.fieldTheme) : null;
+  if(field.getAttribute('style')!==chrome){
+    if(chrome)field.setAttribute('style',chrome);else field.removeAttribute('style');
+  }
+  const template=document.createElement('template');template.innerHTML=fieldSVG(play,settings,{selected:selection,time,drawing:draft});
   const svg=field.querySelector('.pitch-svg'),next=template.content.firstElementChild;
   // Preserve the SVG root and renderer readiness while replacing editable content
   // in one synchronous transaction. Canvas and vector pieces are stage siblings.
@@ -1333,9 +1424,12 @@ function bindField() {
     if(draft && !drag) {previewPoint=coordinates(event); if(!gestureFrame)gestureFrame=requestAnimationFrame(()=>{gestureFrame=null;previewDraft(field.querySelector('svg'),draft,previewPoint);});return;}
     if (!drag || !canEdit()) return;
     pendingFieldPointer=event;
-    if(!gestureFrame)gestureFrame=requestAnimationFrame(flushGesture);
+    if(!gestureFrame) {
+      gestureFrame=requestAnimationFrame(flushGesture);
+      digitalBoard?.deferPendingFrame();
+    }
   });
-  function flushGesture() {
+  function flushGesture(stamp) {
     if(gestureFrame)cancelAnimationFrame(gestureFrame);gestureFrame=null;
     if(!drag || !pendingFieldPointer)return;
     const at=coordinates(pendingFieldPointer);
@@ -1364,8 +1458,9 @@ function bindField() {
       object.y = clamp(drag.original.y + at.y - drag.start.y);
     }
     drag.paintGeometry ??= bindGestureGeometry(field.querySelector('.pitch-svg'), p, drag);
-    if (drag.paintGeometry()) digitalBoard?.refreshBackground();
-    else digitalBoard?.invalidate();
+    const fieldChanged = drag.paintGeometry();
+    // Pointerup commits and presents the final geometry through renderField.
+    if (stamp !== undefined) digitalBoard?.presentFrame(stamp, fieldChanged);
     const readout=field.querySelector('.drag-readout');readout.hidden=false;readout.textContent=`${drag.original?.label||t("editorExtra.adjust_position")} · X ${at.x.toFixed(1)} / Y ${at.y.toFixed(1)}`;
   }
   function releaseDrag() {
@@ -1385,6 +1480,7 @@ function bindField() {
     confirmedFieldTarget = null;
     if (drag?.field !== field) return;
     selection = releaseDrag().selectionBefore;
+    digitalBoard?.finishGesture();
     // SVG coordinates were updated directly even if the selection never changed.
     refreshSelection();
   };
@@ -1393,7 +1489,11 @@ function bindField() {
     if (!canEdit() || drag.base !== current()) { cancelDrag(event); return; }
     pendingFieldPointer = event;
     flushGesture();
-    const completed = releaseDrag();
+    commitGesture(releaseDrag());
+    // Pick the released pointer against the committed piece positions.
+    digitalBoard?.finishGesture(event);
+  };
+  function commitGesture(completed) {
     if (!completed.moved) return;
     const preview = completed.preview;
     const samePosition = (a, b) => Math.abs(a.x-b.x) < 1e-9 && Math.abs(a.y-b.y) < 1e-9;
@@ -1445,7 +1545,7 @@ function bindField() {
     Object.assign(current(), next);
     save();
     refreshGestureCommit();
-  };
+  }
   cancelFieldGesture = cancelDrag;
   field.addEventListener('pointerup',endDrag);
   field.addEventListener('pointercancel',cancelDrag);
@@ -1628,6 +1728,7 @@ function download(content, filename, mime) {
 }
 const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
 async function standaloneSVG(play, png = false) {
+  presentTimelineSeek();
   if (assistantPreview || assistantSettling) clearAssistantPreview();
   if (historyTransition) clearHistoryTransition();
   const settings = viewSettings();
@@ -1683,6 +1784,7 @@ function togglePlay() {
   clearAssistantPreview();
   if (current().reference) { toast(t("feedback.the_original_diagram_has_no_playable_route_data"), { type: 'info' }); return; }
   if(draft && !confirmDraft(togglePlay))return;
+  cancelTimelineSeek();
   if(playing){stop();paintPlayback();syncPlayback();updateCanvasHint();return;}
   if(time>=animationLength(current()))time=0;
   rehearsal=true;playing=true;draft=null;previewPoint=null;markFirstTask('rehearsed');
@@ -1695,7 +1797,7 @@ function togglePlay() {
       if(loop)time%=animationLength(current());
       else{time=animationLength(current());stop();paintPlayback(stamp);syncPlayback();updateCanvasHint();return;}
     }
-    paintPlayback(stamp);syncPlayback();
+    paintPlayback(stamp);syncTimeline();
     frame=requestAnimationFrame(tick);
   };
   frame=requestAnimationFrame(tick);
@@ -1895,10 +1997,15 @@ document.addEventListener('compositionend', event => { if (event.target.id === '
 document.addEventListener('input', event => {
   const input = event.target;
   if (input.id === 'search' && !composingSearch && !event.isComposing) searchInput(input);
-  if(input.id==='timeline')executeEditorLocal([{kind:'playback_set',time:Number(input.value)}]);
+  if(input.id==='timeline')seekTimeline(input);
+});
+document.addEventListener('pointerup', event => {
+  if (event.target.id === 'timeline' && Number(event.target.value) !== time) seekTimeline(event.target, true);
+  else presentTimelineSeek();
 });
 document.addEventListener('change', event => {
   const input = event.target;
+  if (input.id === 'timeline') { seekTimeline(input, true); return; }
   if (!canEdit() && (input.dataset.prop || input.dataset.ball || input.id === 'apply-formation')) return;
   if (input.id === 'new-count' || input.id === 'new-book') refreshNewFormation();
   else if (input.id === 'category-filter') { filter = input.value; refreshPlayList(); }
@@ -2092,6 +2199,7 @@ function showEditor(show) {
       if(state.data.plays.some(play=>play.id===remembered.selectedId)){state.selectedId=remembered.selectedId;book=current().book;}
     }
     digitalBoard = createDigitalBoard({
+      isGestureActive: () => !!drag,
       getState: () => ({ play: fieldPlay(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null, presentationMask:assistantPreview?.mask || historyTransition?.mask, presentationSettling:!!assistantSettling || !!historyTransition }),
       notify: message => toast(message, { type: 'warning' }),
     });

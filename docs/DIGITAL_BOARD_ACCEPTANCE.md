@@ -1,6 +1,16 @@
-# 数字球场 T4 验收记录
+# 数字球场视觉验收
 
-2026-11-19。计时和性能另见 [v57 对照记录](DIGITAL_BOARD_PERFORMANCE.md)。以下记录覆盖编辑器操作、导出图层和实际 PNG 像素，场景取自项目自带的 Mesh 浅交叉。
+## 当前深浅主题
+
+在桌面 Chromium 中打开数字化编辑器，以同一机位查看 22 人的 Mesh 浅交叉，点击「切换球场明暗」取得两张 SVG 兼容视图截图。下图从每张截图截取相同的 770 × 435 像素区域，按原尺寸并排保存。左侧是石墨深色，右侧是冷银浅色，两边都能辨认黄色与紫色的棋子边带、蓝色防守区域及虚线争球线。
+
+![石墨深色与冷银浅色的同机位 Mesh 布阵](assets/readme/digital-field-themes.webp)
+
+另对这套战术的平面场地图和暂停在 2.15 秒的兼容导出图进行 1000 × 800 像素采样。按绿色分量高于红、蓝至少 4 级计算，场地图中偏绿像素的比例从深色 94.46%、浅色 96.35% 均降至 0%。自动回归还覆盖战术卡缩略图，以及球员与路线使用自选绿色时的显示颜色。[配色回归测试](../tests/digital-palette.test.mjs)
+
+## v58 历史验收
+
+2026-11-19。以下测试记录、绿色珐琅球场的图片及演示来自 v58 的 T4 验收。场景取自项目自带的 Mesh 浅交叉。[各版性能数据与设备条件](DIGITAL_BOARD_PERFORMANCE.md)
 
 | 场景 | 操作与验收条件 | 本轮证据 |
 | --- | --- | --- |
@@ -13,21 +23,21 @@
 
 [T2 选中、接管与撤销演示](acceptance/evidence/digital-edit-continuity.mp4)取自实际编辑器的 22 人 Mesh。固定的 AI 工具回复将 X 的路线改为 13 码 Post。演示包含预览中途按下鼠标并拖动、重新提案、应用、撤销和重做，各步核对持久化路线。影片共 97 帧、5.39 秒，由实际 SVG 图层按相机投影采样并离线栅格化。
 
-## 对照画面
+### v57 与 v58 布阵对照
 
-![同机位 11 对 11 Mesh 布阵，新旧数字球场真实浏览器画面](acceptance/evidence/digital-board-comparison.webp)
+![历史兼容渲染对照，左为 v57，右为 v58 的绿色珐琅球场](acceptance/evidence/digital-board-comparison.webp)
 
 高度对照采用同一套 Mesh 站位，比较 50.3、32.7、27.7 和 10 个场景单位，以及 0.34、0.78 两档顶面粗糙度。选择高度 10 和粗糙度 0.78 时，中锋身后的封堵端帽清晰可见。棋子研究图用生产网格与机位在 Cycles CPU 中渲染，布阵对照图取自浏览器中的矢量兼容视图。
 
-[v57 开球阵型](acceptance/evidence/v57-formation.jpg) · [本轮开球阵型](acceptance/evidence/candidate-formation.jpg) · [棋子形状与缩放对照](acceptance/evidence/digital-puck-study.webp) · [v57 与本轮演练对照录像](acceptance/evidence/digital-rehearsal-compare.mp4)
+[v57 开球阵型](acceptance/evidence/v57-formation.jpg) · [v58 开球阵型](acceptance/evidence/candidate-formation.jpg) · [棋子形状与缩放对照](acceptance/evidence/digital-puck-study.webp) · [v57 与 v58 演练对照录像](acceptance/evidence/digital-rehearsal-compare.mp4)
 
-## 完整编辑器与构建
+### v58 编辑器与构建
 
 在前台 Chromium 156 的完整本地编辑器中，打开 Mesh，经「显示模式 → 数字化模式 → 战术演练」把时间轴回拖至 5.99 秒，再从「导出战术本 → 高清图片」下载。界面提示使用立体棋子兼容视图。实收 PNG 签名正确，尺寸 2000 × 1600，文件 2,103,953 字节。
 
 最终源码通过 885 项 JavaScript 测试、4 项 Python 测试、语法检查、TypeScript 检查和生产构建。
 
-## PNG 像素复验
+### v58 PNG 像素复验
 
 在仓库根目录运行以下命令。最后一个命令可跟一个目录，将 9 张图片输出到该目录供放大检查。
 

@@ -32,7 +32,7 @@ html[data-material=liquid] #ambient-particles{opacity:.38}
 .editor-mode::before{background:linear-gradient(135deg,#fff5,#cdcfd121);border-color:#fff8;box-shadow:inset 0 1px #fff9,0 4px 15px #0003;border-radius:12px}
 .field-wrap{border-radius:24px;border:2px solid #e1e3e579;box-shadow:0 0 0 1px #080811,inset 0 2px #fff7,0 20px 70px #0007,0 0 35px #a5aab128}
 .field-context{border-radius:18px;border-color:#fff8;box-shadow:inset 0 1px #fffa,0 8px 35px #0006}
-.field-context:empty>.liquid-surface-canvas{display:none}
+.field-context:has(>.liquid-surface-canvas:only-child){display:none}
 .button.primary,.play-button,.new-play{background:linear-gradient(122deg,#d9dbde 0%,#a3a8af 20%,#737a85 38%,#cdcfd3 54%,#8f959e 72%,#dadcdf 100%);color:#1c1d1e;border:1px solid #d8dade;box-shadow:inset 0 2px 2px #fff9,inset 0 -2px 3px #4a4f5670,0 5px 20px #0005,0 0 22px #888e9725;text-shadow:0 1px #fff3}
 .button.primary:hover:not(:disabled),.play-button:hover:not(:disabled),.new-play:hover{box-shadow:inset 0 2px #fff,0 7px 30px #0005,0 0 35px #9a9fa750;color:#151618;filter:brightness(1.12)}
 .button,.icon-button,.effects-menu>summary,.new-play{border-radius:14px}

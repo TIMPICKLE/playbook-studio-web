@@ -10,7 +10,9 @@
 
 ## Digital coaching table
 
-Choose **显示模式设置 → 数字化模式** on a desktop. The dark board uses graphite-green enamel. The light board uses a pale eucalyptus surface. Major yard lines, short hash marks and the dashed line of scrimmage have distinct weights. Circular, square and triangular pucks share a narrow metal edge, a ceramic face and an enamel band in the player’s chosen color. The offense uses light faces and the defense uses dark faces. A broken ring marks the selected player even when the teams share a color.
+Choose **Display mode → Digital** on a desktop. Click **Toggle field brightness** (the sun above the field) to switch between dark graphite and cool silver. The yard lines, short hash marks and dashed line of scrimmage use different weights on both surfaces. The offense uses light puck faces and the defense uses dark faces. The edge band carries the player’s color, and a broken ring marks the selected player even when both teams share a color.
+
+![The same Mesh play on dark graphite and cool silver fields](assets/readme/digital-field-themes.webp)
 
 The editor loads its pinned Three.js r186 module on demand. The GPU scene and the SVG compatibility renderer build the pucks from the same profile. The fixed camera uses 50° elevation and a 42° field of view. The accessible SVG hit targets use its ground-plane projection, and the GPU picker also tests the elevated pieces. The field and players keep their model coordinates when the user zooms, scrolls or switches display modes.
 

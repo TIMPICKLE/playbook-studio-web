@@ -12,7 +12,7 @@ An American football workspace for drawing plays, rehearsal, AI-assisted analysi
 
 </div>
 
-![Silver workspace with the playbook, field and properties panel](docs/assets/readme/editor-silver.jpg)
+![Traditional editor with the playbook on the left, flat field in the center and properties on the right](docs/assets/readme/editor-silver.jpg)
 
 ## What you can do
 
@@ -46,12 +46,13 @@ English and Simplified Chinese are supported. Phones and iPads use the tradition
 
 ## Digital board
 
-In the desktop editor, choose **Display mode → Digital**. Both views below show the same 11-on-11 Mesh play. The lower pieces on the right leave the block markers beyond the center visible. Each piece carries its position label on top and the player’s chosen color around the edge.
+In the desktop editor, choose **Display mode → Digital**. Click the sun button above the field, **Toggle field brightness**, to switch between dark graphite (left) and cool silver (right). The screenshots show the same Mesh play from the same camera. Steel-gray yard lines sit behind the routes. Each puck carries its position on top and its player color around the edge.
 
-![The same Mesh formation in the browser compatibility view, with v57 on the left and the low-profile pieces and enamel field in v58 on the right](docs/acceptance/evidence/digital-board-comparison.webp)
+![Browser views of the same Mesh formation on the dark and light digital fields](docs/assets/readme/digital-field-themes.webp)
 
-- **Edit a route.** Ask the AI to change X’s go route to a post. The shared release stays in place as the route bends inside. Press the mouse button to take over during the preview, or undo the change after applying it. [Watch the route edit](docs/acceptance/evidence/digital-edit-continuity.mp4)
-- **Rehearse a pass.** Choose **Rehearse** and scrub between the quarterback’s release and the catch. Exporting a paused frame keeps the ball and routes at that instant. A ready WebGL scene exports a perspective PNG. The compatibility view exports a flat diagram. [Watch the rehearsal comparison](docs/acceptance/evidence/digital-rehearsal-compare.mp4)
+- **Edit a route.** Ask the AI to change X’s go route to a post. The shared release stays in place as the route bends inside. Press the mouse button to take over during the preview, or undo the change after applying it.
+- **Rehearse a pass.** Choose **Rehearse** and scrub between the quarterback’s release and the catch. Exporting a paused frame keeps the ball and routes at that instant. A ready WebGL scene exports a perspective PNG. The compatibility view exports a flat diagram.
+- **Drag and scrub.** A player and its linked routes move in the same refresh. Scrubbing shows the latest position on each refresh and settles at the time you release the slider. The compatibility view reuses piece geometry as players move.
 
 [Visual checks and export samples](docs/DIGITAL_BOARD_ACCEPTANCE.md) · [Performance measurements and test conditions](docs/DIGITAL_BOARD_PERFORMANCE.md)
 

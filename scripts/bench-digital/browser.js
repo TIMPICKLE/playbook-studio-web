@@ -11,6 +11,7 @@ const stage=document.querySelector('.pitch-stage');
 const nativeFrame = () => new Promise(resolve=>requestAnimationFrame(resolve));
 const options = new URLSearchParams(location.search);
 if(options.get('theme')==='light')state.settings.fieldTheme='light';
+if (field.digitalFieldChrome) el('field').style.cssText = field.digitalFieldChrome(state.settings.fieldTheme);
 const counts = { rasterJobs:0, fieldUploads:0, drawCalls:0 };
 const originalSerialize = XMLSerializer.prototype.serializeToString;
 XMLSerializer.prototype.serializeToString=function(node) {
