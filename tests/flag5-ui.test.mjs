@@ -104,6 +104,7 @@ test('5v5 flag UI carries its format through creation, opponents, formations, re
       assert.equal(current().ball.receiverId, center.id);
       const marker = q(`#field [data-player="${center.id}"]`), before = marker.getAttribute('transform');
       q('#timeline').value = '3'; q('#timeline').dispatchEvent(new win.Event('input', { bubbles: true }));
+      await new Promise(resolve=>win.requestAnimationFrame(resolve));
       assert.notEqual(q(`#field [data-player="${center.id}"]`).getAttribute('transform'), before);
       assert.equal(q('#field .pitch-svg').querySelectorAll('[data-player]').length, 10);
       click('edit-mode');

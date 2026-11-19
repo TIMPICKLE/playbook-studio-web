@@ -3,7 +3,7 @@ import { createRouteFeedback } from './digital-routes.js';
 import { boardCSSMatrix } from './digital-projection.js';
 import { createDigitalFallback } from './digital-fallback.js';
 
-export function createDigitalBoard({doc=document,getState,makeEngine=async invalidate=>{
+export function createDigitalBoard({doc=document,getState,isGestureActive=()=>false,makeEngine=async invalidate=>{
   const {createDigitalMaterials}=await import('./digital-materials.js');return createDigitalMaterials(doc,{invalidate});
 },notify=()=>{}}) {
   const win=doc.defaultView;
@@ -43,10 +43,12 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async inval
     projectStage();
     drawFrame(state);
   }
-  // The editor owns the rehearsal clock. Submit its new frame after the SVG
-  // positions change so the texture, players and feedback see the same time.
-  function presentTimeline(stamp=win.performance.now()){
-    if(!svg||!allowed()||doc.hidden||!inView)return;
+  // The editor owns both the gesture frame and the rehearsal clock. Present
+  // its SVG geometry, feedback and raised pieces together before this paint.
+  function presentFrame(stamp=win.performance.now(),fieldChanged=false){
+    if(!svg)return;
+    if(fieldChanged)backgroundChanged=true;
+    if(!allowed()||doc.hidden||!inView)return;
     cancelFrame();
     update(stamp);
   }
@@ -74,7 +76,7 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async inval
     }
     return moving;
   }
-  function mount(current,state){feedback?.destroy();svg=current;projectStage();feedback=createRouteFeedback(svg,state.play);feedback.update({...state,materialTime,animated:effectsEnabled()});if(engine){fallback?.destroy();fallback=null;}else if(fallback)fallback.mount(svg,state.play,state.settings);else ensureFallback(state);engine?.mount(svg,state.play,state.settings);engineSvg=engine?svg:null;backgroundChanged=false;drawFrame(state);}
+  function mount(current,state){feedback?.destroy();svg=current;projectStage();feedback=createRouteFeedback(svg,state.play);feedback.update({...state,materialTime,animated:effectsEnabled()});if(engine){fallback?.destroy();fallback=null;}else if(fallback)fallback.mount(svg,state.play,state.settings);else ensureFallback(state);engine?.mount(svg,state.play,state.settings,state.time);engineSvg=engine?svg:null;backgroundChanged=false;drawFrame(state);}
   async function sync({retry=false,contentChanged=false}={}){
     if(!allowed()){generation++;clear();delete doc.documentElement.dataset.digitalBoard;return;}
     if(retry)failed=false;
@@ -109,6 +111,7 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async inval
   const changed=()=>sync({retry:true});
   const visibility=()=>{if(doc.hidden)stop();else sync();};
   const move=event=>{
+    if(isGestureActive())return;
     if(!stage||!inView){hoveredId=null;return;}
     const b=stage.getBoundingClientRect(),x=event.clientX-b.left,y=event.clientY-b.top;
     const inside=x>=0&&y>=0&&x<=b.width&&y<=b.height;
@@ -119,7 +122,16 @@ export function createDigitalBoard({doc=document,getState,makeEngine=async inval
   doc.addEventListener('playbook:effects-changed',changed);doc.addEventListener('visibilitychange',visibility);doc.addEventListener('pointermove',move,{passive:true});
   win.addEventListener('resize',invalidate);
   const hide=()=>{generation++;clear();},show=()=>sync();win.addEventListener('pagehide',hide);win.addEventListener('pageshow',show);
-  return {sync,invalidate,presentTimeline,
+  return {sync,invalidate,presentFrame,presentTimeline:presentFrame,
+    deferPendingFrame(){
+      // Place an earlier material/texture callback after the newly scheduled
+      // gesture. presentFrame consumes it if the sampled geometry changed.
+      if(frame!==null){cancelFrame();invalidate();}
+    },
+    finishGesture(event){
+      if(event?.type==='pointerup'&&event.pointerType!=='touch')move(event);
+      else if(hoveredId!==null){hoveredId=null;invalidate();}
+    },
     get backgroundReady(){
       if(!allowed())return true;
       if(pending||!svg||backgroundChanged||contentDirty)return false;

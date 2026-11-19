@@ -25,6 +25,50 @@ async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null}={}
   return {win,q,geometry,pointer,action,key,data:()=>decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)),raw:()=>win.localStorage.getItem(STORAGE_KEY)};
 }
 
+test('unchanged field hints preserve the material canvas, live region and keyboard focus', async t => {
+  const f = await host(t), doc = f.win.document;
+  const styles = doc.createElement('style');
+  styles.textContent = readFileSync(new URL('../web/liquid.css', import.meta.url), 'utf8');
+  doc.head.append(styles);
+  f.q('[data-effects-mode="digital"]').click();
+  assert.equal(doc.documentElement.dataset.effects, 'full');
+  f.action('rehearse-mode');
+  const context = f.q('#field-context'), playButton = context.querySelector('[data-action="play"]');
+  const hint = f.q('.canvas-hint').firstElementChild, toolbarButton = f.q('.selection-toolbar button');
+  const canvas = doc.createElement('canvas');
+  canvas.className = 'liquid-surface-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  context.prepend(canvas);
+  let entrances = 0;
+  context.animate = () => { entrances++; };
+  playButton.focus();
+  for (let i = 0; i < 5; i++) {
+    f.action('rehearse-mode');
+    assert.equal(canvas.parentElement, context);
+    assert.equal(doc.activeElement, playButton);
+    assert.equal(context.querySelector('[data-action="play"]'), playButton);
+    assert.equal(f.q('.canvas-hint').firstElementChild, hint);
+    assert.equal(f.q('.selection-toolbar button'), toolbarButton);
+  }
+  assert.equal(entrances, 0);
+  f.action('edit-mode');
+  assert.equal(context.textContent.trim(), '');
+  assert.equal(canvas.parentElement, context);
+  assert.equal(f.win.getComputedStyle(context).display, 'none');
+  f.key(f.q('#field [data-player]'), 'Enter');
+  assert.ok(context.querySelector('.context-player'));
+  assert.equal(canvas.parentElement, context);
+  assert.equal(entrances, 1);
+  f.q('[data-effects-mode="traditional"]').click();
+  assert.equal(doc.documentElement.dataset.effects, 'off');
+  canvas.remove();
+  context.querySelector('[data-action="clear-selection"]').click();
+  assert.equal(context.children.length, 0);
+  f.key(f.q('#field [data-player]'), 'Enter');
+  assert.ok(context.querySelector('.context-player'));
+  assert.equal(entrances, 2);
+});
+
 test('Escape during a player drag rolls back the live preview and a late release never commits it',async t=>{
   const f=await host(t),before=f.data(),actor=before.plays[0].players.find(p=>p.label==='X');
   const player=()=>f.q(`#field [data-player="${actor.id}"]`);
@@ -134,20 +178,21 @@ test('scrubbing the editor timeline wakes a still digital board and restores the
   doc.dispatchEvent(new win.Event('playbook:effects-changed'));
   for(let attempt=0;attempt<100&&!q('.digital-token-overlay');attempt++)await new Promise(resolve=>setTimeout(resolve,10));
   assert.ok(q('.digital-token-overlay'),'the vector-compatible board is mounted');
-  const seek=time=>{
+  const seek=async time=>{
     const timeline=q('#timeline');timeline.value=String(time);
     timeline.dispatchEvent(new win.Event('input',{bubbles:true}));
+    await new Promise(resolve=>win.requestAnimationFrame(resolve));
     return q('.digital-decoration [data-ball-cue]')?.dataset.ballCue;
   };
   const positions=()=>[...doc.querySelectorAll('.digital-token-overlay [data-vector-player]')].map(group=>{
     const label=group.querySelector('text');
     return [group.dataset.vectorPlayer,label.getAttribute('x'),label.getAttribute('y')];
   });
-  assert.equal(seek(play.ball.passAt+.1),'release');
+  assert.equal(await seek(play.ball.passAt+.1),'release');
   const released=positions(),feedback=q('.digital-decoration').innerHTML;
-  assert.equal(seek(play.ball.arriveAt+.1),'catch');
+  assert.equal(await seek(play.ball.arriveAt+.1),'catch');
   assert.notDeepEqual(positions(),released);
-  assert.equal(seek(play.ball.passAt+.1),'release');
+  assert.equal(await seek(play.ball.passAt+.1),'release');
   assert.deepEqual(positions(),released);
   assert.equal(q('.digital-decoration').innerHTML,feedback);
   assert.equal(f.raw(),before);

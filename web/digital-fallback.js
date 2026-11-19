@@ -16,8 +16,92 @@ const color=(base,normal,metal=false)=>{
   return `rgb(${base.map(v=>Math.round(Math.min(255,v*(.47+diffuse*.58)+255*highlight))).join(',')})`;
 };
 export { puckFaces as fallbackMesh } from './digital-puck.js';
-const pathOf=points=>'M'+points.map(p=>`${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join('L')+'Z';
 const point=(at,vertex,lift=0)=>projectWorldPoint({x:at.x+vertex[0],y:800-at.y+vertex[1],z:vertex[2]+lift});
+// Geometry is local to the projected ground anchor. Within an 8-unit camera
+// cell only parallax changes the local outline. Keep the mesh, move its anchor,
+// and update any faces that actually cross the silhouette inside the cell.
+// The shared camera is fixed in board space; resizing/zooming scales the SVG
+// viewBox. The full-field projection test includes the corners of these cells.
+const CELL = 8;
+const UNITS = 8; // one local SVG unit is 1/8 of a 1000×800 board pixel
+const cellCenter = value => Math.round(value / CELL) * CELL;
+function outline(rx, ry, start, sweep, dx=0, dy=0) {
+  return Array.from({length:41}, (_,i) => {
+    const a=start+sweep*i/40;
+    return [Math.cos(a)*rx+dx, Math.sin(a)*ry+dy, .2];
+  });
+}
+const shadowOutline = outline(28,27,0,2*Math.PI,1,-2);
+const focusOutline = outline(FOCUS_RADIUS,FOCUS_RADIUS,Math.PI*.59,Math.PI*1.82);
+function facing(face, at, lift) {
+  const [nx,ny,nz]=face.normal, eye=BOARD_CAMERA.position;
+  return nx*(eye[0]-at.x)+ny*(eye[1]-800+at.y)+nz*(eye[2]-lift)-face.plane;
+}
+function paintBatch(batch) {
+  let d='';
+  for(const face of batch.faces)if(face.visible)d+=face.path;
+  if(batch.d!==d){
+    batch.path.setAttribute('d',d);
+    batch.d=d;
+  }
+}
+function localPair(p, anchor) {
+  const x=Math.round((p.x-anchor.x)*UNITS), y=Math.round((p.y-anchor.y)*UNITS);
+  // SVG signed numbers delimit themselves, including between adjacent points.
+  return `${x<0?'':' '}${x}${y<0?'':' '}${y}`;
+}
+function sampleGeometry(item, at, lift, cx, cy) {
+  const cell={x:cx,y:cy}, anchor=point(cell,[0,0,0]), vertices=new Map();
+  item.cell={x:cx,y:cy,lift};
+  item.silhouette=[];
+  let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
+  function pair(v) {
+    if(!vertices.has(v)){
+      const p=point(cell,v,lift), x=p.x-anchor.x, y=p.y-anchor.y;
+      left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
+      vertices.set(v,localPair(p,anchor));
+    }
+    return vertices.get(v);
+  }
+  for(const batch of item.batches.values()){
+    for(const face of batch.faces){
+      const visibility=facing(face,cell,lift);
+      // The visibility function is linear in the two ground coordinates.
+      const spread=CELL/2*(Math.abs(face.normal[0])+Math.abs(face.normal[1]));
+      const crosses=Math.abs(visibility)<=spread;
+      face.visible=crosses ? facing(face,at,lift)>0 : visibility>0;
+      if(crosses)item.silhouette.push({face,batch});
+      if(face.visible||crosses)face.path='M'+face.vertices.map(pair).join('')+'Z';
+    }
+    paintBatch(batch);
+  }
+  item.bounds={left:left-4,right:right+4,top:top-4,bottom:bottom+4};
+  const groundPath=outline=>'M'+outline.map(v=>localPair(point(cell,v),anchor)).join('');
+  item.shadow.setAttribute('d',groundPath(shadowOutline)+'Z');
+  item.ring.setAttribute('d',groundPath(focusOutline));
+}
+function updateSilhouette(item, at, lift) {
+  if(!item.silhouette.length)return;
+  const dirty=new Set();
+  for(const {face,batch} of item.silhouette){
+    const visible=facing(face,at,lift)>0;
+    if(visible!==face.visible){face.visible=visible;dirty.add(batch);}
+  }
+  for(const batch of dirty)paintBatch(batch);
+}
+// Picking uses the exact projected mesh at the current pose, calculated only
+// when the pointer reaches a candidate's conservative screen bounds.
+function hitGeometry(item) {
+  const faces=[],vertices=new Map();
+  for(const batch of item.batches.values())for(const face of batch.faces){
+    if(!face.visible)continue;
+    faces.push(face.vertices.map(v=>{
+      if(!vertices.has(v))vertices.set(v,point(item.at,v,item.lift));
+      return vertices.get(v);
+    }));
+  }
+  return faces;
+}
 export function createDigitalFallback(doc=document) {
   let svg=null,stage=null,overlay=null,disposed=false;
   const players=new Map();
@@ -43,8 +127,9 @@ export function createDigitalFallback(doc=document) {
   }
   function makePlayer(p){
     const group=node(doc,'g',{'data-vector-player':p.id});
-    const shadow=node(doc,'path',{fill:'url(#digital-fallback-shadow)'}),ring=node(doc,'path',{fill:'none',stroke:'#ccd3c7','stroke-width':1.6,'stroke-linecap':'round',opacity:0});
-    group.append(shadow,ring);
+    const geometry=node(doc,'g');
+    const shadow=node(doc,'path',{fill:'url(#digital-fallback-shadow)'}),ring=node(doc,'path',{fill:'none',stroke:'#ccd3c7','stroke-width':1.6*UNITS,'stroke-linecap':'round',opacity:0});
+    geometry.append(shadow,ring);group.append(geometry);
     const palette=puckPalette(p);
     const batches=new Map();
     // Only front-facing surfaces of this convex puck can contribute. Batching
@@ -54,13 +139,13 @@ export function createDigitalFallback(doc=document) {
       const fill=color(rgb(palette[face.material]),face.normal,face.material==='rim');
       const key=face.material+fill;
       if(!batches.has(key)){
-        const path=node(doc,'path',{fill,stroke:fill,'stroke-width':.28,'stroke-linejoin':'round'});
-        group.append(path);batches.set(key,{path,faces:[],d:null});
+        const path=node(doc,'path',{fill,stroke:fill,'stroke-width':.28*UNITS,'stroke-linejoin':'round'});
+        geometry.append(path);batches.set(key,{path,faces:[],d:null});
       }
-      batches.get(key).faces.push(face);
+      batches.get(key).faces.push({...face,plane:dot(face.normal,face.vertices[0])});
     }
     const label=node(doc,'text',{'text-anchor':'middle','dominant-baseline':'central',fill:palette.ink,'font-family':'Arial,sans-serif','font-weight':700,'letter-spacing':-.3,lengthAdjust:'spacingAndGlyphs'});label.textContent=p.label;group.append(label);overlay.append(group);
-    return {group,shadow,ring,batches,label,key:null,hidden:false,opacity:0,ringColor:'#ccd3c7',shape:p.shape,color:p.color,labelText:p.label,side:p.side,bounds:null,depth:0};
+    return {group,geometry,shadow,ring,batches,label,cell:null,hidden:false,opacity:0,ringColor:'#ccd3c7',shape:p.shape,color:p.color,labelText:p.label,side:p.side,bounds:null,depth:0};
   }
   function draw({play,settings={},time=0,selected,hoveredId=null,draggingId=null,animated=true,presentationMask}){
     if(disposed||!overlay)return;
@@ -82,35 +167,19 @@ export function createDigitalFallback(doc=document) {
       if(item.ringColor!==ringColor){item.ring.setAttribute('stroke',ringColor);item.ringColor=ringColor;}
       const opacity=active?.9:hover?.35:0;
       if(opacity!==item.opacity){item.ring.setAttribute('opacity',opacity);item.opacity=opacity;}
-      const key=`${at.x},${at.y},${lift}`;if(item.key===key)continue;item.key=key;
-      orderDirty=true;
-      const projected=new Map(),hitFaces=[],eye=[BOARD_CAMERA.position[0]-at.x,BOARD_CAMERA.position[1]-(800-at.y),BOARD_CAMERA.position[2]-lift];
-      for(const batch of item.batches.values()){
-        const paths=[];
-        for(const face of batch.faces){
-          if(dot(face.normal,eye)<=dot(face.normal,face.vertices[0]))continue;
-          const pts=face.vertices.map(v=>{
-            if(!projected.has(v))projected.set(v,point(at,v,lift));
-            return projected.get(v);
-          });
-          paths.push(pathOf(pts));hitFaces.push(pts);
-        }
-        const d=paths.join('');
-        if(batch.d!==d){batch.path.setAttribute('d',d);batch.d=d;}
-      }
-      const outline=(rx,ry,start,sweep,dx=0,dy=0)=>Array.from({length:41},(_,i)=>{
-        const a=start+sweep*i/40;return point(at,[Math.cos(a)*rx+dx,Math.sin(a)*ry+dy,.2]);
-      });
-      item.shadow.setAttribute('d',pathOf(outline(28,27,0,2*Math.PI,1,-2)));
-      item.ring.setAttribute('d',pathOf(outline(FOCUS_RADIUS,FOCUS_RADIUS,Math.PI*.59,Math.PI*1.82)).slice(0,-1));
+      if(item.at?.x===at.x&&item.at.y===at.y&&item.lift===lift)continue;
+      item.at=at;item.lift=lift;item.hitFaces=null;
+      const cx=cellCenter(at.x),cy=cellCenter(at.y),cell=item.cell;
+      if(!cell||cell.x!==cx||cell.y!==cy||cell.lift!==lift)sampleGeometry(item,at,lift,cx,cy);
+      else updateSilhouette(item,at,lift);
+      const center=point(at,[0,0,0]);
+      item.geometry.setAttribute('transform',`translate(${center.x} ${center.y}) scale(${1/UNITS})`);
+      item.center=center;
+      if(item.depth!==center.depth){item.depth=center.depth;orderDirty=true;}
       const labelAt=point(at,[0,p.shape==='triangle'?-2:0,PIECE_HEIGHT+.12],lift);
       item.label.setAttribute('x',labelAt.x);item.label.setAttribute('y',labelAt.y);
       item.label.setAttribute('font-size',15*labelAt.scale);
       if(p.label.length>2)item.label.setAttribute('textLength',(p.shape==='triangle'?24:29)*labelAt.scale);
-      const center=point(at,[0,0,0]);item.depth=center.depth;
-      item.hitFaces=hitFaces;
-      const pts=[...projected.values()];
-      item.bounds={left:Math.min(...pts.map(p=>p.x))-4,right:Math.max(...pts.map(p=>p.x))+4,top:Math.min(...pts.map(p=>p.y))-4,bottom:Math.max(...pts.map(p=>p.y))+4};
     }
     if(orderDirty){
       let previous=overlay.firstElementChild; // retained gradient definitions
@@ -125,7 +194,10 @@ export function createDigitalFallback(doc=document) {
       if(!stage)return null;const b=stage.getBoundingClientRect(),x=(clientX-b.left)*1000/(b.width||1000),y=(clientY-b.top)*800/(b.height||800);
       for(const [id,item] of [...players].sort((a,b)=>a[1].depth-b[1].depth)){
         const box=item.bounds;
-        if(item.hidden||!box||x<box.left||x>box.right||y<box.top||y>box.bottom)continue;
+        if(item.hidden||!box)continue;
+        const localX=x-item.center.x,localY=y-item.center.y;
+        if(localX<box.left||localX>box.right||localY<box.top||localY>box.bottom)continue;
+        item.hitFaces??=hitGeometry(item);
         // Front faces project clockwise in SVG space. Checking their edges
         // prevents empty corners of a triangle from intercepting a route.
         const hit=item.hitFaces.some(face=>face.every((a,i)=>{

@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { createDigitalFallback, fallbackMesh } from '../web/digital-fallback.js';
-import { PIECE_HEIGHT, puckPalette } from '../web/digital-puck.js';
-import { projectBoardPoint } from '../web/digital-projection.js';
+import { FOCUS_RADIUS, PIECE_HEIGHT, puckPalette } from '../web/digital-puck.js';
+import { BOARD_CAMERA, projectBoardPoint, projectWorldPoint } from '../web/digital-projection.js';
 import { fieldSVG, project, updateAnimation } from '../web/field.js';
 import { movePlayer, starterWorkspace } from '../web/model.js';
 
@@ -159,4 +159,96 @@ test('fallback preserves the existing optional player name once and leaves it at
   f.renderer.destroy();
   const hidden=fixture(fieldSVG(play,{showNames:false}));hidden.renderer.draw({play,settings:{showNames:false}});
   assert.equal([...hidden.doc.querySelectorAll('text')].some(n=>n.textContent===p.name),false);hidden.renderer.destroy();
+});
+
+test('retained geometry preserves every front face, shadow and focus arc within half a board pixel', t=>{
+  const f=fixture(),p=starterWorkspace().plays[0].players[0],play={players:[p],routes:[]};
+  const coordinateNumbers=text=>text.match(/-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gi).map(Number);
+  const curve=(rx,ry,start,sweep,dx=0,dy=0)=>Array.from({length:41},(_,i)=>{
+    const a=start+sweep*i/40;
+    return [Math.cos(a)*rx+dx,Math.sin(a)*ry+dy,.2];
+  });
+  const shadow=curve(28,27,0,2*Math.PI,1,-2);
+  const ring=curve(FOCUS_RADIUS,FOCUS_RADIUS,Math.PI*.59,Math.PI*1.82);
+  let worst=0, compared=0;
+  try{
+    for(const shape of ['circle','square','triangle']){
+      p.shape=shape;
+      const mesh=fallbackMesh(shape);
+      for(const lift of [0,1.5,5])for(const cx of [24,504,976])for(const cy of [24,400,776]){
+        for(const [dx,dy] of [[-3.99,-3.99],[3.99,-3.99],[3.99,3.99],[-3.99,3.99]]){
+          p.x=(cx+dx-18)/9.64;p.y=(cy+dy-20)/7.6;
+          const at=project(p), worldY=800-at.y;
+          const exact=(vertex,z)=>projectWorldPoint({x:at.x+vertex[0],y:worldY+vertex[1],z:z+vertex[2]});
+          const eye=[BOARD_CAMERA.position[0]-at.x,BOARD_CAMERA.position[1]-worldY,BOARD_CAMERA.position[2]-lift];
+          const expected=mesh.filter(({normal,vertices})=>normal[2]>=0&&normal.reduce((v,n,i)=>v+n*(eye[i]-vertices[0][i]),0)>0)
+            .map(face=>face.vertices.map(v=>exact(v,lift)));
+          f.renderer.draw({play,hoveredId:lift===1.5?p.id:null,draggingId:lift===5?p.id:null,selected:{type:'player',id:p.id}});
+          const geometry=f.doc.querySelector('[data-vector-player] > g');
+          const [tx,ty,scale]=coordinateNumbers(geometry.getAttribute('transform'));
+          const label=geometry.parentNode.querySelector('text');
+          const labelAt=exact([0,shape==='triangle'?-2:0,PIECE_HEIGHT+.12],lift);
+          assert.equal(+label.getAttribute('x'),labelAt.x);
+          assert.equal(+label.getAttribute('y'),labelAt.y);
+          assert.equal(+label.getAttribute('font-size'),15*labelAt.scale);
+          const points=path=>{
+            const coords=coordinateNumbers(path),result=[];
+            for(let i=0;i<coords.length;i+=2)result.push({x:tx+coords[i]*scale,y:ty+coords[i+1]*scale});
+            return result;
+          };
+          function error(actual,wanted){
+            if(actual.length!==wanted.length)return Infinity;
+            let max=0;
+            for(let i=0;i<actual.length;i++){
+              const distance=Math.hypot(actual[i].x-wanted[i].x,actual[i].y-wanted[i].y);
+              if(distance>=.5)return Infinity;
+              max=Math.max(max,distance);
+            }
+            return max;
+          }
+          const [shadowNode,ringNode,...surfaces]=geometry.children;
+          assert.equal(+ringNode.getAttribute('stroke-width')*scale,1.6);
+          assert.ok(surfaces.every(path=>+path.getAttribute('stroke-width')*scale===.28));
+          for(const [node,outline] of [[shadowNode,shadow],[ringNode,ring]]){
+            const distance=error(points(node.getAttribute('d')),outline.map(v=>exact(v,0)));
+            assert.ok(distance<.5,'ground decoration follows its exact ground plane');
+            worst=Math.max(worst,distance);compared+=outline.length;
+          }
+          for(const surface of surfaces)for(const polygon of surface.getAttribute('d').match(/M[^Z]+Z/g)||[]){
+            const actual=points(polygon);
+            const index=expected.findIndex(face=>error(actual,face)<.5);
+            assert.notEqual(index,-1,'every rendered polygon matches a visible face with its original winding');
+            const distance=error(actual,expected[index]);worst=Math.max(worst,distance);
+            expected.splice(index,1);compared+=actual.length;
+          }
+          assert.equal(expected.length,0,'all visible mesh faces were drawn');
+        }
+      }
+    }
+    t.diagnostic(`${compared} projected vertices, maximum error ${worst.toFixed(4)} logical pixels`);
+  }finally{f.renderer.destroy();f.win.happyDOM.abort();}
+});
+
+test('22-player Mesh stays within its SVG path-write budget for continuous playback and distant seeks', t=>{
+  const f=fixture(),{play,settings}=JSON.parse(readFileSync(new URL('../scripts/bench-digital/mesh.json',import.meta.url)));
+  const observer=new f.win.MutationObserver(()=>{});
+  function median(values){return [...values].sort((a,b)=>a-b)[Math.ceil(values.length/2)-1];}
+  function sample(times){
+    f.renderer.draw({play,settings,time:0});
+    observer.takeRecords();
+    return times.map(time=>{
+      f.renderer.draw({play,settings,time});
+      return observer.takeRecords().reduce((sum,m)=>sum+m.target.getAttribute('d').length,0);
+    });
+  }
+  try{
+    f.renderer.draw({play,settings,time:0});
+    observer.observe(f.doc.querySelector('.digital-token-overlay'),{attributes:true,subtree:true,attributeFilter:['d']});
+    const playback=median(sample(Array.from({length:204},(_,i)=>(i+1)/60)));
+    const seeks=median(sample(Array.from({length:36},(_,i)=>[3.2,1,2.3,.4,3,1.7][i%6])));
+    // Half of the measured 22-player full-projection median in each scenario.
+    assert.ok(playback<=66594/2,`playback rewrote ${playback} path characters`);
+    assert.ok(seeks<=73778/2,`seeks rewrote ${seeks} path characters`);
+    t.diagnostic(`median path characters per update: playback ${playback}, seeks ${seeks}`);
+  }finally{observer.disconnect();f.renderer.destroy();f.win.happyDOM.abort();}
 });

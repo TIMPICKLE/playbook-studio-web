@@ -81,6 +81,7 @@ test('the editor PNG action exports the paused clock on a traditional-only phone
   action('rehearse-mode');
   const slider = doc.querySelector('#timeline'); slider.value = '2.5';
   slider.dispatchEvent(new win.Event('input', {bubbles:true}));
+  await new Promise(resolve=>win.requestAnimationFrame(resolve));
   const shown = doc.querySelector('#pitch-ball').getAttribute('transform');
   action('export'); action('download-png');
   await new Promise(resolve => setImmediate(resolve));

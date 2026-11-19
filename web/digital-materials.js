@@ -119,7 +119,7 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
     board.remove(item.group,item.shadow,item.ring);const materials=new Set();item.group.traverse(n=>{if(n.material)materials.add(n.material);const index=pickMeshes.indexOf(n);if(index>=0)pickMeshes.splice(index,1);});materials.forEach(m=>m.dispose());item.labelMap.dispose();item.nameMap?.dispose();
     item.shadow.material.dispose();item.ring.material.dispose();
   }
-  function mount(next,play,settings){
+  function mount(next,play,settings,time=0){
     const nextStage=next.closest('.pitch-stage');if(!nextStage)throw new Error('3D board stage is unavailable');
     if(svg!==next)svg?.classList.remove('digital-ready');
     if(stage!==nextStage){resizeObserver?.disconnect();stage?.classList.remove('is-three');}
@@ -134,7 +134,8 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
     snapshotGeneration++;
     if(pendingImage){pendingImage.image.onload=null;pendingImage.image.onerror=null;URL.revokeObjectURL(pendingImage.url);pendingImage=null;}
     lastTheme=settings.fieldTheme;
-    lastTextureTime=-1;refreshBackground();
+    // The initial SVG already contains the feedback for this timeline position.
+    lastTextureTime=time;refreshBackground();
   }
   function refreshBackground(){
     if(!svg||disposed)return;if(pendingImage){backgroundDirty=true;return;}backgroundDirty=false;
