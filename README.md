@@ -8,7 +8,7 @@
 
 美式橄榄球战术工作台：布阵、画线、演练、AI 辅助分析与球队协作。
 
-[免登录体验](https://timpickle.github.io/playbook-studio-web/) · [云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md)
+[免登录体验](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) · [云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md)
 
 </div>
 
@@ -36,13 +36,24 @@
 
 ## 快速开始
 
-1. 打开[免登录工作台](https://timpickle.github.io/playbook-studio-web/)，进入 **「编辑战术本」**。
+1. 打开[免登录编辑器](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local)，选择 **Mesh · 浅交叉**。
 2. 选择内置示例或新建战术，拖动球员调整站位；「添加对象」可一次加入完整 **4–3 防守**。
 3. 选中球员，按 `R` 并点击路线点，按 `Enter` 完成。
 4. 切到 **「战术演练」**，按空格播放／暂停，拖动时间轴检查跑位。
 5. 导出 JSON 备份；需要球队共享时，使用云端版创建战术本。
 
 [完整图解教程、快捷键与 DEPTH CHART 操作 →](docs/USER_GUIDE.md)
+
+## 数字化战术板
+
+在桌面编辑器里选择 **显示模式 → 数字化模式**。下图是同一套 11 对 11 Mesh 战术。右图的棋子降低后，中锋身后的封堵横杠清晰可见。棋子顶面显示位置缩写，侧边保留球员自选色。
+
+![同机位 Mesh 战术的浏览器兼容视图，左为 v57，右为 v58 的低矮棋子与珐琅球场](docs/acceptance/evidence/digital-board-comparison.webp)
+
+- **改线**　让 AI 把 X 的 Go 改为 Post，可以看到两条路线重合的起跑段保持原位。预览中按下鼠标即可接管，应用后可以撤销。[观看编辑演示](docs/acceptance/evidence/digital-edit-continuity.mp4)
+- **演练**　切到「战术演练」，拖动时间轴查看四分卫出手和接球时刻。暂停后导出 PNG 会保留当时的球位和路线。WebGL 场景就绪时导出透视图，兼容视图导出平面图。[观看同机位演练对照](docs/acceptance/evidence/digital-rehearsal-compare.mp4)
+
+[验收画面与导出样例](docs/DIGITAL_BOARD_ACCEPTANCE.md) · [性能实测与设备条件](docs/DIGITAL_BOARD_PERFORMANCE.md)
 
 ## AI 功能
 
