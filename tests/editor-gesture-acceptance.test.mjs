@@ -2,10 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
+import { register } from 'node:module';
 import { makePlay, starterWorkspace, STORAGE_KEY, encodeWorkspace, decodeWorkspace } from '../web/model.js';
 import { project, routePath } from '../web/field.js';
 import { digitalFieldPalette } from '../web/digital-field-palette.js';
 
+register(new URL('./helpers/window-modules.mjs', import.meta.url));
 let serial=0;
 async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null}={}) {
   const win=new Window({url:'http://localhost:3000/local.html#editor',width:1440,height:1000});
@@ -17,7 +19,7 @@ async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null}={}
   const storage=failures?{getItem:key=>win.localStorage.getItem(key),removeItem:key=>win.localStorage.removeItem(key),setItem:(key,value)=>{if(key===STORAGE_KEY&&failures.write)throw new Error('QuotaExceededError');win.localStorage.setItem(key,value);}}:win.localStorage;
   for(const name of names)Object.defineProperty(globalThis,name,{configurable:true,value:name==='localStorage'?storage:['requestAnimationFrame','cancelAnimationFrame'].includes(name)?win[name].bind(win):win[name]});
   t.after(async()=>{win.dispatchEvent(new win.Event('pagehide'));await win.happyDOM.abort();for(const name of names){if(previous[name])Object.defineProperty(globalThis,name,previous[name]);else delete globalThis[name];}});
-  await import(`../web/app.js?gesture-acceptance=${++serial}`);
+  await import(`../web/app.js?test-window=${++serial}`);
   const q=s=>win.document.querySelector(s);
   const geometry=()=>{q('#field .pitch-svg').getBoundingClientRect=()=>({left:0,top:0,x:0,y:0,right:1000,bottom:800,width:1000,height:800});};
   const pointer=(node,type,point,extra={})=>{geometry();const at=project(point);node.dispatchEvent(new win.PointerEvent(type,{bubbles:true,cancelable:true,button:0,pointerId:1,isPrimary:true,clientX:at.x,clientY:at.y,...extra}));};
@@ -48,6 +50,7 @@ test('switching the field at the editor toolbar updates both the board and its s
 
 test('unchanged field hints preserve the material canvas, live region and keyboard focus', async t => {
   const f = await host(t), doc = f.win.document;
+  assert.equal(doc.documentElement.dataset.effects, 'off', 'a new document reads its own display preference');
   const styles = doc.createElement('style');
   styles.textContent = readFileSync(new URL('../web/liquid.css', import.meta.url), 'utf8');
   doc.head.append(styles);
