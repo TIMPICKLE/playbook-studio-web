@@ -191,10 +191,23 @@ test('scrubbing the editor timeline wakes a still digital board and restores the
   assert.equal(await seek(play.ball.passAt+.1),'release');
   const released=positions(),feedback=q('.digital-decoration').innerHTML;
   assert.equal(await seek(play.ball.arriveAt+.1),'catch');
-  assert.notDeepEqual(positions(),released);
+  const caught=positions();
+  assert.notDeepEqual(caught,released);
   assert.equal(await seek(play.ball.passAt+.1),'release');
   assert.deepEqual(positions(),released);
   assert.equal(q('.digital-decoration').innerHTML,feedback);
+  const progress=q('.digital-decoration [data-route-progress]'), read=progress.getAttribute.bind(progress);
+  let feedbackUpdates=0;
+  progress.getAttribute=name=>{if(name==='stroke-dashoffset')feedbackUpdates++;return read(name);};
+  Object.defineProperty(doc,'hidden',{configurable:true,value:true});
+  doc.dispatchEvent(new win.Event('visibilitychange'));
+  assert.equal(await seek(play.ball.arriveAt+.1),'release','hidden board retains its last visible pose');
+  assert.equal(feedbackUpdates,0);
+  delete doc.hidden;
+  doc.dispatchEvent(new win.Event('visibilitychange'));
+  assert.equal(feedbackUpdates,1,'restoring the editor reconciles the digital layer once');
+  assert.deepEqual(positions(),caught);
+  assert.equal(q('.digital-decoration [data-ball-cue]').dataset.ballCue,'catch');
   assert.equal(f.raw(),before);
 });
 

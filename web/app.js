@@ -71,6 +71,9 @@ let multiSelectMode = false, selectionCandidates = [], candidateSelectionAdditiv
 let fieldHitObserver = null;
 let frame = null, lastFrame = null, toastTimer = null;
 let pendingTimelineSeek = null;
+let lastSeekPresented = -Infinity;
+// Allow a normal refresh opportunity before a continuously dragged slider uses its deadline.
+const seekPresentationDeadline = 2 * (1000 / 60);
 const history = new EditorHistory();
 const editorSessions = createWorkspaceSessions();
 let loadedWorkspaceId = null, assistantPanelOpen = false, localRevision=0, progressScope=null, guestRouter=null;
@@ -446,6 +449,8 @@ document.addEventListener('playbook:effects-changed', () => {
 });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { clearHistoryTransition(); assistantPreview?.transition.finish(); cancelFieldGesture(); }
+  // The board's visibility listener presents its renderer after the editable SVG is current.
+  else presentTimelineSeek(undefined, false);
 });
 window.addEventListener('blur', () => cancelFieldGesture());
 window.addEventListener('pagehide', () => { presentTimelineSeek(); clearHistoryTransition(); cancelFieldGesture(); });
@@ -902,23 +907,42 @@ function historyLabel(action) {
   return `${uxCopy(action==='redo'?'Redo':'Undo',action==='redo'?'重做':'撤销')}${transaction?.name?` · ${transaction.name}`:''}`;
 }
 function cancelTimelineSeek() {
-  if (pendingTimelineSeek) cancelAnimationFrame(pendingTimelineSeek.frame);
+  if (pendingTimelineSeek?.frame != null) cancelAnimationFrame(pendingTimelineSeek.frame);
+  if (pendingTimelineSeek?.timer != null) window.clearTimeout(pendingTimelineSeek.timer);
   pendingTimelineSeek = null;
 }
 function stop() { cancelTimelineSeek(); playing = false; if (frame !== null) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { clearHistoryTransition(); stop(); time = 0; }
-function paintPlayback(stamp) {
+function paintPlayback(stamp, syncDigital = true) {
   updateAnimation($('#field svg'), current(), time);
-  digitalBoard?.presentTimeline(stamp);
+  if (syncDigital) digitalBoard?.presentTimeline(stamp);
 }
-function presentTimelineSeek(stamp) {
-  if (!pendingTimelineSeek) return;
+function presentTimelineSeek(stamp, syncDigital = true) {
+  if (!pendingTimelineSeek || document.hidden) return;
   const { previousTime } = pendingTimelineSeek;
   cancelTimelineSeek();
-  paintPlayback(stamp);
+  paintPlayback(stamp, syncDigital);
   const length = animationLength(current());
   syncTimeline(length);
   if (pausedStatus(previousTime, length) !== pausedStatus(time, length)) updateCanvasHint();
+  lastSeekPresented = window.performance.now();
+}
+function queueTimelineSeek(previousTime) {
+  const seek = { previousTime, frame: null, timer: null };
+  pendingTimelineSeek = seek;
+  if (document.hidden) return;
+  // A superseded microtask or a losing frame/deadline must never deliver the next batch.
+  const deliver = stamp => { if (pendingTimelineSeek === seek) presentTimelineSeek(stamp); };
+  const remaining = lastSeekPresented + seekPresentationDeadline - window.performance.now();
+  if (remaining <= 0) {
+    // After an idle gap, show the latest value at the end of this input task.
+    queueMicrotask(deliver);
+  } else {
+    // During a drag, follow display refreshes. A delayed foreground rAF cannot
+    // indefinitely postpone the latest position, even as more inputs arrive.
+    seek.frame = requestAnimationFrame(deliver);
+    seek.timer = window.setTimeout(deliver, remaining);
+  }
 }
 function seekTimeline(input, final = false) {
   const play = current();
@@ -934,9 +958,7 @@ function seekTimeline(input, final = false) {
     rehearsal = true;
     if (modeChanged) { syncRehearsalMode(); updateCanvasHint(); syncPlayback(); }
     // Keep command reads and exports current while presenting only the last input per frame.
-    if (!pendingTimelineSeek) {
-      pendingTimelineSeek = { previousTime: modeChanged ? time : previousTime, frame: requestAnimationFrame(presentTimelineSeek) };
-    }
+    if (!pendingTimelineSeek) queueTimelineSeek(modeChanged ? time : previousTime);
   }
   if (final) presentTimelineSeek();
 }

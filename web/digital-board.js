@@ -8,26 +8,33 @@ export function createDigitalBoard({doc=document,getState,isGestureActive=()=>fa
 },notify=()=>{}}) {
   const win=doc.defaultView;
   let engine=null,fallback=null,stage=null,pending=null,feedback=null,svg=null,engineSvg=null,frame=null,generation=0,disposed=false,materialTime=0,last=null,hoveredId=null,pointer=[.3,.2],failed=false,inView=true,observedField=null;
-  let backgroundChanged=false,contentDirty=false;
+  let backgroundChanged=false,contentDirty=false,projectionDirty=true;
   const allowed=()=>!disposed&&doc.documentElement.dataset.visualMode==='digital'&&!getState().play?.reference;
   const effectsEnabled=()=>doc.documentElement.dataset.effects!=='off';
   function cancelFrame(){if(frame!==null)win.cancelAnimationFrame(frame);frame=null;}
-  function stop(){cancelFrame();last=null;}
+  function stop(){cancelFrame();last=null;projectionDirty=true;}
   function invalidate(){
     if(frame===null&&svg&&!doc.hidden&&inView&&!getState().playing)frame=win.requestAnimationFrame(update);
   }
   const viewportObserver=typeof win.IntersectionObserver==='function'?new win.IntersectionObserver(changes=>{
     for(const change of changes)if(change.target===observedField){inView=change.isIntersecting;if(!inView)stop();else if(!doc.hidden)sync();}
   },{rootMargin:'150px'}):null;
-  const resizeObserver=typeof win.ResizeObserver==='function'?new win.ResizeObserver(invalidate):null;
+  function invalidateProjection(){projectionDirty=true;invalidate();}
+  const resizeObserver=typeof win.ResizeObserver==='function'?new win.ResizeObserver(invalidateProjection):null;
   function observeField(field){if(field===observedField)return;viewportObserver?.disconnect();observedField=field;inView=true;if(field)viewportObserver?.observe(field);}
   function clear(){stop();observeField(null);resizeObserver?.disconnect();feedback?.destroy();feedback=null;engine?.destroy();fallback?.destroy();engine=null;fallback=null;stage?.classList.remove('is-perspective');stage?.style.removeProperty('--board-projection');stage=null;svg=null;engineSvg=null;backgroundChanged=false;contentDirty=false;hoveredId=null;}
   function projectStage(){
     if(!svg)return;
     let nextStage=svg.closest('.pitch-stage');
     if(!nextStage){nextStage=doc.createElement('div');nextStage.className='pitch-stage';svg.before(nextStage);nextStage.append(svg);}
-    if(nextStage!==stage){resizeObserver?.disconnect();stage=nextStage;resizeObserver?.observe(stage);}
-    stage.classList.add('is-perspective');
+    if(nextStage!==stage){
+      resizeObserver?.disconnect();stage=nextStage;stage.classList.add('is-perspective');
+      resizeObserver?.observe(stage);projectionDirty=true;
+    }
+    // Without element resize notifications a CSS-only zoom or panel resize
+    // still needs a fresh measurement, even when the window size is unchanged.
+    if(resizeObserver&&!projectionDirty)return;
+    projectionDirty=false;
     const width=stage.clientWidth||1000,height=stage.clientHeight||width*.8;
     const matrix=boardCSSMatrix(width,height);
     if(stage.style.getPropertyValue('--board-projection')!==matrix)stage.style.setProperty('--board-projection',matrix);
@@ -36,7 +43,7 @@ export function createDigitalBoard({doc=document,getState,isGestureActive=()=>fa
   function update(stamp){
     frame=null;if(!allowed()||doc.hidden||!inView)return;
     const state=getState(), current=doc.querySelector('#field .pitch-svg');
-    if(!current||current.closest('[hidden]')){last=null;return;}
+    if(!current||current.closest('[hidden]')){stop();return;}
     if(last!==null&&effectsEnabled()&&!state.rehearsal)materialTime+=Math.min(Math.max(0,stamp-last)/1000,.1);
     last=stamp;
     if(current!==svg){mount(current,state);return;}
@@ -120,7 +127,7 @@ export function createDigitalBoard({doc=document,getState,isGestureActive=()=>fa
     if(next!==hoveredId){hoveredId=next;invalidate();}
   };
   doc.addEventListener('playbook:effects-changed',changed);doc.addEventListener('visibilitychange',visibility);doc.addEventListener('pointermove',move,{passive:true});
-  win.addEventListener('resize',invalidate);
+  win.addEventListener('resize',invalidateProjection);
   const hide=()=>{generation++;clear();},show=()=>sync();win.addEventListener('pagehide',hide);win.addEventListener('pageshow',show);
   return {sync,invalidate,presentFrame,presentTimeline:presentFrame,
     deferPendingFrame(){
@@ -143,6 +150,7 @@ export function createDigitalBoard({doc=document,getState,isGestureActive=()=>fa
     refreshBackground(){if(!svg)return;backgroundChanged=true;invalidate();},
     capture(){
       if(!allowed()||!svg||!feedback)return null;
+      if(!doc.hidden&&inView&&!svg.closest('[hidden]'))projectStage();
       const state=getState();
       const view={...state,materialTime:state.rehearsal?state.time:materialTime,animated:effectsEnabled(),hoveredId,pointer};
       const focusChanged=feedback.update(view);
@@ -159,5 +167,5 @@ export function createDigitalBoard({doc=document,getState,isGestureActive=()=>fa
       }
       return {image,fullScene:!!image&&engine?.fullScene===true,decoration:feedback.layer.outerHTML,time:state.time};
     },
-    destroy(){disposed=true;generation++;clear();viewportObserver?.disconnect();doc.removeEventListener('playbook:effects-changed',changed);doc.removeEventListener('visibilitychange',visibility);doc.removeEventListener('pointermove',move);win.removeEventListener('resize',invalidate);win.removeEventListener('pagehide',hide);win.removeEventListener('pageshow',show);}};
+    destroy(){disposed=true;generation++;clear();viewportObserver?.disconnect();doc.removeEventListener('playbook:effects-changed',changed);doc.removeEventListener('visibilitychange',visibility);doc.removeEventListener('pointermove',move);win.removeEventListener('resize',invalidateProjection);win.removeEventListener('pagehide',hide);win.removeEventListener('pageshow',show);}};
 }

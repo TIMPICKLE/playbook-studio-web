@@ -55,6 +55,8 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
 
   for (let i = 1; i <= 12; i++) seek(i / 10);
   assert.equal(writes,0,'intermediate range values never paint synchronously');
+  await Promise.resolve();
+  assert.equal(writes,1,'after idle the full burst presents without waiting for a browser frame');
   tick();
   assert.equal(writes,1);
   assert.equal(marker.getAttribute('transform'),pose(1.2));
@@ -70,6 +72,53 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
   assert.equal(writes,2,'release flushes the last position before the next frame');
   seek(2.45,'change'); tick();
   assert.equal(writes,2,'a following change and frame do not present the final position again');
+
+  const perf = win.performance, nowDescriptor = Object.getOwnPropertyDescriptor(perf,'now');
+  const setTimer = win.setTimeout, clearTimer = win.clearTimeout;
+  const timers = new Map();
+  let clock = perf.now()+1000, nextTimer = 0;
+  Object.defineProperty(perf,'now',{configurable:true,value:()=>clock});
+  win.setTimeout = (fn, delay) => { timers.set(++nextTimer,{fn,delay}); return nextTimer; };
+  win.clearTimeout = id => { timers.delete(id); };
+  try {
+    seek(.3); await Promise.resolve();
+    assert.equal(marker.getAttribute('transform'),pose(.3),'an isolated input presents at the next microtask');
+    const startWrites = writes;
+    clock += 1;
+    for (let i = 1; i <= 12; i++) {
+      seek(.3+i*.01);
+      await Promise.resolve();
+    }
+    assert.equal(writes,startWrites,'successive inputs between refreshes share the same pending presentation');
+    const [deadline] = timers.values(), [lateFrame] = frames.values();
+    assert.ok(deadline.delay > 0 && deadline.delay <= 34,'continuous input has a deadline within two 60 Hz periods');
+    clock += deadline.delay;
+    deadline.fn();
+    assert.equal(writes,startWrites+1);
+    assert.equal(marker.getAttribute('transform'),pose(.42));
+    assert.equal(timers.size,0); assert.equal(frames.size,0);
+    clock += 1;
+    seek(.43);
+    const [lateTimer] = timers.values();
+    lateFrame(clock);
+    assert.equal(writes,startWrites+1,'a late callback cannot consume the next pending input');
+    tick();
+    lateTimer.fn();
+    assert.equal(writes,startWrites+2,'frame and deadline winners each present their batch exactly once');
+    assert.equal(timers.size,0);
+    Object.defineProperty(doc,'hidden',{configurable:true,value:true});
+    seek(.5);
+    await Promise.resolve();tick();
+    assert.equal(writes,startWrites+2,'hidden input is retained without rendering');
+    delete doc.hidden;
+    doc.dispatchEvent(new win.Event('visibilitychange'));
+    assert.equal(marker.getAttribute('transform'),pose(.5));
+    assert.equal(writes,startWrites+3);
+  } finally {
+    delete doc.hidden;
+    if (nowDescriptor) Object.defineProperty(perf,'now',nowDescriptor); else delete perf.now;
+    win.setTimeout = setTimer; win.clearTimeout = clearTimer;
+  }
 
   const arrow = new win.KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true,cancelable:true});
   range().dispatchEvent(arrow);
