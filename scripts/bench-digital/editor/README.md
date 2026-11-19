@@ -18,3 +18,5 @@ node scripts/bench-digital/editor/node.mjs ../editor-qa/dist/baseline > /tmp/edi
 node scripts/bench-digital/editor/node.mjs ../editor-qa/dist/candidate > /tmp/editor-after.json
 node scripts/bench-digital/editor/compare.mjs /tmp/editor-before.json /tmp/editor-after.json
 ```
+
+Reload each snapshot before repeating a cross-version comparison so both runs start in the initial formation.
