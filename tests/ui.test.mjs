@@ -90,6 +90,17 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
         ba('done').click();
         await send();
         const before = saved();
+        const preview = query('.assistant-preview');
+        assert.equal(preview.getAttribute('aria-hidden'), 'true');
+        assert.equal(preview.hasAttribute('tabindex'), false);
+        assert.equal(preview.querySelector('[tabindex], .route-hit, .player-hit'), null);
+        const marker = query(`#field .pitch-stage > .pitch-svg [data-player="${player.id}"]`);
+        pointer(marker, 'pointerdown');
+        assert.equal(query('.assistant-preview'), null, 'pointer capture takes over the presentation immediately');
+        pointer(query('#field'), 'pointerup');
+        assert.equal(saved(), before);
+        ba('apply').click();
+        await until(() => query('.assistant-preview') && ba('apply')?.textContent === '应用');
         click('grid'); click('theme'); changedView = true;
         assert.ok(query('.assistant-preview'));
         assert.equal(ba('apply').textContent, '应用');
@@ -120,6 +131,19 @@ test('DOM integration: edit, route drawing, undo, formation, playback, import UI
         if (changedView) { click('grid'); click('theme'); }
         globalThis.fetch = originalFetch;
       }
+    });
+    await t.test('switching presentation mode repaints the existing pitch and preserves the local playbook', () => {
+      const svg = query('#field .pitch-stage > .pitch-svg');
+      const flatPaint = svg.querySelector('.yard-lines').outerHTML;
+      const saved = win.localStorage.getItem(STORAGE_KEY);
+      query('[data-effects-mode="digital"]').click();
+      assert.equal(query('#field .pitch-stage > .pitch-svg'), svg);
+      assert.equal(svg.dataset.fieldSurface, 'enamel');
+      assert.ok(svg.querySelector('[data-field-mark="los"]'));
+      query('[data-effects-mode="traditional"]').click();
+      assert.equal(svg.dataset.fieldSurface, undefined);
+      assert.equal(svg.querySelector('.yard-lines').outerHTML, flatPaint);
+      assert.equal(win.localStorage.getItem(STORAGE_KEY), saved);
     });
     await t.test('repeated field themes preserve yard lines, the independent grid choice, focus and panel state', () => {
       const sidebar=query('.sidebar'), inspector=query('.inspector'), search=query('#search'), theme=query('[data-action="theme"]'), grid=query('[data-action="grid"]');

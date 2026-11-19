@@ -8,32 +8,28 @@
 - The preference lives under `playbook-visual-mode` in local storage. It is absent from shared playbooks, JSON backups and cloud writes. Mode changes preserve selection, drafts, playback time, zoom and history.
 - Reduced motion stops decorative movement while retaining digital materials. Page hiding stops render frames. Stale asynchronous startups are disposed.
 
-## v4.2 materials, geometry and camera
+## Digital coaching table
 
-The desktop board lazily loads the pinned MIT-licensed Three.js 0.186.0 and `MeshTransmissionMaterial` from `@pmndrs/vanilla` 1.25.0. Both are self-hosted with upstream licenses. No React migration or external HDR/CDN request is needed.
+Choose **显示模式设置 → 数字化模式** on a desktop. The dark board uses graphite-green enamel. The light board uses a pale eucalyptus surface. Major yard lines, short hash marks and the dashed line of scrimmage have distinct weights. Circular, square and triangular pucks share a narrow metal edge, a ceramic face and an enamel band in the player’s chosen color. The offense uses light faces and the defense uses dark faces. A broken ring marks the selected player even when the teams share a color.
 
-A real Three.js `PerspectiveCamera` now views the field at 50° elevation with a 42° field of view. The field surface, raised frame, 22-unit plinth, pieces, selection rings, shadows and football occupy one world-space scene. The former orthographic camera, inverse ground scaling and outer affine skew are removed. A rectangular 5:4 stage contains the complete camera image and provides ordinary scrolling at 100–300% zoom; the digital viewport uses fixed 12px padding.
+The editor loads its pinned Three.js r186 module on demand. The GPU scene and the SVG compatibility renderer build the pucks from the same profile. The fixed camera uses 50° elevation and a 42° field of view. The accessible SVG hit targets use its ground-plane projection, and the GPU picker also tests the elevated pieces. The field and players keep their model coordinates when the user zooms, scrolls or switches display modes.
 
-Pieces are 50.3 world units high, with a shaped metal foot, sculpted ceramic body, thin metal collar and glass head around a colored core. Circular, square and softened triangular footprints retain the editable shape distinction. Champagne metal and smoke-purple glass use neutral studio softboxes and restrained dispersion. Labels are camera-facing sprites positioned on the heads. Hover and dragging lift the piece while its ground shadow and selection ring remain anchored to the field. Gameplay positions still come exclusively from the shared animation model.
+The field is a textured mesh with projected shadows. The opaque pieces take one scene submission per draw. A retained 2000 × 1600 field texture contains the markings and route geometry. The editor can move an independent player without rebuilding the field texture. A changed route invalidates the texture. A paused or idle board sleeps once outstanding texture and interaction work finishes.
 
-The field is a textured mesh that receives actual Three.js shadow-map shadows; pieces and the three-dimensional football cast shadows. A separate offscreen pass captures the world without glass heads and labels, providing the glass material with the actual field and opaque silhouettes for refraction. The field texture is refreshed from the SVG geometry and route feedback. The final canvas contains the entire scene; it does not try to read underlying DOM pixels.
+The selected route or player’s routes receive a local highlight. In rehearsal, the underlying routes, optional dashes, arrowheads and block end caps remain visible. Release and catch feedback use the editor’s playback time, so moving the timeline backwards replays the same event. Reduced motion keeps a fixed receiver indicator. Pass and block geometry comes from the same football model used by the flat editor.
 
-The SVG editing layer is projected using the same camera's homography. The stage itself remains untransformed. Input is converted through the inverse camera projection, and elevated pieces use Three.js raycasting. This keeps drawing, dragging and selection aligned after zooming and scrolling. The visible scene replaces the SVG presentation while the underlying editing and accessibility semantics remain available.
-
-Route feedback uses the same playback time for moving highlights, player/ball trails, block-end pulses, catching rings and coverage contours; it is sampled into the field texture for the Three.js scene. Pause and scrubbing are deterministic. A block-only player follows its block path; when a primary running route exists it retains precedence. This does not simulate collisions or infer a successful block. The football is a separate 3D object, with a visible arc and rotation during a pass.
-
-When the selected holder has a non-optional drawn passing route and a receiver, its bends are retained and its endpoints are adjusted to release/catch positions. Rehearsal draws this same adjusted path. No receiver or no drawn pass retains the existing ball behavior. Coverage remains manually drawn defensive coverage, not a computed probability region.
+[Acceptance cases](DIGITAL_BOARD_ACCEPTANCE.md) · [Repeatable measurements](DIGITAL_BOARD_PERFORMANCE.md)
 
 ## Export and failure behavior
 
 - With WebGL ready, digital PNG exports the complete current 3D scene, including the camera view, field, routes, pieces, labels, shadows and football. The scene is not projected again or overlaid with duplicate SVG players.
-- When WebGL is unavailable, an independent CPU mesh renderer projects piece vertices into SVG using the same perspective camera. It preserves upright pieces, depth ordering, shading, labels and selection; it approximates materials and does not reproduce physical glass refraction or GPU shadows. Its geometry is a separate compatibility model, not the exact Three.js mesh.
+- When WebGL is unavailable, an independent CPU mesh renderer projects piece vertices into SVG using the same perspective camera. It draws the shared puck profile with projected faces, contact shadows, labels and a selection ring.
 - Compatibility-view PNG explicitly exports a flat diagram, including the current playback geometry and route feedback. The export dialog states this difference.
 - SVG and printed playbooks retain a portable flat vector representation. JSON contains editable geometry, without device preferences.
 - Reference-image Madden plays remain reference images.
-- If WebGL initialization, context or shader rendering fails, the perspective compatibility renderer and input layer remain available, route feedback continues, and a visible notification explains the fallback. A mode switch can retry. The UI never claims that the compatibility view is a hardware-rendered glass scene.
+- If WebGL initialization, context or shader rendering fails, the perspective compatibility renderer and input layer remain available, route feedback continues, and a visible notification explains the fallback. A mode switch can retry.
 
-## v4.2 validation — 2026-10-25
+## Historical v4.2 validation — 2026-10-25
 
 - `npm run check`, `npm run typecheck`, `npm test` (150 tests), and the production build passed.
 - Real Three scene lifecycle tests retain geometry, materials, camera and raycaster while replacing GPU submission; both actual material shaders with the PCF shadow branch compile and link as GLSL ES 3.0 in Mesa EGL.
@@ -44,7 +40,7 @@ When the selected holder has a non-optional drawn passing route and a receiver, 
 
 ![v4.2 perspective compatibility view — WebGL disabled](assets/v42-board-perspective.jpg)
 
-## v4.2.1 route-edit continuity
+## Historical v4.2.1 route-edit continuity
 
 Editing a route no longer replaces the live board stage or SVG root. Selection, inspector changes, point commits and undo/redo reconcile the same mounted scene; feedback and compatibility pieces update synchronously before the next paint. The Three renderer retains its last complete texture while the replacement SVG image decodes, then swaps a fully rasterized spare canvas atomically. Failed and superseded decodes cannot blank the field or overwrite a newer mounted play. Compatibility remounts retain the existing piece overlay and picking bounds.
 

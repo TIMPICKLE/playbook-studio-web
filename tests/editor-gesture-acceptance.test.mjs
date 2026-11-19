@@ -125,6 +125,34 @@ test('entering export or rehearsal during a drag presents committed geometry and
   });
 });
 
+test('scrubbing the editor timeline wakes a still digital board and restores the exact earlier rehearsal frame',async t=>{
+  const f=await host(t),{win,q}=f,doc=win.document,play=f.data().plays[0],before=f.raw();
+  win.CanvasRenderingContext2D=function(){};
+  win.console.warn=()=>{};
+  doc.documentElement.dataset.visualMode='digital';
+  doc.documentElement.dataset.effects='off';
+  doc.dispatchEvent(new win.Event('playbook:effects-changed'));
+  for(let attempt=0;attempt<100&&!q('.digital-token-overlay');attempt++)await new Promise(resolve=>setTimeout(resolve,10));
+  assert.ok(q('.digital-token-overlay'),'the vector-compatible board is mounted');
+  const seek=time=>{
+    const timeline=q('#timeline');timeline.value=String(time);
+    timeline.dispatchEvent(new win.Event('input',{bubbles:true}));
+    return q('.digital-decoration [data-ball-cue]')?.dataset.ballCue;
+  };
+  const positions=()=>[...doc.querySelectorAll('.digital-token-overlay [data-vector-player]')].map(group=>{
+    const label=group.querySelector('text');
+    return [group.dataset.vectorPlayer,label.getAttribute('x'),label.getAttribute('y')];
+  });
+  assert.equal(seek(play.ball.passAt+.1),'release');
+  const released=positions(),feedback=q('.digital-decoration').innerHTML;
+  assert.equal(seek(play.ball.arriveAt+.1),'catch');
+  assert.notDeepEqual(positions(),released);
+  assert.equal(seek(play.ball.passAt+.1),'release');
+  assert.deepEqual(positions(),released);
+  assert.equal(q('.digital-decoration').innerHTML,feedback);
+  assert.equal(f.raw(),before);
+});
+
 test('Escape cancels group, waypoint, new-zone and annotation gestures before late pointer events',async t=>{
   for(const kind of ['group','waypoint','new-zone','annotation'])await t.test(kind,async t=>{
     const seed=starterWorkspace(),play=seed.plays[0];

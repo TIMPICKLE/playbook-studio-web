@@ -5,6 +5,7 @@ import {Window} from 'happy-dom';
 import * as THREE from '../web/vendor/three-0.186.0/three.module.js';
 import {starterWorkspace,animatedPlayer} from '../web/model.js';
 import {fieldSVG,project} from '../web/field.js';
+import {PIECE_HEIGHT, puckPalette} from '../web/digital-puck.js';
 import {projectBoardPoint} from '../web/digital-projection.js';
 
 // Exercise the production scene with actual Three geometry, materials, matrices
@@ -22,11 +23,11 @@ async function sceneFixture(){
   win.HTMLCanvasElement.prototype.toDataURL=()=>{captures.push(renderer.ratio);return 'data:image/png;base64,c2NlbmU=';};
   win.Image=class{set src(url){this.url=url;images.push(this);}};
   const renderer={shadowMap:{},debug:{},capabilities:{getMaxAnisotropy:()=>16},
-    setPixelRatio(value){this.ratio=value;},setSize(width,height){this.size=[width,height];},setClearColor(){},setRenderTarget(target){this.target=target;},clear(){},
+    setPixelRatio(value){this.ratio=value;},setSize(width,height){this.size=[width*this.ratio,height*this.ratio];},setClearColor(){},setRenderTarget(target){this.target=target;},clear(){},
     render(scene,camera){
       assert.ok(scene.isScene);assert.ok(camera.isPerspectiveCamera);scene.updateMatrixWorld(true);camera.updateMatrixWorld();
-      const sprites=[],heads=[];scene.traverse(n=>{if(n.isSprite)sprites.push(n);if(n.material?.isMeshPhysicalMaterial&&n.material.uniforms)heads.push(n);});
-      renders.push({scene,camera,target:this.target,sprites:sprites.map(n=>n.visible),heads:heads.map(n=>n.visible)});
+      const labels=[];scene.traverse(n=>{if(n.isSprite||n.name==='puck-label')labels.push(n.visible);});
+      renders.push({scene,camera,target:this.target,labels,size:[...this.size]});
     },dispose(){this.disposed=true;},forceContextLoss(){this.lost=true;}};
   const environment={texture:new THREE.Texture(),dispose(){this.disposed=true;}};
   const key=`digitalSceneSmoke${Date.now()}`;
@@ -77,9 +78,11 @@ test('Three selection rings represent every selected player and clear without re
     f.engine.mount(f.svg,f.play,f.settings);
     const view={play:f.play,settings:f.settings,time:0,animated:false,selected:{type:'players',ids}};
     f.engine.draw(view);
-    const selectedRings=()=>{const rings=[];f.renders.at(-1).scene.traverse(item=>{if(item.geometry?.type==='TorusGeometry' && item.geometry.parameters.radius===24 && item.geometry.parameters.tube===1.05 && item.visible)rings.push(item);});return rings;};
+    const selectedRings=()=>{const rings=[];f.renders.at(-1).scene.traverse(item=>{if(item.name==='puck-focus' && item.geometry.parameters.arc<2*Math.PI && item.visible)rings.push(item);});return rings;};
     assert.equal(selectedRings().length,2);
     assert.ok(selectedRings().every(item=>item.material.opacity===.9));
+    f.engine.draw({...view,settings:{...view.settings,fieldTheme:'light'}});
+    assert.ok(selectedRings().every(item=>item.material.color.getHexString()==='435748'));
     f.engine.draw({...view,selected:null});
     assert.equal(selectedRings().length,0);
   }finally{await f.close();}
@@ -98,6 +101,8 @@ test('preview masks hide existing Three pieces, shadows, rings and ball until cl
       if(item.isGroup&&item.children.some(child=>child.geometry?.type==='SphereGeometry'&&child.geometry.parameters.radius===7))ball=item;
     });
     const siblings=body.parent.children,index=siblings.indexOf(body),shadow=siblings[index+1],ring=siblings[index+2];
+    const at=project(player),top=projectBoardPoint(at.x,at.y,PIECE_HEIGHT);
+    assert.notEqual(f.engine.pick(70+top.x*.5,110+top.y*.5)?.id,player.id);
     assert.equal(body.visible,false);assert.equal(shadow.visible,false);assert.equal(ring.visible,false);assert.equal(ball.visible,false);
     f.engine.draw(view);
     assert.equal(body.visible,true);assert.equal(shadow.visible,true);assert.equal(ring.visible,true);assert.equal(ball.visible,true);
@@ -122,7 +127,7 @@ test('slow zone textures drain during preview handoff while real changes still r
     draw(1.7);assert.equal(f.engine.backgroundReady,true,'the final edit can be presented even after a slow decode');
     draw(1.8,{time:.5});assert.equal(f.images.length,1,'real timeline changes still refresh during handoff');
     f.images.shift().onload();draw(1.9,{time:.5});assert.equal(f.engine.backgroundReady,true);
-    draw(2.1,{time:.5,presentationSettling:false});assert.equal(f.images.length,1,'decorative zone updates resume after handoff');
+    draw(2.1,{time:.5,presentationSettling:false});assert.equal(f.images.length,0,'settled zones leave the field texture intact');
   }finally{await f.close();}
 });
 
@@ -132,15 +137,15 @@ test('3D buffers follow the displayed board size and remain capped on high-densi
     let width=700;Object.defineProperty(f.stage,'clientWidth',{get:()=>width});
     Object.defineProperty(f.win,'devicePixelRatio',{configurable:true,value:2});
     f.engine.mount(f.svg,f.play,f.settings);f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
-    assert.equal(f.renderer.ratio,1.4);assert.equal(f.renders[0].target.width,1400);assert.equal(f.renders[0].target.height,1120);
+    assert.equal(f.renderer.ratio,1.4);assert.deepEqual(f.renders.at(-1).size,[1400,1120]);
     width=1500;const beforeResize=f.invalidations;f.win.dispatchEvent(new f.win.Event('resize'));
     assert.ok(f.invalidations>beforeResize,'an idle board wakes when its backing resolution needs to change');
     assert.equal(f.renderer.ratio,1.4,'resize waits for the frame that will redraw the cleared canvas');
     f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
-    assert.equal(f.renderer.ratio,2);assert.equal(f.renders[0].target.width,2000);assert.equal(f.renders[0].target.height,1600);
+    assert.equal(f.renderer.ratio,2);assert.deepEqual(f.renders.at(-1).size,[2000,1600]);
     width=450;f.win.dispatchEvent(new f.win.Event('resize'));
     f.engine.draw({play:f.play,settings:f.settings,time:0,animated:false});
-    assert.equal(f.renderer.ratio,1);assert.equal(f.renders[0].target.width,1000);assert.equal(f.renders[0].target.height,800);
+    assert.equal(f.renderer.ratio,1);assert.deepEqual(f.renders.at(-1).size,[1000,800]);
   }finally{await f.close();}
 });
 
@@ -154,11 +159,11 @@ test('digital export renders at 2000 × 1600 before returning to the smaller int
     assert.equal(f.engine.capture(),'data:image/png;base64,c2NlbmU=');
     assert.deepEqual(f.captures,[2],'the image is captured at full export resolution');
     assert.equal(f.renderer.ratio,1,'the interactive buffer returns to its economical size');
-    assert.equal(f.renders.at(-1).target,null,'the restored board is rendered before returning');
+    assert.equal(f.renders.at(-1).target,undefined,'the restored board is rendered before returning');
   }finally{await f.close();}
 });
 
-test('static fields do not repeatedly regenerate textures but playback and pulsing zones still update',async()=>{
+test('static zones reuse their field texture, playback is sampled, and a pause presents the exact final time',async()=>{
   const f=await sceneFixture();
   try{
     f.play.zones=[];f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();
@@ -168,28 +173,29 @@ test('static fields do not repeatedly regenerate textures but playback and pulsi
     assert.equal(f.images.length,0,'idle scenes without pulsing zones keep their existing field texture');
     draw(.5,2.1,true);assert.equal(f.images.length,1,'scrubbing or playback updates the field');f.images.shift().onload();
     f.play.zones.push({id:'zone',x:50,y:40,rx:10,ry:10,color:'#888888',label:'Zone'});
-    draw(.5,2.3);assert.equal(f.images.length,1,'animated zones still refresh their texture');f.images.shift().onload();
+    draw(.5,2.3);assert.equal(f.images.length,0,'wall-clock time alone never uploads zones');
     for(let i=24;i<=30;i++)draw(.5,i/10,true);
     assert.equal(f.images.length,0,'a paused rehearsal does not animate a zone from wall-clock time');
-    f.engine.draw({play:f.play,settings:f.settings,time:.52,materialTime:3.1,rehearsal:true,animated:true},{refreshTexture:true});
-    assert.equal(f.images.length,1,'an explicit scrub refresh includes timeline moves below the playback sampling interval');
+    f.engine.draw({play:f.play,settings:f.settings,time:.52,materialTime:3.1,rehearsal:true,animated:true,playing:true});
+    assert.equal(f.images.length,0,'active playback samples textures');
+    f.engine.draw({play:f.play,settings:f.settings,time:.52,materialTime:3.1,rehearsal:true,animated:false,playing:false});
+    assert.equal(f.images.length,1,'pausing between sampled frames uploads the exact time');
     f.images.shift().onload();assert.equal(f.images.length,0,'the timeline and explicit refresh coalesce into one snapshot');
   }finally{await f.close();}
 });
 
-test('complete Three scene mounts, renders refraction and labels, picks a raised head, captures and releases resources',async()=>{
+test('the opaque scene presents the field and all puck labels in one render, picks the face, exports and releases resources',async()=>{
   const f=await sceneFixture(),before=JSON.stringify(f.play);
   try{
     f.engine.mount(f.svg,f.play,f.settings);
     const canvas=f.stage.querySelector('.digital-scene-canvas');assert.ok(canvas);assert.equal(canvas.parentElement,f.stage);assert.equal(f.engine.fullScene,true);
     f.images.shift().onload();
     f.engine.draw({play:f.play,settings:f.settings,time:0,materialTime:1,selected:{type:'player',id:f.play.players[0].id}});
-    assert.equal(f.renders.length,2);assert.ok(f.renders[0].target?.isWebGLRenderTarget);assert.equal(f.renders[1].target,null);
-    assert.equal(f.renders[1].sprites.length,f.play.players.length);
-    assert.ok(f.renders[0].sprites.every(v=>!v));assert.ok(f.renders[1].sprites.every(Boolean),'number sprites survive the refraction pass');
-    assert.equal(f.renders[1].heads.length,f.play.players.length);assert.ok(f.renders[0].heads.every(v=>!v));assert.ok(f.renders[1].heads.every(Boolean));
+    assert.equal(f.renders.length,1);assert.equal(f.renders[0].target,undefined);
+    assert.equal(f.renders[0].labels.length,f.play.players.length);
+    assert.ok(f.renders[0].labels.every(Boolean));
     assert.equal(f.svg.classList.contains('digital-ready'),true);assert.equal(f.stage.classList.contains('is-three'),true);
-    const player=f.play.players.find(p=>p.label==='X'),at=project(player),head=projectBoardPoint(at.x,at.y,45);
+    const player=f.play.players.find(p=>p.label==='X'),at=project(player),head=projectBoardPoint(at.x,at.y,PIECE_HEIGHT);
     assert.deepEqual(f.engine.pick(70+head.x*.5,110+head.y*.5),{type:'player',id:player.id});
     assert.equal(f.engine.pick(70,110),null);
     assert.equal(f.engine.capture(),'data:image/png;base64,c2NlbmU=');
@@ -294,14 +300,17 @@ test('Three player edits, removals and theme remounts update a live scene withou
   try{
     f.engine.mount(f.svg,f.play,f.settings);f.images.shift().onload();
     const draw=()=>f.engine.draw({play:f.play,settings:f.settings,time:0,materialTime:1,animated:false});draw();
-    const player=f.play.players[0],oldSprites=f.renders.at(-1).sprites.length;
+    const player=f.play.players[0],oldLabels=f.renders.at(-1).labels.length;
     let oldGroup;f.renders.at(-1).scene.traverse(n=>{if(n.userData.playerId===player.id)oldGroup=n.parent;});
     player.label='T1';player.shape='triangle';player.color='#abcdef';player.side='defense';draw();
-    assert.equal(oldGroup.parent,null,'edited piece is replaced, rather than retaining the old number texture');
-    assert.equal(f.renders.at(-1).sprites.length,oldSprites);assert.ok(f.renders.at(-1).sprites.every(Boolean));
-    player.name='Alex';draw();assert.equal(f.renders.at(-1).sprites.length,oldSprites+1);assert.equal(f.renders.at(-1).sprites.filter(Boolean).length,oldSprites);
-    f.settings.showNames=true;draw();assert.ok(f.renders.at(-1).sprites.every(Boolean),'the existing show-names preference remains available');
-    f.play.players.shift();draw();assert.equal(f.renders.at(-1).sprites.length,oldSprites-1);
+    assert.equal(oldGroup.parent,null,'editing a label releases the previous group');
+    let replacementGroup;f.renders.at(-1).scene.traverse(n=>{if(n.userData.playerId===player.id)replacementGroup=n.parent;});
+    assert.equal('#'+replacementGroup.getObjectByName('band').material.color.getHexString(),player.color);
+    assert.equal('#'+replacementGroup.getObjectByName('face').material.color.getHexString(),puckPalette(player).face);
+    assert.equal(f.renders.at(-1).labels.length,oldLabels);assert.ok(f.renders.at(-1).labels.every(Boolean));
+    player.name='Alex';draw();assert.equal(f.renders.at(-1).labels.length,oldLabels+1);assert.equal(f.renders.at(-1).labels.filter(Boolean).length,oldLabels);
+    f.settings.showNames=true;draw();assert.ok(f.renders.at(-1).labels.every(Boolean),'the existing show-names preference remains available');
+    f.play.players.shift();draw();assert.equal(f.renders.at(-1).labels.length,oldLabels-1);
     f.settings.fieldTheme='light';const replacement=f.doc.createElement('div');replacement.innerHTML=fieldSVG(f.play,f.settings);const next=replacement.firstElementChild;f.svg.replaceWith(next);f.engine.mount(next,f.play,f.settings);draw();
     assert.equal(f.svg.classList.contains('digital-ready'),false);assert.equal(next.classList.contains('digital-ready'),true);assert.equal(f.stage.querySelectorAll('.digital-scene-canvas').length,1);
     f.renderer.canvas.dispatchEvent(new f.win.Event('webglcontextlost',{cancelable:true}));

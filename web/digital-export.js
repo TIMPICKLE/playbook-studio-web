@@ -1,4 +1,6 @@
 import { t } from './i18n.js';
+import { fieldSVG, updateAnimation } from './field.js';
+import { createRouteFeedback } from './digital-routes.js';
 const SVG_NS='http://www.w3.org/2000/svg';
 
 export function pngExportDescription({reference=false,digital=false,ready=false}={}) {
@@ -32,4 +34,23 @@ export function composeDigitalExport(root,capture) {
     decoration.innerHTML=capture.decoration;root.insertBefore(decoration,players);
   }
   return root;
+}
+
+// The model, clock and view are captured when the user requests the PNG. A slow
+// GPU decode or a later play selection must not change the exported instant.
+export function pngFrameSVG(doc, play, view, capture = null) {
+  if (capture?.fullScene && capture.image) {
+    const svg = doc.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('xmlns', SVG_NS);
+    return composeDigitalExport(svg, capture).outerHTML;
+  }
+  const template = doc.createElement('template');
+  template.innerHTML = fieldSVG(play, view.settings, { prefix: 'export', time: view.time });
+  const root = template.content.firstElementChild;
+
+  updateAnimation(root, play, view.time, 'export');
+  if (view.settings.visualMode === 'digital') {
+    createRouteFeedback(root, play, 'export').update({ ...view, play });
+  }
+  return root.outerHTML;
 }

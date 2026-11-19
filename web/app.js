@@ -1,6 +1,6 @@
 import { t, getLocale, setLocale } from './i18n.js';
 import { createDigitalBoard } from './digital-board.js';
-import { composeDigitalExport, pngExportDescription } from './digital-export.js';
+import { pngFrameSVG, pngExportDescription } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
 import { createBoardAssistant } from './board-assistant.js';
 import { animateAssistantLayer } from './assistant-transition.js';
@@ -131,7 +131,7 @@ const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft,onChange:()=>boardAssistant?.refreshLayout?.() });
 const panels = createWorkspacePanels();
 const thumbnails = createPlayThumbnails();
-const viewSettings = () => ({ ...state.data.settings, ...viewOverrides });
+const viewSettings = () => ({ ...state.data.settings, ...viewOverrides, visualMode: document.documentElement.dataset.visualMode || 'traditional' });
 const canEdit = () => cloudMode() ? !!shared?.canEdit : !localRecovery;
 const editBlockedMessage = () => localRecovery ? recoveryMessage : shared?.sync?.viewError ? t("feedback.the_play_view_could_not_update_reload_before_editing") : t("feedback.you_have_read_only_access_and_cannot_edit_this_shared_p");
 const readActions = new Set(['madden-library','compare-source','choose','book','select-route','clear-selection','sidebar','inspector-panel','panel-field','close-panel','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode','local-recovery','download-original','retry-local-load','replace-local-workspace','confirm-replace-local-workspace']);
@@ -245,7 +245,7 @@ let assistantPreviewFrame = null;
 let assistantSettling = null;
 // A route morph explains an edit, even in traditional mode where decoration is off.
 const assistantMotionReduced = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-function clearAssistantPreview({keepLayer = false, refresh = true, notify = true} = {}) {
+function clearAssistantPreview({keepLayer = false, refresh = true, notify = true, immediate = false} = {}) {
   if (assistantSettling) {
     cancelAnimationFrame(assistantSettling.frame);
     assistantSettling.svg.remove();
@@ -258,23 +258,43 @@ function clearAssistantPreview({keepLayer = false, refresh = true, notify = true
   previous?.transition.cancel();
   previous?.restore();
   if (!keepLayer) previous?.svg.remove();
-  if (previous && refresh) digitalBoard?.refreshBackground();
+  if (previous && refresh) {
+    digitalBoard?.refreshBackground();
+    // A pointerdown will raycast in this same event, before the next RAF.
+    if (immediate) digitalBoard?.sync();
+  }
   if (previous && notify && !keepLayer) boardAssistant?.refreshPreview();
 }
 function settleAssistantPreview(svg) {
+  if (document.hidden || (assistantMotionReduced() && digitalBoard?.backgroundReady !== false)) { svg.remove(); return; }
   const pending = {svg, frame: null, started: null};
+  const initialOpacity = Number(svg.style.opacity);
+  const handoffStart = performance.now();
   assistantSettling = pending;
   const step = stamp => {
     if (assistantSettling !== pending) return;
     if (!svg.isConnected) { assistantSettling = null; return; }
-    if (digitalBoard?.backgroundReady === false) { pending.frame = requestAnimationFrame(step); return; }
+    if (!document.hidden && digitalBoard?.backgroundReady === false && stamp - handoffStart < 500) {
+      pending.frame = requestAnimationFrame(step);
+      return;
+    }
     pending.started ??= stamp;
-    const progress = assistantMotionReduced() ? 1 : Math.min(1, (stamp - pending.started) / 180);
-    svg.style.opacity = String(.6 * (1 - progress));
+    const progress = assistantMotionReduced() || document.hidden ? 1 : Math.min(1, (stamp - pending.started) / 180);
+    svg.style.opacity = String(initialOpacity * (1 - progress));
     if (progress < 1) pending.frame = requestAnimationFrame(step);
     else { svg.remove(); assistantSettling = null; }
   };
   pending.frame = requestAnimationFrame(step);
+}
+function prepareAssistantOverlay(svg, className) {
+  svg.classList.add(className);
+  svg.removeAttribute('tabindex');
+  svg.removeAttribute('role');
+  svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('focusable','false');
+  for (const node of svg.querySelectorAll('[tabindex]')) node.removeAttribute('tabindex');
+  for (const node of svg.querySelectorAll('.player-hit,.route-hit')) node.remove();
+  Object.assign(svg.style, {position:'absolute', inset:'0', width:'100%', height:'100%', pointerEvents:'none', zIndex:'4'});
 }
 function showAssistantHighlights(ids) {
   document.querySelector('#field .assistant-highlights')?.remove();
@@ -287,17 +307,29 @@ function showAssistantHighlights(ids) {
   const svg = template.content.firstElementChild;
   svg.querySelectorAll(':scope > rect, :scope > .yard-lines, :scope > text, [data-zone], [data-annotation], #assistant-highlight-ball').forEach(node => node.remove());
   svg.querySelectorAll('[data-player], [data-route]').forEach(node => {
-    if (!selected.has(node.dataset.player || node.dataset.route)) node.remove();
-    else node.style.filter = 'drop-shadow(0 0 12px #ffdb42)';
+    if (!selected.has(node.dataset.player || node.dataset.route)) { node.remove(); return; }
+    if (node.hasAttribute('data-player')) {
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring.setAttribute('r','29');
+      ring.setAttribute('fill','none');
+      ring.setAttribute('stroke',viewSettings().fieldTheme === 'light' ? '#37494a' : '#dae8e4');
+      ring.setAttribute('stroke-width','2.5');
+      ring.setAttribute('stroke-dasharray','34 11.55');
+      node.replaceChildren(ring);
+    } else node.querySelector('.route-stroke')?.setAttribute('stroke-width','5');
   });
-  svg.classList.add('assistant-highlights');
-  Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '4' });
+  prepareAssistantOverlay(svg,'assistant-highlights');
   stage.append(svg);
 }
 function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
   clearHistoryTransition();
   const source = document.createElement('template');
   source.innerHTML = fieldSVG(original, viewSettings(), {prefix:'assistant-before'});
+  const routePaths = root => new Map([...root.querySelectorAll('[data-route]')].map(node =>
+    [node.dataset.route,node.querySelector('.route-stroke')?.getAttribute('d')]));
+  const oldPaths = routePaths(source.content);
+  const oldBall = source.content.querySelector('#assistant-before-ball');
+  const oldBallPosition = oldBall?.getAttribute('transform');
   // A rebased proposal starts at the currently displayed shape if it is still on screen.
   for (const type of ['route','player','zone','annotation']) {
     for (const shown of assistantPreview?.svg.querySelectorAll(`[data-${type}]`) || []) {
@@ -305,18 +337,24 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
       old?.replaceWith(shown.cloneNode(true));
     }
   }
+  const shownBall = assistantPreview?.svg.querySelector('#assistant-preview-ball');
+  if (oldBall && shownBall && shownBall.style.visibility !== 'hidden') oldBall.replaceWith(shownBall.cloneNode(true));
   clearAssistantPreview({refresh:false, notify:false});
   const stage = document.querySelector('#field .pitch-stage');
   if (!stage) return;
   const template = document.createElement('template');
   template.innerHTML = fieldSVG(play, viewSettings(), { prefix: 'assistant-preview' });
   const svg = template.content.firstElementChild;
+  const main = stage.querySelector(':scope > .pitch-svg');
   svg.querySelectorAll(':scope > rect, :scope > .yard-lines, :scope > text').forEach(node => node.remove());
   const changed = (type, value) => {
     const prior = original[type].find(item => item.id === value.id);
     return !prior || JSON.stringify(prior) !== JSON.stringify(value);
   };
-  const changedRoutes = play.routes.filter(route => changed('routes', route));
+  const newPaths = routePaths(svg);
+  // Moving a defender or receiver can change a linked block or pass even when
+  // the stored route object is identical.
+  const changedRoutes = play.routes.filter(route => changed('routes', route) || oldPaths.get(route.id) !== newPaths.get(route.id));
   const changedRouteIds = new Set(changedRoutes.map(route => route.id));
   const movingPlayerIds = new Set(changedRoutes.map(route => route.playerId));
   const changedPlayerIds = new Set(play.players.filter(player => changed('players', player)).map(player => player.id));
@@ -331,8 +369,8 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
     changedObjectIds[attribute] = ids;
     svg.querySelectorAll(`[data-${attribute}]`).forEach(node => { if (!ids.has(node.dataset[attribute])) node.remove(); });
   }
-  const ballChanged = JSON.stringify(play.ball) !== JSON.stringify(original.ball);
   const previewBall = svg.querySelector('#assistant-preview-ball');
+  const ballChanged = JSON.stringify(play.ball) !== JSON.stringify(original.ball) || oldBallPosition !== previewBall?.getAttribute('transform');
   if (!ballChanged && !movingPlayerIds.has(play.ball.holderId)) previewBall?.remove();
   const removedRoutes = original.routes.filter(route => !play.routes.some(item => item.id === route.id));
   if (removedRoutes.length) {
@@ -348,17 +386,17 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
       svg.append(node);
     }
   }
-  svg.classList.add('assistant-preview');
-  Object.assign(svg.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', opacity: '.6', pointerEvents: 'none', zIndex: '4' });
+  prepareAssistantOverlay(svg,'assistant-preview');
+  svg.style.opacity = stage.classList.contains('is-perspective') ? '.85' : '.6';
   stage.append(svg);
   const hidden = [], masked = new Set(), rehearsalOnly = [];
-  const main = stage.querySelector(':scope > .pitch-svg');
   const hide = node => {
     if (node && !masked.has(node)) { hidden.push([node,node.style.opacity]); masked.add(node); node.style.opacity = '0'; }
   };
   for (const [type,ids] of Object.entries(changedObjectIds)) {
     for (const node of main.querySelectorAll(`[data-${type}]`)) if (ids.has(node.dataset[type])) hide(node);
   }
+  for (const node of main.querySelectorAll('.point-handle')) if (changedRouteIds.has(node.dataset.routeId)) hide(node);
   if (ballChanged) hide(main.querySelector('#pitch-ball'));
   for (const node of svg.querySelectorAll('[data-player]')) if (!changedPlayerIds.has(node.dataset.player)) rehearsalOnly.push(node);
   if (!ballChanged && previewBall?.isConnected) rehearsalOnly.push(previewBall);
@@ -377,7 +415,8 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
     for (const node of rehearsalOnly) node.style.visibility = 'hidden';
   };
   const restore = () => { for (const [node,opacity] of hidden) node.style.opacity = opacity; };
-  const transition = animateAssistantLayer({layer:svg,beforeSvg:source.content.firstElementChild,reducedMotion:!!reuse || assistantMotionReduced()});
+  const ready = () => !stage.classList.contains('is-three') || digitalBoard?.backgroundReady !== false;
+  const transition = animateAssistantLayer({layer:svg,beforeSvg:source.content.firstElementChild,ready,reducedMotion:!!reuse || assistantMotionReduced()});
   assistantPreview = Object.assign(reuse || {}, { play, original, svg, restore, transition, mask, rehearse, resetRehearsal });
   if (refresh) digitalBoard?.refreshBackground();
   return assistantPreview;
@@ -398,6 +437,10 @@ function rehearseAssistantPreview() {
 }
 document.addEventListener('playbook:effects-changed', () => {
   clearHistoryTransition();
+  const svg = $('#field .pitch-stage > .pitch-svg');
+  if (svg && !svg.classList.contains('reference-svg') && (svg.dataset.fieldSurface === 'enamel') !== (visualMode() === 'digital')) {
+    renderField({preservePreview:true, syncDigital:false});
+  }
   if (assistantMotionReduced()) assistantPreview?.transition.finish();
 });
 document.addEventListener('visibilitychange', () => {
@@ -515,7 +558,7 @@ function executeEditorLocal(actionsToRun) {
       if (action.time != null) { stop(); time = Math.min(action.time,animationLength(current())); rehearsal = true; }
       if (action.playing != null && playing !== action.playing) togglePlay();
       if (action.mode || action.reset) renderField();
-      updateAnimation($('#field svg'),current(),time); syncEditorChrome();
+      paintPlayback(); syncEditorChrome();
     } else if (action.kind === 'view_set') {
       if (action.visualMode === 'digital' && deviceIsTraditional()) throw Error(t('controls.phones_and_ipads_use_traditional_mode_rehearsal_remains_'));
       if (action.theme != null) viewOverrides.fieldTheme = action.theme;
@@ -858,6 +901,10 @@ function historyLabel(action) {
 }
 function stop() { playing = false; if (frame) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { clearHistoryTransition(); stop(); time = 0; }
+function paintPlayback(stamp) {
+  updateAnimation($('#field svg'), current(), time);
+  digitalBoard?.presentTimeline(stamp);
+}
 function edit(fn, { redraw = true, name = '', source = 'manual' } = {}) {
   if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return null; }
   cancelFieldGesture();
@@ -1146,6 +1193,7 @@ function inspector() {
 function renderField({preservePreview = false, syncDigital = true} = {}) {
   clearHistoryTransition();
   const field=$('#field');if(!field)return;
+  field.querySelector('.assistant-highlights')?.remove();
   const preview = preservePreview ? assistantPreview : null;
   if (assistantPreview || assistantSettling) clearAssistantPreview({refresh:false, notify:!preview});
   const play=fieldPlay();
@@ -1221,7 +1269,7 @@ function bindField() {
     // One contact owns an edit until it finishes. A second finger belongs to
     // browser navigation/zoom and must never replace the active edit baseline.
     if (!field.isConnected || event.button !== 0 || drag || (event.pointerType === 'touch' && !event.isPrimary)) return;
-    clearAssistantPreview();
+    clearAssistantPreview({immediate:true});
     if (rehearsal || playing || time) { toast(t("feedback.return_to_design_mode_to_adjust_players"), { type: 'info' }); return; }
     syncFieldHitTargets(field.querySelector('.pitch-svg'),{pointerType:event.pointerType});
     const at = coordinates(event);
@@ -1579,25 +1627,31 @@ function download(content, filename, mime) {
   const link = document.createElement('a'); link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 const safeName = name => name.replace(/[\\/:*?"<>|]/g, '-').slice(0, 100) || 'play';
-async function standaloneSVG(play, digital = false) {
+async function standaloneSVG(play, png = false) {
   if (assistantPreview || assistantSettling) clearAssistantPreview();
-  if (digital && digitalBoard?.backgroundReady === false) {
-    await new Promise(resolve => {
-      const started = Date.now();
-      const check = () => {
-        if (digitalBoard?.backgroundReady !== false || Date.now() - started >= 1000) resolve();
-        else setTimeout(check, 16);
-      };
-      check();
-    });
+  if (historyTransition) clearHistoryTransition();
+  const settings = viewSettings();
+  if (!png) settings.visualMode = 'traditional';
+  const view = { settings, time, rehearsal, selected: selection, animated: document.documentElement.dataset.effects !== 'off' };
+  if (png && !play.reference) {
+    let capture = null;
+    const board = digitalBoard;
+    if (settings.visualMode === 'digital' && board) {
+      // A live clock can move on while a texture decodes. For a paused board,
+      // give the existing scene a chance to finish before using its flat frame.
+      if (!playing && board.backgroundReady === false) {
+        const deadline = Date.now() + 1000;
+        while (board === digitalBoard && board.backgroundReady === false && time === view.time && Date.now() < deadline) {
+          await new Promise(resolve => setTimeout(resolve, 16));
+        }
+      }
+      if (board === digitalBoard && time === view.time && JSON.stringify(fieldPlay()) === JSON.stringify(play) && JSON.stringify(viewSettings()) === JSON.stringify(settings)) {
+        capture = board.capture();
+      }
+    }
+    return pngFrameSVG(document, play, view, capture);
   }
-  const capture = digital && !play.reference && digitalBoard?.backgroundReady !== false && JSON.stringify(current()) === JSON.stringify(play) ? digitalBoard?.capture() : null;
-  let svg = fieldSVG(play, viewSettings(), { prefix: 'export', time: capture?.time || 0 });
-  if (capture) {
-    const template=document.createElement('template');template.innerHTML=svg;const root=template.content.firstElementChild;
-    updateAnimation(root,play,capture.time,'export');
-    svg=composeDigitalExport(root,capture).outerHTML;
-  }
+  let svg = fieldSVG(play, settings, { prefix: 'export' });
   if (play.reference) {
     const response = await fetch(new URL(`./${play.reference.image}`, import.meta.url));
     if (!response.ok) throw new Error(t("feedback.could_not_load_the_source_diagram_try_again"));
@@ -1629,7 +1683,7 @@ function togglePlay() {
   clearAssistantPreview();
   if (current().reference) { toast(t("feedback.the_original_diagram_has_no_playable_route_data"), { type: 'info' }); return; }
   if(draft && !confirmDraft(togglePlay))return;
-  if(playing){stop();digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();return;}
+  if(playing){stop();paintPlayback();syncPlayback();updateCanvasHint();return;}
   if(time>=animationLength(current()))time=0;
   rehearsal=true;playing=true;draft=null;previewPoint=null;markFirstTask('rehearsed');
   renderField();syncEditorChrome();
@@ -1639,9 +1693,9 @@ function togglePlay() {
     lastFrame=stamp;
     if(time>=animationLength(current())) {
       if(loop)time%=animationLength(current());
-      else{time=animationLength(current());stop();updateAnimation($('#field svg'),current(),time);digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();return;}
+      else{time=animationLength(current());stop();paintPlayback(stamp);syncPlayback();updateCanvasHint();return;}
     }
-    updateAnimation($('#field svg'),current(),time);syncPlayback();
+    paintPlayback(stamp);syncPlayback();
     frame=requestAnimationFrame(tick);
   };
   frame=requestAnimationFrame(tick);
@@ -1799,7 +1853,7 @@ const actions = {
   'download-json': () => { if (localRecovery) { downloadOriginal(); return; } download(encodeWorkspace(state.data), `${safeName(state.data.team.name)}-playbook.json`, 'application/json');markFirstTask('exported'); toast(t("feedback.full_playbook_exported"), { type: 'success' }); },
   'download-play': () => { download(encodeWorkspace({ ...state.data, plays: [current()] }), `${safeName(current().title)}.json`, 'application/json'); toast(t("feedback.current_play_exported"), { type: 'success' }); },
   'do-print': () => { if (!$('#print-root').children.length) { toast(t("feedback.no_plays_to_print"), { type: 'warning' }); return; } window.print(); },
-  play: togglePlay, reset: () => {resetAnimation();clearAssistantPreview();updateAnimation($('#field svg'),current(),0);digitalBoard?.refreshBackground();syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
+  play: togglePlay, reset: () => {resetAnimation();clearAssistantPreview();paintPlayback();syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
 };
 
 document.addEventListener('click', event => {

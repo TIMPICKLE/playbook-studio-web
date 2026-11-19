@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {Window} from 'happy-dom';
 import {traditionalDevice,resolveVisualMode} from '../web/visual-mode.js';
 import {starterWorkspace,clone,animatedPlayer,animatedBall,passFlightRoute,pointAlong,sampledRoute} from '../web/model.js';
-import {fieldSVG,updateAnimation,routePath} from '../web/field.js';
+import {fieldSVG,updateAnimation,routePath,project,displayColor} from '../web/field.js';
 import {feedbackProgress,createRouteFeedback} from '../web/digital-routes.js';
 import {createDigitalBoard} from '../web/digital-board.js';
 
@@ -65,6 +65,41 @@ test('route light, blocking pulse and zones are deterministic at the playback ti
   assert.equal(svg.querySelector('[data-player]'),player);assert.equal(JSON.stringify(play),before);feedback.destroy();assert.equal(svg.querySelector('.digital-decoration'),null);win.happyDOM.abort();
 });
 
+test('selection and rehearsal cues use route ownership, model positions and the scrubbed time in both themes',async()=>{
+  const win=new Window(),play=starterWorkspace().plays[0],route=play.routes[0];
+  win.document.body.innerHTML=fieldSVG(play);
+  const svg=win.document.querySelector('svg'),feedback=createRouteFeedback(svg,play);
+  const paint=(time,extra={})=>feedback.update({play,time,rehearsal:true,...extra});
+  const cue=()=>svg.querySelector('[data-ball-cue]');
+  const location=(id,time)=>{const p=project(animatedPlayer(play,play.players.find(p=>p.id===id),time));return `translate(${p.x} ${p.y})`;};
+  const halo=svg.querySelector(`[data-feedback-route="${route.id}"] [data-route-focus]`);
+  const before=JSON.stringify(play);
+  try {
+    paint(0,{selected:{type:'route',id:route.id},settings:{fieldTheme:'light'},animated:false});
+    assert.equal(halo.getAttribute('stroke'),displayColor(route.color,true));
+    const focused=Number(halo.getAttribute('opacity'));assert.ok(focused>0);
+    paint(0,{selected:{type:'players',ids:[route.playerId]}});
+    assert.ok(Number(halo.getAttribute('opacity'))>0&&Number(halo.getAttribute('opacity'))<focused);
+    assert.equal(cue().dataset.ballCue,'snap');assert.equal(cue().getAttribute('transform'),location(play.ball.holderId,0));
+    const release=play.ball.passAt,arrival=play.ball.arriveAt;
+    paint(release+.1);assert.equal(cue().dataset.ballCue,'release');assert.equal(cue().getAttribute('transform'),location(play.ball.holderId,release));
+    assert.equal(halo.getAttribute('opacity'),'0');assert.ok(svg.querySelector('[data-ball-trail]').getAttribute('d'));
+    const released=feedback.layer.outerHTML;
+    paint(arrival+.1);assert.equal(cue().dataset.ballCue,'catch');assert.equal(cue().getAttribute('transform'),location(play.ball.receiverId,arrival));
+    const radius=Number(cue().firstElementChild.getAttribute('r'));
+    paint(arrival+.18);assert.ok(Number(cue().firstElementChild.getAttribute('r'))<radius);
+    paint(arrival+.6);assert.equal(cue(),null);
+    paint(release+.1);assert.equal(feedback.layer.outerHTML,released);
+    paint(release+.1,{animated:false});const staticRing=cue().outerHTML;
+    paint(release+.2,{animated:false});assert.equal(cue().outerHTML,staticRing);
+    assert.equal(svg.querySelector('[data-ball-trail]').style.display,'none');
+    assert.equal(svg.querySelector('#pitch-ball ellipse').getAttribute('transform'),'rotate(-35)');
+    paint(arrival+.1,{presentationMask:{playerIds:[play.ball.receiverId]}});assert.equal(cue(),null);
+    assert.equal(JSON.stringify(play),before);
+    play.ball.receiverId='';paint(arrival);assert.equal(cue(),null);assert.equal(svg.querySelector('[data-ball-trail]').style.display,'none');
+  } finally { feedback.destroy();await win.happyDOM.abort(); }
+});
+
 function fixture(makeEngine,{notify=()=>{},IntersectionObserver,ResizeObserver}={}){
   const win=new Window({width:1440,height:900}),doc=win.document,frames=new Map();let id=0,hidden=false;
   if(IntersectionObserver)win.IntersectionObserver=IntersectionObserver;
@@ -86,10 +121,10 @@ test('digital drawing pauses offscreen, resumes on return, and ignores pointer m
     f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:25,clientY:25,bubbles:true}));assert.equal(picks,0);
     f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:200,clientY:200,bubbles:true}));assert.equal(picks,1);
     observer.callback([{target:observer.node,isIntersecting:false}]);
-    assert.equal(f.frames.size,0);const before=draws;f.step(100);assert.equal(draws,before);
+    assert.equal(f.frames.size,0);const before=draws;f.controller.presentTimeline(100);assert.equal(draws,before);
     f.doc.dispatchEvent(new f.win.PointerEvent('pointermove',{clientX:200,clientY:200,bubbles:true}));assert.equal(picks,1);
     observer.callback([{target:observer.node,isIntersecting:true}]);await Promise.resolve();
-    assert.equal(f.frames.size,1);f.step(200);assert.ok(draws>before);
+    assert.equal(f.frames.size,0);f.controller.presentTimeline(200);assert.ok(draws>before);
   }finally{await f.close();assert.equal(observer.disconnected,true);}
 });
 
@@ -123,6 +158,27 @@ test('a still board sleeps and coalesces drag updates into one draw and texture 
     assert.equal(draws.length,4);assert.equal(draws.at(-1).refreshTexture,false,'mesh-only edits wake the renderer without baking the field');
     assert.equal(f.controller.backgroundReady,true);assert.equal(f.frames.size,0);
   }finally{await f.close();}
+});
+
+test('hidden edits and selection-only updates refresh the visible field exactly once',async()=>{
+  const paints=[];
+  const f=fixture(async()=>({status:'ready',mount(){},draw(view,options){paints.push(options.refreshTexture);},destroy(){}}));
+  try {
+    f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();
+    const route={...clone(f.state.play.routes[0]),id:'hidden-edit'};
+    f.visibility(true);const before=paints.length;
+    f.state.play.routes.push(route);
+    await f.controller.sync({contentChanged:true});f.controller.presentTimeline();f.controller.invalidate();
+    assert.equal(f.frames.size,0);assert.equal(paints.length,before);
+    assert.equal(f.controller.backgroundReady,false);
+    f.visibility(false);await Promise.resolve();
+    assert.deepEqual(paints.slice(before),[true]);assert.ok(f.doc.querySelector('[data-feedback-route="hidden-edit"]'));
+    f.state.selected={type:'route',id:route.id};await f.controller.sync();
+    assert.equal(paints.at(-1),true);
+    await f.controller.sync();assert.equal(paints.at(-1),false);
+    f.state.selected=null;await f.controller.sync();assert.equal(paints.at(-1),true);
+    assert.equal(f.frames.size,0);
+  } finally { await f.close(); }
 });
 
 test('a still board wakes on a changed hover or stage resize and then sleeps again',async()=>{
@@ -189,10 +245,13 @@ test('digital renderer follows playback and survives theme remounts without rese
   try{
     f.state.play.zones.push({id:'active-zone',x:50,y:35,rx:10,ry:8,color:'#888888',label:'Zone'});
     f.doc.documentElement.dataset.visualMode='digital';await f.controller.sync();f.step(0);f.step(100);
-    assert.ok(draws.at(-1).materialTime>0,'active zones advance even while the play is not running');
-    f.state.rehearsal=true;f.state.playing=true;f.state.time=2.4;f.step(200);assert.equal(f.frames.size,1,'playback continues drawing');
-    f.state.playing=false;f.state.time=2.5;f.controller.refreshBackground();f.step(250);
+    assert.equal(draws.length,1,'zones do not keep an idle board awake');
+    f.state.rehearsal=true;f.state.playing=true;f.state.time=2.4;f.controller.presentTimeline(200);
+    assert.equal(draws.at(-1).materialTime,2.4);assert.equal(f.frames.size,0,'only the editor schedules the next playback tick');
+    f.state.playing=false;f.state.time=2.5;f.controller.presentTimeline(250);
     const frozen=draws.at(-1).materialTime;f.step(300);assert.equal(draws.at(-1).materialTime,frozen);assert.equal(draws.at(-1).time,2.5);assert.equal(f.frames.size,0);
+    f.state.time=.15;f.controller.presentTimeline(311);assert.equal(draws.at(-1).materialTime,.15);assert.equal(f.frames.size,0);
+    f.state.time=2.5;f.controller.presentTimeline(312);
     f.doc.querySelector('svg').outerHTML=fieldSVG(f.state.play,{fieldTheme:'light'},{time:2.5});await f.controller.sync();f.step(400);
     assert.equal(mounts,2);assert.equal(draws.at(-1).time,2.5);assert.equal(f.doc.querySelectorAll('.digital-decoration').length,1);
     f.visibility(true);assert.equal(f.frames.size,0);const before=draws.length;f.visibility(false);await Promise.resolve();assert.equal(draws.length,before+1);assert.equal(f.frames.size,0);

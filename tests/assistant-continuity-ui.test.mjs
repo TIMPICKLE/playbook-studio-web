@@ -119,6 +119,15 @@ test('consecutive turns build on the staged preview and commit as one undoable t
     assert.equal(saved().plays.find(item=>item.id===selected.id).players.filter(player=>player.side==='defense').length,11);
     assert.ok([...win.document.querySelectorAll('.ba-turn-status')].some(node=>node.dataset.status==='redone'));
     q('[data-action="undo"]').click(); assert.deepEqual(saved(),original);
+    const holder=selected.players.find(player=>player.id===selected.ball.holderId);
+    await send('持球人右移两码',()=>[{kind:'move_player',playerId:holder.id,dxYards:2}],holder.label);
+    const ball=q('#pitch-ball');
+    assert.equal(ball.style.opacity,'0','the committed ball waits under the moving proposal');
+    assert.ok(q('#assistant-preview-ball'));
+    ba('discard').click();
+    assert.equal(ball.style.opacity,'');
+    assert.equal(q('#assistant-preview-ball'),null);
+    assert.deepEqual(saved(),original);
   }finally{
     ba('close')?.click();globalThis.fetch=originalFetch;
     await win.happyDOM.abort();

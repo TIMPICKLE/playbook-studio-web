@@ -1,4 +1,4 @@
-import { interpolatePath } from './vendor/d3-interpolate-path-2.3.0.js';
+import { interpolatePath, pathCommandsFromString } from './vendor/d3-interpolate-path-2.3.0.js';
 
 const objectAttributes = ['route', 'player', 'zone', 'annotation'];
 const clamp = value => Math.max(0, Math.min(1, value));
@@ -52,6 +52,43 @@ function strokeColor(target, source, updates, restores) {
     Math.round(channel + (end[index] - channel) * progress).toString(16).padStart(2, '0')).join('')));
 }
 
+// D3 equalizes point counts before tweening. For a Go becoming a Post that
+// would bend the shared stem partway upfield, before the actual break.
+function routeInterpolator(from, to) {
+  const a = pathCommandsFromString(from), b = pathCommandsFromString(to);
+  const isPolyline = points => points[0]?.type === 'M' && points.slice(1).every(p => p.type === 'L');
+  if (!isPolyline(a) || !isPolyline(b) || a[0].x !== b[0].x || a[0].y !== b[0].y)
+    return interpolatePath(from, to);
+
+  let anchor = a[0], i = 1, j = 1;
+  const prefix = [anchor];
+  while (i < a.length && j < b.length) {
+    const dx = a[i].x - anchor.x, dy = a[i].y - anchor.y;
+    const ex = b[j].x - anchor.x, ey = b[j].y - anchor.y;
+    const da = Math.hypot(dx, dy), db = Math.hypot(ex, ey);
+    if (!da) { i++; continue; }
+    if (!db) { j++; continue; }
+    // A shared ray can have different waypoint spacing on its two paths.
+    if (dx * ex + dy * ey <= 0 || Math.abs(dx * ey - dy * ex) > 1e-7 * da * db) break;
+    anchor = da <= db ? a[i] : b[j];
+    prefix.push(anchor);
+    if (da <= db) i++;
+    if (db <= da) j++;
+  }
+  if (prefix.length === 1) return interpolatePath(from, to);
+  const xy = p => p.x + ',' + p.y;
+  const lines = points => points.map(p => 'L' + xy(p)).join('');
+  const stem = 'M' + xy(prefix[0]) + lines(prefix.slice(1));
+  const move = 'M' + xy(anchor);
+  // Keep one segment when either tail is empty so D3 can grow or retract it.
+  const tail = points => move + (lines(points) || 'L' + xy(anchor));
+  const mix = interpolatePath(tail(a.slice(i)), tail(b.slice(j)));
+  return progress => {
+    const suffix = mix(progress);
+    return stem + suffix.slice(suffix.indexOf('L'));
+  };
+}
+
 function pathChanges(target, source, updates, restores) {
   const targetPaths = [...target.querySelectorAll('path')];
   const sourcePaths = [...source.querySelectorAll('path')];
@@ -65,7 +102,7 @@ function pathChanges(target, source, updates, restores) {
     numericAttributes(path, old, ['stroke-width'], updates, restores);
     if (!from || !to || from === to) continue;
     let mix;
-    try { mix = interpolatePath(from, to); } catch { continue; }
+    try { mix = selector ? routeInterpolator(from, to) : interpolatePath(from, to); } catch { continue; }
     restores.push(savedAttribute(path, 'd'));
     updates.push(progress => path.setAttribute('d', progress <= 0 ? from : progress >= 1 ? to : mix(progress)));
   }
@@ -132,6 +169,12 @@ export function animateAssistantLayer({ layer, beforeSvg, ...options }) {
     node, source: originals.get(objectKey(node)), type: objectAttributes.find(type => node.hasAttribute('data-' + type)),
     removing: node.hasAttribute('data-removing'),
   }));
+  const ball = layer?.querySelector(':scope > g[id$="-ball"]');
+  if (ball && ball.style.visibility !== 'hidden') {
+    objects.push({node:ball, source:beforeSvg?.querySelector(':scope > g[id$="-ball"]'), type:'ball'});
+    // The carried ball and its holder must leave and arrive on the same frame.
+    return animateFieldObjects({layer, objects, ...options, stagger:0});
+  }
   return animateFieldObjects({layer, objects, ...options});
 }
 

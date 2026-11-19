@@ -1,100 +1,192 @@
-import { blockContact, clamp, passFlightRoute, animatedBall, animatedPlayer, dynamicBlockRoute } from './model.js';
-import { project, routePath, motionPath, displayColor } from './field.js';
+import { animatedBall, animatedPlayer, blockContact, clamp, dynamicBlockRoute, passFlightRoute } from './model.js';
+import { displayColor, displayZoneColor, motionPath, project, routePath } from './field.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const el = (doc, name, attrs = {}) => {
-  const node = doc.createElementNS(NS, name);
-  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+const PITCH_SCALE = { x: 9.64, y: 7.6 };
+
+function attributes(node, values) {
+  for (const [key, value] of Object.entries(values)) {
+    const text = String(value);
+    if (node.getAttribute(key) !== text) node.setAttribute(key, text);
+  }
   return node;
-};
+}
+
+function element(doc, name, values = {}) {
+  return attributes(doc.createElementNS(NS, name), values);
+}
+
+function show(node, visible) {
+  const display = visible ? '' : 'none';
+  if (node.style.display !== display) node.style.display = display;
+}
+
 export function feedbackProgress(play, route, time) {
   const flight = route.kind === 'pass' && route.playerId === play.ball.holderId && play.ball.receiverId;
   const delay = flight ? play.ball.passAt : route.delay;
   const duration = flight ? play.ball.arriveAt - play.ball.passAt : route.duration;
-  return { progress: clamp((time-delay)/Math.max(.01,duration),0,1), active: !route.optional && time >= delay && time < delay+duration,
-    impact: route.kind === 'block' && !route.optional ? clamp(1-(time-delay-duration)/.55,0,1) * Number(time>=delay+duration) : 0 };
+  const elapsed = time - delay;
+  return {
+    progress: clamp(elapsed / Math.max(.01, duration), 0, 1),
+    active: !route.optional && elapsed >= 0 && elapsed < duration,
+    impact: route.kind === 'block' && !route.optional && elapsed >= duration ? clamp(1 - (elapsed - duration) / .55, 0, 1) : 0,
+  };
 }
-export function createRouteFeedback(svg, play) {
-  const doc=svg.ownerDocument, layer=el(doc,'g',{'class':'digital-decoration','pointer-events':'none','aria-hidden':'true'});
-  const defs=el(doc,'defs');
-  const filter=el(doc,'filter',{id:'digital-route-glow',x:'-100%',y:'-100%',width:'300%',height:'300%'});
-  filter.innerHTML='<feGaussianBlur stdDeviation="2.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>';
-  defs.append(filter);layer.append(defs);
-  const zones=new Map(), routes=new Map();
-  for (const zone of play.zones) {
-    const p=project(zone), id=`digital-zone-${zones.size}`, gradient=el(doc,'radialGradient',{id});
-    gradient.innerHTML=`<stop offset="0" stop-color="${zone.color}" stop-opacity=".13"/><stop offset=".72" stop-color="${zone.color}" stop-opacity=".06"/><stop offset="1" stop-color="${zone.color}" stop-opacity="0"/>`;
-    defs.append(gradient);
-    const group=el(doc,'g',{'data-feedback-zone':zone.id,transform:`translate(${p.x} ${p.y})`});
-    group.append(el(doc,'ellipse',{rx:zone.rx*9.64,ry:zone.ry*7.6,fill:`url(#${id})`}));
-    const contour=el(doc,'ellipse',{rx:zone.rx*9.64*.78,ry:zone.ry*7.6*.78,fill:'none',stroke:zone.color,'stroke-width':.8,opacity:.25});
-    group.append(contour);zones.set(zone.id,{group,contour});layer.append(group);
+
+function createZone(doc, defs, layer, zone, index) {
+  const id = `digital-zone-${index}`;
+  const gradient = element(doc, 'radialGradient', { id });
+  for (const [offset, opacity] of [[0, .13], [.72, .06], [1, 0]]) {
+    gradient.append(element(doc, 'stop', { offset, 'stop-color': zone.color, 'stop-opacity': opacity }));
   }
-  for (const route of play.routes) {
-    const d=route.kind==='motion'?motionPath(route):routePath(route);
-    const group=el(doc,'g',{'data-feedback-route':route.id});
-    const halo=el(doc,'path',{d,fill:'none',stroke:displayColor(route.color),'stroke-width':route.kind==='block'?7:5,opacity:route.optional?.08:.18,filter:'url(#digital-route-glow)','stroke-linecap':'round'});
-    if(route.optional||route.kind==='pass')halo.setAttribute('stroke-dasharray',route.kind==='pass'?'4 7':'9 6');
-    const tracer=el(doc,'path',{d,fill:'none',stroke:route.kind==='pass'?'#dcdee0':'#ffffff','stroke-width':route.kind==='block'?4:3,pathLength:1,'stroke-dasharray':route.kind==='motion'?'.04 .96':'.08 .92','stroke-linecap':'round',filter:'url(#digital-route-glow)',opacity:0});
-    const end=project(route.points.at(-1)), impact=el(doc,'circle',{cx:end.x,cy:end.y,r:12,fill:'none',stroke:displayColor(route.color),'stroke-width':2,opacity:0});
-    group.append(halo,tracer,impact);routes.set(route.id,{group,halo,tracer,impact});layer.append(group);
+  defs.append(gradient);
+  const group = element(doc, 'g', { 'data-feedback-zone': zone.id });
+  const fill = element(doc, 'ellipse', { fill: `url(#${id})` });
+  const contour = element(doc, 'ellipse', { fill: 'none', stroke: zone.color, 'stroke-width': 1 });
+  group.append(fill, contour);
+  layer.append(group);
+  return { group, fill, contour, stops: Array.from(gradient.children) };
+}
+
+function createRoute(doc, layer, route) {
+  const group = element(doc, 'g', { 'data-feedback-route': route.id });
+  const stroke = { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+  const halo = element(doc, 'path', { ...stroke, 'data-route-focus': '', 'stroke-width': 9 });
+  if (route.optional || route.kind === 'pass') halo.setAttribute('stroke-dasharray', route.kind === 'pass' ? '4 7' : '9 6');
+  const progress = element(doc, 'path', { ...stroke, 'data-route-progress': '', 'stroke-width': 3.6, pathLength: 1, 'stroke-dasharray': '1 1' });
+  const impact = element(doc, 'circle', { fill: 'none', 'stroke-width': 2 });
+  group.append(halo, progress, impact);
+  layer.append(group);
+  return { group, halo, progress, impact };
+}
+
+function renderRoute(item, route, play, view, flight) {
+  const { selected, time, animated } = view;
+  const selectedRoute = selected?.type === 'route' && selected.id === route.id;
+  const selectedOwner = selected?.type === 'player' && selected.id === route.playerId || selected?.type === 'players' && selected.ids?.includes(route.playerId);
+  const light = view.settings?.fieldTheme === 'light';
+  const color = displayColor(route.color, light);
+  const display = flight?.id === route.id ? flight : dynamicBlockRoute(play, route, time);
+  const d = route.kind === 'motion' ? motionPath(display) : routePath(display);
+  const focus = selectedRoute ? .34 : selectedOwner ? .2 : 0;
+  const focusChanged = item.halo.getAttribute('opacity') !== String(focus);
+  attributes(item.halo, { d, stroke: color, opacity: focus });
+  const timing = feedbackProgress(play, route, time);
+  const contact = blockContact(route, time);
+  const tracing = animated && (selectedRoute || selectedOwner) && !contact && timing.active && time > 0 && route.kind !== 'pass';
+  attributes(item.progress, { d, stroke: color, opacity: tracing ? .85 : 0, 'stroke-dashoffset': 1 - timing.progress });
+  const end = project(contact ? display.points[contact.index + 1] : display.points.at(-1));
+  const impact = contact ? (route.optional ? 0 : contact.impact) : timing.impact;
+  attributes(item.impact, { cx: end.x, cy: end.y, stroke: color, r: animated ? 13 + (1 - impact) * 13 : 18, opacity: animated ? impact * .75 : impact > 0 ? .65 : 0 });
+  return focusChanged;
+}
+
+// The model stores release and arrival times. The first cue marks the initial
+// ball holder at timeline zero without inventing a center-to-quarterback pass.
+function ballCue(play, time) {
+  const { holderId, receiverId, passAt, arriveAt } = play.ball;
+  if (!holderId) return null;
+  if (receiverId && time >= arriveAt) return { kind: 'catch', playerId: receiverId, at: arriveAt, duration: .48 };
+  if (receiverId && time >= passAt) return { kind: 'release', playerId: holderId, at: passAt, duration: Math.min(.32, arriveAt - passAt) };
+  return { kind: 'snap', playerId: holderId, at: 0, duration: .32 };
+}
+
+function renderBall(layer, play, view, hiddenPlayers) {
+  const { time, animated, rehearsal, playing } = view;
+  const { receiverId, passAt, arriveAt } = play.ball;
+  const light = view.settings?.fieldTheme === 'light';
+  const inFlight = !!receiverId && time >= passAt && time < arriveAt;
+  const active = time > 0 || rehearsal || playing;
+  const cue = active && ballCue(play, time);
+  const age = cue ? time - cue.at : 0;
+  const player = cue && age < cue.duration && !hiddenPlayers.has(cue.playerId) && play.players.find(p => p.id === cue.playerId);
+  const colors = light ? { snap: '#235a52', release: '#885720', catch: '#1c665a' } : { snap: '#c9e4d7', release: '#ffcf8a', catch: '#a9ead1' };
+  const cueVisible = !!player && !view.presentationMask?.ball;
+  show(layer.cue, cueVisible);
+  if (cueVisible) {
+    const at = project(animatedPlayer(play, player, cue.at)), fraction = age / cue.duration;
+    attributes(layer.cue, { 'data-ball-cue': cue.kind, transform: `translate(${at.x} ${at.y})`, stroke: colors[cue.kind], opacity: animated ? 1 - fraction : .85 });
+    const eased = 1 - (1 - fraction) ** 2;
+    const radius = cue.kind === 'catch' ? 39 - 13 * eased : 26 + 11 * eased;
+    attributes(layer.outer, { r: animated ? radius : 29, 'stroke-dasharray': cue.kind === 'release' ? '14 6' : 'none' });
+    show(layer.inner, cue.kind === 'catch');
+  } else {
+    layer.cue.removeAttribute('data-ball-cue');
+    layer.cue.removeAttribute('transform');
+    layer.cue.removeAttribute('stroke');
+    layer.cue.removeAttribute('opacity');
+    attributes(layer.outer, { r: 26, 'stroke-dasharray': 'none' });
+    show(layer.inner, false);
   }
-  const trails=new Map();
-  for(const p of play.players){const trail=el(doc,'path',{fill:'none',stroke:displayColor(p.color),'stroke-width':4,'stroke-linecap':'round',opacity:0,filter:'url(#digital-route-glow)'});layer.append(trail);trails.set(p.id,trail);}
-  const catchRing=el(doc,'circle',{r:15,fill:'none',stroke:'#cacdd1','stroke-width':2,opacity:0,filter:'url(#digital-route-glow)'});
-  const ballTrail=el(doc,'path',{fill:'none',stroke:'#d5d7db','stroke-width':3,'stroke-linecap':'round',opacity:0,filter:'url(#digital-route-glow)'});
-  layer.append(ballTrail,catchRing);
-  svg.insertBefore(layer,svg.querySelector('#pitch-players'));
+  const flying = animated && inFlight && !view.presentationMask?.ball;
+  show(layer.trail, flying);
+  let d = '';
+  if (flying) {
+    const start = Math.max(passAt, time - .13);
+    for (let i = 0; i <= 4; i++) {
+      const ball = animatedBall(play, start + (time - start) * i / 4);
+      if (!ball) break;
+      const p = project(ball);
+      d += `${i ? 'L' : 'M'}${(p.x + 23).toFixed(2)} ${(p.y - 11).toFixed(2)} `;
+    }
+  }
+  attributes(layer.trail, { d, stroke: colors.release });
+  const ball = layer.svg.querySelector(`#${layer.prefix}-ball`);
+  if (ball) {
+    const rotation = animated && inFlight ? 1260 * (time - passAt) / Math.max(.01, arriveAt - passAt) : 0;
+    for (const child of ball.children) attributes(child, { transform: `rotate(${-35 + rotation})` });
+  }
+}
+
+export function createRouteFeedback(svg, play, prefix = 'pitch') {
+  const doc = svg.ownerDocument;
+  const layer = element(doc, 'g', { class: 'digital-decoration', 'pointer-events': 'none', 'aria-hidden': 'true' });
+  const defs = element(doc, 'defs');
+  layer.append(defs);
+  const zones = new Map(play.zones.map((zone, index) => [zone.id, createZone(doc, defs, layer, zone, index)]));
+  const routes = new Map(play.routes.map(route => [route.id, createRoute(doc, layer, route)]));
+  const trail = element(doc, 'path', { fill: 'none', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: .75, 'data-ball-trail': '' });
+  const cue = element(doc, 'g', { fill: 'none' });
+  const outer = element(doc, 'circle', { r: 26, 'stroke-width': 2.2 });
+  const inner = element(doc, 'circle', { r: 23, 'stroke-width': 1, opacity: .75 });
+  cue.append(outer, inner);
+  layer.append(trail, cue);
+  svg.insertBefore(layer, svg.querySelector(`#${prefix}-players`));
+  const ballLayer = { svg, prefix, trail, cue, outer, inner };
   return {
     layer,
-    update({play,time,selected,animated=true,materialTime=time,rehearsal=false,presentationMask}) {
-      const hiddenRoutes=new Set(presentationMask?.routeIds||[]),hiddenZones=new Set(presentationMask?.zoneIds||[]),hiddenPlayers=new Set(presentationMask?.playerIds||[]);
-      const flight=time>0?passFlightRoute(play):null;
+    update({ animated = true, ...state }) {
+      const view = { ...state, animated };
+      const { play, time, selected, presentationMask } = view;
+      const hiddenRoutes = new Set(presentationMask?.routeIds), hiddenZones = new Set(presentationMask?.zoneIds);
+      const flight = time > 0 ? passFlightRoute(play) : null;
+      let focusChanged = false;
       for (const route of play.routes) {
-        const item=routes.get(route.id);if(!item)continue;
-        item.group.style.display=hiddenRoutes.has(route.id)?'none':'';
-        const displayRoute=flight?.id===route.id?flight:dynamicBlockRoute(play,route,time);
-        const d=route.kind==='motion'?motionPath(route):routePath(displayRoute);
-        item.halo.setAttribute('d',d);item.tracer.setAttribute('d',d);
-        const f=feedbackProgress(play,route,time);
-        const contact=blockContact(route,time);
-        // The marker trail follows staged stops; a uniform tracer would run ahead.
-        item.tracer.setAttribute('opacity',animated&&!contact&&f.active&&time>0?'.9':'0');
-        item.tracer.setAttribute('stroke-dashoffset',String(-f.progress));
-        const end=project(contact ? displayRoute.points[contact.index+1] : displayRoute.points.at(-1));item.impact.setAttribute('cx',end.x);item.impact.setAttribute('cy',end.y);
-        const pulse=contact ? (route.optional ? 0 : contact.impact) : f.impact;
-        item.impact.setAttribute('r',String(10+(1-pulse)*20));item.impact.setAttribute('opacity',animated?String(pulse*.75):'0');
+        const item = routes.get(route.id);
+        if (!item) continue;
+        show(item.group, !hiddenRoutes.has(route.id));
+        if (renderRoute(item, route, play, view, flight)) focusChanged = true;
       }
       for (const zone of play.zones) {
-        const item=zones.get(zone.id);if(!item)continue;
-        item.group.style.display=hiddenZones.has(zone.id)?'none':'';
-        const p=project(zone);item.group.setAttribute('transform',`translate(${p.x} ${p.y})`);
-        const active=selected?.type==='zone'&&selected.id===zone.id;
-        const clock=rehearsal?time:materialTime;
-        item.contour.setAttribute('opacity',active?String(.55+(animated?Math.sin(clock*2)*.15:0)):'.25');
-        item.contour.setAttribute('rx',zone.rx*9.64*(.78+(animated?Math.sin(clock*2)*.035:0)));
-        item.contour.setAttribute('ry',zone.ry*7.6*(.78+(animated?Math.sin(clock*2)*.035:0)));
-        const fill=item.group.firstElementChild;fill.setAttribute('rx',zone.rx*9.64);fill.setAttribute('ry',zone.ry*7.6);
+        const item = zones.get(zone.id);
+        if (!item) continue;
+        show(item.group, !hiddenZones.has(zone.id));
+        const p = project(zone), rx = zone.rx * PITCH_SCALE.x, ry = zone.ry * PITCH_SCALE.y;
+        const color = displayZoneColor(zone.color, view.settings?.fieldTheme === 'light');
+        for (const stop of item.stops) attributes(stop, { 'stop-color': color });
+        attributes(item.group, { transform: `translate(${p.x} ${p.y})` });
+        attributes(item.fill, { rx, ry });
+        const focus = selected?.type === 'zone' && selected.id === zone.id ? .55 : .25;
+        if (item.contour.getAttribute('opacity') !== String(focus)) focusChanged = true;
+        attributes(item.contour, { rx: rx * .78, ry: ry * .78, stroke: color, opacity: focus });
       }
-      const age=time-play.ball.arriveAt,b=animatedBall(play,time);
-      for(const p of play.players){const trail=trails.get(p.id);if(!trail)continue;
-        trail.style.display=hiddenPlayers.has(p.id)?'none':'';
-        const at=animatedPlayer(play,p,time),before=animatedPlayer(play,p,Math.max(0,time-.22));
-        const moving=animated&&time>0&&Math.hypot(at.x-before.x,at.y-before.y)>.05;
-        trail.setAttribute('opacity',moving?'.3':'0');
-        if(moving)trail.setAttribute('d',Array.from({length:7},(_,i)=>{const v=project(animatedPlayer(play,p,Math.max(0,time-.22+i*.22/6)));return`${i?'L':'M'}${v.x} ${v.y}`;}).join(' '));
-      }
-      const flying=animated&&play.ball.receiverId&&time>=play.ball.passAt&&time<play.ball.arriveAt;
-      ballTrail.style.display=presentationMask?.ball?'none':'';catchRing.style.display=presentationMask?.ball?'none':'';
-      ballTrail.setAttribute('opacity',flying?'.65':'0');
-      if(flying)ballTrail.setAttribute('d',Array.from({length:9},(_,i)=>{const v=project(animatedBall(play,Math.max(play.ball.passAt,time-.12+i*.12/8)));return`${i?'L':'M'}${v.x+23} ${v.y-11}`;}).join(' '));
-      const caught=animated&&play.ball.receiverId&&age>=0&&age<.6;
-      catchRing.setAttribute('opacity',caught?String((1-age/.6)*.8):'0');
-      if(b){const p=project(b);catchRing.setAttribute('cx',p.x);catchRing.setAttribute('cy',p.y);catchRing.setAttribute('r',String(17+clamp(age,0,.6)*40));}
-      const ball=svg.querySelector('#pitch-ball');
-      if(ball){const t=time>=play.ball.passAt&&time<play.ball.arriveAt&&play.ball.receiverId?time*560:0;
-        for(const child of ball.children)child.setAttribute('transform',`rotate(${-35+(animated?t:0)})`);}
+      renderBall(ballLayer, play, view, new Set(presentationMask?.playerIds));
+      return focusChanged;
     },
-    destroy(){layer.remove();const ball=svg.querySelector('#pitch-ball');if(ball)for(const child of ball.children)child.setAttribute('transform','rotate(-35)');}
+    destroy() {
+      layer.remove();
+      const ball = svg.querySelector(`#${prefix}-ball`);
+      if (ball) for (const child of ball.children) attributes(child, { transform: 'rotate(-35)' });
+    },
   };
 }

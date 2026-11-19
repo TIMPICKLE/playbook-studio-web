@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { createDigitalFallback, fallbackMesh } from '../web/digital-fallback.js';
+import { PIECE_HEIGHT, puckPalette } from '../web/digital-puck.js';
 import { projectBoardPoint } from '../web/digital-projection.js';
 import { fieldSVG, project, updateAnimation } from '../web/field.js';
 import { movePlayer, starterWorkspace } from '../web/model.js';
@@ -22,9 +23,27 @@ test('fallback selection rings represent the same multiple-player selection as t
     f.renderer.draw({play,settings:{},time:0,selected:{type:'players',ids}});
     const active=[...f.doc.querySelectorAll('[data-vector-player]')].filter(node=>node.querySelector('path[opacity="0.9"]')).map(node=>node.dataset.vectorPlayer);
     assert.deepEqual(new Set(active),new Set(ids));
+    f.renderer.draw({play,settings:{fieldTheme:'light'},time:0,selected:{type:'players',ids}});
+    assert.ok([...f.doc.querySelectorAll('path[opacity="0.9"]')].every(r=>r.getAttribute('stroke')==='#435748'));
     f.renderer.draw({play,settings:{},time:0,selected:null});
     assert.equal(f.doc.querySelectorAll('path[opacity="0.9"]').length,0);
   }finally{f.renderer.destroy();f.win.happyDOM.abort();}
+});
+
+test('a stationary fallback frame performs no DOM writes, selection changes only the focus ring',()=>{
+  const f=fixture(),play=starterWorkspace().plays[0],view={play,settings:{},time:0};
+  const observer=new f.win.MutationObserver(()=>{});
+  try{
+    f.renderer.draw(view);
+    const overlay=f.doc.querySelector('.digital-token-overlay');
+    observer.observe(overlay,{childList:true,attributes:true,subtree:true});
+    f.renderer.draw(view);assert.equal(observer.takeRecords().length,0);
+    f.renderer.draw({...view,selected:{type:'player',id:play.players[0].id}});
+    assert.deepEqual(observer.takeRecords().map(m=>[m.type,m.attributeName]),[['attributes','opacity']]);
+    movePlayer(play,play.players[0].id,play.players[0].x+1,play.players[0].y);
+    f.renderer.draw(view);
+    assert.ok(observer.takeRecords().every(m=>m.type!=='childList'),'movement within a row keeps the existing painter order');
+  }finally{observer.disconnect();f.renderer.destroy();f.win.happyDOM.abort();}
 });
 
 test('preview masks hide and restore fallback pieces without rebuilding or mutating them',()=>{
@@ -34,6 +53,8 @@ test('preview masks hide and restore fallback pieces without rebuilding or mutat
     const piece=f.doc.querySelector(`[data-vector-player="${player.id}"]`),geometry=piece.innerHTML;
     f.renderer.draw({play,settings:{},time:0,presentationMask:{playerIds:[player.id]}});
     assert.equal(piece.style.display,'none');
+    const at=project(player),top=projectBoardPoint(at.x,at.y,PIECE_HEIGHT);
+    assert.notEqual(f.renderer.pick(70+top.x*.5,110+top.y*.5)?.id,player.id);
     f.renderer.draw({play,settings:{},time:0});
     assert.equal(piece.style.display,'');assert.equal(piece.innerHTML,geometry);
     assert.equal(f.doc.querySelector(`[data-vector-player="${player.id}"]`),piece);
@@ -41,22 +62,23 @@ test('preview masks hide and restore fallback pieces without rebuilding or mutat
   }finally{f.renderer.destroy();f.win.happyDOM.abort();}
 });
 
-test('fallback chips use tall closed three-dimensional mesh surfaces for every symbol',()=>{
+test('fallback uses the same closed low bevels, team-color band and matte face for every symbol',()=>{
   for(const shape of ['circle','square','triangle']){
     const mesh=fallbackMesh(shape);assert.ok(mesh.length>25);
     const heights=mesh.flatMap(f=>f.vertices.map(v=>v[2]));
-    assert.equal(Math.min(...heights),0);assert.ok(Math.max(...heights)>=42);
-    for(const face of mesh){assert.equal(face.vertices.length,4);assert.ok(face.vertices.flat().every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...face.normal)-1)<1e-10);}
+    assert.equal(Math.min(...heights),0);assert.equal(Math.max(...heights),PIECE_HEIGHT);
+    assert.deepEqual([...new Set(mesh.map(f=>f.material))].sort(),['band','face','foot','rim']);
+    for(const face of mesh){assert.ok(face.vertices.length>=3);assert.ok(face.vertices.flat().every(Number.isFinite));assert.ok(Math.abs(Math.hypot(...face.normal)-1)<1e-10);}
   }
   assert.notEqual(fallbackMesh('circle').length,fallbackMesh('triangle').length);
 });
 
-test('fallback follows shared animation without mutating data, retains labels and picks the raised head after zoom/scroll',()=>{
+test('fallback follows shared animation without mutating data, retains labels and picks the puck face after zoom/scroll',()=>{
   const f=fixture(),play=starterWorkspace().plays[0],before=JSON.stringify(play);
   f.renderer.draw({play,time:0,settings:{},selected:{type:'player',id:play.players[0].id}});
   assert.equal(f.doc.querySelectorAll('[data-vector-player]').length,11);
   assert.equal(f.svg.classList.contains('digital-fallback-ready'),true);
-  const p=play.players.find(p=>p.label==='X'),at=project(p),head=projectBoardPoint(at.x,at.y,42);
+  const p=play.players.find(p=>p.label==='X'),at=project(p),head=projectBoardPoint(at.x,at.y,PIECE_HEIGHT);
   assert.deepEqual(f.renderer.pick(70+head.x*.5,110+head.y*.5),{type:'player',id:p.id});
   assert.equal(f.renderer.pick(70,110),null);
   const first=f.doc.querySelector(`[data-vector-player="${p.id}"] path`).getAttribute('d');
@@ -69,13 +91,24 @@ test('fallback follows shared animation without mutating data, retains labels an
   f.renderer.destroy();assert.equal(f.doc.querySelector('.digital-token-overlay'),null);assert.equal(f.svg.classList.contains('digital-fallback-ready'),false);
 });
 
+test('the corners outside a triangle remain available to route editing',()=>{
+  const f=fixture(),play=starterWorkspace().plays[0],p=play.players.find(p=>p.label==='X');
+  try{
+    p.shape='triangle';f.renderer.draw({play});
+    const at=project(p),top=projectBoardPoint(at.x,at.y,PIECE_HEIGHT);
+    const corner=projectBoardPoint(at.x-15,at.y-14,PIECE_HEIGHT);
+    assert.equal(f.renderer.pick(70+top.x*.5,110+top.y*.5)?.id,p.id);
+    assert.equal(f.renderer.pick(70+corner.x*.5,110+corner.y*.5),null);
+  }finally{f.renderer.destroy();f.win.happyDOM.abort();}
+});
+
 test('fallback redraws colors, symbol shape and label changes and removes deleted players',()=>{
   const f=fixture(),play=starterWorkspace().plays[0];
   f.renderer.draw({play,settings:{},time:0});
   const p=play.players[0],old=f.doc.querySelector(`[data-vector-player="${p.id}"]`);
   p.shape='square';p.color='#abcdef';p.label='T1';
   f.renderer.draw({play,settings:{fieldTheme:'light'},time:0});
-  const next=f.doc.querySelector(`[data-vector-player="${p.id}"]`);assert.notEqual(next,old);assert.equal(next.querySelector('text').textContent,'T1');
+  const next=f.doc.querySelector(`[data-vector-player="${p.id}"]`);assert.notEqual(next,old);assert.equal(next.querySelector('text').textContent,'T1');assert.equal(next.querySelector('text').getAttribute('fill'),puckPalette(p).ink);
   play.players.shift();f.renderer.draw({play,settings:{},time:0});assert.equal(f.doc.querySelectorAll('[data-vector-player]').length,10);
   f.renderer.destroy();
 });
@@ -106,7 +139,7 @@ test('fallback migrates its complete image and picking to a replacement stage be
   const next=nextStage.querySelector('.pitch-svg');f.renderer.mount(next);
   assert.ok(nextStage.querySelector('.digital-token-overlay')===overlay);assert.equal(overlay.innerHTML,image);
   assert.equal(f.stage.classList.contains('is-fallback'),false);assert.equal(nextStage.classList.contains('is-fallback'),true);
-  const at=project(p),head=projectBoardPoint(at.x,at.y,42);
+  const at=project(p),head=projectBoardPoint(at.x,at.y,PIECE_HEIGHT);
   assert.deepEqual(f.renderer.pick(135+head.x*.75,240+head.y*.75),{type:'player',id:p.id});
   f.renderer.destroy();assert.equal(nextStage.querySelector('.digital-token-overlay'),null);assert.equal(nextStage.classList.contains('is-fallback'),false);
 });
