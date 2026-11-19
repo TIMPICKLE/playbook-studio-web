@@ -8,7 +8,7 @@
 
 An American football workspace for drawing plays, rehearsal, AI-assisted analysis and team collaboration.
 
-[Live demo · no sign-in](https://timpickle.github.io/playbook-studio-web/) · [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md)
+[Live demo · no sign-in](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) · [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md)
 
 </div>
 
@@ -36,13 +36,24 @@ English and Simplified Chinese are supported. Phones and iPads use the tradition
 
 ## Quick start
 
-1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/) and choose **Edit playbook**.
+1. Open the [no-sign-in editor](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) and select the **Mesh** sample play.
 2. Open a sample or create a play. Drag players into position; **Add objects** can add a complete **4–3 defense**.
 3. Select a player, press `R`, click route points, then press `Enter` to finish.
-4. Switch to **Rehearsal**, press Space to play or pause, and scrub the timeline.
+4. Switch to **Rehearse**, press Space to play or pause, and scrub the timeline.
 5. Export JSON backups. Use the cloud app to create a shared team playbook.
 
 [Full visual walkthrough, shortcuts and DEPTH CHART instructions →](docs/USER_GUIDE.en.md)
+
+## Digital board
+
+In the desktop editor, choose **Display mode → Digital**. Both views below show the same 11-on-11 Mesh play. The lower pieces on the right leave the block markers beyond the center visible. Each piece carries its position label on top and the player’s chosen color around the edge.
+
+![The same Mesh formation in the browser compatibility view, with v57 on the left and the low-profile pieces and enamel field in v58 on the right](docs/acceptance/evidence/digital-board-comparison.webp)
+
+- **Edit a route.** Ask the AI to change X’s go route to a post. The shared release stays in place as the route bends inside. Press the mouse button to take over during the preview, or undo the change after applying it. [Watch the route edit](docs/acceptance/evidence/digital-edit-continuity.mp4)
+- **Rehearse a pass.** Choose **Rehearse** and scrub between the quarterback’s release and the catch. Exporting a paused frame keeps the ball and routes at that instant. A ready WebGL scene exports a perspective PNG. The compatibility view exports a flat diagram. [Watch the rehearsal comparison](docs/acceptance/evidence/digital-rehearsal-compare.mp4)
+
+[Visual checks and export samples](docs/DIGITAL_BOARD_ACCEPTANCE.md) · [Performance measurements and test conditions](docs/DIGITAL_BOARD_PERFORMANCE.md)
 
 ## AI features
 
