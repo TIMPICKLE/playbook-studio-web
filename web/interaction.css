@@ -37,7 +37,7 @@ button:not(:disabled):active,.button:not(:disabled):active{transform:translateY(
 .is-dragging,.is-dragging *{cursor:grabbing!important}
 .is-dragging .player-token[aria-pressed=true] .player-symbol{filter:drop-shadow(0 6px 4px #11121477) brightness(1.1)}
 .drag-readout{position:absolute;bottom:14px;right:13px;padding:7px 10px;border:1px solid #a3a5a944;background:#26282bd9;color:#dbdddf;font:10px var(--mono);border-radius:6px;pointer-events:none}
-.is-rehearsal .route-stroke{opacity:.35;transition:opacity .24s}
+html:not([data-visual-mode=digital]) .is-rehearsal .route-stroke{opacity:.35;transition:opacity .24s}
 .is-rehearsal .route-hit{pointer-events:none}
 .is-rehearsal .player-token,.is-rehearsal .zone-token{cursor:default}
 .is-rehearsal .selection-ring,.is-rehearsal .point-handle{display:none}

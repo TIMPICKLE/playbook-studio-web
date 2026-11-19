@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en" data-visual-mode="digital" data-effects="on">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Digital board regression</title>
+<link rel="stylesheet" href="./web/visual-mode.css">
+<style>
+*{box-sizing:border-box}body{margin:0;font:15px system-ui;background:#1e2924;color:#e8efe8}header,nav{padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}button{padding:5px 12px;cursor:pointer}output{font-weight:600}.pitch-stage{margin:auto;width:min(100vw,850px,calc(100vh - 112px) * 1.25);aspect-ratio:5/4;position:relative}.pitch-svg{width:100%;height:100%;display:block;position:relative}#field{width:100%;overflow:hidden;background:#222925}#result{white-space:pre-wrap;font-size:12px;overflow-wrap:anywhere;margin:8px}.workspace{display:block}
+</style></head>
+<body><header><strong>11 v 11 · Mesh</strong><button id="run" disabled>Run benchmark</button><output id="progress">Loading</output></header>
+<nav aria-label="Keyframes"><button data-pose="formation">Formation</button><button data-pose="select">Selected X</button><button data-pose="throw">Release</button><button data-pose="catch">Catch</button><button data-pose="theme">Light / dark</button></nav>
+<main class="workspace"><section id="field" class="field-wrap"><div class="pitch-stage is-perspective"></div></section></main>
+<pre id="result"></pre><script type="module" src="./browser.js"></script></body></html>

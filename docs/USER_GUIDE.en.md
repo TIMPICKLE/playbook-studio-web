@@ -121,11 +121,9 @@ Filter by team, formation group, specific formation, or English play name. Previ
 | View | Experience |
 |---|---|
 | **Traditional** | Enabled by default. Flat player markers, clear routes, and no decorative motion for everyday editing and reading |
-| **Digital** | Optional on desktop. A perspective board, raised pieces, glass and metal materials, and route, movement, blocking, passing, and zone feedback during rehearsal |
+| **Digital** | Optional on desktop. Low-profile metal pucks sit on a light or dark enamel field. Each puck shows the position on its face and the player color around its edge. Rehearsal highlights the release, catch and blocking contact points |
 
-Switch views through **显示模式** (Display mode) in the upper right. The screenshot below shows the silver glass interface and raised pieces in the **compatibility view**. WebGL was unavailable in the capture environment, so this is not a screenshot of the full WebGL 3D renderer.
-
-![Digital mode's compatibility view with silver glass controls, a perspective board, and raised player pieces](assets/readme/digital-compatible-silver.jpg)
+Switch views through **Display mode** in the upper right. A notched silver ring marks a selected puck. The line of scrimmage remains visible when you hide the grid.
 
 Phones and iPads use the traditional view while retaining editing and rehearsal. When WebGL is unavailable, digital mode uses an interactive compatibility view. Reduced-motion preferences retain materials while stopping decorative movement.
 

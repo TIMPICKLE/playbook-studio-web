@@ -68,6 +68,23 @@ test('curved paths morph without replacing their stable route groups', () => {
   assert.equal(group.querySelector('path').getAttribute('d'), 'M0,0 L10,10 L20,20');
 });
 
+test('Go/Post pins the entire shared stem and changes only the suffix in both directions', () => {
+  const go = 'M20,100 L20,0', post = 'M20,100 L20,20 L75,0';
+  const markup = d => '<g data-route="x"><path class="route-stroke" d="' + d + '"/></g>';
+  for (const [from, to] of [[go, post], [post, go], ['M20,100 L20,82 L20,0', post]]) {
+    const f = fixture(markup(from), markup(to));
+    const tween = animateAssistantLayer(f), path = f.layer.querySelector('path');
+    assert.equal(path.getAttribute('d'), from);
+    f.step(0);
+    for (const stamp of [60, 170, 450]) {
+      f.step(stamp);
+      assert.match(path.getAttribute('d'), /^M20,100(?:L20,82)?L20,20L/);
+    }
+    tween.finish();
+    assert.equal(path.getAttribute('d'), to);
+  }
+});
+
 test('route color and width interpolate to the exact target styling', () => {
   const f = fixture('<g data-route="x"><path d="M0,0 L0,20" stroke="#fff" stroke-width="2"/></g>',
     '<g data-route="x"><path d="M0,0 L10,10" stroke="#335577" stroke-width="4"/></g>');
@@ -112,6 +129,19 @@ test('players, coverage regions and annotations move with the same presentation 
   assert.equal(f.layer.querySelector('[data-player]').getAttribute('transform'), 'translate(30 40)');
   assert.equal(f.layer.querySelector('ellipse').getAttribute('cx'), '30');
   assert.equal(f.layer.querySelector('[data-annotation] text').getAttribute('x'), '8');
+});
+
+test('a carried ball keeps its offset to the moving player across every proposal frame', () => {
+  const frame = (x, id) => '<g data-player="qb" transform="translate(' + x + ' 40)"/>' +
+    '<g id="' + id + '-ball" transform="translate(' + (x+23) + ' 29)"/>';
+  const f = fixture(frame(100, 'before'), frame(180, 'preview'));
+  const tween = animateAssistantLayer(f);
+  for (const stamp of [0, 70, 158, 390, 900]) {
+    f.step(stamp);
+    const x = selector => Number(f.layer.querySelector(selector).getAttribute('transform').match(/^translate\(([^ ]+)/)[1]);
+    assert.ok(Math.abs(x('#preview-ball') - x('[data-player]') - 23) < 1e-8);
+  }
+  tween.finish();
 });
 
 test('cancellation retains the visible intermediate path and clears its pending frame', async () => {
