@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { fieldSVG, project } from '../web/field.js';
+import { digitalFieldPalette } from '../web/digital-field-palette.js';
 import { COLORS, makePlay } from '../web/model.js';
 
 const play = makePlay();
@@ -114,6 +115,24 @@ test('on both enamel themes optional routes retain their line pattern, default m
         assert.equal(zone.querySelector('ellipse').getAttribute('stroke'), color);
         assert.equal(zone.querySelector('text').getAttribute('fill'), color);
       }
+    }
+  } finally { await win.happyDOM.abort(); }
+});
+
+test('a live route draft and its handles have legible ink on each digital field and retain the traditional finish', async () => {
+  const win = new Window(), drawing = {points:[{x:25,y:42},{x:45,y:30}]};
+  try {
+    for (const fieldTheme of ['dark','light']) {
+      const palette = digitalFieldPalette(fieldTheme);
+      const svg = render(win, {fieldTheme}, {drawing});
+      const draft = svg.querySelector('.draft-layer');
+      const stroke = draft.querySelector('path').getAttribute('stroke');
+      assert.equal(stroke, palette.ink);
+      for (const base of [palette.top,palette.middle,palette.bottom]) assert.ok(contrast(stroke,base)>=4.5);
+      assert.equal(draft.querySelector('circle').getAttribute('stroke'),palette.middle);
+      assert.equal(svg.querySelector('#pitch-draft-arrow path').getAttribute('stroke'),stroke);
+      const flat = render(win, {fieldTheme,visualMode:'traditional'}, {drawing});
+      assert.equal(flat.querySelector('.draft-layer path').getAttribute('stroke'),'#ffffff');
     }
   } finally { await win.happyDOM.abort(); }
 });

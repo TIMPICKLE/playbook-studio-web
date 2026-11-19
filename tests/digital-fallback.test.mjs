@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { createDigitalFallback, fallbackMesh } from '../web/digital-fallback.js';
-import { FOCUS_RADIUS, PIECE_HEIGHT, puckPalette } from '../web/digital-puck.js';
+import { FOCUS_RADIUS, PIECE_HEIGHT, focusInk, puckPalette } from '../web/digital-puck.js';
 import { BOARD_CAMERA, projectBoardPoint, projectWorldPoint } from '../web/digital-projection.js';
 import { fieldSVG, project, updateAnimation } from '../web/field.js';
 import { movePlayer, starterWorkspace } from '../web/model.js';
@@ -24,7 +24,7 @@ test('fallback selection rings represent the same multiple-player selection as t
     const active=[...f.doc.querySelectorAll('[data-vector-player]')].filter(node=>node.querySelector('path[opacity="0.9"]')).map(node=>node.dataset.vectorPlayer);
     assert.deepEqual(new Set(active),new Set(ids));
     f.renderer.draw({play,settings:{fieldTheme:'light'},time:0,selected:{type:'players',ids}});
-    assert.ok([...f.doc.querySelectorAll('path[opacity="0.9"]')].every(r=>r.getAttribute('stroke')==='#435748'));
+    assert.ok([...f.doc.querySelectorAll('path[opacity="0.9"]')].every(r=>r.getAttribute('stroke')===focusInk('light')));
     f.renderer.draw({play,settings:{},time:0,selected:null});
     assert.equal(f.doc.querySelectorAll('path[opacity="0.9"]').length,0);
   }finally{f.renderer.destroy();f.win.happyDOM.abort();}

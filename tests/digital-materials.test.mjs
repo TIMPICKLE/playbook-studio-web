@@ -6,7 +6,8 @@ import * as THREE from '../web/vendor/three-0.186.0/three.module.js';
 import {starterWorkspace,animatedPlayer} from '../web/model.js';
 import {fieldSVG,project} from '../web/field.js';
 import {createDigitalBoard} from '../web/digital-board.js';
-import {PIECE_HEIGHT, puckPalette} from '../web/digital-puck.js';
+import {PIECE_HEIGHT, focusInk, puckPalette} from '../web/digital-puck.js';
+import {DIGITAL_FIELD_LIGHT, digitalFieldPalette} from '../web/digital-field-palette.js';
 import {projectBoardPoint} from '../web/digital-projection.js';
 
 // Exercise the production scene with actual Three geometry, materials, matrices
@@ -123,9 +124,47 @@ test('Three selection rings represent every selected player and clear without re
     assert.equal(selectedRings().length,2);
     assert.ok(selectedRings().every(item=>item.material.opacity===.9));
     f.engine.draw({...view,settings:{...view.settings,fieldTheme:'light'}});
-    assert.ok(selectedRings().every(item=>item.material.color.getHexString()==='435748'));
+    assert.ok(selectedRings().every(item=>'#'+item.material.color.getHexString()===focusInk('light')));
     f.engine.draw({...view,selected:null});
     assert.equal(selectedRings().length,0);
+  }finally{await f.close();}
+});
+
+test('field textures and trim share a palette through first paint, theme change and capture',async()=>{
+  const f=await sceneFixture();
+  const hex=color=>'#'+color.getHexString();
+  let previous=null,svg=f.svg;
+  try{
+    for(const theme of ['dark','light','dark']){
+      const settings={...f.settings,fieldTheme:theme,visualMode:'digital'},palette=digitalFieldPalette(theme);
+      const holder=f.doc.createElement('div');holder.innerHTML=fieldSVG(f.play,settings);
+      const next=holder.firstElementChild;svg.replaceWith(next);svg=next;
+      f.engine.mount(svg,f.play,settings);
+      const draw=()=>f.engine.draw({play:f.play,settings,time:0,animated:false});
+      draw();
+      const scene=f.renders.at(-1).scene,hemisphere=scene.children.find(n=>n.isHemisphereLight);
+      const lights=scene.children.filter(n=>n.isDirectionalLight);
+      assert.deepEqual([hemisphere.color,hemisphere.groundColor,lights.find(n=>n.castShadow).color,lights.find(n=>!n.castShadow).color].map(hex),
+        [DIGITAL_FIELD_LIGHT.sky,DIGITAL_FIELD_LIGHT.ground,DIGITAL_FIELD_LIGHT.key,DIGITAL_FIELD_LIGHT.fill]);
+      const trim=[];
+      scene.traverse(n=>{if(n.geometry?.type==='ExtrudeGeometry')trim.push(n);});
+      const frame=trim.find(n=>n.geometry.parameters.options.depth===1.5);
+      const plinth=trim.find(n=>n.geometry.parameters.options.depth===12);
+      const trimColors=()=>[hex(frame.material.color),hex(plinth.material.color)];
+      if(previous)assert.deepEqual(trimColors(),[previous.frame,previous.plinth],'pending updates retain a coherent complete board');
+      else assert.equal(f.renderer.canvas.style.visibility,'hidden','the current SVG is visible before the first texture');
+      assert.equal(f.images.length,1);
+      const image=f.images.shift(),xml=await (await fetch(image.url)).text();
+      assert.ok(xml.includes(palette.middle),'the GPU receives the same field color as the SVG');
+      image.onload();draw();
+      assert.deepEqual(trimColors(),[palette.frame,palette.plinth]);
+      assert.equal(f.contexts.get(f.fieldTexture().image).image,image);
+      assert.equal(f.engine.backgroundReady,true);
+      assert.equal(f.renderer.canvas.style.visibility,'visible');
+      assert.equal(f.engine.capture(),'data:image/png;base64,c2NlbmU=');
+      assert.equal(f.images.length,0,'capture reuses the displayed field');
+      previous=palette;
+    }
   }finally{await f.close();}
 });
 

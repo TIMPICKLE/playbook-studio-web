@@ -4,6 +4,7 @@ import { Window } from 'happy-dom';
 import { readFileSync } from 'node:fs';
 import { makePlay, starterWorkspace, STORAGE_KEY, encodeWorkspace, decodeWorkspace } from '../web/model.js';
 import { project, routePath } from '../web/field.js';
+import { digitalFieldPalette } from '../web/digital-field-palette.js';
 
 let serial=0;
 async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null}={}) {
@@ -24,6 +25,26 @@ async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null}={}
   const key=(node,key,extra={})=>node.dispatchEvent(new win.KeyboardEvent('keydown',{bubbles:true,cancelable:true,key,...extra}));
   return {win,q,geometry,pointer,action,key,data:()=>decodeWorkspace(win.localStorage.getItem(STORAGE_KEY)),raw:()=>win.localStorage.getItem(STORAGE_KEY)};
 }
+
+test('switching the field at the editor toolbar updates both the board and its surround', async t => {
+  const f=await host(t);
+  const mode=name=>f.q(`[data-effects-mode="${name}"]`).click();
+  const check=theme=>{
+    const field=f.q('#field'),paint=digitalFieldPalette(theme);
+    assert.deepEqual([...field.querySelectorAll('.yard-lines linearGradient stop')].map(stop=>stop.getAttribute('stop-color')),
+      [paint.top,paint.middle,paint.bottom]);
+    assert.equal(field.style.getPropertyValue('--field-stage-mid'),paint.stageMid);
+    assert.equal(field.style.getPropertyValue('--field-frame'),paint.frame);
+  };
+  mode('digital');
+  check('dark');
+  f.action('theme');check('light');
+  mode('traditional');
+  assert.equal(f.q('#field').style.getPropertyValue('--field-frame'),'');
+  assert.equal(f.q('#field svg[data-field-surface]'),null);
+  mode('digital');check('light');
+  f.action('theme');check('dark');
+});
 
 test('unchanged field hints preserve the material canvas, live region and keyboard focus', async t => {
   const f = await host(t), doc = f.win.document;

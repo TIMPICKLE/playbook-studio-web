@@ -1,5 +1,6 @@
 import { t, getLocale, setLocale } from './i18n.js';
 import { createDigitalBoard } from './digital-board.js';
+import { digitalFieldPalette, digitalFieldChrome } from './digital-field-palette.js';
 import { pngFrameSVG, pngExportDescription } from './digital-export.js';
 import { createMaddenLibrary } from './madden.js';
 import { createBoardAssistant } from './board-assistant.js';
@@ -307,7 +308,9 @@ function showAssistantHighlights(ids) {
   const stage = document.querySelector('#field .pitch-stage');
   if (!stage) return;
   const template = document.createElement('template');
-  template.innerHTML = fieldSVG(current(), viewSettings(), { prefix: 'assistant-highlight' });
+  const settings=viewSettings();
+  const focusColor=settings.visualMode==='digital' ? digitalFieldPalette(settings.fieldTheme).focus : settings.fieldTheme==='light' ? '#37494a' : '#dae8e4';
+  template.innerHTML = fieldSVG(current(), settings, { prefix: 'assistant-highlight' });
   const svg = template.content.firstElementChild;
   svg.querySelectorAll(':scope > rect, :scope > .yard-lines, :scope > text, [data-zone], [data-annotation], #assistant-highlight-ball').forEach(node => node.remove());
   svg.querySelectorAll('[data-player], [data-route]').forEach(node => {
@@ -316,7 +319,7 @@ function showAssistantHighlights(ids) {
       const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       ring.setAttribute('r','29');
       ring.setAttribute('fill','none');
-      ring.setAttribute('stroke',viewSettings().fieldTheme === 'light' ? '#37494a' : '#dae8e4');
+      ring.setAttribute('stroke',focusColor);
       ring.setAttribute('stroke-width','2.5');
       ring.setAttribute('stroke-dasharray','34 11.55');
       node.replaceChildren(ring);
@@ -1044,6 +1047,8 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
   document.title = `${p.title} · Playbook Studio`;
   const plays = filtered(), categories = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
   const formations = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.formation))];
+  const settings=viewSettings();
+  const chrome=!p.reference&&settings.visualMode==='digital' ? ` style="${digitalFieldChrome(settings.fieldTheme)}"` : '';
   const html = `<div class="workspace ${p.reference ? 'reference-play' : ''}" data-assistant-open="${assistantPanelOpen}">
     <button class="sidebar-scrim" data-action="close-panel" aria-label="${t("editor.close_side_panel")}" tabindex="-1"></button><aside class="sidebar" id="plays-panel" aria-label="${t("editor.play_list")}">
       <button class="panel-close compact-only" data-action="close-panel" aria-label="${t("editor.close_play_list")}">${icon('close')}</button>
@@ -1067,7 +1072,7 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
       <section class="play-header"><div><div class="eyebrow"><span class="league-badge">${getPlayLeague(p)===5?uxCopy('5v5 Flag','5 人腰旗'):uxCopy(`${getPlayLeague(p)} per side`,`${getPlayLeague(p)} 人制`)}</span> <span>·</span> ${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1>${editorStatus()}<p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', historyLabel('undo'), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', historyLabel('redo'), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
       ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? t("editor.recovery_required") : shared?.sync?.viewError ? t("editor.view_recovery_required") : t("editor.read_only")}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : t("editor.you_can_view_rehearse_export_and_print_ask_an_administr")}</span>${localRecovery ? `<button class="button subtle" data-action="local-recovery">${t("editor.recovery_options")}</button>` : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="${t("editor.field_and_rehearsal")}">
         <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="selection-toolbar">${selectionControls()}</div><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button>${isFlag5Play(p) ? `<button data-action="opponents">${icon('team')}${t(p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? 'editor.flag5_remove_opponents' : 'editor.flag5_add_opponents')}<small>${t('editor.flag5')}</small></button>` : `<button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button>`}<button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
-        <div id="field" class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, viewSettings(), { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
+        <div id="field"${chrome} class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, settings, { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
         <div class="stage-dock"><div class="editor-mode" role="group" aria-label="${t("editor.workspace_mode")}"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}${t("editor.design_play")}</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}${t("editor.rehearse")}</button></div><div class="toolbar" role="toolbar" aria-label="${t("editor.drawing_tools")}"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', t("editor.select_move_v")], ['route', 'route', t("editor.route_r")], ['block', 'block', t("editor.block_b")], ['motion', 'motion', t("editor.pre_snap_motion_m")], ['pass', 'pass', t("editor.pass_p")], ['zone', 'zone', t("editor.coverage_zone_z")], ['text', 'text', t("editor.text_t")]].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:t("editor.select"),route:t("editor.route"),block:t("editor.block"),motion:t("editor.motion"),pass:t("editor.pass"),zone:t("editor.zone"),text:t("editor.text")})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>${t("editor.rehearse")}</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">${t("editorExtra.speed")}<select id="speed" aria-label="${t("editor.playback_speed")}">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', t("editor.loop"), `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? t("editor.pause") : t("editor.play"), 'play-button')}${btn('reset', 'reset', t("editor.reset_animation"), 'icon-button')}<input type="range" id="timeline" aria-label="${t("editor.animation_time")}" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div></div>
         ${boardHeightHandle}
         <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
@@ -1278,7 +1283,12 @@ function renderField({preservePreview = false, syncDigital = true} = {}) {
   const preview = preservePreview ? assistantPreview : null;
   if (assistantPreview || assistantSettling) clearAssistantPreview({refresh:false, notify:!preview});
   const play=fieldPlay();
-  const template=document.createElement('template');template.innerHTML=fieldSVG(play,viewSettings(),{selected:selection,time,drawing:draft});
+  const settings=viewSettings();
+  const chrome=!play.reference&&settings.visualMode==='digital' ? digitalFieldChrome(settings.fieldTheme) : null;
+  if(field.getAttribute('style')!==chrome){
+    if(chrome)field.setAttribute('style',chrome);else field.removeAttribute('style');
+  }
+  const template=document.createElement('template');template.innerHTML=fieldSVG(play,settings,{selected:selection,time,drawing:draft});
   const svg=field.querySelector('.pitch-svg'),next=template.content.firstElementChild;
   // Preserve the SVG root and renderer readiness while replacing editable content
   // in one synchronous transaction. Canvas and vector pieces are stage siblings.

@@ -27,6 +27,7 @@ test('the service worker installs the editor shell and caches geometry only afte
   await install;
   assert.ok(installed.includes('./madden-traces.js'));
   assert.ok(installed.includes('./editor-dialog.css'));
+  assert.ok(installed.includes('./digital-field-palette.js'));
   assert.ok(installed.includes('./component-layout.css'));
   assert.ok(installed.includes('./history-transition.js'));
   assert.ok(installed.includes('./depth-chart-motion.js'));

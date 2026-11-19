@@ -128,7 +128,7 @@ export function createDigitalFallback(doc=document) {
   function makePlayer(p){
     const group=node(doc,'g',{'data-vector-player':p.id});
     const geometry=node(doc,'g');
-    const shadow=node(doc,'path',{fill:'url(#digital-fallback-shadow)'}),ring=node(doc,'path',{fill:'none',stroke:'#ccd3c7','stroke-width':1.6*UNITS,'stroke-linecap':'round',opacity:0});
+    const shadow=node(doc,'path',{fill:'url(#digital-fallback-shadow)'}),ring=node(doc,'path',{fill:'none',stroke:focusInk(),'stroke-width':1.6*UNITS,'stroke-linecap':'round',opacity:0});
     geometry.append(shadow,ring);group.append(geometry);
     const palette=puckPalette(p);
     const batches=new Map();
@@ -145,11 +145,12 @@ export function createDigitalFallback(doc=document) {
       batches.get(key).faces.push({...face,plane:dot(face.normal,face.vertices[0])});
     }
     const label=node(doc,'text',{'text-anchor':'middle','dominant-baseline':'central',fill:palette.ink,'font-family':'Arial,sans-serif','font-weight':700,'letter-spacing':-.3,lengthAdjust:'spacingAndGlyphs'});label.textContent=p.label;group.append(label);overlay.append(group);
-    return {group,geometry,shadow,ring,batches,label,cell:null,hidden:false,opacity:0,ringColor:'#ccd3c7',shape:p.shape,color:p.color,labelText:p.label,side:p.side,bounds:null,depth:0};
+    return {group,geometry,shadow,ring,batches,label,cell:null,hidden:false,opacity:0,ringColor:focusInk(),shape:p.shape,color:p.color,labelText:p.label,side:p.side,bounds:null,depth:0};
   }
   function draw({play,settings={},time=0,selected,hoveredId=null,draggingId=null,animated=true,presentationMask}){
     if(disposed||!overlay)return;
     const hiddenPlayers=new Set(presentationMask?.playerIds||[]);
+    const ringColor=focusInk(settings.fieldTheme);
     let orderDirty=false;
     const live=new Set(play.players.map(p=>p.id));
     for(const [id,item]of players)if(!live.has(id)){disposeItem(item);players.delete(id);}
@@ -163,7 +164,6 @@ export function createDigitalFallback(doc=document) {
       const lift=animated?(draggingId===p.id?5:hoveredId===p.id?1.5:0):0;
       const active=selected?.type==='player'&&selected.id===p.id || selected?.type==='players'&&selected.ids?.includes(p.id);
       const hover=hoveredId===p.id;
-      const ringColor=focusInk(settings.fieldTheme);
       if(item.ringColor!==ringColor){item.ring.setAttribute('stroke',ringColor);item.ringColor=ringColor;}
       const opacity=active?.9:hover?.35:0;
       if(opacity!==item.opacity){item.ring.setAttribute('opacity',opacity);item.opacity=opacity;}
