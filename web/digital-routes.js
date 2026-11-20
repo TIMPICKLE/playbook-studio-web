@@ -51,13 +51,15 @@ function createZone(doc, defs, layer, zone, index) {
 function createRoute(doc, layer, route) {
   const group = element(doc, 'g', { 'data-feedback-route': route.id });
   const stroke = { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
-  const halo = element(doc, 'path', { ...stroke, 'data-route-focus': '', 'stroke-width': 9 });
-  if (route.optional || route.kind === 'pass') halo.setAttribute('stroke-dasharray', route.kind === 'pass' ? '4 7' : '9 6');
-  const progress = element(doc, 'path', { ...stroke, 'data-route-progress': '', 'stroke-width': 3.6, pathLength: 1, 'stroke-dasharray': '1 1' });
+  // Overprint the existing route with a narrow stroke. Its arrowhead, colour
+  // and dash pattern still describe the assignment when other routes cross it.
+  const focusStroke = element(doc, 'path', { ...stroke, 'data-route-focus': '', 'stroke-width': 4.6 });
+  if (route.optional || route.kind === 'pass') focusStroke.setAttribute('stroke-dasharray', route.kind === 'pass' ? '4 7' : '9 6');
+  const progress = element(doc, 'path', { ...stroke, 'data-route-progress': '', 'stroke-width': 5.4, pathLength: 1, 'stroke-dasharray': '1 1' });
   const impact = element(doc, 'circle', { fill: 'none', 'stroke-width': 2 });
-  group.append(halo, progress, impact);
+  group.append(focusStroke, progress, impact);
   layer.append(group);
-  return { group, halo, progress, impact };
+  return { group, focusStroke, progress, impact };
 }
 
 function renderRoute(item, route, play, view, flight) {
@@ -68,9 +70,9 @@ function renderRoute(item, route, play, view, flight) {
   const color = displayColor(route.color, light);
   const display = flight?.id === route.id ? flight : dynamicBlockRoute(play, route, time);
   const d = route.kind === 'motion' ? motionPath(display) : routePath(display);
-  const focus = selectedRoute ? .34 : selectedOwner ? .2 : 0;
-  const focusChanged = item.halo.getAttribute('opacity') !== String(focus);
-  attributes(item.halo, { d, stroke: color, opacity: focus });
+  const focus = selectedRoute ? 1 : selectedOwner ? .8 : 0;
+  const focusChanged = item.focusStroke.getAttribute('opacity') !== String(focus);
+  attributes(item.focusStroke, { d, stroke: color, opacity: focus });
   const timing = feedbackProgress(play, route, time);
   const contact = blockContact(route, time);
   const tracing = animated && (selectedRoute || selectedOwner) && !contact && timing.active && time > 0 && route.kind !== 'pass';

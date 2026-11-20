@@ -2,6 +2,7 @@ import { digitalFieldPalette } from './digital-field-palette.js';
 
 // World units shared by the perspective GPU scene and the lightweight SVG renderer.
 export const PIECE_HEIGHT = 10;
+export const DRAG_LIFT = 5;
 export const PUCK_RADIUS = 21;
 export const FOCUS_RADIUS = 26;
 export const focusInk = theme => digitalFieldPalette(theme).focus;
@@ -44,7 +45,7 @@ export function puckOutline(shape) {
 // One polygon caps the face in the vector renderer, avoiding radial hairlines.
 const profile = [
   [.90,0], [.97,1.2,'foot'], [1,2.4,'rim'], [1,6.3,'band'],
-  [.96,8.2,'band'], [.90,9.2,'rim'], [.85,PIECE_HEIGHT,'face'],
+  [.96,8.2,'band'], [.93,9.1,'rim'], [.87,PIECE_HEIGHT,'face'],
 ];
 export function puckFaces(shape) {
   const outline = puckOutline(shape);

@@ -56,6 +56,25 @@ test('reduced-motion digital PNG preserves the static catch cue without leaving 
   assert.equal(first, frame(3.1));
 });
 
+test('digital compatibility PNG keeps only the selected assignments emphasized with their original line notation',async t=>{
+  const win=new Window(),doc=win.document,play=passingPlay();
+  t.after(()=>win.happyDOM.abort());
+  const existing=play.routes.find(r=>r.kind!=='pass');
+  play.routes.push({...existing,id:'option',optional:true,color:'#75aacc'});
+  const ids=[existing.playerId,play.ball.holderId];
+  const view={settings:{visualMode:'digital'},time:0,animated:false,selected:{type:'players',ids}};
+  doc.body.innerHTML=pngFrameSVG(doc,play,view);
+  for(const route of play.routes){
+    const path=doc.querySelector(`[data-feedback-route="${route.id}"] [data-route-focus]`);
+    const base=doc.querySelector(`[data-route="${route.id}"] .route-stroke`);
+    assert.equal(Number(path.getAttribute('opacity'))>0,ids.includes(route.playerId));
+    assert.equal(path.getAttribute('stroke'),base.getAttribute('stroke'));
+    assert.equal(path.getAttribute('stroke-dasharray'),base.getAttribute('stroke-dasharray'));
+    assert.ok(Number(path.getAttribute('stroke-width'))>Number(base.getAttribute('stroke-width')));
+    assert.ok(base.getAttribute('marker-end'),'the base route still supplies the assignment’s end marker');
+  }
+});
+
 test('the editor PNG action exports the paused clock on a traditional-only phone', async t => {
   const win = new Window({ url: 'http://localhost:3000/local.html#editor', width: 390, height: 844 });
   const doc = win.document, data = starterWorkspace();

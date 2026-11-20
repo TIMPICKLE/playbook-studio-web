@@ -66,6 +66,30 @@ test('visual preferences stay local and obsolete asynchronous particle startups 
       assert.equal(registrations,1);
       await fx.setEffectsMode('digital');
     });
+    await t.test('the digital editor releases decoration without altering board motion and restores it on return',async()=>{
+      const editor=win.document.createElement('div');editor.id='app';editor.hidden=true;
+      const button=win.document.createElement('button');let buttonAnimations=0;
+      button.animate=()=>{buttonAnimations++;return {};};editor.append(button);win.document.body.append(editor);
+      editor.hidden=false;await fx.syncPageDecoration();
+      assert.equal(win.document.documentElement.dataset.effects,'full');
+      assert.equal(win.document.documentElement.dataset.decoration,'off');
+      assert.equal(live.size,0);assert.equal(win.document.querySelector('#liquid-metal-world'),null);
+      win.document.dispatchEvent(new win.Event('visibilitychange'));win.dispatchEvent(new win.Event('pageshow'));
+      button.dispatchEvent(new win.PointerEvent('pointerdown',{bubbles:true}));fx.burstAt(button);
+      assert.equal(buttonAnimations,0);assert.equal(win.document.querySelector('.press-wave,.particle-burst'),null);
+      editor.hidden=true;await fx.syncPageDecoration();
+      assert.equal(win.document.documentElement.dataset.decoration,'full');assert.equal(live.size,1);
+      editor.remove();
+    });
+    await t.test('entering the board while a particle startup is pending disposes the late canvas',async()=>{
+      await fx.setEffectsMode('traditional');delayed=true;resolveFirst=null;
+      const editor=win.document.createElement('div');editor.id='app';editor.hidden=true;win.document.body.append(editor);
+      const started=fx.setEffectsMode('digital');await settle();assert.equal(typeof resolveFirst,'function');
+      editor.hidden=false;await fx.syncPageDecoration();resolveFirst();await started;
+      assert.equal(live.size,0);assert.equal(win.document.documentElement.dataset.decoration,'off');
+      assert.equal(win.document.documentElement.dataset.effects,'full');
+      delayed=false;editor.hidden=true;await fx.syncPageDecoration();editor.remove();
+    });
     await t.test('system reduced motion overrides decorative effects without overwriting the chosen preference',async()=>{
       reduced=true;for(const fn of reduceListeners)await fn();assert.equal(live.size,0);
       assert.equal(win.document.documentElement.dataset.effects,'off');assert.equal(fx.preference(),'digital');

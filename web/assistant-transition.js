@@ -54,11 +54,11 @@ function strokeColor(target, source, updates, restores) {
 
 // D3 equalizes point counts before tweening. For a Go becoming a Post that
 // would bend the shared stem partway upfield, before the actual break.
-function routeInterpolator(from, to) {
+function routeMorph(from, to) {
   const a = pathCommandsFromString(from), b = pathCommandsFromString(to);
   const isPolyline = points => points[0]?.type === 'M' && points.slice(1).every(p => p.type === 'L');
   if (!isPolyline(a) || !isPolyline(b) || a[0].x !== b[0].x || a[0].y !== b[0].y)
-    return interpolatePath(from, to);
+    return { mix:interpolatePath(from, to) };
 
   let anchor = a[0], i = 1, j = 1;
   const prefix = [anchor];
@@ -75,21 +75,49 @@ function routeInterpolator(from, to) {
     if (da <= db) i++;
     if (db <= da) j++;
   }
-  if (prefix.length === 1) return interpolatePath(from, to);
   const xy = p => p.x + ',' + p.y;
+  // Trace only the first new leg, even when later parts of the route rejoin.
+  // A shortened route or a change in waypoint spacing has no new leg.
+  const next = b.slice(j).find(p => p.x !== anchor.x || p.y !== anchor.y);
+  const segment = next ? 'M' + xy(anchor) + 'L' + xy(next) : null;
+  if (prefix.length === 1) return { mix:interpolatePath(from, to), segment };
   const lines = points => points.map(p => 'L' + xy(p)).join('');
   const stem = 'M' + xy(prefix[0]) + lines(prefix.slice(1));
   const move = 'M' + xy(anchor);
   // Keep one segment when either tail is empty so D3 can grow or retract it.
   const tail = points => move + (lines(points) || 'L' + xy(anchor));
-  const mix = interpolatePath(tail(a.slice(i)), tail(b.slice(j)));
-  return progress => {
-    const suffix = mix(progress);
+  const mixTail = interpolatePath(tail(a.slice(i)), tail(b.slice(j)));
+  const mix = progress => {
+    const suffix = mixTail(progress);
     return stem + suffix.slice(suffix.indexOf('L'));
   };
+  return {mix, segment};
 }
 
-function pathChanges(target, source, updates, restores) {
+function changeTrace(path, segment) {
+  let overlay;
+  function draw(progress) {
+    if (progress <= 0) return;
+    if (progress >= 1) { overlay?.remove(); return; }
+    if (!overlay) {
+      overlay = path.ownerDocument.createElementNS(path.namespaceURI, 'path');
+      const attributes = {
+        class:'assistant-route-trace', d:segment, fill:'none', stroke:path.getAttribute('stroke') || 'currentColor',
+        'stroke-width':(number(path.getAttribute('stroke-width')) || 2.8) + 2.4,
+        'stroke-linecap':'round', pathLength:1, 'stroke-dasharray':'1 1',
+        'pointer-events':'none', 'aria-hidden':'true',
+      };
+      for (const [key,value] of Object.entries(attributes)) overlay.setAttribute(key, String(value));
+      path.after(overlay);
+    }
+    overlay.setAttribute('stroke-dashoffset', String(1 - clamp(progress / .7)));
+    overlay.setAttribute('opacity', String(.72 * clamp((1 - progress) / .3)));
+  }
+  return {draw, remove:() => overlay?.remove()};
+}
+
+function pathChanges(target, source, updates, restores, traceChange) {
+  let trace;
   const targetPaths = [...target.querySelectorAll('path')];
   const sourcePaths = [...source.querySelectorAll('path')];
   for (const [index, path] of targetPaths.entries()) {
@@ -102,10 +130,18 @@ function pathChanges(target, source, updates, restores) {
     numericAttributes(path, old, ['stroke-width'], updates, restores);
     if (!from || !to || from === to) continue;
     let mix;
-    try { mix = selector ? routeInterpolator(from, to) : interpolatePath(from, to); } catch { continue; }
+    try {
+      if (selector) {
+        const morph = routeMorph(from, to);
+        mix = morph.mix;
+        if (traceChange && selector === '.route-stroke' && morph.segment && !path.hasAttribute('stroke-dasharray'))
+          trace = changeTrace(path, morph.segment);
+      } else mix = interpolatePath(from, to);
+    } catch { continue; }
     restores.push(savedAttribute(path, 'd'));
     updates.push(progress => path.setAttribute('d', progress <= 0 ? from : progress >= 1 ? to : mix(progress)));
   }
+  return trace;
 }
 
 function drawNewRoute(node, updates, restores, start = 0) {
@@ -125,7 +161,7 @@ function drawNewRoute(node, updates, restores, start = 0) {
   }
 }
 
-function tweenObject({node: target, source, type, removing, fadeChange}) {
+function tweenObject({node: target, source, type, removing, fadeChange, traceChange}) {
   const updates = [], restores = [];
   const targetOpacity = number(target.getAttribute('opacity') ?? '1');
   if (removing) {
@@ -139,7 +175,7 @@ function tweenObject({node: target, source, type, removing, fadeChange}) {
   }
   const partial = type === 'route' && source.querySelector('.route-stroke[stroke-dasharray="1 1"][stroke-dashoffset]');
   if (partial) drawNewRoute(target, updates, restores, 1 - clamp(number(partial.getAttribute('stroke-dashoffset'))));
-  pathChanges(target, source, updates, restores);
+  const trace = pathChanges(target, source, updates, restores, traceChange);
   const from = translate(source.getAttribute('transform'));
   const to = translate(target.getAttribute('transform'));
   if (from && to && (from[0] !== to[0] || from[1] !== to[1])) {
@@ -158,7 +194,7 @@ function tweenObject({node: target, source, type, removing, fadeChange}) {
   if (startOpacity !== targetOpacity) opacity(target, startOpacity, targetOpacity, updates, restores);
   else if ((source.textContent !== target.textContent && type === 'annotation') || (fadeChange && !updates.length))
     opacity(target, 0, targetOpacity, updates, restores);
-  return { updates, restores };
+  return { updates, restores, trace };
 }
 
 /** Animate a presentation layer only. Canonical play data and undo belong to the editor. */
@@ -169,6 +205,11 @@ export function animateAssistantLayer({ layer, beforeSvg, ...options }) {
     node, source: originals.get(objectKey(node)), type: objectAttributes.find(type => node.hasAttribute('data-' + type)),
     removing: node.hasAttribute('data-removing'),
   }));
+  // A single edited route has a clear focus. A batch keeps its ordinary morphs.
+  if (layer?.getAttribute('data-field-surface') === 'enamel') {
+    const routes = objects.filter(({type}) => type === 'route');
+    if (routes.length === 1) routes[0].traceChange = true;
+  }
   const ball = layer?.querySelector(':scope > g[id$="-ball"]');
   if (ball && ball.style.visibility !== 'hidden') {
     objects.push({node:ball, source:beforeSvg?.querySelector(':scope > g[id$="-ball"]'), type:'ball'});
@@ -191,6 +232,7 @@ export function animateFieldObjects({ layer, objects, reducedMotion = false, dur
     frame = null;
   }
   function cleanup() {
+    for (const object of active) object.trace?.remove();
     win?.removeEventListener?.('pagehide', cancel);
     win?.document?.removeEventListener?.('visibilitychange', visibility);
     win?.document?.removeEventListener?.('playbook:effects-changed', effects);
@@ -234,7 +276,11 @@ export function animateFieldObjects({ layer, objects, reducedMotion = false, dur
       const delay = Math.min(index * stagger, 110);
       const progress = length ? clamp((now - started - delay) / length) : 1;
       if (progress < 1) allDone = false;
-      for (const update of object.updates) update(ease(progress));
+      // Reserve the last part of the same clock for a single stroke on the
+      // exact new break. Held-ball and player updates keep their own timing.
+      const morphEnd = object.trace ? .62 : 1;
+      for (const update of object.updates) update(ease(progress / morphEnd));
+      if (object.trace) object.trace.draw((progress - morphEnd) / (1 - morphEnd));
     });
     if (allDone) finish();
     else frame = win.requestAnimationFrame(step);

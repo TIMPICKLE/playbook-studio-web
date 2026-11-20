@@ -175,7 +175,8 @@ test('retained geometry preserves every front face, shadow and focus arc within 
     for(const shape of ['circle','square','triangle']){
       p.shape=shape;
       const mesh=fallbackMesh(shape);
-      for(const lift of [0,1.5,5])for(const cx of [24,504,976])for(const cy of [24,400,776]){
+      for(const gesture of ['idle','hover','drag'])for(const cx of [24,504,976])for(const cy of [24,400,776]){
+        const lift=gesture==='drag'?5:0;
         for(const [dx,dy] of [[-3.99,-3.99],[3.99,-3.99],[3.99,3.99],[-3.99,3.99]]){
           p.x=(cx+dx-18)/9.64;p.y=(cy+dy-20)/7.6;
           const at=project(p), worldY=800-at.y;
@@ -183,7 +184,7 @@ test('retained geometry preserves every front face, shadow and focus arc within 
           const eye=[BOARD_CAMERA.position[0]-at.x,BOARD_CAMERA.position[1]-worldY,BOARD_CAMERA.position[2]-lift];
           const expected=mesh.filter(({normal,vertices})=>normal[2]>=0&&normal.reduce((v,n,i)=>v+n*(eye[i]-vertices[0][i]),0)>0)
             .map(face=>face.vertices.map(v=>exact(v,lift)));
-          f.renderer.draw({play,hoveredId:lift===1.5?p.id:null,draggingId:lift===5?p.id:null,selected:{type:'player',id:p.id}});
+          f.renderer.draw({play,hoveredId:gesture==='hover'?p.id:null,draggingId:gesture==='drag'?p.id:null,selected:{type:'player',id:p.id}});
           const geometry=f.doc.querySelector('[data-vector-player] > g');
           const [tx,ty,scale]=coordinateNumbers(geometry.getAttribute('transform'));
           const label=geometry.parentNode.querySelector('text');

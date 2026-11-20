@@ -37,13 +37,14 @@ test('hidden pages pause material time and pointer feedback does not cancel edit
     f.visibility(true);assert.equal(f.frames.size,0);
     f.visibility(false);assert.equal(f.frames.size,1);f.step(100000);
     assert.equal(draws.at(-1).time,.2);
-    f.doc.dispatchEvent(new f.win.CustomEvent('playbook:effects-changed',{detail:{mode:'off'}}));assert.equal(f.frames.size,0);
-    f.doc.dispatchEvent(new f.win.CustomEvent('playbook:effects-changed',{detail:{mode:'full'}}));assert.equal(f.frames.size,1);
+    f.win.dispatchEvent(new f.win.Event('pagehide'));assert.equal(f.frames.size,0);
+    f.visibility(false);assert.equal(f.frames.size,0, 'a cached page remains paused until pageshow');
+    f.win.dispatchEvent(new f.win.Event('pageshow'));assert.equal(f.frames.size,1);
   }finally{await f.close();}
 });
 test('disposing an unfinished material startup releases its eventual engine',async()=>{
-  let finish,destroyed=0;const f=fixture(()=>new Promise(r=>{finish=r;}));
-  const pending=f.controller.setMode('full');await Promise.resolve();f.controller.destroy();
+  let finish,isActive,destroyed=0;const f=fixture((_doc, active)=>new Promise(r=>{finish=r;isActive=active;}));
+  const pending=f.controller.setMode('full');await Promise.resolve();assert.equal(isActive(),true);f.controller.destroy();assert.equal(isActive(),false);
   finish({draw(){throw new Error('must not draw');},destroy(){destroyed++;}});await pending;
   assert.equal(destroyed,1);assert.equal(f.frames.size,0);await f.close();
 });

@@ -49,7 +49,7 @@ html[data-material=liquid] #ambient-particles{opacity:.38}
 .modal>header{border-bottom:1px solid #e4e6e838}.modal>footer{background:#10111266;border-radius:0 0 28px 28px;border-top:1px solid #e4e6e830}
 .modal-backdrop{background:#07070880;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .effects-panel{border-radius:23px;border-color:#f3f4f588}
-.effects-panel [aria-pressed=true]{background:linear-gradient(135deg,#e4e6e825,#9a9fa712)!important;border-color:#fff5!important}
+.effects-panel button[aria-pressed=true]{background:linear-gradient(135deg,#e4e6e825,#9a9fa712);border-color:#fff5}
 .effects-panel strong{font-size:14px}.effects-panel small{line-height:1.6}
 .madden-panel{border:1px solid #f2f2f388;border-radius:27px;box-shadow:inset 0 1px #fffa,0 24px 100px #0009;background-color:#17181999}
 .madden-header,.madden-footer,.madden-team-tabs,.madden-filterbar{background-color:#12131566}

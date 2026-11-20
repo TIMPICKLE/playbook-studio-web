@@ -5,10 +5,12 @@ const SURFACES='.cloud-bar,.workspace-current-card,.topbar,.draw-tools,.editor-m
 
 // One metal context and one reusable lens context, irrespective of card count.
 // Each panel receives a decorative 2D canvas; its real controls stay mounted.
-export async function createMaterialEngine(doc=document) {
+export async function createMaterialEngine(doc=document, isActive=()=>true) {
   const win=doc.defaultView;
   const {ShaderMount,liquidMetalFragmentShader,emptyPixel}=await import('./vendor/paper-shaders-0.0.82/paper-liquid-metal-0.0.82.js');
+  if (!isActive()) return null;
   const pixel=new win.Image();pixel.src=emptyPixel;await pixel.decode();
+  if (!isActive()) return null;
   const world=doc.createElement('div');world.id='liquid-metal-world';world.setAttribute('aria-hidden','true');
   doc.querySelector('.atmosphere').prepend(world);
   let metal,painter,renderer='webgl';
@@ -72,9 +74,9 @@ export async function createMaterialEngine(doc=document) {
 
 export function createMaterialController({doc=document,makeEngine=createMaterialEngine}={}) {
   const win=doc.defaultView;
-  let mode='off',engine=null,pending=null,raf=null,disposed=false,generation=0,time=0,last=null;
+  let mode='off',engine=null,pending=null,raf=null,disposed=false,suspended=false,time=0,last=null;
   let pointer=[win.innerWidth*.65,win.innerHeight*.3],target=[...pointer],pulse=[-1000,-1000,-1000];
-  const canRun=()=>!disposed&&mode!=='off'&&!doc.hidden;
+  const canRun=()=>!disposed&&!suspended&&mode!=='off'&&!doc.hidden;
   function stop(){if(raf!==null)win.cancelAnimationFrame(raf);raf=null;last=null;}
   function tick(now){
     raf=null;if(!canRun()||!engine)return;
@@ -88,22 +90,36 @@ export function createMaterialController({doc=document,makeEngine=createMaterial
     mode=value==='full'?'full':'off';
     if(!canRun()){stop();return;}
     if(engine){start();return;}
-    if(!pending){const ticket=++generation;pending=Promise.resolve().then(()=>makeEngine(doc)).then(value=>{if(disposed||ticket!==generation){value.destroy();return;}engine=value;start();}).catch(error=>{if(!disposed){win.console.warn('Liquid material initialization failed:',error);doc.documentElement.dataset.material='fallback';}}).finally(()=>{pending=null;});}
+    if(!pending) {
+      pending=Promise.resolve()
+        .then(()=>makeEngine(doc,()=>!disposed))
+        .then(value=>{
+          if(disposed) value?.destroy();
+          else engine=value;
+        })
+        .catch(error=>{
+          if(disposed)return;
+          win.console.warn('Liquid material initialization failed:',error);
+          doc.documentElement.dataset.material='fallback';
+        })
+        .finally(()=>{pending=null;});
+    }
     await pending;start();
   }
   const move=event=>{target=[event.clientX,event.clientY];};
   const down=event=>{move(event);if(mode==='full')pulse=[event.clientX,event.clientY,time];};
   const visibility=()=>{if(doc.hidden)stop();else setMode(mode);};
-  const changed=event=>setMode(event.detail.mode);
+  const hide=()=>{suspended=true;stop();};
+  const show=()=>{suspended=false;setMode(mode);};
   doc.addEventListener('pointermove',move,{passive:true});doc.addEventListener('pointerdown',down,{passive:true});
-  doc.addEventListener('visibilitychange',visibility);doc.addEventListener('playbook:effects-changed',changed);
-  return {setMode,destroy(){if(disposed)return;disposed=true;generation++;stop();engine?.destroy();engine=null;doc.removeEventListener('pointermove',move);doc.removeEventListener('pointerdown',down);doc.removeEventListener('visibilitychange',visibility);doc.removeEventListener('playbook:effects-changed',changed);}};
-}
-
-export function initLiquidMaterials(){
-  if(typeof window.CanvasRenderingContext2D==='undefined')return null;
-  const controller=createMaterialController();controller.setMode(document.documentElement.dataset.effects||'full');
-  window.addEventListener('pagehide',()=>controller.setMode('off'));
-  window.addEventListener('pageshow',()=>controller.setMode(document.documentElement.dataset.effects||'full'));
-  return controller;
+  doc.addEventListener('visibilitychange',visibility);
+  win.addEventListener('pagehide',hide);win.addEventListener('pageshow',show);
+  return {setMode,destroy(){
+    if(disposed)return;
+    disposed=true;stop();engine?.destroy();engine=null;
+    delete doc.documentElement.dataset.material;
+    doc.removeEventListener('pointermove',move);doc.removeEventListener('pointerdown',down);
+    doc.removeEventListener('visibilitychange',visibility);
+    win.removeEventListener('pagehide',hide);win.removeEventListener('pageshow',show);
+  }};
 }

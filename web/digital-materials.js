@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three-0.186.0/three.module.js';
-import { FOCUS_RADIUS, PIECE_HEIGHT, focusInk, puckPalette } from './digital-puck.js';
+import { DRAG_LIFT, FOCUS_RADIUS, PIECE_HEIGHT, focusInk, puckPalette } from './digital-puck.js';
 import { DIGITAL_FIELD_LIGHT, digitalFieldPalette } from './digital-field-palette.js';
 import { animatedPlayer, animatedBall } from './model.js';
 import { project } from './field.js';
@@ -95,11 +95,11 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
   function makePlayer(p,now) {
     const group=new THREE.Group(),palette=puckPalette(p);
     const finish={
-      foot:{metalness:0,roughness:.94},rim:{metalness:.74,roughness:.43},
-      band:{metalness:.07,roughness:.55},face:{metalness:.04,roughness:.78},
+      foot:{metalness:0,roughness:.94},rim:{metalness:.52,roughness:.64},
+      band:{metalness:.02,roughness:.77},face:{metalness:0,roughness:.89},
     };
     for(const [name,geometry] of Object.entries(geometries(p.shape))) {
-      const mat=new THREE.MeshStandardMaterial({color:palette[name],...finish[name],envMapIntensity:.48});
+      const mat=new THREE.MeshStandardMaterial({color:palette[name],...finish[name],envMapIntensity:.32});
       const mesh=new THREE.Mesh(geometry,mat);
       mesh.name=name;mesh.castShadow=true;mesh.receiveShadow=true;mesh.userData.playerId=p.id;
       group.add(mesh);pickMeshes.push(mesh);
@@ -193,7 +193,7 @@ export function createDigitalMaterials(doc=document,{invalidate=()=>{}}={}) {
       let item=players.get(p.id);if(item&&(item.shape!==p.shape||item.color!==p.color||item.side!==p.side||item.labelText!==p.label||item.name!==p.name)){removePlayer(item);players.delete(p.id);item=null;}
       if(!item){item=makePlayer(p,rehearsal?-Infinity:materialTime);players.set(p.id,item);}
       item.group.visible=!hiddenPlayers.has(p.id);item.shadow.visible=item.group.visible;
-      const at=project(animatedPlayer(play,p,time)),lift=draggingId===p.id?7:hoveredId===p.id?1.5:0;
+      const at=project(animatedPlayer(play,p,time)),lift=draggingId===p.id?DRAG_LIFT:0;
       const liftDelta=lift-item.lift;
       if(!animated)item.lift=0;
       else if(Math.abs(liftDelta)<.015)item.lift=lift;

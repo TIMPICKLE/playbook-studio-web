@@ -1,8 +1,7 @@
 import { t } from './i18n.js';
-import { initLiquidMaterials } from './liquid-materials.js';
 import { VISUAL_MODE_KEY as KEY, deviceIsTraditional, resolveVisualMode } from './visual-mode.js';
 const modes = new Set(['traditional', 'digital']);
-let instance, loading, engineReady, generation = 0, initialized = false, sessionMode, startQueue = Promise.resolve();
+let instance, materials, loading, engineReady, generation = 0, initialized = false, sessionMode, startQueue = Promise.resolve();
 const mq = query => window.matchMedia?.(query);
 export function preference() {
   if (sessionMode) return sessionMode;
@@ -57,7 +56,7 @@ function prepareEngine() {
   return engineReady;
 }
 async function applyMode() {
-  const ticket = ++generation, mode = effectiveMode(), reduced = !!mq('(prefers-reduced-motion: reduce)')?.matches;
+  const reduced = !!mq('(prefers-reduced-motion: reduce)')?.matches, mode = effectiveMode(visualMode(), reduced);
   document.documentElement.dataset.visualMode = visualMode();
   document.documentElement.dataset.effects = mode;
   document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
@@ -65,16 +64,33 @@ async function applyMode() {
   document.querySelectorAll('[data-effects-mode]').forEach(n => n.setAttribute('aria-pressed', n.dataset.effectsMode === visualMode()));
   document.querySelectorAll('.effects-note').forEach(n => { n.textContent = modeNote(); });
   document.querySelectorAll('[data-effects-mode="digital"]').forEach(n => { n.disabled = deviceIsTraditional(); });
+  if (reduced) document.getAnimations?.().forEach(animation => { try { animation.finish(); } catch { animation.cancel(); } });
+  return syncPageDecoration();
+}
+
+// The field renderer owns player and route motion. Only the surrounding pages
+// own ambient particles and liquid lenses. Use the editor's actual visibility
+// so guest links, workspace navigation and access changes share this boundary.
+export function syncPageDecoration() {
+  if (!initialized) return;
+  const editor = document.getElementById('app');
+  const mode = editor && !editor.hidden ? 'off' : effectiveMode();
+  const root = document.documentElement;
+  if (root.dataset.decoration === mode) return mode === 'full' ? startQueue : undefined;
+  root.dataset.decoration = mode;
+  const ticket = ++generation;
+  materials?.destroy(); materials = null;
   instance?.destroy(); instance = null;
-  document.querySelectorAll('.particle-burst,.press-wave').forEach(n => n.remove());
-  if (mode === 'off') {
-    // Turning decoration off must not terminate route morphs or task feedback.
-    // System reduced-motion does finish those transitions immediately.
-    if (reduced) document.getAnimations?.().forEach(animation => { try { animation.finish(); } catch { animation.cancel(); } });
-    return;
-  }
+  document.querySelectorAll('.particle-burst,.press-wave').forEach(node => node.remove());
+  document.querySelectorAll('.has-press-wave').forEach(node => node.classList.remove('has-press-wave'));
+  if (mode === 'off') return;
   // In non-canvas environments the complete interface still works without decoration.
   if (typeof window.CanvasRenderingContext2D === 'undefined') return;
+  import('./liquid-materials.js').then(({createMaterialController}) => {
+    if (ticket !== generation) return;
+    materials = createMaterialController();
+    return materials.setMode('full');
+  }).catch(() => { /* Static surfaces remain usable. */ });
   startQueue = startQueue.then(async () => { try {
     if (ticket !== generation) return;
     const engine = await prepareEngine();
@@ -94,7 +110,7 @@ export function setEffectsMode(mode) {
 }
 // Kept separate from any shared-workspace setting: visual preferences are device-only.
 export function burstAt(node, count = 7) {
-  if (!node || effectiveMode() !== 'full' || document.hidden || !node.animate) return;
+  if (!node || document.documentElement.dataset.decoration !== 'full' || document.hidden || !node.animate) return;
   const layer = document.querySelector('#action-particles');
   if (!layer || layer.childElementCount >= 70) return;
   const box = node.getBoundingClientRect();
@@ -126,7 +142,7 @@ export function initEffects() {
     if (menu) { event.stopPropagation(); event.preventDefault(); menu.open = false; menu.querySelector('summary')?.focus(); }
   }, { capture: true });
   document.addEventListener('pointerdown', event => {
-    if (effectiveMode() !== 'full') return;
+    if (document.documentElement.dataset.decoration !== 'full') return;
     const button = event.target.closest('button,.button');
     if (!button || button.disabled || button.closest('svg') || !button.animate) return;
     const box = button.getBoundingClientRect(), wave = document.createElement('span');
@@ -140,9 +156,8 @@ export function initEffects() {
   for (const query of ['(pointer: coarse)', '(hover: none)']) mq(query)?.addEventListener('change', applyMode);
   document.addEventListener('visibilitychange', () => {
     document.documentElement.classList.toggle('page-hidden', document.hidden);
-    if (document.hidden) instance?.pause(); else if (effectiveMode() !== 'off') instance?.play();
+    if (document.hidden) instance?.pause(); else if (document.documentElement.dataset.decoration === 'full') instance?.play();
   });
   window.addEventListener('storage', event => { if (event.key === KEY) { sessionMode = undefined; applyMode(); } });
   applyMode();
-  initLiquidMaterials();
 }
