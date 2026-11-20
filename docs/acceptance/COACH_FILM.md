@@ -43,11 +43,13 @@ node --test tests/coach-film-*.test.mjs
 
 ## 工程实测
 
-本地生产构建、静态 Pages 构建、语法检查、TypeScript 检查和 PDF 知识导入的 4 个 Python 用例通过。每条路径的状态由软件和真人两部分各自验收。
+全量 Node 回归 968/968 通过。后续 AI 能力发现与错误回执的 22/22 项专项同样通过。本地生产构建、静态 Pages 构建、语法检查、TypeScript 检查和 PDF 知识导入的 4 个 Python 用例通过。每条路径的状态由软件和真人两部分各自验收。
 
 云 Chromium 156，1363 × 936 CSS 像素、DPR 1。测试战术含 22 名球员与 10 条路线。第一轮自动渲染选择了 SVG，三次 30 秒回放的帧间隔 P95 均为 1016.5 ms；32 次双向时间跳转的输入至显示采样 P95 分别为 1022.0、1043.3、1209.6 ms。暂停前台观察 10 秒没有场地 DOM 更新。该结果未达到 60 Hz 桌面验收线。[原始采样](evidence/coach-film/first-svg.json)
 
-空页三轮的帧间隔 P95 为 16.7、16.7、16.8 ms。同一浏览器文档的分段测量中，进入原有常规编辑器后就出现 1016.5 ms，数字编辑、讲解静置与讲解播放的 P95 也相同。此次现象可早于讲解渲染出现。硬件 WebGL 的集显、独显和物理投屏仍待测。[空页对照](evidence/coach-film/bare-clock.json) · [同页分阶段数据](evidence/coach-film/paired-profile.json) · [复测方法](../../scripts/bench-digital/coach/README.md)
+空页三轮的帧间隔 P95 为 16.7、16.7、16.8 ms。同一浏览器文档的分段测量中，进入原有常规编辑器后就出现 1016.5 ms，数字编辑、讲解静置与讲解播放的 P95 也相同。另一次隔离中，静态 HTML 壳在加载样式前仍为 16.7 ms；动态插入 24 个样式表、尚未启动应用时已出现约一秒间隔。随后禁用样式和移除产品 DOM 未立即恢复。以全新顶层文档独立复验，13 组中只有动态插入整组样式出现 1016.5 ms；HTML 正常声明 24 份样式、打包成一份、内联和空文件对照均为 16.7–16.8 ms。单凭动态试验不能将真实入口的表现归因为样式数量。[隔离记录](evidence/coach-film/isolation.json) · [独立文档样式对照](evidence/coach-film/style-matrix.json) 硬件 WebGL 的集显、独显和物理投屏仍待测。[空页对照](evidence/coach-film/bare-clock.json) · [同页分阶段数据](evidence/coach-film/paired-profile.json) · [复测方法](../../scripts/bench-digital/coach/README.md)
+
+正式强制 SVG 复测中，三轮拖动输入至场地标记提交的 P95 为 7.6、18.2、33.8 ms；到下一次浏览器显示采样的 P95 为 1020.7、1019.2、1036.0 ms，回放帧间隔 P95 为 1016.5、1016.5、1033.1 ms，三轮超过 33.3 ms 的比例均为 100%。10 秒静置场地修改为 0。输入落地和看到它是两个指标。此份实测的 SVG 显示门槛仍未通过。[最终逐帧数据](evidence/coach-film/final-svg.json)
 
 ## 使用试点的边界
 

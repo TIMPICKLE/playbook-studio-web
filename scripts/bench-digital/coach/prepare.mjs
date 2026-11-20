@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { prepareStyleCases } from './style-cases.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../../..');
@@ -35,6 +36,7 @@ const driver = await readFile(join(here, 'page.js'));
 const clock = await readFile(join(here,'clock.js'));
 const clockPage = await readFile(join(here,'clock-page.js'));
 const profile = await readFile(join(here,'profile.js'));
+const styleDriver=await readFile(join(here,'style-stage.js'));
 await writeFile(join(dist, 'film-bench-scene.json'), fixture);
 await writeFile(join(dist, 'film-bench.js'), driver);
 await writeFile(join(dist,'film-clock.js'),clock);
@@ -49,6 +51,7 @@ await writeFile(join(dist, 'film-bench-build.json'), JSON.stringify({
   driverSha256: createHash('sha256').update(driver).digest('hex'),
   clockSha256:createHash('sha256').update(clock).update(clockPage).digest('hex'),
   profileSha256:createHash('sha256').update(profile).digest('hex'),
+  freshStyleDriverSha256:createHash('sha256').update(styleDriver).digest('hex'),
 }));
 // The benchmark can share a preview origin with the editor. Keep the primary workspace
 // and tutorial preferences of that editor intact even when a run is interrupted.
@@ -64,6 +67,7 @@ await replaceOnce('visual-mode.js', "'playbook-visual-mode'", "'coach-film-bench
 await replaceOnce('app.js', "if ('serviceWorker' in navigator", "if (false && 'serviceWorker' in navigator");
 const index = await readFile(join(dist, 'index.html'), 'utf8');
 await writeFile(join(dist, 'film-bench.html'), index.replace('src="./app.js"', 'src="./film-bench.js"'));
+await prepareStyleCases(dist,index,styleDriver);
 if (!mounted) {
   await mkdir(join(destination, '.openai'));
   await writeFile(join(destination, '.openai/hosting.json'), JSON.stringify({static:{directory:'dist'}}));
