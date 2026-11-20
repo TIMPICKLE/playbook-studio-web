@@ -18,12 +18,17 @@ export function frameSummary(intervals) {
 }
 
 // One foreground rAF callback per display tick, with no reads or writes to the DOM.
-export function sampleClock(durationMs,requestFrame=callback=>requestAnimationFrame(callback),cancelFrame=id=>cancelAnimationFrame(id)) {
+export function sampleClock(durationMs,requestFrame=callback=>requestAnimationFrame(callback),cancelFrame=id=>cancelAnimationFrame(id),maxWallMs=durationMs+12000) {
   return new Promise((resolve,reject)=>{
     const samples=[];
     let request,start,last;
+    const timeout=setTimeout(()=>{
+      finish();
+      reject(Error('The visible page did not receive enough rAF callbacks to finish its clock sample.'));
+    },maxWallMs);
     function finish() {
-      cancelFrame(request);
+      clearTimeout(timeout);
+      if(request!=null)cancelFrame(request);
       document.removeEventListener('visibilitychange',visibility);
     }
     function visibility() {

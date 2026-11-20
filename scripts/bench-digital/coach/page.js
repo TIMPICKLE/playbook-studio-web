@@ -44,7 +44,13 @@ HTMLCanvasElement.prototype.getContext = function(kind, ...args) {
 };
 
 async function measure({build,play}) {
-  let interrupted = document.hidden, cancelWait = null, dialog;
+  let interrupted = document.hidden, cancelWait = null, frameWait = null, dialog;
+  let phase = '准备场景';
+  const stage = label => {
+    phase = label;
+    document.title = `讲解台验收 · ${label}`;
+    resultNode.textContent = label;
+  };
   const focusChanges = [{atMs:performance.now(),hasFocus:document.hasFocus()}];
   const recordFocus = () => focusChanges.push({atMs:performance.now(),hasFocus:document.hasFocus()});
   const hiddenError = () => Error('Tab hidden during sampling. Restart and keep this tab in the foreground.');
@@ -57,14 +63,22 @@ async function measure({build,play}) {
     if (interrupted) throw hiddenError();
     if (dialog && !dialog.open) throw Error('Film room closed during sampling.');
   }
-  function waitVisible(schedule, cancel) {
+  function waitVisible(schedule, cancel, isFrame = false) {
     check();
     return new Promise((resolve,reject)=>{
-      const handle=schedule(stamp=>{cancelWait=null;resolve(stamp);});
-      cancelWait=()=>{cancel(handle);cancelWait=null;reject(hiddenError());};
+      const handle=schedule(stamp=>{frameWait=null;cancelWait=null;resolve(stamp);});
+      cancelWait=(error=hiddenError())=>{cancel(handle);frameWait=null;cancelWait=null;reject(error);};
+      if (isFrame) frameWait=cancelWait;
     });
   }
-  const nextFrame = () => waitVisible(callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id));
+  const nextFrame = () => waitVisible(callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),true);
+  // Keep one ordinary timer for the trial. A visible document can stop
+  // receiving rAF entirely, so checking the deadline inside rAF is insufficient.
+  let previousWait = null;
+  const watchdog = setInterval(() => {
+    if (frameWait && frameWait === previousWait) frameWait(Error(`前台 rAF 停止响应 · ${phase}`));
+    previousWait = frameWait;
+  },6000);
   document.addEventListener('visibilitychange', hidden);
   window.addEventListener('focus',recordFocus);
   window.addEventListener('blur',recordFocus);
@@ -78,6 +92,7 @@ async function measure({build,play}) {
       observedAtMs:round(performance.now()),path:location.pathname.split('/').at(-1)}:null;
     async function clockStage(name) {
       if (!normalEntry)return;
+      stage(name);
       const {raw,...timing}=await sampleClock(quick?1200:6500);
       clockStages.push({name,readyState:document.readyState,visibility:document.visibilityState,hasFocus:document.hasFocus(),...timing});
       stageSamples.push({name,frameIntervalMs:raw});
@@ -113,7 +128,23 @@ async function measure({build,play}) {
       const attribute = pitch.getAttribute('data-film-time');
       return attribute === null ? NaN : Number(attribute);
     };
+    const native = query.get('gesture') === 'native';
+    async function recordDrag(step) {
+      stage(`第 ${step+1} 轮${native ? '原生' : '脚本'}拖动`);
+      const instruction = document.createElement('p');
+      if (native) {
+        instruction.textContent = `第 ${step+1} 轮 · 按住时间轴滑块并连续拖动一段距离，再松开。`;
+        instruction.setAttribute('role','status');
+        dialog.querySelector('.film-transport').prepend(instruction);
+      }
+      try { return await sampleDrag(range,pitch,{native,count:quick ? 12 : 32}); }
+      finally { instruction.remove(); }
+    }
     await clockStage('coach-open-idle');
+    // Let a person or browser driver supply the real gesture promptly in a
+    // smoke run, before the sequential seek workload on a low-refresh display.
+    const earlyNativeDrag = quick && native ? await recordDrag(0) : null;
+    stage('预热');
     async function seek(time) {
       checkField();
       const start = performance.now();
@@ -162,22 +193,16 @@ async function measure({build,play}) {
     await playback(quick ? 250 : 2000);
     const trials = [];
     for (let step = 0; step < (quick ? 1 : 3); step++) {
+      stage(`第 ${step+1} 轮回放`);
       const {intervals,modelSecondsAdvanced} = await playback(quick ? 2500 : 30000);
       const latencies = [],commitLatencies=[];
       const times = [.26,4.25,1.0,3.0,.75,2.25,.5,3.5];
+      stage(`第 ${step+1} 轮单次定位`);
       for (let i=0; i<(quick ? 8 : 32); i++) {
         const {commitMs,observedMs}=await seek(times[i%times.length]);
         commitLatencies.push(commitMs);latencies.push(observedMs);
       }
-      const native = query.get('gesture') === 'native';
-      const instruction = document.createElement('p');
-      if (native) {
-        instruction.textContent = `第 ${step+1} 轮 · 按住时间轴滑块并连续拖动一段距离，再松开。`;
-        dialog.querySelector('.film-transport').prepend(instruction);
-      }
-      let drag;
-      try { drag = await sampleDrag(range,pitch,{native,count:quick ? 12 : 32}); }
-      finally { instruction.remove(); }
+      const drag = earlyNativeDrag ?? await recordDrag(step);
       checkField();
       trials.push({intervals,latencies,commitLatencies,drag,summary:{
         modelSecondsAdvanced,
@@ -188,6 +213,7 @@ async function measure({build,play}) {
       }});
     }
     const idleMs = quick ? 1000 : 10000;
+    stage('暂停空闲');
     const idleCalls = {domChanges:0, glCommands:0};
     const observer = new MutationObserver(records=>{idleCalls.domChanges+=records.length;});
     const fieldGl = [...contexts].find(([canvas])=>pitch.contains(canvas))?.[1];
@@ -222,6 +248,7 @@ async function measure({build,play}) {
       raw:trials.map(({intervals,latencies,commitLatencies,drag})=>({frameIntervalMs:intervals,inputToMatchingRafMs:latencies,inputToFieldCommitMs:commitLatencies,drag})),
     };
   } finally {
+    clearInterval(watchdog);
     document.removeEventListener('visibilitychange',hidden);
     window.removeEventListener('focus',recordFocus);
     window.removeEventListener('blur',recordFocus);

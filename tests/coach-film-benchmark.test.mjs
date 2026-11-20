@@ -22,6 +22,33 @@ test('the downloaded rAF samples reproduce both thresholds and the wall-time sha
   } finally { delete globalThis.document; }
 });
 
+test('a visible clock sample exits on an ordinary timer if no display callback is delivered', async () => {
+  globalThis.document = Object.assign(new EventTarget(),{hidden:false});
+  const cancellations = [];
+  try {
+    await assert.rejects(sampleClock(100,() => 17,id => cancellations.push(id),5),/did not receive enough rAF/);
+    assert.deepEqual(cancellations,[17]);
+  } finally { delete globalThis.document; }
+});
+
+test('waiting for a physical gesture leaves the event loop idle and ignores untrusted input', async () => {
+  const win = new Window(), doc = win.document;
+  const range = doc.createElement('input'), pitch = doc.createElement('div');
+  range.type = 'range'; pitch.dataset.filmTime = '0'; doc.body.append(range,pitch);
+  let frames = 0;
+  win.requestAnimationFrame = () => ++frames;
+  try {
+    const gesture = sampleDrag(range,pitch,{native:true});
+    range.dispatchEvent(new win.PointerEvent('pointerdown',{bubbles:true,pointerId:1}));
+    range.dispatchEvent(new win.Event('input',{bubbles:true}));
+    await new Promise(resolve => win.setTimeout(resolve,10));
+    assert.equal(frames,0);
+    Object.defineProperty(doc,'hidden',{configurable:true,value:true});
+    doc.dispatchEvent(new win.Event('visibilitychange'));
+    await assert.rejects(gesture,/hidden during the drag/);
+  } finally { await win.happyDOM.abort(); }
+});
+
 test('the continuous drag sends multiple values per frame and flushes the final pointer value', async () => {
   const win = new Window(), doc = win.document;
   const range = doc.createElement('input');
