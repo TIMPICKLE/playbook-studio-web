@@ -45,7 +45,7 @@ node --test tests/coach-film-*.test.mjs
 
 ## 公开站点回归
 
-已在原公开站点 v61 的桌面编辑器中打开 Mesh，从标题旁进入「讲解」。点「出手 2.0s」、选 H 和 Y、固定参考帧，再拖至 1.0 秒，侧栏同时显示当前 H 深 1.0 码、参考帧 H 深 3.0 码。打开场内助手后，球场和两个读数仍可查看。在助手中选用比较球员的示例，指令会进入原输入框。点「返回编辑」后，战术名称仍为 Mesh，撤销仍处于禁用状态。该线上操作未向模型供应商发送请求。[公开桌面入口](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [v61 线上截图](evidence/coach-film/live-v61.jpg)
+已在原公开站点 v61 的桌面编辑器中打开 Mesh，从标题旁进入「讲解」。点「出手 2.0s」、选 H 和 Y、固定参考帧，再拖至 1.0 秒，侧栏同时显示当前 H 深 1.0 码、参考帧 H 深 3.0 码。打开场内助手后，球场和两个读数仍可查看。在助手中选用比较球员的示例，指令会进入原输入框。点「返回编辑」后，战术名称仍为 Mesh，撤销仍处于禁用状态。v62 修正课件按需加载前的 AI 能力回执之后，重新加载同一公开入口并复验两个读数、场内助手和示例输入。该线上操作未向模型供应商发送请求。[公开桌面入口](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [v62 线上助手截图](evidence/coach-film/live-v62-ai.jpg) · [v61 首轮截图](evidence/coach-film/live-v61.jpg)
 
 ## 工程实测
 
