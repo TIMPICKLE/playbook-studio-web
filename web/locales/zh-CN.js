@@ -119,6 +119,8 @@ export default {
   "editor.coach_notes": "教练笔记",
   "editor.reads_routes_adjustments": "阅读顺序、跑位要点、调整方案…",
   "editor.ball_movement": "足球移动",
+  "editor.no_ball_carrier": "未指定持球人",
+  "editor.unconfirmed_ball_carrier": "旧版默认标记为 {player}，请确认持球人",
   "editor.ball_carrier": "持球人",
   "editor.pass_to": "传给",
   "editor.no_pass_run": "不传球 / 跑球",

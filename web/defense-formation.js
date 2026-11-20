@@ -1,4 +1,4 @@
-import { clone, formationPlayers, uid, validatePlay } from './model.js';
+import { clone, defaultBallHolder, formationPlayers, setBallHolder, uid, validatePlay } from './model.js';
 
 /** Add a complete 4–3 front without changing the offensive play or choosing coverage. */
 export function withDefense43(play, { reset = false, idFactory = uid } = {}) {
@@ -17,7 +17,8 @@ export function withDefense43(play, { reset = false, idFactory = uid } = {}) {
       // Each target belongs to one waypoint. Keep null placeholders in that order.
       return { ...route, blockTargets: route.blockTargets.map(target => oldDefense.has(target) ? null : target) };
     });
-    if (oldDefense.has(next.ball.holderId)) next.ball.holderId = retained.find(player => player.side === 'offense' && player.label === 'QB')?.id || next.players[0].id;
+    if (oldDefense.has(next.ball.holderId)) setBallHolder(next, defaultBallHolder(retained));
+    if (oldDefense.has(next.ball.unconfirmedHolderId)) delete next.ball.unconfirmedHolderId;
     if (oldDefense.has(next.ball.receiverId)) next.ball.receiverId = '';
   }
   validatePlay(next);

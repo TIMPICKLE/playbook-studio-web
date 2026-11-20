@@ -81,9 +81,9 @@
 .board-ai .ba-status.ba-error { color:var(--ui-danger,#ff8e7e); }
 .board-ai .ba-compose { display:flex; gap:4px; align-items:flex-end; padding:8px; border:1px solid var(--ui-border-strong,#ffffff30); border-radius:var(--r-control,8px); background:var(--ui-bg,#14171b); }
 .board-ai .ba-compose:focus-within { border-color:var(--ui-focus,#a9c1ff); box-shadow:var(--ui-focus-ring,0 0 0 3px #a9c1ff33); }
-.board-ai textarea { flex:1; width:0; resize:none; padding:4px; border:0; border-radius:4px; background:transparent; color:var(--ui-text,#f3f4f6); font-size:14px; line-height:1.6; box-shadow:none; min-height:56px; }
-.board-ai textarea:focus-visible { outline-offset:0; box-shadow:none; }
-.board-ai textarea::placeholder { color:var(--ui-text-subtle,#a0a9b7); }
+.board-ai :where(textarea,.ba-covered-prompt) { flex:1; width:0; resize:none; padding:4px; border:0; border-radius:4px; background:transparent; color:var(--ui-text,#f3f4f6); font-size:14px; line-height:1.6; box-shadow:none; min-height:56px; }
+.board-ai :where(textarea,.ba-covered-prompt):focus-visible { outline-offset:0; box-shadow:none; }
+.board-ai :where(textarea,.ba-covered-prompt)::placeholder { color:var(--ui-text-subtle,#a0a9b7); }
 .board-ai .ba-controls { display:flex; align-items:center; gap:2px; }
 .board-ai .ba-send { background:var(--ui-accent,#e4e7eb); color:var(--ui-on-accent,#111214); }
 .board-ai .ba-send:hover:not(:disabled) { background:var(--accent-strong,#fff); color:var(--ui-on-accent,#111214); }
@@ -144,7 +144,7 @@
 .board-ai.ba-docked .ba-heading { cursor:default; touch-action:pan-y; }
 .board-ai.ba-docked :is(.ba-icon,.ba-pill,.ba-fab) { min-height:44px; }
 .board-ai.ba-docked .ba-icon { width:44px; height:44px; }
-.board-ai.ba-docked .ba-config :is(input,select),.board-ai.ba-docked textarea { font-size:16px; }
+.board-ai.ba-docked .ba-config :is(input,select),.board-ai.ba-docked :where(textarea,.ba-covered-prompt) { font-size:16px; }
 .board-ai.ba-docked .ba-config :is(input,select) { min-height:44px; }
 .board-ai.ba-docked:has(:is(textarea,input,select):focus) .ba-panel { max-height:calc(100% - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)); }
 .board-ai.ba-docked .ba-panel.ba-collapsed { max-height:64px; }
@@ -154,7 +154,7 @@
   .board-ai .ba-fab { min-height:44px; right:8px; top:8px; }
   .board-ai.ba-docked .ba-panel { left:max(8px,env(safe-area-inset-left,0px))!important; width:auto; }
   .board-ai.ba-docked .ba-panel.ba-collapsed .ba-expand { min-width:0; }
-  .board-ai .ba-config input,.board-ai textarea { font-size:16px; }
+  .board-ai .ba-config input,.board-ai :where(textarea,.ba-covered-prompt) { font-size:16px; }
 }
 body:is(.compact-panel-open,.madden-open,.modal-open) > .board-ai.ba-floating { visibility:hidden; }
 @media (prefers-reduced-motion:reduce) { .board-ai .ba-panel { animation:none; } }

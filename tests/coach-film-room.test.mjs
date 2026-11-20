@@ -107,21 +107,25 @@ test('distinct events at the same timestamp are individually reachable, and nati
   } finally { await s.close(); }
 });
 
-test('one animation slot owns playback and coalesces scrub bursts; the final input and backgrounding settle', async () => {
+test('one animation slot owns playback and coalesces scrub bursts; the final input and backgrounding settle', async t => {
   const s = session();
   try {
     const scheduled = new Map();
-    let ticket = 0;
+    let ticket = 0, clock = 100;
+    t.mock.method(s.win.performance, 'now', () => clock);
     s.win.requestAnimationFrame = callback => { scheduled.set(++ticket, callback); return ticket; };
     s.win.cancelAnimationFrame = id => scheduled.delete(id);
     const advance = stamp => {
+      clock = stamp;
       assert.equal(scheduled.size, 1);
       const [[id, callback]] = scheduled;
       scheduled.delete(id);
       callback(stamp);
     };
     s.click('[data-film-action=play]');
-    advance(100); advance(2100);
+    advance(1100);
+    assert.equal(s.at(), 1);
+    advance(2100);
     assert.equal(s.at(), 2);
     for (const time of [.25, 4, 2.5]) {
       s.range.value = time;
@@ -258,7 +262,9 @@ test('an explicit lesson attachment reuses the open room and delegates the actua
     assert.equal(s.win.localStorage.length, 1);
     s.room.update({...s.play, title:'Renamed'});
     assert.equal(s.q('.film-actions').querySelectorAll('[data-lesson-action=toggle]').length, 1);
-    assert.equal(s.room.readState().lesson.open, false);
+    assert.equal(s.room.readState().lesson.open, true);
+    assert.equal(s.room.readState().lesson.revealed, true);
+    assert.equal(s.q('.film-title').textContent, 'Renamed');
     await lesson('open');
     await lesson('load');
     assert.equal(s.q('.film-lesson-question').textContent, 'Who is deeper?');

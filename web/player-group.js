@@ -1,4 +1,4 @@
-import { preparePlayerTranslation } from './model.js';
+import { defaultBallHolder, preparePlayerTranslation, setBallHolder } from './model.js';
 
 // Shared domain mutations. Both manual gestures and AI commands execute these
 // against a caller-owned draft, then validate and commit the complete group.
@@ -25,7 +25,8 @@ export function removePlayerGroup(play, ids) {
   if(!retained.length)throw new Error('A play must retain at least one player.');
   play.players=retained;
   play.routes=play.routes.filter(route=>!chosen.has(route.playerId)).map(route=>route.blockTargets?{...route,blockTargets:route.blockTargets.map(target=>chosen.has(target)?null:target)}:route);
-  if(chosen.has(play.ball.holderId))play.ball.holderId=retained.find(player=>player.side==='offense'&&player.label==='QB')?.id||retained[0].id;
+  if(chosen.has(play.ball.holderId))setBallHolder(play,defaultBallHolder(retained));
+  if(chosen.has(play.ball.unconfirmedHolderId))delete play.ball.unconfirmedHolderId;
   if(chosen.has(play.ball.receiverId))play.ball.receiverId='';
   return {ids:selected,changed:true};
 }

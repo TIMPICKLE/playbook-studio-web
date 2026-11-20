@@ -1,4 +1,4 @@
-import { animationLength, clamp, clone, createAnimationSampler } from './model.js';
+import { animationLength, clamp, clone, createAnimationSampler, normalizePlayBall } from './model.js';
 import { getPlayLeague } from './game-formats.js';
 import { routeDepthYards } from './field-metrics.js';
 
@@ -67,7 +67,7 @@ function compareDepth(focus, calibrated) {
   const difference = b.position.y - a.position.y;
   const gapYards = calibrated ? Number(Math.abs(a.depthYards - b.depthYards).toFixed(1)) : null;
   const same = calibrated
-    ? gapYards === 0 || Number(a.depthYards.toFixed(1)) === Number(b.depthYards.toFixed(1))
+    ? gapYards === 0
     : Math.abs(difference) < 1e-6;
   if (same) return { deeperId: null, shallowerId: null, gapYards: calibrated ? 0 : null };
   return {
@@ -104,7 +104,7 @@ export function createFilmModel(source, { roster = [] } = {}) {
   // cloud updates and undo can change the editor's own objects in place.
   const play = clone(source);
   play.routes ??= [];
-  play.ball ??= { holderId: '', receiverId: '', passAt: 0, arriveAt: 0 };
+  play.ball = play.ball ? normalizePlayBall(play) : { holderId: '', receiverId: '', passAt: 0, arriveAt: 0 };
   const reference = Boolean(play.reference);
   const players = describePlayers(reference ? [] : play.players, roster);
   const byId = new Map(players.map(player => [player.id, player]));
@@ -112,12 +112,14 @@ export function createFilmModel(source, { roster = [] } = {}) {
   const calibrated = !reference && getPlayLeague(play) === 11;
   const animation = createAnimationSampler(play);
   const origins = new Map(players.map(player => [player.id, animation.playerAt(player, 0)]));
+  const movers = players.filter(player => animation.hasPlayerRoute(player.id));
   let geometry;
 
   function frameAt(requestedTime, focusIds = []) {
     const time = Number.isFinite(requestedTime) ? clamp(requestedTime, 0, duration) : 0;
     if (geometry?.time !== time) {
-      const positions = time === 0 ? origins : new Map(players.map(player => [player.id, animation.playerAt(player, time)]));
+      const positions = time === 0 ? origins : new Map(origins);
+      if (time !== 0) for (const player of movers) positions.set(player.id, animation.playerAt(player, time));
       geometry = { time, positions, ...ballAt(play, time, positions, canPass, animation) };
     }
     const focus = [];
@@ -126,7 +128,7 @@ export function createFilmModel(source, { roster = [] } = {}) {
       if (!player) continue;
       const position = geometry.positions.get(id);
       focus.push({
-        id, position, origin: origins.get(id), trail: recentTrail(animation, player, time, position),
+        id, position, origin: origins.get(id), trail: animation.hasPlayerRoute(id) ? recentTrail(animation, player, time, position) : [position],
         depthYards: calibrated ? routeDepthYards(position.y) : null,
       });
       if (focus.length === 2) break;
@@ -141,4 +143,16 @@ const preciseSeconds = new Intl.NumberFormat('en', {minimumFractionDigits: 1, ma
 // Freeze-frame labels retain the authored event time. The moving clock stays readable.
 export function formatFilmTime(time, exact = false) {
   return exact ? preciseSeconds.format(time) : time.toFixed(1);
+}
+
+// This is also the input to the SHA-256 revision on existing v1 lessons.
+// Keep field presentation and meeting metadata out of the teaching geometry.
+export function filmLessonSource({ play, calibrated }) {
+  const actors = play.players.map(p => [p.id, p.label, p.rosterId || '', p.side, p.x, p.y]);
+  const paths = play.routes.map(r => [r.id, r.playerId, r.kind, r.delay, r.duration, !!r.optional, !!r.smooth,
+    r.endCap, !!r.stagedBlock, r.blockTargets || [], r.points.map(p => [p.x, p.y])]);
+  const zones = (play.zones || []).map(z => [z.id, z.label, z.x, z.y, z.rx, z.ry]);
+  const marks = (play.annotations || []).map(a => [a.id, a.text, a.x, a.y]);
+  const { holderId, receiverId, passAt, arriveAt } = play.ball;
+  return JSON.stringify([play.book, play.formation, calibrated, actors, paths, zones, marks, [holderId, receiverId, passAt, arriveAt]]);
 }

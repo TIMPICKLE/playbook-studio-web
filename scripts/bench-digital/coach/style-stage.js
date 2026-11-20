@@ -51,7 +51,7 @@ async function stage(run,manifest) {
   run.samples.push({name:marker,mode,files,documentStart:performance.timeOrigin,loadedInMs:round(performance.getEntriesByType('navigation')[0]?.loadEventEnd||0),
     visibility:document.visibilityState,hasFocus:document.hasFocus(),stylesheetCount:document.styleSheets.length,
     resources:performance.getEntriesByType('resource').length,timerIntervalMs:timerTimes.length?stats(timerTimes):null,
-    frameIntervalMs:clock.frameIntervalMs,over33_3msPercent:clock.over33_3msPercent,raw:clock.raw});
+    ...clock});
   run.queue.shift();extend(run,manifest);next(run,manifest);
 }
 async function start(manifest,mode=null) {

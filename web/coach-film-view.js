@@ -63,7 +63,7 @@ export function createFilmView(doc) {
       </main>
       <aside class="film-inspector" aria-labelledby="film-focus-title">
         <div class="film-inspector-heading"><h3 id="film-focus-title">${t('film.focus')}</h3><span class="film-focus-count"></span></div>
-        <div class="film-readout"><p class="film-comparison" data-film-comparison></p><div class="film-depth-list"></div>
+        <div class="film-readout"><p data-film-question-hint hidden>${t('film.questionReadings')}</p><p class="film-comparison" data-film-comparison></p><div class="film-depth-list"></div>
           <p class="film-reference" data-film-reference hidden></p>
           <button type="button" class="film-control film-pin" data-film-action="pin" aria-pressed="false">${icon('pin')}<span>${t('film.pin')}</span></button>
         </div>
@@ -105,16 +105,37 @@ export function createFilmView(doc) {
   const events = get('.film-events'), ticks = get('.film-ticks'), unavailable = get('.film-unavailable');
   let names = new Map(), playerButtons = new Map(), depthRows = new Map(), eventButtons = [], eventTicks = [];
   let activeEvent = null;
+  let questionMasked = false;
   let durationLabel, displayedTime, eventTimes = new Set();
 
   function stoppedTime(time) {
     return formatFilmTime(eventTimes.has(time) ? time : Math.round(time * 100) / 100, true);
   }
 
+  function setTitle(value) {
+    write(title, value);
+    const image = unavailable.querySelector('img');
+    if (image) image.alt = value;
+  }
+
+  function setMetadata(model) {
+    setTitle(model.play.title);
+    for (const player of model.players) {
+      if (names.get(player.id) === player.displayLabel) continue;
+      names.set(player.id, player.displayLabel);
+      const button = playerButtons.get(player.id);
+      const [position, ...detail] = player.displayLabel.split(' · ');
+      button.setAttribute('aria-label', player.displayLabel);
+      button.title = player.displayLabel;
+      write(button.firstElementChild, position);
+      write(button.lastElementChild, detail.join(' · '));
+    }
+  }
+
   function setModel(model) {
     const play = model.play;
     names = new Map(model.players.map(player => [player.id, player.displayLabel]));
-    title.textContent = play.title;
+    setTitle(play.title);
     get('[data-film-formation]').textContent = play.formation || '';
     unavailable.hidden = !model.reference;
     unavailable.querySelector('img')?.remove();
@@ -167,11 +188,22 @@ export function createFilmView(doc) {
     const active = !!referenceFrame;
     pin.setAttribute('aria-pressed', String(active));
     write(pin.lastElementChild, t(active ? 'film.unpin' : 'film.pin'));
-    pinned.hidden = !active;
+    pinned.hidden = !active || questionMasked;
     write(originLegend, t(active ? 'film.pinnedOrigin' : 'film.origin'));
-    if (active) {
+    if (active && !questionMasked) {
       const result = comparisonText(referenceFrame, names), args = { time: stoppedTime(referenceFrame.time), result };
       write(pinned, t(result ? 'film.referenceGap' : 'film.referenceAt', args));
+    } else write(pinned, '');
+  }
+
+  function setQuestionMasked(masked) {
+    questionMasked = masked;
+    get('[data-film-question-hint]').hidden = !masked;
+    depthList.hidden = comparison.hidden = phaseText.hidden = masked;
+    write(announceNode, '');
+    if (masked) {
+      write(comparison, ''); write(phaseText, '');
+      for (const cell of depthRows.values()) write(cell, '');
     }
   }
 
@@ -202,13 +234,15 @@ export function createFilmView(doc) {
     if (timeline.value !== sliderValue) timeline.value = sliderValue;
     const accessibleTime = t('film.timelineValue', {time});
     if (timeline.getAttribute('aria-valuetext') !== accessibleTime) timeline.setAttribute('aria-valuetext', accessibleTime);
-    const phase = t('film.phase.' + frame.phase, {player:names.get(frame.holderId) || ''});
+    const phase = questionMasked ? '' : t('film.phase.' + frame.phase, {player:names.get(frame.holderId) || ''});
     write(phaseText, phase);
     if (phaseText.dataset.phase !== frame.phase) phaseText.dataset.phase = frame.phase;
-    write(comparison, comparisonText(frame, names) || t(frame.focus.length ? 'film.chooseSecond' : 'film.choose'));
-    for (const player of frame.focus) {
+    if (!questionMasked) write(comparison, comparisonText(frame, names) || t(frame.focus.length ? 'film.chooseSecond' : 'film.choose'));
+    for (const player of questionMasked ? [] : frame.focus) {
       const cell = depthRows.get(player.id);
-      if (cell) write(cell, player.depthYards == null ? t('film.relative') : t('film.depth', { yards:player.depthYards.toFixed(1) }));
+      if (cell) write(cell, player.depthYards == null ? t('film.relative') : t('film.depth', {
+        yards: player.depthYards.toFixed(frame.comparison ? 2 : 1),
+      }));
     }
     if (activeEvent !== eventId) {
       activeEvent = eventId;
@@ -227,8 +261,9 @@ export function createFilmView(doc) {
     return phase;
   }
 
-  return { dialog, title, headerActions, field, timeline, speed, pin, setModel, setFocus, setReference, setPlaying, setTheme, draw,
+  return { dialog, title, headerActions, field, timeline, speed, pin, setModel, setMetadata, setTitle, setFocus, setReference, setPlaying, setTheme, draw,
     readComparison: () => comparison.textContent,
+    setQuestionMasked,
     readTime: () => displayedTime,
     announce: message => write(announceNode, message),
     revision(message = '') {

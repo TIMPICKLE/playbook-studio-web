@@ -1,0 +1,27 @@
+{
+  "fixtureSha256": "02cd5f79de9293b30e790894fd950797b5fcedb7b0ed6eb20220e10d916d1ce5",
+  "players": 22,
+  "routes": 10,
+  "stationaryPlayers": 12,
+  "frames": 361,
+  "focus": [
+    "H",
+    "Y"
+  ],
+  "results": [
+    {
+      "moduleSha256": "d0ad3d3dfa72791a3aa969eef445964839dd1e73c6f7b9a725d6466dff7b4b7a",
+      "actorTransformReads": 7942,
+      "stationaryTransformReads": 4332,
+      "actorTransformWrites": 1772,
+      "liveBlockPathReads": 361
+    },
+    {
+      "moduleSha256": "9f5de20d0d47d171eccd102c25d1ab378f658f16e77094c25baf881b87ba756b",
+      "actorTransformReads": 1772,
+      "stationaryTransformReads": 12,
+      "actorTransformWrites": 1772,
+      "liveBlockPathReads": 1
+    }
+  ]
+}

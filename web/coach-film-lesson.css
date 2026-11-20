@@ -17,9 +17,8 @@
 .film-lesson-status, .film-lesson-form label { color: var(--film-muted); font-size: .8125rem; }
 .film-lesson-status:empty { display: none; }
 .film-lesson-form label { display: block; margin-block: .55rem; }
-.film-lesson-form textarea {
+.film-lesson-form :is(textarea,input) {
   display: block; width: 100%; margin-block-start: .2rem; padding: .45rem; font: inherit;
   background: var(--film-bg); border: 1px solid var(--film-edge); color: var(--film-ink); border-radius: .35rem;
 }
-.film-lesson textarea:focus-visible { outline: 2px solid var(--film-focus); }
-.coach-film[data-film-question] [data-film-reference] { display: none; }
+.film-lesson-form :is(textarea,input):focus-visible { outline: 2px solid var(--film-focus); }

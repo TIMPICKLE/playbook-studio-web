@@ -1,10 +1,11 @@
 import { t } from './i18n.js';
-import { createFilmModel, selectFilmFocus } from './coach-film-model.js';
+import { createFilmModel, filmLessonSource, selectFilmFocus } from './coach-film-model.js';
 import { createFilmField } from './coach-film-field.js';
 import { createFilmView } from './coach-film-view.js';
 import { mountFilmAssistant } from './coach-film-assistant.js';
 import { readFilmState, runFilmCommand } from './coach-film-commands.js';
 import { createScrubPresentation } from './scrub-presentation.js';
+import { createPlaybackClock } from './playback-clock.js';
 
 const validTheme = settings => settings?.fieldTheme === 'light' ? 'light' : 'dark';
 
@@ -15,7 +16,7 @@ function sourceSignature(play, roster) {
   const bindings = roster.filter(member => boundIds.has(member.id))
     .map(member => [member.id, member.name, member.number, member.position])
     .sort(([left], [right]) => left.localeCompare(right));
-  return JSON.stringify([play.id, play.title, play.formation, play.league, play.book, play.reference,
+  return JSON.stringify([play.id, play.formation, play.league, play.book, play.reference,
     play.players, play.routes, play.zones, play.annotations, play.ball, bindings]);
 }
 
@@ -27,12 +28,18 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
   const motion = win.matchMedia?.('(prefers-reduced-motion: reduce)');
   const inertSiblings = [];
   let assistantPanel;
+  let questionMasked = false;
   let model, field, signature, lessonController, currentRoster = roster;
   let sampledFrame, sampledFocus;
-  let time = 0, speed = 1, playing = false, drawRequest = null, originStamp = null, originTime = 0;
+  let time = 0, speed = 1, playing = false;
   let focusIds = [], pendingId = null, activeEvent = null, selectedPin = null, referenceFrame = null;
   let sourceTheme = validTheme(settings), theme = sourceTheme, closed = false, lastPhase = '';
   const scrub = createScrubPresentation(win, paint);
+  const playback = createPlaybackClock(win, (at, stamp, running) => {
+    time = at;
+    playing = running;
+    paint();
+  });
 
   function eventAtTime() {
     return model.events.find(event => event.id === activeEvent && event.time === time)
@@ -59,38 +66,16 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
   function paint() {
     if (closed || !model || model.reference) return;
     const frame = currentFrame();
-    field.render(frame, focusIds, referenceFrame);
+    field.render(frame, focusIds, referenceFrame, questionMasked);
     lastPhase = view.draw(frame, model, eventAtTime()?.id ?? null, neighbours(), playing);
     view.setPlaying(playing, model.hasMotion && time === model.duration);
   }
 
-  function cancelFrame() {
-    if (drawRequest != null) win.cancelAnimationFrame(drawRequest);
-    drawRequest = null;
-  }
-
   function stopClock() {
-    cancelFrame();
+    time = playback.pause() ?? time;
     scrub.cancel();
     playing = false;
-    originStamp = null;
     if (model) view.setPlaying(false, model.hasMotion && time === model.duration);
-  }
-
-  function nextFrame(stamp) {
-    drawRequest = null;
-    if (closed || doc.hidden) return;
-    if (playing) {
-      if (originStamp == null) originStamp = stamp;
-      time = Math.min(model.duration, originTime + Math.max(0, stamp - originStamp) * speed / 1000);
-      if (time >= model.duration) playing = false;
-    }
-    paint();
-    if (playing) schedule();
-  }
-
-  function schedule() {
-    if (drawRequest == null && !closed && !doc.hidden) drawRequest = win.requestAnimationFrame(nextFrame);
   }
 
   function jump(value, eventId = null, immediate = true) {
@@ -113,11 +98,11 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
     if (!event) return;
     jump(event.time, event.id);
     const label = t('film.eventAnnouncement', { event: t('film.event.' + event.id), time: view.readTime(), phase: lastPhase });
-    view.announce(focusIds.length === 2 ? `${label} ${view.readComparison()}` : label);
+    view.announce(!questionMasked && focusIds.length === 2 ? `${label} ${view.readComparison()}` : label);
   }
 
   function announceComparison() {
-    if (focusIds.length === 2) {
+    if (!questionMasked && focusIds.length === 2) {
       view.announce(t('film.comparisonAnnouncement', { time:view.readTime(), result:view.readComparison() }));
     }
   }
@@ -140,22 +125,21 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
     }
     if (playing || !model.hasMotion || doc.hidden) return;
     scrub.cancel();
-    if (time >= model.duration) time = 0;
+    time = playback.start(time, {duration:model.duration, speed});
     activeEvent = null;
     playing = true;
-    originTime = time;
-    originStamp = null;
-    view.setPlaying(true, false);
     paint();
-    schedule();
   }
 
   function setSpeed(next) {
     if (speed === next) return;
     speed = next;
     view.speed.value = String(speed);
-    originStamp = null;
-    originTime = time;
+    if (playing) {
+      time = playback.configure(speed);
+      playing = playback.running;
+      paint();
+    }
   }
 
   function syncFocus() {
@@ -183,9 +167,9 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
   }
 
   function setPin(next) {
-    if (!model.hasMotion || selectedPin === next) return;
+    if (!model.hasMotion || (next === undefined ? !playing && selectedPin === time : selectedPin === next)) return;
     stopClock();
-    selectedPin = next;
+    selectedPin = next === undefined ? time : next;
     syncFocus();
     paint();
   }
@@ -213,6 +197,14 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
       host: view.headerActions, model,
       read: () => ({time, focusIds: [...focusIds]}),
       go: lessonGo,
+      onProjectionChange(masked, lessonOpen) {
+        assistantPanel?.setLessonOpen(lessonOpen && !closed);
+        if (questionMasked === masked) return;
+        questionMasked = masked;
+        view.setQuestionMasked(masked);
+        view.setReference(referenceFrame);
+        if (field && !closed) paint();
+      },
     });
   }
 
@@ -238,34 +230,61 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
     }
     currentRoster = next.roster ?? currentRoster;
     const nextSignature = sourceSignature(nextPlay, currentRoster);
-    if (signature === nextSignature) return;
+    if (signature === nextSignature) {
+      if (model.play.title !== nextPlay.title) {
+        model.play.title = nextPlay.title;
+        view.setTitle(nextPlay.title);
+      }
+      return;
+    }
     const nextModel = createFilmModel(nextPlay, {roster: currentRoster});
     const wasMounted = !!model, samePlay = model?.play.id === nextPlay.id;
+    const sameLesson = samePlay && !model.reference && !nextModel.reference;
+    const sameLayout = sameLesson && filmLessonSource(model) === filmLessonSource(nextModel);
     const oldEvent = model?.events.find(event => event.id === activeEvent);
     const previousFocus = focusIds;
     const hadPin = selectedPin != null;
-    stopClock();
-    field?.destroy();
-    releaseLesson();
+    const activeControl = doc.activeElement?.dataset;
+    if (!sameLayout) {
+      stopClock();
+      field?.destroy();
+      field = null;
+      if (!sameLesson) releaseLesson();
+    }
     signature = nextSignature;
     model = nextModel;
     sampledFrame = null;
-    field = null;
-    const known = new Set(model.players.map(player => player.id));
-    focusIds = samePlay ? previousFocus.filter(id => known.has(id)) : [];
-    const retainedEvent = samePlay && oldEvent && model.events.find(event => event.id === oldEvent.id);
-    time = retainedEvent ? retainedEvent.time : samePlay ? Math.min(time, model.duration) : 0;
-    activeEvent = retainedEvent?.id ?? null;
-    selectedPin = pendingId = null;
-    view.setModel(model);
+    if (sameLayout) {
+      view.setMetadata(model);
+      field.setMetadata(model);
+    } else {
+      const known = new Set(model.players.map(player => player.id));
+      focusIds = samePlay ? previousFocus.filter(id => known.has(id)) : [];
+      const retainedEvent = samePlay && oldEvent && model.events.find(event => event.id === oldEvent.id);
+      time = retainedEvent ? retainedEvent.time : samePlay ? Math.min(time, model.duration) : 0;
+      activeEvent = retainedEvent?.id ?? null;
+      selectedPin = pendingId = null;
+      view.setModel(model);
+      if (sameLesson && lessonController) {
+        if (lessonController.revise) lessonController.revise(model);
+        else releaseLesson();
+      }
+      if (wasMounted) {
+        const lostMarkers = previousFocus.length !== focusIds.length || (oldEvent && !retainedEvent) || hadPin;
+        view.revision(t(lostMarkers ? 'film.focusExpired' : 'film.updated'));
+      }
+    }
     view.setTheme(theme);
-    if (!model.reference) field = createFilmField(view.field, { model, theme, onPick: pick, reducedMotion: !!motion?.matches });
+    if (!field && !model.reference) field = createFilmField(view.field, { model, theme, onPick: pick, reducedMotion: !!motion?.matches });
     syncFocus();
     paint();
-    mountLesson();
-    if (wasMounted) {
-      const lostMarkers = previousFocus.length !== focusIds.length || (oldEvent && !retainedEvent) || hadPin;
-      view.revision(t(lostMarkers ? 'film.focusExpired' : 'film.updated'));
+    if (!lessonController) mountLesson();
+    if (sameLayout && activeControl) {
+      if (activeControl.filmReplace) {
+        [...dialog.querySelectorAll('[data-film-replace]')].find(node => node.dataset.filmReplace === activeControl.filmReplace)?.focus({preventScroll:true});
+      } else if (activeControl.filmAction === 'cancel-replace') {
+        dialog.querySelector('[data-film-action="cancel-replace"]')?.focus({preventScroll:true});
+      }
     }
   }
 
@@ -285,21 +304,25 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
       case 'next': jumpToEvent(neighbours().next); break;
       case 'prev': jumpToEvent(neighbours().previous); break;
       case 'theme': setTheme(theme === 'light' ? 'dark' : 'light'); break;
-      case 'pin': setPin(selectedPin == null ? time : null); break;
-      case 'cancel-replace': {
-        const cancelled = pendingId;
-        pendingId = null;
-        syncFocus();
-        view.focusPlayer(cancelled);
-        break;
-      }
+      case 'pin': setPin(selectedPin == null ? undefined : null); break;
+      case 'cancel-replace': dismissReplacement(); break;
     }
+  }
+
+  function dismissReplacement() {
+    if (!pendingId) return false;
+    const cancelled = pendingId;
+    pendingId = null;
+    syncFocus();
+    view.focusPlayer(cancelled);
+    return true;
   }
 
   function cancel(event) {
     event.preventDefault();
     event.stopPropagation();
-    if (!assistantPanel?.dismiss()) close();
+    if (assistantPanel?.dismiss() || dismissReplacement() || lessonController?.dismiss?.()) return;
+    close();
   }
 
   function keydown(event) {
@@ -322,7 +345,13 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
       }
       return;
     }
-    if (event.target.matches?.('textarea,input:not([type="range"]),[contenteditable="true"]')) return;
+    if (event.target.closest?.('textarea,input:not([type="range"]),[contenteditable]:not([contenteditable="false"]),[role="textbox"]')) return;
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+        && lessonController?.navigateStop?.(event.key === 'ArrowUp' ? 'previous' : 'next')) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     const backwards = event.key === '[' || (event.altKey && event.key === 'ArrowLeft');
     const forwards = event.key === ']' || (event.altKey && event.key === 'ArrowRight');
     if (backwards || forwards) {
@@ -367,7 +396,7 @@ export function openFilmRoom({ play, settings = {}, roster = [], onClose = () =>
   dialog.addEventListener('keydown', keydown);
   dialog.addEventListener('cancel', cancel);
   dialog.addEventListener('close', close);
-  view.timeline.addEventListener('pointerdown', () => { scrub.flush(); stopClock(); });
+  view.timeline.addEventListener('pointerdown', () => { scrub.flush(); setPlaying(false); });
   view.timeline.addEventListener('input', () => rangeSeek());
   view.timeline.addEventListener('change', () => { rangeSeek(true); announceComparison(); });
   view.timeline.addEventListener('pointerup', () => rangeSeek(true));

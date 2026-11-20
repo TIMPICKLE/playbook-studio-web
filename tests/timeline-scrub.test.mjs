@@ -14,6 +14,7 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
   doc.body.innerHTML = readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
   let nextFrame = 0, stamp = 0;
   const frames = new Map();
+  t.mock.method(win.performance, 'now', () => stamp);
   win.requestAnimationFrame = callback => { frames.set(++nextFrame, callback); return nextFrame; };
   win.cancelAnimationFrame = id => frames.delete(id);
   const tick = () => {
@@ -73,18 +74,17 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
   seek(2.45,'change'); tick();
   assert.equal(writes,2,'a following change and frame do not present the final position again');
 
-  const perf = win.performance, nowDescriptor = Object.getOwnPropertyDescriptor(perf,'now');
   const setTimer = win.setTimeout, clearTimer = win.clearTimeout;
   const timers = new Map();
-  let clock = perf.now()+1000, nextTimer = 0;
-  Object.defineProperty(perf,'now',{configurable:true,value:()=>clock});
+  let nextTimer = 0;
+  stamp += 1000;
   win.setTimeout = (fn, delay) => { timers.set(++nextTimer,{fn,delay}); return nextTimer; };
   win.clearTimeout = id => { timers.delete(id); };
   try {
     seek(.3); await Promise.resolve();
     assert.equal(marker.getAttribute('transform'),pose(.3),'an isolated input presents at the next microtask');
     const startWrites = writes;
-    clock += 1;
+    stamp += 1;
     for (let i = 1; i <= 12; i++) {
       seek(.3+i*.01);
       await Promise.resolve();
@@ -92,15 +92,15 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
     assert.equal(writes,startWrites,'successive inputs between refreshes share the same pending presentation');
     const [deadline] = timers.values(), [lateFrame] = frames.values();
     assert.ok(deadline.delay > 0 && deadline.delay <= 34,'continuous input has a deadline within two 60 Hz periods');
-    clock += deadline.delay;
+    stamp += deadline.delay;
     deadline.fn();
     assert.equal(writes,startWrites+1);
     assert.equal(marker.getAttribute('transform'),pose(.42));
     assert.equal(timers.size,0); assert.equal(frames.size,0);
-    clock += 1;
+    stamp += 1;
     seek(.43);
     const [lateTimer] = timers.values();
-    lateFrame(clock);
+    lateFrame(stamp);
     assert.equal(writes,startWrites+1,'a late callback cannot consume the next pending input');
     tick();
     lateTimer.fn();
@@ -116,7 +116,6 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
     assert.equal(writes,startWrites+3);
   } finally {
     delete doc.hidden;
-    if (nowDescriptor) Object.defineProperty(perf,'now',nowDescriptor); else delete perf.now;
     win.setTimeout = setTimer; win.clearTimeout = clearTimer;
   }
 
@@ -132,10 +131,14 @@ test('native range presents the latest seek, preserves focus and cancels obsolet
 
   seek(1.7);
   action('play');
-  tick();
   assert.equal(Number(range().value),1.7,'play starts at the latest pending seek');
+  const playingMarker = () => q(`#field [data-player="${actor.id}"]`).getAttribute('transform');
+  assert.equal(playingMarker(),pose(1.7));
+  tick();
+  assert.equal(playingMarker(),pose(1.716),'the first frame includes the 16 ms since Play');
   tick();
   assert.ok(Number(range().value)>1.7);
+  assert.equal(playingMarker(),pose(1.732));
   seek(.5);
   tick();tick();
   assert.equal(Number(range().value),.5);

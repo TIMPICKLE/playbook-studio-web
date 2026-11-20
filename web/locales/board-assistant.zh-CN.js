@@ -1,4 +1,7 @@
 export default {
+  sharedLesson: '课件正在投屏。可以继续发送指令，关闭课件后可查看完整对话和工具记录。',
+  sharedPrompt: '输入指令（投屏时隐藏文字）',
+  lessonConflict: '本次课件未保存。另一窗口已经更新了本机课件。',
   updateGroupsFirst:'请先更新所选修改组的预览，再继续对话。',
   chooseGroups:'选择要保留的修改组',updateGroups:'更新预览',groupHint:'按整轮修改选择；先重新预览，再应用。',groupRequired:'至少保留一组修改，或使用放弃取消整个提案。',groupDependency:'这组修改依赖前面的步骤，请保留所需的前序组。',groupsUpdated:'已更新预览，确认后才会写入战术。',
   fieldLeft:'场地左侧',fieldRight:'场地右侧',fieldMiddle:'场地中间',

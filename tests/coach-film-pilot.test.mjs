@@ -116,6 +116,14 @@ test('the actual two plays yield different answers and both roles balance all fo
   assert.equal(result.total, 8);
   assert.equal(result.pairedGain, .25);
   assert.equal(result.decision, 'passes-pilot-task');
+  assert.equal(result.conditions.film.cadenceObserved, 0, 'legacy trials omit display observations');
+  const trial = sessions[0].trials.find(row => row.mode === 'film');
+  Object.assign(trial, { usedPlayback: false, observedStall: true, frameP95Ms: 1001.7 });
+  const withCadence = await summarize(sessions, 'baseline');
+  assert.equal(withCadence.decision, result.decision);
+  assert.deepEqual(withCadence.conditions.film, {
+    played: 0, playbackKnown: 1, visibleStalls: 1, cadenceObserved: 1, measuredFrameP95Ms: [1001.7],
+  });
   assert.equal((await summarize(sessions.slice(0, 3), 'baseline')).pairedGain, null);
   assert.equal((await summarize(sessions.slice(0, 7), 'baseline')).decision, 'incomplete');
   await assert.rejects(summarize([sessions[0], sessions[0]], 'baseline'));

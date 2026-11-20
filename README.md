@@ -54,7 +54,9 @@
 
 讲解台里的 **AI 助手** 可以连续执行「停在出手，比较 H 和 Y，固定这一帧，再倒回一秒」，读取场上的实际停点和纵深，并按教练指令编排本机课件。[讲解工具与回执](docs/COACH_FILM_COMMANDS.md)
 
-只有战术定义了有效传球，才会出现「出手」和「到达」。无比例的场地显示相对纵深。教练还可以在本机课件试点保存最多三个带问题、答案和球员焦点的停点。手机和 iPad 继续使用原有触屏工作区。
+本机课件可以保存三个停点，每个停点记住问题、答案和聚焦球员。下次在同一工作区打开这套战术，可以直接续编。投屏提问时，队员能看场上站位，点「揭示」后才出现答案和纵深读数。即使焦点在球员身上，教练也能用 `Alt+↑` 和 `Alt+↓` 切换停点。
+
+战术定义了有效传球时，时间轴会标出「出手」和「到达」。纯防守布阵按编排显示球权，无比例的场地显示相对纵深。手机和 iPad 使用触屏工作区。
 
 [打开桌面演示](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [试用本机课件](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local?filmPilot=lesson#editor) · [试教材料与两套战术](docs/COACH_FILM_PILOT.md) · [讲解台验收记录](docs/acceptance/COACH_FILM.md)
 

@@ -1,5 +1,5 @@
 import { z } from './vendor/assistant-zod.js';
-import { COLORS, FORMATIONS, clone, formationPlayers, mirrorPlay, movePlayer, uid } from './model.js';
+import { COLORS, FORMATIONS, clone, defaultBallHolder, formationPlayers, mirrorPlay, movePlayer, setBallHolder, uid } from './model.js';
 import { spaceMaddenLine } from './madden-model.js';
 import { linkRosterPlayer, personnelAssignments } from './board-personnel.js';
 import { LEAGUE_SIZES, defaultFormation, getPlayLeague, resolveFormation } from './game-formats.js';
@@ -41,7 +41,7 @@ export const EDITOR_PLAY_COMMANDS = [
   command('zone_update', z.strictObject({ kind: z.literal('zone_update'), zoneId: id, patch: patch(zoneFields) }), 'Update an existing coverage ellipse.'),
   command('annotation_add', z.strictObject({ kind: z.literal('annotation_add'), ...annotationFields, as: id.optional() }), 'Add text at explicit board coordinates.'),
   command('annotation_update', z.strictObject({ kind: z.literal('annotation_update'), annotationId: id, patch: patch(annotationFields) }), 'Update text or the position of an existing annotation.'),
-  command('ball_update', z.strictObject({ kind: z.literal('ball_update'), patch: patch({ holderId: id, receiverId: z.string().max(100), passAt: z.number().min(0).max(10), arriveAt: z.number().min(.1).max(15) }) }), 'Set the ball carrier, receiver or pass timing. An empty receiver means no pass.'),
+  command('ball_update', z.strictObject({ kind: z.literal('ball_update'), patch: patch({ holderId: z.string().max(100), receiverId: z.string().max(100), passAt: z.number().min(0).max(10), arriveAt: z.number().min(.1).max(15) }) }), 'Set the ball carrier, receiver or pass timing. An empty holder clears possession and receiver. Set a holder before assigning a receiver.'),
   command('play_update', z.strictObject({ kind: z.literal('play_update'), patch: patch({ title: z.string().max(120), category: z.string().max(60), personnel: z.string().max(80), notes: z.string().max(10000), favorite: z.boolean() }) }), 'Update play details, coach notes or favorite status.'),
   command('play_mirror', z.strictObject({ kind: z.literal('play_mirror') }), 'Mirror players, routes, zones and annotations horizontally.'),
   command('formation_apply', z.union([
@@ -202,7 +202,9 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
   else if (op.kind === 'ball_update') {
     if (op.patch.holderId) find(play.players, op.patch.holderId, 'Player');
     if (op.patch.receiverId) find(play.players, op.patch.receiverId, 'Player');
+    if (op.patch.receiverId && !(op.patch.holderId ?? play.ball.holderId)) fail('Choose a ball carrier before assigning a receiver.');
     Object.assign(play.ball, op.patch);
+    if (op.patch.holderId !== undefined) setBallHolder(play, op.patch.holderId, true);
     if (play.ball.receiverId === play.ball.holderId) play.ball.receiverId = '';
     if (play.ball.arriveAt <= play.ball.passAt) fail('Pass arrival must follow release.');
   } else if (op.kind === 'play_update') Object.assign(play, op.patch);
@@ -231,7 +233,8 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
       ? { ...route, blockTargets: route.blockTargets.map(target => retainedIds.has(target) ? target : null) } : route);
     if (!retained.length || side === 'defense') play.zones = [];
     if (!retained.length) play.annotations = [];
-    if (!retainedIds.has(play.ball.holderId)) play.ball.holderId = players.find(player => player.label === 'QB')?.id || players[0].id;
+    if (play.ball.holderId && !retainedIds.has(play.ball.holderId)) setBallHolder(play, defaultBallHolder(play.players));
+    if (!retainedIds.has(play.ball.unconfirmedHolderId)) delete play.ball.unconfirmedHolderId;
     if (!retainedIds.has(play.ball.receiverId)) play.ball.receiverId = '';
   } else if (op.kind === 'opponents_set') {
     const opposingSide = play.book === 'defense' ? 'offense' : 'defense';

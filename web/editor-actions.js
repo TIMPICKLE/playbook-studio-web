@@ -1,5 +1,5 @@
 import { z } from './vendor/assistant-zod.js';
-import { clone, decodeWorkspace, encodeWorkspace, FORMATIONS, makePlay } from './model.js';
+import { clone, decodeWorkspace, defaultBallHolder, encodeWorkspace, FORMATIONS, makePlay } from './model.js';
 import { hasEditableTrace, makeMaddenPlay } from './madden-model.js';
 import { LEAGUE_SIZES, getPlayLeague, isFlag5Play } from './game-formats.js';
 
@@ -44,6 +44,10 @@ export function parseEditorActions(actions) {
   const parsed = EditorActionsSchema.safeParse(actions);
   if (!parsed.success) throw new Error('Invalid editor actions. Use the advertised command schema and setting ranges.');
   return parsed.data;
+}
+
+export function usesLivePlayback(action) {
+  return action.kind === 'playback_set' || (action.kind === 'dialog_open' && action.dialog === 'coach_film');
 }
 
 const english = locale => locale === 'en';
@@ -147,7 +151,7 @@ export function prepareEditorActions({data, selectedId, catalogRows} = {}, value
       if (custom) {
         play.formation = custom.name;
         play.players = clone(custom.players);
-        play.ball.holderId = play.players.find(player => player.label === 'QB')?.id || play.players[0].id;
+        play.ball.holderId = defaultBallHolder(play.players);
       }
       play = identifyPlay(play, makeId);
       play.createdAt = now;

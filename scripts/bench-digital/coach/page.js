@@ -3,7 +3,8 @@
 import { encodeWorkspace, starterWorkspace, STORAGE_KEY } from './model.js';
 import { ONBOARDING_STORAGE_KEY } from './onboarding.js';
 import { VISUAL_MODE_KEY } from './visual-mode.js';
-import { stats, round, sampleClock } from './film-clock.js';
+import { stats, round, sampleClock, frameSummary } from './film-clock.js';
+import { sampleDrag, dragSummary } from './pointer-trial.js';
 
 const normalEntry=new URL(import.meta.url).searchParams.has('normal-entry');
 const query = new URLSearchParams(normalEntry?sessionStorage.getItem('coach-film-normal-entry:'+new URL('.',location.href).pathname):location.search);
@@ -44,6 +45,8 @@ HTMLCanvasElement.prototype.getContext = function(kind, ...args) {
 
 async function measure({build,play}) {
   let interrupted = document.hidden, cancelWait = null, dialog;
+  const focusChanges = [{atMs:performance.now(),hasFocus:document.hasFocus()}];
+  const recordFocus = () => focusChanges.push({atMs:performance.now(),hasFocus:document.hasFocus()});
   const hiddenError = () => Error('Tab hidden during sampling. Restart and keep this tab in the foreground.');
   const hidden = () => {
     if (!document.hidden) return;
@@ -63,6 +66,8 @@ async function measure({build,play}) {
   }
   const nextFrame = () => waitVisible(callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id));
   document.addEventListener('visibilitychange', hidden);
+  window.addEventListener('focus',recordFocus);
+  window.addEventListener('blur',recordFocus);
   try {
     check();
     const enter=document.querySelector('[data-action="coach-film"]');
@@ -124,7 +129,7 @@ async function measure({build,play}) {
         do {
           await nextFrame();
           checkField();
-          if (performance.now()-start > 3000) throw Error('Field did not present time '+time);
+          if (!matches() && performance.now()-start > 3000) throw Error('No rAF observed a matching field time for '+time);
         } while (!matches());
         recordCommit();
         return {commitMs,observedMs:performance.now()-start};
@@ -146,10 +151,13 @@ async function measure({build,play}) {
         if (!Number.isFinite(modelTime)) throw Error('The field did not expose its committed play time.');
         if (modelTime>previousModel) modelSecondsAdvanced+=modelTime-previousModel;
         previousModel=modelTime;
-        if (modelTime >= Number(range.max)-1e-7) playButton.click();
+        if (modelTime >= Number(range.max)-1e-7) {
+          playButton.click();
+          previousModel = markerTime();
+        }
       }
       if (modelSecondsAdvanced<=0) throw Error('The play stopped advancing during the playback sample.');
-      return {intervals,modelSecondsAdvanced:round(modelSecondsAdvanced)};
+      return {intervals,modelSecondsAdvanced};
     }
     await playback(quick ? 250 : 2000);
     const trials = [];
@@ -161,12 +169,22 @@ async function measure({build,play}) {
         const {commitMs,observedMs}=await seek(times[i%times.length]);
         commitLatencies.push(commitMs);latencies.push(observedMs);
       }
-      trials.push({intervals,latencies,commitLatencies,summary:{
+      const native = query.get('gesture') === 'native';
+      const instruction = document.createElement('p');
+      if (native) {
+        instruction.textContent = `第 ${step+1} 轮 · 按住时间轴滑块并连续拖动一段距离，再松开。`;
+        dialog.querySelector('.film-transport').prepend(instruction);
+      }
+      let drag;
+      try { drag = await sampleDrag(range,pitch,{native,count:quick ? 12 : 32}); }
+      finally { instruction.remove(); }
+      checkField();
+      trials.push({intervals,latencies,commitLatencies,drag,summary:{
         modelSecondsAdvanced,
-        frameIntervalMs:stats(intervals),
-        over33_3msPercent:round(100*intervals.filter(v => v>33.3).length/intervals.length),
-        inputToObservedFrameMs:stats(latencies),
+        ...frameSummary(intervals),
+        inputToMatchingRafMs:stats(latencies),
         inputToFieldCommitMs:stats(commitLatencies),
+        drag:dragSummary(drag,stats),
       }});
     }
     const idleMs = quick ? 1000 : 10000;
@@ -193,17 +211,20 @@ async function measure({build,play}) {
     const box=pitch.getBoundingClientRect();
     const gpuInfo=fieldGl?.getExtension('WEBGL_debug_renderer_info');
     return {
-      context:{...build,sample:quick?'smoke':'full',startup:normalEntry?'normal-app-entry':'driver-started-app',entryState,renderer:[renderer],forcedSvg,
+      context:{...build,schemaVersion:2,sample:quick?'smoke':'full',startup:normalEntry?'normal-app-entry':'driver-started-app',entryState,renderer:[renderer],forcedSvg,
         userAgent:navigator.userAgent,graphics:gpuInfo?fieldGl.getParameter(gpuInfo.UNMASKED_RENDERER_WEBGL):null,
+        visibility:document.visibilityState,hasFocus:document.hasFocus(),focusChanges,embedded:window.self!==window.top,timeOrigin:performance.timeOrigin,
         viewport:[innerWidth,innerHeight],pixelRatio:devicePixelRatio,fieldSize:[round(box.width),round(box.height)],
         players:play.players.length,routes:play.routes.length,focus:['H','Y'],machine:query.get('machine')||null},
       rounds:trials.map(t=>t.summary),
       ...(normalEntry ? {clockStages,rawClockStages:stageSamples} : {}),
       idle:{durationMs:idleMs,...idleCalls,glObserved:!!fieldGl},
-      raw:trials.map(({intervals,latencies,commitLatencies})=>({frameIntervalMs:intervals.map(round),inputToObservedFrameMs:latencies.map(round),inputToFieldCommitMs:commitLatencies.map(round)})),
+      raw:trials.map(({intervals,latencies,commitLatencies,drag})=>({frameIntervalMs:intervals,inputToMatchingRafMs:latencies,inputToFieldCommitMs:commitLatencies,drag})),
     };
   } finally {
     document.removeEventListener('visibilitychange',hidden);
+    window.removeEventListener('focus',recordFocus);
+    window.removeEventListener('blur',recordFocus);
     dialog?.querySelector('[data-film-action=exit]')?.click();
   }
 }

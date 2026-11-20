@@ -119,6 +119,8 @@ export default {
   "editor.coach_notes": "Coach notes",
   "editor.reads_routes_adjustments": "Reads, routes, adjustments…",
   "editor.ball_movement": "Ball movement",
+  "editor.no_ball_carrier": "No assigned carrier",
+  "editor.unconfirmed_ball_carrier": "Legacy default {player} · confirm the ball carrier",
   "editor.ball_carrier": "Ball carrier",
   "editor.pass_to": "Pass to",
   "editor.no_pass_run": "No pass / run",

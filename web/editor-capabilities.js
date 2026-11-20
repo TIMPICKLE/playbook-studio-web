@@ -2,6 +2,7 @@ import { z } from './vendor/assistant-zod.js';
 import { EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
 import { EDITOR_ACTIONS } from './editor-actions.js';
 import { BoardOperationSchema } from './assistant-schema.js';
+import { pendingFilmDecision } from './coach-film-commands.js';
 
 const semantic = {
   defense_formation: 'Add or explicitly reset a complete local 4-3 defense.',
@@ -21,6 +22,7 @@ export function editorCapabilities(input) {
     if (input.editor?.readOnly && (command.lane === 'play' || command.lane === 'workspace' || command.id === 'history_action')) unavailable = 'This workspace is read-only.';
     if (input.board.reference && command.lane === 'play' && command.id !== 'play_update') unavailable = 'A reference image has no editable geometry.';
     if (!hasWorkspace && command.lane === 'workspace') unavailable = 'Workspace context is unavailable.';
+    if (input.board.source === 'staged' && command.id === 'playback_set') unavailable = pendingFilmDecision(input.locale).error;
     return {...command, available:!unavailable, ...(unavailable ? {reason:unavailable} : {})};
   });
 }

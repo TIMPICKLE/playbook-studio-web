@@ -1,5 +1,13 @@
 // This module is shared by the room, assistant tools and the external bridge.
 // Its schemas and validators deliberately have no DOM or assistant-runtime dependency.
+import en from './locales/coach-film.en.js';
+import zh from './locales/coach-film.zh-CN.js';
+
+export function pendingFilmDecision(locale) {
+  const words = locale === 'en' ? en : zh;
+  return {code:'FILM_PREVIEW_PENDING', error:words['film.previewPending'], details:{source:'staged', choices:['apply','discard']}};
+}
+
 const version = 1;
 const playerRef = { type: 'string', minLength: 1, pattern: '\\S', description: 'Exact player ID, unique position label, or unique display label from state.players.' };
 const playerId = { type: 'string', minLength: 1, pattern: '\\S', description: 'Player ID from state.players.' };
@@ -138,9 +146,10 @@ export function validateFilmCommand(input) {
   return command;
 }
 
-function focusSnapshot(frame) {
+function focusSnapshot(frame, masked = false) {
   return (frame?.focus || []).map(({ id, position, origin, trail, depthYards }) => ({
-    id, position: { ...position }, origin: { ...origin }, trail: trail.map(point => ({ ...point })), depthYards,
+    id, position: { ...position }, origin: masked ? null : { ...origin },
+    trail: trail.map(point => ({ ...point })), depthYards: masked ? null : depthYards,
   }));
 }
 
@@ -158,10 +167,11 @@ export function filmOperationAvailability(raw) {
   };
 }
 
-function serialize(raw) {
+function serialize(raw, teacherRead = false) {
   if (!raw?.open) return { version, open: false };
   const { model, frame, referenceFrame } = raw;
-  const reference = referenceFrame && !raw.questionMasked ? {
+  const masked = raw.questionMasked && !teacherRead;
+  const reference = referenceFrame && !masked ? {
     time: referenceFrame.time, focus: focusSnapshot(referenceFrame),
     comparison: referenceFrame.comparison ? { ...referenceFrame.comparison } : null,
   } : null;
@@ -176,9 +186,9 @@ function serialize(raw) {
       const point = frame?.positions.get(id);
       return { id, label, displayLabel, side, position: point ? { ...point } : null };
     }),
-    ball: { phase: frame?.phase ?? 'none', holderId: frame?.holderId ?? null, position: frame?.ball ? { ...frame.ball } : null },
-    focusIds: [...raw.focusIds], pendingId: raw.pendingId ?? null, focus: focusSnapshot(frame),
-    comparison: frame?.comparison ? { ...frame.comparison } : null,
+    ball: { phase: frame?.phase ?? 'none', holderId: masked ? null : frame?.holderId ?? null, position: frame?.ball ? { ...frame.ball } : null },
+    focusIds: [...raw.focusIds], pendingId: raw.pendingId ?? null, focus: focusSnapshot(frame, masked),
+    comparison: !masked && frame?.comparison ? { ...frame.comparison } : null,
     pinnedTime: raw.pinnedTime, reference, questionMasked: Boolean(raw.questionMasked),
     lesson: raw.lesson ? structuredClone(raw.lesson) : null, available: filmOperationAvailability(raw),
   };
@@ -248,8 +258,8 @@ export async function runFilmCommand(session, input) {
       const request = { ...command };
       delete request.operation;
       await session.lessonCommand(request);
-      // Only an explicit teacher request discloses the authored answer key.
-      return serialize(session.snapshot({ includeAnswers: request.action === 'state' && request.includeAnswers === true }));
+      const teacherRead = request.action === 'state' && request.includeAnswers === true;
+      return serialize(session.snapshot({includeAnswers: teacherRead}), teacherRead);
     }
     case 'theme': session.setTheme(command.theme); break;
     case 'event': {
@@ -274,7 +284,7 @@ export async function runFilmCommand(session, input) {
           break;
         case 'pause': session.setPlaying(false); break;
         case 'speed': session.setSpeed(command.speed); break;
-        case 'pin': session.setPin(command.time ?? raw.time); break;
+        case 'pin': session.setPin(command.time); break;
         case 'unpin': session.setPin(null); break;
       }
   }

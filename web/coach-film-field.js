@@ -1,5 +1,5 @@
 import { t } from './i18n.js';
-import { COLORS, colorOK, dynamicBlockRoute, passFlightRoute } from './model.js';
+import { COLORS, colorOK, blockRouteAtPositions, passFlightRoute } from './model.js';
 import { displayColor, displayZoneColor, motionPath, routePath } from './field.js';
 import { SCRIMMAGE_Y, UNITS_PER_YARD_Y } from './field-metrics.js';
 import { createFilmPlayerSurface } from './coach-film-players-gl.js';
@@ -125,11 +125,12 @@ function addTeachingLayer(layer) {
   const guides = svg(depth,'path',{class:'film-depth-guides'});
   const bracket = svg(depth,'path',{class:'film-depth-bracket'});
   const label = svg(depth,'text',{class:'film-depth-label'});
-  function update(frame, reference, reduced) {
+  function update(frame, reference, reduced, questionMasked) {
     for (const [index,item] of tracks.entries()) {
       const player = frame.focus[index];
       visible(item.group, !!player);
       if (!player) continue;
+      visible(item.origin, !questionMasked);
       const origin = reference?.positions.get(player.id) || player.origin;
       attr(item.origin,'cx',num(fieldX(origin.x)));
       attr(item.origin,'cy',num(fieldY(origin.y)));
@@ -140,8 +141,11 @@ function addTeachingLayer(layer) {
         attr(item.trail,'d',d);
       }
     }
-    visible(depth, !!frame.comparison);
-    if (!frame.comparison) return;
+    visible(depth, !!frame.comparison && !questionMasked);
+    if (questionMasked || !frame.comparison) {
+      if (label.textContent) label.textContent = '';
+      return;
+    }
     const [a,b] = frame.focus.map(({position})=>({x:fieldX(position.x),y:fieldY(position.y)}));
     const left = Math.min(a.x,b.x) - 35;
     const placeLeft = left > LEFT + 78;
@@ -202,20 +206,21 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
   const foreground = svg(root,'svg',{viewBox,class:'film-chalk',role:'group','aria-label':t('film.fieldLabel')});
   markings(ground,model.calibrated);
   const {play} = model;
+  const plan = svg(ground,'g',{'data-film-plan':''});
   const zones = (play.zones || []).map(zone => {
-    const group = svg(ground,'g',{'data-film-zone':zone.id});
+    const group = svg(plan,'g',{'data-film-zone':zone.id});
     svg(group,'ellipse',{cx:num(fieldX(zone.x)),cy:num(fieldY(zone.y)),rx:num(zone.rx*PITCH_WIDTH/100),
       ry:num(zone.ry*PITCH_HEIGHT/100),class:'film-zone-shape'});
     svg(group,'text',{x:num(fieldX(zone.x)),y:num(fieldY(zone.y)),class:'film-zone-label'},zone.label);
     return {zone,group};
   });
   const defs = svg(ground,'defs'), prefix = 'film-route-' + ++fieldCount;
-  const routesLayer = svg(ground,'g',{transform:routeProjection});
+  const routesLayer = svg(plan,'g',{transform:routeProjection});
   const flight = model.events.some(event=>event.id==='release') ? passFlightRoute(play) : null;
   const routes = (play.routes || []).map((route,i)=>addRoute(routesLayer,defs,route,prefix,i,flight));
-  const movingBlocks = routes.filter(({route})=>route.blockTargets?.length);
+  const movingBlocks = routes.filter(({route})=>route.kind === 'block' && route.blockTargets?.length);
   for (const note of play.annotations || []) {
-    svg(ground,'text',{x:num(fieldX(note.x)),y:num(fieldY(note.y)),class:'film-annotation'},note.text);
+    svg(plan,'text',{x:num(fieldX(note.x)),y:num(fieldY(note.y)),class:'film-annotation'},note.text);
   }
   const updateTeaching = addTeachingLayer(ground);
   const tokenLayer = svg(foreground, 'g', {class:'film-players'});
@@ -223,6 +228,7 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
   const tokens = model.players.map(player=>addToken(tokenLayer,player));
   const updateBall = addBall(foreground,play);
   let surface = null, frame = null, reference = null, focused = [], destroyed = false;
+  let questionMasked = false;
 
   function paintColors() {
     root.dataset.theme = theme === 'light' ? 'light' : 'dark';
@@ -253,7 +259,7 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
     try { surface = createFilmPlayerSurface(canvas,tokens.length,WIDTH,HEIGHT); }
     catch { surface = null; }
     paintColors();
-    if (frame) updatePositions();
+    if (frame) updatePositions(true);
     refreshSurface();
   }
   function lost(event) {
@@ -262,16 +268,26 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
     surface = null;
     root.dataset.filmRenderer = 'svg';
   }
-  function updatePositions() {
+  function updatePositions(force = false) {
+    let changed = false;
     for (const [i,token] of tokens.entries()) {
       const pos = frame.positions.get(token.player.id);
+      if (!force && token.position?.x === pos.x && token.position.y === pos.y) continue;
+      token.position = pos;
       const x = fieldX(pos.x), y = fieldY(pos.y);
       attr(token.group,'transform',move(x,y));
       surface?.setPosition(i,x,y);
+      changed = true;
     }
+    return changed;
   }
-  function render(nextFrame, focusIds = nextFrame.focus.map(item=>item.id), referenceFrame = null) {
+  function render(nextFrame, focusIds = nextFrame.focus.map(item=>item.id), referenceFrame = null, maskQuestion = false) {
     if (destroyed) return;
+    if (questionMasked !== maskQuestion) {
+      questionMasked = maskQuestion;
+      visible(plan, !maskQuestion);
+    }
+    const previous = frame;
     frame = nextFrame;
     reference = referenceFrame;
     if (focusIds.length !== focused.length || focusIds.some((id,i)=>id !== focused[i])) {
@@ -295,11 +311,17 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
         attr(path,'data-emphasis',!focused.length ? 'normal' : focused.includes(route.playerId) ? 'focus' : 'dim');
       }
     }
-    updatePositions();
-    for (const {route,path} of movingBlocks) attr(path,'d',routePath(dynamicBlockRoute(play,route,frame.time)));
-    updateTeaching(frame,reference,reducedMotion);
+    const positionsChanged = previous?.positions !== frame.positions && updatePositions();
+    for (const {route,path} of movingBlocks) {
+      if (previous && !route.blockTargets.some(id => {
+        const a = previous.positions.get(id), b = frame.positions.get(id);
+        return a?.x !== b?.x || a?.y !== b?.y;
+      })) continue;
+      attr(path,'d',routePath(blockRouteAtPositions(route, id=>frame.positions.get(id))));
+    }
+    updateTeaching(frame,reference,reducedMotion,questionMasked);
     updateBall(frame);
-    drawFaces();
+    if (positionsChanged && surface) drawFaces();
     attr(root,'data-film-time',frame.time);
   }
   function choose(event) {
@@ -321,6 +343,37 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
   return {
     render,
     get renderer() { return root.dataset.filmRenderer; },
+    // Called only for the same ordered actors, geometry and timing.
+    // Refresh presentation without replacing the canvas, SVG hit targets or mask.
+    setMetadata(next) {
+      let repaint = false;
+      for (const [i, token] of tokens.entries()) {
+        const player = next.players[i], previous = token.player;
+        if (previous.displayLabel !== player.displayLabel) {
+          attr(token.group, 'aria-label', player.displayLabel);
+          token.group.querySelector('title').textContent = player.displayLabel;
+        }
+        if (previous.shape !== player.shape) {
+          const face = addFace(token.group, player.shape);
+          token.face.replaceWith(face);
+          token.face = face;
+        }
+        if (previous.shape !== player.shape || previous.color !== player.color) repaint = true;
+        token.player = player;
+      }
+      for (const [i, item] of routes.entries()) {
+        if (item.route.color !== next.play.routes[i].color) repaint = true;
+        item.route = next.play.routes[i];
+      }
+      for (const [i, item] of zones.entries()) {
+        if (item.zone.color !== next.play.zones[i].color) repaint = true;
+        item.zone = next.play.zones[i];
+      }
+      if (repaint) {
+        paintColors();
+        if (frame) drawFaces();
+      }
+    },
     setTheme(next) {
       theme = next;
       paintColors();
@@ -328,7 +381,7 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
     },
     setReducedMotion(enabled) {
       reducedMotion = enabled;
-      if (frame) updateTeaching(frame,reference,reducedMotion);
+      if (frame) updateTeaching(frame,reference,reducedMotion,questionMasked);
     },
     destroy() {
       if (destroyed) return;

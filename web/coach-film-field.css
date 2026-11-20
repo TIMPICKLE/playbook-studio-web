@@ -137,8 +137,7 @@
   stroke-linejoin: round;
 }
 .film-pitch .film-reference-position { stroke-width: 1.8; opacity: .86; }
-.coach-film[data-film-question] .film-route,
-.coach-film[data-film-question] .film-reference-position { visibility: hidden; }
+.coach-film[data-film-question] :is(.film-legend-route,.film-legend-origin) { display: none; }
 .film-pitch .film-depth-guides,
 .film-pitch .film-depth-bracket { fill: none; stroke: var(--pitch-guide); }
 .film-pitch .film-depth-guides { stroke-width: 1; stroke-dasharray: 2 4; }
