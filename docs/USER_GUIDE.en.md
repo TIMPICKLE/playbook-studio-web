@@ -121,7 +121,7 @@ Filter by team, formation group, specific formation, or English play name. Previ
 | View | Experience |
 |---|---|
 | **Traditional** | Enabled by default. Flat player markers, clear routes, and no decorative motion for everyday editing and reading |
-| **Digital** | Optional on desktop. Low-profile metal pucks sit on a light or dark enamel field. Each puck shows the position on its face and the player color around its edge. Rehearsal highlights the release, catch and blocking contact points |
+| **Digital** | Optional on desktop. Matte pucks sit on a graphite or silver field. Each face shows the position and its rim carries the player color. Selecting a player thickens their routes in the original color. Rehearsal highlights the release, catch and blocking contact points |
 
 Switch views through **Display mode** in the upper right. A notched silver ring marks a selected puck. The line of scrimmage remains visible when you hide the grid.
 

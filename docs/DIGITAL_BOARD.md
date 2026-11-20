@@ -3,7 +3,7 @@
 ## Viewing preference
 
 - `传统模式` is the default. Flat SVG symbols, solid interface surfaces, no decorative animation. Playback, speed, scrubbing, editing and exports remain functional.
-- `数字化模式` is an explicit desktop choice. It enables the existing liquid interface material and particles plus the digital board renderer.
+- `数字化模式` is an explicit desktop choice. In the editor it opens the perspective board with fixed graphite toolbars and a solid timeline. The digital workspace pauses the page’s decorative lighting, particle and liquid-material loops. The display-mode preference still applies when you visit other screens.
 - Phones and iPads cannot select digital mode. Detection includes mobile/tablet user agents, User-Agent Client Hints, touch-enabled Mac identity used by desktop-site iPads, and coarse/no-hover devices. Window width alone does not misclassify a narrow desktop browser.
 - The preference lives under `playbook-visual-mode` in local storage. It is absent from shared playbooks, JSON backups and cloud writes. Mode changes preserve selection, drafts, playback time, zoom and history.
 - Reduced motion stops decorative movement while retaining digital materials. Page hiding stops render frames. Stale asynchronous startups are disposed.
@@ -18,7 +18,7 @@ The editor loads its pinned Three.js r186 module on demand. The GPU scene and th
 
 The field is a textured mesh with projected shadows. The opaque pieces take one scene submission per draw. A retained 2000 × 1600 field texture contains the markings and route geometry. The editor can move an independent player without rebuilding the field texture. A changed route invalidates the texture. A paused or idle board sleeps once outstanding texture and interaction work finishes.
 
-The selected route or player’s routes receive a local highlight. In rehearsal, the underlying routes, optional dashes, arrowheads and block end caps remain visible. Release and catch feedback use the editor’s playback time, so moving the timeline backwards replays the same event. Reduced motion keeps a fixed receiver indicator. Pass and block geometry comes from the same football model used by the flat editor.
+Pointing to a player shows an outline. Dragging lifts the piece, and selecting it emphasizes its assignments in their original colors and line patterns. In a single-route AI preview, a Go-to-Post edit traces the new inside break once. Reduced motion shows the destination immediately. In rehearsal, the underlying routes, optional dashes, arrowheads and block end caps remain visible. Release and catch feedback use the editor’s playback time, so moving the timeline backwards replays the same event. Reduced motion keeps a fixed receiver indicator. Pass and block geometry comes from the same football model used by the flat editor.
 
 [Acceptance cases](DIGITAL_BOARD_ACCEPTANCE.md) · [Repeatable measurements](DIGITAL_BOARD_PERFORMANCE.md)
 
