@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { createFilmModel } from '../web/coach-film-model.js';
 import { createFilmField } from '../web/coach-film-field.js';
-import { starterWorkspace } from '../web/model.js';
+import { dynamicBlockRoute, starterWorkspace } from '../web/model.js';
+import { routePath } from '../web/field.js';
 import { t } from '../web/i18n.js';
 
 function scene({ play = starterWorkspace().plays[0], gl = null } = {}) {
@@ -107,6 +109,36 @@ function glRecorder() {
   gl.getExtension=()=>({loseContext:()=>{recorded.released=true;}});
   return {gl,recorded};
 }
+
+test('stationary defenders and blocked paths reuse their geometry while moving markers still follow the simulation', async () => {
+  const {play} = JSON.parse(readFileSync(new URL('../scripts/bench-digital/mesh.json',import.meta.url),'utf8'));
+  const block = play.routes.find(route => route.blockTargets?.length);
+  const movingTarget = play.players.find(player => player.id === block.blockTargets[0]);
+  const still = play.players.find(player => player.side === 'defense' && player.id !== movingTarget.id);
+  const points = [{x:movingTarget.x,y:movingTarget.y},{x:movingTarget.x+8,y:movingTarget.y+9}];
+  play.routes.push({...play.routes[0],id:'moving-defender',playerId:movingTarget.id,points,delay:.5,duration:1});
+  const {gl,recorded} = glRecorder(), f = scene({play,gl});
+  try {
+    const fixedOrigin = f.model.frameAt(0).positions.get(still.id);
+    f.at(0,[still.id]);
+    const node = f.nodeFor(still.id), reads = [];
+    const getAttribute = node.getAttribute.bind(node);
+    node.getAttribute = name => { reads.push(name); return getAttribute(name); };
+    const path = f.one(`[data-film-route="${block.id}"]`);
+    for (const time of [.2,.65,.9,1.4,1.1,4]) {
+      const frame = f.model.frameAt(time,[still.id]);
+      f.field.render(frame,[still.id]);
+      assert.strictEqual(frame.positions.get(still.id),fixedOrigin);
+      assert.deepEqual(frame.focus[0].trail,[fixedOrigin]);
+      assert.equal(path.getAttribute('d'),routePath(dynamicBlockRoute(play,block,time)));
+    }
+    const draws = recorded.draws;
+    f.at(4,[f.h,f.y]);
+    f.at(4,[f.y],f.model.frameAt(.5));
+    assert.equal(recorded.draws,draws,'focus and reference updates keep immutable GPU faces in place');
+    assert.ok(!reads.includes('transform'),'unchanged positions require no SVG transform reads');
+  } finally { await f.done(); }
+});
 
 test('GPU faces align with SVG picks; a lost and restored context keeps the exact frozen frame and focus', async()=>{
   const {gl,recorded}=glRecorder(), f=scene({gl});

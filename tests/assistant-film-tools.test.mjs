@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createBoardTools } from '../web/assistant-tools.js';
 import { boardAssistantInput, requestBoardAssistant } from '../web/assistant-provider.js';
 import { FILM_COMMAND_SCHEMAS } from '../web/coach-film-commands.js';
+import { createFilmBridge } from '../web/coach-film-bridge.js';
 import { starterWorkspace } from '../web/model.js';
 import { handleApi } from '../server/api.mjs';
 import { database } from './helpers/db.mjs';
@@ -82,6 +83,42 @@ for (const protocol of ['anthropic','responses']) {
   });
 }
 
+test('all local provider protocols and the cloud relay return the device failure when a lesson save conflicts',async t=>{
+  const receipt={error:'Another window updated the lesson.',code:'LESSON_CONFLICT',details:{}};
+  for (const transport of ['chat','responses','anthropic','cloud']) await t.test(transport,async t=>{
+    const cloud=transport==='cloud',protocol=cloud?'chat':transport;
+    const db=cloud?database(t):null,book=cloud?await bookWithViewer(db):null;
+    const play=(book?.data || starterWorkspace()).plays[0];
+    let writes=0,providerCalls=0;
+    const film={read:()=>({open:true}),execute() {
+      writes++;
+      throw Object.assign(Error(receipt.error),{code:receipt.code,details:receipt.details});
+    }};
+    const provider=async()=>{
+      providerCalls++;
+      const [name,args]=providerCalls===1
+        ? ['control_film',{command:{operation:'lesson',action:'save'}}]
+        : ['submit_result',{result:{kind:'answer',message:'Successfully saved.'}}];
+      const id='response-'+providerCalls;
+      if(protocol==='anthropic')return Response.json({stop_reason:'tool_use',content:[{type:'tool_use',id,name,input:args}]});
+      if(protocol==='responses')return Response.json({status:'completed',output:[{type:'function_call',call_id:id,name,arguments:JSON.stringify(args)}]});
+      return modelReply(tool(id,name,args));
+    };
+    if(cloud)t.mock.method(globalThis,'fetch',provider);
+    const traces=[];
+    const result=await requestBoardAssistant({
+      instruction:'Save my lesson on this device.',board:play,locale:'en',film,
+      model:{...model,provider:protocol==='anthropic'?'anthropic':'openai',protocol:protocol==='chat'?'chat-completions':protocol},
+      ...(cloud?{workspace:{id:book.id,revision:book.revision},fetchImpl:(path,options)=>post(db,path,JSON.parse(options.body),viewer,options.signal)}:{fetchImpl:provider}),
+      onEvent:event=>traces.push(event),
+    });
+    assert.equal(writes,1);assert.equal(providerCalls,1);
+    assert.equal(result.kind,'error');assert.equal(result.status,'failed');assert.equal(result.submission,'device');
+    assert.equal(result.code,receipt.code);assert.equal(result.message,receipt.error);assert.deepEqual(result.receipt,receipt);
+    assert.deepEqual(traces.filter(event=>event.type==='result'),[{type:'result',kind:'error',summary:receipt.error}]);
+  });
+});
+
 test('a cloud viewer can inspect and control the browser in one turn, with one receipt per real action', async t => {
   const db = database(t), book = await bookWithViewer(db);
   const original = db.sql.prepare('SELECT data_json,revision FROM workspaces WHERE id=?').get(book.id);
@@ -132,6 +169,37 @@ test('a cloud viewer can inspect and control the browser in one turn, with one r
   assert.deepEqual(streamedTools,['read_film','control_film','control_film','read_film','submit_result']);
   assert.deepEqual(traces,streamedTools);
   assert.deepEqual(db.sql.prepare('SELECT data_json,revision FROM workspaces WHERE id=?').get(book.id),original);
+});
+
+test('the worker and browser keep a pending timeline on the same source while a committed room is open',async t=>{
+  const db=database(t),book=await bookWithViewer(db);
+  const staged=structuredClone(book.data.plays[0]);staged.ball.passAt=1.4;
+  let providerCalls=0;
+  const film=createFilmBridge({
+    guard() {},available:()=>true,pilot:'film',source:'staged',
+    getPlay:()=>staged,getRoster:()=>[],getRoom:()=>({readState:()=>assert.fail('the committed scene belongs to another version')}),
+    open:()=>assert.fail('a staged read cannot change the room'),regular:{enabled:()=>true},
+  });
+  t.mock.method(globalThis,'fetch',async(_url,options)=>{
+    providerCalls++;
+    const messages=JSON.parse(options.body).messages;
+    const evidence=messages.filter(m=>m.role==='tool').map(m=>JSON.parse(m.content));
+    if(!evidence.length)return modelReply(tool('board','read_board',{}));
+    assert.equal(evidence[0].source,'staged');assert.equal(evidence[0].ball.passAt,1.4);
+    if(evidence.length===1)return modelReply(tool('film','read_film',{}));
+    assert.equal(evidence[1].source,'staged');assert.equal(evidence[1].projectedSource,'committed');
+    assert.equal(evidence[1].events.find(e=>e.id==='release').time,1.4);
+    return modelReply(tool('seek','control_film',{command:{operation:'event',event:'release'}}));
+  });
+  const result=await requestBoardAssistant({instruction:'Show the pending release.',locale:'en',
+    board:{...staged,play:staged,source:'staged'},workspace:{id:book.id,revision:book.revision},film,model,
+    request:async(path,{body,signal})=>(await post(db,path,body,viewer,signal)).json(),
+  });
+  assert.equal(result.kind,'error');assert.equal(result.code,'FILM_PREVIEW_PENDING');
+  assert.deepEqual(result.receipt.details,{source:'staged',choices:['apply','discard']});
+  assert.equal(providerCalls,3);
+  const persisted=JSON.parse(db.sql.prepare('SELECT data_json FROM workspaces WHERE id=?').get(book.id).data_json);
+  assert.equal(persisted.plays.find(play=>play.id===staged.id).ball.passAt,2);
 });
 
 test('an opaque continuation is bound to membership, workspace, request, and revision', async t => {

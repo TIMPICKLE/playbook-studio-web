@@ -54,7 +54,9 @@ Open the sample **Mesh** on a desktop and select **Film room** beside the play t
 
 The **AI assistant** shares the film controls. Ask it to “freeze at release, compare H and Y, pin the frame, then go back one second.” It reads the actual time and depth from the field, and can author an on-device lesson. [Film commands and receipts](docs/COACH_FILM_COMMANDS.md)
 
-Release and arrival markers appear for a valid designed pass. Schematic fields report relative depth. An optional on-device lesson can store up to three stops with a question, answer and player selection. Phones and iPads use the existing touch workspace.
+Save up to three lesson stops on this device, each with a question, an answer and the selected players. Reopen the same play in the same workspace to continue preparing the lesson. While a question is on screen, players can judge the positions for themselves. Choose **Reveal** to show the answer and depth readings. Use `Alt+↑` and `Alt+↓` to move between stops, including when a player has keyboard focus.
+
+Release and arrival markers appear for a valid designed pass. Defense-only diagrams show possession when the play assigns it. Schematic fields report relative depth. Phones and iPads use the touch workspace.
 
 [Open the desktop demo](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [Try an on-device lesson](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local?filmPilot=lesson#editor) · [Study protocol and practice plays](docs/COACH_FILM_PILOT.md) · [Film room verification](docs/acceptance/COACH_FILM.md)
 

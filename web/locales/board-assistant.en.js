@@ -1,4 +1,7 @@
 export default {
+  sharedLesson: 'The lesson is on screen. You can send commands here. Close the lesson to view the conversation and tool results.',
+  sharedPrompt: 'Enter a command (text concealed during the lesson)',
+  lessonConflict: 'Save failed. Another window updated the lesson on this device.',
   updateGroupsFirst:'Update the selected-group preview before continuing the conversation.',
   chooseGroups:'Choose change groups to keep',updateGroups:'Update preview',groupHint:'Select whole turns. Preview the selection before applying.',groupRequired:'Keep at least one group, or discard the entire proposal.',groupDependency:'This group depends on an earlier step. Keep the required preceding groups.',groupsUpdated:'Preview updated. Confirm Apply to save these changes.',
   fieldLeft:'Field left',fieldRight:'Field right',fieldMiddle:'Field middle',

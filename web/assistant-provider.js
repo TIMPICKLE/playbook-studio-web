@@ -1,7 +1,7 @@
 import { validateFilmCommand } from './coach-film-commands.js';
 import { runBoardAssistant, BOARD_AGENT_LIMITS } from './assistant-harness.js';
 import { providerMessages } from './locales/assistant-provider.js';
-import { validatePlay, COLORS, clone, decodeWorkspace, encodeWorkspace } from './model.js';
+import { validatePlay, COLORS, clone, decodeWorkspace, defaultBallHolder, encodeWorkspace } from './model.js';
 import { submitResultTool } from './assistant-schema.js';
 import { buildModelRequest, parseModelResponse, resolveModelEndpoint } from './model-protocol.js';
 import { conversationRecords } from './assistant-session.js';
@@ -23,7 +23,7 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
   const play = validatePlay({...source, id:source.id || board?.playId || 'assistant-play', title:source.title || 'Current play', book:source.book || 'offense',
     formation:source.formation || 'Custom', category:source.category || 'Custom', personnel:source.personnel || 'Custom', notes:source.notes || '', createdAt:source.createdAt || '',
     players, routes, zones:source.zones || [], annotations:source.annotations || [],
-    ball:source.ball || {holderId:players[0]?.id || '',receiverId:'',passAt:2,arriveAt:3}});
+    ball:source.ball || {holderId:defaultBallHolder(players),receiverId:'',passAt:2,arriveAt:3}});
   const flag5 = isFlag5Play(play);
   const compactPlayers = play.players.map(p => {
     const original = (board?.players || rawPlayers).find(item => item.id === p.id) || p;
@@ -46,7 +46,7 @@ export function boardAssistantInput({ instruction, board, locale, mode, previous
   return {instruction:instruction.trim(),locale:locale === 'en' ? 'en' : 'zh-CN',mode:['edit','search'].includes(mode) ? mode : 'auto',
     ...(editorContext ? {editor:editorContext} : {}),
     previous:conversationRecords(previous),
-    board:{...play, playId:play.id, players:compactPlayers, play, playersPerSide:getPlayLeague(play), gameFormat:flag5 ? 'flag5' : 'unspecified',
+    board:{...play, playId:play.id, source:board?.source === 'staged' ? 'staged' : 'committed', players:compactPlayers, play, playersPerSide:getPlayLeague(play), gameFormat:flag5 ? 'flag5' : 'unspecified',
       geometry:{losY:67,xUnitsPerYard:1.875,yUnitsPerYard:2,offenseDirection:'decreasing_y', ...(flag5 ? { scale:'diagram_grid', regulationFieldVerified:false } : {})},
       ...(play.players.some(p => p.id === selected) ? {selectedPlayerId:selected} : {}), ...(selectedIds.length ? {selectedPlayerIds:selectedIds} : {})}};
 }

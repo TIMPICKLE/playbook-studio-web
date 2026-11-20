@@ -1,9 +1,9 @@
 import { resolveBoardPlayer } from './assistant-edit.js';
 import { proposeEdit } from './assistant-proposal.js';
 import { previewEditTool, previewActionsTool, parseBoardOperations, controlFilmParameters } from './assistant-schema.js';
-import { FILM_COMMAND_SCHEMAS, validateFilmCommand } from './coach-film-commands.js';
+import { FILM_COMMAND_SCHEMAS, pendingFilmDecision, validateFilmCommand } from './coach-film-commands.js';
 import { EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
-import { parseEditorActions, prepareEditorActions, getEditorOverview } from './editor-actions.js';
+import { parseEditorActions, prepareEditorActions, getEditorOverview, usesLivePlayback } from './editor-actions.js';
 import { editorCapabilities, editorCommandSchema } from './editor-capabilities.js';
 import { loadEditableEntries } from './madden-model.js';
 import { conversationContext } from './assistant-session.js';
@@ -111,7 +111,7 @@ export function createBoardTools(input, searchCatalog, film) {
     get_command_schema: {schema:object({command:string}),description:'Get the authoritative parameter schema for a discovered editor command.',
       run(args) {const schema=(film && filmSchemas.get(args.command)) || editorCommandSchema(args.command);return schema ? {command:args.command,schema} : {error:'Unknown editor command. Consult list_capabilities.'};}},
     ...(film ? {
-      read_film: {schema:noArgs, description:'Read the actual device scene, availability, current play, event times, playback, theme, ball phase and holder, player IDs, focus, designed route depths, comparison, reference and local lesson. This also works before opening the room.',
+      read_film: {schema:noArgs, description:'Read the film source, events and availability. A committed play can provide the live scene, time, theme, ball, focus, comparison, reference and lesson. A staged preview provides its own planned events and players for inspection. Check source, open and available before reporting an action.',
         run:() => observeFilm(() => film.read())},
       control_film: {schema:controlFilmParameters,description:'Perform a requested film or lesson action on this device and return its actual updated state or a structured error. Call again for another step. Use exact event IDs and real player IDs. Save a lesson only on an explicit request.',
         run(args) {
@@ -123,6 +123,7 @@ export function createBoardTools(input, searchCatalog, film) {
       async run(args) {
         if (!editorRead) throw new Error('Read the editor context before preparing editor actions.');
         const actions=parseEditorActions(args.actions);
+        if (input.board.source === 'staged' && actions.some(usesLivePlayback)) return pendingFilmDecision(input.locale);
         if (!input.editor?.data) throw new Error('Workspace context is unavailable.');
         if (actions.some(action => action.kind === 'catalog_import' && !candidates.has(action.catalogId))) throw new Error('Search the catalog and choose a returned catalog ID before importing.');
         const catalogRows=actions.some(action => action.kind === 'catalog_import') ? input.editor.catalogRows || (await input.editor.loadCatalog?.())?.plays : undefined;

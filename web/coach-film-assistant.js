@@ -37,5 +37,5 @@ export function mountFilmAssistant(dialog, assistant) {
     return true;
   }
   trigger.addEventListener('click', () => { if (!dismiss()) assistant.open(); });
-  return {dismiss, release};
+  return {dismiss, release, setLessonOpen: open => assistant.setSharedLesson?.(open)};
 }

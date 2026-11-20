@@ -1,0 +1,129 @@
+--- a/film-bench.js
++++ b/film-bench.js
+@@ -94 +94 @@
+-      if (!normalEntry)return;
++      if (!normalEntry || query.get('experiment')==='timer40')return;
+@@ -130,0 +131,4 @@
++    if (query.get('experiment')==='timer40') {
++      const {runTimerExperiment} = await import('./film-timer-experiment.js');
++      return await runTimerExperiment({build,range,playButton,pitch,query,stage,checkField,renderer,entryState});
++    }
+--- a/film-entry-seed.js
++++ b/film-entry-seed.js
+@@ -15 +15 @@
+-  for(const key of ['run','quick','renderer','machine','visual','gesture'])if(query.has(key))choices.set(key,query.get(key));
++  for(const key of ['run','quick','renderer','machine','visual','gesture','experiment','order'])if(query.has(key))choices.set(key,query.get(key));
+--- a/playback-clock.js
++++ b/playback-clock.js
+@@ -4 +4 @@
+-  let run = null, frame = null;
++  let run = null, frame = null, timer = null;
+@@ -15,0 +16 @@
++    win.clearTimeout(timer); timer = null;
+@@ -18,0 +20,20 @@
++    // Scratch-only A/B. Both arms read the same clock and execute the
++    // production field paint. Only treatment supplies a missing presentation.
++    const trial = win.__coachCadenceExperiment;
++    const fallback = trial?.arm === 'timer40';
++    let lastDelivery = win.performance.now(), lastModelStamp = -Infinity;
++    function draw(stamp, source) {
++      const before = win.performance.now();
++      if (fallback && stamp < lastModelStamp) return;
++      lastModelStamp = stamp;
++      const at = position(stamp);
++      if (at === run.duration) {
++        run = null;
++        win.clearTimeout(timer); timer = null;
++        if (frame !== null) win.cancelAnimationFrame(frame);
++        frame = null;
++      }
++      present(at, stamp, run !== null);
++      lastDelivery = win.performance.now();
++      trial?.draws.push([source,before,at,lastDelivery-before]);
++    }
+@@ -20 +40,0 @@
+-      // A callback already dispatched before a seek/close cannot advance a new run.
+@@ -23,3 +43 @@
+-      const at = position(stamp);
+-      if (at === run.duration) run = null;
+-      present(at, stamp, run !== null);
++      draw(stamp,'raf');
+@@ -27,0 +46,7 @@
++    function rescue() {
++      timer = null;
++      if (run !== active || win.document.hidden) return;
++      const now = win.performance.now();
++      if (now-lastDelivery >= 40) draw(now,'timer');
++      if (run === active) timer = win.setTimeout(rescue,Math.max(1,40-(win.performance.now()-lastDelivery)));
++    }
+@@ -28,0 +54 @@
++    if (fallback && !win.document.hidden) timer = win.setTimeout(rescue,40);
+--- /dev/null
++++ b/film-timer-experiment.js
+@@ -0,0 +1,66 @@
++import {frameSummary,stats} from './film-clock.js';
++
++const repeatMs=5000;
++const delta=times=>times.slice(1).map((stamp,i)=>stamp-times[i]);
++export async function runTimerExperiment({build,range,playButton,pitch,query,stage,checkField,renderer,entryState}) {
++  const order=query.get('order')==='ba' ? ['timer40','raf','raf','timer40'] : ['raf','timer40','timer40','raf'];
++  const results=[],raw=[];
++  const getTime=()=>Number(pitch.dataset.filmTime);
++  let everHidden=document.hidden;
++  const visibility=()=>{if(document.hidden)everHidden=true;};
++  document.addEventListener('visibilitychange',visibility);
++  async function runRepeat(arm) {
++    checkField();
++    if (everHidden) throw Error('Foreground sampling interrupted.');
++    if (playButton.dataset.state==='pause') playButton.click();
++    range.value='0';
++    range.dispatchEvent(new Event('input',{bubbles:true}));
++    range.dispatchEvent(new Event('change',{bubbles:true}));
++    if (getTime()!==0) throw Error('Could not reset the field to the same initial frame.');
++    const trial=window.__coachCadenceExperiment={arm,draws:[]};
++    const commits=[],frames=[];
++    let frame=null;
++    const observer=new MutationObserver(()=>commits.push([performance.now(),getTime()]));
++    observer.observe(pitch,{attributes:true,attributeFilter:['data-film-time']});
++    const startedAt=performance.now();
++    try {
++      playButton.click();
++      if(playButton.dataset.state!=='pause')throw Error('Playback did not start.');
++      const probe=stamp=>{
++        frames.push([stamp,performance.now(),getTime()]);
++        frame=requestAnimationFrame(probe);
++      };
++      frame=requestAnimationFrame(probe);
++      await new Promise(resolve=>setTimeout(resolve,repeatMs));
++      checkField();
++      if(everHidden)throw Error('The page was hidden during the experiment.');
++      const endedAt=performance.now();
++      return {startedAt,endedAt,frames,commits,draws:trial.draws,lastObservedTime:getTime()};
++    } finally {
++      observer.disconnect();
++      if(frame!==null)cancelAnimationFrame(frame);
++      if(playButton.dataset.state==='pause')playButton.click();
++      delete window.__coachCadenceExperiment;
++    }
++  }
++  try {
++    for (const [index,arm] of order.entries()) {
++      stage('A/B '+(index+1)+' / 4 · '+arm);
++      const rounds=[];
++      for (let rep=0;rep<2;rep++) rounds.push(await runRepeat(arm));
++      const nativeIntervals=rounds.flatMap(r=>delta(r.frames.map(f=>f[0])));
++      const commitIntervals=rounds.flatMap(r=>delta(r.commits.map(c=>c[0])));
++      const draws=rounds.flatMap(r=>r.draws);
++      results.push({arm,nativeRaf:frameSummary(nativeIntervals),nativeCallbacks:rounds.map(r=>r.frames.length),
++        lastCommittedModelSeconds:rounds.map(r=>r.lastObservedTime),
++        fieldCommitMs:stats(commitIntervals),timerDraws:draws.filter(d=>d[0]==='timer').length,
++        nativeDraws:draws.filter(d=>d[0]==='raf').length,presentCpuMs:stats(draws.map(d=>d[3])),
++        wallMs:rounds.reduce((sum,r)=>sum+r.endedAt-r.startedAt,0),focused:document.hasFocus()});
++      raw.push({arm,rounds});
++    }
++    return {context:{...build,sample:'scratch-crossover-timer40',order,entryState,renderer,
++      scene:{players:22,routes:10,focus:['H','Y']},repeatMs,repeatsPerPeriod:2,viewport:[innerWidth,innerHeight],
++      pixelRatio:devicePixelRatio,userAgent:navigator.userAgent,visibility:document.visibilityState,embedded:window!==window.top,
++      metric:'native rAF timestamp intervals within each play; leading/trailing partial intervals omitted. Field DOM commits are observed separately.'},rounds:results,raw};
++  } finally {document.removeEventListener('visibilitychange',visibility);delete window.__coachCadenceExperiment;}
++}

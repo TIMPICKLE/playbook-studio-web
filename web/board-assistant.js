@@ -35,12 +35,14 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
         <button class="ba-pill" type="button" data-ba="search" data-text="search"></button></div></div>
         <details class="ba-trace" hidden><summary data-ba-trace-title></summary><ol class="ba-trace-list"></ol></details></div>
       <footer class="ba-footer"><button type="button" class="ba-mode ba-pill" data-ba="clear-mode" hidden></button><div class="ba-status" role="status" aria-live="polite"></div>
-        <div class="ba-compose"><textarea rows="2" maxlength="1600" data-ba-prompt></textarea>
+        <div class="ba-compose"><textarea rows="2" maxlength="1600" data-ba-prompt></textarea><input type="password" class="ba-covered-prompt" maxlength="1600" autocomplete="off" spellcheck="false" hidden>
         <div class="ba-controls"><button type="button" class="ba-icon" data-ba="mic">${glyph('mic')}</button>
         <button type="button" class="ba-icon ba-send" data-ba="send">${glyph('send')}</button></div></div></footer></section>`;
   const q = selector => root.querySelector(selector);
   const button = name => q('[data-ba="' + name + '"]');
-  const panel = q('.ba-panel'), output = q('.ba-output'), config = q('.ba-config'), prompt = q('[data-ba-prompt]');
+  const panel = q('.ba-panel'), output = q('.ba-output'), config = q('.ba-config');
+  const ordinaryPrompt = q('[data-ba-prompt]'), coveredPrompt = q('.ba-covered-prompt');
+  let prompt = ordinaryPrompt, sharedLesson = false, coveredDraft = '';
   const status = q('.ba-status'), key = q('[data-ba-key]'), model = q('[data-ba-model]'), provider = q('[data-ba-provider]');
   const protocol = q('[data-ba-protocol]'), baseUrl = q('[data-ba-base-url]');
   provider.value = 'openai';
@@ -115,9 +117,10 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   }
   function traceView() {
     const details = q('.ba-trace'), list = q('.ba-trace-list'), lang = copy();
-    details.hidden = !trace.length || !config.hidden;
+    details.hidden = sharedLesson || !trace.length || !config.hidden;
     q('[data-ba-trace-title]').textContent = `${lang.viewProcess} · ${trace.length}`;
     list.replaceChildren();
+    if (sharedLesson) return;
     for (const entry of trace) {
       const item = doc.createElement('li'), title = doc.createElement('strong');
       const label = entry.type === 'tool' ? lang.traceTool : entry.type === 'validation_error' ? lang.traceValidation : lang.traceResult;
@@ -148,7 +151,12 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     traceView();
   }
 
-  function announce(message = '', error = false, spokenOnly = false) {
+  function announce(message = '', error = false, spokenOnly = false, code) {
+    if (sharedLesson && message) {
+      const lang = copy();
+      const safe = [lang.configure, lang.customUrlRequired, lang.listening, lang.micError, lang.micDenied];
+      if (!safe.includes(message)) message = code === 'LESSON_CONFLICT' ? lang.lessonConflict : error ? lang.runStates.failed : '';
+    }
     status.textContent = message;
     status.classList.toggle('ba-error', error);
     status.classList.toggle('ba-spoken-only', spokenOnly);
@@ -209,10 +217,10 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   }
   function historyView() {
     const lang = copy(), records = thread.records(), history = q('.ba-history'), list = q('.ba-history-list');
-    history.hidden = !records.length || !config.hidden;
+    history.hidden = sharedLesson || !records.length || !config.hidden;
     q('[data-ba-history-title]').textContent = `${lang.conversation} · ${records.length}`;
     list.replaceChildren();
-    records.forEach((record, index) => {
+    if (!sharedLesson) records.forEach((record, index) => {
       const item = doc.createElement('li'); item.className = 'ba-turn';
       const heading = doc.createElement('div'); heading.className = 'ba-turn-heading';
       const state = doc.createElement('span'); state.className = 'ba-turn-status'; state.dataset.status = record.status || 'answered';
@@ -235,6 +243,17 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     const lang = copy();
     traceView(); historyView();
     output.replaceChildren();
+    if (sharedLesson) {
+      output.hidden = !config.hidden;
+      q('.ba-welcome').hidden = true;
+      if (config.hidden) {
+        const hint = doc.createElement('p'); hint.textContent = lang.sharedLesson;
+        output.append(hint);
+        if (lastError && !pending) output.append(pill('retry', lang.retry, !!applying));
+        if (staged) output.append(pill('discard', lang.discard, !!pending || !!applying));
+      }
+      return;
+    }
     output.hidden = (!reply && !staged) || !config.hidden;
     q('.ba-welcome').hidden = !!reply || !!staged || !config.hidden;
     if (reply?.kind === 'search') {
@@ -304,6 +323,28 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     config.hidden = !show; outputView(); updateButtons();
     if (show) key.focus();
   }
+  function promptText() {
+    return sharedLesson && coveredDraft.replace(/[\r\n]/g, '') === prompt.value ? coveredDraft : prompt.value;
+  }
+  function setPrompt(value) {
+    coveredDraft = sharedLesson ? value : '';
+    prompt.value = value;
+  }
+  function setSharedLesson(active) {
+    if (sharedLesson === active) return;
+    const draft = promptText(), hadFocus = doc.activeElement === prompt;
+    stopSpeech();
+    prompt.hidden = true; prompt.removeAttribute('data-ba-prompt'); prompt.value = '';
+    sharedLesson = active;
+    panel.toggleAttribute('data-ba-shared-lesson', active);
+    prompt = active ? coveredPrompt : ordinaryPrompt;
+    prompt.hidden = false; prompt.setAttribute('data-ba-prompt','');
+    setPrompt(draft);
+    label(prompt, active ? copy().sharedPrompt : copy().prompt);
+    prompt.placeholder = active ? copy().sharedPrompt : clarification ? copy().clarified : copy().prompt;
+    announce(); updateButtons(); outputView();
+    if (hadFocus) prompt.focus({preventScroll:true});
+  }
   // An open panel is a window of the whole page, not of the pitch: it lives in a
   // viewport layer so it can be moved anywhere and is never clipped by the board.
   // Phones and touch tablets dock it above the software keyboard instead.
@@ -354,7 +395,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       locale = getLocale();
       for (const n of root.querySelectorAll('[data-text]')) n.textContent = lang[n.dataset.text];
       for (const action of ['open','settings','close']) label(button(action), lang[action]);
-      label(prompt, lang.prompt);
+      label(prompt, sharedLesson ? lang.sharedPrompt : lang.prompt);
       q('[data-ba-drag]').title = lang.move;
       syncModelOptions();
     }
@@ -362,7 +403,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     q('.ba-scope').textContent = ctx.title || '';
     updateGuide(ctx, lang);
     button('edit').hidden = !!ctx.readOnly;
-    prompt.placeholder = clarification ? lang.clarified : lang.prompt;
+    prompt.placeholder = sharedLesson ? lang.sharedPrompt : clarification ? lang.clarified : lang.prompt;
     updateButtons(); outputView();
   }
   function mount(next) {
@@ -402,6 +443,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     syncPanelLayout();
     return () => {
       if (presentation !== state || destroyed) return;
+      setSharedLesson(false);
       presentation = null;
       localExamples.remove();
       ordinaryExamples.hidden = false;
@@ -416,7 +458,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   }
   async function send() {
     if (pending) { cancel(); prompt.focus(); return; }
-    const lang = copy(), text = prompt.value.trim();
+    const lang = copy(), text = promptText().trim();
     if (!text || recognition || applying || continuing) return;
     if (!key.value.trim() || !model.value.trim()) { showConfig(true); announce(lang.configure); return; }
     if (provider.value === 'custom' && !baseUrl.value.trim()) { showConfig(true); announce(lang.customUrlRequired,true); baseUrl.focus(); return; }
@@ -457,8 +499,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       reply = result; runState = result.kind === 'preview' ? 'preview' : result.kind === 'clarify' ? 'clarify' : 'complete';
       if (result.kind === 'answer' && result.highlights) onHighlight?.(result.highlights);
       if (!presentation && result.kind === 'preview' && win.matchMedia?.('(max-width: 600px)').matches) panel.classList.add('ba-collapsed');
-      prompt.value = '';
-      prompt.placeholder = clarification ? lang.clarified : lang.prompt;
+      setPrompt('');
+      prompt.placeholder = sharedLesson ? lang.sharedPrompt : clarification ? lang.clarified : lang.prompt;
       outputView(); q('.ba-content').scrollTop = q('.ba-content').scrollHeight;
       announce(result.kind === 'search' ? lang.matches + ' · ' + result.items.length : result.message || lang.change, false, true);
       if (clarification) prompt.focus();
@@ -467,7 +509,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
         // A failed turn stays in the thread: the next message usually completes it.
         thread.add({instruction, kind:'error', status:TURN_STATUS.failed, message:String(error?.message || lang.error).slice(0, 400)});
         lastError = {instruction,message:String(error?.message || lang.error).slice(0,400)}; runState = 'failed';
-        announce(lastError.message, true);
+        announce(lastError.message, true, false, error?.code);
       }
     } finally {
       if (pending === control) { pending = null; activeInstruction = ''; updateButtons(); outputView(); }
@@ -613,7 +655,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     if (update) update.disabled = !changed || !selectedGroups.size;
     const error = q('.ba-group-error'); if(error){error.textContent=!selectedGroups.size?copy().groupRequired:'';error.hidden=!error.textContent;}
   });
-  prompt.addEventListener('input', updateButtons);
+  ordinaryPrompt.addEventListener('input', updateButtons);
+  coveredPrompt.addEventListener('input', () => { coveredDraft = ''; updateButtons(); });
   provider.addEventListener('change', () => { key.value = ''; baseUrl.value = ''; model.value = MODEL_PROVIDER_PRESETS[provider.value].defaultModel; syncModelOptions(true); key.focus(); });
   root.addEventListener('keydown', event => {
     if (!presentation || event.key !== 'Tab') event.stopPropagation();
@@ -658,7 +701,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   function refreshPreview() { if (staged) outputView(); }
   function saveSession() {
     if (scope == null) return;
-    sessions.set(scope,{thread,reply:reply?.kind === 'preview' ? null : reply,trace,runNumber,clarification,selectedMode,prompt:prompt.value,lastError,lastAppliedTurns,targetCandidates});
+    sessions.set(scope,{thread,reply:reply?.kind === 'preview' ? null : reply,trace,runNumber,clarification,selectedMode,prompt:promptText(),lastError,lastAppliedTurns,targetCandidates});
   }
   function switchScope(next, {adopting = false} = {}) {
     if (scope === next) return;
@@ -672,7 +715,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     scope = next; thread = saved?.thread || createConversation();
     reply = saved?.reply || null; trace = saved?.trace || []; runNumber = saved?.runNumber || 0;
     clarification = saved?.clarification || ''; selectedMode = saved?.selectedMode || 'auto';
-    prompt.value = saved?.prompt || ''; lastError = saved?.lastError || null; lastAppliedTurns = saved?.lastAppliedTurns || []; targetCandidates = saved?.targetCandidates || [];
+    setPrompt(saved?.prompt || ''); lastError = saved?.lastError || null; lastAppliedTurns = saved?.lastAppliedTurns || []; targetCandidates = saved?.targetCandidates || [];
     runState = staged && movingTransaction ? 'applying' : lastError ? 'failed' : 'idle';
     q('.ba-trace').open = false;
   }
@@ -688,8 +731,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   }
   function compose(instruction, {send:submit = false} = {}) {
     if (destroyed) return;
-    open(); prompt.value = String(instruction || '').slice(0,prompt.maxLength); updateButtons(); prompt.focus();
+    open(); setPrompt(String(instruction || '').slice(0,prompt.maxLength)); updateButtons(); prompt.focus();
     if (submit) void send();
   }
-  return {mount, presentIn, refresh, refreshLayout:syncPanelLayout, refreshPreview, open, close, destroy, adoptScope, notifyTransaction, compose};
+  return {mount, presentIn, setSharedLesson, refresh, refreshLayout:syncPanelLayout, refreshPreview, open, close, destroy, adoptScope, notifyTransaction, compose};
 }

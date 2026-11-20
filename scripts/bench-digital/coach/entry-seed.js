@@ -12,7 +12,7 @@ async function start() {
   localStorage.setItem(VISUAL_MODE_KEY,query.get('visual')==='digital'?'digital':'traditional');
   localStorage.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify({dismissed:true,completed:[]}));
   const choices=new URLSearchParams();
-  for(const key of ['run','quick','renderer','machine','visual'])if(query.has(key))choices.set(key,query.get(key));
+  for(const key of ['run','quick','renderer','machine','visual','gesture'])if(query.has(key))choices.set(key,query.get(key));
   sessionStorage.setItem('coach-film-normal-entry:'+new URL('.',location.href).pathname,choices.toString());
   location.replace('./index.html#editor');
 }

@@ -50,11 +50,12 @@ async function sample(name,afterFrame) {
   try { clock=await sampleClock(duration,schedule,originalCancel); }
   finally {clearInterval(timer);}
   const until=performance.now();
-  const entry={name,clock:{frameIntervalMs:clock.frameIntervalMs,over33_3msPercent:clock.over33_3msPercent},
+  const {raw:rawClock,...clockSummary}=clock;
+  const entry={name,clock:clockSummary,
     sampleWindowMs:[since,until],timerIntervalMs:timerIntervals.length?stats(timerIntervals):null,frameAgeMs:stats(frameAge),
     callbackCpuMs:Object.fromEntries(Object.entries(callbacks).map(([k,samples])=>[k,stats(samples)])),
     page:pageState(),lastPlayTime:lastPlayTime??null,
-    raw:{clock:clock.raw,cpu:Object.fromEntries(Object.entries(callbacks).map(([k,samples])=>[k,samples.map(round)]))}};
+    raw:{clock:rawClock,cpu:callbacks}};
   callbacks=null;stages.push(entry);
 }
 async function waitFor(selector) {
@@ -174,9 +175,9 @@ async function start() {
     try {
       range.value=String(time);range.dispatchEvent(new Event('input',{bubbles:true}));
       const afterInput=performance.now();record();
-      do{await frame();if(performance.now()-start>4000||backgrounded)throw Error('Seek did not commit in the foreground.');}while(!matches());
+      do{await frame();if(backgrounded||(!matches()&&performance.now()-start>4000))throw Error('Seek did not commit in the foreground.');}while(!matches());
       record();
-      input.push({eventCpuMs:round(afterInput-start),inputToFieldCommitMs:round(commitMs),inputToObservedFrameMs:round(performance.now()-start)});
+      input.push({eventCpuMs:afterInput-start,inputToFieldCommitMs:commitMs,inputToMatchingRafMs:performance.now()-start});
     } finally{mutation.disconnect();}
   }
   dialog.querySelector('[data-film-action=exit]').click();

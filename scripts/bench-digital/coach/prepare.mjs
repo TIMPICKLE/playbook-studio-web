@@ -33,6 +33,7 @@ async function hashSnapshot(directory) {
 await hashSnapshot(dist);
 const fixture = await readFile(join(root, 'scripts/bench-digital/mesh.json'));
 const driver = await readFile(join(here, 'page.js'));
+const pointerTrial = await readFile(join(here, 'pointer-trial.js'));
 const clock = await readFile(join(here,'clock.js'));
 const clockPage = await readFile(join(here,'clock-page.js'));
 const profile = await readFile(join(here,'profile.js'));
@@ -40,6 +41,7 @@ const styleDriver=await readFile(join(here,'style-stage.js'));
 const entryDriver=await readFile(join(here,'entry-seed.js'));
 await writeFile(join(dist, 'film-bench-scene.json'), fixture);
 await writeFile(join(dist, 'film-bench.js'), driver);
+await writeFile(join(dist, 'pointer-trial.js'), pointerTrial);
 await writeFile(join(dist,'film-clock.js'),clock);
 await writeFile(join(dist,'film-clock-page.js'),clockPage);
 await writeFile(join(dist,'film-profile.js'),profile);
@@ -52,6 +54,7 @@ await writeFile(join(dist, 'film-bench-build.json'), JSON.stringify({
   sourceSha256: fingerprint.digest('hex'),
   fixtureSha256: createHash('sha256').update(fixture).digest('hex'),
   driverSha256: createHash('sha256').update(driver).digest('hex'),
+  pointerTrialSha256:createHash('sha256').update(pointerTrial).digest('hex'),
   clockSha256:createHash('sha256').update(clock).update(clockPage).digest('hex'),
   profileSha256:createHash('sha256').update(profile).digest('hex'),
   freshStyleDriverSha256:createHash('sha256').update(styleDriver).digest('hex'),

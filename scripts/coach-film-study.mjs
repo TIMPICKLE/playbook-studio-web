@@ -51,6 +51,9 @@ function median(numbers) {
 export async function summarize(sessions, comparator) {
   const keys = { A: await answerKey('A'), B: await answerKey('B') };
   const seen = new Set(), gains = [], byRole = { C: { n: 0, film: 0 }, P: { n: 0, film: 0 } };
+  const conditions = Object.fromEntries(['film', comparator].map(mode => [mode, {
+    played: 0, playbackKnown: 0, visibleStalls: 0, cadenceObserved: 0, measuredFrameP95Ms: [],
+  }]));
   let filmSuccess = 0, controlSuccess = 0;
   for (const session of sessions) {
     const { code, trials } = session;
@@ -60,6 +63,18 @@ export async function summarize(sessions, comparator) {
       trial.task !== expected[i].task || trial.mode !== expected[i].mode)) throw Error(`编号 ${code} 的题目或顺序有误。`);
     seen.add(code);
     const results = trials.map(trial => ({ ...trial, ...scoreTrial(trial, keys[trial.task]) }));
+    for (const trial of trials) {
+      const condition = conditions[trial.mode];
+      if (typeof trial.usedPlayback === 'boolean') {
+        condition.playbackKnown++;
+        if (trial.usedPlayback) condition.played++;
+      }
+      if (typeof trial.observedStall === 'boolean') {
+        condition.cadenceObserved++;
+        if (trial.observedStall) condition.visibleStalls++;
+      }
+      if (Number.isFinite(trial.frameP95Ms) && trial.frameP95Ms > 0) condition.measuredFrameP95Ms.push(trial.frameP95Ms);
+    }
     const film = results.find(row => row.mode === 'film'), control = results.find(row => row.mode === comparator);
     byRole[code[0]].n++;
     if (film.success) { filmSuccess++; byRole[code[0]].film++; }
@@ -71,7 +86,7 @@ export async function summarize(sessions, comparator) {
   const total = seen.size;
   const successGate = filmSuccess >= 6 && byRole.C.film >= 3 && byRole.P.film >= 3;
   const overControl = filmSuccess > controlSuccess || (filmSuccess === controlSuccess && pairedGain != null && pairedGain >= .25);
-  return { total, filmSuccess, controlSuccess, byRole, pairs: gains.length, pairedGain,
+  return { total, filmSuccess, controlSuccess, byRole, conditions, pairs: gains.length, pairedGain,
     decision: total < 8 ? 'incomplete' : successGate && overControl ? 'passes-pilot-task' : 'review-before-expansion' };
 }
 
@@ -118,7 +133,15 @@ async function run(code, target, comparator) {
         ['', 'h', 'y'].includes(value) ? value.toUpperCase() || null : undefined);
       const evidence = await ask(rl, '参与者是否指出同一帧上沿进攻方向的判断依据？(y/n) ', yesNo);
       const prompted = await ask(rl, '主持人是否给过操作或答案提示？(y/n) ', yesNo);
-      trials.push({ task, mode, elapsedMs, frame, deeper, evidence, prompted });
+      const observed = value => value === '' ? null : yesNo(value);
+      const usedPlayback = await ask(rl, '参与者是否按过播放？(y/n，未观察到请回车) ', observed);
+      const observedStall = await ask(rl, '在这次操作中是否看到画面停顿？(y/n，未观察到请回车) ', observed);
+      const frameP95Ms = await ask(rl, '本回合前台记录的帧间隔 P95（毫秒，无测量请回车）：', value => {
+        if (!value) return null;
+        const ms = Number(value);
+        return Number.isFinite(ms) && ms > 0 ? ms : undefined;
+      });
+      trials.push({ task, mode, elapsedMs, frame, deeper, evidence, prompted, usedPlayback, observedStall, frameP95Ms });
     }
     await writeFile(path, JSON.stringify({ code, comparator, trials }, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
     console.log(`两次观察已保存在本机 ${path}`);
@@ -140,6 +163,11 @@ async function main(args) {
       { condition: 'film · coaches', completed: result.byRole.C.film, observed: result.byRole.C.n },
       { condition: 'film · players', completed: result.byRole.P.film, observed: result.byRole.P.n },
     ]);
+    console.table(Object.entries(result.conditions).map(([condition, observations]) => ({
+      condition, '使用播放 / 已观察': observations.played + '/' + observations.playbackKnown,
+      '可见停顿 / 已观察': observations.visibleStalls + '/' + observations.cadenceObserved,
+      '实测帧间隔 P95 (ms)': observations.measuredFrameP95Ms.join(', ') || '无采样',
+    })));
     console.log(`双臂成功配对 ${result.pairs}；用时中位缩短 ${result.pairedGain == null ? '待至少 4 对再报告' : (100 * result.pairedGain).toFixed(1) + '%'}。`);
     console.log({ incomplete: '试点未收齐 4 位教练和 4 位球员。', 'passes-pilot-task': '本轮解题门槛通过；请另查视觉辨识、误读与技术回归。', 'review-before-expansion': '本轮解题门槛未通过；请复盘失败样本。' }[result.decision]);
     return;

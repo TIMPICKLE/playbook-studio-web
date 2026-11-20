@@ -64,7 +64,7 @@ test('new plays use actual formations, stable IDs, valid ball references and one
   assert.equal(play.formation, '4–3');
   assert.equal(play.players.length, 11);
   assert.ok(play.players.every(player => player.side === 'defense'));
-  assert.ok(play.players.some(player => player.id === play.ball.holderId));
+  assert.equal(play.ball.holderId, '');
   assert.deepEqual(prepareEditorActions(structuredClone(input), actions), plan);
   assert.deepEqual(decodeWorkspace(encodeWorkspace(plan.data)), plan.data);
   assert.throws(() => prepareEditorActions(input, [{...actions[0], formation:'Invented front'}]), /formation/);

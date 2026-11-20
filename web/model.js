@@ -54,16 +54,76 @@ export function formationPlayers(formation = 'Gun Trips', count = 11, side) {
   return result;
 }
 
+export function defaultBallHolder(players) {
+  return players.find(player => player.side === 'offense' && player.label === 'QB')?.id
+    ?? players.find(player => player.side === 'offense')?.id ?? '';
+}
+
+export function setBallHolder(play, holderId, explicit = false) {
+  const { ball } = play;
+  ball.holderId = holderId;
+  delete ball.unconfirmedHolderId;
+  delete ball.holderConfirmed;
+  if (explicit && play.players.some(player => player.id === holderId && player.side === 'defense')) {
+    ball.holderConfirmed = true;
+  }
+  if (!holderId || holderId === ball.receiverId) ball.receiverId = '';
+}
+
 export function makePlay({ title = '新战术', formation = 'Gun Trips', book = 'offense', count = 11 } = {}) {
   formation = resolveFormation(formation, book, count);
   const players = formationPlayers(formation, count, book === 'defense' ? 'defense' : 'offense');
-  return { id: uid(), title, book, formation, ...(LEAGUE_SIZES.includes(count) ? { league: count } : {}), category: book === 'defense' ? '区域防守' : '传球', personnel: count === 11 ? '11 personnel' : count === 5 ? '5 人腰旗' : `${count} 人制`, notes: '', favorite: false, players, routes: [], zones: [], annotations: [], ball: { holderId: players.find(p => p.label === 'QB')?.id || players[0].id, receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString() };
+  return { id: uid(), title, book, formation, ...(LEAGUE_SIZES.includes(count) ? { league: count } : {}), category: book === 'defense' ? '区域防守' : '传球', personnel: count === 11 ? '11 personnel' : count === 5 ? '5 人腰旗' : `${count} 人制`, notes: '', favorite: false, players, routes: [], zones: [], annotations: [], ball: { holderId: defaultBallHolder(players), receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString() };
 }
 
 export function addRoute(play, label, waypoints, kind = 'route', options = {}) {
   const p = play.players.find(p => p.label === label);
   if (!p) return;
   play.routes.push({ id: uid(), playerId: p.id, points: [{ x: p.x, y: p.y }, ...waypoints.map(([x, y]) => ({ x, y }))], kind, color: kind === 'pass' ? COLORS.pass : p.color, smooth: false, endCap: kind === 'block' ? 'bar' : 'arrow', delay: 0, duration: kind === 'block' ? 2 : 4, optional: false, ...options });
+}
+
+function starterDefenses() {
+  const cover3 = makePlay({ title: 'Cover 3 · 三深区', formation: '4–3', book: 'defense' });
+  cover3.favorite = true;
+  for (const [label, x, y] of [['CB', 14, 27], ['FS', 50, 20], ['SS', 80, 27], ['W', 25, 49], ['M', 48, 46], ['S', 72, 49]]) {
+    const p = cover3.players.find(p => p.label === label && !cover3.routes.some(r => r.playerId === p.id));
+    if (p) { cover3.routes.push({ id: uid(), playerId: p.id, points: [{ x: p.x, y: p.y }, { x, y }], kind: 'route', color: '#88bfff', smooth: false, endCap: 'arrow', delay: 0, duration: 3, optional: false }); cover3.zones.push({ id: uid(), x, y, rx: label === 'CB' || label === 'FS' || label === 'SS' ? 16 : 12, ry: 12, color: '#88bfff', label: label === 'CB' || label === 'FS' || label === 'SS' ? 'DEEP ⅓' : 'UNDER' }); }
+  }
+  cover3.notes = '三名防守者负责纵深，各守三分之一；下层覆盖者保护短传区域。示例区域仅作教学示意。';
+  const blitz = makePlay({ title: 'Nickel Blitz · 槽位冲传', formation: 'Nickel', book: 'defense' }); blitz.category = '冲传';
+  addRoute(blitz, 'NB', [[68, 64], [53, 77]], 'route', { color: '#ffd166', duration: 3 });
+  for (const label of ['DE', 'DT', 'M']) { const p = blitz.players.find(p => p.label === label); addRoute(blitz, label, [[p.x, 75]], 'route', { duration: 3 }); }
+  return [cover3, blitz];
+}
+
+function defenseDiagramKey(play) {
+  const order = new Map(play.players.map((player, index) => [player.id, index]));
+  return JSON.stringify([
+    play.formation, play.players.map(p => [p.label, p.side, p.x, p.y]),
+    (play.routes || []).map(r => [order.get(r.playerId), r.kind, r.optional, r.smooth, r.delay, r.duration,
+      r.points.map(p => [p.x, p.y])]),
+    (play.zones || []).map(z => [z.x, z.y, z.rx, z.ry, z.label]),
+    (play.annotations || []).map(a => [a.x, a.y, a.text]),
+  ]);
+}
+
+let starterDefenseKeys;
+export function normalizePlayBall(play) {
+  const { holderId, passAt, arriveAt, holderConfirmed, unconfirmedHolderId } = play.ball;
+  const receiverId = play.ball.receiverId || '';
+  const ball = { holderId, receiverId, passAt, arriveAt };
+  if (holderId && holderConfirmed === true) return { ...ball, holderConfirmed: true };
+  if (!holderId && unconfirmedHolderId && play.players.some(p => p.id === unconfirmedHolderId)) {
+    return { ...ball, unconfirmedHolderId };
+  }
+  // Old Cover 3 and Nickel Blitz seeds pointed to the first DE as a fallback.
+  // Match their actual geometry before marking the old ID for coach confirmation.
+  if (holderId && !receiverId && passAt === 2 && arriveAt === 3 && play.book === 'defense'
+      && holderId === play.players[0]?.id && play.players.length === 11 && play.players.every(p => p.side === 'defense')) {
+    starterDefenseKeys ??= new Set(starterDefenses().map(defenseDiagramKey));
+    if (starterDefenseKeys.has(defenseDiagramKey(play))) return { ...ball, holderId: '', unconfirmedHolderId: holderId };
+  }
+  return ball;
 }
 
 export function starterWorkspace({ demoDepth = false } = {}) {
@@ -90,16 +150,7 @@ export function starterWorkspace({ demoDepth = false } = {}) {
   zone.category = '跑球'; addRoute(zone, 'RB', [[50, 72], [57, 55], [57, 35]], 'route', { smooth: true });
   for (const label of ['LT', 'LG', 'C', 'RG', 'RT']) { const p = zone.players.find(p => p.label === label); addRoute(zone, label, [[p.x + 3, 58]], 'block'); }
   zone.ball.holderId = zone.players.find(p => p.label === 'RB').id;
-  const cover3 = makePlay({ title: 'Cover 3 · 三深区', formation: '4–3', book: 'defense' });
-  cover3.favorite = true;
-  for (const [label, x, y] of [['CB', 14, 27], ['FS', 50, 20], ['SS', 80, 27], ['W', 25, 49], ['M', 48, 46], ['S', 72, 49]]) {
-    const p = cover3.players.find(p => p.label === label && !cover3.routes.some(r => r.playerId === p.id));
-    if (p) { cover3.routes.push({ id: uid(), playerId: p.id, points: [{ x: p.x, y: p.y }, { x, y }], kind: 'route', color: '#88bfff', smooth: false, endCap: 'arrow', delay: 0, duration: 3, optional: false }); cover3.zones.push({ id: uid(), x, y, rx: label === 'CB' || label === 'FS' || label === 'SS' ? 16 : 12, ry: 12, color: '#88bfff', label: label === 'CB' || label === 'FS' || label === 'SS' ? 'DEEP ⅓' : 'UNDER' }); }
-  }
-  cover3.notes = '三名防守者负责纵深，各守三分之一；下层覆盖者保护短传区域。示例区域仅作教学示意。';
-  const blitz = makePlay({ title: 'Nickel Blitz · 槽位冲传', formation: 'Nickel', book: 'defense' }); blitz.category = '冲传';
-  addRoute(blitz, 'NB', [[68, 64], [53, 77]], 'route', { color: '#ffd166', duration: 3 });
-  for (const label of ['DE', 'DT', 'M']) { const p = blitz.players.find(p => p.label === label); addRoute(blitz, label, [[p.x, 75]], 'route', { duration: 3 }); }
+  const [cover3, blitz] = starterDefenses();
   const goal = makePlay({ title: 'Field Goal · 射门保护', formation: 'Field Goal', book: 'special' }); goal.category = '射门'; goal.personnel = 'Field Goal Unit';
   addRoute(goal, 'K', [[53, 80]], 'route', { duration: 2 }); goal.ball.holderId = goal.players.find(p => p.label === 'H').id;
   const roster = [{ id: uid(), name: 'TIM', number: '12', position: 'QB' }, { id: uid(), name: 'Alex', number: '10', position: 'WR' }, { id: uid(), name: 'Chris', number: '22', position: 'RB' }];
@@ -229,11 +280,19 @@ export function blockContact(route, time) {
 // stored waypoints as a fallback for old plays or a removed target.
 export function dynamicBlockRoute(play, route, time, visiting = new Set(), cache) {
   if (route.kind !== 'block' || !route.blockTargets?.length) return route;
+  return blockRouteAtPositions(route, id => {
+    const target = play.players.find(player => player.id === id);
+    return target && !visiting.has(id) ? animatedPlayer(play, target, time, visiting, cache) : null;
+  });
+}
+
+// A rendered frame already has every defender's evaluated position. Use the
+// same contact geometry for the field and for recursive movement sampling.
+export function blockRouteAtPositions(route, positionFor) {
   const points = [route.points[0]];
   for (let i = 0; i < route.points.length - 1; i++) {
-    const target = play.players.find(p => p.id === route.blockTargets[i]);
-    if (!target || visiting.has(target.id)) { points.push(route.points[i + 1]); continue; }
-    const defender = animatedPlayer(play, target, time, visiting, cache);
+    const defender = positionFor(route.blockTargets[i]);
+    if (!defender) { points.push(route.points[i + 1]); continue; }
     const from = points.at(-1);
     const dx = (from.x - defender.x) * 9.64, dy = (from.y - defender.y) * 7.6;
     const distance = Math.hypot(dx, dy);
@@ -338,6 +397,7 @@ export function createAnimationSampler(play) {
     for (const route of active) if (!route.blockTargets?.length) fixedPath(cache, route);
   }
   return {
+    hasPlayerRoute: id => routes.has(id),
     playerAt: (player, time) => animatedPlayer(play, player, time, undefined, cache),
     ballAt: time => animatedBall(play, time, cache),
   };
@@ -382,10 +442,12 @@ export function validatePlay(p) {
   }), '路线');
   const zones = unique(array(p.zones, 60, '区域').map(z => ({ id: id(z.id), x: num(z.x, 0, 100, '区域横坐标'), y: num(z.y, 0, 100, '区域纵坐标'), rx: num(z.rx, 1, 50, '区域半径'), ry: num(z.ry, 1, 50, '区域半径'), color: col(z.color), label: text(z.label, 80, '区域名称') })), '区域');
   const annotations = unique(array(p.annotations, 100, '标注').map(a => ({ id: id(a.id), x: num(a.x, 0, 100, '标注横坐标'), y: num(a.y, 0, 100, '标注纵坐标'), text: text(a.text, 200, '标注内容') })), '标注');
-  if (!p.ball || (reference ? p.ball.holderId !== '' || p.ball.receiverId !== '' : !playerIds.has(p.ball.holderId) || p.ball.receiverId && !playerIds.has(p.ball.receiverId))) fail('持球人或接球人不存在');
+  if (!p.ball || (p.ball.holderId !== '' && !playerIds.has(p.ball.holderId))
+      || (p.ball.receiverId && (!p.ball.holderId || !playerIds.has(p.ball.receiverId)))
+      || (reference && p.ball.receiverId !== '')) fail('持球人或接球人不存在');
   const passAt = num(p.ball.passAt, 0, 10, '传球时间'), arriveAt = num(p.ball.arriveAt, .1, 15, '接球时间');
   if (arriveAt <= passAt) fail('接球时间须晚于传球时间');
-  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), ...(p.league === undefined ? {} : { league: choice(p.league, LEAGUE_SIZES, '人数') }), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: { holderId: p.ball.holderId, receiverId: p.ball.receiverId || '', passAt, arriveAt }, createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}), ...(diagramSource ? { diagramSource } : {}) };
+  return { id: id(p.id), title: text(p.title, 120, '战术名称'), book: choice(p.book, Object.keys(BOOKS), '战术本'), formation: text(p.formation, 100, '阵型'), ...(p.league === undefined ? {} : { league: choice(p.league, LEAGUE_SIZES, '人数') }), category: text(p.category, 60, '分类'), personnel: text(p.personnel, 80, '人员组'), notes: text(p.notes, 10000, '说明'), favorite: !!p.favorite, players, routes, zones, annotations, ball: normalizePlayBall(p), createdAt: text(p.createdAt || '', 100, '创建时间'), ...(reference ? { reference } : {}), ...(diagramSource ? { diagramSource } : {}) };
 }
 export function validateReference(r) {
   for (const key of ['provider', 'catalogId', 'team', 'game', 'sourceUrl', 'image']) text(r[key], 600, '战术来源');

@@ -31,7 +31,7 @@ function fixture(t) {
   const step = (time,focusIds = ids) => { clock = { time, focusIds }; };
   function submit(question, answer) {
     room.querySelector('textarea[name=question]').value = question;
-    room.querySelector('textarea[name=answer]').value = answer;
+    room.querySelector('[name=answer]:not([hidden])').value = answer;
     room.querySelector('form').dispatchEvent(new win.Event('submit', {bubbles:true,cancelable:true}));
   }
   function add(time, question, answer = '', focusIds = ids) {
@@ -114,7 +114,8 @@ test('only explicit saves persist, loads are scoped and block changed geometry o
   same.notes += ' a meeting note';
   same.players = same.players.map(player => Object.fromEntries(Object.entries(player).reverse()));
   f.mount('team-a', same);
-  assert.ok(f.room.querySelector('.film-lesson-question').hidden);
+  await f.settled('已加载');
+  assert.equal(f.room.querySelector('.film-lesson-question').hidden, false);
   const prior = storage.getItem(storage.key(0));
   await f.command('save');
   assert.equal(storage.getItem(storage.key(0)), prior);
@@ -122,7 +123,7 @@ test('only explicit saves persist, loads are scoped and block changed geometry o
   await f.command('close');
   await assert.rejects(interrupted, { code:'LESSON_CANCELLED' });
   assert.equal(f.snapshot().open, false);
-  assert.equal(f.snapshot().stops.length, 0);
+  assert.equal(f.snapshot().stops.length, 1, 'cancelling a reload preserves the restored lesson');
   await f.command('open');
   f.click('load'); await f.settled('已加载');
   assert.equal(f.room.querySelector('.film-lesson-question').textContent, '<img src=x onerror=alert(1)>');
@@ -159,7 +160,8 @@ test('bounded text and checked stop coordinates survive corrupt storage, conflic
   f.click('load'); await f.settled('无法读取');
   assert.equal(f.room.querySelector('.film-lesson-question').textContent, 'from this window');
   storage.setItem(key, raw);
-  f.mount(); f.add(0, 'cancelled'); f.click('save'); f.dispose();
+  f.mount(); await f.settled('已加载');
+  f.add(0, 'cancelled'); f.click('save'); f.dispose();
   await tick();
   assert.equal(storage.getItem(key), raw);
 });
@@ -247,10 +249,43 @@ test('invalid and stale AI requests fail with typed errors and preserve transact
   changed.routes[0].duration += .1;
   f.mount('team-a', changed);
   await failure('load', {}, 'LESSON_STALE');
-  assert.equal(f.snapshot().stops.length, 0);
+  assert.equal(f.snapshot().stops.length, 3);
+  assert.ok(f.snapshot().stops.every(stop => stop.needsReview));
+  assert.deepEqual(f.snapshot().stops.map(stop => stop.question), ['q0', 'q1', 'q2']);
+  await failure('save', {}, 'LESSON_STALE');
+  assert.equal(storage.getItem(key), raw);
   f.dispose();
   await failure('add', { question: 'late' }, 'LESSON_DISPOSED');
   f.mount('team-a', { reference: {}, players: [], routes: [], id: 'reference' });
   assert.equal((await f.command('state')).available, false);
   await failure('open', {}, 'LESSON_UNAVAILABLE');
+});
+
+test('a save queued behind another tab rechecks its baseline under the storage lock and leaves the local draft intact', async t => {
+  const f = fixture(t);
+  await f.command('add', {question:'Q1'});
+  await f.command('save');
+  const storage = f.win.localStorage, key = storage.key(0), original = JSON.parse(storage.getItem(key));
+  const acquired = Promise.withResolvers(), grant = Promise.withResolvers();
+  Object.defineProperty(f.win.navigator, 'locks', {configurable:true, value:{
+    async request(name, commit) {
+      acquired.resolve(name);
+      await grant.promise;
+      return commit();
+    },
+  }});
+  await f.command('add', {question:'Local Q2'});
+  const saving = f.command('save');
+  assert.equal(await acquired.promise, key);
+  original.stops[0].question = 'Another window’s revision';
+  const remote = JSON.stringify(original);
+  storage.setItem(key, remote);
+  grant.resolve();
+  await assert.rejects(saving, {code:'LESSON_CONFLICT'});
+  assert.deepEqual(f.snapshot().stops.map(stop => stop.question), ['Q1','Local Q2']);
+  assert.equal(f.snapshot().dirty, true);
+  assert.equal(storage.getItem(key), remote);
+  const loaded = await f.command('load');
+  assert.equal(loaded.stops[0].question, 'Another window’s revision');
+  assert.equal(loaded.dirty, false);
 });

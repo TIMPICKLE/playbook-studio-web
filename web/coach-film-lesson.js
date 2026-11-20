@@ -1,5 +1,5 @@
 import { getLocale } from './i18n.js';
-import { formatFilmTime } from './coach-film-model.js';
+import { filmLessonSource, formatFilmTime } from './coach-film-model.js';
 
 const MAX_STOPS = 3;
 const QUESTION_LIMIT = 160;
@@ -7,10 +7,12 @@ const ANSWER_LIMIT = 320;
 const labels = {
   'zh-CN': {
     lesson: '课件', title: '停帧提问', empty: '把当前时刻和所选球员存为停点，最多三个。',
-    add: '添加当前停点', question: '教练问题', answer: '参考答案（选填）', keep: '收录停点', cancel: '取消',
+    add: '添加当前停点', question: '教练问题', answer: '参考答案（选填）', coveredAnswer: '参考答案（本屏隐藏输入）', keep: '收录停点', cancel: '取消',
     previous: '上一停点', next: '下一停点', revisit: '回到此帧', edit: '编辑提问', replace: '替换为当前帧',
     remove: '删除停点', reveal: '揭示答案与走势', showRoutes: '揭示走势', hide: '重新提问', save: '保存到本机', load: '加载本机课件',
     saved: '已保存此次课件。', loaded: '已加载本机课件。', missing: '这套战术还没有本机课件。',
+    restoring: '正在恢复本机课件…', review: '战术已更新。请逐个选择待复核停点，调整至正确画面后点「替换为当前帧」。待复核',
+    draftReview: '在编提问', keepCurrent: '按当前帧收录',
     stale: '战术布局或演练时序已变，原课件已过期。', invalid: '此课件无法读取。',
     unavailable: '暂时无法读写本机课件。', conflict: '另一窗口更新了课件，请先加载最新版本。',
     required: '请先写下教练问题。', captured: '已收录停点。', replaced: '已替换停点的时间和球员。',
@@ -21,10 +23,12 @@ const labels = {
   },
   en: {
     lesson: 'Lesson', title: 'Freeze-frame questions', empty: 'Capture the current time and players in up to three stops.',
-    add: 'Add current stop', question: 'Coach’s question', answer: 'Answer (optional)', keep: 'Keep stop', cancel: 'Cancel',
+    add: 'Add current stop', question: 'Coach’s question', answer: 'Answer (optional)', coveredAnswer: 'Answer (input concealed on this screen)', keep: 'Keep stop', cancel: 'Cancel',
     previous: 'Previous stop', next: 'Next stop', revisit: 'Return to this frame', edit: 'Edit question', replace: 'Use current frame',
     remove: 'Remove stop', reveal: 'Reveal answer and routes', showRoutes: 'Reveal routes', hide: 'Ask again', save: 'Save on this device', load: 'Load saved lesson',
     saved: 'Lesson saved on this device.', loaded: 'Saved lesson loaded.', missing: 'No saved lesson for this play.',
+    restoring: 'Restoring the saved lesson…', review: 'The play changed. Select each affected stop, find the correct frame, then choose “Use current frame”. Review',
+    draftReview: 'question being edited', keepCurrent: 'Keep at current frame',
     stale: 'The play or its timing has changed. This saved lesson is out of date.', invalid: 'This lesson could not be read.',
     unavailable: 'Local lesson storage is unavailable.', conflict: 'Another window updated the lesson. Load its latest version first.',
     required: 'Enter a question for this stop.', captured: 'Stop recorded.', replaced: 'Time and players updated.',
@@ -35,27 +39,17 @@ const labels = {
   },
 };
 
-// Ignore unrelated notes, cosmetic changes and object key insertion order.
-// Positions, route timing, assignments and ball events must still match.
 async function playRevision(model) {
-  const { play } = model;
-  const actors = play.players.map(p => [p.id, p.label, p.rosterId || '', p.side, p.x, p.y]);
-  const paths = play.routes.map(r => [r.id, r.playerId, r.kind, r.delay, r.duration, !!r.optional, !!r.smooth,
-    r.endCap, !!r.stagedBlock, r.blockTargets || [], r.points.map(p => [p.x, p.y])]);
-  const zones = (play.zones || []).map(z => [z.id, z.label, z.x, z.y, z.rx, z.ry]);
-  const marks = (play.annotations || []).map(a => [a.id, a.text, a.x, a.y]);
-  const { holderId, receiverId, passAt, arriveAt } = play.ball;
-  const data = [play.book, play.formation, model.calibrated, actors, paths, zones, marks, [holderId, receiverId, passAt, arriveAt]];
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(data)));
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(filmLessonSource(model)));
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function validStops(stops, model) {
-  const ids = new Set(model.players.map(player => player.id));
+  const ids = model && new Set(model.players.map(player => player.id));
   return Array.isArray(stops) && stops.length <= MAX_STOPS && stops.every(stop =>
-    stop && Number.isFinite(stop.time) && stop.time >= 0 && stop.time <= model.duration
+    stop && Number.isFinite(stop.time) && stop.time >= 0 && (!model || stop.time <= model.duration)
       && Array.isArray(stop.focusIds) && stop.focusIds.length <= 2
-      && new Set(stop.focusIds).size === stop.focusIds.length && stop.focusIds.every(id => ids.has(id))
+      && new Set(stop.focusIds).size === stop.focusIds.length && stop.focusIds.every(id => typeof id === 'string' && (!ids || ids.has(id)))
       && typeof stop.question === 'string' && !!stop.question.trim() && stop.question.length <= QUESTION_LIMIT
       && typeof stop.answer === 'string' && stop.answer.length <= ANSWER_LIMIT);
 }
@@ -64,7 +58,7 @@ function lessonError(code, message, details = {}) {
   return Object.assign(new Error(message), { code, details });
 }
 
-function mountLesson(workspaceId, { host, model, read, go }) {
+function mountLesson(workspaceId, { host, model, read, go, onProjectionChange }) {
   const words = labels[getLocale()];
   if (model.reference) {
     const snapshot = () => ({ available: false, open: false, selectedIndex: null, revealed: false, dirty: false, busy: false, drafting: false, stops: [] });
@@ -78,7 +72,7 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   }
   const doc = host.ownerDocument;
   const key = 'playbook:coach-lesson:' + JSON.stringify([workspaceId, model.play.id]);
-  const currentIds = new Set(model.players.map(player => player.id));
+  let currentIds = new Set(model.players.map(player => player.id));
   const scope = host.closest('.coach-film');
   const inspector = scope?.querySelector('.film-inspector');
   if (!doc.querySelector('link[data-film-lesson-css]')) {
@@ -129,6 +123,10 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   const presentation = row(panel);
   const previous = button('previous', words.previous, presentation);
   const next = button('next', words.next, presentation);
+  for (const [control, shortcut] of [[previous, 'Alt+ArrowUp'], [next, 'Alt+ArrowDown']]) {
+    control.setAttribute('aria-keyshortcuts', shortcut);
+    control.title = control.textContent + ' (' + shortcut + ')';
+  }
   button('revisit', words.revisit, presentation);
   const reveal = button('reveal', words.reveal, presentation);
   const editing = row(panel);
@@ -146,6 +144,12 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   }
   const questionInput = textInput('question', words.question, QUESTION_LIMIT);
   const answerInput = textInput('answer', words.answer, ANSWER_LIMIT);
+  const coveredAnswer = element('input');
+  coveredAnswer.type = 'password'; coveredAnswer.maxLength = ANSWER_LIMIT;
+  coveredAnswer.name = 'answer'; coveredAnswer.placeholder = words.coveredAnswer;
+  coveredAnswer.setAttribute('aria-label', words.coveredAnswer);
+  coveredAnswer.autocomplete = 'off'; coveredAnswer.hidden = true;
+  answerInput.after(coveredAnswer);
   const formActions = row(form);
   const keep = button('keep', words.keep, formActions);
   keep.type = 'submit';
@@ -157,15 +161,47 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   notice.className = 'film-lesson-status';
   notice.setAttribute('role', 'status');
   panel.append(notice);
+  const reviewNotice = element('p');
+  reviewNotice.className = 'film-lesson-review';
+  reviewNotice.setAttribute('role', 'status');
+  panel.append(reviewNotice);
 
   let stops = [], selected = -1, draft = null, revealed = false, dirty = false, busy = false, alive = true;
-  let signature, baseRaw, loadRevision = 0;
-  try { baseRaw = doc.defaultView.localStorage.getItem(key); } catch { /* in-memory teaching remains usable */ }
+  let signature, baseRaw = null, loadRevision = 0, needsRestore = false, restoring = null;
+  try { needsRestore = doc.defaultView.localStorage.getItem(key) !== null; } catch { /* in-memory teaching remains usable */ }
   const formatTime = time => formatFilmTime(time, true) + words.seconds;
   const status = message => { notice.textContent = message; };
+  const activeAnswerInput = () => coveredAnswer.hidden ? answerInput : coveredAnswer;
+  function draftAnswer() {
+    // A native password field conceals text but flattens line breaks. Preserve
+    // the authored answer exactly when only the question was edited.
+    if (!coveredAnswer.hidden && draft.answer.replace(/[\r\n]/g, '') === coveredAnswer.value) return draft.answer;
+    return activeAnswerInput().value.trim().slice(0, ANSWER_LIMIT);
+  }
+  function revise(nextModel) {
+    model = nextModel;
+    currentIds = new Set(model.players.map(player => player.id));
+    signature = null;
+    for (const stop of stops) stop.needsReview = true;
+    if (draft) draft.needsReview = true;
+    if (stops.length) dirty = true;
+    revealed = false;
+    status('');
+    update();
+  }
+  function syncProjection() {
+    const masked = !panel.hidden && (draft ? draft.coverAnswer : !!stops[selected] && !revealed);
+    scope?.toggleAttribute('data-film-question', !!masked);
+    onProjectionChange?.(!!masked, !panel.hidden);
+  }
   function update() {
     const stop = stops[selected];
-    scope?.toggleAttribute('data-film-question', !panel.hidden && !!stop && !draft && !revealed);
+    const pending = stops.flatMap((item, i) => item.needsReview ? [i + 1] : []);
+    if (draft?.needsReview) pending.push(words.draftReview);
+    reviewNotice.hidden = !pending.length;
+    reviewNotice.textContent = pending.length ? words.review + ' · ' + pending.join(', ') : '';
+    keep.textContent = draft?.needsReview && draft.isNew ? words.keepCurrent : words.keep;
+    syncProjection();
     empty.hidden = !!stops.length || !!draft;
     nav.hidden = !stops.length || !!draft;
     stopsNav.forEach((control, i) => {
@@ -181,22 +217,26 @@ function mountLesson(workspaceId, { host, model, read, go }) {
     presentation.hidden = !stop || !!draft;
     reveal.textContent = revealed ? words.hide : stop?.answer ? words.reveal : words.showRoutes;
     reveal.setAttribute('aria-expanded', String(revealed));
+    reveal.disabled = !!stop?.needsReview;
     previous.disabled = selected < 1;
     next.disabled = selected + 1 >= stops.length;
     editing.hidden = !!draft;
-    add.disabled = stops.length >= MAX_STOPS;
+    add.disabled = busy || stops.length >= MAX_STOPS;
     edit.hidden = replace.hidden = remove.hidden = !stop;
     form.hidden = !draft;
     fileActions.hidden = !!draft;
-    save.disabled = busy || !dirty;
+    save.disabled = busy || !dirty || !!pending.length;
     load.disabled = busy;
   }
   function snapshot({ includeAnswers = false } = {}) {
     return {
       available: alive, open: !panel.hidden, selectedIndex: selected < 0 ? null : selected,
       revealed, dirty, busy, drafting: !!draft,
+      ...(needsRestore ? {restorePending: true} : {}),
+      ...(draft?.needsReview ? {draftNeedsReview: true} : {}),
       stops: stops.map((stop, index) => ({
         time: stop.time, focusIds: [...stop.focusIds], question: stop.question, hasAnswer: !!stop.answer,
+        ...(stop.needsReview ? {needsReview: true} : {}),
         ...(includeAnswers || (index === selected && revealed) ? { answer: stop.answer } : {}),
       })),
     };
@@ -228,14 +268,16 @@ function mountLesson(workspaceId, { host, model, read, go }) {
     }
     return value;
   }
-  function showStop(index) {
-    selected = index; revealed = false;
+  function showStop(index, showAnswer = false) {
+    selected = index; revealed = showAnswer;
+    syncProjection();
     const stop = stops[index];
-    if (stop) go(stop.time, [...stop.focusIds]);
+    if (stop && !stop.needsReview) go(stop.time, [...stop.focusIds]);
   }
   function closeForm() {
     draft = null;
-    questionInput.value = ''; answerInput.value = '';
+    questionInput.value = ''; answerInput.value = ''; coveredAnswer.value = '';
+    answerInput.hidden = false; coveredAnswer.hidden = true;
   }
   function setOpen(open) {
     panel.hidden = !open;
@@ -245,10 +287,14 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   }
   function openForm(isNew) {
     if (busy || (isNew && stops.length >= MAX_STOPS)) return;
+    const coverAnswer = isNew || !revealed;
     draft = isNew ? { ...capture({}), question: '', answer: '', index: stops.length, isNew } : { ...stops[selected], index: selected, isNew };
-    go(draft.time, [...draft.focusIds]);
+    draft.coverAnswer = coverAnswer;
+    syncProjection();
+    if (!draft.needsReview) go(draft.time, [...draft.focusIds]);
     questionInput.value = draft.question;
-    answerInput.value = draft.answer;
+    answerInput.hidden = coverAnswer; coveredAnswer.hidden = !coverAnswer;
+    activeAnswerInput().value = draft.answer;
     revealed = false;
     status('');
     update();
@@ -256,29 +302,51 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   }
   async function persist(kind) {
     const requestedRevision = loadRevision;
+    const source = model;
+    const guard = () => {
+      if (!alive) throw lessonError('LESSON_DISPOSED', words.absent);
+      if (source !== model) throw lessonError('LESSON_STALE', words.stale);
+      if (kind !== 'lesson_save' && loadRevision !== requestedRevision) throw lessonError('LESSON_CANCELLED', words.cancelled);
+    };
     busy = true; update();
     try {
       signature ??= playRevision(model);
       const revision = await signature;
-      if (!alive) throw lessonError('LESSON_DISPOSED', words.absent);
-      if (kind === 'lesson_load' && loadRevision !== requestedRevision) throw lessonError('LESSON_CANCELLED', words.cancelled);
+      guard();
       const storage = doc.defaultView.localStorage;
-      const raw = storage.getItem(key);
       if (kind === 'lesson_save') {
-        if (raw !== (baseRaw ?? null)) throw lessonError('LESSON_CONFLICT', words.conflict);
-        if (!dirty) { status(words.unchanged); return; }
-        const nextRaw = JSON.stringify({ version: 1, revision, stops });
-        storage.setItem(key, nextRaw);
-        baseRaw = nextRaw; dirty = false; status(words.saved);
+        const commit = () => {
+          guard();
+          if (storage.getItem(key) !== baseRaw) throw lessonError('LESSON_CONFLICT', words.conflict);
+          if (stops.some(stop => stop.needsReview)) throw lessonError('LESSON_STALE', reviewNotice.textContent);
+          if (!dirty) { status(words.unchanged); return; }
+          const nextRaw = JSON.stringify({ version: 1, revision, stops });
+          storage.setItem(key, nextRaw);
+          baseRaw = nextRaw; dirty = false; status(words.saved);
+        };
+        const locks = doc.defaultView.navigator.locks;
+        if (locks?.request) await locks.request(key, commit);
+        else commit();
       } else {
-        if (raw === null) { baseRaw = null; throw lessonError('LESSON_NOT_FOUND', words.missing); }
+        const raw = storage.getItem(key);
+        if (raw === null) {
+          needsRestore = false;
+          if (kind === 'resume') return;
+          baseRaw = null;
+          throw lessonError('LESSON_NOT_FOUND', words.missing);
+        }
         let data;
         try { data = JSON.parse(raw); } catch { throw lessonError('LESSON_INVALID_DATA', words.invalid); }
-        if (data?.version !== 1) throw lessonError('LESSON_INVALID_DATA', words.invalid);
-        if (data.revision !== revision) { baseRaw = raw; throw lessonError('LESSON_STALE', words.stale); }
-        if (!validStops(data.stops, model)) throw lessonError('LESSON_INVALID_DATA', words.invalid);
-        baseRaw = raw; stops = data.stops.map(({time, focusIds, question, answer}) => ({time, focusIds, question, answer}));
-        dirty = false; setOpen(true); showStop(stops.length ? 0 : -1); status(words.loaded);
+        if (data?.version !== 1 || typeof data.revision !== 'string') throw lessonError('LESSON_INVALID_DATA', words.invalid);
+        const stale = data.revision !== revision;
+        if (stale && kind === 'lesson_load') throw lessonError('LESSON_STALE', words.stale);
+        if (!validStops(data.stops, stale ? null : model)) throw lessonError('LESSON_INVALID_DATA', words.invalid);
+        // Only a record actually reconciled with the in-memory lesson is a save baseline.
+        baseRaw = raw; needsRestore = false;
+        stops = data.stops.map(({time, focusIds, question, answer}) => ({time, focusIds, question, answer, ...(stale ? {needsReview:true} : {})}));
+        dirty = false; selected = stops.length ? 0 : -1; revealed = false;
+        if (kind === 'lesson_load') { setOpen(true); showStop(selected); }
+        status(stale ? words.stale : words.loaded);
       }
     } catch (error) {
       if (error.code?.startsWith?.('LESSON_')) throw error;
@@ -293,6 +361,18 @@ function mountLesson(workspaceId, { host, model, read, go }) {
     const kind = action?.kind;
     try {
       if (!alive) throw lessonError('LESSON_DISPOSED', words.absent);
+      const opening = kind === 'lesson_open' && panel.hidden;
+      if (opening) setOpen(true);
+      if (kind !== 'lesson_close' && (restoring || (needsRestore && kind !== 'lesson_load'))) {
+        const request = loadRevision;
+        if (!restoring) {
+          status(words.restoring);
+          restoring = persist('resume').finally(() => { restoring = null; });
+        }
+        await restoring;
+        if (!alive) throw lessonError('LESSON_DISPOSED', words.absent);
+        if (request !== loadRevision) throw lessonError('LESSON_CANCELLED', words.cancelled);
+      }
       if (kind === 'lesson_state') return snapshot({ includeAnswers: action.includeAnswers === true });
       if (busy && kind !== 'lesson_close') throw lessonError('LESSON_BUSY', words.busy);
       if (draft && !fromForm && !['lesson_open', 'lesson_close', 'lesson_cancel'].includes(kind)) {
@@ -300,7 +380,7 @@ function mountLesson(workspaceId, { host, model, read, go }) {
       }
       switch (kind) {
         case 'lesson_open': {
-          if (panel.hidden) { setOpen(true); if (selected >= 0) showStop(selected); }
+          if (opening && selected >= 0) showStop(selected);
           break;
         }
         case 'lesson_close': loadRevision++; setOpen(false); break;
@@ -325,7 +405,8 @@ function mountLesson(workspaceId, { host, model, read, go }) {
         case 'lesson_replace': {
           const index = indexOfStop(action.index === undefined ? selected : action.index);
           const frame = capture(action);
-          setOpen(true); stops[index] = { ...stops[index], ...frame }; showStop(index);
+          const {question, answer} = stops[index];
+          setOpen(true); stops[index] = { question, answer, ...frame }; showStop(index);
           dirty = true; status(words.replaced + ' ' + words.unsaved);
           break;
         }
@@ -347,9 +428,9 @@ function mountLesson(workspaceId, { host, model, read, go }) {
         }
         case 'lesson_reveal': case 'lesson_hide': {
           const index = indexOfStop(action.index === undefined ? selected : action.index);
+          if (kind === 'lesson_reveal' && stops[index].needsReview) throw lessonError('LESSON_STALE', reviewNotice.textContent);
           setOpen(true);
-          showStop(index);
-          revealed = kind === 'lesson_reveal';
+          showStop(index, kind === 'lesson_reveal');
           break;
         }
         case 'lesson_save': case 'lesson_load': await persist(kind); break;
@@ -364,6 +445,24 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   }
   const execute = action => perform(action);
   const dispatch = (kind, args = {}) => execute({ kind: 'lesson_' + kind, ...args }).catch(() => {});
+  function dismiss() {
+    if (panel.hidden) return false;
+    if (draft) {
+      const opener = draft.isNew ? add : edit;
+      void dispatch('cancel');
+      opener.focus({ preventScroll: true });
+    } else {
+      void dispatch('close');
+      trigger.focus({ preventScroll: true });
+    }
+    return true;
+  }
+  function navigateStop(direction) {
+    if (panel.hidden || draft || busy) return false;
+    const control = direction === 'previous' ? previous : next;
+    if (!control.disabled) void dispatch(direction);
+    return true;
+  }
   trigger.addEventListener('click', () => {
     if (panel.hidden) {
       void dispatch('open');
@@ -377,7 +476,7 @@ function mountLesson(workspaceId, { host, model, read, go }) {
     switch (action) {
       case 'add': case 'edit': openForm(action === 'add'); break;
       case 'reveal': void dispatch(revealed ? 'hide' : 'reveal'); break;
-      case 'cancel': void dispatch(action); (selected >= 0 ? edit : add).focus(); break;
+      case 'cancel': dismiss(); break;
       case 'remove': void dispatch(action); (selected >= 0 ? stopsNav[selected] : add).focus(); break;
       default: void dispatch(action);
     }
@@ -385,25 +484,24 @@ function mountLesson(workspaceId, { host, model, read, go }) {
   form.addEventListener('submit', event => {
     event.preventDefault();
     if (!draft) return;
-    const { isNew, index, time, focusIds } = draft;
+    const { isNew, index } = draft;
+    const { time, focusIds } = isNew && draft.needsReview ? read() : draft;
     const input = {
       kind: isNew ? 'lesson_add' : 'lesson_update', index, time, focusIds,
-      question: questionInput.value.trim().slice(0, QUESTION_LIMIT), answer: answerInput.value.trim().slice(0, ANSWER_LIMIT),
+      question: questionInput.value.trim().slice(0, QUESTION_LIMIT),
+      answer: draftAnswer(),
     };
-    void perform(input, true).then(() => stopsNav[index].focus(), () => questionInput.focus());
-  });
-  panel.addEventListener('keydown', event => {
-    if (event.target.matches('textarea')) { event.stopPropagation(); return; }
-    if (!draft && event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-      event.preventDefault(); event.stopPropagation();
-      void dispatch(event.key === 'ArrowUp' ? 'previous' : 'next');
-    }
+    void perform(input, true).then(() => {
+      if (alive && !draft && !panel.hidden && selected === index && (form.contains(doc.activeElement) || doc.activeElement === doc.body)) {
+        stopsNav[index].focus();
+      }
+    }, () => { if (alive && draft && form.contains(doc.activeElement)) questionInput.focus(); });
   });
   update();
   function dispose() {
-    alive = false; setOpen(false); scope?.removeAttribute('data-film-question'); trigger.remove(); panel.remove();
+    alive = false; setOpen(false); syncProjection(); trigger.remove(); panel.remove();
   }
-  return { dispose, snapshot, execute };
+  return { dispose, snapshot, execute, dismiss, navigateStop, revise };
 }
 
 export function createFilmLesson({ workspaceId }) {
