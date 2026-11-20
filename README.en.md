@@ -46,6 +46,20 @@ English and Simplified Chinese are supported. Phones and iPads use the tradition
 
 ## Digital board
 
+### Teach one throw with Mesh
+
+Open the sample **Mesh** on a desktop and select **Film room** beside the play title. Jump to **Release 2.0s**, then select **H** and **Y**. The ball is at the quarterback’s hand. Starting positions and recent movement remain visible, and the comparison reads **H is 3.0 yd deeper than Y**. Scrub back to 1.0 second and the gap reads **1.0 yd**. Pin a frame to compare positions across time. Press Escape or choose **Back to editor** to resume your work.
+
+![Mesh at release with H and Y selected and their 3.0-yard depth difference visible](docs/assets/readme/coach-film-room.jpg)
+
+The **AI assistant** shares the film controls. Ask it to “freeze at release, compare H and Y, pin the frame, then go back one second.” It reads the actual time and depth from the field, and can author an on-device lesson. [Film commands and receipts](docs/COACH_FILM_COMMANDS.md)
+
+Release and arrival markers appear for a valid designed pass. Schematic fields report relative depth. An optional on-device lesson can store up to three stops with a question, answer and player selection. Phones and iPads use the existing touch workspace.
+
+[Open the desktop demo](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [Try an on-device lesson](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local?filmPilot=lesson#editor) · [Study protocol and practice plays](docs/COACH_FILM_PILOT.md) · [Film room verification](docs/acceptance/COACH_FILM.md)
+
+### Edit and rehearse on the digital field
+
 In the desktop editor, choose **Display mode → Digital**. Click the sun button above the field, **Toggle field brightness**, to switch between dark graphite and cool silver. The screenshot shows receiver X selected in Mesh. The fixed toolbars and timeline have solid graphite surfaces. Select a matte puck to emphasize its routes in their original colors while keeping the other assignments visible.
 
 ![The digital editor with receiver X selected and its route emphasized](docs/assets/readme/digital-workspace.webp)

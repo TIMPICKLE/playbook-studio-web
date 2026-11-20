@@ -5,6 +5,7 @@ import { buildMatchup, limitedResponse, modelEndpoint } from './matchup.mjs';
 import { boardAssistantInput, invokeBoardModel } from '../web/assistant-provider.js';
 import * as boardGraph from '@langchain/langgraph';
 import { searchServerMadden, boardCatalogRows } from './board-assistant-catalog.mjs';
+import { createBoardFilmRelay } from './board-film-relay.mjs';
 import { EDITOR_ACTIONS } from '../web/editor-actions.js';
 import { proposeEdit } from '../web/assistant-proposal.js';
 import { proposalConflicts } from '../web/assistant-conflicts.js';
@@ -150,8 +151,9 @@ export async function handleApi(request, env, user) {
       else editorData.plays.push(input.board.play);
       input.editor = {data:editorData,selectedId:input.board.playId,view:input.editor?.view || {},readOnly:!['owner','editor'].includes(record.role),catalogRows:boardCatalogRows};
       assertPrivateRuntime(env);
-      await checkModelBudget(db, user.userId);
-      // The board is the editor's working copy. Model tools only read this snapshot.
+      const relay = await createBoardFilmRelay(db, {userId:user.userId, workspaceId, revision:record.revision, body});
+      if (!relay?.resuming) await checkModelBudget(db, user.userId);
+      // Workspace commands use this working snapshot. Film commands need the live browser.
       const reauthorize = async (needed = 'read') => {
         const identity = await resolveIdentity(request, env, platformUser);
         if (identity?.userId !== user.userId) fail(401, '登录状态已失效，请重新登录');
@@ -162,10 +164,17 @@ export async function handleApi(request, env, user) {
         let reply;
         try {
           reply = await invokeBoardModel(config, input, {
-            runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize, onTool, onEvent,
+            runtime: boardGraph, searchCatalog: searchServerMadden, reauthorize, film:relay?.film, relay,
+            onTool:relay ? relay.listener('tool',onTool) : onTool,
+            onEvent:relay ? relay.listener('trace',onEvent) : onEvent,
             signal, readResponse: limitedResponse,
           });
         } catch (error) {
+          if (relay?.pending() && !signal.aborted) {
+            const latest = await reauthorize();
+            if (latest.revision !== record.revision) fail(409, '战术本在讲解中已改变，请重新发送指令。');
+            return relay.yieldToBrowser();
+          }
           if (error instanceof ApiError) throw error;
           fail(502, error.message);
         }

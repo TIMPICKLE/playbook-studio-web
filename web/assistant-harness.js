@@ -17,6 +17,8 @@ Search Madden by concepts, tags or similarity, inspect catalog evidence, and exp
 This is one continuing conversation about a single play. previous lists its earlier turns, oldest first, each with a status: pending edits are staged in the working draft, are already part of the board you read and will be committed together with your next edit, so build on them and never repeat or undo them unless asked; applied or redone edits are committed; undone edits have been reverted and are absent unless later edits recreated them; stale edits need a fresh preview and are not on the board; discarded edits were rejected by the coach and are not on the board; failed turns ended in an error and the next message usually completes them. staged counts the pending turns. focus names the players and routes of the most recent turn that had a subject. When the instruction omits its subject or refers back ("it", "that route", "deeper", "change it to a post", "再深两码", "改成向内"), apply it to focus, otherwise to selectedPlayerId; read_board shows their current routes and stored intent. Ask with clarify only when there is no such subject or several unrelated subjects fit equally, and name the candidates. A current multi-selection is explicit group context, not permission to pick its first player. For a singular ambiguous request such as "move him" with several selected players, return clarify and name the candidates. An explicit request to move the group targets the whole selection. Players listed in focus or selected are already confirmed on this board; resolve any other player through tools. Use submit_result to finish in the user's language. Only if the provider requires text fallback, return an object conforming to that tool's result schema as plain JSON.`;
 const editorInstructions = `You are also a full editor command interface. Discover list_capabilities and get_command_schema rather than claiming an editor feature is unavailable. read_board exposes diagram objects; read_editor exposes the real workspace, roster, formations, personnel groups and device state. Use preview_edit for play commands including object creation/update/removal, complete route editing, ball, metadata, mirror, formation, opponents, spacing and personnel. New player_add/route_add/zone_add/annotation_add may declare an as alias; subsequent operations can reference it as $alias. Never invent persisted IDs. Use preview_actions then submit_result kind editor with the identical actions for workspace CRUD, saving formations, catalog imports, selection, tools, draft, history, playback, view, layout, filters, panels, navigation, export, print and file interactions. Keep workspace, local and interaction lanes separate. Tools prepare proposals only; the host applies writes and executes device actions. A file picker or print dialog is awaiting_user, not a completed import or print. Respect capability availability and explain actual device/reference/read-only constraints. The knowledge base provides coaching evidence; executable abilities come from the command registry, not Madden search.`;
 
+const filmInstructions = `For coaching film, inspect read_film for the live scene, available events, player IDs, film controls and lesson. Use control_film for the coach's requested device actions. It performs the action and returns the actual state. To show the release and compare two players, use the release event from read_film, focus their two actual IDs, then explain the returned comparison. Several calls may be needed in one request. Use stable IDs for duplicates and ask which player if ambiguous. Depth is the designed downfield distance from the line of scrimmage; report yards only when calibrated. Read or reveal hidden answers and explicitly save a local lesson only when asked. Recheck a moving scene for current-time questions. Respect device and trial restrictions and explain real errors or missing events. Submit a grounded answer based on receipts. Never simulate film control via workspace edits or deferred dialog proposals.`;
+
 export function validateBoardReply(value, input, tools, {requirePreview = false} = {}) {
   const msg = providerMessages[input.locale];
   const invalid = reason => { throw new Error(reason || msg.invalid); };
@@ -39,7 +41,7 @@ export function validateBoardReply(value, input, tools, {requirePreview = false}
     return result;
   }
   if (result.kind === 'answer') {
-    if (!tools.didReadBoard() || !(result.highlights || []).every(id => tools.resolved.has(id) || tools.routeIds.has(id))) invalid();
+    if ((!tools.didReadBoard() && !tools.didObserveFilm()) || !(result.highlights || []).every(id => tools.resolved.has(id) || tools.routeIds.has(id))) invalid();
     return {...result, highlights:result.highlights || []};
   }
   if (result.kind === 'handoff') {
@@ -52,14 +54,15 @@ export function validateBoardReply(value, input, tools, {requirePreview = false}
   return legacy ? {kind:'edit',operation:result.operations[0]} : result;
 }
 
-export async function runBoardAssistant({ runtime, input, callModel, searchCatalog, signal, onTool, onEvent }) {
+export async function runBoardAssistant({ runtime, input, callModel, searchCatalog, film, signal, onTool, onEvent }) {
   const { Annotation, StateGraph, START, END } = runtime;
   const limits = BOARD_AGENT_LIMITS, msg = providerMessages[input.locale];
   const thread = conversationContext(input);
-  const tools = createBoardTools(input, searchCatalog), used = [];
+  const tools = createBoardTools(input, searchCatalog, film), used = [];
   const flagInstructions = input.board.gameFormat === 'flag5' ? '\nThe current play explicitly uses 5v5 flag football. Read its format and formation capabilities. The center may receive after the snap; do not assume an offensive blocking line, contact blocking, tackling or kicking. To add a flag defense to a five-player offensive diagram, preview_edit with {kind:"opponents_set",enabled:true,count:5}; use formation_apply for the current side with its named Flag 5 template. Do not use the eleven-player defense_formation operation to satisfy a flag-defense request; it remains available only for an explicit 4-3/tackle comparison. Madden catalog plays remain their original eleven-player diagrams, not ready-made flag plays. Rushing distance/eligibility, QB running and regulation field dimensions depend on the competition and are unconfirmed. Route yardages use the existing diagram grid; do not claim that this is a regulation flag field.' : '';
-  const conversation = [{role:'system',content:instructions + '\n' + editorInstructions + flagInstructions + '\nThe selected mode is a preference, not a restriction. Use any available capability needed by the current instruction. Madden contains offensive plays even when the current diagram is defensive.'}, {role:'user',content:JSON.stringify({instruction:input.instruction,locale:input.locale,selectedPlayerId:input.board.selectedPlayerId,selectedPlayerIds:input.board.selectedPlayerIds,playersPerSide:input.board.playersPerSide,gameFormat:input.board.gameFormat,mode:input.mode,previous:input.previous,...(thread.focus ? {focus:thread.focus} : {}),...(thread.staged ? {staged:thread.staged} : {})})}];
+  const conversation = [{role:'system',content:instructions + '\n' + editorInstructions + (film ? '\n' + filmInstructions : '') + flagInstructions + '\nThe selected mode is a preference, not a restriction. Use any available capability needed by the current instruction. Madden contains offensive plays even when the current diagram is defensive.'}, {role:'user',content:JSON.stringify({instruction:input.instruction,locale:input.locale,selectedPlayerId:input.board.selectedPlayerId,selectedPlayerIds:input.board.selectedPlayerIds,playersPerSide:input.board.playersPerSide,gameFormat:input.board.gameFormat,mode:input.mode,previous:input.previous,...(thread.focus ? {focus:thread.focus} : {}),...(thread.staged ? {staged:thread.staged} : {})})}];
   let pending, result, submitted, submission = 'text', repairs = 0, repeatedRounds = 0;
+  let lastFilmScene = null;
   const facts = new Map(), progressFacts = new Set();
   const checked = () => { if (signal?.aborted) throw signal.reason || new DOMException('The assistant request was cancelled.', 'AbortError'); };
   const emit = event => onEvent?.(event);
@@ -77,8 +80,14 @@ export async function runBoardAssistant({ runtime, input, callModel, searchCatal
         (item.candidates || []).map(value => ({type:item.status === 'found' ? 'resolved_player' : 'player_candidate',value})));
     }
     if (name === 'search_madden') evidence = (output.candidates || []).map(value => ({type:'catalog_candidate',value}));
-    if (name === 'preview_edit' || name === 'preview_actions') evidence = [{type:name,value:output}];
+    if (['preview_edit','preview_actions','read_film','control_film'].includes(name)) evidence = [{type:name,value:output}];
     let progressed = false;
+    if (name === 'control_film' || name === 'read_film') {
+      const scene = canonical(output);
+      // Repeatedly alternating two requested frames still changes the actual device.
+      progressed = name === 'control_film' && scene !== lastFilmScene;
+      lastFilmScene = scene;
+    }
     for (const fact of evidence) {
       const key = canonical(fact);
       if (!progressFacts.has(key)) progressed = true;
@@ -105,7 +114,8 @@ export async function runBoardAssistant({ runtime, input, callModel, searchCatal
       }
     }
     const earlier = [...facts].filter(([key]) => !recentKeys.has(key)).map(([,fact]) => fact);
-    const memory = earlier.length ? [{role:'user',content:'Earlier read-only tool evidence (exact deduplicated observations, not accepted edits): ' + JSON.stringify(earlier)}] : [];
+    const heading = tools.didObserveFilm() ? 'Earlier tool evidence (including executed device receipts): ' : 'Earlier read-only tool evidence (exact deduplicated observations, not accepted edits): ';
+    const memory = earlier.length ? [{role:'user',content:heading + JSON.stringify(earlier)}] : [];
     conversation.splice(2,conversation.length - 2,...memory,...recent);
     emit({type:'context_compacted',facts:earlier.length});
     // This is a compaction target, not a request quota. Essential evidence may

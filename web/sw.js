@@ -1,7 +1,10 @@
-const CACHE = 'playbook-studio-v12-quiet-digital';
+const CACHE = 'playbook-studio-v13-coach-film';
 // Heavy graph and Madden geometry modules are fetched and cached on first use.
 const FILES = [
   './editor-history.js', './workspace-merge.js', './player-group.js', './editor-selection.js', './model-connection.js', './workspace-ui.js', './locales/madden-workflow.js',
+  './scrub-presentation.js', './field-metrics.js', './coach-film-model.js', './coach-film-room.js', './coach-film-view.js', './coach-film-field.js',
+  './coach-film-players-gl.js', './coach-film.css', './coach-film-field.css', './locales/coach-film.zh-CN.js', './locales/coach-film.en.js',
+  './coach-film-assistant.js', './coach-film-bridge.js', './coach-film-commands.js', './coach-film-pilot.js', './coach-film-lesson.js', './coach-film-lesson.css',
   './assistant-transition.js', './history-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
   './assistant-schema.js', './assistant-proposal.js', './assistant-conflicts.js', './assistant-draft.js', './assistant-session.js', './vendor/assistant-zod.js',
   './game-formats.js', './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',

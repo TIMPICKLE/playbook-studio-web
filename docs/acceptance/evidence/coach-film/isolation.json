@@ -1,0 +1,1449 @@
+{
+  "context": {
+    "checkoutHead": "beebef8b29bf7a50a4f578524efa6fff6ccb0620",
+    "sourceSha256": "639a2a81548747ea022465f22fcfb017ec94e02af12c28049168ae54db03967d",
+    "fixtureSha256": "02cd5f79de9293b30e790894fd950797b5fcedb7b0ed6eb20220e10d916d1ce5",
+    "driverSha256": "ccf0325a1d8205e59071f95c1942a418e397acc5574de4c2ebb3deecac442530",
+    "clockSha256": "8c309d5a54fe426f8884e84460178a108dad7d5c7a2a495c5640a7ecbfabe239",
+    "profileSha256": "67d75adb32d2822b7f4df63a99f4348ee7ba5f0168ff64aed6cd16c0c014da27",
+    "sample": "editor-isolation",
+    "durationMs": 4500,
+    "viewport": [
+      1363,
+      936
+    ],
+    "dpr": 1,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "supportsLongAnimationFrames": true
+  },
+  "phases": [
+    {
+      "name": "empty",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 270,
+          "p50": 16.7,
+          "p95": 16.7,
+          "max": 33.3
+        },
+        "over33_3msPercent": 0.37
+      },
+      "sampleWindowMs": [
+        194.1000000005588,
+        4721.100000000559
+      ],
+      "timerIntervalMs": {
+        "samples": 141,
+        "p50": 32,
+        "p95": 33.1,
+        "max": 56.7
+      },
+      "frameAgeMs": {
+        "samples": 271,
+        "p50": 1.2,
+        "p95": 4.8,
+        "max": 20.9
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": null,
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 12,
+        "styles": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 0,
+        "longestMs": 0
+      }
+    },
+    {
+      "name": "static-editor-shell-no-css-or-app",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 266,
+          "p50": 16.7,
+          "p95": 16.7,
+          "max": 99.9
+        },
+        "over33_3msPercent": 0.38
+      },
+      "sampleWindowMs": [
+        4804.200000000186,
+        9334.800000000745
+      ],
+      "timerIntervalMs": {
+        "samples": 138,
+        "p50": 32,
+        "p95": 32.5,
+        "max": 125.7
+      },
+      "frameAgeMs": {
+        "samples": 267,
+        "p50": 1.1,
+        "p95": 2.5,
+        "max": 45.1
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": null,
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 21,
+        "styles": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 1,
+        "longestMs": 71.4
+      }
+    },
+    {
+      "name": "static-editor-shell-all-css-before-app",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        11451.600000000559,
+        17552.10000000056
+      ],
+      "timerIntervalMs": {
+        "samples": 190,
+        "p50": 32,
+        "p95": 33.9,
+        "max": 46.8
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 1.6,
+        "p95": 3.2,
+        "max": 3.2
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": null,
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 45,
+        "styles": 24,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 6,
+        "longestMs": 1018
+      }
+    },
+    {
+      "name": "app-running-editor-display-none-all-css",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        19219.900000000373,
+        25318.900000000373
+      ],
+      "timerIntervalMs": {
+        "samples": 190,
+        "p50": 32,
+        "p95": 33.2,
+        "max": 51.2
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 3.1,
+        "p95": 5,
+        "max": 5
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 981,
+        "styles": 24,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 6,
+        "longestMs": 1026.6
+      }
+    },
+    {
+      "name": "app-running-editor-display-none-no-css",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        27355.200000000186,
+        33450.5
+      ],
+      "timerIntervalMs": {
+        "samples": 190,
+        "p50": 32,
+        "p95": 33.4,
+        "max": 36.1
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 2,
+        "p95": 5.9,
+        "max": 5.9
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 981,
+        "styles": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 6,
+        "longestMs": 1156.1
+      }
+    },
+    {
+      "name": "app-running-visible-editor-no-css",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.5,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        35479,
+        40815.700000000186
+      ],
+      "timerIntervalMs": {
+        "samples": 166,
+        "p50": 32,
+        "p95": 32.4,
+        "max": 48
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 3,
+        "p95": 10.1,
+        "max": 10.1
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 1223,
+        "styles": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 5,
+        "longestMs": 1020
+      }
+    },
+    {
+      "name": "visible-editor-all-css-pitch-removed",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.5,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        42847.300000000745,
+        48944.300000000745
+      ],
+      "timerIntervalMs": {
+        "samples": 190,
+        "p50": 32,
+        "p95": 32.5,
+        "max": 38.7
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 2.1,
+        "p95": 4.5,
+        "max": 4.5
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 1223,
+        "styles": 24,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 5,
+        "longestMs": 1019.9
+      }
+    },
+    {
+      "name": "visible-editor-all-css",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.5,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        50977.60000000056,
+        57076.10000000056
+      ],
+      "timerIntervalMs": {
+        "samples": 190,
+        "p50": 32,
+        "p95": 33.6,
+        "max": 47
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 2.4,
+        "p95": 8.1,
+        "max": 8.1
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 1223,
+        "styles": 24,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 5,
+        "longestMs": 1022.2
+      }
+    },
+    {
+      "name": "app-runtime-alive-empty-document-no-css",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 5,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "sampleWindowMs": [
+        59107.700000000186,
+        65212.40000000037
+      ],
+      "timerIntervalMs": {
+        "samples": 190,
+        "p50": 32,
+        "p95": 33,
+        "max": 36.1
+      },
+      "frameAgeMs": {
+        "samples": 6,
+        "p50": 3,
+        "p95": 7.2,
+        "max": 7.2
+      },
+      "callbackCpuMs": {},
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "originalProbeUnchanged": true,
+        "nodes": 35,
+        "styles": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null,
+      "longFrames": {
+        "count": 5,
+        "longestMs": 1018
+      }
+    }
+  ],
+  "input": [],
+  "raw": [
+    {
+      "name": "empty",
+      "clock": [
+        33.3,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.5,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.5,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7
+      ],
+      "cpu": {},
+      "longFrames": []
+    },
+    {
+      "name": "static-editor-shell-no-css-or-app",
+      "clock": [
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.5,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        99.9,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.5,
+        16.8,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.8,
+        16.5,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 6086.1,
+          "durationMs": 71.4,
+          "blockedMs": 25.2,
+          "renderMs": 71.4,
+          "styleLayoutAndPaintMs": 9.1,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 18,
+              "forcedLayoutMs": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "static-editor-shell-all-css-before-app",
+      "clock": [
+        1016.3,
+        1016.5,
+        1016.5,
+        1016.4,
+        1016.4
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 11452.1,
+          "durationMs": 1017.1,
+          "blockedMs": 0,
+          "renderMs": 0.7,
+          "styleLayoutAndPaintMs": 0.4,
+          "scripts": []
+        },
+        {
+          "startMs": 12469.7,
+          "durationMs": 1014.6,
+          "blockedMs": 0,
+          "renderMs": 0,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 13484.5,
+          "durationMs": 1016.7,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 9,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 14501.3,
+          "durationMs": 1015.7,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 15517.2,
+          "durationMs": 1018,
+          "blockedMs": 0,
+          "renderMs": 0.4,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 10.1,
+              "forcedLayoutMs": 0
+            },
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 5,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 16538.1,
+          "durationMs": 1015.9,
+          "blockedMs": 0,
+          "renderMs": 2.2,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "app-running-editor-display-none-all-css",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.5,
+        1016.4
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 19221.1,
+          "durationMs": 1013.6,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 20235.6,
+          "durationMs": 1017.8,
+          "blockedMs": 0,
+          "renderMs": 0.7,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 5.1,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 21254.8,
+          "durationMs": 1011.1,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 22266.3,
+          "durationMs": 1019.8,
+          "blockedMs": 0,
+          "renderMs": 0.7,
+          "styleLayoutAndPaintMs": 0.4,
+          "scripts": []
+        },
+        {
+          "startMs": 23286.4,
+          "durationMs": 1012.5,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 24299.3,
+          "durationMs": 1026.6,
+          "blockedMs": 0,
+          "renderMs": 7.4,
+          "styleLayoutAndPaintMs": 5.5,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 17.5,
+              "forcedLayoutMs": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "app-running-editor-display-none-no-css",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.5,
+        1016.4
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 27361.5,
+          "durationMs": 1003.6,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 28365.4,
+          "durationMs": 1019.1,
+          "blockedMs": 0,
+          "renderMs": 0.4,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 29385.2,
+          "durationMs": 1012.8,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 30398.5,
+          "durationMs": 1019.9,
+          "blockedMs": 0,
+          "renderMs": 0.4,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 31418.7,
+          "durationMs": 1011.8,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 32430.7,
+          "durationMs": 1156.1,
+          "blockedMs": 89.2,
+          "renderMs": 137.6,
+          "styleLayoutAndPaintMs": 133.7,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "app-running-visible-editor-no-css",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.5
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 35480.9,
+          "durationMs": 249.2,
+          "blockedMs": 0,
+          "renderMs": 0.7,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        },
+        {
+          "startMs": 35735.5,
+          "durationMs": 1010.6,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 36746.9,
+          "durationMs": 1017.6,
+          "blockedMs": 0,
+          "renderMs": 1,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        },
+        {
+          "startMs": 37765.1,
+          "durationMs": 1019,
+          "blockedMs": 0,
+          "renderMs": 0.5,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 38784.2,
+          "durationMs": 1020,
+          "blockedMs": 0,
+          "renderMs": 0.6,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "visible-editor-all-css-pitch-removed",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.5,
+        1016.5
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 42848.2,
+          "durationMs": 1013,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 43861.4,
+          "durationMs": 1016.9,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 44878.7,
+          "durationMs": 1019.9,
+          "blockedMs": 0,
+          "renderMs": 1.6,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 45898.7,
+          "durationMs": 1011.8,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 46911,
+          "durationMs": 1018.2,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "visible-editor-all-css",
+      "clock": [
+        1016.5,
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.3
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 50978.1,
+          "durationMs": 1015.2,
+          "blockedMs": 0,
+          "renderMs": 0.5,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 51993.8,
+          "durationMs": 1022.2,
+          "blockedMs": 0,
+          "renderMs": 0.4,
+          "styleLayoutAndPaintMs": 0.2,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 6.7,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 53016.2,
+          "durationMs": 1015.5,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 54037.4,
+          "durationMs": 1007.5,
+          "blockedMs": 0,
+          "renderMs": 1.3,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        },
+        {
+          "startMs": 55055.5,
+          "durationMs": 1003.4,
+          "blockedMs": 0,
+          "renderMs": 0.5,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "app-runtime-alive-empty-document-no-css",
+      "clock": [
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 59108.2,
+          "durationMs": 1018,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 60126.3,
+          "durationMs": 1016.7,
+          "blockedMs": 0,
+          "renderMs": 0.4,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 61149.3,
+          "durationMs": 1009.3,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 62158.8,
+          "durationMs": 1015.3,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 63174.8,
+          "durationMs": 1016,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        }
+      ]
+    }
+  ]
+}

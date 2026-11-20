@@ -6,6 +6,12 @@ Playbook Studio has two AI entry points. The board assistant edits and operates 
 
 This guide describes the current repository implementation. The version available online depends on the actual deployment.
 
+## Coach a play with the assistant
+
+Open **AI** from the desktop editor or the film room, using the same model connection. Try “Open the film room, freeze at release, compare H and Y, and tell me who is deeper.” Then ask “Pin that frame, rewind to 1.0 second and compare the gap.” The assistant can discover the available events and player IDs, select players, seek, change speed or theme, pin a reference and return to the editor. Tool results report the actual time, ball phase and designed depth.
+
+For a lesson, ask it to add a freeze-frame question, enter an answer and save the lesson on this device. You can change the question, remove a stop, advance or reveal the answer in the same conversation. Viewing a frame and authoring private lessons leave the team play and its undo history intact. Model requests use your configured provider. [Film commands and receipts](COACH_FILM_COMMANDS.md) · [Practice plays and lessons](COACH_FILM_PILOT.md)
+
 ## Choose the entry point
 
 | Your goal | Where to open it | API key required? |

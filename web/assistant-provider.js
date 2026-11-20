@@ -1,3 +1,4 @@
+import { validateFilmCommand } from './coach-film-commands.js';
 import { runBoardAssistant, BOARD_AGENT_LIMITS } from './assistant-harness.js';
 import { providerMessages } from './locales/assistant-provider.js';
 import { validatePlay, COLORS, clone, decodeWorkspace, encodeWorkspace } from './model.js';
@@ -109,18 +110,52 @@ function transport(config, locale, fetchImpl, readResponse, signal, onRequest) {
   };
 }
 
-export async function invokeBoardModel(config, input, { signal, fetchImpl = fetch, readResponse = r => r.json(), runtime, searchCatalog, onTool, onEvent, reauthorize } = {}) {
+export async function invokeBoardModel(config, input, { signal, fetchImpl = fetch, readResponse = r => r.json(), runtime, searchCatalog, film, relay, onTool, onEvent, reauthorize } = {}) {
   let providerCalls = 0;
-  const send = transport(config, input.locale, fetchImpl, readResponse, signal, () => providerCalls++);
-  const result = await runBoardAssistant({ input, runtime, searchCatalog, signal, onTool, onEvent,
+  const send = transport(config, input.locale, fetchImpl, readResponse, signal, () => {
+    providerCalls++;
+    if (relay) relay.countProviderRequest();
+  });
+  const result = await runBoardAssistant({ input, runtime, searchCatalog, film, signal, onTool, onEvent,
     async callModel(messages, tools, allowTools, options) {
-      if (reauthorize) await reauthorize();
-      return send(messages, tools, allowTools, options);
+      const requestTurn = async () => {
+        if (reauthorize) await reauthorize();
+        return send(messages, tools, allowTools, options);
+      };
+      return relay ? relay.modelTurn(requestTurn) : requestTurn();
     } });
-  return {...result,providerCalls};
+  return {...result,providerCalls:relay ? relay.providerCalls() : providerCalls};
 }
 
-export async function requestBoardAssistant({ instruction, board, locale, mode, previous, editor, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool, onEvent }) {
+async function cloudBoardTurn(path, body, {request, fetchImpl, signal, onTool, onEvent, locale}) {
+  if (!onTool && !onEvent) return request(path, {method:'POST', body, signal});
+  const response = await (fetchImpl || fetch)(path, {method:'POST', credentials:'same-origin', cache:'no-store',
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify({...body, stream:true}), signal});
+  if (!response.ok) {
+    let payload; try { payload = await response.json(); } catch { payload = {}; }
+    throw Object.assign(new Error(payload.error || words(locale).failed), {status:response.status});
+  }
+  const reader = response.body.getReader(), decoder = new TextDecoder();
+  let pending = '', result;
+  while (true) {
+    const {value, done} = await reader.read();
+    pending += decoder.decode(value || new Uint8Array(), {stream:!done});
+    const lines = pending.split('\n'); pending = lines.pop();
+    for (const line of lines) {
+      if (!line) continue;
+      const event = JSON.parse(line);
+      if (event.type === 'tool') onTool?.(event.name,event.args);
+      if (event.type === 'trace') onEvent?.(event.event);
+      if (event.type === 'result') result = event.result;
+      if (event.type === 'error') throw Object.assign(new Error(event.error), {status:event.status});
+    }
+    if (done) break;
+  }
+  if (!result) throw new Error(words(locale).invalid);
+  return result;
+}
+
+export async function requestBoardAssistant({ instruction, board, locale, mode, previous, editor, film, model, signal, workspace, request, fetchImpl, runtime, loadCatalog, onTool, onEvent }) {
   const input = boardAssistantInput({ instruction, board, locale, mode, previous, editor });
   const provider = model?.provider || 'openai';
   const modelId = model?.model?.trim() || (provider === 'openai' ? DEFAULT_BOARD_MODEL : '');
@@ -131,31 +166,24 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
     // The Worker supplies authoritative workspace data; transmit only local view state.
     const payloadInput={...input,...(input.editor ? {editor:{view:input.editor.view}} : {})};
     const path = '/api/workspaces/' + encodeURIComponent(workspace.id) + '/board-assistant';
-    if (!onTool && !onEvent) return request(path, {method:'POST', body:{...payloadInput, model:config, revision:workspace.revision}, signal});
-    const response = await (fetchImpl || fetch)(path, {method:'POST', credentials:'same-origin', cache:'no-store',
-      headers:{'Content-Type':'application/json'}, body:JSON.stringify({...payloadInput, model:config, revision:workspace.revision, stream:true}), signal});
-    if (!response.ok) {
-      let payload; try { payload = await response.json(); } catch { payload = {}; }
-      throw Object.assign(new Error(payload.error || words(locale).failed), {status:response.status});
-    }
-    const reader = response.body.getReader(), decoder = new TextDecoder();
-    let pending = '', result;
+    const base = {...payloadInput, model:config, revision:workspace.revision};
+    let filmRelay = film ? { enabled:true } : null;
     while (true) {
-      const {value, done} = await reader.read();
-      pending += decoder.decode(value || new Uint8Array(), {stream:!done});
-      const lines = pending.split('\n'); pending = lines.pop();
-      for (const line of lines) {
-        if (!line) continue;
-        const event = JSON.parse(line);
-        if (event.type === 'tool') onTool?.(event.name,event.args);
-        if (event.type === 'trace') onEvent?.(event.event);
-        if (event.type === 'result') result = event.result;
-        if (event.type === 'error') throw Object.assign(new Error(event.error), {status:event.status});
+      signal?.throwIfAborted();
+      const reply = await cloudBoardTurn(path, filmRelay ? {...base, filmRelay} : base, {request, fetchImpl, signal, onTool, onEvent, locale});
+      if (reply?.kind !== 'film_host_call') return reply;
+      signal?.throwIfAborted();
+      if (!film || !reply.continuation || !['read_film','control_film'].includes(reply.call?.name)) throw Error(words(locale).invalid);
+      let receipt;
+      try {
+        if (reply.call.name === 'control_film') {validateFilmCommand(reply.call.command);receipt = await film.execute(reply.call.command);}
+        else receipt = await film.read();
+      } catch (error) {
+        signal?.throwIfAborted();
+        receipt = {error:error?.message || words(locale).invalid, ...(error?.code ? {code:error.code} : {}), ...(error?.details ? {details:error.details} : {})};
       }
-      if (done) break;
+      filmRelay = {continuation:reply.continuation, receipt};
     }
-    if (!result) throw new Error(words(locale).invalid);
-    return result;
   }
   let resolved;
   try { resolved=resolveModelEndpoint(config); }
@@ -166,6 +194,6 @@ export async function requestBoardAssistant({ instruction, board, locale, mode, 
   };
   if (input.editor) input.editor.loadCatalog = loadCatalog || (await import('./assistant-search.js')).loadAssistantCatalog;
   return invokeBoardModel({ ...resolved, browser:true }, input, {
-    runtime: runtime || await import('./vendor/assistant-langgraph.js'), signal, fetchImpl, searchCatalog, onTool, onEvent,
+    runtime: runtime || await import('./vendor/assistant-langgraph.js'), signal, fetchImpl, searchCatalog, film, onTool, onEvent,
   });
 }

@@ -2,6 +2,7 @@ import { t } from './i18n.js';
 import { COLORS, escapeHTML as e, cubicSegments, animatedPlayer, animatedBall, passFlightRoute, dynamicBlockRoute } from './model.js';
 import { projectBoardPoint } from './digital-projection.js';
 import { digitalFieldPalette } from './digital-field-palette.js';
+import { SCRIMMAGE_Y } from './field-metrics.js';
 export { digitalFieldChrome } from './digital-field-palette.js';
 export const project = p => ({ x: 18 + p.x * 9.64, y: 20 + p.y * 7.6 });
 const n = x => Number(x).toFixed(2);
@@ -60,7 +61,7 @@ function enamelSurface(paint, prefix, showGrid) {
     }
     marks.push(`<path data-field-mark="hash" d="${hashes.join('')}" stroke="${paint.hash}" stroke-width="1.1"/>`);
   }
-  const los = project({ x: 0, y: 67 }).y;
+  const los = project({ x: 0, y: SCRIMMAGE_Y }).y;
   return `<g class="yard-lines" pointer-events="none" aria-hidden="true">
     <defs><linearGradient id="${wash}" x1="0%" y1="0%" x2="85%" y2="100%">
       <stop stop-color="${paint.top}"/><stop offset=".45" stop-color="${paint.middle}"/><stop offset="1" stop-color="${paint.bottom}"/>
@@ -92,7 +93,7 @@ function traditionalSurface({ light, thumbnail, print, prefix, bg, ink, showGrid
       if (i < 10) for (let j = 1; j < 5; j++) for (const x of [362, 638]) lines.push(`<line x1="${x}" y1="${y + j * 15.2}" x2="${x + 8}" y2="${y + j * 15.2}" stroke="${major}" stroke-width="1.3"/>`);
     }
   }
-  const los = project({ x: 0, y: 67 }).y;
+  const los = project({ x: 0, y: SCRIMMAGE_Y }).y;
   lines.push(`<line x1="18" y1="${los}" x2="982" y2="${los}" stroke="${light ? '#6b7079' : '#e6e8eb'}" stroke-width="1.6" stroke-dasharray="8 8" opacity=".65"/>`);
   if (!thumbnail) lines.push(`<text x="949" y="${los - 9}" fill="${ink}" font-size="12" opacity=".6" text-anchor="end" letter-spacing="1">${t('support.los')}</text>`);
   return `<rect width="1000" height="800" rx="${print ? 0 : 12}" fill="${bg}"/>${light || thumbnail ? '' : `<radialGradient id="${prefix}-flood" cx="50%" cy="50%" r="72%"><stop offset=".62" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".26"/></radialGradient>`}<rect x="18" y="20" width="964" height="760" fill="none" stroke="${line}" stroke-width="2"/><g class="yard-lines">${lines.join('')}</g>${light || thumbnail ? '' : `<rect x="18" y="20" width="964" height="760" fill="url(#${prefix}-flood)" pointer-events="none"/>`}${!thumbnail && !print ? `<text x="500" y="62" text-anchor="middle" fill="${ink}" opacity=".4" font-size="12" letter-spacing="2">${t('support.direction')}</text>` : ''}`;

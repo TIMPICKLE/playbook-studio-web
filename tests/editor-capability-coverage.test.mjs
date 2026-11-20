@@ -41,7 +41,7 @@ const terminalFeatures = [
   ['download-png','export_request'], ['download-svg','export_request'],
   ['download-play','export_request'], ['download-json','export_request'],
   ['print','print_request'], ['import','import_request'],
-  ['help','dialog_open'], ['madden-library','dialog_open'],
+  ['coach-film','dialog_open'], ['help','dialog_open'], ['madden-library','dialog_open'],
   ['compare-source','dialog_open'], ['convert-reference','dialog_open'],
 ];
 

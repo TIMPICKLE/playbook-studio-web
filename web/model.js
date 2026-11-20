@@ -175,23 +175,30 @@ export function cubicSegments(points) {
     return [p1, { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 }, { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 }, p2];
   });
 }
+// Every cubic segment uses the same 16 interpolation parameters.
+const cubicWeights = Array.from({ length: 16 }, (_, index) => {
+  const t = (index + 1) / 16, u = 1 - t;
+  return [u ** 3, 3 * u * u * t, 3 * u * t * t, t ** 3];
+});
 export function sampledRoute(route) {
   if (!route.smooth || route.points.length < 3) return route.points;
   const out = [route.points[0]];
-  for (const [a, b, c, d] of cubicSegments(route.points)) for (let i = 1; i <= 16; i++) {
-    const t = i / 16, u = 1 - t;
-    out.push({ x: u ** 3 * a.x + 3 * u * u * t * b.x + 3 * u * t * t * c.x + t ** 3 * d.x, y: u ** 3 * a.y + 3 * u * u * t * b.y + 3 * u * t * t * c.y + t ** 3 * d.y });
+  for (const [a, b, c, d] of cubicSegments(route.points)) for (const [w0, w1, w2, w3] of cubicWeights) {
+    out.push({ x: w0 * a.x + w1 * b.x + w2 * c.x + w3 * d.x, y: w0 * a.y + w1 * b.y + w2 * c.y + w3 * d.y });
   }
   return out;
 }
-export function pointAlong(points, ratio) {
+function measurePath(points) {
+  // A normalized field is wider than it is tall on screen. Account for scale.
+  const lengths = points.slice(1).map((p, i) => Math.hypot((p.x - points[i].x) * 9.64, (p.y - points[i].y) * 7.6));
+  return { lengths, total: lengths.reduce((a, b) => a + b, 0) };
+}
+export function pointAlong(points, ratio, measurement) {
   if (!points.length) return { x: 50, y: 50 };
   if (points.length === 1) return { ...points[0] };
   if (ratio <= 0) return { ...points[0] };
   if (ratio >= 1) return { ...points.at(-1) };
-  // A normalized field is wider than it is tall on screen. Account for scale.
-  const lengths = points.slice(1).map((p, i) => Math.hypot((p.x - points[i].x) * 9.64, (p.y - points[i].y) * 7.6));
-  const total = lengths.reduce((a, b) => a + b, 0);
+  const { lengths, total } = measurement || measurePath(points);
   if (!total) return { ...points[0] };
   let distance = clamp(ratio, 0, 1) * total;
   for (let i = 0; i < lengths.length; i++) {
@@ -220,13 +227,13 @@ export function blockContact(route, time) {
 
 // Resolve contacts against the defender's current position while retaining the
 // stored waypoints as a fallback for old plays or a removed target.
-export function dynamicBlockRoute(play, route, time, visiting = new Set()) {
+export function dynamicBlockRoute(play, route, time, visiting = new Set(), cache) {
   if (route.kind !== 'block' || !route.blockTargets?.length) return route;
   const points = [route.points[0]];
   for (let i = 0; i < route.points.length - 1; i++) {
     const target = play.players.find(p => p.id === route.blockTargets[i]);
     if (!target || visiting.has(target.id)) { points.push(route.points[i + 1]); continue; }
-    const defender = animatedPlayer(play, target, time, visiting);
+    const defender = animatedPlayer(play, target, time, visiting, cache);
     const from = points.at(-1);
     const dx = (from.x - defender.x) * 9.64, dy = (from.y - defender.y) * 7.6;
     const distance = Math.hypot(dx, dy);
@@ -236,50 +243,104 @@ export function dynamicBlockRoute(play, route, time, visiting = new Set()) {
   return { ...route, points };
 }
 
-export function animatedPlayer(play, player, time, visiting = new Set()) {
+function movementRouteAt(routes, time) {
+  return routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind === 'route') || routes.find(r => r.kind === 'block') || routes[0];
+}
+
+function fixedPath(cache, route) {
+  let path = cache.paths.get(route);
+  if (!path) {
+    const samples = sampledRoute(route);
+    path = { samples, measurement: measurePath(samples) };
+    cache.paths.set(route, path);
+  }
+  return path;
+}
+
+export function animatedPlayer(play, player, time, visiting = new Set(), cache) {
   if (visiting.has(player.id)) return { x: player.x, y: player.y };
   const next = new Set(visiting);
   next.add(player.id);
-  const routes = play.routes.filter(r => r.playerId === player.id && !r.optional && r.kind !== 'pass');
-  const route = routes.find(r => r.kind === 'motion' && time < r.delay + r.duration) || routes.find(r => r.kind === 'route') || routes.find(r => r.kind === 'block') || routes[0];
+  const routes = cache ? cache.routes.get(player.id) || [] : play.routes.filter(r => r.playerId === player.id && !r.optional && r.kind !== 'pass');
+  const route = movementRouteAt(routes, time);
   if (!route) return { x: player.x, y: player.y };
   if (time <= route.delay) return { ...route.points[0] };
-  const currentRoute = dynamicBlockRoute(play, route, time, next);
+  const currentRoute = dynamicBlockRoute(play, route, time, next, cache);
   const contact = blockContact(currentRoute, time);
-  const samples = sampledRoute(currentRoute);
+  // Only stored paths have fixed geometry. A block that follows a defender
+  // must be sampled again at the requested instant.
+  const measured = cache && currentRoute === route ? fixedPath(cache, route) : null;
+  const samples = measured?.samples || sampledRoute(currentRoute);
   if (contact) {
     const segments = (samples.length - 1) / (route.points.length - 1);
     const start = contact.index * segments;
     return pointAlong(samples.slice(start, start + segments + 1), contact.fraction);
   }
-  return pointAlong(samples, (time - route.delay) / route.duration);
+  return pointAlong(samples, (time - route.delay) / route.duration, measured?.measurement);
 }
 // Keep the drawn pass's bends while anchoring release/catch to the actual players.
 // Shared by the flight animation and the rehearsal path in both visual modes.
-export function passFlightRoute(play) {
+export function passFlightRoute(play, cache) {
   const holder = play.players.find(p => p.id === play.ball.holderId);
   const receiver = play.players.find(p => p.id === play.ball.receiverId);
   if (!holder || !receiver) return null;
   const route = play.routes.findLast(r => r.kind === 'pass' && r.playerId === holder.id && !r.optional && r.points.length > 1);
   if (!route) return null;
-  const a = animatedPlayer(play, holder, play.ball.passAt), b = animatedPlayer(play, receiver, play.ball.arriveAt);
+  const a = animatedPlayer(play, holder, play.ball.passAt, undefined, cache);
+  const b = animatedPlayer(play, receiver, play.ball.arriveAt, undefined, cache);
   const first = route.points[0], last = route.points.at(-1);
   return { ...route, points: route.points.map((p, i) => {
     const t = i / (route.points.length - 1);
     return { x: p.x + (a.x-first.x)*(1-t) + (b.x-last.x)*t, y: p.y + (a.y-first.y)*(1-t) + (b.y-last.y)*t };
   }) };
 }
-export function animatedBall(play, time) {
+export function animatedBall(play, time, cache) {
   const holder = play.players.find(p => p.id === play.ball.holderId);
   if (!holder) return null;
   const receiver = play.players.find(p => p.id === play.ball.receiverId);
-  if (!receiver || time <= play.ball.passAt) return animatedPlayer(play, holder, time);
-  if (time >= play.ball.arriveAt) return animatedPlayer(play, receiver, time);
-  const a = animatedPlayer(play, holder, play.ball.passAt), b = animatedPlayer(play, receiver, play.ball.arriveAt);
+  if (!receiver || time <= play.ball.passAt) return animatedPlayer(play, holder, time, undefined, cache);
+  if (time >= play.ball.arriveAt) return animatedPlayer(play, receiver, time, undefined, cache);
   const t = (time - play.ball.passAt) / (play.ball.arriveAt - play.ball.passAt);
-  const route = passFlightRoute(play);
-  if (route) return pointAlong(sampledRoute(route), t);
+  let flight = cache?.flight;
+  if (!flight) {
+    const route = passFlightRoute(play, cache);
+    if (route) {
+      const samples = sampledRoute(route);
+      flight = { samples, measurement: cache ? measurePath(samples) : undefined };
+    } else {
+      flight = {
+        a: animatedPlayer(play, holder, play.ball.passAt, undefined, cache),
+        b: animatedPlayer(play, receiver, play.ball.arriveAt, undefined, cache),
+      };
+    }
+    if (cache) cache.flight = flight;
+  }
+  if (flight.samples) return pointAlong(flight.samples, t, flight.measurement);
+  const { a, b } = flight;
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+}
+
+// A sampler is owned by one immutable revision. Mutable editor callers use
+// the eager functions above, including during uncommitted route manipulation.
+export function createAnimationSampler(play) {
+  const routes = new Map();
+  for (const route of play.routes) {
+    if (route.optional || route.kind === 'pass') continue;
+    if (!routes.has(route.playerId)) routes.set(route.playerId, []);
+    routes.get(route.playerId).push(route);
+  }
+  const cache = { routes, paths: new WeakMap(), flight: null };
+  // Opening the lecture prepares the paths used before and after motion so
+  // their first sample cannot stall the first moving frame. Extra historical
+  // alternatives remain lazy and follow the same route selection rule.
+  for (const candidates of routes.values()) {
+    const active = new Set([movementRouteAt(candidates, 0), movementRouteAt(candidates, Infinity)]);
+    for (const route of active) if (!route.blockTargets?.length) fixedPath(cache, route);
+  }
+  return {
+    playerAt: (player, time) => animatedPlayer(play, player, time, undefined, cache),
+    ballAt: time => animatedBall(play, time, cache),
+  };
 }
 export const animationLength = play => Math.max(6, play.ball.arriveAt, ...play.routes.filter(r => !r.optional).map(r => r.delay + r.duration));
 

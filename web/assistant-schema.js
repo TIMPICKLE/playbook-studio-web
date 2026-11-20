@@ -1,6 +1,7 @@
 import { z } from './vendor/assistant-zod.js';
 import { EditorPlayOperationSchema } from './editor-play-commands.js';
 import { EditorActionSchema } from './editor-actions.js';
+import { FILM_COMMAND_SCHEMAS } from './coach-film-commands.js';
 
 const id = z.string().min(1).max(100);
 const routeId = id.optional();
@@ -60,6 +61,10 @@ const toJSON = schema => { const { $schema, ...json } = z.toJSONSchema(schema, {
 export const submitResultTool = { type: 'function', function: { name: 'submit_result', description: 'Submit the final grounded result. For edits, preview the complete operation group first and inspect its actual effects. This ends the current request.', parameters: toJSON(SubmitResultSchema) } };
 export const previewEditTool = { type: 'function', function: { name: 'preview_edit', description: 'Simulate the complete operation group against the current diagram with full play validation, without saving. Inspect actual depth, breaks, boundary adjustments, target order and changed IDs before submitting. Inside and outside are relative to the offensive center, or the field midpoint when there is no unique center. Treat clipped geometry as an approximation.', parameters: toJSON(PreviewEditSchema) } };
 export const previewActionsTool = {type:'function',function:{name:'preview_actions',description:'Prepare workspace, local editor, or file interaction actions without executing them. Keep one execution lane per group. Inspect actual changes before submitting kind editor with the same actions.',parameters:toJSON(PreviewActionsSchema)}};
+export const controlFilmParameters = {
+  type: 'object', required: ['command'], additionalProperties: false,
+  properties: { command: { oneOf: FILM_COMMAND_SCHEMAS } },
+};
 
 function operationError(operations) {
   if (!Array.isArray(operations) || !operations.length || operations.length > 20) return 'Expected 1–20 operations.';

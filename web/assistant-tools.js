@@ -1,6 +1,7 @@
 import { resolveBoardPlayer } from './assistant-edit.js';
 import { proposeEdit } from './assistant-proposal.js';
-import { previewEditTool, previewActionsTool, parseBoardOperations } from './assistant-schema.js';
+import { previewEditTool, previewActionsTool, parseBoardOperations, controlFilmParameters } from './assistant-schema.js';
+import { FILM_COMMAND_SCHEMAS, validateFilmCommand } from './coach-film-commands.js';
 import { EDITOR_PLAY_COMMANDS } from './editor-play-commands.js';
 import { parseEditorActions, prepareEditorActions, getEditorOverview } from './editor-actions.js';
 import { editorCapabilities, editorCommandSchema } from './editor-capabilities.js';
@@ -29,7 +30,7 @@ function validValue(schema, value) {
 }
 const validArgs = (schema, value) => !!validValue(schema, value);
 
-export function createBoardTools(input, searchCatalog) {
+export function createBoardTools(input, searchCatalog, film) {
   // Players this conversation already worked with, and the coach's selection,
   // are host-verified against the current board. Requiring the model to look
   // them up again only turned a follow-up without a subject into an error.
@@ -42,6 +43,31 @@ export function createBoardTools(input, searchCatalog) {
   const previews = new Map();
   const actionPreviews = new Map();
   let editorRead = false;
+  let filmObserved = false;
+  let filmState = null;
+  const filmSchemas = new Map(FILM_COMMAND_SCHEMAS.map(schema => ['film_' + schema.properties.operation.const, schema]));
+  function capabilities() {
+    const result = editorCapabilities(input);
+    if (film) for (const [id, schema] of filmSchemas) {
+      const operation = schema.properties.operation.const;
+      const available = filmState?.available && (filmState.available[operation] === true || (operation === 'lesson' && filmState.lessonOnRequest === true));
+      result.push({id, lane:'film', description:schema.description, available:available ?? null});
+    }
+    return result;
+  }
+  async function observeFilm(call) {
+    try {
+      const state = await call();
+      if (!state || typeof state !== 'object' || Array.isArray(state)) throw Error('No film state was returned.');
+      filmObserved = true;
+      if (state.available && typeof state.available === 'object') filmState = state;
+      return state;
+    } catch (error) {
+      if (error?.awaitingFilmHost) throw error;
+      filmObserved = true;
+      return {error: error?.message || 'Film control failed.', ...(error?.code ? {code:error.code} : {}), ...(error?.details ? {details:error.details} : {})};
+    }
+  }
   const commandKinds = new Set(Object.values(EDITOR_PLAY_COMMANDS).map(command => command.id));
   const options = () => ({locale:input.locale,roster:input.editor?.data?.roster || [],formations:input.editor?.data?.formations || [],depthChart:input.editor?.data?.depthChart});
   function assertReferences(operations) {
@@ -73,11 +99,26 @@ export function createBoardTools(input, searchCatalog) {
   // A registry entry owns its schema, description and implementation together.
   const registry = {
     read_editor: {schema:noArgs,description:'Read available editor capabilities, real workspace play IDs, roster, saved formations, personnel groups and current view/playback state before using workspace or local actions.',
-      run() {editorRead = true;return {...(input.editor?.data ? getEditorOverview(input.editor.data,input.board.playId) : {}), capabilities:editorCapabilities(input), view:input.editor?.view || {}};}},
-    list_capabilities: {schema:object({category:string}),description:'Discover registered editor commands and availability. Categories: play, workspace, local, interaction. Geometry and metadata edits use preview_edit; other actions use preview_actions.',
-      run(args) {return {capabilities:editorCapabilities(input).filter(command => !args.category || command.lane === args.category)};}},
+      run() {editorRead = true;return {...(input.editor?.data ? getEditorOverview(input.editor.data,input.board.playId) : {}), capabilities:capabilities(), view:input.editor?.view || {}};}},
+    list_capabilities: {schema:object({category:string}),description:'Discover registered commands. Categories: play, workspace, local, interaction, film. Film commands run on the open editor through control_film. Read read_film for device, current scene and lesson availability.',
+      async run(args) {
+        if (film && args.category === 'film') {
+          const scene = await observeFilm(() => film.read());
+          if (scene.error) return scene;
+        }
+        return {capabilities:capabilities().filter(command => !args.category || command.lane === args.category)};
+      }},
     get_command_schema: {schema:object({command:string}),description:'Get the authoritative parameter schema for a discovered editor command.',
-      run(args) {const schema=editorCommandSchema(args.command);return schema ? {command:args.command,schema} : {error:'Unknown editor command. Consult list_capabilities.'};}},
+      run(args) {const schema=(film && filmSchemas.get(args.command)) || editorCommandSchema(args.command);return schema ? {command:args.command,schema} : {error:'Unknown editor command. Consult list_capabilities.'};}},
+    ...(film ? {
+      read_film: {schema:noArgs, description:'Read the actual device scene, availability, current play, event times, playback, theme, ball phase and holder, player IDs, focus, designed route depths, comparison, reference and local lesson. This also works before opening the room.',
+        run:() => observeFilm(() => film.read())},
+      control_film: {schema:controlFilmParameters,description:'Perform a requested film or lesson action on this device and return its actual updated state or a structured error. Call again for another step. Use exact event IDs and real player IDs. Save a lesson only on an explicit request.',
+        run(args) {
+          if (!args || typeof args !== 'object' || !Object.hasOwn(args,'command') || Object.keys(args).length !== 1) throw Error('Supply one film command.');
+          return observeFilm(() => film.execute(validateFilmCommand(args.command)));
+        }},
+    } : {}),
     preview_actions: {schema:previewActionsTool.function.parameters,description:previewActionsTool.function.description,
       async run(args) {
         if (!editorRead) throw new Error('Read the editor context before preparing editor actions.');
@@ -141,13 +182,13 @@ export function createBoardTools(input, searchCatalog) {
   const definitions = Object.entries(registry).filter(([name]) => allowed.includes(name)).map(([name, tool]) => ({ type: 'function',
     function: { name, description: tool.description, parameters: tool.schema } }));
   return { definitions, resolved, routeIds, candidates, didSearch: () => searched, didReadBoard: () => boardRead,
-    getSimilarRanks: () => similarRanks, assertReferences, didReadEditor:()=>editorRead,
+    getSimilarRanks: () => similarRanks, assertReferences, didReadEditor:()=>editorRead, didObserveFilm:()=>filmObserved,
     getActionPreview: actions => actionPreviews.get(JSON.stringify(actions)),
     getPreview: operations => previews.get(JSON.stringify(operations)),
     async run(name, args) {
       const tool = Object.hasOwn(registry, name) && registry[name];
-      if (!tool || !allowed.includes(name) || (!['preview_edit','preview_actions'].includes(name) && !validArgs(tool.schema, args))) return { error: 'Unknown tool or invalid parameters; consult the tool schema.' };
+      if (!tool || !allowed.includes(name) || (!['preview_edit','preview_actions','control_film'].includes(name) && !validArgs(tool.schema, args))) return { error: 'Unknown tool or invalid parameters; consult the tool schema.' };
       try { return await tool.run(args); }
-      catch (error) { return {error:error instanceof Error ? error.message : 'Tool failed.'}; }
+      catch (error) { if (error?.awaitingFilmHost) throw error;return {error:error instanceof Error ? error.message : 'Tool failed.'}; }
     } };
 }

@@ -1,5 +1,11 @@
 # Traditional and digital board modes
 
+## Desktop film room
+
+Choose **Film room** next to the play title to open the coaching field. It starts at the first frame. Jump to a defined release or arrival, select up to two players, and read their signed depth from the line of scrimmage. The optional pin compares another frame on the same field. The player list also handles overlapping pieces and duplicate labels. Escape returns to the existing editor. Static diagrams show starting positions, and reference-only plays display their source image.
+
+The room evaluates the existing route and ball clock once per presented frame. Its WebGL player layer and SVG fallback share the same positions, ball, labels and comparison. The optional lesson attaches to the current play and workspace when the user explicitly saves it on the device. [Technical acceptance](acceptance/COACH_FILM.md) · [Practice and comparison variants](COACH_FILM_PILOT.md)
+
 ## Viewing preference
 
 - `传统模式` is the default. Flat SVG symbols, solid interface surfaces, no decorative animation. Playback, speed, scrubbing, editing and exports remain functional.

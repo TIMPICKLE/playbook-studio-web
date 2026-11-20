@@ -2,10 +2,10 @@ import { uid, validatePlay } from './model.js';
 import { parseBoardOperations, routeBreak } from './assistant-schema.js';
 import { withDefense43 } from './defense-formation.js';
 import { runEditorPlayCommand } from './editor-play-commands.js';
+import { SCRIMMAGE_Y, UNITS_PER_YARD_Y as YARDS_Y } from './field-metrics.js';
+export { routeDepthYards } from './field-metrics.js';
 
 const YARDS_X = 100 / 53.333333;
-const YARDS_Y = 2;
-const SCRIMMAGE_Y = 67;
 const BREAK_TOLERANCE = .01;
 const field = n => Math.max(0, Math.min(100, n));
 const point = (x, y) => ({ x: field(x), y: field(y) });
@@ -19,7 +19,6 @@ export function routeCenterX(players) {
   const centers = players.filter(player => player.side === 'offense' && /^(c|center)$/i.test(player.label.trim()));
   return centers.length === 1 ? centers[0].x : 50;
 }
-export const routeDepthYards = y => (SCRIMMAGE_Y - y) / YARDS_Y;
 export function measuredRouteBreak(originX, endX, centerX) {
   const dx = endX - originX, centerOffset = centerX - originX;
   if (Math.abs(dx) < BREAK_TOLERANCE) return 'straight';
