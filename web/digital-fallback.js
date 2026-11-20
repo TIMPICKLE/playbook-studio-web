@@ -1,7 +1,7 @@
 import { animatedPlayer } from './model.js';
 import { project } from './field.js';
 import { BOARD_CAMERA, projectWorldPoint } from './digital-projection.js';
-import { FOCUS_RADIUS, PIECE_HEIGHT, focusInk, puckFaces, puckPalette } from './digital-puck.js';
+import { DRAG_LIFT, FOCUS_RADIUS, PIECE_HEIGHT, focusInk, puckFaces, puckPalette } from './digital-puck.js';
 
 const NS='http://www.w3.org/2000/svg';
 const node=(doc,tag,attrs={})=>{const n=doc.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));return n;};
@@ -11,7 +11,7 @@ const light=unit([-.6,-.7,1.2]),view=unit([0,-.64,.77]),half=unit(light.map((v,i
 const rgb=hex=>/^#[\da-f]{6}$/i.test(hex||'')?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[176,144,218];
 const color=(base,normal,metal=false)=>{
   const diffuse=Math.round(Math.max(0,dot(normal,light))*8)/8;
-  const gloss=Math.pow(Math.max(0,dot(normal,half)),metal?34:22)*(metal?.48:.24);
+  const gloss=Math.pow(Math.max(0,dot(normal,half)),metal?18:12)*(metal?.2:.08);
   const highlight=Math.round(gloss*12)/12;
   return `rgb(${base.map(v=>Math.round(Math.min(255,v*(.47+diffuse*.58)+255*highlight))).join(',')})`;
 };
@@ -161,7 +161,7 @@ export function createDigitalFallback(doc=document) {
       const hidden=hiddenPlayers.has(p.id);
       if(item.hidden!==hidden){item.hidden=hidden;item.group.style.display=hidden?'none':'';}
       const at=project(animatedPlayer(play,p,time));
-      const lift=animated?(draggingId===p.id?5:hoveredId===p.id?1.5:0):0;
+      const lift=animated&&draggingId===p.id?DRAG_LIFT:0;
       const active=selected?.type==='player'&&selected.id===p.id || selected?.type==='players'&&selected.ids?.includes(p.id);
       const hover=hoveredId===p.id;
       if(item.ringColor!==ringColor){item.ring.setAttribute('stroke',ringColor);item.ringColor=ringColor;}

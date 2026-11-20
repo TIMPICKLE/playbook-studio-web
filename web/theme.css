@@ -147,6 +147,99 @@ html[data-visual-mode=traditional] :is(.field-context, .effects-panel, .account-
 html[data-visual-mode=traditional] .modal-backdrop { background: #080808d9; }
 html[data-visual-mode=traditional] .compact-nav { border-top: 1px solid var(--hairline); }
 
+/* The digital field owns the depth and field theme. Its surrounding controls
+   share a stable graphite surface in both field themes. Menus have their own
+   opaque fallback so they remain legible over white yard lines. */
+@media screen {
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] {
+    --menu-surface: var(--ui-surface-raised);
+    --menu-blur: none;
+    background: var(--ui-bg);
+  }
+  html[data-decoration=off][data-visual-mode=digital] body[data-workspace-mode=editor] :is(.atmosphere,#action-particles) {
+    display: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.topbar,.sidebar,.inspector-panel,.compact-nav,.modal,.madden-panel,.field-tag,.drag-readout,.draw-tools,.editor-mode,.playback) {
+    background: var(--ui-surface);
+    border-color: var(--ui-border);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.topbar,.workspace-nav) {
+    background: var(--ui-bg);
+    border-bottom: 1px solid var(--ui-border);
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .inspector {
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .stage-dock :is(.draw-tools,.editor-mode,.playback) {
+    background: var(--ui-surface-raised);
+    border: 1px solid var(--ui-border-strong);
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .tool-indicator,
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .editor-mode::before {
+    background: var(--night-4);
+    border: 0;
+    border-radius: var(--r-pill);
+    box-shadow: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.button.primary,.play-button,.field-context .context-primary) {
+    background: var(--accent-main);
+    color: var(--on-accent);
+    border: 1px solid transparent;
+    box-shadow: none;
+    text-shadow: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.button.primary,.play-button,.field-context .context-primary):hover:not(:disabled) {
+    background: var(--accent-strong);
+    filter: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.button.subtle,.new-play,.icon-button,.add-object-menu > summary,.effects-menu > summary) {
+    background: var(--ui-surface);
+    color: var(--ui-text-muted);
+    border-color: var(--ui-border-strong);
+    box-shadow: none;
+    text-shadow: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.button.subtle,.new-play,.icon-button,.add-object-menu > summary,.effects-menu > summary):hover:not(:disabled),
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .icon-button.enabled {
+    background: var(--ui-surface-hover);
+    color: var(--ui-text);
+    filter: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .play-card.active,
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .effects-panel button[aria-pressed=true] {
+    background: var(--ui-surface-hover);
+    border-color: var(--ui-border-strong);
+    box-shadow: none;
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] :is(.field-context,.effects-panel,.account-menu-panel,.add-object-menu > div) {
+    background: var(--menu-surface);
+    color: var(--ui-text);
+    border: 1px solid var(--ui-border-strong);
+    box-shadow: var(--dock-shadow);
+    -webkit-backdrop-filter: var(--menu-blur);
+    backdrop-filter: var(--menu-blur);
+  }
+  html[data-visual-mode=digital] body[data-workspace-mode=editor] .modal-backdrop {
+    background: #080a0dba;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@supports ((-webkit-backdrop-filter: blur(6px)) or (backdrop-filter: blur(6px))) {
+  @media screen and (prefers-reduced-transparency: no-preference) {
+    html[data-visual-mode=digital] body[data-workspace-mode=editor] {
+      --menu-surface: color-mix(in srgb, var(--ui-surface-raised) 95%, transparent);
+      --menu-blur: blur(6px);
+    }
+  }
+}
+
 /* --------------------------------------------------------------------------
    Sidebar content
    -------------------------------------------------------------------------- */

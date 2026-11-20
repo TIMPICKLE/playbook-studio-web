@@ -46,11 +46,11 @@ English and Simplified Chinese are supported. Phones and iPads use the tradition
 
 ## Digital board
 
-In the desktop editor, choose **Display mode → Digital**. Click the sun button above the field, **Toggle field brightness**, to switch between dark graphite (left) and cool silver (right). The screenshots show the same Mesh play from the same camera. Steel-gray yard lines sit behind the routes. Each puck carries its position on top and its player color around the edge.
+In the desktop editor, choose **Display mode → Digital**. Click the sun button above the field, **Toggle field brightness**, to switch between dark graphite and cool silver. The screenshot shows receiver X selected in Mesh. The fixed toolbars and timeline have solid graphite surfaces. Select a matte puck to emphasize its routes in their original colors while keeping the other assignments visible.
 
-![Browser views of the same Mesh formation on the dark and light digital fields](docs/assets/readme/digital-field-themes.webp)
+![The digital editor with receiver X selected and its route emphasized](docs/assets/readme/digital-workspace.webp)
 
-- **Edit a route.** Ask the AI to change X’s go route to a post. The shared release stays in place as the route bends inside. Press the mouse button to take over during the preview, or undo the change after applying it.
+- **Edit a route.** Ask the AI to change X’s go route to a post. The shared stem stays in place as the route bends inside, and a single stroke traces the new break. Press the mouse button to take over during the preview, or undo the change after applying it.
 - **Rehearse a pass.** Choose **Rehearse** and scrub between the quarterback’s release and the catch. Exporting a paused frame keeps the ball and routes at that instant. A ready WebGL scene exports a perspective PNG. The compatibility view exports a flat diagram.
 - **Drag and scrub.** A player and its linked routes move in the same refresh. Scrubbing shows the latest position on each refresh and settles at the time you release the slider. The compatibility view reuses piece geometry as players move.
 

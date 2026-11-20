@@ -1,6 +1,6 @@
 # Liquid glass and liquid metal
 
-> v4 更新：此页保留面板材质的实现记录；当前模式入口和移动设备限制以 [数字化战术板](DIGITAL_BOARD.md) 为准。
+> 历史实现记录。当前数字战术编辑器采用实底面板，关闭页面粒子与液态材质动画。其他页面仍可使用下列材质引擎。当前模式与设备支持见[数字化战术板](DIGITAL_BOARD.md)。
 
 Implemented after reviewing upstream projects on 2026-10-25. This is an Apple-inspired material treatment for Playbook Studio, not Apple's proprietary renderer.
 
@@ -13,7 +13,7 @@ Implemented after reviewing upstream projects on 2026-10-25. This is an Apple-in
 | [liquid-glass-react](https://github.com/rdev/liquid-glass-react) | Reviewed existing control approach; the editor is vanilla DOM and needs a shared animated material across many surfaces. |
 | [WebGL glass example](https://github.com/rezzminator/liquid-glass) and [Kube optical tutorial](https://kube.io/blog/liquid-glass-css-svg/) | Reference for rounded surface distance, lens profiles and refraction. Playbook's lens compositor is independently implemented. The tutorial's SVG backdrop path is Chrome-specific, so it is not the cross-device foundation. |
 
-## Shipped behavior
+## Behavior in the original release
 
 - A continuous silver/purple liquid-metal scene with full-resolution WebGL rendering. The minimum world pixel ratio is 2, and there is no automatic screen-size or performance tier.
 - A shared lens renderer samples that animated scene for headers, toolbars, playback, side panels, dialogs and playbook cards. Rounded bevel normals, refraction, RGB dispersion, specular edges and pointer-following light make the material visible. Main action buttons use molten-gold coloring.

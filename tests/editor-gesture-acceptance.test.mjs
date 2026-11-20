@@ -9,10 +9,11 @@ import { digitalFieldPalette } from '../web/digital-field-palette.js';
 
 register(new URL('./helpers/window-modules.mjs', import.meta.url));
 let serial=0;
-async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null}={}) {
+async function host(t,{raw=encodeWorkspace(starterWorkspace()),failures=null,visualMode}={}) {
   const win=new Window({url:'http://localhost:3000/local.html#editor',width:1440,height:1000});
   win.document.body.innerHTML=readFileSync(new URL('../web/index.html',import.meta.url),'utf8').split('<body>')[1].split('</body>')[0];
   win.localStorage.setItem(STORAGE_KEY,raw);
+  if(visualMode)win.localStorage.setItem('playbook-visual-mode',visualMode);
   win.localStorage.setItem('playbook-studio:onboarding:v1',JSON.stringify({dismissed:true,completed:[]}));
   const names=['window','document','navigator','localStorage','location','history','Image','Blob','requestAnimationFrame','cancelAnimationFrame'];
   const previous=Object.fromEntries(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
@@ -48,27 +49,40 @@ test('switching the field at the editor toolbar updates both the board and its s
   f.action('theme');check('dark');
 });
 
-test('unchanged field hints preserve the material canvas, live region and keyboard focus', async t => {
+test('a saved digital preference opens the editor without ambient artwork and follows actual workspace navigation', async t => {
+  const f=await host(t,{visualMode:'digital'}), doc=f.win.document;
+  const check=mode=>{
+    assert.equal(doc.documentElement.dataset.decoration,mode);
+    assert.equal(doc.documentElement.dataset.effects,'full');
+  };
+  check('off');
+  assert.ok(f.q('#field svg[data-field-surface="enamel"]'));
+  assert.equal(f.q('#liquid-metal-world,.liquid-surface-canvas,.particle-burst,.press-wave'),null);
+  f.q('.workspace-nav [data-workspace-mode="roster"]').click();
+  check('full');
+  f.q('.workspace-nav [data-workspace-mode="editor"]').click();
+  check('off');
+  assert.equal(f.q('#liquid-metal-world,.liquid-surface-canvas,.particle-burst,.press-wave'),null);
+});
+
+test('unchanged field hints preserve live region and keyboard focus in the quiet digital editor', async t => {
   const f = await host(t), doc = f.win.document;
   assert.equal(doc.documentElement.dataset.effects, 'off', 'a new document reads its own display preference');
-  const styles = doc.createElement('style');
-  styles.textContent = readFileSync(new URL('../web/liquid.css', import.meta.url), 'utf8');
+  const styles=doc.createElement('style');
+  styles.textContent=readFileSync(new URL('../web/interaction.css',import.meta.url),'utf8');
   doc.head.append(styles);
   f.q('[data-effects-mode="digital"]').click();
   assert.equal(doc.documentElement.dataset.effects, 'full');
+  assert.equal(doc.documentElement.dataset.decoration, 'off');
   f.action('rehearse-mode');
   const context = f.q('#field-context'), playButton = context.querySelector('[data-action="play"]');
   const hint = f.q('.canvas-hint').firstElementChild, toolbarButton = f.q('.selection-toolbar button');
-  const canvas = doc.createElement('canvas');
-  canvas.className = 'liquid-surface-canvas';
-  canvas.setAttribute('aria-hidden', 'true');
-  context.prepend(canvas);
   let entrances = 0;
   context.animate = () => { entrances++; };
   playButton.focus();
   for (let i = 0; i < 5; i++) {
     f.action('rehearse-mode');
-    assert.equal(canvas.parentElement, context);
+    assert.equal(context.querySelector('.liquid-surface-canvas'), null);
     assert.equal(doc.activeElement, playButton);
     assert.equal(context.querySelector('[data-action="play"]'), playButton);
     assert.equal(f.q('.canvas-hint').firstElementChild, hint);
@@ -77,15 +91,14 @@ test('unchanged field hints preserve the material canvas, live region and keyboa
   assert.equal(entrances, 0);
   f.action('edit-mode');
   assert.equal(context.textContent.trim(), '');
-  assert.equal(canvas.parentElement, context);
+  assert.equal(context.children.length, 0);
   assert.equal(f.win.getComputedStyle(context).display, 'none');
   f.key(f.q('#field [data-player]'), 'Enter');
   assert.ok(context.querySelector('.context-player'));
-  assert.equal(canvas.parentElement, context);
+  assert.equal(context.querySelector('.liquid-surface-canvas'), null);
   assert.equal(entrances, 1);
   f.q('[data-effects-mode="traditional"]').click();
   assert.equal(doc.documentElement.dataset.effects, 'off');
-  canvas.remove();
   context.querySelector('[data-action="clear-selection"]').click();
   assert.equal(context.children.length, 0);
   f.key(f.q('#field [data-player]'), 'Enter');

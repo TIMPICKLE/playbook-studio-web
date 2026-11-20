@@ -164,6 +164,10 @@ export function createDigitalBoard({doc=document,getState,isGestureActive=()=>fa
           // WebGL may lose its drawing buffer after the download dialog opens.
           // The SVG frame below still has the committed geometry and clock.
         } finally {invalidate();}
+      } else if(engine&&focusChanged){
+        // Updating the export decoration also changed the live feedback. If
+        // another texture is decoding, its completion must paint this focus.
+        backgroundChanged=true;invalidate();
       }
       return {image,fullScene:!!image&&engine?.fullScene===true,decoration:feedback.layer.outerHTML,time:state.time};
     },

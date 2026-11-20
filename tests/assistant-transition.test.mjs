@@ -85,6 +85,78 @@ test('Go/Post pins the entire shared stem and changes only the suffix in both di
   }
 });
 
+const go = 'M20,100 L20,75 L20,0', post = 'M20,100 L20,20 L75,0';
+const route = (d, attributes = '', id = 'x') => '<g data-route="' + id + '"><path class="route-stroke" d="' + d +
+  '" stroke="#93acbe" stroke-width="2.8" marker-end="url(#arrow)" ' + attributes + '/></g>';
+
+test('a digital AI edit traces only the new break once, after the exact morph, on the existing clock', async () => {
+  const f = fixture(route(go), route(post));
+  f.layer.setAttribute('data-field-surface', 'enamel');
+  const original = f.layer.outerHTML;
+  const animation = animateAssistantLayer(f);
+  f.step(0); f.step(220);
+  const line = f.layer.querySelector('.route-stroke');
+  assert.notEqual(line.getAttribute('d'), post);
+  assert.equal(f.layer.querySelector('.assistant-route-trace'), null);
+  f.step(430);
+  assert.equal(line.getAttribute('d'), post);
+  const trace = f.layer.querySelector('.assistant-route-trace');
+  assert.equal(trace.getAttribute('d'), 'M20,20L75,0');
+  assert.equal(trace.getAttribute('pointer-events'), 'none');
+  assert.equal(trace.getAttribute('stroke'), '#93acbe');
+  assert.equal(trace.hasAttribute('marker-end'), false);
+  const offset = Number(trace.getAttribute('stroke-dashoffset'));
+  assert.ok(offset > 0 && offset < 1);
+  f.step(510);
+  assert.ok(Number(trace.getAttribute('stroke-dashoffset')) < offset);
+  f.step(590);
+  assert.ok(Number(trace.getAttribute('opacity')) < .72);
+  assert.equal(f.callbacks.size, 1);
+  f.step(620);
+  assert.deepEqual(await animation.finished, {cancelled:false});
+  assert.equal(f.layer.outerHTML, original);
+  assert.equal(f.callbacks.size, 0);
+});
+
+test('the AI trace clears immediately on interruption or reduced motion', async () => {
+  for (const end of ['cancel', 'reduced', 'initial-reduced']) {
+    const f = fixture(route(go), route(post));
+    f.layer.setAttribute('data-field-surface', 'enamel');
+    if (end === 'initial-reduced') f.setReducedMotion(true);
+    const animation = animateAssistantLayer(f);
+    if (end !== 'initial-reduced') {
+      f.step(0); f.step(470);
+      assert.ok(f.layer.querySelector('.assistant-route-trace'));
+      if (end === 'cancel') animation.cancel();
+      else f.setReducedMotion(true);
+    }
+    await animation.finished;
+    assert.equal(f.layer.querySelector('.assistant-route-trace'), null);
+    assert.equal(f.layer.querySelector('.route-stroke').getAttribute('d'), post);
+    assert.equal(f.callbacks.size, 0);
+  }
+});
+
+test('traditional, dashed, batch, equivalent and shortened routes keep their original presentation', () => {
+  for (const [before, after, enamel] of [
+    [route(go), route(post), false],
+    [route(go), route(post, 'stroke-dasharray="9 6"'), true],
+    [route(go) + route(go, '', 'z'), route(post) + route(post, '', 'z'), true],
+    [route(go), route('M20,100 L20,0'), true],
+    [route(go), route('M20,100 L20,75'), true],
+    [route(go), route(go.replaceAll('20,', '30,')), true],
+  ]) {
+    const f = fixture(before, after);
+    if (enamel) f.layer.setAttribute('data-field-surface', 'enamel');
+    const original = f.layer.outerHTML;
+    const transition = animateAssistantLayer(f);
+    f.step(0); f.step(460);
+    assert.equal(f.layer.querySelector('.assistant-route-trace'), null);
+    transition.finish();
+    assert.equal(f.layer.outerHTML, original);
+  }
+});
+
 test('route color and width interpolate to the exact target styling', () => {
   const f = fixture('<g data-route="x"><path d="M0,0 L0,20" stroke="#fff" stroke-width="2"/></g>',
     '<g data-route="x"><path d="M0,0 L10,10" stroke="#335577" stroke-width="4"/></g>');

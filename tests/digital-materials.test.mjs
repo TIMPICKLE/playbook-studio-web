@@ -98,7 +98,7 @@ test('mounting a paused timeline bakes one field and subsequent focus and seeks 
     const focus=f.images.shift();
     const focusedSvg=await (await fetch(focus.url)).text();
     const doc=new f.win.DOMParser().parseFromString(focusedSvg,'image/svg+xml');
-    assert.equal(doc.querySelector(`[data-feedback-route="${route.id}"] [data-route-focus]`).getAttribute('opacity'),'0.34');
+    assert.equal(doc.querySelector(`[data-feedback-route="${route.id}"] [data-route-focus]`).getAttribute('opacity'),'1');
     for(const time of [0,f.play.ball.passAt,f.play.ball.arriveAt+.1]){
       state.time=time;board.presentTimeline();
     }
@@ -111,6 +111,43 @@ test('mounting a paused timeline bakes one field and subsequent focus and seeks 
     assert.equal(f.contexts.get(f.fieldTexture().image).image,latest);
     assert.equal(board.backgroundReady,true);
     assert.equal(f.images.length,0);
+
+    // The clock stays paused. Selection alone must replace exactly one field
+    // texture, including when the final selected player is cleared.
+    const owners=[...new Set(f.play.routes.map(r=>r.playerId))].slice(0,2);
+    assert.equal(owners.length,2);
+    for(const selected of [{type:'player',id:owners[0]},{type:'player',id:owners[1]},{type:'players',ids:owners},null]){
+      state.selected=selected;
+      board.presentTimeline();
+      assert.equal(f.images.length,1);
+      const job=f.images.shift();
+      const field=new f.win.DOMParser().parseFromString(await (await fetch(job.url)).text(),'image/svg+xml');
+      const ids=selected?.ids||[selected?.id];
+      for(const r of f.play.routes){
+        const path=field.querySelector(`[data-feedback-route="${r.id}"] [data-route-focus]`);
+        assert.equal(Number(path.getAttribute('opacity'))>0,ids.includes(r.playerId));
+      }
+      assert.equal(board.capture().fullScene,false,'a capture never uses the previous selection texture');
+      job.onload();board.presentTimeline();
+      assert.equal(f.images.length,0);
+      assert.equal(board.capture().fullScene,true);
+    }
+
+    state.selected={type:'player',id:owners[0]};
+    board.presentTimeline();
+    const older=f.images.shift();
+    state.selected={type:'player',id:owners[1]};
+    assert.equal(board.capture().fullScene,false,'capture sees the new selection before a render can start');
+    older.onload();board.presentTimeline();
+    assert.equal(f.images.length,1,'the first decode cannot leave the captured focus stale on the GPU');
+    const newer=f.images.shift();
+    const newField=new f.win.DOMParser().parseFromString(await (await fetch(newer.url)).text(),'image/svg+xml');
+    for(const r of f.play.routes){
+      const path=newField.querySelector(`[data-feedback-route="${r.id}"] [data-route-focus]`);
+      assert.equal(Number(path.getAttribute('opacity'))>0,r.playerId===owners[1]);
+    }
+    newer.onload();board.presentTimeline();
+    assert.equal(board.backgroundReady,true);
   }finally{board.destroy();await f.close();}
 });
 

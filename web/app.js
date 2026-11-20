@@ -30,7 +30,7 @@ import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starter
 import { fieldSVG, updateAnimation, bindGestureGeometry, previewDraft, displayColor, syncFieldHitTargets, fieldHitCandidates } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
-import { effectsControl, initEffects, burstAt, setEffectsMode, visualMode } from './effects.js';
+import { effectsControl, initEffects, syncPageDecoration, burstAt, setEffectsMode, visualMode } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
 import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
 import { createWorkspacePanels,isCompactWorkspace } from './workspace-panels.js';
@@ -2189,6 +2189,7 @@ function showEditor(show) {
   if (app.hidden === !show) return;
   resetFileImport();
   app.hidden = !show;
+  syncPageDecoration();
   if (show) {
     syncWorkspaceNavigation('editor');
     const remembered=editorSessions.get(shared?.current?.id||'local');
@@ -2253,7 +2254,6 @@ async function editAnalysisSuggestion(payload) {
   return {ok:true};
 }
 initViewportLayout();
-initEffects();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
 
 if (cloudMode()) {
@@ -2311,6 +2311,8 @@ if (cloudMode()) {
     },
   });
 }
+
+initEffects();
 
 // This control is independent of the editor so it also works on sign-in and home.
 const localeControl = document.createElement('div');

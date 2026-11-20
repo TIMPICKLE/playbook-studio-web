@@ -1,0 +1,91 @@
+{
+  "baselineRef": "7208e6be858a142899528a0a9a7126188e1c5205",
+  "candidateRef": "7cd53fee11fe28d168e1d337f4f7a9ffcbfcd166",
+  "fixtureSha256": "02cd5f79de9293b30e790894fd950797b5fcedb7b0ed6eb20220e10d916d1ce5",
+  "measurement": "Fresh editor page at default board size, viewport 1363×936, no reduced motion, foreground Chromium, SVG fallback with WebGL2 unavailable. Production UI event handlers. Wait for board ready, settle 1900 ms, then measure 2200 ms. Count executed requestAnimationFrame callbacks across the page and CanvasRenderingContext2D.drawImage calls targeting liquid-surface-canvas. Lens paints are per-panel copies, not frames per second. No estimate of GPU or display FPS.",
+  "baseline": {
+    "fixture": "Mesh · 浅交叉",
+    "players": 22,
+    "elapsedMs": 2202,
+    "rAF": 6,
+    "callbacks": {
+      "tick": 3,
+      "(anonymous)": 3
+    },
+    "lensPaints": 24,
+    "surfaces": 11,
+    "particles": 1,
+    "metal": true,
+    "gpu": "unavailable",
+    "board": "vector",
+    "effects": "full",
+    "theme": "dark",
+    "control": "rgba(23, 24, 25, 0.25)",
+    "viewport": [
+      1363,
+      936
+    ]
+  },
+  "candidate": {
+    "fixture": "Mesh · 浅交叉",
+    "players": 22,
+    "elapsedMs": 2213,
+    "rAF": 0,
+    "callbacks": {},
+    "lensPaints": 0,
+    "surfaces": 0,
+    "particles": 0,
+    "metal": false,
+    "gpu": "unavailable",
+    "board": "vector",
+    "effects": "full",
+    "theme": "dark",
+    "control": "rgb(37, 42, 50)",
+    "viewport": [
+      1363,
+      936
+    ]
+  },
+  "interactions": {
+    "player": "X",
+    "selectedRoutes": [
+      {
+        "id": "d2a2adfc-3f04-4527-bf8a-f4719dc7266d",
+        "opacity": 0.8,
+        "strokeWidth": 4.6
+      }
+    ],
+    "themeRoundTrip": "dark/light/dark: X remained selected",
+    "scrub": [
+      {
+        "clock": 3.3,
+        "hud": "接球后跑动"
+      },
+      {
+        "clock": 2.5,
+        "hud": "传球中"
+      }
+    ],
+    "settings": {
+      "selected": "数字化模式",
+      "description": "立体球场 · 哑光棋子"
+    },
+    "depthChart": {
+      "decorativeWorld": true,
+      "particleCanvases": 1
+    },
+    "returnedToEditor": {
+      "decorativeWorld": false,
+      "particleCanvases": 0,
+      "lensCanvases": 0,
+      "players": 22
+    },
+    "pointerDragX": {
+      "stage": "SVG player transform, logical coordinates",
+      "before": "translate(143.32 529.20)",
+      "after": "translate(204.86 560.84)",
+      "undo": "translate(143.32 529.20)"
+    }
+  },
+  "candidateTree": "90f19fc2db58877ba67de1232414c84c5ba85334"
+}
