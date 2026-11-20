@@ -69,9 +69,10 @@
 ## 状态与边界
 
 - 房间状态以 `version: 1` 标识。`players[].position`、`ball.position`、`focus[].origin` 与 `focus[].trail` 使用和画面一致的场地图坐标。`ball.phase` 标明控球、出手、飞行、到达或接球。`activeEvent` 能区分同一时刻的多个事件。
-- `focusIds` 保留选人顺序。`focus[].depthYards` 与 `comparison.gapYards` 使用开球线作为基准。缺少码数标定的场地返回 `null`，仍可用 `comparison.deeperId`、`shallowerId` 判断前后。深度相同的两人对应两个空 ID。
+- `focusIds` 保留选人顺序。`focus[].depthYards` 与 `comparison.gapYards` 使用开球线作为基准。缺少码数标定的场地返回 `null`，仍可用 `comparison.deeperId`、`shallowerId` 判断前后。深度相同的两人对应两个空 ID。播报两人差值时读取 `comparison.gapYards`。它由同一帧的原始坐标相减后保留一位小数，侧栏的个人读数各自四舍五入至一位小数。
 - `pinnedTime` 是钉住的时刻。`reference` 包含该时刻的选人位置、短尾迹和比较。`questionMasked` 为真时，参考帧在通用读屏中隐藏。题目未揭晓时，常规课件快照省略答案。
 - `available` 给出与当前状态相关的操作。无传球的战术没有出手或到达事件，静止阵型可选人，纯参考图只能展示图像。设备与试点分组的可用能力由编辑器宿主返回，事件简版沿用常规演练的时间轴。
+- `available.lesson` 表示当前设备和战术允许按需打开课件。`lesson: null` 表示课件尚未开启；`lesson/state` 此时只回答状态。已开启的课件支持在同一宿主使用 `includeAnswers: true` 备课，画面继续隐藏答案。
 - 执行失败时可读取具体原因。常见返回有 `INVALID_COMMAND`、`EVENT_UNAVAILABLE`、`TIME_OUT_OF_RANGE`、`REFERENCE_ONLY`、`NO_MOTION` 与 `LESSON_STALE`。课件在其他标签页更新时会返回 `LESSON_CONFLICT`，可以先加载最新版本再决定如何编辑。
 
 仓内房间对象提供 `room.readState()` 和 `await room.perform(command)`。返回值可直接 JSON 序列化，修改返回对象不影响编辑器。各项参数、错误分支和回归用例随源码维护。[命令定义](../web/coach-film-commands.js) · [接口测试](../tests/coach-film-commands.test.mjs) · [AI 手册](AI_GUIDE.md)

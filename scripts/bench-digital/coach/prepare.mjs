@@ -37,11 +37,14 @@ const clock = await readFile(join(here,'clock.js'));
 const clockPage = await readFile(join(here,'clock-page.js'));
 const profile = await readFile(join(here,'profile.js'));
 const styleDriver=await readFile(join(here,'style-stage.js'));
+const entryDriver=await readFile(join(here,'entry-seed.js'));
 await writeFile(join(dist, 'film-bench-scene.json'), fixture);
 await writeFile(join(dist, 'film-bench.js'), driver);
 await writeFile(join(dist,'film-clock.js'),clock);
 await writeFile(join(dist,'film-clock-page.js'),clockPage);
 await writeFile(join(dist,'film-profile.js'),profile);
+await writeFile(join(dist,'film-entry-seed.js'),entryDriver);
+await writeFile(join(dist,'film-entry.html'),'<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>普通入口测量</title><body><button type="button" disabled>准备演练样本</button><pre id="film-bench-result" role="status">保持前台</pre><script type="module" src="./film-entry-seed.js"></script></body></html>');
 await writeFile(join(dist,'film-clock.html'),`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>空白页面刷新时钟</title><main><h1>空白页面刷新时钟</h1><button type="button" disabled>开始测量</button> <a hidden download="coach-film-bare-raf.json">下载逐帧数据</a><pre id="film-bench-result" role="status">已就绪 · 三轮各 15 秒，保持此标签前台</pre></main><script type="module" src="./film-clock-page.js"></script></html>`);
 await writeFile(join(dist,'film-profile.html'),`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>同页逐段测量</title><main><button type="button" disabled>开始逐段测量</button> <a hidden download="coach-film-paired-profile.json">下载完整数据</a><pre id="film-bench-result" role="status">保持前台</pre></main><script type="module" src="./film-profile.js"></script></html>`);
 await writeFile(join(dist, 'film-bench-build.json'), JSON.stringify({
@@ -52,6 +55,7 @@ await writeFile(join(dist, 'film-bench-build.json'), JSON.stringify({
   clockSha256:createHash('sha256').update(clock).update(clockPage).digest('hex'),
   profileSha256:createHash('sha256').update(profile).digest('hex'),
   freshStyleDriverSha256:createHash('sha256').update(styleDriver).digest('hex'),
+  normalEntryDriverSha256:createHash('sha256').update(entryDriver).digest('hex'),
 }));
 // The benchmark can share a preview origin with the editor. Keep the primary workspace
 // and tutorial preferences of that editor intact even when a run is interrupted.
@@ -64,10 +68,15 @@ async function replaceOnce(file, from, to) {
 await replaceOnce('model.js', "'playbook-studio:v1'", "'coach-film-bench:workspace'");
 await replaceOnce('onboarding.js', "'playbook-studio:onboarding:v1'", "'coach-film-bench:onboarding'");
 await replaceOnce('visual-mode.js', "'playbook-visual-mode'", "'coach-film-bench:visual-mode'");
-await replaceOnce('app.js', "if ('serviceWorker' in navigator", "if (false && 'serviceWorker' in navigator");
+// Keep the entry module byte-for-byte intact, while the dedicated QA scope
+// uses the browser's network handling instead of installing release caches.
+await writeFile(join(dist,'sw.js'),'// Isolated benchmark scope. Requests use the network.\n');
 const index = await readFile(join(dist, 'index.html'), 'utf8');
 await writeFile(join(dist, 'film-bench.html'), index.replace('src="./app.js"', 'src="./film-bench.js"'));
 await prepareStyleCases(dist,index,styleDriver);
+const observerHook=`if(sessionStorage.getItem('coach-film-normal-entry:'+new URL('.',location.href).pathname)!==null){addEventListener('load',()=>{document.fonts.ready.then(()=>setTimeout(()=>{import('./film-bench.js?normal-entry')},0))},{once:true})}`;
+await writeFile(join(dist,'film-entry-observe.js'),observerHook);
+await writeFile(join(dist,'index.html'),index.replace('</body>','<script defer src="./film-entry-observe.js"></script>\n</body>'));
 if (!mounted) {
   await mkdir(join(destination, '.openai'));
   await writeFile(join(destination, '.openai/hosting.json'), JSON.stringify({static:{directory:'dist'}}));

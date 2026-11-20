@@ -3,9 +3,10 @@
 import { encodeWorkspace, starterWorkspace, STORAGE_KEY } from './model.js';
 import { ONBOARDING_STORAGE_KEY } from './onboarding.js';
 import { VISUAL_MODE_KEY } from './visual-mode.js';
-import { stats, round } from './film-clock.js';
+import { stats, round, sampleClock } from './film-clock.js';
 
-const query = new URLSearchParams(location.search);
+const normalEntry=new URL(import.meta.url).searchParams.has('normal-entry');
+const query = new URLSearchParams(normalEntry?sessionStorage.getItem('coach-film-normal-entry:'+new URL('.',location.href).pathname):location.search);
 const forcedSvg = query.get('renderer') === 'svg';
 const quick = query.has('quick');
 const panel = document.createElement('section');
@@ -66,6 +67,25 @@ async function measure({build,play}) {
     check();
     const enter=document.querySelector('[data-action="coach-film"]');
     if (!enter || enter.disabled) throw Error('Coach film is unavailable on this device.');
+    const clockStages=[],stageSamples=[];
+    const entryState=normalEntry?{readyState:document.readyState,fonts:document.fonts?.status,automatic:query.has('run'),
+      visual:document.documentElement.dataset.visualMode,loadedAtMs:round(performance.getEntriesByType('navigation')[0]?.loadEventEnd||0),
+      observedAtMs:round(performance.now()),path:location.pathname.split('/').at(-1)}:null;
+    async function clockStage(name) {
+      if (!normalEntry)return;
+      const {raw,...timing}=await sampleClock(quick?1200:6500);
+      clockStages.push({name,readyState:document.readyState,visibility:document.visibilityState,hasFocus:document.hasFocus(),...timing});
+      stageSamples.push({name,frameIntervalMs:raw});
+    }
+    if (normalEntry) {
+      if(document.readyState!=='complete'||document.fonts?.status!=='loaded')throw Error('The editor did not finish normal startup before measurement.');
+      enter.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
+      await nextFrame();
+      const bounds=enter.getBoundingClientRect(),x=bounds.x+bounds.width/2,y=bounds.y+bounds.height/2;
+      entryState.visibleLaunchTarget=bounds.width>0 && bounds.height>0 && enter.contains(document.elementFromPoint(x,y));
+      if(!entryState.visibleLaunchTarget)throw Error('The actual entry button is obscured.');
+    }
+    await clockStage('normal-editor-idle');
     enter.click();
     dialog = await waitFor('#coach-film-room[open]');
     const pitch = await waitFor('#coach-film-room [data-film-renderer]');
@@ -88,6 +108,7 @@ async function measure({build,play}) {
       const attribute = pitch.getAttribute('data-film-time');
       return attribute === null ? NaN : Number(attribute);
     };
+    await clockStage('coach-open-idle');
     async function seek(time) {
       checkField();
       const start = performance.now();
@@ -172,11 +193,12 @@ async function measure({build,play}) {
     const box=pitch.getBoundingClientRect();
     const gpuInfo=fieldGl?.getExtension('WEBGL_debug_renderer_info');
     return {
-      context:{...build,sample:quick?'smoke':'full',renderer:[renderer],forcedSvg,
+      context:{...build,sample:quick?'smoke':'full',startup:normalEntry?'normal-app-entry':'driver-started-app',entryState,renderer:[renderer],forcedSvg,
         userAgent:navigator.userAgent,graphics:gpuInfo?fieldGl.getParameter(gpuInfo.UNMASKED_RENDERER_WEBGL):null,
         viewport:[innerWidth,innerHeight],pixelRatio:devicePixelRatio,fieldSize:[round(box.width),round(box.height)],
         players:play.players.length,routes:play.routes.length,focus:['H','Y'],machine:query.get('machine')||null},
       rounds:trials.map(t=>t.summary),
+      ...(normalEntry ? {clockStages,rawClockStages:stageSamples} : {}),
       idle:{durationMs:idleMs,...idleCalls,glObserved:!!fieldGl},
       raw:trials.map(({intervals,latencies,commitLatencies})=>({frameIntervalMs:intervals.map(round),inputToObservedFrameMs:latencies.map(round),inputToFieldCommitMs:commitLatencies.map(round)})),
     };
@@ -186,14 +208,15 @@ async function measure({build,play}) {
   }
 }
 
-try {
+async function startBenchmark() {
   const [build,{play}] = await Promise.all([readJson('./film-bench-build.json'),readJson('./film-bench-scene.json')]);
-  const workspace=starterWorkspace();
-  workspace.plays=[play];
-  localStorage.setItem(STORAGE_KEY,encodeWorkspace(workspace));
-  localStorage.setItem(VISUAL_MODE_KEY,'digital');
-  localStorage.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify({dismissed:true,completed:[]}));
-  await import('./app.js');
+  if (!normalEntry) {
+    const workspace=starterWorkspace();workspace.plays=[play];
+    localStorage.setItem(STORAGE_KEY,encodeWorkspace(workspace));
+    localStorage.setItem(VISUAL_MODE_KEY,'digital');
+    localStorage.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify({dismissed:true,completed:[]}));
+    await import('./app.js');
+  }
   await waitFor('[data-action="coach-film"]');
   await document.fonts?.ready;
   resultNode.textContent = quick ? '已就绪 · 快速自检' : '已就绪 · 三轮各 30 秒，保持此标签前台';
@@ -205,17 +228,19 @@ try {
     link.hidden=true;
     delete window.coachFilmBenchmark;
     resultNode.textContent='测量进行中 · 保持前台';
+    if(normalEntry)panel.hidden=true;
     try {
       const report=await measure({build,play});
       window.coachFilmBenchmark=report;
-      const {raw, ...summary}=report;
+      const {raw,rawClockStages, ...summary}=report;
       resultNode.textContent=JSON.stringify(summary,null,2);
       try {
         link.href=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));
         link.hidden=false;
       } catch { resultNode.textContent+='\n下载不可用 · 完整数据保留在 window.coachFilmBenchmark'; }
     } catch (error) {resultNode.textContent='ERROR: '+error.message;}
-    finally {runButton.disabled=false;}
+    finally {panel.hidden=false;runButton.disabled=false;}
   };
   if (query.has('run')) runButton.click();
-} catch (error) {resultNode.textContent='ERROR: '+error.message;}
+}
+startBenchmark().catch(error=>{resultNode.textContent='ERROR: '+error.message;});

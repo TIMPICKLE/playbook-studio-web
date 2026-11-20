@@ -77,11 +77,17 @@ test('Chinese tool calls teach Mesh across consecutive turns and read the true p
   configure(f);
   const original=f.raw(),prompt=f.node('[data-ba-prompt]');
   const h=actorId(play,'H'),y=actorId(play,'Y');
-  const opening=await model.send(f,'打开教练讲解。',[read(),control('open')],()=> '教练讲解已打开。');
+  const opening=await model.send(f,'先检查课件，再打开教练讲解。',[read(),control('lesson',{action:'state'}),control('open'),control('lesson',{action:'state'})],()=> '教练讲解已打开。');
   assert.equal(opening[0].open,false);assert.equal(opening[0].roomAvailable,true);
   assert.ok(opening[0].events.some(event=>event.id==='release'&&event.time===2));
   assert.ok(opening[0].players.some(player=>player.id===h));
-  assert.ok(opening[1].open);assert.equal(opening[1].available.seek,true);
+  assert.deepEqual(opening[1],opening[0],'a lesson-state query keeps the closed room closed');
+  assert.ok(opening[2].open);assert.equal(opening[2].available.seek,true);
+  assert.equal(opening[3].open,true);
+  for(const state of opening) {
+    assert.equal(state.available.lesson,true);assert.equal(state.lessonOnRequest,true);
+    assert.equal(state.lesson,null,'an available on-demand lesson stays unmounted during inspection');
+  }
   const room=f.node('#coach-film-room[open]');
   assert.equal(roomPrompt(f),prompt,'the real composer and conversation survive moving into the dialog');
   const first=await model.send(f,'停到出手，对比 H 与 Y，固定这一帧。',[
@@ -92,6 +98,7 @@ test('Chinese tool calls teach Mesh across consecutive turns and read the true p
     assert.equal(state.comparison.deeperId,h);assert.equal(state.comparison.gapYards,3);
     return '出手时 H 比 Y 深 '+state.comparison.gapYards.toFixed(1)+' 码。';
   });
+  assert.equal(first[0].lesson,null);assert.equal(first[0].available.lesson,true);
   assert.deepEqual(first[2].focusIds,[h,y]);
   assert.match(f.node('[data-film-comparison]').textContent,/H.*Y.*3(?:\.0)?\s*码/);
   assert.equal(f.node('#coach-film-room[open]'),room);
@@ -118,10 +125,17 @@ test('English lesson turns save and reload personal stops through the same host 
     read(),control('event',{event:'release'}),control('lesson',{action:'add',question,answer}),read(),
   ]);
   for(const receipt of receipts) assert.equal(receipt.error,undefined);
+  assert.equal(receipts[0].available.lesson,true);assert.equal(receipts[0].lesson.available,true);
+  assert.equal(receipts[2].available.lesson,true);assert.equal(receipts[2].lesson.open,true);
   const key='playbook:coach-lesson:'+JSON.stringify(['local',play.id]);
   assert.equal(f.win.localStorage.getItem(key),null,'a draft stays in the open room until explicitly saved');
-  const saved=await model.send(f,'Save this lesson on my device.',[read(),control('lesson',{action:'save'})]);
-  assert.equal(saved[1].error,undefined);
+  const saved=await model.send(f,'Review the authored teacher answer privately and save this lesson on my device.',[
+    read(),control('lesson',{action:'state',includeAnswers:true}),control('lesson',{action:'save'}),
+  ]);
+  assert.equal(saved[0].lesson.stops[0].answer,undefined,'the ordinary model read keeps the answer hidden');
+  assert.equal(saved[1].lesson.stops[0].answer,answer,'the explicit teacher read can inspect an answer behind the question');
+  assert.equal(saved[1].lesson.revealed,false,'private review does not reveal the answer on the field');
+  assert.equal(saved[2].error,undefined);
   const encoded=f.win.localStorage.getItem(key);
   assert.ok(encoded?.includes(question));assert.ok(encoded.includes(answer));
   assert.equal(f.raw(),original);
@@ -192,6 +206,11 @@ test('film commands give specific errors for ambiguous players, missing passes, 
       read(),ambiguous?control('focus',{players:['H']}):control('event',{event:'release'}),read(),
     ],()=>ambiguous?'有两个 H，请指定具体球员。':'这套战术无法定位传球出手。');
     expectError(receipts[1],ambiguous?'PLAYER_AMBIGUOUS':kind==='no-pass'?'EVENT_UNAVAILABLE':'REFERENCE_ONLY');
+    if(kind==='reference') {
+      assert.equal(receipts[0].available.lesson,false);assert.equal(receipts[0].lessonOnRequest,false);
+      const inspected=await model.send(f,'检查原图的课件。',[read(),control('lesson',{action:'state'})]);
+      expectError(inspected[1],'REFERENCE_ONLY');
+    }
     assert.deepEqual(receipts[2].focusIds,[]);
     assert.equal(receipts[2].time,0);
     assert.equal(f.raw(),original);
@@ -206,11 +225,12 @@ test('device and trial gates also apply to AI; the event-only arm can still seek
     configure(f);
     assert.equal(f.q('[data-action="coach-film"]'),null);
     const original=f.raw();
-    const unavailable=await model.send(f,'请打开完整教练讲解。',[read(),control('open')],()=> '当前界面没有完整讲解房间。');
+    const unavailable=await model.send(f,'检查课件并打开完整教练讲解。',[read(),control('lesson',{action:'state'}),control('open')],()=> '当前界面没有完整讲解房间。');
     assert.equal(unavailable[0].open,false);assert.equal(unavailable[0].roomAvailable,false);
+    assert.equal(unavailable[0].available.lesson,false);assert.equal(unavailable[0].lessonOnRequest,false);
     assert.ok(!unavailable[0].operations.includes('open'));
     assert.equal(unavailable[0].operations.includes('event'),gate==='events');
-    expectError(unavailable[1],'FILM_UNAVAILABLE');
+    expectError(unavailable[1],'FILM_UNAVAILABLE');expectError(unavailable[2],'FILM_UNAVAILABLE');
     assert.equal(f.q('#coach-film-room[open]'),null);
     if (gate==='events') {
       const moved=await model.send(f,'使用这个常规板上的事件控件定位出手。',[read(),control('event',{event:'release'}),read()]);

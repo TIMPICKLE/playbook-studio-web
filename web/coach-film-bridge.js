@@ -16,26 +16,31 @@ export function createFilmBridge({guard, available, pilot, getPlay, getRoster, g
     return eventsOnly ? transport : ['state', 'capabilities'];
   }
 
+  // The host can attach a personal lesson on demand. The room's own lesson
+  // snapshot separately describes the controller which is actually mounted.
+  function hostState(state, full) {
+    const lessonOnRequest = full && !state.referenceOnly;
+    return {...state, roomAvailable:full, pilot, lessonOnRequest,
+      available:{...state.available, lesson:lessonOnRequest}};
+  }
+
   function read() {
     guard();
     const room = getRoom();
-    if (room) {
-      const state = room.readState();
-      return {...state, roomAvailable:true, pilot, lessonOnRequest:!state.referenceOnly};
-    }
-    const play = getPlay();
     const full = available();
+    if (room) return hostState(room.readState(), full);
+    const play = getPlay();
     const eventsOnly = !full && pilot === 'events' && regular.enabled();
     const supported = operations(full, eventsOnly);
-    const metadata = {version:1, open:false, roomAvailable:full, pilot, playId:play.id, title:play.title,
+    const metadata = {version:1, open:false, playId:play.id, title:play.title, lesson:null,
       operations:supported, available:Object.fromEntries(supported.map(name=>[name,true]))};
-    if (!full && !eventsOnly) return {...metadata, events:[], players:[]};
+    if (!full && !eventsOnly) return hostState({...metadata, events:[], players:[]}, false);
     const model = createFilmModel(play,{roster:getRoster()});
-    const enabled = filmOperationAvailability({model, focusIds:[], hidden:false, lesson:full && !model.reference});
+    const enabled = filmOperationAvailability({model, focusIds:[], hidden:false});
     metadata.available = Object.fromEntries(supported.map(name=>[name, Boolean(enabled[name])]));
-    return {...metadata, ...(eventsOnly ? regular.read() : {}), lessonOnRequest:full && !model.reference,
+    return hostState({...metadata, ...(eventsOnly ? regular.read() : {}),
       events: model.events, duration:model.duration, calibrated:model.calibrated, referenceOnly:model.reference, reference:null,
-      players: model.players.map(({id,label,displayLabel,side})=>({id,label,displayLabel,side}))};
+      players: model.players.map(({id,label,displayLabel,side})=>({id,label,displayLabel,side}))}, full);
   }
 
   async function execute(input) {
@@ -64,6 +69,11 @@ export function createFilmBridge({guard, available, pilot, getPlay, getRoster, g
       } else regular.apply(input);
       return read();
     }
+    if (op === 'lesson' && input.action === 'state') {
+      const state = read();
+      if (state.referenceOnly) fail('REFERENCE_ONLY', 'This reference diagram has no editable player positions or timeline.');
+      if (!state.lesson) return state;
+    }
     if (op === 'close' && !getRoom()) return read();
     if (!getRoom()) {
       const opened = await open();
@@ -80,7 +90,7 @@ export function createFilmBridge({guard, available, pilot, getPlay, getRoster, g
     const result = await room.perform(input);
     guard();
     if (op === 'close') return read();
-    if (result?.open) return {...result, roomAvailable:true, pilot, lessonOnRequest:!result.referenceOnly};
+    if (result?.open) return hostState(result, available());
     return result;
   }
   return {read, execute};
