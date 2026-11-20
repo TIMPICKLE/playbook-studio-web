@@ -307,36 +307,46 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   // An open panel is a window of the whole page, not of the pitch: it lives in a
   // viewport layer so it can be moved anywhere and is never clipped by the board.
   // Phones and touch tablets dock it above the software keyboard instead.
-  let position = null;
+  let position = null, presentation = null;
   function placePanel() {
     if (position) return positionPanel(position.x, position.y);
     const anchor = host.getBoundingClientRect(), layer = root.getBoundingClientRect();
     positionPanel(anchor.right - layer.left - panel.offsetWidth - 10, anchor.top - layer.top + 10);
   }
   function syncPanelLayout() {
-    const opened = !panel.hidden, dockHost = getContext().dockHost;
-    const docked = opened && (win.innerWidth <= 600 || !!win.matchMedia?.('(any-pointer: coarse)').matches);
-    const floating = opened && (docked || floatingRequested || !dockHost);
+    const opened = !panel.hidden, dockHost = presentation?.host ?? getContext().dockHost;
+    const docked = !presentation && opened && (win.innerWidth <= 600 || !!win.matchMedia?.('(any-pointer: coarse)').matches);
+    const floating = !presentation && opened && (docked || floatingRequested || !dockHost);
     root.classList.toggle('ba-floating', floating);
     root.classList.toggle('ba-docked', docked);
     root.classList.toggle('ba-task-panel', opened && !floating);
-    button('float').hidden = !dockHost || docked;
+    button('float').hidden = !!presentation || !dockHost || docked;
     button('float').textContent = floatingRequested ? copy().dock : copy().float;
-    q('.ba-mode-switch').hidden = !dockHost || floating;
-    if (win.innerWidth > 600) panel.classList.remove('ba-collapsed');
-    const parent = floating ? doc.body : opened && dockHost ? dockHost : host;
+    q('.ba-mode-switch').hidden = !!presentation || !dockHost || floating;
+    if (presentation || win.innerWidth > 600) panel.classList.remove('ba-collapsed');
+    const parent = presentation?.host ?? (floating ? doc.body : opened && dockHost ? dockHost : host);
     if (root.parentElement !== parent) parent.append(root);
     if (docked || !floating) { panel.style.left = ''; panel.style.top = ''; panel.style.right = ''; }
     else placePanel();
-    onPanelChange?.({open:opened,docked,floating,touchSheet:docked});
+    if (presentation) presentation.onOpenChange(opened);
+    else onPanelChange?.({open:opened,docked,floating,touchSheet:docked});
+  }
+  function setOpen(opened) {
+    panel.hidden = !opened;
+    button('open').hidden = opened;
+    button('open').setAttribute('aria-expanded', String(opened));
+    syncPanelLayout();
   }
   function close({clear = false, suspend = false} = {}) {
     // Collapsing is a view action: the uncommitted proposal and conversation stay intact.
+    const returnFocus = root.contains(doc.activeElement);
     if (suspend) cancel();
-    stopSpeech(); panel.hidden = true; button('open').hidden = false;
-    button('open').setAttribute('aria-expanded', 'false'); config.hidden = true; syncPanelLayout();
+    stopSpeech(); config.hidden = true; setOpen(false);
     if (clear) { key.value = ''; reset(); }
-    if (root.contains(doc.activeElement)) button('open').focus();
+    if (returnFocus) (presentation?.trigger ?? button('open')).focus();
+  }
+  function updateGuide(ctx = getContext(), lang = copy()) {
+    q('[data-ba-guide]').textContent = presentation?.guide ?? (ctx.readOnly ? lang.guideSearch : lang.guide);
   }
   function refresh() {
     const ctx = getContext(), lang = copy();
@@ -350,7 +360,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     }
     if (scope !== ctx.scope) switchScope(ctx.scope);
     q('.ba-scope').textContent = ctx.title || '';
-    q('[data-ba-guide]').textContent = ctx.readOnly ? lang.guideSearch : lang.guide;
+    updateGuide(ctx, lang);
     button('edit').hidden = !!ctx.readOnly;
     prompt.placeholder = clarification ? lang.clarified : lang.prompt;
     updateButtons(); outputView();
@@ -361,8 +371,48 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     refresh(); syncPanelLayout();
   }
   function open() {
-    refresh(); panel.hidden = false; button('open').hidden = true;
-    button('open').setAttribute('aria-expanded', 'true'); syncPanelLayout(); prompt.focus();
+    refresh(); setOpen(true); prompt.focus();
+  }
+  // A full-screen view owns its own dialog layer. Move this instance into that
+  // layer, keeping its request, draft and staged confirmation in the same session.
+  function presentIn(next, {trigger, onOpenChange, guide, examples = []}) {
+    const state = {host:next, trigger, onOpenChange, guide};
+    const wasOpen = !panel.hidden, wasCollapsed = panel.classList.contains('ba-collapsed');
+    const ordinaryExamples = q('.ba-examples');
+    const localExamples = doc.createElement('div');
+    localExamples.className = 'ba-examples';
+    for (const example of examples) {
+      const exampleButton = doc.createElement('button');
+      exampleButton.type = 'button';
+      exampleButton.className = 'ba-pill';
+      exampleButton.textContent = example.label;
+      exampleButton.addEventListener('click', () => {
+        selectedMode = 'auto';
+        clarification = '';
+        compose(example.prompt);
+      });
+      localExamples.append(exampleButton);
+    }
+    ordinaryExamples.hidden = true;
+    ordinaryExamples.after(localExamples);
+    presentation = state;
+    panel.setAttribute('role', 'region');
+    panel.removeAttribute('aria-modal');
+    updateGuide();
+    syncPanelLayout();
+    return () => {
+      if (presentation !== state || destroyed) return;
+      presentation = null;
+      localExamples.remove();
+      ordinaryExamples.hidden = false;
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'false');
+      panel.classList.toggle('ba-collapsed', wasCollapsed);
+      if (!wasOpen) { config.hidden = true; stopSpeech(); }
+      updateGuide();
+      setOpen(wasOpen);
+      return wasOpen ? prompt : button('open');
+    };
   }
   async function send() {
     if (pending) { cancel(); prompt.focus(); return; }
@@ -406,7 +456,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       }
       reply = result; runState = result.kind === 'preview' ? 'preview' : result.kind === 'clarify' ? 'clarify' : 'complete';
       if (result.kind === 'answer' && result.highlights) onHighlight?.(result.highlights);
-      if (result.kind === 'preview' && win.matchMedia?.('(max-width: 600px)').matches) panel.classList.add('ba-collapsed');
+      if (!presentation && result.kind === 'preview' && win.matchMedia?.('(max-width: 600px)').matches) panel.classList.add('ba-collapsed');
       prompt.value = '';
       prompt.placeholder = clarification ? lang.clarified : lang.prompt;
       outputView(); q('.ba-content').scrollTop = q('.ba-content').scrollHeight;
@@ -566,7 +616,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   prompt.addEventListener('input', updateButtons);
   provider.addEventListener('change', () => { key.value = ''; baseUrl.value = ''; model.value = MODEL_PROVIDER_PRESETS[provider.value].defaultModel; syncModelOptions(true); key.focus(); });
   root.addEventListener('keydown', event => {
-    event.stopPropagation();
+    if (!presentation || event.key !== 'Tab') event.stopPropagation();
     if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Escape') { event.preventDefault(); close(); }
     if (event.target === prompt && event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if (!pending) void send(); }
@@ -590,7 +640,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   });
   grip.addEventListener('lostpointercapture', () => { drag = null; });
   grip.addEventListener('pointerup', () => { drag = null; });
-  grip.addEventListener('dblclick', () => { position = null; floatingRequested = false; syncPanelLayout(); });
+  grip.addEventListener('dblclick', () => { if (!presentation) { position = null; floatingRequested = false; syncPanelLayout(); } });
   function positionPanel(x, y) {
     const clamp = (value, max) => Math.max(4, Math.min(value, max - 4));
     // Unchanged values are not rewritten, so a size observer cannot re-trigger itself.
@@ -641,5 +691,5 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     open(); prompt.value = String(instruction || '').slice(0,prompt.maxLength); updateButtons(); prompt.focus();
     if (submit) void send();
   }
-  return {mount, refresh, refreshLayout:syncPanelLayout, refreshPreview, open, close, destroy, adoptScope, notifyTransaction, compose};
+  return {mount, presentIn, refresh, refreshLayout:syncPanelLayout, refreshPreview, open, close, destroy, adoptScope, notifyTransaction, compose};
 }

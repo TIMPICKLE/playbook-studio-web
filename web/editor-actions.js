@@ -31,7 +31,7 @@ const definitions = [
   ['export_request', 'interaction', 'Prepare a PNG, SVG, current-play JSON or complete-workspace JSON export.', false, false, ['download-png', 'download-svg', 'download-play', 'download-json'], action('export_request', {format:z.enum(['png', 'svg', 'play_json', 'workspace_json'])})],
   ['print_request', 'interaction', 'Open the existing print workflow with the requested scope and layout.', false, false, ['print', 'print-scope', 'print-layout', 'do-print'], action('print_request', {scope:z.enum(['current', 'filtered', 'all']), layout:z.enum(['playbook', 'wristband', 'callsheet'])})],
   ['import_request', 'interaction', 'Open the native file picker; the user supplies a local playbook file before import can continue.', false, false, ['import', 'import-input', 'confirm-import'], action('import_request')],
-  ['dialog_open', 'interaction', 'Open an existing editor workflow. A workflow is not completed merely by opening it.', false, false, ['help', 'new', 'export', 'personnel-group', 'madden-library', 'compare-source', 'local-recovery', 'convert-reference'], action('dialog_open', {dialog:z.enum(['help', 'new_play', 'export', 'personnel', 'madden', 'source', 'recovery', 'convert_reference'])})],
+  ['dialog_open', 'interaction', 'Open an existing editor workflow. A workflow is not completed merely by opening it.', false, false, ['help', 'new', 'export', 'personnel-group', 'madden-library', 'compare-source', 'local-recovery', 'convert-reference', 'coach-film'], action('dialog_open', {dialog:z.enum(['help', 'new_play', 'export', 'personnel', 'madden', 'source', 'recovery', 'convert_reference', 'coach_film'])})],
 ];
 
 // One typed definition is shared by UI dispatch, model contracts and previews.

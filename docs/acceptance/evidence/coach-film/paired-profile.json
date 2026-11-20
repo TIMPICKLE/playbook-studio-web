@@ -1,0 +1,1330 @@
+{
+  "context": {
+    "checkoutHead": "beebef8b29bf7a50a4f578524efa6fff6ccb0620",
+    "sourceSha256": "5b57670eb3f023eaf1eaa08c66ccb255d60aa89b21c4dcf0efd64786f67f3688",
+    "fixtureSha256": "02cd5f79de9293b30e790894fd950797b5fcedb7b0ed6eb20220e10d916d1ce5",
+    "driverSha256": "edccfe8ded7b8a97b855aa4a34a641b21b44fba5ff00a7bfd471290c94953f60",
+    "clockSha256": "8c309d5a54fe426f8884e84460178a108dad7d5c7a2a495c5640a7ecbfabe239",
+    "profileSha256": "98f8a11c61ce1c596129481e5e425c589f7954758ba4998a776a722c99adae6b",
+    "sample": "paired-profile",
+    "durationMs": 8000,
+    "viewport": [
+      1363,
+      936
+    ],
+    "dpr": 1,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "supportsLongAnimationFrames": true
+  },
+  "phases": [
+    {
+      "name": "empty",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 471,
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 50
+        },
+        "over33_3msPercent": 1.49
+      },
+      "callbackCpuMs": {},
+      "longFrames": {
+        "count": 0,
+        "longestMs": 0
+      },
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": null,
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null
+    },
+    {
+      "name": "traditional-editor-idle",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 8,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "callbackCpuMs": {},
+      "longFrames": {
+        "count": 8,
+        "longestMs": 1018.4
+      },
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "traditional",
+        "digitalBackend": null,
+        "coachRenderer": null,
+        "canvases": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null
+    },
+    {
+      "name": "digital-editor-idle",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 8,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "callbackCpuMs": {},
+      "longFrames": {
+        "count": 7,
+        "longestMs": 1017.6
+      },
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "digital",
+        "digitalBackend": "unavailable",
+        "coachRenderer": null,
+        "canvases": 0,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null
+    },
+    {
+      "name": "coach-idle",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 8,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "callbackCpuMs": {},
+      "longFrames": {
+        "count": 7,
+        "longestMs": 1024.7
+      },
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "digital",
+        "digitalBackend": "unavailable",
+        "coachRenderer": "svg",
+        "canvases": 1,
+        "runningAnimations": []
+      },
+      "lastPlayTime": null
+    },
+    {
+      "name": "coach-playing",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 8,
+          "p50": 1016.4,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 100
+      },
+      "callbackCpuMs": {
+        "nextFrame": {
+          "samples": 9,
+          "p50": 1.7,
+          "p95": 38.3,
+          "max": 38.3
+        }
+      },
+      "longFrames": {
+        "count": 1,
+        "longestMs": 971.4
+      },
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "digital",
+        "digitalBackend": "unavailable",
+        "coachRenderer": "svg",
+        "canvases": 1,
+        "runningAnimations": [
+          "film-event",
+          "film-event"
+        ]
+      },
+      "lastPlayTime": 3.049300000000003
+    },
+    {
+      "name": "coach-playing-hidden-editor",
+      "clock": {
+        "frameIntervalMs": {
+          "samples": 14,
+          "p50": 816.5,
+          "p95": 1016.5,
+          "max": 1016.5
+        },
+        "over33_3msPercent": 57.14
+      },
+      "callbackCpuMs": {
+        "nextFrame": {
+          "samples": 15,
+          "p50": 0.9,
+          "p95": 50.6,
+          "max": 50.6
+        }
+      },
+      "longFrames": {
+        "count": 27,
+        "longestMs": 1431.8
+      },
+      "page": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "embedded": false,
+        "visual": "digital",
+        "digitalBackend": "unavailable",
+        "coachRenderer": "svg",
+        "canvases": 1,
+        "runningAnimations": []
+      },
+      "lastPlayTime": 2.032800000000003
+    }
+  ],
+  "input": [
+    {
+      "eventCpuMs": 1.8,
+      "inputToObservedFrameMs": 1008.4
+    },
+    {
+      "eventCpuMs": 0.6,
+      "inputToObservedFrameMs": 1015.1
+    },
+    {
+      "eventCpuMs": 0.5,
+      "inputToObservedFrameMs": 1016.8
+    },
+    {
+      "eventCpuMs": 0.4,
+      "inputToObservedFrameMs": 1016.6
+    },
+    {
+      "eventCpuMs": 0.3,
+      "inputToObservedFrameMs": 1028.6
+    },
+    {
+      "eventCpuMs": 0.4,
+      "inputToObservedFrameMs": 1023.3
+    }
+  ],
+  "raw": [
+    {
+      "name": "empty",
+      "clock": [
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        33.3,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.5,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.5,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.5,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.7,
+        16.5,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        50,
+        16.7,
+        16.6,
+        33.3,
+        16.7,
+        33.3,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        33.3,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        33.3,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        33.3,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        50,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.5,
+        16.8,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.8,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.6,
+        16.7,
+        16.7,
+        16.7,
+        16.6,
+        16.7,
+        16.7
+      ],
+      "cpu": {},
+      "longFrames": []
+    },
+    {
+      "name": "traditional-editor-idle",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 11552.9,
+          "durationMs": 996.7,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.2,
+          "scripts": []
+        },
+        {
+          "startMs": 12551,
+          "durationMs": 1016.3,
+          "blockedMs": 0,
+          "renderMs": 0.9,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        },
+        {
+          "startMs": 13568,
+          "durationMs": 1013.3,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 14581.5,
+          "durationMs": 1018.4,
+          "blockedMs": 0,
+          "renderMs": 1.1,
+          "styleLayoutAndPaintMs": 0.3,
+          "scripts": []
+        },
+        {
+          "startMs": 15600.2,
+          "durationMs": 1014.2,
+          "blockedMs": 0,
+          "renderMs": 0.4,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 16615.4,
+          "durationMs": 1015.6,
+          "blockedMs": 0,
+          "renderMs": 0.1,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 17631.2,
+          "durationMs": 1015.9,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 18647.9,
+          "durationMs": 1015.5,
+          "blockedMs": 0,
+          "renderMs": 0,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "digital-editor-idle",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.4
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 22904.2,
+          "durationMs": 828.5,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 23732.8,
+          "durationMs": 1012.6,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 24745.7,
+          "durationMs": 1017.6,
+          "blockedMs": 0,
+          "renderMs": 1.4,
+          "styleLayoutAndPaintMs": 0.2,
+          "scripts": []
+        },
+        {
+          "startMs": 25763.6,
+          "durationMs": 1015.7,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 26779.4,
+          "durationMs": 1016.5,
+          "blockedMs": 0,
+          "renderMs": 0.9,
+          "styleLayoutAndPaintMs": 0.2,
+          "scripts": []
+        },
+        {
+          "startMs": 27796.3,
+          "durationMs": 1015.5,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 30851.2,
+          "durationMs": 1009.9,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "coach-idle",
+      "clock": [
+        1016.4,
+        1016.4,
+        1016.4,
+        1016.5,
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.5
+      ],
+      "cpu": {},
+      "longFrames": [
+        {
+          "startMs": 33928,
+          "durationMs": 1000.4,
+          "blockedMs": 0,
+          "renderMs": 8.9,
+          "styleLayoutAndPaintMs": 0.9,
+          "scripts": []
+        },
+        {
+          "startMs": 37014.1,
+          "durationMs": 944.9,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 37959.3,
+          "durationMs": 1016.6,
+          "blockedMs": 0,
+          "renderMs": 0.2,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        },
+        {
+          "startMs": 38977.3,
+          "durationMs": 1024.7,
+          "blockedMs": 0,
+          "renderMs": 4.7,
+          "styleLayoutAndPaintMs": 0.8,
+          "scripts": []
+        },
+        {
+          "startMs": 40003.9,
+          "durationMs": 1004.6,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0,
+          "scripts": []
+        },
+        {
+          "startMs": 41009,
+          "durationMs": 1018.6,
+          "blockedMs": 0,
+          "renderMs": 0.7,
+          "styleLayoutAndPaintMs": 0.4,
+          "scripts": []
+        },
+        {
+          "startMs": 42028.1,
+          "durationMs": 1013.4,
+          "blockedMs": 0,
+          "renderMs": 0.3,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "coach-playing",
+      "clock": [
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.5
+      ],
+      "cpu": {
+        "nextFrame": [
+          1.2,
+          38.3,
+          4.3,
+          1,
+          3.1,
+          0.8,
+          1.7,
+          1.7,
+          1.5
+        ]
+      },
+      "longFrames": [
+        {
+          "startMs": 51219.9,
+          "durationMs": 971.4,
+          "blockedMs": 0,
+          "renderMs": 1.1,
+          "styleLayoutAndPaintMs": 0.1,
+          "scripts": []
+        }
+      ]
+    },
+    {
+      "name": "coach-playing-hidden-editor",
+      "clock": [
+        1016.5,
+        1016.4,
+        816.5,
+        16.7,
+        16.6,
+        16.7,
+        16.6,
+        16.7,
+        16.7,
+        1016.4,
+        1016.5,
+        1016.4,
+        1016.4,
+        1016.4
+      ],
+      "cpu": {
+        "nextFrame": [
+          1.5,
+          50.6,
+          0.8,
+          0.8,
+          0.6,
+          0.5,
+          0.9,
+          0.7,
+          1.3,
+          0.9,
+          0.8,
+          1,
+          0.3,
+          1.5,
+          1.1
+        ]
+      },
+      "longFrames": [
+        {
+          "startMs": 8523.6,
+          "durationMs": 61.8,
+          "blockedMs": 0,
+          "renderMs": 29.5,
+          "styleLayoutAndPaintMs": 29.3,
+          "scripts": []
+        },
+        {
+          "startMs": 8586.5,
+          "durationMs": 1431.8,
+          "blockedMs": 631.1,
+          "renderMs": 32.1,
+          "styleLayoutAndPaintMs": 5.5,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "app.js",
+              "durationMs": 647.6,
+              "forcedLayoutMs": 470.8
+            }
+          ]
+        },
+        {
+          "startMs": 10033.6,
+          "durationMs": 501.9,
+          "blockedMs": 0,
+          "renderMs": 9.5,
+          "styleLayoutAndPaintMs": 9.2,
+          "scripts": []
+        },
+        {
+          "startMs": 10563.1,
+          "durationMs": 976.2,
+          "blockedMs": 0,
+          "renderMs": 2.7,
+          "styleLayoutAndPaintMs": 2.5,
+          "scripts": []
+        },
+        {
+          "startMs": 19663.7,
+          "durationMs": 1242.5,
+          "blockedMs": 163.1,
+          "renderMs": 211.7,
+          "styleLayoutAndPaintMs": 8.3,
+          "scripts": [
+            {
+              "fn": "onFrame",
+              "source": "film-clock.js",
+              "durationMs": 193.1,
+              "forcedLayoutMs": 159.5
+            }
+          ]
+        },
+        {
+          "startMs": 20924.1,
+          "durationMs": 822.6,
+          "blockedMs": 52,
+          "renderMs": 51.4,
+          "styleLayoutAndPaintMs": 51.1,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "digital-materials.js",
+              "durationMs": 5.7,
+              "forcedLayoutMs": 0
+            },
+            {
+              "fn": "",
+              "source": "digital-board.js",
+              "durationMs": 44.2,
+              "forcedLayoutMs": 5
+            }
+          ]
+        },
+        {
+          "startMs": 21757.7,
+          "durationMs": 1130.9,
+          "blockedMs": 103.7,
+          "renderMs": 142.6,
+          "styleLayoutAndPaintMs": 12,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 118.1,
+              "forcedLayoutMs": 68.8
+            }
+          ]
+        },
+        {
+          "startMs": 28812,
+          "durationMs": 1017.6,
+          "blockedMs": 0,
+          "renderMs": 2,
+          "styleLayoutAndPaintMs": 1.6,
+          "scripts": []
+        },
+        {
+          "startMs": 29832.2,
+          "durationMs": 1013.9,
+          "blockedMs": 0,
+          "renderMs": 1.9,
+          "styleLayoutAndPaintMs": 1.4,
+          "scripts": []
+        },
+        {
+          "startMs": 32929.3,
+          "durationMs": 971.1,
+          "blockedMs": 84.6,
+          "renderMs": 7.2,
+          "styleLayoutAndPaintMs": 6.6,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "coach-film-room.js",
+              "durationMs": 13.5,
+              "forcedLayoutMs": 0
+            },
+            {
+              "fn": "",
+              "source": "app.js",
+              "durationMs": 113.4,
+              "forcedLayoutMs": 88.6
+            }
+          ]
+        },
+        {
+          "startMs": 34930.1,
+          "durationMs": 998.6,
+          "blockedMs": 0,
+          "renderMs": 1.9,
+          "styleLayoutAndPaintMs": 1.6,
+          "scripts": []
+        },
+        {
+          "startMs": 35933.2,
+          "durationMs": 1074.3,
+          "blockedMs": 0,
+          "renderMs": 29.4,
+          "styleLayoutAndPaintMs": 1.9,
+          "scripts": []
+        },
+        {
+          "startMs": 43041.7,
+          "durationMs": 1046.5,
+          "blockedMs": 0,
+          "renderMs": 22,
+          "styleLayoutAndPaintMs": 5.5,
+          "scripts": [
+            {
+              "fn": "onFrame",
+              "source": "film-clock.js",
+              "durationMs": 13.4,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 45078.5,
+          "durationMs": 1042.3,
+          "blockedMs": 0,
+          "renderMs": 29,
+          "styleLayoutAndPaintMs": 24.6,
+          "scripts": []
+        },
+        {
+          "startMs": 46125.3,
+          "durationMs": 1001.6,
+          "blockedMs": 0,
+          "renderMs": 14.4,
+          "styleLayoutAndPaintMs": 11.2,
+          "scripts": []
+        },
+        {
+          "startMs": 47132.8,
+          "durationMs": 1080,
+          "blockedMs": 25.3,
+          "renderMs": 74.5,
+          "styleLayoutAndPaintMs": 25.8,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 40.5,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 48220,
+          "durationMs": 931.8,
+          "blockedMs": 0,
+          "renderMs": 10.1,
+          "styleLayoutAndPaintMs": 5.5,
+          "scripts": []
+        },
+        {
+          "startMs": 49155.6,
+          "durationMs": 1009.5,
+          "blockedMs": 0,
+          "renderMs": 5.5,
+          "styleLayoutAndPaintMs": 4.1,
+          "scripts": []
+        },
+        {
+          "startMs": 50168.7,
+          "durationMs": 1045.7,
+          "blockedMs": 0,
+          "renderMs": 40.2,
+          "styleLayoutAndPaintMs": 29.5,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 6.9,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 52191.6,
+          "durationMs": 1029.8,
+          "blockedMs": 0,
+          "renderMs": 12,
+          "styleLayoutAndPaintMs": 9.9,
+          "scripts": []
+        },
+        {
+          "startMs": 53225.6,
+          "durationMs": 1014.2,
+          "blockedMs": 0,
+          "renderMs": 16.5,
+          "styleLayoutAndPaintMs": 9.5,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 6.8,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 54243.5,
+          "durationMs": 1072,
+          "blockedMs": 27.1,
+          "renderMs": 76.9,
+          "styleLayoutAndPaintMs": 60.2,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 14.5,
+              "forcedLayoutMs": 7.8
+            }
+          ]
+        },
+        {
+          "startMs": 55322.7,
+          "durationMs": 935.9,
+          "blockedMs": 0,
+          "renderMs": 2.5,
+          "styleLayoutAndPaintMs": 0.2,
+          "scripts": []
+        },
+        {
+          "startMs": 56258.7,
+          "durationMs": 1064.9,
+          "blockedMs": 0,
+          "renderMs": 23.1,
+          "styleLayoutAndPaintMs": 12.4,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 7.6,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 57327.3,
+          "durationMs": 970.9,
+          "blockedMs": 0,
+          "renderMs": 9.9,
+          "styleLayoutAndPaintMs": 7.9,
+          "scripts": []
+        },
+        {
+          "startMs": 58301.1,
+          "durationMs": 1229.3,
+          "blockedMs": 139.2,
+          "renderMs": 185,
+          "styleLayoutAndPaintMs": 79.7,
+          "scripts": [
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 82.9,
+              "forcedLayoutMs": 0
+            },
+            {
+              "fn": "",
+              "source": "film-profile.js",
+              "durationMs": 8.7,
+              "forcedLayoutMs": 0
+            }
+          ]
+        },
+        {
+          "startMs": 59537.6,
+          "durationMs": 789.1,
+          "blockedMs": 0,
+          "renderMs": 4.7,
+          "styleLayoutAndPaintMs": 3.8,
+          "scripts": []
+        }
+      ]
+    }
+  ]
+}

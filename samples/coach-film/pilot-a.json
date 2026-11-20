@@ -1,0 +1,382 @@
+{
+  "format": "playbook-studio",
+  "version": 1,
+  "exportedAt": "2026-11-20T00:00:00.000Z",
+  "data": {
+    "team": {
+      "name": "Playbook Studio",
+      "subtitle": "Film study",
+      "accent": "#555e69"
+    },
+    "plays": [
+      {
+        "id": "pilot-a",
+        "title": "Play A",
+        "book": "offense",
+        "formation": "Gun Trips",
+        "league": 11,
+        "category": "传球",
+        "personnel": "11 personnel",
+        "notes": "",
+        "favorite": false,
+        "players": [
+          {
+            "id": "a-lt",
+            "label": "LT",
+            "x": 40,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-lg",
+            "label": "LG",
+            "x": 45,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-c",
+            "label": "C",
+            "x": 50,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-rg",
+            "label": "RG",
+            "x": 55,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-rt",
+            "label": "RT",
+            "x": 60,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-qb",
+            "label": "QB",
+            "x": 50,
+            "y": 77,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-rb",
+            "label": "RB",
+            "x": 60,
+            "y": 79,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-x",
+            "label": "X",
+            "x": 13,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-y",
+            "label": "Y",
+            "x": 72,
+            "y": 70,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-z",
+            "label": "Z",
+            "x": 87,
+            "y": 67,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          },
+          {
+            "id": "a-h",
+            "label": "H",
+            "x": 80,
+            "y": 73,
+            "side": "offense",
+            "name": "",
+            "color": "#ffdc42",
+            "shape": "circle"
+          }
+        ],
+        "routes": [
+          {
+            "id": "a-x-route",
+            "playerId": "a-x",
+            "points": [
+              {
+                "x": 13,
+                "y": 67
+              },
+              {
+                "x": 13,
+                "y": 18
+              }
+            ],
+            "kind": "route",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "a-y-route",
+            "playerId": "a-y",
+            "points": [
+              {
+                "x": 72,
+                "y": 70
+              },
+              {
+                "x": 66,
+                "y": 58
+              },
+              {
+                "x": 30,
+                "y": 58
+              }
+            ],
+            "kind": "route",
+            "color": "#ffd166",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0.2,
+            "duration": 4.2,
+            "optional": false
+          },
+          {
+            "id": "a-h-route",
+            "playerId": "a-h",
+            "points": [
+              {
+                "x": 80,
+                "y": 73
+              },
+              {
+                "x": 68,
+                "y": 52
+              },
+              {
+                "x": 24,
+                "y": 52
+              }
+            ],
+            "kind": "route",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4.5,
+            "optional": false
+          },
+          {
+            "id": "a-z-route",
+            "playerId": "a-z",
+            "points": [
+              {
+                "x": 87,
+                "y": 67
+              },
+              {
+                "x": 87,
+                "y": 39
+              },
+              {
+                "x": 74,
+                "y": 27
+              }
+            ],
+            "kind": "route",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 4,
+            "optional": false
+          },
+          {
+            "id": "a-rb-route",
+            "playerId": "a-rb",
+            "points": [
+              {
+                "x": 60,
+                "y": 79
+              },
+              {
+                "x": 66,
+                "y": 73
+              },
+              {
+                "x": 91,
+                "y": 60
+              }
+            ],
+            "kind": "route",
+            "color": "#ffdc42",
+            "smooth": true,
+            "endCap": "arrow",
+            "delay": 0,
+            "duration": 3,
+            "optional": false
+          },
+          {
+            "id": "a-lt-route",
+            "playerId": "a-lt",
+            "points": [
+              {
+                "x": 40,
+                "y": 67
+              },
+              {
+                "x": 40,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "a-lg-route",
+            "playerId": "a-lg",
+            "points": [
+              {
+                "x": 45,
+                "y": 67
+              },
+              {
+                "x": 45,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "a-c-route",
+            "playerId": "a-c",
+            "points": [
+              {
+                "x": 50,
+                "y": 67
+              },
+              {
+                "x": 50,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "a-rg-route",
+            "playerId": "a-rg",
+            "points": [
+              {
+                "x": 55,
+                "y": 67
+              },
+              {
+                "x": 55,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          },
+          {
+            "id": "a-rt-route",
+            "playerId": "a-rt",
+            "points": [
+              {
+                "x": 60,
+                "y": 67
+              },
+              {
+                "x": 60,
+                "y": 61
+              }
+            ],
+            "kind": "block",
+            "color": "#ffdc42",
+            "smooth": false,
+            "endCap": "bar",
+            "delay": 0,
+            "duration": 2,
+            "optional": false
+          }
+        ],
+        "zones": [],
+        "annotations": [],
+        "ball": {
+          "holderId": "a-qb",
+          "receiverId": "a-y",
+          "passAt": 2,
+          "arriveAt": 3
+        },
+        "createdAt": "2026-11-20T00:00:00.000Z"
+      }
+    ],
+    "roster": [],
+    "formations": [],
+    "settings": {
+      "league": 11,
+      "fieldTheme": "dark",
+      "showGrid": true,
+      "showNames": false
+    }
+  }
+}

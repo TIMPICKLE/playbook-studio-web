@@ -16,12 +16,14 @@ import extraZh from './locales/madden-ai.zh-CN.js';
 import extraEn from './locales/madden-ai.en.js';
 import analysisZh from './locales/analysis-knowledge.zh-CN.js';
 import analysisEn from './locales/analysis-knowledge.en.js';
+import filmZh from './locales/coach-film.zh-CN.js';
+import filmEn from './locales/coach-film.en.js';
 
 export const LOCALE_KEY = 'playbook-studio.locale';
 export const LOCALES = ['zh-CN', 'en'];
 const messages = {
-  'zh-CN': { ...zh, ...cloudZh, ...extraZh, ...supportZh, ...rosterZh, ...depthZh, ...fieldZh, ...groupsZh, ...analysisZh },
-  en: { ...en, ...cloudEn, ...extraEn, ...supportEn, ...rosterEn, ...depthEn, ...fieldEn, ...groupsEn, ...analysisEn }
+  'zh-CN': { ...zh, ...cloudZh, ...extraZh, ...supportZh, ...rosterZh, ...depthZh, ...fieldZh, ...groupsZh, ...analysisZh, ...filmZh },
+  en: { ...en, ...cloudEn, ...extraEn, ...supportEn, ...rosterEn, ...depthEn, ...fieldEn, ...groupsEn, ...analysisEn, ...filmEn }
 };
 let locale = 'zh-CN';
 try { const saved = globalThis.localStorage?.getItem(LOCALE_KEY); if (LOCALES.includes(saved)) locale = saved; } catch { /* storage may be unavailable */ }

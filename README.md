@@ -46,6 +46,20 @@
 
 ## 数字化战术板
 
+### 用 Mesh 讲清一次出手
+
+在桌面打开 **Mesh 浅交叉**，点战术标题旁的 **讲解**。点时间轴上的 **出手 2.0s**，再选 **H** 和 **Y**。球停在 QB 手上，画面同时给出两人的开球站位、近期跑位和纵深差。此时 H 比 Y 深 **3.0 码**，拖回 1.0 秒，两人只差 **1.0 码**。固定一帧再拖动，可以同时指给队员看差距怎样形成。按 Esc 或点「返回编辑」继续原先的工作。
+
+![Mesh 出手时刻，聚焦 H 和 Y，在球场与侧栏核对 3.0 码纵深差](docs/assets/readme/coach-film-room.jpg)
+
+讲解台里的 **AI 助手** 可以连续执行「停在出手，比较 H 和 Y，固定这一帧，再倒回一秒」，读取场上的实际停点和纵深，并按教练指令编排本机课件。[讲解工具与回执](docs/COACH_FILM_COMMANDS.md)
+
+只有战术定义了有效传球，才会出现「出手」和「到达」。无比例的场地显示相对纵深。教练还可以在本机课件试点保存最多三个带问题、答案和球员焦点的停点。手机和 iPad 继续使用原有触屏工作区。
+
+[打开桌面演示](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [试用本机课件](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local?filmPilot=lesson#editor) · [试教材料与两套战术](docs/COACH_FILM_PILOT.md) · [讲解台验收记录](docs/acceptance/COACH_FILM.md)
+
+### 在数字球场编辑与演练
+
 在桌面编辑器选择 **显示模式 → 数字化模式**。点击球场上方的太阳按钮「切换球场明暗」，即可在石墨深色与冷银浅色之间切换。下图显示选中外接手 X 的 Mesh 浅交叉。固定工具栏和播放条使用石墨实底。选中一枚哑光棋子，它的路线沿原色加粗，其余球员的任务仍可读。
 
 ![桌面数字编辑器中选中外接手 X 后的球场、属性与绘图工具](docs/assets/readme/digital-workspace.webp)

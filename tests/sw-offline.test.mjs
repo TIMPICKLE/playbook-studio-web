@@ -29,6 +29,9 @@ test('the service worker installs the editor shell and caches geometry only afte
   assert.ok(installed.includes('./editor-dialog.css'));
   assert.ok(installed.includes('./digital-field-palette.js'));
   assert.ok(installed.includes('./component-layout.css'));
+  for (const asset of ['field-metrics.js', 'coach-film-room.js', 'coach-film-field.css', 'coach-film-lesson.js']) {
+    assert.ok(installed.includes('./' + asset));
+  }
   assert.ok(installed.includes('./history-transition.js'));
   assert.ok(installed.includes('./depth-chart-motion.js'));
   assert.ok(!installed.some(name=>/madden-editable(?:-[^/]+)?\.js$/.test(name)), 'install must not eagerly download geometry');

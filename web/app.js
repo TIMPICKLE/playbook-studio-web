@@ -29,6 +29,7 @@ import { createDemoRequest } from './ai-demo.js';
 import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, preparePlayerTranslation, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
 import { fieldSVG, updateAnimation, bindGestureGeometry, previewDraft, displayColor, syncFieldHitTargets, fieldHitCandidates } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
+import { createScrubPresentation } from './scrub-presentation.js';
 import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
 import { effectsControl, initEffects, syncPageDecoration, burstAt, setEffectsMode, visualMode } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
@@ -42,8 +43,12 @@ import { canRefreshHistoryField, EditorHistory, PersonnelHistoryConflict } from 
 import { workspaceNavigation, createWorkspaceSessions } from './workspace-ui.js';
 import { clearModelCredential } from './model-connection.js';
 
+// The comparison study is opt-in. The normal editor does not load its controls.
+const pilot = new URLSearchParams(window.location.search).has('filmPilot') ? await import('./coach-film-pilot.js') : null;
+const filmPilotVariant = pilot?.getFilmPilotVariant(window.location.search);
 const $ = selector => document.querySelector(selector);
 const icons = {
+  film: '<rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="M7 4v16M17 4v16M3 9h4m-4 6h4m10-6h4m-4 6h4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>', search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>', book: '<path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM20 4h-4a3 3 0 0 0-3 3M13 21a4 4 0 0 1 4-2h3V4"/>', select: '<path d="m5 3 14 10-7 1-3 7z"/>', route: '<path d="M5 20V7h14m-5-5 5 5-5 5"/>', block: '<path d="M5 20V7h14M19 2v10"/>', motion: '<path d="m4 20 3-5-3-5 3-5h13m-5-4 5 4-5 4"/>', pass: '<path stroke-dasharray="2 4" d="M4 19 19 4"/><path d="M12 4h7v7"/>', zone: '<ellipse cx="12" cy="12" rx="9" ry="7" stroke-dasharray="3 3"/>', text: '<path d="M4 5h16M12 5v15M8 20h8"/>', flip: '<path d="M12 3v18M8 8l-5 4 5 4M16 8l5 4-5 4"/>', undo: '<path d="m8 4-5 5 5 5M3 9h10a7 7 0 0 1 0 14"/>', redo: '<path d="m16 4 5 5-5 5M21 9H11a7 7 0 0 0 0 14"/>', copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>', export: '<path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/>', print: '<path d="M7 7V3h10v4M7 17H3V8h18v9h-4M7 14h10v7H7z"/>', star: '<path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L3.2 9.7l6.4-.9z"/>', play: '<path d="m8 4 13 8-13 8z"/>', pause: '<path d="M8 4v16M16 4v16"/>', reset: '<path d="M4 8V3m0 5h5M4 8a9 9 0 1 1-1 7"/>', loop: '<path d="m17 2 4 4-4 4M3 10V6h18M7 22l-4-4 4-4M21 14v4H3"/>', trash: '<path d="M4 6h16M9 6V3h6v3M7 6l1 15h8l1-15M10 10v7M14 10v7"/>', close: '<path d="m6 6 12 12M18 6 6 18"/>', chevron: '<path d="m9 5 7 7-7 7"/>', team: '<circle cx="9" cy="7" r="3"/><path d="M3 21v-4a6 6 0 0 1 12 0v4M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 6"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9 8a3 3 0 0 1 6 0c0 3-3 2-3 5M12 17h.01"/>', check: '<path d="m5 12 4 4L19 6"/>', sun: '<circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/>', grid: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>', save: '<path d="M5 3h13l3 3v15H3V3zM7 3v7h10V3M7 21v-7h10v7"/>', folder: '<path d="M3 6h7l2 3h9v12H3z"/>', menu: '<path d="M4 6h16M4 12h16M4 18h16"/>', ball: '<ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(-35 12 12)"/><path d="m8 15 8-6M9 11l3 3M12 8l3 3"/>', flag: '<path d="M5 21V3h14l-3 5 3 5H5"/>'
 };
 const icon = name => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.route}</svg>`;
@@ -71,10 +76,8 @@ let book = workspace.plays[0].book, query = '', filter = '', formationFilter = '
 let multiSelectMode = false, selectionCandidates = [], candidateSelectionAdditive = false, selectionCandidateScope = '', confirmedFieldTarget = null;
 let fieldHitObserver = null;
 let frame = null, lastFrame = null, toastTimer = null;
-let pendingTimelineSeek = null;
-let lastSeekPresented = -Infinity;
-// Allow a normal refresh opportunity before a continuously dragged slider uses its deadline.
-const seekPresentationDeadline = 2 * (1000 / 60);
+const timelineSeek = createScrubPresentation(window, paintTimelineSeek);
+const {cancel: cancelTimelineSeek, flush: presentTimelineSeek} = timelineSeek;
 const history = new EditorHistory();
 const editorSessions = createWorkspaceSessions();
 let loadedWorkspaceId = null, assistantPanelOpen = false, localRevision=0, progressScope=null, guestRouter=null;
@@ -130,6 +133,7 @@ document.addEventListener('click',event=>{
 });
 let shared = null, digitalBoard = null, analysisView = null, demoAnalysisData = null;
 let pendingNavigation = null, viewOverrides = {}, renderedPlayId = null, gestureFrame = null, pendingFieldPointer = null, previewPoint = null, rehearsal = false;
+let filmRoom = null, filmLaunch = null, filmFieldDraft = null;
 let importReadSequence = 0, pendingFileImport = null;
 let cancelFieldGesture = () => {};
 const drawingTools = ['route','block','motion','pass'];
@@ -140,7 +144,7 @@ const viewSettings = () => ({ ...state.data.settings, ...viewOverrides, visualMo
 const canEdit = () => cloudMode() ? !!shared?.canEdit : !localRecovery;
 const editBlockedMessage = () => localRecovery ? recoveryMessage : shared?.sync?.viewError ? t("feedback.the_play_view_could_not_update_reload_before_editing") : t("feedback.you_have_read_only_access_and_cannot_edit_this_shared_p");
 const readActions = new Set(['madden-library','compare-source','choose','book','select-route','clear-selection','sidebar','inspector-panel','panel-field','close-panel','export','print','help','close-modal','download-svg','download-png','download-json','download-play','do-print','play','reset','loop','grid','theme','clear-filters','keep-drawing','edit-mode','rehearse-mode','local-recovery','download-original','retry-local-load','replace-local-workspace','confirm-replace-local-workspace']);
-for(const action of ['assistant-task','properties-task','multi-select','choose-hit','retry-save'])readActions.add(action);
+for(const action of ['coach-film','film-pilot-event','assistant-task','properties-task','multi-select','choose-hit','retry-save'])readActions.add(action);
 function protectReadOnly() {
   if (canEdit()) return;
   document.querySelectorAll('[data-prop],[data-ball],#apply-formation').forEach(n => { n.disabled = true; });
@@ -456,7 +460,7 @@ document.addEventListener('visibilitychange', () => {
   else presentTimelineSeek(undefined, false);
 });
 window.addEventListener('blur', () => cancelFieldGesture());
-window.addEventListener('pagehide', () => { presentTimelineSeek(); clearHistoryTransition(); cancelFieldGesture(); });
+window.addEventListener('pagehide', () => { closeFilmRoom();presentTimelineSeek(); clearHistoryTransition(); cancelFieldGesture(); });
 window.addEventListener('resize', () => cancelFieldGesture());
 const assistantScope = () => JSON.stringify([shared?.current?.id || 'local', current().id]);
 const scopeFor = selectedId => JSON.stringify([shared?.current?.id || 'local', selectedId]);
@@ -616,7 +620,10 @@ function editorInteractionReply(plan) {
           awaitingUser=true;
         } else if (action.kind === 'dialog_open') {
           const mapping = {help:'help',new_play:'new',export:'export',madden:'madden-library',source:'compare-source',recovery:'local-recovery'};
-          if (action.dialog === 'personnel') { selection=null;refreshSelection();if(panels.active!=='properties')panels.toggle('properties');$('#personnel-group')?.focus(); }
+          if (action.dialog === 'coach_film') {
+            if (!await enterFilmRoom()) throw Error(t('film.openFailed'));
+          }
+          else if (action.dialog === 'personnel') { selection=null;refreshSelection();if(panels.active!=='properties')panels.toggle('properties');$('#personnel-group')?.focus(); }
           else if (action.dialog === 'convert_reference') {
             if (!canEdit()) throw Error(editBlockedMessage());
             const reference=current().reference;
@@ -678,18 +685,47 @@ function mountBoardAssistant() {
         const carried = pendingEdit && (JSON.stringify(current()) === JSON.stringify(pendingEdit.edit.base) ? pendingEdit.edit : restage(pendingEdit.edit.steps, 'assistant.stagedConflict'));
         const play = clone(carried ? carried.play : current());
         const requestEditorSnapshot=editorSnapshot(), requestWorkspaceState=JSON.stringify(requestEditorSnapshot.data);
+        const checkScope = () => {
+          signal.throwIfAborted();
+          if ($('#app').hidden || assistantScope() !== scope) throw Error(t('assistant.boardChanged'));
+        };
+        let filmBridge;
+        const loadFilm = async () => {
+          checkScope();
+          filmBridge ??= import('./coach-film-bridge.js').then(({createFilmBridge}) => createFilmBridge({
+            guard:checkScope, available:filmRoomAvailable, pilot:filmPilotVariant,
+            getPlay:current, getRoster:()=>state.data.roster, getRoom:()=>filmRoom, open:enterFilmRoom,
+            attachLesson: async room => {
+              const {createFilmLesson} = await import('./coach-film-lesson.js');
+              checkScope();
+              if (room === filmRoom) room.attachLesson(createFilmLesson({workspaceId:shared?.current?.id || 'local'}));
+            },
+            regular:{
+              enabled:()=>!deviceIsTraditional(), read:()=>({time,playing,speed}),
+              apply(command) {
+                if (draft || current().reference) throw Error(t('assistant.finishDrawing'));
+                if (command.operation === 'seek') {
+                  const slider = $('#timeline');
+                  slider.value = command.time;
+                  seekTimeline(slider, true);
+                } else {
+                  const action = command.operation === 'speed' ? {speed:command.speed} : {playing:command.operation === 'play'};
+                  executeEditorLocal([{kind:'playback_set', ...action}]);
+                }
+              },
+            },
+          }));
+          return filmBridge;
+        };
         const result = await requestBoardAssistant({
           instruction: prompt, mode, previous, onTool, onEvent, locale, signal, model: {provider, protocol, baseUrl, model, apiKey},
           board: {...play, play: clone(play), playId: play.id, players: assistantPlayers(play, state.data.roster),
             selectedPlayerId: selection?.type === 'player' ? selection.id : null,
             selectedPlayerIds:selection?.type==='players'?selection.ids:selection?.type==='player'?[selection.id]:[],
             routes: play.routes},
+          film:{read:async ()=>(await loadFilm()).read(), execute:async command=>(await loadFilm()).execute(command)},
           editor:requestEditorSnapshot, workspace: workspace ? {id: workspace.id, revision: workspace.revision} : undefined, request,
         });
-        const checkScope = () => {
-          signal.throwIfAborted();
-          if ($('#app').hidden || assistantScope() !== scope) throw Error(t('assistant.boardChanged'));
-        };
         checkScope();
         if (result.kind === 'editor') {
           const snapshot = editorSnapshot();
@@ -826,6 +862,61 @@ function mountBoardAssistant() {
   } else boardAssistant.mount(host);
 }
 
+function filmRoomAvailable() {
+  return !deviceIsTraditional() && filmPilotVariant !== 'events' && filmPilotVariant !== 'baseline';
+}
+
+function coachFilmEntry() {
+  if (!filmRoomAvailable()) return '';
+  return `<button type="button" class="button coach-film-entry" data-action="coach-film" aria-haspopup="dialog">${icon('film')}<span>${t('film.enter')}</span></button>`;
+}
+
+function closeFilmRoom() {
+  filmLaunch = null;
+  filmRoom?.close();
+  filmRoom = null;
+  filmFieldDraft = null;
+}
+
+async function enterFilmRoom() {
+  if (filmLaunch || filmRoom || $('#app').hidden || !filmRoomAvailable()) return false;
+  const launch = { scope: assistantScope() };
+  filmLaunch = launch;
+  const restoreScroll = captureEditorScroll({samePlay:true});
+  try {
+    const [{openFilmRoom}, lesson] = await Promise.all([
+      import('./coach-film-room.js'),
+      filmPilotVariant === 'lesson' ? import('./coach-film-lesson.js') : null,
+    ]);
+    if (filmLaunch !== launch || $('#app').hidden || assistantScope() !== launch.scope) return false;
+    // Settle the visible edit frame. Draft geometry and the undo stack stay with the editor.
+    presentTimelineSeek();
+    if (playing) { stop(); paintPlayback(); syncPlayback(); updateCanvasHint(); }
+    cancelFieldGesture();
+    filmFieldDraft = getFieldDraftLabel() ? editingField : null;
+    filmRoom = openFilmRoom({
+      play: current(), settings: viewSettings(), roster: state.data.roster, assistant: boardAssistant,
+      lesson: lesson?.createFilmLesson({workspaceId:shared?.current?.id || 'local'}),
+      onClose() {
+        filmRoom = null;
+        filmFieldDraft = null;
+        if (!$('#app').hidden && assistantScope() === launch.scope) restoreScroll();
+      },
+    });
+    return true;
+  } catch (error) {
+    filmFieldDraft = null;
+    toast(t('film.openFailed'), { type:'error' });
+    return false;
+  } finally {
+    if (filmLaunch === launch) filmLaunch = null;
+  }
+}
+
+function syncFilmRoom() {
+  filmRoom?.update(current(), {settings:viewSettings(), roster:state.data.roster});
+}
+
 function protectReference() {
   if (!current().reference) return;
   document.querySelectorAll('[data-action="mirror"],[data-action="rehearse-mode"],[data-action="play"]').forEach(n => { n.disabled = true; n.title = t("feedback.the_original_diagram_has_no_editable_or_playable_coordi"); });
@@ -909,43 +1000,17 @@ function historyLabel(action) {
   const transaction=history.info(action==='redo'?history.future.at(-1):history.past.at(-1));
   return `${uxCopy(action==='redo'?'Redo':'Undo',action==='redo'?'重做':'撤销')}${transaction?.name?` · ${transaction.name}`:''}`;
 }
-function cancelTimelineSeek() {
-  if (pendingTimelineSeek?.frame != null) cancelAnimationFrame(pendingTimelineSeek.frame);
-  if (pendingTimelineSeek?.timer != null) window.clearTimeout(pendingTimelineSeek.timer);
-  pendingTimelineSeek = null;
-}
 function stop() { cancelTimelineSeek(); playing = false; if (frame !== null) cancelAnimationFrame(frame); frame = null; lastFrame = null; }
 function resetAnimation() { clearHistoryTransition(); stop(); time = 0; }
 function paintPlayback(stamp, syncDigital = true) {
   updateAnimation($('#field svg'), current(), time);
   if (syncDigital) digitalBoard?.presentTimeline(stamp);
 }
-function presentTimelineSeek(stamp, syncDigital = true) {
-  if (!pendingTimelineSeek || document.hidden) return;
-  const { previousTime } = pendingTimelineSeek;
-  cancelTimelineSeek();
+function paintTimelineSeek(previousTime, stamp, syncDigital = true) {
   paintPlayback(stamp, syncDigital);
   const length = animationLength(current());
   syncTimeline(length);
   if (pausedStatus(previousTime, length) !== pausedStatus(time, length)) updateCanvasHint();
-  lastSeekPresented = window.performance.now();
-}
-function queueTimelineSeek(previousTime) {
-  const seek = { previousTime, frame: null, timer: null };
-  pendingTimelineSeek = seek;
-  if (document.hidden) return;
-  // A superseded microtask or a losing frame/deadline must never deliver the next batch.
-  const deliver = stamp => { if (pendingTimelineSeek === seek) presentTimelineSeek(stamp); };
-  const remaining = lastSeekPresented + seekPresentationDeadline - window.performance.now();
-  if (remaining <= 0) {
-    // After an idle gap, show the latest value at the end of this input task.
-    queueMicrotask(deliver);
-  } else {
-    // During a drag, follow display refreshes. A delayed foreground rAF cannot
-    // indefinitely postpone the latest position, even as more inputs arrive.
-    seek.frame = requestAnimationFrame(deliver);
-    seek.timer = window.setTimeout(deliver, remaining);
-  }
 }
 function seekTimeline(input, final = false) {
   const play = current();
@@ -955,13 +1020,13 @@ function seekTimeline(input, final = false) {
   if (nextTime !== requestedTime) input.value = nextTime;
   if (modeChanged || time !== nextTime) {
     if (playing) stop();
-    if (!pendingTimelineSeek) clearAssistantPreview();
+    if (!timelineSeek.pending) clearAssistantPreview();
     const previousTime = time;
     time = nextTime;
     rehearsal = true;
     if (modeChanged) { syncRehearsalMode(); updateCanvasHint(); syncPlayback(); }
     // Keep command reads and exports current while presenting only the last input per frame.
-    if (!pendingTimelineSeek) queueTimelineSeek(modeChanged ? time : previousTime);
+    timelineSeek.queue(modeChanged ? time : previousTime);
   }
   if (final) presentTimelineSeek();
 }
@@ -1069,11 +1134,11 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
     <main class="main" id="main-content" tabindex="-1">
       <header class="topbar"><div class="breadcrumbs">${btn('sidebar', 'menu', t("editor.toggle_play_list"), 'mobile-menu', `aria-expanded="${panels.active==='plays'}"`)}<span>${icon('book')} ${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')} ${t("editor.playbook")}</span><span class="crumb-slash">/</span><span>${e(p.formation)}</span></div><div class="top-actions"><button class="button subtle" data-action="madden-library" aria-label="${t("editor.open_madden_play_library")}">${icon('ball')}<span>${t("editor.madden_library")}</span></button>${effectsControl()}<button class="button subtle" data-action="print" aria-label="${t("editor.print_playbook")}">${icon('print')}<span>${t("editor.print")}</span></button><button class="button primary" data-action="export" aria-label="${t("editor.export_playbook")}">${icon('export')}<span>${t("editor.export")}</span></button></div></header>
       <div class="import-notice" data-import-notice="editor" aria-live="polite">${importNotice("editor")}</div>
-      <section class="play-header"><div><div class="eyebrow"><span class="league-badge">${getPlayLeague(p)===5?uxCopy('5v5 Flag','5 人腰旗'):uxCopy(`${getPlayLeague(p)} per side`,`${getPlayLeague(p)} 人制`)}</span> <span>·</span> ${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1>${editorStatus()}<p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', historyLabel('undo'), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', historyLabel('redo'), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
+      <section class="play-header"><div><div class="eyebrow"><span class="league-badge">${getPlayLeague(p)===5?uxCopy('5v5 Flag','5 人腰旗'):uxCopy(`${getPlayLeague(p)} per side`,`${getPlayLeague(p)} 人制`)}</span> <span>·</span> ${e(p.personnel)} <span>·</span> ${e(p.category)}</div><h1>${e(p.title)} ${btn('favorite', 'star', p.favorite ? t("editor.remove_favorite") : t("editor.favorite_play"), `favorite-button ${p.favorite ? 'is-favorite' : ''}`)}</h1>${editorStatus()}<p>${p.diagramSource ? t("editor.editable_reconstruction_move_players_draw_and_rehearse_") : p.reference ? t("editor.original_madden_diagram_favorite_annotate_export_and_pr") : canEdit() ? t("editor.select_a_player_to_draw_a_route_or_drag_to_adjust_posit") : t("editor.review_team_plays_and_rehearse_routes")}</p></div><div class="play-actions">${coachFilmEntry()}${p.diagramSource ? `<button class="button subtle" data-action="compare-source">${t("editorExtra.compare_source")}</button><button class="button subtle" data-action="space-madden-line">${t("editorExtra.normalize_line_spacing")}</button>` : ''}${btn('undo', 'undo', historyLabel('undo'), 'icon-button', !history.past.length ? 'disabled' : '')}${btn('redo', 'redo', historyLabel('redo'), 'icon-button', !history.future.length ? 'disabled' : '')}<span class="vertical-rule"></span>${btn('mirror', 'flip', t("editor.mirror"), 'icon-button')}${btn('duplicate', 'copy', t("editor.duplicate_play"), 'icon-button')}</div></section>
       ${!canEdit() ? `<div class="readonly-banner"><strong>${localRecovery ? t("editor.recovery_required") : shared?.sync?.viewError ? t("editor.view_recovery_required") : t("editor.read_only")}</strong><span>${localRecovery || shared?.sync?.viewError ? e(editBlockedMessage()) : t("editor.you_can_view_rehearse_export_and_print_ask_an_administr")}</span>${localRecovery ? `<button class="button subtle" data-action="local-recovery">${t("editor.recovery_options")}</button>` : ''}</div>` : ''}<div class="editor-layout"><section class="canvas-section" aria-label="${t("editor.field_and_rehearsal")}">
         <div class="canvas-heading">${boardSizeControls()}<div class="canvas-actions"><div class="selection-toolbar">${selectionControls()}</div><div class="view-tools" role="group" aria-label="${t("editor.field_display_options")}">${btn('grid', 'grid', t("editor.show_or_hide_yard_lines"), 'tool-button')}${btn('theme', 'sun', t("editor.toggle_field_brightness"), 'tool-button')}</div><details class="add-object-menu"><summary aria-label="${t("editor.add_objects")}">${icon('plus')}<span>${t("editor.add_objects")}</span></summary><div><button data-action="add-player:offense">${icon('plus')}${t("editor.add_offensive_player")}</button><button data-action="add-player:defense">${icon('plus')}${t("editor.add_defensive_player")}</button>${isFlag5Play(p) ? `<button data-action="opponents">${icon('team')}${t(p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? 'editor.flag5_remove_opponents' : 'editor.flag5_add_opponents')}<small>${t('editor.flag5')}</small></button>` : `<button data-action="add-defense-43" title="${t('editor.defense43_detail')}">${icon('team')}${t(p.players.some(v => v.side === 'defense') ? 'editor.reset' : 'editor.add')} ${t('editor.defense43')}<small>${t('editor.defense43_detail')}</small></button>`}<button data-action="tool:zone">${icon('zone')}${t("editor.draw_coverage_zone")}</button><button data-action="tool:text">${icon('text')}${t("editor.add_text")}</button></div></details></div></div>
         <div id="field"${chrome} class="field-wrap tool-${tool} ${rehearsal ? 'is-rehearsal' : ''}"><div class="pitch-viewport" aria-label="${t("editor.scalable_play_board")}"><div class="pitch-stage">${patchShell ? '' : fieldSVG(p, settings, { selected: selection, time, drawing: draft })}</div></div><div class="field-tag" title="${t("editor.offense_defense_players")}">${icon('ball')} <span>${t("editor.offense")} ${p.players.filter(v => v.side === 'offense').length} · ${t("editor.defense")} ${p.players.filter(v => v.side === 'defense').length}</span></div><div id="field-context" class="field-context">${fieldContext()}</div><div class="drag-readout" hidden></div></div>
-        <div class="stage-dock"><div class="editor-mode" role="group" aria-label="${t("editor.workspace_mode")}"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}${t("editor.design_play")}</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}${t("editor.rehearse")}</button></div><div class="toolbar" role="toolbar" aria-label="${t("editor.drawing_tools")}"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', t("editor.select_move_v")], ['route', 'route', t("editor.route_r")], ['block', 'block', t("editor.block_b")], ['motion', 'motion', t("editor.pre_snap_motion_m")], ['pass', 'pass', t("editor.pass_p")], ['zone', 'zone', t("editor.coverage_zone_z")], ['text', 'text', t("editor.text_t")]].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:t("editor.select"),route:t("editor.route"),block:t("editor.block"),motion:t("editor.motion"),pass:t("editor.pass"),zone:t("editor.zone"),text:t("editor.text")})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>${t("editor.rehearse")}</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">${t("editorExtra.speed")}<select id="speed" aria-label="${t("editor.playback_speed")}">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', t("editor.loop"), `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? t("editor.pause") : t("editor.play"), 'play-button')}${btn('reset', 'reset', t("editor.reset_animation"), 'icon-button')}<input type="range" id="timeline" aria-label="${t("editor.animation_time")}" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div></div></div>
+        <div class="stage-dock"><div class="editor-mode" role="group" aria-label="${t("editor.workspace_mode")}"><button data-action="edit-mode" aria-pressed="${!rehearsal}" class="${!rehearsal?'active':''}">${icon('select')}${t("editor.design_play")}</button><button data-action="rehearse-mode" aria-pressed="${rehearsal}" class="${rehearsal?'active':''}">${icon('play')}${t("editor.rehearse")}</button></div><div class="toolbar" role="toolbar" aria-label="${t("editor.drawing_tools")}"><div class="draw-tools" style="--tool-index:${['select','route','block','motion','pass','zone','text'].indexOf(tool)}"><span class="tool-indicator" aria-hidden="true"></span>${[['select', 'select', t("editor.select_move_v")], ['route', 'route', t("editor.route_r")], ['block', 'block', t("editor.block_b")], ['motion', 'motion', t("editor.pre_snap_motion_m")], ['pass', 'pass', t("editor.pass_p")], ['zone', 'zone', t("editor.coverage_zone_z")], ['text', 'text', t("editor.text_t")]].map(([a, i, l]) => `<button class="tool-button ${tool === a ? 'active' : ''}" data-action="tool:${a}" title="${e(l)}" aria-label="${e(l)}" aria-pressed="${tool === a}">${icon(i)}<span class="tool-name">${({select:t("editor.select"),route:t("editor.route"),block:t("editor.block"),motion:t("editor.motion"),pass:t("editor.pass"),zone:t("editor.zone"),text:t("editor.text")})[a]}</span><kbd>${l.split(' · ')[1]}</kbd></button>`).join('')}</div></div><div class="playback"><div class="playback-top"><div class="playback-title">${icon('play')}<span>${t("editor.rehearse")}</span><small id="playback-phase">${playbackPhase()}</small></div><div class="playback-options"><label class="speed-label">${t("editorExtra.speed")}<select id="speed" aria-label="${t("editor.playback_speed")}">${[.5, 1, 1.5, 2].map(s => `<option value="${s}" ${s === speed ? 'selected' : ''}>${s}×</option>`).join('')}</select></label>${btn('loop', 'loop', t("editor.loop"), `icon-button ${loop ? 'enabled' : ''}`, `aria-pressed="${loop}"`)}</div></div><div class="transport">${btn('play', playing ? 'pause' : 'play', playing ? t("editor.pause") : t("editor.play"), 'play-button')}${btn('reset', 'reset', t("editor.reset_animation"), 'icon-button')}<input type="range" id="timeline" aria-label="${t("editor.animation_time")}" min="0" max="${animationLength(p)}" step="0.01" value="${time}"><span id="time-label">${time.toFixed(1)} <span>/ ${animationLength(p).toFixed(1)}s</span></span></div>${filmPilotVariant === 'events' && !deviceIsTraditional() ? `<div data-film-pilot-mount>${pilot.filmPilotEventControls(p)}</div>` : ''}</div></div>
         ${boardHeightHandle}
         <div class="canvas-hint" aria-live="polite">${canvasHint()}</div>
       </section>${boardWidthHandle}<section class="inspector-panel" id="properties-panel" aria-label="${t("editor.play_properties")}"><header class="panel-heading compact-only"><strong>${t("editor.properties_and_settings")}</strong><button class="panel-close" data-action="close-panel" aria-label="${t("editor.close_properties")}">${icon('close')}</button></header><div class="task-panel-tabs" role="group" aria-label="${uxCopy('Task panel','任务面板')}"><button type="button" data-action="properties-task" aria-pressed="${!assistantPanelOpen}">${uxCopy('Properties','属性')}</button><button type="button" data-action="assistant-task" aria-pressed="${assistantPanelOpen}">AI ${uxCopy('assistant','助手')}</button></div><aside class="inspector" ${assistantPanelOpen?'hidden':''} data-context="${e(inspectorContext())}" aria-label="${t("editor.play_properties")}">${inspector()}</aside></section></div>
@@ -1097,6 +1162,7 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
   renderedCardState=cardState();
   if (editingField) syncSaveStatus();
   digitalBoard?.sync({contentChanged:restoringHistory});
+  syncFilmRoom();
 }
 function selectionControls() {
   if (!canEdit() || current().reference) return '';
@@ -1329,7 +1395,10 @@ function refreshMetadata() {
     node.title=historyLabel(action);node.setAttribute('aria-label',historyLabel(action));
   }
   if (renderedFieldState !== fieldState()) renderField();
+  const pilotMount = filmPilotVariant === 'events' && document.querySelector('[data-film-pilot-mount]');
+  if (pilotMount) patchEditorHTML(pilotMount, pilot.filmPilotEventControls(play));
   syncEditorChrome();protectReadOnly();
+  syncFilmRoom();
 }
 function refreshGestureCommit({restoringHistory = false} = {}) {
   const restoreScroll=captureEditorScroll({samePlay:true});
@@ -1839,6 +1908,7 @@ function deleteSelected() {
 }
 
 const actions = {
+  'coach-film': enterFilmRoom,
   'multi-select':()=>{
     if(draft && !confirmDraft(()=>actions['multi-select']()))return;
     resetAnimation();rehearsal=false;tool='select';draft=null;selectionCandidates=[];multiSelectMode=!multiSelectMode;
@@ -1958,6 +2028,10 @@ const actions = {
   play: togglePlay, reset: () => {resetAnimation();clearAssistantPreview();paintPlayback();syncPlayback();updateCanvasHint();}, loop: node => {loop=!loop;node.classList.toggle('enabled',loop);node.setAttribute('aria-pressed',loop);}
 };
 
+// Keep a partially typed property in its original input while the read-only room has focus.
+document.addEventListener('pointerdown', event => {
+  if (event.target.closest?.('[data-action="coach-film"]') && getFieldDraftLabel()) event.preventDefault();
+});
 document.addEventListener('click', event => {
   for(const menu of document.querySelectorAll('.add-object-menu[open],.account-menu[open]'))if(!menu.contains(event.target))menu.open=false;
   const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
@@ -1966,6 +2040,12 @@ document.addEventListener('click', event => {
   if(name==='dismiss-toast'){actions[name]();return;}
   if (!canEdit() && !readActions.has(name) && !(name === 'tool' && value === 'select')) { toast(editBlockedMessage(), { type: 'warning' }); return; }
   if(node.closest('.add-object-menu'))node.closest('details').open=false;
+  if (name === 'film-pilot-event') {
+    if (filmPilotVariant !== 'events' || deviceIsTraditional()) return;
+    const at = pilot.filmPilotEventTime(current(), value);
+    if (at != null) seekTimeline({value:at}, true);
+    return;
+  }
   if (name === 'choose') return choose(value);
   if (['book','new','import','add-player','add-defense-43','opponents','mirror'].includes(name) && !confirmDraft(() => node.click())) return;
   if (name === 'book') { executeEditorLocal([{kind:'filter_set',book:value}]); return; }
@@ -2005,6 +2085,7 @@ document.addEventListener('pointerup', event => {
 });
 document.addEventListener('change', event => {
   const input = event.target;
+  if (input === filmFieldDraft) return;
   if (input.id === 'timeline') { seekTimeline(input, true); return; }
   if (!canEdit() && (input.dataset.prop || input.dataset.ball || input.id === 'apply-formation')) return;
   if (input.id === 'new-count' || input.id === 'new-book') refreshNewFormation();
@@ -2130,7 +2211,7 @@ function reviewPendingImport() {
 }
 
 document.addEventListener('change', event => {
-  if (event.target !== editingField) return;
+  if (event.target !== editingField || event.target === filmFieldDraft) return;
   editingField = null;
   syncSaveStatus();
 });
@@ -2149,7 +2230,7 @@ $('#import-input').addEventListener('change', async event => {
     const data = decodeWorkspace(raw);
     validateAppendCapacity(data);
     pendingFileImport = { data, name: file.name || 'playbook.json', isCurrent };
-    if ($('.modal') || maddenLibrary.isOpen || draft || drag || playing || document.activeElement?.matches('input:not([type="file"]),select,textarea,[contenteditable="true"]')) {
+    if (filmRoom || $('.modal') || maddenLibrary.isOpen || draft || drag || playing || document.activeElement?.matches('input:not([type="file"]),select,textarea,[contenteditable="true"]')) {
       refreshImportNotices();
     } else {
       reviewPendingImport();
@@ -2159,7 +2240,7 @@ $('#import-input').addEventListener('change', async event => {
   }
 });
 document.addEventListener('keydown', event => {
-  if(event.defaultPrevented||event.isComposing||event.keyCode===229)return;
+  if(filmRoom?.isOpen() || event.defaultPrevented || event.isComposing || event.keyCode===229)return;
   const modal = $('.modal');
   if (modal) {
     const native = modal.closest('dialog')?.dataset.nativeModal === 'true';
@@ -2184,7 +2265,7 @@ document.addEventListener('keydown', event => {
 });
 function showEditor(show) {
   const app = $('#app');
-  if(!show && !app.hidden)cancelFieldGesture();
+  if(!show) { closeFilmRoom(); if (!app.hidden) cancelFieldGesture(); }
   $('.skip-link').hidden = !show;
   if (app.hidden === !show) return;
   resetFileImport();
@@ -2200,7 +2281,7 @@ function showEditor(show) {
       if(state.data.plays.some(play=>play.id===remembered.selectedId)){state.selectedId=remembered.selectedId;book=current().book;}
     }
     digitalBoard = createDigitalBoard({
-      isGestureActive: () => !!drag,
+      isGestureActive: () => !!drag || !!filmRoom,
       getState: () => ({ play: fieldPlay(), settings: viewSettings(), selected: selection, time, playing, rehearsal, draggingId: drag?.type === 'player' && drag.moved ? drag.id : null, presentationMask:assistantPreview?.mask || historyTransition?.mask, presentationSettling:!!assistantSettling || !!historyTransition }),
       notify: message => toast(message, { type: 'warning' }),
     });
@@ -2266,7 +2347,7 @@ if (cloudMode()) {
       if (changedBook || !canEdit()) resetFileImport();
       const sameData=JSON.stringify(state.data)===JSON.stringify(data);
       loadedWorkspaceId=record?.id;
-      if(changedBook){history.clear();boardAssistant?.close({suspend:true});}
+      if(changedBook){closeFilmRoom();history.clear();boardAssistant?.close({suspend:true});}
       cancelFieldGesture(); resetAnimation(); selection = null; draft = null;
       const selectedId = data.plays.some(p => p.id === state.selectedId) ? state.selectedId : data.plays[0].id;
       state = { data, selectedId }; book = current().book;
@@ -2280,10 +2361,10 @@ if (cloudMode()) {
       if (getFieldDraftLabel()) editingField.dispatchEvent(new window.Event('change', { bubbles: true }));
     },
     onAnalysisData(data, record) { matchupView.onData(data, record); },
-    onPermissionLost(error) { clearModelCredential();boardAssistant?.close({clear:true}); cancelFieldGesture(); resetAnimation(); draft = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
+    onPermissionLost(error) { closeFilmRoom();clearModelCredential();boardAssistant?.close({clear:true}); cancelFieldGesture(); resetAnimation(); draft = null; rosterView.refresh(); toast(error.message || t("editorExtra.access_changed_sign_in_again_or_contact_an_ad"), { type: 'error' }); },
     onModeChange:syncWorkspaceNavigation,
     getHomeContext:homeContext,
-    onLogout() {clearModelCredential();boardAssistant?.close({clear:true});history.clear();syncWorkspaceNavigation('login');},
+    onLogout() {closeFilmRoom();clearModelCredential();boardAssistant?.close({clear:true});history.clear();syncWorkspaceNavigation('login');},
     showEditor,
     showRoster: visible => {rosterView.show(visible);if(visible)syncWorkspaceNavigation('roster');},
     canLeaveRoster: () => !rosterView.isEditing(),
