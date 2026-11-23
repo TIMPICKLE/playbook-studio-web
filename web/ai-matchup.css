@@ -487,13 +487,13 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
 }
 .ai-dot.offense,
 .ai-page .ai-dot.offense {
-  background-color: #2b2f36;
-  border: 1.5px solid #dce3ee;
+  background-color: #e8ecf2;
+  border: 0;
   box-shadow: none;
 }
 .ai-dot.defense,
 .ai-page .ai-dot.defense {
-  background-color: #d07b61;
+  background-color: #e59275;
   border-radius: 2px;
 }
 
@@ -572,17 +572,17 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   line-height: 1.6;
 }
 
-/* Framed tactical diagram canvas (renders light SVG routes cleanly) */
+/* Dark studio tactical diagram canvas (pairs with fieldTheme: 'dark') */
 .ai-board,
 .ai-page .ai-board {
-  background-color: #eef1f5;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #161920;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
   min-height: 240px;
   display: grid;
   place-items: center;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 24px rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 24px rgba(0, 0, 0, 0.36);
 }
 .ai-board .pitch-svg {
   display: block;
@@ -593,11 +593,11 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
 .ai-board .pitch-svg [role=button] { pointer-events: none; }
 .ai-board .ai-evidence-dim { opacity: .22; }
 .ai-board .ai-evidence-active,
-.ai-page .ai-board .ai-evidence-active { filter: drop-shadow(0 0 6px #b67c60); }
+.ai-page .ai-board .ai-evidence-active { filter: drop-shadow(0 0 8px rgba(232, 236, 242, 0.78)); }
 .ai-board .ai-evidence-active .route-stroke { stroke-width: 5; }
 .ai-board-placeholder {
   font-size: 13px;
-  color: #414b5b;
+  color: #9aa3b2;
   text-align: center;
   padding: 32px;
 }
