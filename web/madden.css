@@ -1,68 +1,1564 @@
-.sidebar > * { flex-shrink:0; }
-.madden-launch { display:flex; align-items:center; gap:10px; width:100%; padding:12px; margin:12px 0 0; text-align:left; border:1px solid #9a9fa750; border-radius:12px; background:linear-gradient(125deg,#565a5f88,#9a9fa711); color:var(--ink); }
-.madden-launch > span { display:grid; gap:3px; flex:1; }.madden-launch strong { font-size:12px; }.madden-launch small { font-size:12px; color:var(--muted); }.madden-launch b { color:var(--accent); font-size:20px; }
-.madden-drop-target { display:none; padding:20px 12px; margin-top:12px; border:1px dashed #9a9fa766; border-radius:12px; text-align:center; color:var(--accent); font-size:12px; background:#9a9fa708; transition:background .18s,border-color .18s,transform .18s; }
-.madden-drop-target small { display:block; margin-top:6px; color:var(--muted); font-size:12px; }.madden-open .madden-drop-target { display:block; }.madden-drop-hover,.madden-dragging .madden-drop-target { background:#9a9fa722!important; border-color:#9a9fa7!important; box-shadow:0 0 32px #9a9fa720; }.madden-drop-hover { transform:scale(1.02); }
-.madden-panel { position:fixed; z-index:75; top:78px; right:18px; bottom:18px; width:min(880px,calc(100vw - 320px)); display:flex; flex-direction:column; overflow:hidden; border:1px solid #c6c9cd55; border-radius:22px; background:linear-gradient(145deg,#333539f5,#18191bf8); backdrop-filter:blur(28px); box-shadow:0 24px 100px #0009,inset 0 1px #ffffff12; color:var(--ink); animation:madden-enter .24s ease-out; }
-@keyframes madden-enter { from { opacity:0;transform:translateX(22px) } to { opacity:1;transform:translateX(0) } }
-.madden-header { display:flex; align-items:center; justify-content:space-between; padding:24px 24px 16px; }.madden-header small { color:#c9cbce; font-size:11px; letter-spacing:2px; }.madden-header h2 { margin:7px 0 0; font-size:24px; letter-spacing:-.6px; }.madden-header h2 span { display:inline-block; vertical-align:middle; margin-left:8px; padding:4px 7px; border:1px solid #9a9fa744; color:var(--accent); border-radius:6px; font-size:12px; }
-.madden-close { border:1px solid #b5b9be44; background:#ffffff06; color:var(--ink); border-radius:50%; width:36px; height:36px; }
-.madden-team-tabs { display:flex; gap:10px; padding:0 24px 16px; overflow-x:auto; flex-shrink:0; scrollbar-width:thin; }.madden-team { flex:0 0 170px; min-width:0; display:flex; gap:12px; align-items:center; text-align:left; padding:12px; border:1px solid #caccd12b; border-radius:13px; background:#ffffff03; color:var(--ink); }.madden-team.active { border-color:#9a9fa788; background:#9a9fa70b; }.madden-team>span:nth-child(2) { flex:1; display:grid; gap:3px; }.madden-team strong { font-size:15px; }.madden-team small { color:#b9bbbe; font-size:12px; }.madden-team em { font-size:12px; color:var(--accent); font-style:normal; }.madden-team-code { display:grid; place-items:center; width:42px; height:42px; border-radius:10px; border:1px solid #ffffff18; font-size:12px; font-weight:900; letter-spacing:1px; }.madden-team-code.eagles { background:#004c54; color:#d4f1ef; }.madden-team-code.ravens { background:#474b51; color:#a0a5ad; }
-.madden-filterbar { padding:0 24px; display:grid; gap:9px; }.madden-filterbar input,.madden-filterbar select { width:100%; min-width:0; height:39px; color:var(--ink); border:1px solid #caccd12b; border-radius:9px; padding:9px 12px; background:#181a1c88; font:inherit; font-size:12px; }.madden-filterbar select option { background:#26282b; }.madden-filterbar>div { display:grid; grid-template-columns:1fr 1.5fr; gap:8px; }.madden-result-heading { padding:14px 24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; font-size:12px; }.madden-result-heading>span { color:#bec0c2; font-size:12px; }.madden-results { overflow-y:auto; flex:1; min-height:0; padding:0 24px 16px; overscroll-behavior:contain; }.madden-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.madden-card { border:1px solid #caccd12b; border-radius:12px; overflow:hidden; background:#ffffff04; transition:transform .18s,border-color .18s,box-shadow .18s; }.madden-card[draggable=true] { cursor:grab; }.madden-card:hover { transform:translateY(-3px); border-color:#9a9fa770; box-shadow:0 10px 24px #0004; }.madden-card.is-imported { border-color:#9a9fa745; }.madden-art { display:block; width:100%; padding:0; border:0; position:relative; background:#080808; cursor:zoom-in; }.madden-art img { display:block; width:100%; aspect-ratio:554/256; object-fit:contain; }.madden-art-hint { position:absolute; right:6px; bottom:6px; background:#26282bd9; color:#eff0f2; border-radius:4px; padding:3px 5px; font-size:11px; opacity:0; transition:opacity .18s; }.madden-art:hover .madden-art-hint,.madden-art:focus-visible .madden-art-hint { opacity:1; }.madden-card-body { padding:11px; }.madden-card-body>small { color:#bbbdc0; font-size:11px; line-height:1.5; }.madden-card h3 { font-size:12px; line-height:1.5; margin:5px 0 12px; min-height:36px; overflow-wrap:anywhere; }.madden-card-foot { display:flex; align-items:center; justify-content:space-between; gap:4px; }.madden-card-foot>span { color:#bbbdc0; font-size:11px; }.madden-card-foot button,.madden-pagination button,.madden-empty button { border:1px solid #9a9fa740; border-radius:7px; background:#9a9fa712; color:var(--accent); padding:7px 9px; font-size:12px; }.madden-panel button:disabled { cursor:default; opacity:.45; }.madden-pagination { display:flex; align-items:center; justify-content:center; gap:22px; margin-top:22px; font-size:12px; color:#c7c9cb; }.madden-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; padding:12px 24px; border-top:1px solid #caccd121; font-size:11px; color:#bbbdc0; }.madden-footer a,.madden-detail>a { color:#bfc3c8; }.madden-empty { padding:60px 24px; text-align:center; color:#c7c9cb; display:grid; justify-items:center; gap:14px; font-size:13px; }.madden-empty strong { color:#f5f5f6; }.madden-empty p { margin:0; }
-.madden-detail { position:absolute; inset:0; overflow:auto; padding:24px; background:#1f2123fb; display:flex; flex-direction:column; align-items:flex-start; gap:14px; }.madden-detail h2,.madden-detail p { margin:0; }.madden-detail h2 { font-size:24px; }.madden-detail>small,.madden-detail>p { color:#c7c9cb; font-size:12px; line-height:1.8; }.madden-detail>img { width:100%; margin:8px 0; border:1px solid #caccd133; border-radius:12px; background:#080808; }.madden-back { padding:8px 0; color:var(--accent); background:none; border:0; font-size:12px; }.madden-detail>a { font-size:12px; }.madden-reference-note { border-left:2px solid #9a9fa777; padding-left:12px; }.madden-source-box { padding:15px; background:#9a9fa708; border:1px solid #9a9fa733; border-radius:12px; font-size:12px; line-height:1.8; margin-bottom:20px; }.madden-source-box strong { color:var(--accent); }.madden-source-box a { color:#e9eaeb; }.reference-play .canvas-heading,.reference-play .toolbar,.reference-play .playback,.reference-play .field-tag { display:none; }.reference-play #field>.pitch-svg { width:min(100%,calc(var(--board-height) * 1.786)); max-height:100%; }.reference-play .canvas-hint .shortcut-hint { display:none; }
-@media(max-width:1100px) { .madden-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }.madden-panel { width:calc(100vw - 290px); right:12px; }.madden-header,.madden-filterbar,.madden-results { padding-left:16px;padding-right:16px; }.madden-team-tabs { padding-left:16px;padding-right:16px; } }
-@media(max-width:720px) { .madden-panel { inset:12px; width:auto; z-index:110; border-radius:16px; }.madden-header { padding-top:16px; }.madden-header h2 { font-size:21px; }.madden-team-tabs { gap:7px; }.madden-team { padding:9px; gap:7px; }.madden-team-code { width:32px;height:36px;font-size:12px; }.madden-team strong { font-size:13px; }.madden-team small { font-size:11px; }.madden-result-heading>span { font-size:11px; }.madden-cards { gap:9px; }.madden-card-foot>span { display:none; }.madden-card-foot button { width:100%; min-height:34px; }.madden-detail { padding:16px; } }
-@media(prefers-reduced-motion:reduce) { .madden-panel { animation:none; }.madden-card,.madden-drop-target { transition:none; }.madden-card:hover { transform:none; } }
-@media print { #madden-root { display:none!important; } }
+/* ==========================================================================
+   Madden Play Library — Studio Dark-Mode Drawer & Reference Play Support
+   --------------------------------------------------------------------------
+   Scoped via #madden-root and #app so this sheet cleanly owns the Madden
+   library in both digital and traditional visual modes across breakpoints.
+   ========================================================================== */
 
-.madden-result-bar{position:relative;z-index:2;display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 20px;background:#2b2c2e;border-top:1px solid #9a9fa766;flex-shrink:0}.madden-result-message{flex:1;min-width:120px;font-size:12px}.madden-result-bar button{min-height:44px;padding:8px 14px;border:1px solid #9a9fa766;border-radius:8px;color:var(--accent)}.madden-result-bar[data-type=error]{border-color:#ff9185}.madden-detail-slot:has(.madden-detail)+.madden-result-bar{position:absolute;bottom:0;left:0;right:0}.madden-detail{padding-bottom:100px}.madden-card.just-added{animation:card-added .6s ease-out}@keyframes card-added{50%{box-shadow:0 0 0 2px #9a9fa7}}@media(prefers-reduced-motion:reduce){.madden-card.just-added{animation:none}}
+.sidebar > * { flex-shrink: 0; }
 
-.madden-editable-filter{display:flex;gap:8px;align-items:center;padding:6px 24px;color:var(--accent);font-size:12px}.madden-editable-filter input{width:18px;height:18px}.source-comparison{width:100%;background:#080808;border-radius:10px;margin-bottom:16px}.play-actions{flex-wrap:wrap}
+/* Screen-reader helper for team city search metadata */
+#madden-root .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-.madden-detail-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; flex:none; }
-.madden-detail-bar .madden-close { flex:none; }
-.madden-team-picker { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; padding:8px 24px; flex:none; }
-.madden-team-picker label { font-size:12px; font-weight:650; color:var(--ui-text-muted,var(--muted)); }
-.madden-team-picker input { min-width:120px; flex:1; padding:8px 12px; color:var(--ui-text,var(--ink)); background:var(--ui-surface,transparent); border:1px solid var(--ui-border-strong,var(--line)); border-radius:var(--r-control,8px); }
-.madden-team[hidden],.madden-team-empty[hidden] { display:none; }
-.madden-team-empty { padding:8px 24px; font-size:12px; line-height:1.5; color:var(--ui-text-muted,var(--muted)); }
-.madden-team-empty button { color:inherit; text-decoration:underline; }
-.madden-search-scope { display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 24px; }
-.madden-search-scope > span { font-size:12px; color:var(--ui-text-muted,var(--muted)); margin-inline-end:4px; }
-.madden-search-scope button { min-height:36px; padding:6px 10px; border:1px solid var(--ui-border-strong,var(--line)); border-radius:var(--r-control,8px); background:var(--ui-surface,transparent); color:var(--ui-text,var(--ink)); font-size:12px; }
-.madden-search-scope button[aria-pressed=true] { background:var(--ui-accent,var(--accent)); color:var(--ui-on-accent,#111214); font-weight:650; }
-.madden-panel :is(.madden-team-picker input,.madden-search-scope button):focus-visible { outline:var(--ui-focus-ring,2px solid var(--focus,#a9c1ff)); outline-offset:2px; }
-.madden-result-heading .madden-active-scope { color:var(--ui-text,var(--ink)); }
-@media screen and (max-width:1180px), screen and (any-pointer:coarse) {
-  #madden-root:not([hidden]) { position:fixed; inset:0; z-index:75; background:#080a0e77; }
+/* --------------------------------------------------------------------------
+   Left Sidebar Launcher & Ultra-Compact Dropzone
+   -------------------------------------------------------------------------- */
+.madden-launch,
+#app .madden-launch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  margin: 10px 0 0;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  background: #181c23;
+  color: var(--text-1, #f3f4f6);
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.madden-launch:hover,
+#app .madden-launch:hover {
+  background: #1f242e;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.madden-launch > span,
+#app .madden-launch > span {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.madden-launch strong,
+#app .madden-launch strong {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-1, #f3f4f6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.madden-launch small,
+#app .madden-launch small {
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--text-3, #8f98a8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.madden-launch b,
+#app .madden-launch b {
+  flex: none;
+  color: var(--text-3, #8f98a8);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  transition: transform 150ms ease, color 150ms ease;
+}
+.madden-launch:hover b,
+#app .madden-launch:hover b {
+  color: var(--text-1, #f3f4f6);
+  transform: translate(1px, -1px);
+}
+
+.madden-drop-target,
+#app .madden-drop-target {
+  display: none;
+  margin-top: 8px;
+  padding: 8px 10px;
+  min-height: 36px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  text-align: center;
+  color: var(--text-2, #b9c1ce);
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.025);
+  transition: padding 180ms var(--ease-out, ease), background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
+}
+.madden-drop-target small,
+#app .madden-drop-target small {
+  display: none;
+  margin-top: 4px;
+  color: #a6e3c0;
+  font-size: 11px;
+  font-weight: 400;
+}
+.madden-open .madden-drop-target,
+.madden-open #app .madden-drop-target {
+  display: block;
+}
+.madden-dragging .madden-drop-target,
+.madden-dragging #app .madden-drop-target,
+.madden-drop-hover,
+#app .madden-drop-hover {
+  padding: 16px 10px;
+  background: rgba(143, 224, 178, 0.11);
+  border-color: rgba(143, 224, 178, 0.72);
+  color: #ecfaf2;
+  box-shadow: 0 0 0 3px rgba(143, 224, 178, 0.12), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.madden-dragging .madden-drop-target small,
+.madden-dragging #app .madden-drop-target small,
+.madden-drop-hover small,
+#app .madden-drop-hover small {
+  display: block;
+}
+.madden-drop-hover,
+#app .madden-drop-hover {
+  transform: scale(1.015);
+  background: rgba(143, 224, 178, 0.17);
+  border-color: #8fe0b2;
+}
+
+/* --------------------------------------------------------------------------
+   Studio Drawer Backdrop & Shell
+   -------------------------------------------------------------------------- */
+#madden-root:not([hidden])::before {
+  content: '';
+  position: fixed;
+  z-index: 74;
+  top: var(--cloud-height, 0px);
+  right: 0;
+  bottom: 0;
+  left: 260px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 10, 14, 0) 0%,
+    rgba(8, 10, 14, 0.36) 36%,
+    rgba(8, 10, 14, 0.64) 100%
+  );
+  animation: madden-fade 180ms ease-out;
+}
+
+#madden-root .madden-panel {
+  position: fixed;
+  z-index: 75;
+  top: max(56px, calc(var(--cloud-height, 56px) + 10px));
+  right: 12px;
+  bottom: 12px;
+  left: auto;
+  width: min(860px, calc(100vw - 288px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  background: #111318;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.68),
+    0 4px 16px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--text-1, #f3f4f6);
+  font-family: var(--font-ui, system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif);
+  animation: madden-enter 200ms var(--ease-out, cubic-bezier(.22, 1, .36, 1));
+}
+
+@keyframes madden-enter {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes madden-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#madden-root .madden-panel button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+#madden-root .madden-panel :is(button, input, select, a):focus-visible {
+  outline: 2px solid var(--focus, #a9c1ff);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Row 1: Compact Studio Header (~48px)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 8px;
+  min-height: 48px;
+  flex: none;
+  background: transparent;
+  border: 0;
+}
+
+#madden-root .madden-title-group {
+  order: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+#madden-root .madden-header h2 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui, system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif);
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #f3f4f6;
+  white-space: nowrap;
+}
+
+#madden-root .madden-header h2 span,
+#madden-root .madden-offense-tag {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(255, 255, 255, 0.06);
+  color: #cdd4e0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+#madden-root .madden-header small {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #7c8596;
+  white-space: nowrap;
+  text-transform: none;
+}
+
+#madden-root .madden-header-tools {
+  order: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#madden-root .madden-search-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  height: 30px;
+  flex: none;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #171a21;
+}
+
+#madden-root .madden-search-scope button {
+  height: 24px;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #939cad;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+#madden-root .madden-search-scope button:hover:not([aria-pressed="true"]) {
+  color: #e4e8f0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#madden-root .madden-search-scope button[aria-pressed="true"] {
+  background: #e8ecf2;
+  color: #111318;
+  font-weight: 650;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+}
+
+#madden-root .madden-team-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 146px;
+  padding: 0;
+  flex: none;
+}
+
+#madden-root .madden-input-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #70798b;
+  pointer-events: none;
+}
+
+#madden-root #madden-team-search {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 9px 0 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #171a21;
+  color: #f3f4f6;
+  font: inherit;
+  font-size: 12px;
+  box-shadow: none;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+#madden-root #madden-team-search::placeholder {
+  color: #6b7485;
+}
+
+#madden-root #madden-team-search:focus {
+  outline: none;
+  border-color: rgba(169, 193, 255, 0.65);
+  background: #1a1e26;
+  box-shadow: 0 0 0 3px rgba(169, 193, 255, 0.16);
+}
+
+#madden-root .madden-close {
+  order: 3;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #a4adbc;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+#madden-root .madden-close:hover {
+  background: #222733;
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #f3f4f6;
+}
+
+/* --------------------------------------------------------------------------
+   Row 2: Single-Line Horizontal NFL Team Chip Rail (~42px)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-team-rail {
+  position: relative;
+  flex: none;
+  padding: 0 16px 8px;
+  background: transparent;
+}
+
+#madden-root .madden-team-rail::before,
+#madden-root .madden-team-rail::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  width: 44px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+#madden-root .madden-team-rail::before {
+  left: 16px;
+  background: linear-gradient(90deg, #111318 0%, rgba(17, 19, 24, 0) 100%);
+}
+
+#madden-root .madden-team-rail::after {
+  right: 16px;
+  background: linear-gradient(270deg, #111318 0%, rgba(17, 19, 24, 0) 100%);
+}
+
+#madden-root .madden-team-rail.has-fade-left::before { opacity: 1; }
+#madden-root .madden-team-rail.has-fade-right::after { opacity: 1; }
+
+#madden-root .madden-team-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  background: transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#madden-root .madden-team-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+#madden-root .madden-team {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 5px;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  background: #171a21;
+  color: #d4dbe6;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+#madden-root .madden-team[hidden] {
+  display: none;
+}
+
+#madden-root .madden-team:hover {
+  background: #1d212b;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f3f4f6;
+}
+
+#madden-root .madden-team.active {
+  background: #222734;
+  border-color: rgba(255, 255, 255, 0.30);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#madden-root .madden-team-label {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+
+#madden-root .madden-team strong {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  color: inherit;
+}
+
+#madden-root .madden-team em {
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #7c8596;
+  line-height: 1;
+}
+
+#madden-root .madden-team.active em {
+  color: #cbd3e0;
+}
+
+/* Authentic 24x24 NFL Team Monogram Badges (all 13 teams + fallback) */
+#madden-root .madden-team-code {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 6px;
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  background: #262c38;
+  color: #d8dee8;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+#madden-root .madden-team-code[data-team="eagles"]   { background: #004c54; color: #d8f6f3; }
+#madden-root .madden-team-code[data-team="ravens"]   { background: #2c1b7e; color: #efe6ff; }
+#madden-root .madden-team-code[data-team="49ers"]    { background: #aa0000; color: #ffeed2; }
+#madden-root .madden-team-code[data-team="bengals"]  { background: #d94312; color: #fff3ed; }
+#madden-root .madden-team-code[data-team="bills"]    { background: #00338d; color: #e2eeff; }
+#madden-root .madden-team-code[data-team="chiefs"]   { background: #c8102e; color: #fff0d4; }
+#madden-root .madden-team-code[data-team="cowboys"]  { background: #0c2340; color: #dce8f8; }
+#madden-root .madden-team-code[data-team="dolphins"] { background: #007d87; color: #e2fcff; }
+#madden-root .madden-team-code[data-team="lions"]    { background: #0069a7; color: #e3f4ff; }
+#madden-root .madden-team-code[data-team="packers"]  { background: #203731; color: #ffd046; }
+#madden-root .madden-team-code[data-team="rams"]     { background: #003594; color: #ffd43b; }
+#madden-root .madden-team-code[data-team="seahawks"] { background: #0a2540; color: #79d938; }
+#madden-root .madden-team-code[data-team="texans"]   { background: #082438; color: #ff6b7e; }
+
+#madden-root .madden-team-empty {
+  padding: 6px 2px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #8f98a8;
+}
+
+#madden-root .madden-team-empty[hidden] {
+  display: none;
+}
+
+#madden-root .madden-team-empty button {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #e4e8f0;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   Row 3: Unified Horizontal Filter Toolbar (~42px)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-filterbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 8px;
+  flex: none;
+  background: transparent;
+}
+
+#madden-root .madden-search-wrap {
+  position: relative;
+  flex: 1.45 1 180px;
+  min-width: 140px;
+}
+
+#madden-root #madden-search {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 10px 0 30px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: #171a21;
+  color: #f3f4f6;
+  font: inherit;
+  font-size: 12.5px;
+  box-shadow: none;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+#madden-root #madden-search::placeholder {
+  color: #6b7485;
+}
+
+#madden-root #madden-search:focus {
+  outline: none;
+  border-color: rgba(169, 193, 255, 0.65);
+  background: #1a1e26;
+  box-shadow: 0 0 0 3px rgba(169, 193, 255, 0.16);
+}
+
+#madden-root .madden-filterbar select {
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 26px 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background-color: #171a21;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%238b94a3' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  appearance: none;
+  -webkit-appearance: none;
+  color: #e4e8f0;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+#madden-root #madden-group {
+  flex: 0.72 1 112px;
+}
+
+#madden-root #madden-formation {
+  flex: 0.92 1 136px;
+}
+
+#madden-root .madden-filterbar select:hover {
+  border-color: rgba(255, 255, 255, 0.17);
+  background-color: #1b1f28;
+}
+
+#madden-root .madden-filterbar select:focus {
+  outline: none;
+  border-color: rgba(169, 193, 255, 0.65);
+  box-shadow: 0 0 0 3px rgba(169, 193, 255, 0.16);
+}
+
+#madden-root .madden-filterbar select option {
+  background: #171a21;
+  color: #f3f4f6;
+}
+
+#madden-root .madden-editable-filter {
+  flex: none;
+  height: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: #171a21;
+  color: #a4adbc;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+#madden-root .madden-editable-filter:hover {
+  border-color: rgba(255, 255, 255, 0.17);
+  color: #e4e8f0;
+}
+
+#madden-root .madden-editable-filter:has(input:checked) {
+  background: rgba(143, 224, 178, 0.10);
+  border-color: rgba(143, 224, 178, 0.30);
+  color: #d8f7e5;
+}
+
+#madden-root .madden-editable-filter input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #8fe0b2;
+  cursor: pointer;
+}
+
+#madden-root .madden-editable-count {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   Row 4: Micro Status Bar (~26px)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 16px 8px;
+  flex: none;
+  font-size: 11.5px;
+  line-height: 1.3;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+#madden-root .madden-status-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+#madden-root #madden-count {
+  color: #e6eaf2;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#madden-root .madden-status-dot {
+  color: #4d5667;
+}
+
+#madden-root .madden-active-scope {
+  color: #8d96a6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#madden-root .madden-drag-hint {
+  color: #6b7485;
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Play Cards Grid (.madden-results & .madden-card)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-results {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 10px 16px 14px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+#madden-root .madden-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#madden-root .madden-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #171a21;
+  box-shadow: none;
+  transition: transform 160ms var(--ease-out, ease), border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+#madden-root .madden-card[draggable="true"] {
+  cursor: grab;
+}
+
+#madden-root .madden-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.20);
+  background: #1c2029;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.40);
+}
+
+#madden-root .madden-card.is-imported {
+  border-color: rgba(143, 224, 178, 0.22);
+}
+
+#madden-root .madden-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  background: #080a0e;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+
+#madden-root .madden-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 -24px 24px -12px rgba(8, 10, 14, 0.72);
+}
+
+#madden-root .madden-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 220ms var(--ease-out, ease);
+}
+
+#madden-root .madden-card:hover .madden-art img {
+  transform: scale(1.025);
+}
+
+#madden-root .madden-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+
+#madden-root .madden-art .madden-card-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 1;
+  backdrop-filter: blur(8px);
+}
+
+#madden-root .madden-card-badge.is-editable {
+  background: rgba(13, 25, 20, 0.88);
+  border: 1px solid rgba(143, 224, 178, 0.34);
+  color: #9ce6bc;
+}
+
+#madden-root .madden-card-badge.is-original {
+  background: rgba(17, 19, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #a4adbc;
+}
+
+#madden-root .madden-art-hint {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  bottom: auto;
+  z-index: 1;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(17, 19, 24, 0.88);
+  color: #eef1f6;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+#madden-root .madden-art:hover .madden-art-hint,
+#madden-root .madden-art:focus-visible .madden-art-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#madden-root .madden-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px 8px;
+}
+
+#madden-root .madden-card-body > small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #8790a0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#madden-root .madden-card h3 {
+  margin: 1px 0 0;
+  min-height: 0;
+  font-family: var(--font-ui, system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: #f3f4f6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+#madden-root .madden-card-foot {
+  margin-top: auto;
+  padding-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#madden-root .madden-card-grip {
+  font-size: 13px;
+  line-height: 1;
+  color: #545d6d;
+  user-select: none;
+  transition: color 140ms ease;
+}
+
+#madden-root .madden-card:hover .madden-card-grip {
+  color: #8c96a6;
+}
+
+#madden-root .madden-card-grip.is-added {
+  color: #8fe0b2;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#madden-root .madden-card-foot button,
+#madden-root .madden-pagination button,
+#madden-root .madden-empty button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef1f6;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+#madden-root .madden-card-foot button:hover:not(:disabled),
+#madden-root .madden-pagination button:hover:not(:disabled),
+#madden-root .madden-empty button:hover:not(:disabled) {
+  background: #e8ecf2;
+  border-color: #e8ecf2;
+  color: #111318;
+}
+
+#madden-root .madden-card.is-imported .madden-card-foot button {
+  background: rgba(143, 224, 178, 0.10);
+  border-color: rgba(143, 224, 178, 0.26);
+  color: #8fe0b2;
+  opacity: 0.9;
+}
+
+#madden-root .madden-card.just-added {
+  animation: card-added 600ms ease-out;
+}
+@keyframes card-added {
+  50% { box-shadow: 0 0 0 2px #8fe0b2; }
+}
+
+#madden-root .madden-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #9ba4b4;
+}
+
+#madden-root .madden-pagination button {
+  height: 30px;
+  padding: 0 12px;
+}
+
+#madden-root .madden-empty {
+  padding: 56px 24px;
+  text-align: center;
+  color: #a4adbc;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+#madden-root .madden-empty strong {
+  color: #f3f4f6;
+  font-size: 14px;
+}
+
+#madden-root .madden-empty p {
+  margin: 0;
+  color: #8b94a3;
+}
+
+#madden-root .madden-empty button {
+  height: 32px;
+  padding: 0 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Compact Single-Line Footer (36px)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  min-height: 36px;
+  padding: 0 16px;
+  flex: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0d0f14;
+  font-size: 11px;
+  color: #7c8596;
+}
+
+#madden-root .madden-footer > span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#madden-root .madden-footer a,
+#madden-root .madden-detail > a {
+  color: #a8b1c0;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+#madden-root .madden-footer a:hover,
+#madden-root .madden-detail > a:hover {
+  color: #f3f4f6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Framed Detail Preview View (.madden-detail)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-detail {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: auto;
+  padding: 14px 20px 88px;
+  background: #111318;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  overscroll-behavior: contain;
+}
+
+#madden-root .madden-detail-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  flex: none;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+#madden-root .madden-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 8px;
+  background: #171a21;
+  color: #dce2ec;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+#madden-root .madden-back:hover {
+  background: #202531;
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+#madden-root .madden-detail-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#madden-root .madden-detail-step {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 7px;
+  background: #171a21;
+  color: #d8dee8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+#madden-root .madden-detail-step:hover:not(:disabled) {
+  background: #222733;
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+#madden-root .madden-detail-pos {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #7c8596;
+  padding: 0 4px;
+}
+
+#madden-root .madden-detail-bar .madden-close {
+  order: 0;
+  margin-left: 4px;
+}
+
+#madden-root .madden-detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+#madden-root .madden-detail-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#madden-root .madden-detail small {
+  font-size: 12px;
+  color: #8f98a8;
+  line-height: 1.4;
+}
+
+#madden-root .madden-detail h2 {
+  margin: 0;
+  font-family: var(--font-ui, system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #f3f4f6;
+}
+
+#madden-root .madden-detail-formation {
+  margin: 0;
+  font-size: 13px;
+  color: #aeb7c6;
+  line-height: 1.4;
+}
+
+#madden-root .madden-detail-stage {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #080a0e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+#madden-root .madden-detail-stage img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+#madden-root .madden-reference-note {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 2px solid rgba(228, 231, 235, 0.45);
+  border-radius: 8px;
+  background: #171a21;
+  color: #b4bdcb;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+#madden-root .madden-detail-cta {
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid #e8ecf2;
+  border-radius: 9px;
+  background: #e8ecf2;
+  color: #111318;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: none;
+  text-shadow: none;
+  transition: background 140ms ease, transform 140ms ease;
+}
+
+#madden-root .madden-detail-cta:hover:not(:disabled) {
+  background: #ffffff;
+  color: #0d0f14;
+}
+
+#madden-root .madden-detail > a {
+  font-size: 12px;
+  color: #8f98a8;
+}
+
+/* --------------------------------------------------------------------------
+   Result Feedback Banner (.madden-result-bar)
+   -------------------------------------------------------------------------- */
+#madden-root .madden-result-bar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #181c24;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+#madden-root .madden-result-bar[hidden] {
+  display: none;
+}
+
+#madden-root .madden-result-bar[data-type="success"] {
+  border-top-color: rgba(143, 224, 178, 0.45);
+}
+
+#madden-root .madden-result-bar[data-type="error"] {
+  border-top-color: rgba(255, 142, 126, 0.65);
+}
+
+#madden-root .madden-result-bar[data-type="warning"] {
+  border-top-color: rgba(242, 207, 137, 0.55);
+}
+
+#madden-root .madden-result-message {
+  flex: 1;
+  min-width: 140px;
+  font-size: 12px;
+  color: #e6eaf2;
+}
+
+#madden-root .madden-result-bar button {
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef1f6;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+#madden-root .madden-result-bar button:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+#madden-root .madden-detail-slot:has(.madden-detail) + .madden-result-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Reference Play Canvas & Inspector Helpers (outside #madden-root)
+   -------------------------------------------------------------------------- */
+.madden-source-box {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+.madden-source-box strong { color: var(--text-1, #f3f4f6); }
+.madden-source-box a { color: var(--text-2, #c3c9d2); }
+.source-comparison { width: 100%; background: #080a0e; border-radius: 10px; margin-bottom: 16px; }
+.play-actions { flex-wrap: wrap; }
+.reference-play .canvas-heading,
+.reference-play .toolbar,
+.reference-play .playback,
+.reference-play .field-tag { display: none; }
+.reference-play #field > .pitch-svg { width: min(100%, calc(var(--board-height) * 1.786)); max-height: 100%; }
+.reference-play .canvas-hint .shortcut-hint { display: none; }
+
+/* --------------------------------------------------------------------------
+   Medium Desktop (< 1280px)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 1280px) and (min-width: 1181px) {
   #madden-root .madden-panel {
-    inset:auto; top:calc(var(--visible-top,0px) + max(8px,env(safe-area-inset-top,0px)));
-    left:max(8px,env(safe-area-inset-left,0px)); right:max(8px,env(safe-area-inset-right,0px));
-    width:auto; max-width:1000px; margin:0 auto;
-    height:calc(var(--visible-height,100dvh) - max(8px,env(safe-area-inset-top,0px)) - max(8px,env(safe-area-inset-bottom,0px)));
-    max-height:none;
+    width: calc(100vw - 276px);
   }
-  .madden-panel :is(.madden-header,.madden-team-tabs,.madden-filterbar,.madden-result-heading,.madden-footer,.madden-editable-filter,.madden-result-bar) { flex-shrink:0; }
-  .madden-close,.madden-panel .madden-back { min-width:44px; min-height:44px; }
-  .madden-panel .madden-filterbar :is(input,select) { min-height:44px; font-size:16px; }
-  .madden-team-picker,.madden-search-scope { padding-inline:16px; }
-  .madden-team-picker input,.madden-search-scope button { min-height:44px; }
-  .madden-team-picker input { font-size:16px; }
-  .madden-panel .madden-card-foot button,.madden-panel .madden-pagination button { min-height:44px; }
-  .madden-editable-filter { min-height:44px; }
-  .madden-art-hint { opacity:1; }
-  .madden-card:hover { transform:none; }
-  .madden-short .madden-panel { overflow:auto; overscroll-behavior:contain; }
-  .madden-short .madden-panel:has(.madden-detail) { overflow:hidden; }
-  .madden-detail { overscroll-behavior:contain; }
-  .madden-short .madden-results { flex:none; overflow:visible; }
-  .madden-short .madden-header small,.madden-short .madden-result-heading>span { display:none; }
-  .madden-short .madden-header { padding:8px 12px; }
-  .madden-short .madden-header h2 { margin:0; font-size:20px; }
-  .madden-short .madden-team-tabs { padding-bottom:8px; }
-  .madden-short .madden-team { padding:6px 10px; }
-  .madden-short .madden-team small { display:none; }
-  .madden-short .madden-team-code { height:30px; width:30px; }
-  .madden-short .madden-result-heading { padding-top:6px; padding-bottom:6px; }
+  #madden-root .madden-team-picker {
+    width: 124px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Touch & Compact Viewports (<= 1180px or coarse pointer)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 1180px), screen and (any-pointer: coarse) {
+  .madden-open { overflow: hidden; }
+
+  #madden-root:not([hidden]) {
+    position: fixed;
+    inset: 0;
+    z-index: 75;
+    background: rgba(8, 10, 14, 0.68);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  #madden-root:not([hidden])::before {
+    display: none;
+  }
+
+  #madden-root .madden-panel {
+    inset: auto;
+    top: calc(var(--visible-top, 0px) + max(8px, env(safe-area-inset-top, 0px)));
+    left: max(8px, env(safe-area-inset-left, 0px));
+    right: max(8px, env(safe-area-inset-right, 0px));
+    width: auto;
+    max-width: 960px;
+    margin: 0 auto;
+    height: calc(var(--visible-height, 100dvh) - max(8px, env(safe-area-inset-top, 0px)) - max(8px, env(safe-area-inset-bottom, 0px)));
+    max-height: none;
+    border-radius: 16px;
+  }
+
+  #madden-root .madden-header {
+    flex-wrap: wrap;
+    padding: 10px 14px 8px;
+    gap: 8px;
+  }
+
+  #madden-root .madden-header-tools {
+    order: 4;
+    width: 100%;
+  }
+
+  #madden-root .madden-search-scope {
+    height: auto;
+    padding: 3px;
+  }
+
+  #madden-root .madden-search-scope button {
+    min-height: 38px;
+    height: auto;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  #madden-root .madden-team-picker {
+    flex: 1;
+    width: auto;
+  }
+
+  #madden-root #madden-team-search {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  #madden-root .madden-close,
+  #madden-root .madden-back,
+  #madden-root .madden-detail-step {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  #madden-root .madden-team-rail {
+    padding: 0 14px 8px;
+  }
+
+  #madden-root .madden-team {
+    height: 40px;
+  }
+
+  #madden-root .madden-filterbar {
+    flex-wrap: wrap;
+    padding: 0 14px 8px;
+    gap: 8px;
+  }
+
+  #madden-root .madden-search-wrap {
+    flex: 1 1 100%;
+  }
+
+  #madden-root #madden-search,
+  #madden-root .madden-filterbar select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  #madden-root #madden-group,
+  #madden-root #madden-formation {
+    flex: 1 1 140px;
+  }
+
+  #madden-root .madden-editable-filter {
+    min-height: 44px;
+    padding: 0 12px;
+  }
+
+  #madden-root .madden-result-heading {
+    padding: 4px 14px 8px;
+  }
+
+  #madden-root .madden-drag-hint {
+    display: none;
+  }
+
+  #madden-root .madden-results {
+    padding: 10px 14px 14px;
+  }
+
+  #madden-root .madden-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  #madden-root .madden-card:hover {
+    transform: none;
+  }
+
+  #madden-root .madden-art-hint {
+    opacity: 1;
+    transform: none;
+  }
+
+  #madden-root .madden-card-grip {
+    display: none;
+  }
+
+  #madden-root .madden-card-foot button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 13px;
+  }
+
+  #madden-root .madden-pagination button,
+  #madden-root .madden-result-bar button,
+  #madden-root .madden-detail-cta {
+    min-height: 44px;
+  }
+
+  #madden-root .madden-footer {
+    padding: 8px 14px;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  #madden-root .madden-detail {
+    padding: 14px 14px 96px;
+  }
+
+  /* Short viewport (e.g., virtual keyboard open < 540px) */
+  #madden-root.madden-short .madden-panel {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  #madden-root.madden-short .madden-panel:has(.madden-detail) {
+    overflow: hidden;
+  }
+  #madden-root.madden-short .madden-results {
+    flex: none;
+    overflow: visible;
+  }
+  #madden-root.madden-short .madden-header small,
+  #madden-root.madden-short .madden-drag-hint {
+    display: none;
+  }
+  #madden-root.madden-short .madden-header {
+    padding: 8px 12px 6px;
+  }
+  #madden-root.madden-short .madden-team-rail {
+    padding: 0 12px 6px;
+  }
+  #madden-root.madden-short .madden-team {
+    height: 34px;
+  }
+  #madden-root.madden-short .madden-result-heading {
+    padding: 4px 12px 6px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  #madden-root .madden-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #madden-root:not([hidden])::before,
+  #madden-root .madden-panel,
+  #madden-root .madden-card.just-added {
+    animation: none;
+  }
+  #madden-root .madden-card,
+  #madden-root .madden-art img,
+  #app .madden-drop-target {
+    transition: none;
+  }
+  #madden-root .madden-card:hover,
+  #madden-root .madden-card:hover .madden-art img {
+    transform: none;
+  }
+}
+
+@media print {
+  #madden-root {
+    display: none !important;
+  }
 }

@@ -1,75 +1,113 @@
+/* Compact single-row studio toolbar for unit switcher, personnel group picker, and actions */
 .personnel-controls {
-  display: grid;
-  gap: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--night-1);
 }
 .personnel-units {
-  display: flex;
-  gap: 3px;
-  justify-self: start;
+  display: inline-flex;
+  gap: 2px;
+  flex: 0 0 auto;
   max-width: 100%;
   padding: 3px;
   border: 1px solid var(--hairline);
-  border-radius: 12px;
+  border-radius: 9px;
   background: var(--night-0);
 }
 .personnel-units button {
-  min-height: 40px;
+  min-height: 32px;
   min-width: 0;
-  padding: 7px 16px;
+  padding: 5px 13px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 7px;
   background: transparent;
   color: var(--text-2);
   font: 600 13px/1.25 var(--font-ui, inherit);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
 }
+.personnel-units button:hover { color: var(--text-1); }
 .personnel-units button[aria-pressed=true] {
   border-color: var(--hairline-strong);
   background: var(--night-3);
   color: var(--text-1);
 }
-.personnel-toolbar, .personnel-actions {
+.personnel-toolbar {
   display: flex;
-  gap: 8px;
-  align-items: end;
+  flex: 1 1 340px;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
-}
-.personnel-toolbar { justify-content: space-between; }
-.personnel-picker {
-  display: grid;
-  gap: 5px;
   min-width: 0;
-  flex: 1 1 180px;
-  max-width: 350px;
+}
+.personnel-actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-inline-start: auto;
+}
+.personnel-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 0 1 260px;
+  max-width: 300px;
   color: var(--text-2);
-  font-size: 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 .personnel-picker select, .personnel-dialog textarea {
-  min-height: 42px;
+  min-height: 36px;
   min-width: 0;
   max-width: 100%;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border: 1px solid var(--hairline-strong);
-  border-radius: 9px;
+  border-radius: var(--r-control, 8px);
   color: var(--text-1);
-  background: var(--night-2);
+  background: var(--night-0);
   font: inherit;
 }
-.personnel-picker select { font-weight: 650; }
-.personnel-actions :is(button, summary) { min-height: 42px; }
+.personnel-picker select {
+  flex: 1 1 160px;
+  font-weight: 650;
+  font-size: 13px;
+}
+.personnel-picker select:focus, .personnel-dialog textarea:focus {
+  outline: none;
+  border-color: var(--ui-focus, #a9c1ff);
+  box-shadow: var(--ui-focus-ring, 0 0 0 3px #a9c1ff33);
+}
+.personnel-actions :is(button, summary) { min-height: 36px; }
 .personnel-more { position: relative; }
 .personnel-more summary {
   box-sizing: border-box;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border: 1px solid var(--hairline-strong);
-  border-radius: 10px;
+  border-radius: var(--r-control, 8px);
+  background: var(--night-2);
   color: var(--text-2);
   list-style: none;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.personnel-more summary:hover {
+  background: var(--night-3);
+  color: var(--text-1);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 .personnel-more summary::-webkit-details-marker { display: none; }
 .personnel-more summary::after { content: '▾'; }
@@ -78,15 +116,15 @@
   position: absolute;
   z-index: 4;
   inset-inline-end: 0;
-  top: calc(100% + 4px);
+  top: calc(100% + 5px);
   display: grid;
   width: max-content;
   max-width: 200px;
   padding: 4px;
   border: 1px solid var(--hairline-strong);
-  border-radius: 11px;
+  border-radius: 10px;
   background: var(--night-2);
-  box-shadow: var(--island-shadow);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 .personnel-more button {
   padding: 7px 12px;
@@ -96,6 +134,7 @@
   background: transparent;
   text-align: start;
   font-size: 13px;
+  cursor: pointer;
 }
 .personnel-more button:hover, .personnel-more button:focus-visible { background: var(--night-3); }
 .personnel-more [data-personnel-action=remove] { color: var(--danger-1); }
@@ -103,11 +142,12 @@
 .personnel-note, .personnel-empty, .personnel-hint, .personnel-notice {
   margin: 0;
   color: var(--text-2);
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .personnel-note {
+  flex: 1 0 100%;
   padding-inline-start: 10px;
   border-inline-start: 2px solid var(--hairline-strong);
   white-space: pre-line;
@@ -116,19 +156,23 @@
 .personnel-notice:not(:empty) { padding-top: 8px; }
 .personnel-dialog textarea { width: 100%; resize: vertical; }
 .personnel-danger {
-  min-height: 42px;
-  padding: 8px 14px;
+  min-height: 38px;
+  padding: 7px 14px;
   border: 1px solid var(--danger-1);
-  border-radius: 9px;
+  border-radius: var(--r-control, 8px);
   color: var(--danger-1);
   background: var(--night-2);
   font-size: 13px;
   font-weight: 650;
+  cursor: pointer;
 }
 @media (max-width: 640px) {
-  .personnel-units { justify-self: stretch; }
+  .personnel-controls { padding: 10px; gap: 10px; }
+  .personnel-units { width: 100%; }
   .personnel-units button { flex: 1 1 0; padding-inline: 7px; }
-  .personnel-picker { max-width: none; }
+  .personnel-toolbar { flex-basis: 100%; }
+  .personnel-picker { flex: 1 1 100%; max-width: none; }
+  .personnel-actions { margin-inline-start: 0; }
   .personnel-picker select, .personnel-dialog textarea { font-size: 16px; }
 }
 @media (max-width: 1180px), (any-pointer: coarse) {

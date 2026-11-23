@@ -1,9 +1,121 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f0a17"><meta name="description" content="Playbook Studio 团队战术工作台：账号登录、云端保存、成员权限和橄榄球战术演练。"><title>Playbook Studio · 团队战术工作台</title><link rel="icon" href="./assets/brand/icon-32.png" sizes="32x32"><link rel="icon" href="./assets/brand/playbook-studio-icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./assets/brand/icon-180.png"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cloud.css"><link rel="stylesheet" href="./glass.css"><link rel="stylesheet" href="./liquid.css">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14171b"><meta name="description" content="Playbook Studio 团队战术工作台：账号登录、云端保存、成员权限和橄榄球战术演练。"><title>Playbook Studio · 团队战术工作台</title><link rel="icon" href="./assets/brand/icon-32.png" sizes="32x32"><link rel="icon" href="./assets/brand/playbook-studio-icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./assets/brand/icon-180.png"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cloud.css"><link rel="stylesheet" href="./glass.css"><link rel="stylesheet" href="./liquid.css">
   <link rel="stylesheet" href="./visual-mode.css">
   <link rel="stylesheet" href="./layout-polish.css">
-  <link rel="stylesheet" href="./theme.css"></head>
+  <link rel="stylesheet" href="./theme.css">
+  <style>
+    /* Clean full-viewport hero framing and unified dark studio palette across visual modes */
+    html, body.entry-page {
+      background-color: var(--night-0, #14171b);
+      color: var(--text-1, #f3f4f6);
+      color-scheme: dark;
+    }
+    .entry-page .entry-header {
+      min-height: 76px;
+      padding: 18px 6%;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--hairline, rgba(255, 255, 255, 0.08));
+      box-shadow: none;
+    }
+    .entry-page .entry-main {
+      min-height: calc(100svh - 76px);
+      padding: 40px 6% 48px;
+      align-content: center;
+    }
+    .entry-page .entry-copy h1 {
+      color: var(--text-1, #f3f4f6);
+      line-height: 1.08;
+      margin: 16px 0 20px;
+    }
+    .entry-page .entry-copy > p {
+      color: var(--text-2, #c3c9d2);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+    .entry-page .entry-permissions {
+      margin-top: 28px;
+      gap: 12px 24px;
+    }
+    .entry-page .entry-permissions b {
+      color: var(--text-1, #f3f4f6);
+      font-weight: 650;
+      margin-bottom: 2px;
+    }
+    .entry-page .entry-permissions span {
+      color: var(--text-3, #a0a9b7);
+    }
+    .entry-page .entry-demo {
+      padding: 20px;
+      background: var(--night-1, #1c2026);
+      border: 1px solid var(--hairline, rgba(255, 255, 255, 0.09));
+      border-radius: 22px;
+      box-shadow: 0 0 110px -30px rgba(128, 134, 144, 0.28), 0 36px 72px -36px rgba(0, 0, 0, 0.78);
+    }
+    .entry-page .demo-heading > span,
+    .entry-page .entry-demo > p {
+      color: var(--text-2, #c3c9d2);
+      font-size: 13px;
+    }
+    .entry-page .demo-heading [role=group] {
+      background: var(--night-2, #252a32);
+      border: 1px solid var(--hairline, rgba(255, 255, 255, 0.08));
+      border-radius: 999px;
+      padding: 3px;
+    }
+    .entry-page .demo-heading button {
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-2, #c3c9d2);
+      padding: 6px 12px;
+      font-weight: 600;
+    }
+    .entry-page .demo-heading button.active {
+      background: var(--night-4, #3d4652);
+      color: var(--text-1, #f3f4f6);
+    }
+    .entry-page .entry-migration {
+      padding: 52px 6%;
+      background: var(--night-1, #1c2026);
+      border-top: 1px solid var(--hairline, rgba(255, 255, 255, 0.09));
+      border-bottom: 1px solid var(--hairline, rgba(255, 255, 255, 0.09));
+      box-shadow: none;
+    }
+    .entry-page .entry-migration h2 {
+      color: var(--text-1, #f3f4f6);
+      letter-spacing: -.02em;
+    }
+    .entry-page .entry-migration p {
+      color: var(--text-2, #c3c9d2);
+      font-size: 13.5px;
+      line-height: 1.75;
+    }
+    .entry-page .entry-migration .button.subtle {
+      background: var(--night-2, #252a32);
+      color: var(--text-1, #f3f4f6);
+      border: 1px solid var(--hairline-strong, rgba(255, 255, 255, 0.2));
+    }
+    .entry-page .entry-migration .button.subtle:hover {
+      background: var(--night-3, #303741);
+    }
+    .entry-page .entry-migration a {
+      color: var(--text-1, #f3f4f6);
+      font-size: 13.5px;
+      text-underline-offset: 4px;
+    }
+    .entry-page .entry-footer {
+      border-top: 0;
+      color: var(--text-3, #a0a9b7);
+    }
+    @media (max-width: 720px) {
+      .entry-page .entry-main { min-height: auto; padding: 28px 20px 36px; }
+      .entry-page .entry-demo { padding: 14px; border-radius: 16px; }
+      .entry-page .entry-migration > div + div { border-top-color: var(--hairline, rgba(255, 255, 255, 0.09)); }
+    }
+  </style>
+</head>
 <body class="entry-page">
 <header class="entry-header"><a class="entry-brand" href="./"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" width="52" height="28" alt=""><span>Playbook<small>Studio</small></span></a><div class="entry-header-actions"><label class="entry-language"><span class="sr-only" data-landing="language">语言</span><select id="entry-language" aria-label="语言"><option value="zh-CN">中文</option><option value="en">English</option></select></label><div id="entry-effects"></div><a class="button primary" href="https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/" data-landing="openWorkspace">进入工作台 →</a></div></header>
 <main class="entry-main"><section class="entry-copy"><span class="section-kicker brand-kicker" data-landing="kicker">从开球前，到下一次达阵。</span><h1><span data-landing="heading1">战术，</span><br><span data-landing="heading2">交给整支球队。</span></h1><p><span data-landing="intro1">排阵型，画路线，一起演练。</span><br><span data-landing="intro2">用管理员分配的账号登录，和团队使用同一份战术本。</span></p><a class="button primary entry-cta" href="https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/"><span data-landing="openCloud">进入云端共享版</span> <span aria-hidden="true">→</span></a><div class="entry-permissions"><span><b data-landing="owner">管理员</b> <span data-landing="ownerDesc">管理与恢复</span></span><span><b data-landing="editor">编辑者</b> <span data-landing="editorDesc">修改战术</span></span><span><b data-landing="viewer">只读成员</b> <span data-landing="viewerDesc">查看与演练</span></span></div></section><section class="entry-demo" aria-label="教学示例预览" data-landing-aria="demoAria"><div class="demo-heading"><span data-landing="demoHeading">先看一眼，战术如何展开。</span><div role="group" aria-label="选择教学示例" data-landing-aria="demoSelect"><button data-demo="offense" class="active" aria-pressed="true" data-landing="offense">进攻 · Mesh</button><button data-demo="defense" aria-pressed="false" data-landing="defense">防守 · Cover 3</button></div></div><div id="landing-preview"></div><p data-landing="demoCaption">教学示例 · 这里不会显示你的私有战术</p></section></main>

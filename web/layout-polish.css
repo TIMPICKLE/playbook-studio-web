@@ -75,7 +75,7 @@
 .effects-panel button { border-radius:var(--ui-radius-control); }
 .add-object-menu > div { padding:8px; }
 .add-object-menu button,.account-menu-panel button { border-radius:var(--ui-radius-control); }
-.modal,.madden-panel { border-radius:var(--ui-radius-panel); overflow:hidden; }
+.modal { border-radius:var(--ui-radius-panel); overflow:hidden; }
 .modal > header { border-radius:inherit; border-bottom-left-radius:0; border-bottom-right-radius:0; }
 .modal > footer { border-radius:inherit; border-top-left-radius:0; border-top-right-radius:0; }
 .modal > header,.modal-body,.modal > footer { padding-left:20px; padding-right:20px; }
@@ -117,7 +117,7 @@
 }
 
 /* Keep moving reflections subordinate to the drawing surface. */
-html[data-visual-mode=digital] { --glass-shadow:inset 0 1px #f3f4f526,0 10px 30px #07070830; }
-html[data-visual-mode=digital] #liquid-metal-world { opacity:.22; }
-html[data-visual-mode=digital] .liquid-surface-canvas { opacity:.4; }
-html[data-visual-mode=digital] :is(.draw-tools,.effects-panel,.field-context) { border-color:#d9dbdd40;box-shadow:var(--glass-shadow); }
+html[data-visual-mode=digital] { --glass-shadow:var(--dock-shadow,0 1px 0 #ffffff0a inset,0 3px 12px #00000024); }
+html[data-visual-mode=digital] #liquid-metal-world { opacity:.18; }
+html[data-visual-mode=digital] .liquid-surface-canvas { opacity:.3; }
+html[data-visual-mode=digital] :is(.draw-tools,.effects-panel,.field-context) { border-color:var(--ui-border-strong,#ffffff24);box-shadow:var(--dock-shadow,none); }
