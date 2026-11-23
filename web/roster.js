@@ -143,7 +143,7 @@ export function createRosterView({ root, getData, getWorkspaceId, canEdit, commi
       </section>
       <section id="roster-directory-pane" class="roster-panel" role="tabpanel" aria-labelledby="roster-directory-tab"><div class="roster-tools">
         <h2 id="roster-directory">${t('roster.directory')} <span class="roster-count" aria-live="polite"></span></h2>
-        <input type="search" aria-label="${t('roster.search')}" placeholder="${t('roster.search')}">
+        <input type="search" autocomplete="off" spellcheck="false" aria-label="${t('roster.search')}" placeholder="${t('roster.search')}">
         <button type="button" data-roster="add" class="roster-primary"><span aria-hidden="true">＋</span> ${t('roster.add')}</button></div>
         <div class="roster-results"></div></section><p class="roster-notice" role="status"></p>
       <dialog class="roster-dialog" aria-labelledby="roster-form-title"></dialog>

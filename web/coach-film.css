@@ -2,19 +2,19 @@
 
 /* Full-screen coaching view, independent of the editor's panels and field zoom. */
 dialog.coach-film {
-  --film-bg: #14181d;
-  --film-panel: #1b2026;
-  --film-inset: #232a31;
-  --film-hover: #303943;
-  --film-ink: #f2f4f5;
-  --film-muted: #aeb9c3;
-  --film-edge: #39424b;
-  --film-line: #2d363f;
-  --film-active: #e3e9ec;
-  --film-on-active: #182026;
-  --film-signal: #e9b673;
-  --film-focus: #a8cfec;
-  --film-gap: clamp(.85rem, 1.65vw, 2rem);
+  --film-bg: #12151a;
+  --film-panel: #181c23;
+  --film-inset: #20252e;
+  --film-hover: #2c3340;
+  --film-ink: #f3f5f8;
+  --film-muted: #b0b9c6;
+  --film-edge: rgba(255, 255, 255, 0.14);
+  --film-line: rgba(255, 255, 255, 0.08);
+  --film-active: #e8ecf2;
+  --film-on-active: #101318;
+  --film-signal: #ecc07b;
+  --film-focus: #a9c1ff;
+  --film-gap: clamp(.85rem, 1.5vw, 1.75rem);
   color-scheme: dark;
   position: fixed;
   inset: 0;
@@ -106,6 +106,7 @@ html:has(.coach-film[open]) { overflow: hidden; }
   color: var(--film-ink);
   font: 600 .875rem/1.3 var(--font-ui);
   white-space: nowrap;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 .coach-film :is(.film-control, .film-player, .film-event, .film-replace button):hover:not(:disabled) {
   background: var(--film-hover);
