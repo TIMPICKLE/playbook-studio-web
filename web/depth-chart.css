@@ -1,30 +1,39 @@
 .depth-panel {
-  border: 1px solid var(--hairline-strong);
-  border-radius: 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-island, 14px);
   background: var(--night-1);
+  box-shadow: var(--island-shadow);
   overflow: hidden;
 }
 .depth-heading, .depth-heading-title { display: flex; align-items: center; gap: 10px; }
-.depth-heading { justify-content: space-between; padding: 16px 20px; }
-.depth-heading h3 { margin: 0; font-size: 18px; }
+.depth-heading {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+.depth-heading h3 { margin: 0; font-size: 16.5px; font-weight: 700; }
 .depth-heading p {
   margin: 0;
-  color: var(--text-2);
+  color: var(--text-3);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 .depth-panel table { width: 100%; table-layout: fixed; border-collapse: collapse; }
-.depth-panel th, .depth-panel td { padding: 10px 14px; text-align: start; overflow-wrap: anywhere; }
+.depth-panel th, .depth-panel td { padding: 9px 14px; text-align: start; overflow-wrap: anywhere; }
 .depth-panel thead th {
   border-block: 1px solid var(--hairline);
-  background: var(--night-2);
-  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-3);
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 600;
 }
-.depth-panel th:first-child { width: 17%; padding-inline-start: 20px; }
+.depth-panel th:first-child { width: 17%; padding-inline-start: 18px; }
 .depth-panel th:nth-child(2) { width: 25%; }
 .depth-panel thead th:nth-child(4) { width: 82px; }
+.depth-panel tbody tr { transition: background-color 120ms ease; }
+.depth-panel tbody tr:hover { background: rgba(255, 255, 255, 0.035); }
 .depth-panel tbody tr + tr { border-top: 1px solid var(--hairline); }
 .depth-position { font: 700 17px/1.35 var(--font-display); letter-spacing: .015em; }
 .depth-mobile-label { display: none; }
@@ -38,7 +47,7 @@
 .depth-jersey { font-size: 12px; color: var(--text-2); font-weight: 600; }
 .depth-starter .depth-athlete {
   border: 1px solid var(--hairline-strong);
-  background: var(--night-3);
+  background: var(--night-2);
   border-radius: 7px;
   padding: 4px 8px;
 }
@@ -54,14 +63,15 @@
   color: var(--text-1);
   background: var(--night-2);
   font: 600 12px/1.3 var(--font-ui);
+  cursor: pointer;
 }
 .depth-inline-actions button:hover { background: var(--night-3); }
 .df-ranks dd .depth-inline-actions { display: flex; margin-top: 6px; }
 .depth-status[data-state=error] { color: var(--danger-1); }
-.depth-status:not(:empty) { padding: 8px 10px; border-inline-start: 2px solid var(--hairline-strong); }
+.depth-status:not(:empty) { padding: 8px 12px; border-inline-start: 2px solid var(--hairline-strong); }
 .depth-rank {
   min-width: 1.45em;
-  padding: 1px 3px;
+  padding: 1px 4px;
   border: 1px solid var(--hairline-strong);
   border-radius: 4px;
   color: var(--text-2);
@@ -70,11 +80,18 @@
 }
 .depth-open, .depth-muted, .depth-hint, .depth-empty { color: var(--text-2); font-size: 13px; }
 .depth-open { border-bottom: 1px dashed var(--hairline-strong); }
-.depth-empty, .depth-hint { margin: 0; padding: 10px 20px 18px; }
+.depth-empty, .depth-hint { margin: 0; padding: 12px 18px 16px; }
 .depth-edit-cell button { min-width: 42px; }
 .depth-status, .depth-dialog-status { margin: 8px 3px; color: var(--text-2); font-size: 13px; }
 .depth-status:empty, .depth-dialog-status:empty { margin: 0; }
-.depth-transfer-hint { margin: 4px 0 12px; color: var(--text-2); font-size: 12px; line-height: 1.6; }
+/* Aligned flush with .depth-heading and .df-formation horizontal padding */
+.depth-transfer-hint {
+  margin: 0;
+  padding: 10px 18px 8px;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.55;
+}
 [data-depth-source] { cursor: grab; }
 [data-depth-source]:active { cursor: grabbing; }
 .depth-assign-player { align-self: end; max-width: 100%; overflow-wrap: anywhere; }
@@ -97,11 +114,67 @@
   color: var(--text-1);
   background: var(--night-2);
   font-size: 13px;
+  cursor: pointer;
 }
 .depth-rank-tools button:hover:not(:disabled) { background: var(--night-3); }
 .depth-rank-tools button:disabled { opacity: .45; }
+.depth-view-picker {
+  display: inline-flex;
+  gap: 2px;
+  margin-inline-start: auto;
+  padding: 3px;
+  border: 1px solid var(--hairline);
+  border-radius: 9px;
+  background: var(--night-0);
+}
+.depth-view-picker button {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.depth-view-picker button:hover { color: var(--text-1); }
+.depth-view-picker button[aria-pressed=true] {
+  border-color: var(--hairline-strong);
+  color: var(--text-1);
+  background: var(--night-3);
+}
+.depth-lineup {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(144px, 100%), 1fr));
+  margin: 0;
+  padding: 0 18px 16px;
+  gap: 8px;
+  list-style: none;
+}
+.depth-lineup li { min-width: 0; }
+.depth-lineup li > :is(div, button) {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-control, 8px);
+  background: var(--night-2);
+  color: var(--text-1);
+  text-align: start;
+  overflow-wrap: anywhere;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.depth-lineup li > button:hover { background: var(--night-3); border-color: var(--hairline-strong); }
+.depth-lineup li strong { color: var(--text-2); font: 650 12px/1.3 var(--font-display); }
 @media (max-width: 640px) {
-  .depth-heading { padding: 14px; }
+  .depth-heading { padding: 12px 14px; }
+  .depth-transfer-hint { padding: 10px 14px 8px; }
   .depth-heading-title { display: block; }
   .depth-heading p { margin-top: 4px; }
   .depth-panel table, .depth-panel tbody { display: block; }
@@ -121,61 +194,9 @@
   .depth-mobile-label { display: block; margin-bottom: 5px; color: var(--text-2); font-size: 12px; }
   .depth-backups ol { display: grid; gap: 6px; }
   .depth-rank-tools button { min-height: 42px; min-width: 42px; }
-}
-.depth-heading { flex-wrap: wrap; gap: 10px; }
-.depth-view-picker {
-  display: inline-flex;
-  margin-inline-start: auto;
-  padding: 3px;
-  border: 1px solid var(--hairline);
-  border-radius: 11px;
-  background: var(--night-0);
-}
-.depth-view-picker button {
-  min-height: 40px;
-  padding: 5px 14px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-2);
-  font-size: 13px;
-  font-weight: 650;
-}
-.depth-view-picker button[aria-pressed=true] {
-  border-color: var(--hairline-strong);
-  color: var(--text-1);
-  background: var(--night-3);
-}
-.depth-lineup {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(144px, 100%), 1fr));
-  margin: 0;
-  padding: 0 14px 14px;
-  gap: 6px;
-  list-style: none;
-}
-.depth-lineup li { min-width: 0; }
-.depth-lineup li > :is(div, button) {
-  display: grid;
-  align-content: start;
-  justify-items: start;
-  gap: 3px;
-  width: 100%;
-  height: 100%;
-  padding: 9px 10px;
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  background: var(--night-2);
-  color: var(--text-1);
-  text-align: start;
-  overflow-wrap: anywhere;
-}
-.depth-lineup li > button:hover { background: var(--night-3); border-color: var(--hairline-strong); }
-.depth-lineup li strong { color: var(--text-2); font: 650 12px/1.3 var(--font-display); }
-@media (max-width: 640px) {
   .depth-view-picker { order: 2; flex-basis: 100%; }
   .depth-view-picker button { flex: 1 1 0; padding-inline: 5px; }
-  .depth-lineup { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 10px 10px; }
+  .depth-lineup { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 14px 14px; }
 }
 @media (max-width: 1180px), (any-pointer: coarse) {
   .depth-inline-actions button { min-width: 44px; min-height: 44px; }
