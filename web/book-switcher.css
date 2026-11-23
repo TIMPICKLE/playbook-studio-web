@@ -1,12 +1,12 @@
-.cloud-bar .workspace-current-card { display:flex; flex-direction:row; align-items:center; gap:10px; width:260px; min-width:180px; max-width:300px; min-height:54px; padding:8px 11px; border:1px solid #9a9fa740; border-radius:12px; background:#9a9fa709; text-align:left; }
-.workspace-current-card:hover { background:#9a9fa712; border-color:#9a9fa780; }
-.workspace-current-icon { display:grid; place-items:center; width:28px; height:32px; flex:none; color:var(--accent); }
-.workspace-current-icon svg { width:25px; height:25px; }
-.workspace-current-copy { display:grid; gap:1px; flex:1; min-width:0; }
-.workspace-current-copy small { font-size:12px; color:var(--muted); }
-.workspace-current-copy strong { display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:12px; font-weight:600; }
-.workspace-current-count { display:flex; align-items:center; gap:5px; font:11px var(--mono); color:var(--accent); }
-.workspace-current-count svg { width:13px; height:13px; }
+.cloud-bar .workspace-current-card { display:flex; flex-direction:row; align-items:center; gap:8px; width:228px; min-width:170px; max-width:260px; min-height:40px; height:40px; padding:4px 10px; border:1px solid var(--hairline,#ffffff14); border-radius:var(--r-control,8px); background:var(--night-2,#252a32); text-align:left; }
+.workspace-current-card:hover { background:var(--night-3,#303741); border-color:var(--hairline-strong,#ffffff30); }
+.workspace-current-icon { display:grid; place-items:center; width:22px; height:22px; flex:none; color:var(--text-2,#c3c9d2); }
+.workspace-current-icon svg { width:18px; height:18px; }
+.workspace-current-copy { display:grid; gap:0; flex:1; min-width:0; line-height:1.2; }
+.workspace-current-copy small { font-size:10px; line-height:1.2; color:var(--text-3,#a0a9b7); }
+.workspace-current-copy strong { display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:12px; line-height:1.25; font-weight:600; color:var(--text-1,#f3f4f6); }
+.workspace-current-count { display:flex; align-items:center; gap:3px; font:11px var(--mono); color:var(--text-3,#a0a9b7); flex:none; }
+.workspace-current-count svg { width:12px; height:12px; }
 .book-picker-backdrop { grid-template-columns:minmax(0,1fr); }
 .book-switcher-modal { min-width:0; width:min(790px,calc(100vw - 32px)); }
 .book-switcher-modal .modal-body,#book-card-picker,.book-switcher,.book-viewport { min-width:0; max-width:100%; }

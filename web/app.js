@@ -1163,7 +1163,7 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
       <button class="madden-launch" data-action="madden-library">${icon('ball')}<span><strong>${t("editor.madden_nfl_play_library")}</strong><small>${t("editor.eagles_ravens_drag_to_add")}</small></span><b>↗</b></button>
       <div class="madden-drop-target" data-madden-drop="offense">${t("editor.drop_here_to_add_to_offense")}<small>${canEdit() ? t("editor.add_to_current_workspace_autosaved") : t("editor.read_only_cannot_add")}</small></div>
       <div class="side-divider"></div>
-      <label class="search-box">${icon('search')}<input type="search" id="search" placeholder="${t("editor.search_plays")}" aria-label="${t("editor.search_plays_2")}" value="${e(query)}"></label>
+      <label class="search-box">${icon('search')}<input type="search" id="search" name="play-filter" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="${t("editor.search_plays")}" aria-label="${t("editor.search_plays_2")}" value="${e(query)}"></label>
       <div class="filters"><select aria-label="${t("editor.play_category")}" id="category-filter"><option value="">${t("editor.all_categories")}</option><option value="favorite" ${filter === 'favorite' ? 'selected' : ''}>${t("editor.favorites")}</option>${categories.map(c => `<option value="${e(c)}" ${c === filter ? 'selected' : ''}>${e(c)}</option>`).join('')}</select><select aria-label="${t("editor.formation_filter")}" id="formation-filter"><option value="">${t("editor.all_formations")}</option>${formations.map(f => `<option value="${e(f)}" ${formationFilter === f ? 'selected' : ''}>${e(f)}</option>`).join('')}</select></div>
       <div class="play-list-label"><span>${filter === 'favorite' ? t("editor.favorite_plays") : t("editor.my_plays")} <b>${plays.length}</b></span>${btn('new', 'plus', t("editor.new_play"), 'small-icon')}</div>
       <div class="play-list">${playCards(plays, p)}</div>
@@ -1196,7 +1196,11 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
   if (restoringHistory) showHistoryTransition($('#field .pitch-svg'), historyFrame);
   else if (previousPlay && previousPlay!==p.id) revealPlay($('#field svg'));
   else if(previousPlay) enterPlayers($('#field'),new Set(p.players.filter(v=>!existingIds.has(v.id)).map(v=>v.id)));
-  if(!previousPlay) enterWorkbench(document.querySelector('.workspace'));
+  if(!previousPlay) {
+    enterWorkbench(document.querySelector('.workspace'));
+    clearUnsolicitedSearchAutofill();
+    window.requestAnimationFrame?.(clearUnsolicitedSearchAutofill);
+  }
   renderedPlayId=p.id;
   renderedCardState=cardState();
   if (editingField) syncSaveStatus();
@@ -2101,12 +2105,34 @@ function refreshPlayList() {
   thumbnails.mount($('.play-list'), plays);
 }
 let composingSearch = false;
+function isAutofilledInput(input) {
+  try { return !!input?.matches?.(':-webkit-autofill'); } catch { return false; }
+}
+function isUnsolicitedSearchAutofill(input, event = null) {
+  if (!input || input.id !== 'search') return false;
+  if (isAutofilledInput(input) && document.activeElement !== input) return true;
+  return !!(event?.isTrusted && !event.inputType && document.activeElement !== input && !query);
+}
+function clearUnsolicitedSearchAutofill() {
+  const input = $('#search');
+  if (!input || document.activeElement === input || query) return;
+  if (input.value || isAutofilledInput(input)) input.value = '';
+}
 function searchInput(input) { query = input.value; refreshPlayList(); }
 document.addEventListener('compositionstart', event => { if (event.target.id === 'search') composingSearch = true; });
 document.addEventListener('compositionend', event => { if (event.target.id === 'search') { composingSearch = false; searchInput(event.target); } });
+document.addEventListener('animationstart', event => {
+  if (event.animationName === 'playbook-autofill-start' && event.target?.id === 'search' && document.activeElement !== event.target && !query) {
+    event.target.value = '';
+  }
+});
+window.addEventListener('pageshow', clearUnsolicitedSearchAutofill);
 document.addEventListener('input', event => {
   const input = event.target;
-  if (input.id === 'search' && !composingSearch && !event.isComposing) searchInput(input);
+  if (input.id === 'search' && !composingSearch && !event.isComposing) {
+    if (isUnsolicitedSearchAutofill(input, event)) { input.value = query; return; }
+    searchInput(input);
+  }
   if(input.id==='timeline')seekTimeline(input);
 });
 document.addEventListener('pointerup', event => {
@@ -2473,5 +2499,37 @@ const onboarding = createOnboarding({document,getContext:onboardingContext,getSt
 replayTour.addEventListener('click', async () => {
   if (!await onboarding.start({manual:true})) toast(tourCopy.busy,{type:'info'});
 });
+let onboardingActive = false, preOnboardingScroll = { pageTop: 0, sidebarTop: 0 };
+function capturePreOnboardingScroll() {
+  if (document.body.classList.contains('driver-active')) return;
+  const page = document.scrollingElement || document.documentElement;
+  preOnboardingScroll = { pageTop: page?.scrollTop || 0, sidebarTop: $('.sidebar')?.scrollTop || 0 };
+}
+function restorePreOnboardingScroll(saved) {
+  const page = document.scrollingElement || document.documentElement;
+  const sidebar = $('.sidebar');
+  if (page) {
+    if (typeof page.scrollTo === 'function') page.scrollTo({ left: 0, top: saved.pageTop, behavior: 'instant' });
+    else page.scrollTop = saved.pageTop;
+  }
+  if (sidebar) {
+    if (typeof sidebar.scrollTo === 'function') sidebar.scrollTo({ left: 0, top: saved.sidebarTop, behavior: 'instant' });
+    else sidebar.scrollTop = saved.sidebarTop;
+  }
+}
+const onboardingScrollObserver = typeof MutationObserver === 'function' ? new MutationObserver(() => {
+  const active = document.body.classList.contains('driver-active');
+  if (active === onboardingActive) return;
+  onboardingActive = active;
+  if (!active) {
+    const saved = { ...preOnboardingScroll };
+    restorePreOnboardingScroll(saved);
+    window.requestAnimationFrame?.(() => {
+      if (!document.body.classList.contains('driver-active')) restorePreOnboardingScroll(saved);
+    });
+  }
+}) : null;
+document.addEventListener('scroll', capturePreOnboardingScroll, { capture: true, passive: true });
+onboardingScrollObserver?.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 onboarding.sync();
-window.addEventListener('pagehide',()=>onboarding.stop());
+window.addEventListener('pagehide',()=>{ document.removeEventListener('scroll', capturePreOnboardingScroll, true); onboardingScrollObserver?.disconnect(); onboarding.stop(); });

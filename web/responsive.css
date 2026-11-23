@@ -80,13 +80,6 @@
   .modal-body { min-height:0; }
   .modal input:not([type=checkbox]),.modal select,.modal textarea { font-size:16px!important; }
   .modal button,.modal .button { min-height:44px; }
-  .madden-panel { inset:max(8px,env(safe-area-inset-top,0px)) max(8px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px)); width:auto; max-width:940px; margin-left:auto; margin-right:auto; z-index:75; }
-  .madden-header,.madden-team-tabs,.madden-filterbar,.madden-result-heading,.madden-footer,.madden-editable-filter { flex-shrink:0; }
-  .madden-close { width:44px; height:44px; }
-  .madden-filterbar input,.madden-filterbar select { min-height:44px; font-size:16px; }
-  .madden-card-foot button,.madden-detail button,.madden-pagination button { min-height:44px; }
-  .madden-footer { flex-wrap:wrap; gap:5px; }
-  .madden-card:hover { transform:none; }
   .madden-open { overflow:hidden; }
 }
 @media screen and (min-width:601px) and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) {
@@ -144,17 +137,6 @@
   .transport { flex-wrap:wrap; gap:8px; }
   .transport input[type=range] { min-width:80px; }
   .transport #time-label { min-width:auto; font-size:12px; }
-  .madden-header { padding:12px; }
-  .madden-header h2 { font-size:20px; }
-  .madden-team-tabs { padding:0 12px 10px; }
-  .madden-filterbar { padding:0 12px; }
-  .madden-results { padding:0 12px 12px; }
-  .madden-result-heading { padding:10px 12px; }
-  .madden-result-heading > span { display:none; }
-  .madden-cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-  .madden-card-body { padding:10px; }
-  .madden-card-foot button { font-size:12px; }
-  .madden-footer { padding:8px 12px; font-size:11px; }
   .modal-backdrop { align-items:end; padding:env(safe-area-inset-top,0px) 8px max(8px,env(safe-area-inset-bottom,0px)); }
   .modal > footer { padding-bottom:max(12px,env(safe-area-inset-bottom,0px)); }
   .cloud-bar { padding:10px 12px; }
@@ -167,21 +149,12 @@
   .play-actions { grid-template-columns:repeat(2,44px); }
   .board-size-actions { width:100%; margin:0; }
   .board-size-actions button { flex:1; }
-  .madden-cards { grid-template-columns:minmax(0,1fr); }
 }
 @media screen and (min-width:601px) and ((max-width:1180px) or ((max-width:1400px) and (any-pointer:coarse))) and (max-height:600px) {
   .play-header p,.play-header .eyebrow,.touch-board-help { display:none; }
   .play-header { padding-top:8px; padding-bottom:8px; }
   .play-header h1 { font-size:21px; margin:0; }
   .board-size-controls { margin:6px 0; }
-  .madden-header small,.madden-team small,.madden-result-heading > span { display:none; }
-  .madden-header { padding:8px 14px; }
-  .madden-header h2 { margin:0; font-size:20px; }
-  .madden-team-tabs { padding:0 14px 8px; }
-  .madden-team { padding:6px 10px; }
-  .madden-team-code { width:30px; height:30px; }
-  .madden-filterbar { padding:0 14px; grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); }
-  .madden-result-heading { padding:6px 14px; }
 }
 @media print {
   .compact-nav,.compact-only,.touch-board-help { display:none!important; }
