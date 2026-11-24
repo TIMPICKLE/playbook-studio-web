@@ -75,7 +75,6 @@ export default {
   "editor.play_properties": "Play properties",
   "editor.properties_and_settings": "Properties and settings",
   "editor.close_properties": "Close properties",
-  "editor.draw_the_routes_understand_the_game": "Draw the routes. Understand the game.",
   "editor.shortcuts_and_help": "Shortcuts and help",
   "editor.workspace_panels": "Workspace panels",
   "editor.field": "Field",
