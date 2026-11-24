@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="docs/assets/brand/playbook-studio-logo-black.svg" alt="Playbook Studio" width="420">
+<img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="420">
 
 # Playbook Studio
 
