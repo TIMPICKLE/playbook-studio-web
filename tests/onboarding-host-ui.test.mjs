@@ -47,11 +47,14 @@ function fixture(t,{url='http://localhost:3000/',width=1440,height=1000,fetchImp
   return {win,q,original,popover,skip,finish};
 }
 
-test('first-time guests get contextual tours, can skip globally and replay without changing their playbook', {timeout:30000},async t=>{
+test('first-time guests avoid home ambush, get per-page contextual tours, and replay without changing their playbook', {timeout:30000},async t=>{
   const f=fixture(t);
   await import(`../web/app.js?onboarding-host=${Date.now()}`);
-  await until(f.popover,'the workspace tour appears after the first stable render');
-  assert.ok(f.q('[data-onboarding="replay"]'));
+  await until(()=>f.q('.studio-home') && f.q('[data-onboarding="replay"]'),'the home workspace and persistent help entry render');
+  await pause(950);
+  assert.equal(Boolean(f.popover()),false,'home does not ambush first-time guests with an automatic tour');
+  f.q('[data-onboarding="replay"]').click();
+  await until(f.popover,'manual replay works on home');
   assert.ok(f.q('.driver-active-element').closest('.studio-home'));
   const first=f.popover().textContent;
   f.q('.driver-popover-next-btn').click();await until(()=>f.popover()?.textContent!==first);
@@ -71,14 +74,22 @@ test('first-time guests get contextual tours, can skip globally and replay witho
   assert.equal(f.q('[data-action="undo"]').disabled,true,'the tour does not add edit-history checkpoints');
 
   f.q('[data-cloud-action="home"]').click();
-  await pause(950);assert.equal(f.popover(),null,'a completed workspace guide is not repeated');
+  await pause(950);assert.equal(Boolean(f.popover()),false,'a completed workspace guide is not repeated');
   f.q('[data-cloud-action="enter-analysis"]').click();
   await until(f.popover,'analysis has its own first-use explanation');
   await f.skip();
-  assert.equal(JSON.parse(f.win.localStorage.getItem(ONBOARDING_STORAGE_KEY)).dismissed,true);
+  const afterSkip=JSON.parse(f.win.localStorage.getItem(ONBOARDING_STORAGE_KEY));
+  assert.equal(afterSkip.dismissed,false,'skipping analysis does not set global dismissal');
+  assert.ok(afterSkip.dismissedScopes.includes('analysis'),'skipping analysis records its page scope');
   f.q('[data-cloud-action="home"]').click();
   f.q('[data-cloud-action="enter-roster"]').click();
-  await pause(950);assert.equal(f.popover(),null,'Skip does not ambush the user again in the next module');
+  await until(f.popover,'skipping analysis does not silence the first-visit roster tour');
+  assert.ok(!f.q('.driver-active-element').closest('[hidden],[inert]'));
+  await f.finish();
+  assert.ok(JSON.parse(f.win.localStorage.getItem(ONBOARDING_STORAGE_KEY)).completed.includes('roster'));
+  f.q('[data-cloud-action="home"]').click();
+  f.q('[data-cloud-action="enter-analysis"]').click();
+  await pause(950);assert.equal(Boolean(f.popover()),false,'returning to a skipped page stays quiet');
   f.q('[data-onboarding="replay"]').click();await until(f.popover,'the persistent help entry can replay a skipped guide');
   assert.ok(!f.q('.driver-active-element').closest('[hidden],[inert]'));
   await f.finish();
