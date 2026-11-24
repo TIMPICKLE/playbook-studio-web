@@ -57,7 +57,7 @@ export function studioHome({ user, bookCount = 0, cloudUrl, recentPlay, firstTas
     : `<a href="./landing.html">${t('cloud.demoGuide')}</a>`;
   return `<div class="studio-home">
     <header class="studio-home-header">
-      <div class="studio-home-brand"><img class="brand-icon" src="./assets/brand/playbook-studio-icon.svg" alt="" width="48" height="26"><span>Playbook<small>Studio</small></span></div>
+      <div class="studio-home-brand"><img class="brand-logo" src="./assets/brand/playbook-studio-logo-dark-transparent.svg" width="200" height="42" alt="Playbook Studio"></div>
       <div class="studio-home-account">${account}</div>
     </header>
     <main class="studio-home-main">
