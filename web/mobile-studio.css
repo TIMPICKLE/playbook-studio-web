@@ -7,6 +7,12 @@
    native bottom sheet & swipe-dismiss drawers, scroll-snap tool rail.
    ========================================================================== */
 
+/* Suppress spurious pointer focus rings while preserving keyboard :focus-visible */
+html[data-visual-mode] :is(.panel-close, #main-content, [tabindex="-1"], .field-context button):focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* --------------------------------------------------------------------------
    1. Shared Compact & Touch Workspace (<= 1180px or coarse <= 1400px)
    -------------------------------------------------------------------------- */
@@ -94,6 +100,15 @@
     transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.26s;
     touch-action: pan-y;
   }
+  /* Reserve clear channel for absolute .panel-close when cloud mode hides .brand */
+  html[data-visual-mode] .cloud-enabled .workspace .sidebar .team-switch {
+    width: auto;
+    margin-right: 48px;
+  }
+  /* Phone overflow menu stays hidden on tablet/landscape where topbar & actions show */
+  html[data-visual-mode] .play-more-menu {
+    display: none;
+  }
 
   /* Properties inspector drawer (tablet right slide-in) */
   html[data-visual-mode] .inspector-panel {
@@ -177,13 +192,17 @@
    -------------------------------------------------------------------------- */
 @media screen and (max-width: 600px) {
   html[data-visual-mode] .workspace {
+    min-height: 0 !important;
     padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+  .cloud-enabled .workspace {
+    min-height: 0 !important;
   }
   html[data-visual-mode] .workspace .editor-layout {
     padding: 0 max(10px, env(safe-area-inset-right, 0px)) 0 max(10px, env(safe-area-inset-left, 0px));
   }
 
-  /* 2.1 Single-row sticky frosted Cloud Bar (reclaims ~56px vertical space) */
+  /* 2.1 Single-row sticky frosted Cloud Bar */
   html[data-visual-mode] .cloud-bar {
     position: sticky;
     top: 0;
@@ -191,8 +210,9 @@
     flex-wrap: nowrap;
     align-items: center;
     gap: 5px;
-    min-height: 46px;
-    padding: 5px max(10px, env(safe-area-inset-right, 0px)) 5px max(10px, env(safe-area-inset-left, 0px));
+    min-height: 42px;
+    padding: 4px max(10px, env(safe-area-inset-right, 0px)) 4px max(10px, env(safe-area-inset-left, 0px));
+    padding-block: 4px;
     background: rgba(20, 23, 27, 0.92);
     border-bottom: 1px solid var(--hairline);
     backdrop-filter: blur(18px) saturate(135%);
@@ -230,16 +250,22 @@
   html[data-visual-mode] .cloud-bar .cloud-sync {
     order: 2;
     flex: none;
-    min-height: 32px;
-    height: 32px;
+    min-height: 30px;
+    height: 30px;
     padding: 2px 3px 2px 8px;
     gap: 4px;
     background: var(--night-1);
     border: 1px solid var(--hairline);
   }
+  html[data-visual-mode] .cloud-bar .cloud-sync:has(#cloud-status[data-state="saved"]) {
+    padding: 2px 9px;
+  }
+  html[data-visual-mode] .cloud-bar .cloud-sync:has(#cloud-status[data-state="saved"]) .save-now {
+    display: none;
+  }
   html[data-visual-mode] .cloud-bar .cloud-status {
-    min-height: 26px;
-    max-width: 72px;
+    min-height: 24px;
+    max-width: 96px;
     font-size: 11px;
     gap: 5px;
   }
@@ -247,18 +273,20 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* When cleanly synced, keep a calm glowing dot without noisy text */
-  html[data-visual-mode] .cloud-bar .cloud-status[data-state="saved"] span {
-    display: none;
+  /* When cleanly synced, show calm status copy inside a slim pill */
+  html[data-visual-mode] .cloud-bar #cloud-status[data-state="saved"] span {
+    display: inline;
+    font-size: 11px;
+    color: var(--text-3);
   }
   html[data-visual-mode] .cloud-bar .cloud-status[data-state="saved"] i {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     box-shadow: 0 0 8px rgba(143, 224, 178, 0.55);
   }
   html[data-visual-mode] .cloud-bar .save-now {
-    min-height: 26px;
-    height: 26px;
+    min-height: 24px;
+    height: 24px;
     padding: 0 8px;
     font-size: 11px;
     font-weight: 600;
@@ -269,9 +297,11 @@
     margin-left: 0;
     gap: 4px;
   }
-  /* Home is already the leftmost button in .workspace-nav */
+  /* Home lives in .workspace-nav; members & history live in .account-menu-panel */
   html[data-visual-mode] .cloud-bar-actions [data-cloud-action="home"],
-  html[data-visual-mode] .cloud-bar-actions .cloud-role {
+  html[data-visual-mode] .cloud-bar-actions .cloud-role,
+  html[data-visual-mode] .cloud-bar-actions > [data-cloud-action="members"],
+  html[data-visual-mode] .cloud-bar-actions > [data-cloud-action="history"] {
     display: none;
   }
   html[data-visual-mode] .cloud-bar-actions > button {
@@ -299,11 +329,20 @@
     font-size: 12px;
     border: 1px solid var(--hairline-strong);
   }
+  .account-menu-panel .mobile-account-only {
+    display: block;
+  }
+  html[data-visual-mode] .cloud-bar .account-menu-panel button {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
 
   /* 2.2 Crisp segmented Workspace Mode Strip */
   html[data-visual-mode] .workspace-nav {
     gap: 4px;
-    padding: 5px max(10px, env(safe-area-inset-right, 0px)) 5px max(10px, env(safe-area-inset-left, 0px));
+    padding: 4px max(10px, env(safe-area-inset-right, 0px)) 4px max(10px, env(safe-area-inset-left, 0px));
+    padding-block: 4px;
     background: var(--night-0);
     border-bottom: 1px solid var(--hairline);
     scrollbar-width: none;
@@ -312,16 +351,16 @@
     display: none;
   }
   html[data-visual-mode] .workspace-nav :is(a, button) {
-    min-height: 36px;
-    height: 36px;
+    min-height: 34px;
+    height: 34px;
     padding: 0 10px;
     border-radius: 9px;
     font-size: 12px;
   }
   html[data-visual-mode] .workspace-nav .workspace-home {
     flex: none;
-    min-width: 36px;
-    width: 36px;
+    min-width: 34px;
+    width: 34px;
     padding: 0;
     background: var(--night-1);
     border-color: var(--hairline);
@@ -330,43 +369,24 @@
     flex: 1 1 0;
     min-width: 0;
   }
+  /* Avoid duplicate Back to Workspace buttons when .workspace-nav is visible */
+  body:has(#workspace-navigation:not([hidden])) #roster-root .roster-back,
+  body:has(#workspace-navigation:not([hidden])) #ai-matchup-root [data-cloud-action="home"] {
+    display: none;
+  }
 
-  /* 2.3 Compact Top Utility Bar */
+  /* 2.3 Collapse redundant Top Utility Bar on phones (moved to bottom nav & overflow menu) */
   html[data-visual-mode] .topbar {
-    min-height: 42px;
-    padding: 4px max(10px, env(safe-area-inset-right, 0px)) 4px max(10px, env(safe-area-inset-left, 0px));
-    gap: 6px;
-    border-bottom: 1px solid var(--hairline);
-  }
-  html[data-visual-mode] .topbar .mobile-menu {
-    min-width: 38px;
-    width: 38px;
-    height: 38px;
-    border-radius: 9px;
-    background: var(--night-1);
-    border: 1px solid var(--hairline);
-  }
-  html[data-visual-mode] .topbar .top-actions {
-    gap: 5px;
-  }
-  html[data-visual-mode] .topbar .top-actions .button,
-  html[data-visual-mode] .topbar .top-actions .effects-menu > summary {
-    min-width: 38px;
-    width: 38px;
-    min-height: 38px;
-    height: 38px;
-    padding: 0;
-    border-radius: 9px;
-    justify-content: center;
+    display: none !important;
   }
 
-  /* 2.4 Fixed Play Header (clean flex row, zero grid collision with Coach Film) */
+  /* 2.4 Fixed Play Header (clean flex row + progressive-disclosure overflow menu) */
   html[data-visual-mode] .play-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 7px max(12px, env(safe-area-inset-right, 0px)) 5px max(12px, env(safe-area-inset-left, 0px));
+    padding: 6px max(12px, env(safe-area-inset-right, 0px)) 4px max(12px, env(safe-area-inset-left, 0px));
   }
   html[data-visual-mode] .play-header > div:first-child {
     flex: 1 1 auto;
@@ -403,6 +423,9 @@
     gap: 5px;
     color: var(--text-3);
   }
+  html[data-visual-mode] .cloud-enabled .play-header .editor-status[data-state="saved"] {
+    display: none;
+  }
   html[data-visual-mode] .play-header .editor-status :is(button, a) {
     min-height: 26px;
     padding: 2px 7px;
@@ -419,7 +442,9 @@
     gap: 4px;
     margin: 0;
   }
-  html[data-visual-mode] .play-actions :is([data-action=undo], [data-action=redo], .vertical-rule) {
+  html[data-visual-mode] .play-actions :is([data-action=undo], [data-action=redo], .vertical-rule),
+  html[data-visual-mode] .play-actions > [data-action="mirror"],
+  html[data-visual-mode] .play-actions > [data-action="duplicate"] {
     display: none;
   }
   html[data-visual-mode] .play-actions .button {
@@ -440,6 +465,78 @@
     background: var(--night-1);
     border: 1px solid var(--hairline);
   }
+  html[data-visual-mode] .play-more-menu {
+    display: block;
+    position: relative;
+  }
+  html[data-visual-mode] .play-more-menu > summary {
+    list-style: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    border-radius: 9px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+    color: var(--text-1);
+    cursor: pointer;
+  }
+  html[data-visual-mode] .play-more-menu > summary::-webkit-details-marker {
+    display: none;
+  }
+  html[data-visual-mode] .play-more-menu[open] > summary {
+    background: var(--night-3);
+    border-color: var(--hairline-strong);
+  }
+  html[data-visual-mode] .play-more-menu .play-more-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 36;
+    min-width: 196px;
+    padding: 6px;
+    display: grid;
+    gap: 2px;
+    border-radius: 14px;
+    background: rgba(26, 30, 36, 0.98);
+    border: 1px solid var(--hairline-strong);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.68);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  html[data-visual-mode] .play-more-menu[open] .play-more-panel {
+    animation: menu-reveal 180ms var(--ease-out);
+    transform-origin: top right;
+  }
+  html[data-visual-mode] .play-more-menu .play-more-panel button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-1);
+    text-align: left;
+    white-space: nowrap;
+  }
+  html[data-visual-mode] .play-more-menu .play-more-panel button:hover,
+  html[data-visual-mode] .play-more-menu .play-more-panel button:active {
+    background: var(--night-3);
+  }
+  html[data-visual-mode] .play-more-menu .play-more-panel button svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: var(--text-2);
+  }
 
   /* 2.5 Single-row Canvas Heading (overflow: visible so popovers never clip!) */
   html[data-visual-mode] .canvas-heading {
@@ -448,7 +545,7 @@
     flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    gap: 5px;
+    gap: 8px;
     padding: 3px 0 6px;
     margin: 0;
     overflow: visible;
@@ -458,7 +555,7 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin: 0;
   }
   html[data-visual-mode] .board-zoom-controls {
@@ -471,10 +568,10 @@
     border: 1px solid var(--hairline);
   }
   html[data-visual-mode] .board-zoom-controls button {
-    min-width: 34px;
-    width: 34px;
-    min-height: 34px;
-    height: 34px;
+    min-width: 32px;
+    width: 32px;
+    min-height: 32px;
+    height: 32px;
     padding: 0;
     border: 0;
     border-radius: 7px;
@@ -487,19 +584,45 @@
     text-align: center;
     color: var(--text-2);
   }
+  html[data-visual-mode] .workspace:not(.pitch-zoomed) .board-zoom-controls [data-board-action="fit"] {
+    display: none;
+  }
+  html[data-visual-mode] .workspace.pitch-zoomed .board-zoom-controls [data-board-action="fit"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    min-width: 44px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-1);
+    background: var(--night-2);
+  }
+  html[data-visual-mode] .workspace.pitch-zoomed .board-zoom-controls :is([data-board-action="zoom-out"], [data-board-action="zoom-in"]) {
+    min-width: 28px;
+    width: 28px;
+  }
+  html[data-visual-mode] .workspace.pitch-zoomed .board-zoom-controls output {
+    min-width: 34px;
+  }
   html[data-visual-mode] .board-advanced {
     position: static;
     margin-left: 0;
   }
   html[data-visual-mode] .board-advanced > summary {
-    min-width: 36px;
-    width: 36px;
+    width: auto;
+    min-width: 38px;
     min-height: 36px;
     height: 36px;
-    padding: 0;
+    padding: 0 8px;
     border-radius: 9px;
     background: var(--night-1);
     border: 1px solid var(--hairline);
+    font-size: 11.5px;
+    font-weight: 550;
+    white-space: nowrap;
   }
   html[data-visual-mode] .board-dimensions {
     left: 0;
@@ -517,7 +640,7 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     margin-left: auto;
     flex: 0 0 auto;
   }
@@ -572,9 +695,10 @@
     padding: 0;
     justify-content: center;
     border-radius: 9px;
-    background: var(--night-2);
-    border: 1px solid var(--hairline-strong);
-    color: var(--text-1);
+    background: rgba(228, 231, 235, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    color: var(--accent-strong);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
   html[data-visual-mode] .canvas-heading .add-object-menu > summary > span {
     display: none;
@@ -590,7 +714,7 @@
     box-shadow: 0 18px 46px rgba(0, 0, 0, 0.65);
   }
 
-  /* 2.6 Field Stage, Sleek Context Capsule & Subtle Resize Pill */
+  /* 2.6 Field Stage, Sleek Context Capsule, Subtle AI Pill & Resize Handle */
   html[data-visual-mode] .field-wrap {
     border-radius: 14px;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 36px rgba(0, 0, 0, 0.48);
@@ -603,10 +727,16 @@
     opacity: 0.78;
     border-radius: 999px;
   }
+  html[data-visual-mode] .field-wrap:has(.field-context:not(:empty)) .field-tag {
+    opacity: 0;
+    pointer-events: none;
+  }
   html[data-visual-mode] .field-context:not(:empty) {
+    top: auto !important;
+    bottom: 8px !important;
     left: 8px;
     right: 8px;
-    bottom: 8px;
+    height: auto !important;
     transform: none;
     max-width: none;
     width: auto;
@@ -623,8 +753,50 @@
     display: none;
   }
   html[data-visual-mode] .field-context:has(.selection-candidates) {
+    padding: 0;
     flex-wrap: wrap;
     overflow-x: visible;
+    border-radius: 14px;
+  }
+  html[data-visual-mode] .field-context .selection-candidates {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    padding: 6px 8px;
+  }
+  html[data-visual-mode] .field-context .selection-candidates > :is(span, strong) {
+    flex-basis: 100%;
+    padding: 0 2px 2px;
+    font-size: 11px;
+    font-weight: 550;
+    color: var(--text-3);
+    line-height: 1.3;
+  }
+  html[data-visual-mode] .field-context .selection-candidates button {
+    min-height: 38px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0 11px;
+    border-radius: 9px;
+    border: 1px solid var(--hairline-strong);
+    background: var(--night-2);
+    color: var(--text-1);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  html[data-visual-mode] .field-context .selection-candidates button:focus-visible {
+    outline-offset: 1px;
+  }
+  html[data-visual-mode] .field-context .selection-candidates button[data-action="dismiss-candidates"] {
+    margin-left: auto;
+    width: 38px;
+    padding: 0;
+    background: transparent;
+    border-color: var(--hairline);
+    color: var(--text-2);
   }
   html[data-visual-mode] .field-context > span {
     flex: none;
@@ -653,14 +825,54 @@
     color: var(--on-accent);
     border-color: transparent;
   }
+  /* Subtle glass AI pill on pitch so routes stay completely unobstructed */
+  html[data-visual-mode] .board-ai .ba-fab,
+  html[data-visual-mode] .board-ai.ba-docked .ba-fab {
+    min-height: 30px;
+    height: 30px;
+    min-width: 0;
+    padding: 0 10px;
+    top: 8px;
+    right: 8px;
+    gap: 4px;
+    border-radius: 999px;
+    background: rgba(20, 23, 27, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--text-1);
+    font-size: 11.5px;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  html[data-visual-mode] .board-ai .ba-fab:hover,
+  html[data-visual-mode] .board-ai .ba-fab:active {
+    background: rgba(37, 42, 50, 0.9);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: var(--text-1);
+  }
+  html[data-visual-mode] .board-ai .ba-fab svg {
+    width: 13px;
+    height: 13px;
+    color: var(--ui-info, #a7ccfa);
+  }
   html[data-visual-mode] .board-height-resizer {
-    min-height: 20px;
-    height: 20px;
-    margin: 4px 0 0;
+    min-height: 16px;
+    height: 16px;
+    margin: 2px 0 0;
     padding: 0;
+  }
+  html[data-visual-mode] .board-height-resizer small {
+    display: none !important;
   }
   html[data-visual-mode] .board-height-resizer > span:last-child {
     display: none;
+  }
+  html[data-visual-mode] .board-height-resizer > span:first-child {
+    width: 36px;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
   }
   html[data-visual-mode] .canvas-hint {
     margin-top: 4px;
@@ -672,14 +884,14 @@
     display: none;
   }
 
-  /* 2.7 Elevated Studio Stage Dock + Smooth Scroll-Snap Drawing Rail */
+  /* 2.7 Elevated Studio Stage Dock + Full-Fit / Scroll-Snap Drawing Rail */
   html[data-visual-mode] .workspace:not(.reference-play) .stage-dock {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
     margin-block-start: 6px;
-    padding: 7px;
+    padding: 6px;
     border-radius: 16px;
     background: var(--night-1);
     border: 1px solid var(--hairline);
@@ -702,12 +914,12 @@
     font-size: 12.5px;
     font-weight: 600;
   }
-  /* Horizontal scroll-snap touch rail replaces cramped 7-column grid */
+  /* All 7 tools fit visibly on 375px-430px; horizontal scroll-snap retained for < 360px */
   html[data-visual-mode] .stage-dock .draw-tools {
     display: flex !important;
     flex-wrap: nowrap;
     align-items: stretch;
-    gap: 4px;
+    gap: 3px;
     width: 100%;
     padding: 3px;
     border-radius: 11px;
@@ -726,11 +938,11 @@
     display: none;
   }
   html[data-visual-mode] .stage-dock .draw-tools .tool-button {
-    flex: 0 0 auto;
-    min-width: 56px;
+    flex: 1 1 0;
+    min-width: 45px;
     min-height: 46px;
     height: auto;
-    padding: 5px 8px;
+    padding: 5px 2px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -753,13 +965,14 @@
   }
   html[data-visual-mode] .stage-dock .draw-tools .tool-button.active {
     background: var(--accent-main);
-    color: var(--on-accent);
+    color: var(--on-accent) !important;
     border-color: transparent;
     font-weight: 700;
     box-shadow: 0 3px 12px rgba(228, 231, 235, 0.22);
   }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button.active .tool-name,
   html[data-visual-mode] .stage-dock .draw-tools .tool-button.active svg {
-    color: var(--on-accent);
+    color: var(--on-accent) !important;
   }
 
   /* Studio Rehearsal Transport inside Dock */
@@ -804,8 +1017,19 @@
     border-top: 1px solid var(--hairline);
   }
   html[data-visual-mode] .stage-dock .playback-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
     font-size: 12px;
-    color: var(--text-3);
+    color: var(--text-2);
+  }
+  html[data-visual-mode] .stage-dock .playback-title small {
+    display: inline !important;
+    color: var(--text-2);
+    font-size: 11.5px;
+    font-weight: 550;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   html[data-visual-mode] .stage-dock .playback-options {
     display: flex;
@@ -881,13 +1105,13 @@
     max-height: calc(var(--visible-height, 100dvh) - 16px);
   }
 
-  /* 2.10 Compact Studio Footer */
+  /* 2.10 Eliminate bottom dead scroll tail on phone editor & login */
   html[data-visual-mode] .app-footer {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-    padding: 14px 12px 10px;
+    display: none !important;
+  }
+  body[data-workspace-mode="editor"] .locale-control,
+  .login-visual-control {
+    display: none !important;
   }
 }
 
