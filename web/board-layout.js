@@ -36,7 +36,8 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
     // Size the initial pitch around real controls, rather than making the
     // coach scroll to discover drawing/transport controls below a tall pitch.
     const available=window.innerHeight-top-Math.max(56,dock)-compact-48;
-    const preferred=window.innerWidth<=720 ? Math.min((window.innerWidth-28)*.8,window.innerHeight*.7)
+    const preferred=window.innerWidth<=600 ? Math.min((window.innerWidth-20)*.94,window.innerHeight*.62)
+      : window.innerWidth<=720 ? Math.min((window.innerWidth-28)*.8,window.innerHeight*.7)
       : isCompactWorkspace()?Math.min((window.innerWidth-36)*.8,window.innerHeight*.5):window.innerHeight*.62;
     return bound(Math.min(preferred,available),heightMin(),820);
   };

@@ -22,6 +22,13 @@ test('mobile-studio.css is loaded after component-layout.css and cached by sw.js
   assert.ok(css.includes('scroll-snap-type: x proximity'), 'draw-tools uses smooth scroll-snap on phone');
   assert.ok(css.includes('.sheet-handle'), 'bottom sheet drag handle is styled');
   assert.ok(css.includes('[data-has-selection]'), 'compact-nav selection dot indicator is styled');
+
+  const zh = readWeb('locales/zh-CN.js');
+  const en = readWeb('locales/en.js');
+  assert.ok(zh.includes('"editor.ball_movement": "橄榄球移动轨迹"'), 'zh-CN.js uses 橄榄球移动轨迹 for ball movement');
+  assert.equal(zh.includes('画清路线'), false, 'zh-CN.js omits retired 画清路线 tagline');
+  assert.equal(zh.includes('editor.draw_the_routes_understand_the_game'), false);
+  assert.equal(en.includes('editor.draw_the_routes_understand_the_game'), false);
 });
 
 test('mobile gestures, quick inspector entry, AI tab transition, and pinch-to-zoom work cleanly on phone', async t => {
@@ -143,6 +150,28 @@ test('mobile gestures, quick inspector entry, AI tab transition, and pinch-to-zo
       // Reset to 100% via fit
       q('[data-board-action="fit"]').click();
       assert.equal(q('#board-zoom-value').textContent, '100%');
+    });
+
+    await t.test('copy polish and play-more-menu progressive disclosure work and auto-close on item click', () => {
+      const footer = q('.app-footer');
+      assert.ok(footer, '.app-footer should exist');
+      assert.equal(footer.textContent.includes('画清路线'), false, '.app-footer must not contain 画清路线');
+      assert.ok(q('.inspector').textContent.includes('橄榄球移动轨迹'), 'inspector uses 橄榄球移动轨迹 copy');
+
+      const moreMenu = q('.play-actions .play-more-menu');
+      assert.ok(moreMenu, '.play-more-menu should exist inside .play-actions');
+      for (const action of ['mirror', 'duplicate', 'madden-library', 'export', 'print', 'help']) {
+        assert.ok(moreMenu.querySelector(`[data-action="${action}"]`), `play-more-menu includes ${action}`);
+      }
+
+      moreMenu.open = true;
+      moreMenu.querySelector('[data-action="help"]').click();
+      assert.equal(moreMenu.open, false, '.play-more-menu must auto-close when a menu item is clicked');
+      q('[data-action="close-modal"]')?.click();
+
+      moreMenu.open = true;
+      q('.play-header h1').click();
+      assert.equal(moreMenu.open, false, '.play-more-menu auto-closes on outside click');
     });
   } finally {
     await win.happyDOM.abort();
