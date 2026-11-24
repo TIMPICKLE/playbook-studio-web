@@ -874,9 +874,9 @@ html[lang="en"] .entry-page .entry-copy h1 { white-space: normal; font-size: cla
 }
 
 /* Playbook Studio brand system */
-:is(.entry-brand,.cloud-brand,.studio-home-brand,.login-brand) img.brand-logo{display:block;width:200px;height:42px;max-width:100%;object-fit:cover;object-position:center;padding:0;border:0;border-radius:0;background:none;flex:none}
+:is(.entry-brand,.cloud-brand,.studio-home-brand,.login-brand) img.brand-logo{display:block;width:200px;height:60px;max-width:100%;object-fit:contain;object-position:center;padding:0;border:0;border-radius:0;background:none;flex:none}
 :is(.entry-brand,.cloud-brand) img.brand-logo-dark{display:none}html[data-visual-mode] :is(.entry-brand,.cloud-brand) img.brand-logo-light{display:none}html[data-visual-mode] :is(.entry-brand,.cloud-brand) img.brand-logo-dark{display:block}
-.cloud-brand{flex-direction:column;align-items:flex-start;justify-content:center;gap:0}.cloud-brand img.brand-logo{width:172px;height:36px}.cloud-brand-context{display:block;margin:0;color:var(--muted);font:500 10px/1.2 var(--font-ui)}html[data-visual-mode] .cloud-brand-context{color:var(--text-3)}
+.cloud-brand{flex-direction:column;align-items:flex-start;justify-content:center;gap:0}.cloud-brand img.brand-logo{width:172px;height:52px}.cloud-brand-context{display:block;margin:0;color:var(--muted);font:500 10px/1.2 var(--font-ui)}html[data-visual-mode] .cloud-brand-context{color:var(--text-3)}
 :is(.studio-home-brand,.login-brand) img.brand-logo{width:200px;height:42px}.entry-brand img.brand-logo{width:200px;height:42px}
 html[data-visual-mode] .brand{gap:8px}html[data-visual-mode] .brand img.brand-icon{width:42px;height:42px;aspect-ratio:1;object-fit:contain}html[data-visual-mode] .brand>.brand-wordmark{font:800 18px/1 var(--font-display);letter-spacing:.04em;white-space:nowrap}html[data-visual-mode] .brand>.brand-wordmark>span{display:inline;margin-left:5px;color:var(--text-2);font:500 18px/1 var(--font-display)}html[data-visual-mode] .help-intro img.brand-icon{width:48px;height:48px;aspect-ratio:1;object-fit:contain}
-@media(max-width:720px){:is(.entry-brand,.studio-home-brand,.login-brand) img.brand-logo{width:160px;height:34px}.cloud-brand img.brand-logo{width:132px;height:30px}}
+@media(max-width:720px){:is(.entry-brand,.studio-home-brand,.login-brand) img.brand-logo{width:160px;height:48px}.cloud-brand img.brand-logo{width:132px;height:40px}}

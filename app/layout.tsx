@@ -5,8 +5,12 @@ export const metadata: Metadata = {
   title: "Playbook Studio · 共享战术工作台",
   description: "橄榄球战术编辑、云端保存、团队协作和成员权限管理。",
   icons: {
-    icon: "/editor/assets/brand/icon-32.png",
-    shortcut: "/editor/assets/brand/icon-32.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/editor/assets/brand/icon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/editor/assets/brand/icon-180.png",
   },
 };
 
