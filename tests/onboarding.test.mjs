@@ -66,11 +66,12 @@ function setup(t,options={}) {
   return {win,library,state,controller};
 }
 
-test('first-visit completion is scoped, explicit skip suppresses automatic tours, and replay still works',async t=>{
+test('first-visit completion and skip are scoped per page, while replay still works',async t=>{
   const f=setup(t);
   await until(()=>f.controller.active);
   assert.equal(f.controller.contextId,'home');
   assert.equal(f.library.instances.length,1);
+  assert.equal(f.library.instances.at(-1).config.closeBtnLabel,'跳过本页');
   f.controller.sync();await tick();assert.equal(f.library.instances.length,1,'re-renders do not duplicate the active tour');
   f.library.instances.at(-1).finish();
   await until(()=>!f.controller.active);
@@ -79,10 +80,72 @@ test('first-visit completion is scoped, explicit skip suppresses automatic tours
   f.state.context={id:'editor',locale:'zh-CN'};f.controller.sync();
   await until(()=>f.controller.active);
   f.library.instances.at(-1).skip();await until(()=>!f.controller.active);
-  assert.equal(JSON.parse(f.win.localStorage.getItem(ONBOARDING_STORAGE_KEY)).dismissed,true);
-  f.state.context={id:'roster',locale:'zh-CN'};f.controller.sync();await tick();
-  assert.equal(f.controller.active,false,'skip applies to later automatic module guides');
-  await f.controller.start({manual:true});assert.equal(f.controller.active,true,'manual replay ignores the auto-dismiss preference');
+  const afterEditorSkip=JSON.parse(f.win.localStorage.getItem(ONBOARDING_STORAGE_KEY));
+  assert.equal(afterEditorSkip.dismissed,false,'skipping one page does not set legacy global dismissal');
+  assert.deepEqual(afterEditorSkip.dismissedScopes,['editor']);
+  f.controller.sync();await tick();assert.equal(f.controller.active,false,'a skipped page does not auto-open again');
+  f.state.context={id:'roster',locale:'zh-CN'};f.controller.sync();
+  await until(()=>f.controller.active,'skipping editor does not silence another page on its first visit');
+  assert.equal(f.controller.contextId,'roster');
+  f.library.instances.at(-1).finish();await until(()=>!f.controller.active);
+  f.state.context={id:'editor',locale:'zh-CN'};f.controller.sync();await tick();
+  assert.equal(f.controller.active,false,'returning to a skipped page stays quiet');
+  await f.controller.start({manual:true});assert.equal(f.controller.active,true,'manual replay ignores dismissedScopes');
+});
+
+test('legacy global dismissed flag and autoStart gate automatic tours without blocking manual replay',async t=>{
+  const legacy=setup(t,{delay:10});
+  legacy.controller.destroy();
+  legacy.win.localStorage.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify({dismissed:true,completed:[]}));
+  const legacyLib=fakeLibrary();
+  const legacyState={context:{id:'home',locale:'en'}};
+  const legacyCtrl=createOnboarding({document:legacy.win.document,getContext:()=>legacyState.context,delay:10,
+    getSteps:()=>[{id:'first',element:()=>legacy.win.document.getElementById('first'),title:'First',description:'Desc'}],...legacyLib});
+  legacy.win.__onboardingCleanup=()=>legacyCtrl.destroy();
+  await tick();await tick();
+  assert.equal(legacyCtrl.active,false,'legacy dismissed:true suppresses home auto-start');
+  legacyState.context={id:'editor',locale:'en'};legacyCtrl.sync();await tick();await tick();
+  assert.equal(legacyCtrl.active,false,'legacy dismissed:true suppresses editor auto-start');
+  assert.equal(await legacyCtrl.start({manual:true}),true,'manual replay still starts under legacy dismissal');
+  legacyCtrl.destroy();
+
+  const gatedWin=windowFixture(t),gatedLib=fakeLibrary();
+  const badScopes=Array.from({length:60},(_,i)=>`scope-${i}`);
+  gatedWin.localStorage.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify({dismissed:false,dismissedScopes:[123,null,...badScopes],completed:[]}));
+  const gatedState={context:{id:'home',locale:'en'}};
+  const gatedCtrl=createOnboarding({document:gatedWin.document,getContext:()=>gatedState.context,autoStart:ctx=>ctx.id!=='home',delay:10,
+    getSteps:()=>[{id:'first',element:()=>gatedWin.document.getElementById('first'),title:'First',description:'Desc'}],...gatedLib});
+  gatedWin.__onboardingCleanup=()=>gatedCtrl.destroy();
+  await tick();await tick();
+  assert.equal(gatedCtrl.active,false,'autoStart suppresses home automatic tour');
+  assert.equal(await gatedCtrl.start({manual:true}),true,'manual replay works even when autoStart returns false');
+  gatedCtrl.stop();
+  gatedState.context={id:'editor',locale:'en'};gatedCtrl.sync();
+  await until(()=>gatedCtrl.active,'non-suppressed scopes still auto-start');
+  gatedLib.instances.at(-1).skip();await until(()=>!gatedCtrl.active);
+  const stored=JSON.parse(gatedWin.localStorage.getItem(ONBOARDING_STORAGE_KEY));
+  assert.ok(stored.dismissedScopes.length<=50,'dismissedScopes is safely capped at 50 strings');
+  assert.ok(stored.dismissedScopes.every(item=>typeof item==='string'));
+  assert.ok(stored.dismissedScopes.includes('editor'));
+});
+
+test('context changes for touch, serverAiConfigured and cloud refresh step copy accurately',async t=>{
+  const win=windowFixture(t),library=fakeLibrary();
+  const state={context:{id:'editor',locale:'en',cloud:false,touch:false,serverAiConfigured:false}};
+  const getSteps=ctx=>[{id:'first',element:()=>win.document.getElementById('first'),title:'Mode',description:`cloud=${!!ctx.cloud};touch=${!!ctx.touch};ai=${!!ctx.serverAiConfigured}`}];
+  const controller=createOnboarding({document:win.document,getContext:()=>state.context,getSteps,delay:100000,...library});
+  win.__onboardingCleanup=()=>controller.destroy();
+  await controller.start({manual:true});
+  assert.equal(library.instances.at(-1).config.steps[0].popover.description,'cloud=false;touch=false;ai=false');
+  state.context={...state.context,touch:true,serverAiConfigured:true};
+  controller.sync();
+  assert.equal(controller.active,true,'touch and server AI updates refresh the active tour without killing it');
+  assert.equal(library.instances.at(-1).config.steps[0].popover.description,'cloud=false;touch=true;ai=true');
+  state.context={...state.context,cloud:true};
+  controller.sync();
+  assert.equal(controller.active,false,'switching cloud mode resets context cleanly');
+  await controller.start({manual:true});
+  assert.equal(library.instances.at(-1).config.steps[0].popover.description,'cloud=true;touch=true;ai=true');
 });
 
 test('programmatic stops and navigation never become a user dismissal',async t=>{
@@ -175,7 +238,7 @@ test('reduced motion and translated controls are reflected in the actual driver 
   assert.equal(config.animate,false);assert.equal(config.smoothScroll,false);
   assert.equal(config.allowClose,true);assert.equal(config.disableActiveInteraction,true);
   assert.equal(config.overlayClickBehavior,'none');
-  assert.match(config.nextBtnText,/next/i);assert.match(config.closeBtnLabel,/skip/i);
+  assert.match(config.nextBtnText,/next/i);assert.equal(config.closeBtnLabel,'Skip page');
 });
 
 test('read-only tours describe permissions and source images use the visible library fallback in both languages',t=>{
@@ -201,6 +264,81 @@ test('read-only tours describe permissions and source images use the visible lib
     assert.match(properties.description,/Members with editing access can change|修改由有编辑权限的成员完成/);
     const depth=onboardingSteps({id:'roster',locale,readOnly:true},win.document).find(step=>step.id==='depth');
     assert.match(depth.description,/Changing or applying starters requires editing access|调整或应用首发需要编辑权限/);
+    assert.equal(steps.find(step=>step.id==='coachFilm'),undefined,'reference source images omit the Coach Film step');
+  }
+});
+
+test('onboardingSteps adapts to cloud, touch, mobile overflow, server AI and safety preview copy in both languages',t=>{
+  const win=windowFixture(t);
+  win.document.body.innerHTML=`
+    <section class="studio-home">
+      <article class="studio-choice-editor"></article>
+      <article class="studio-choice-roster"></article>
+      <article class="studio-choice-ai"></article>
+    </section>
+    <main id="app">
+      <header class="topbar"><div class="top-actions"><button id="desktop-export" data-action="export">Export</button></div></header>
+      <section class="play-list"></section>
+      <button id="coach-film-btn" class="coach-film-entry">Film room</button>
+      <details class="play-more-menu"><summary id="more-menu-summary">...</summary></details>
+      <div id="field"></div>
+      <div class="stage-dock"></div>
+      <section class="inspector"></section>
+      <div class="task-panel-tabs"><button id="assistant-tab" data-action="assistant-task">AI</button></div>
+      <div class="board-ai"><button id="assistant-fab" data-ba="open">AI</button></div>
+    </main>
+    <main id="ai-matchup-root">
+      <select data-ai-field="offense"></select>
+      <div data-local-brief></div>
+      <section class="ai-knowledge"></section>
+      <select data-ai-field="provider"></select>
+    </main>`;
+
+  for(const locale of ['zh-CN','en']){
+    const homeSteps=onboardingSteps({id:'home',locale},win.document);
+    assert.match(homeSteps.find(s=>s.id==='editor').description,/AI 助手|AI board assistant/);
+    assert.match(homeSteps.find(s=>s.id==='analysis').description,/免 API Key|no API key/i);
+
+    const desktopCloud=onboardingSteps({id:'editor',locale,cloud:true,touch:false,serverAiConfigured:false},win.document);
+    assert.equal(desktopCloud.find(s=>s.id==='coachFilm')?.element()?.id,'coach-film-btn');
+    assert.match(desktopCloud.find(s=>s.id==='coachFilm').description,/Coach Film|Film room/);
+    assert.match(desktopCloud.find(s=>s.id==='tools').description,/Enter/);
+    const aiManual=desktopCloud.find(s=>s.id==='assistant');
+    assert.equal(aiManual.element()?.id,'assistant-fab');
+    assert.match(aiManual.description,/半透明预览|translucent field preview/i);
+    assert.match(aiManual.description,/应用|Apply/);
+    assert.match(aiManual.description,/一键撤销|one-click Undo/i);
+    assert.match(aiManual.description,/deepseek-chat/);
+    const expCloud=desktopCloud.find(s=>s.id==='export');
+    assert.equal(expCloud.element()?.id,'desktop-export');
+    assert.match(expCloud.description,/云端自动保存|auto-save to the cloud/i);
+
+    const touchReady=onboardingSteps({id:'editor',locale,cloud:false,touch:true,serverAiConfigured:true},win.document);
+    assert.match(touchReady.find(s=>s.id==='tools').description,/完成|Done/);
+    assert.doesNotMatch(touchReady.find(s=>s.id==='tools').description,/Enter/);
+    assert.match(touchReady.find(s=>s.id==='assistant').description,/DeepSeek/);
+    assert.match(touchReady.find(s=>s.id==='assistant').description,/无需填写 API Key|no API key needed/i);
+
+    // Simulate mobile <= 600px where .topbar is hidden and FAB is hidden so fallbacks kick in.
+    win.document.querySelector('.topbar').style.display='none';
+    win.document.querySelector('#assistant-fab').style.display='none';
+    const mobileCloud=onboardingSteps({id:'editor',locale,cloud:true,touch:true},win.document);
+    assert.equal(mobileCloud.find(s=>s.id==='assistant').element()?.id,'assistant-tab');
+    assert.equal(mobileCloud.find(s=>s.id==='export').element()?.id,'more-menu-summary');
+    assert.match(mobileCloud.find(s=>s.id==='export').description,/云端自动保存|auto-save to the cloud/i);
+    const mobileLocal=onboardingSteps({id:'editor',locale,cloud:false,touch:true},win.document);
+    assert.equal(mobileLocal.find(s=>s.id==='export').element()?.id,'more-menu-summary');
+    assert.match(mobileLocal.find(s=>s.id==='export').description,/当前浏览器|this browser/i);
+    win.document.querySelector('.topbar').style.display='';
+    win.document.querySelector('#assistant-fab').style.display='';
+
+    const analysisManual=onboardingSteps({id:'analysis',locale,serverAiConfigured:false},win.document);
+    assert.match(analysisManual.find(s=>s.id==='matchup').description,/观察视角|perspective/i);
+    assert.match(analysisManual.find(s=>s.id==='brief').description,/免 API Key|no API key/i);
+    assert.match(analysisManual.find(s=>s.id==='model').description,/deepseek-chat/);
+    const analysisReady=onboardingSteps({id:'analysis',locale,serverAiConfigured:true},win.document);
+    assert.match(analysisReady.find(s=>s.id==='model').description,/DeepSeek/);
+    assert.match(analysisReady.find(s=>s.id==='model').description,/免填 API Key|no API key needed/i);
   }
 });
 
@@ -227,5 +365,7 @@ test('the real vendored driver renders accessible steps, moves backward and forw
   await until(()=>!controller.active);
   assert.equal(q('.driver-popover'),null);
   await until(()=>win.document.activeElement===launcher,'dismissal restores the triggering control after the lifecycle settles');
-  assert.equal(JSON.parse(win.localStorage.getItem(ONBOARDING_STORAGE_KEY)).dismissed,true);
+  const stored=JSON.parse(win.localStorage.getItem(ONBOARDING_STORAGE_KEY));
+  assert.equal(stored.dismissed,false);
+  assert.ok(stored.dismissedScopes.includes('editor'));
 });

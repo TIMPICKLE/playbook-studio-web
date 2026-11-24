@@ -2,9 +2,10 @@ export const ONBOARDING_STORAGE_KEY = 'playbook-studio:onboarding:v1';
 
 const sessionRecords = new WeakMap();
 const words = locale => locale === 'en'
-  ? {skip:'Skip guide',next:'Next',previous:'Back',done:'Get started',progress:'Step {{current}} of {{total}}',label:'Getting started'}
-  : {skip:'跳过引导',next:'下一步',previous:'上一步',done:'开始使用',progress:'第 {{current}} 步，共 {{total}} 步',label:'快速上手'};
-const contextKey = context => context ? JSON.stringify([context.id,context.locale,!!context.readOnly,!!context.reference]) : '';
+  ? {skip:'Skip page',next:'Next',previous:'Back',done:'Get started',progress:'Step {{current}} of {{total}}',label:'Getting started'}
+  : {skip:'跳过本页',next:'下一步',previous:'上一步',done:'开始使用',progress:'第 {{current}} 步，共 {{total}} 步',label:'快速上手'};
+const contextKey = context => context ? JSON.stringify([context.id,context.locale,!!context.readOnly,!!context.reference,!!context.cloud,!!context.touch,!!context.serverAiConfigured]) : '';
+const sameTourScope = (a, b) => !!a && !!b && a.id===b.id && a.locale===b.locale && !!a.readOnly===!!b.readOnly && !!a.reference===!!b.reference && !!a.cloud===!!b.cloud;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 
 export function isOnboardingTargetVisible(element) {
@@ -20,10 +21,12 @@ export function isOnboardingTargetVisible(element) {
 }
 
 /** A tour only explains existing controls. It never dispatches editor actions. */
-export function createOnboarding({document:doc=globalThis.document,getContext,getSteps,isBusy=()=>false,delay=800,
+export function createOnboarding({document:doc=globalThis.document,getContext,getSteps,isBusy=()=>false,autoStart=()=>true,delay=800,
   loadDriver=()=>import('./vendor/driver-1.14.0.js'),storage}={}) {
   const win=doc.defaultView;
-  const record=sessionRecords.get(doc) || {dismissed:false,completed:[]};
+  const record=sessionRecords.get(doc) || {dismissed:false,dismissedScopes:[],completed:[]};
+  if (!Array.isArray(record.dismissedScopes)) record.dismissedScopes=[];
+  if (!Array.isArray(record.completed)) record.completed=[];
   sessionRecords.set(doc,record);
   let persistence=storage;
   if (persistence===undefined) try { persistence=win.localStorage; } catch { persistence=null; }
@@ -31,13 +34,16 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
     const saved=JSON.parse(persistence?.getItem(ONBOARDING_STORAGE_KEY) || 'null');
     if (saved && typeof saved==='object') {
       record.dismissed=record.dismissed || saved.dismissed===true;
-      if (Array.isArray(saved.completed)) record.completed=[...new Set([...record.completed,...saved.completed.filter(id=>typeof id==='string').slice(0,50)])];
+      if (Array.isArray(saved.dismissedScopes)) record.dismissedScopes=[...new Set([...record.dismissedScopes,...saved.dismissedScopes.filter(id=>typeof id==='string').slice(0,50)])].slice(0,50);
+      if (Array.isArray(saved.completed)) record.completed=[...new Set([...record.completed,...saved.completed.filter(id=>typeof id==='string').slice(0,50)])].slice(0,50);
     }
   } catch { /* The editor remains usable when storage is denied or malformed. */ }
   let currentKey='', running=null, timer=null, scheduled=null, loading=null, factory;
   let generation=0, destroyed=false;
   const persist = () => { try { persistence?.setItem(ONBOARDING_STORAGE_KEY,JSON.stringify(record)); } catch { /* Retain the choice for this page. */ } };
   const readContext = () => { try { const context=getContext?.(); return context?.id ? context : null; } catch { return null; } };
+  const canAutoStart = context => { try { return typeof autoStart==='function' ? !!autoStart(context) : !!autoStart; } catch { return false; } };
+  const isAutoSuppressed = context => record.dismissed || record.dismissedScopes.includes(context.id) || record.completed.includes(context.id) || !canAutoStart(context);
   const resolve = step => { try { return typeof step.element==='function' ? step.element() : typeof step.element==='string' ? doc.querySelector(step.element) : step.element; } catch { return null; } };
   const visibleSteps = context => (getSteps?.(context) || []).map(step=>({...step,resolved:resolve(step)})).filter(step=>isOnboardingTargetVisible(step.resolved));
   const uiNode = node => node?.nodeType===1 && (node.matches('.driver-popover,.driver-overlay,#driver-dummy-element,.driver-live-region,[data-onboarding-ui]') || !!node.closest('.driver-popover,[data-onboarding-ui]'));
@@ -61,8 +67,12 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
     running=null;
     if (!session.programmatic) {
       const endedBy=session.reason || reason;
-      if (endedBy==='done') record.completed=[...new Set([...record.completed,session.context.id])];
-      else if (['close','escape','overlay'].includes(endedBy)) record.dismissed=true;
+      if (endedBy==='done') {
+        record.completed=[...new Set([...record.completed,session.context.id])].slice(-50);
+        record.dismissedScopes=record.dismissedScopes.filter(id=>id!==session.context.id);
+      } else if (['close','escape','overlay'].includes(endedBy)) {
+        record.dismissedScopes=[...new Set([...record.dismissedScopes,session.context.id])].slice(-50);
+      }
       persist();
       restoreFocus(session);
     }
@@ -157,7 +167,7 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
   async function start({manual=true}={}) {
     if (destroyed) return false;
     const context=readContext(), key=contextKey(context);
-    if (!context || (!manual && (record.dismissed || record.completed.includes(context.id))) || blocked()) return false;
+    if (!context || (!manual && isAutoSuppressed(context)) || blocked()) return false;
     if (running && contextKey(running.context)===key) return true;
     if (loading?.key===key) return loading.promise;
     stop();
@@ -168,10 +178,11 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
     job.promise=(async()=>{
       try {
         factory ??= (await loadDriver()).driver;
-        if (destroyed || token!==generation || contextKey(readContext())!==key || blocked()) return false;
-        const steps=visibleSteps(context);
+        const latest=readContext();
+        if (destroyed || token!==generation || contextKey(latest)!==key || (!manual && isAutoSuppressed(latest)) || blocked()) return false;
+        const steps=visibleSteps(latest);
         if (!steps.length || typeof factory!=='function') return false;
-        const session={context,steps,trigger:doc.activeElement,programmatic:false,driver:null};
+        const session={context:latest,steps,trigger:doc.activeElement,programmatic:false,driver:null};
         running=session;
         session.driver=factory(configuration(session));
         session.driver.drive();
@@ -187,7 +198,12 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
     if (destroyed) return;
     const next=readContext(), nextKey=contextKey(next);
     if (nextKey!==currentKey) {
-      stop();currentKey=nextKey;
+      if (running && sameTourScope(running.context,next)) {
+        running.context=next;
+        currentKey=nextKey;
+      } else {
+        stop();currentKey=nextKey;
+      }
     }
     if (!next) return;
     if (running) {
@@ -195,7 +211,10 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
       const fresh=visibleSteps(next), index=running.driver.getActiveIndex?.() ?? 0;
       const prior=running.steps[index], replacement=fresh.findIndex(step=>step.id===prior?.id);
       if (!fresh.length) { stop(); return; }
-      const changed=fresh.length!==running.steps.length || fresh.some((step,i)=>step.id!==running.steps[i]?.id || step.resolved!==running.steps[i]?.resolved);
+      const changed=fresh.length!==running.steps.length || fresh.some((step,i)=>
+        step.id!==running.steps[i]?.id || step.resolved!==running.steps[i]?.resolved ||
+        step.title!==running.steps[i]?.title || step.description!==running.steps[i]?.description ||
+        (step.side || 'bottom')!==(running.steps[i]?.side || 'bottom'));
       if (changed) {
         running.steps=fresh;
         running.driver.setSteps(driverSteps(running));
@@ -203,7 +222,7 @@ export function createOnboarding({document:doc=globalThis.document,getContext,ge
       }
       return;
     }
-    if (loading || timer!==null || record.dismissed || record.completed.includes(next.id) || blocked()) return;
+    if (loading || timer!==null || isAutoSuppressed(next) || blocked()) return;
     timer=win.setTimeout(()=>{timer=null;void start({manual:false});},delay);
   }
   function scheduleSync() {
