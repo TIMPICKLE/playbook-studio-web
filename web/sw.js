@@ -1,4 +1,4 @@
-const CACHE = 'playbook-studio-v14-coach-film';
+const CACHE = 'playbook-studio-v15-mobile-ux';
 // Heavy graph and Madden geometry modules are fetched and cached on first use.
 const FILES = [
   './editor-history.js', './workspace-merge.js', './player-group.js', './editor-selection.js', './model-connection.js', './workspace-ui.js', './locales/madden-workflow.js',
@@ -8,7 +8,7 @@ const FILES = [
   './assistant-transition.js', './history-transition.js', './vendor/d3-interpolate-path-2.3.0.js',
   './assistant-schema.js', './assistant-proposal.js', './assistant-conflicts.js', './assistant-draft.js', './assistant-session.js', './vendor/assistant-zod.js',
   './game-formats.js', './defense-formation.js', './editor-play-commands.js', './editor-actions.js', './editor-capabilities.js',
-  './model-protocol.js', './editor-render.js', './editor-dialog.css', './component-layout.css',
+  './model-protocol.js', './editor-render.js', './editor-dialog.css', './component-layout.css', './mobile-studio.css',
   './madden-traces.js', './data/madden-trace-index.js', './data/madden-trace-evidence.js', './locales/madden-loading.js',
   './onboarding.js', './onboarding-steps.js', './onboarding.css', './locales/onboarding.en.js', './locales/onboarding.zh-CN.js', './vendor/driver-1.14.0.js', './vendor/driver-1.14.0.css',
   './board-assistant.js', './board-assistant.css', './assistant-edit.js', './assistant-operations.js', './assistant-search.js', './madden-catalog.js', './madden-concepts.js', './data/madden-search-tags.js',

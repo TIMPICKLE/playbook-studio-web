@@ -1,0 +1,1016 @@
+/* ==========================================================================
+   Playbook Studio · Mobile & Touch Studio Experience
+   --------------------------------------------------------------------------
+   Loaded after component-layout.css so mobile and tablet ergonomics own
+   the final cascade without touching desktop (> 1180px, fine pointer).
+   Design language: Dark Graphite & Silver studio, field-first hierarchy,
+   native bottom sheet & swipe-dismiss drawers, scroll-snap tool rail.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Shared Compact & Touch Workspace (<= 1180px or coarse <= 1400px)
+   -------------------------------------------------------------------------- */
+@media screen and ((max-width: 1180px) or ((max-width: 1400px) and (any-pointer: coarse))) {
+  html[data-visual-mode] body {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Native frosted-glass bottom tab bar */
+  html[data-visual-mode] .compact-nav {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: 4px;
+    padding: 6px max(10px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
+    background: rgba(20, 23, 27, 0.9);
+    border-top: 1px solid var(--hairline);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 -10px 28px rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+  }
+  html[data-visual-mode] .compact-nav button {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 48px;
+    padding: 4px 2px;
+    max-width: none;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 550;
+    letter-spacing: 0.01em;
+    color: var(--text-3);
+    transition: background-color 140ms ease, color 140ms ease, transform 110ms ease, opacity 140ms ease;
+  }
+  html[data-visual-mode] .compact-nav button svg {
+    width: 19px;
+    height: 19px;
+    transition: transform 140ms var(--ease-out);
+  }
+  html[data-visual-mode] .compact-nav button:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+  html[data-visual-mode] .compact-nav button:disabled {
+    opacity: 0.32;
+  }
+  html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true]) {
+    color: var(--text-1);
+    background: rgba(228, 231, 235, 0.13);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    font-weight: 650;
+  }
+  html[data-visual-mode] .compact-nav :is([aria-pressed=true], [aria-expanded=true]) svg {
+    color: var(--accent-strong);
+  }
+  /* Subtle luminous dot on Properties tab whenever a player/route/object is selected */
+  html[data-visual-mode] .compact-nav[data-has-selection] [data-action="inspector-panel"]::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    right: calc(50% - 16px);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ui-preview, #b4d4ff);
+    box-shadow: 0 0 0 2px rgba(20, 23, 27, 0.92), 0 0 8px rgba(180, 212, 255, 0.75);
+  }
+
+  /* Atmospheric modal scrim */
+  html[data-visual-mode] .workspace.sidebar-open .sidebar-scrim,
+  html[data-visual-mode] .workspace.inspector-open .sidebar-scrim {
+    background: rgba(8, 10, 13, 0.68);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* Playbook sidebar drawer */
+  html[data-visual-mode] .workspace .sidebar {
+    background: linear-gradient(180deg, #1b1f26 0%, #15181e 100%);
+    border-right: 1px solid var(--hairline-strong);
+    box-shadow: 18px 0 60px rgba(0, 0, 0, 0.65);
+    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.26s;
+    touch-action: pan-y;
+  }
+
+  /* Properties inspector drawer (tablet right slide-in) */
+  html[data-visual-mode] .inspector-panel {
+    background: linear-gradient(180deg, #1d2128 0%, #16191f 100%);
+    border-color: var(--hairline-strong);
+    box-shadow: -18px 0 60px rgba(0, 0, 0, 0.65);
+    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.26s;
+  }
+  html[data-visual-mode] .inspector-panel .panel-heading {
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .inspector-panel .panel-heading strong {
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--text-1);
+    letter-spacing: -0.01em;
+  }
+  html[data-visual-mode] .sheet-handle {
+    display: none;
+  }
+
+  /* Segmented Properties / AI Assistant pill switcher inside compact inspector */
+  html[data-visual-mode] .inspector-panel > .task-panel-tabs {
+    margin: 10px 14px 2px;
+    padding: 3px;
+    gap: 3px;
+    border: 1px solid var(--hairline);
+    border-radius: 11px;
+    background: var(--night-0);
+  }
+  html[data-visual-mode] .inspector-panel > .task-panel-tabs button {
+    min-height: 36px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 550;
+  }
+  html[data-visual-mode] .inspector-panel > .task-panel-tabs [aria-pressed=true] {
+    background: var(--night-2);
+    border-color: var(--hairline-strong);
+    color: var(--text-1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  }
+
+  /* Floating contextual action bar on field */
+  html[data-visual-mode] .field-context:not(:empty) {
+    background: rgba(24, 28, 35, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Docked AI assistant sheet polish */
+  html[data-visual-mode] .board-ai.ba-docked .ba-panel {
+    background: linear-gradient(180deg, #1e232b 0%, #161a20 100%);
+    border-color: var(--hairline-strong);
+    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Subtle footer placement for locale switcher on touch */
+  .locale-control {
+    position: static;
+    margin: 12px auto calc(78px + env(safe-area-inset-bottom, 0px));
+    padding: 4px 10px;
+    min-height: 38px;
+    background: var(--night-1);
+    border-color: var(--hairline);
+    box-shadow: none;
+  }
+  .locale-control select {
+    min-height: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Phone Portrait Studio Overhaul (<= 600px)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 600px) {
+  html[data-visual-mode] .workspace {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+  html[data-visual-mode] .workspace .editor-layout {
+    padding: 0 max(10px, env(safe-area-inset-right, 0px)) 0 max(10px, env(safe-area-inset-left, 0px));
+  }
+
+  /* 2.1 Single-row sticky frosted Cloud Bar (reclaims ~56px vertical space) */
+  html[data-visual-mode] .cloud-bar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header, 20);
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 5px;
+    min-height: 46px;
+    padding: 5px max(10px, env(safe-area-inset-right, 0px)) 5px max(10px, env(safe-area-inset-left, 0px));
+    background: rgba(20, 23, 27, 0.92);
+    border-bottom: 1px solid var(--hairline);
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
+  }
+  html[data-visual-mode] .cloud-bar .cloud-brand {
+    display: none;
+  }
+  html[data-visual-mode] .cloud-bar .workspace-current-card {
+    order: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 9px;
+    gap: 5px;
+    border-radius: 9px;
+    background: var(--night-2);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .cloud-bar .workspace-current-icon,
+  html[data-visual-mode] .cloud-bar .workspace-current-copy small {
+    display: none;
+  }
+  html[data-visual-mode] .cloud-bar .workspace-current-copy strong {
+    font-size: 12.5px;
+    font-weight: 650;
+  }
+  html[data-visual-mode] .cloud-bar .workspace-current-count {
+    font-size: 11px;
+    gap: 2px;
+  }
+  html[data-visual-mode] .cloud-bar .cloud-sync {
+    order: 2;
+    flex: none;
+    min-height: 32px;
+    height: 32px;
+    padding: 2px 3px 2px 8px;
+    gap: 4px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .cloud-bar .cloud-status {
+    min-height: 26px;
+    max-width: 72px;
+    font-size: 11px;
+    gap: 5px;
+  }
+  html[data-visual-mode] .cloud-bar .cloud-status span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* When cleanly synced, keep a calm glowing dot without noisy text */
+  html[data-visual-mode] .cloud-bar .cloud-status[data-state="saved"] span {
+    display: none;
+  }
+  html[data-visual-mode] .cloud-bar .cloud-status[data-state="saved"] i {
+    width: 7px;
+    height: 7px;
+    box-shadow: 0 0 8px rgba(143, 224, 178, 0.55);
+  }
+  html[data-visual-mode] .cloud-bar .save-now {
+    min-height: 26px;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  html[data-visual-mode] .cloud-bar .cloud-bar-actions {
+    order: 3;
+    flex: none;
+    margin-left: 0;
+    gap: 4px;
+  }
+  /* Home is already the leftmost button in .workspace-nav */
+  html[data-visual-mode] .cloud-bar-actions [data-cloud-action="home"],
+  html[data-visual-mode] .cloud-bar-actions .cloud-role {
+    display: none;
+  }
+  html[data-visual-mode] .cloud-bar-actions > button {
+    min-height: 32px;
+    height: 32px;
+    padding: 0 7px;
+    font-size: 11px;
+    border-radius: 8px;
+    background: var(--night-2);
+    border: 1px solid var(--hairline);
+    color: var(--text-2);
+  }
+  html[data-visual-mode] .cloud-bar .account-menu summary {
+    min-height: 34px;
+    height: 34px;
+    padding: 2px;
+    gap: 0;
+  }
+  html[data-visual-mode] .cloud-bar .account-menu summary > span:not(.account-avatar) {
+    display: none;
+  }
+  html[data-visual-mode] .cloud-bar .account-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+    border: 1px solid var(--hairline-strong);
+  }
+
+  /* 2.2 Crisp segmented Workspace Mode Strip */
+  html[data-visual-mode] .workspace-nav {
+    gap: 4px;
+    padding: 5px max(10px, env(safe-area-inset-right, 0px)) 5px max(10px, env(safe-area-inset-left, 0px));
+    background: var(--night-0);
+    border-bottom: 1px solid var(--hairline);
+    scrollbar-width: none;
+  }
+  html[data-visual-mode] .workspace-nav::-webkit-scrollbar {
+    display: none;
+  }
+  html[data-visual-mode] .workspace-nav :is(a, button) {
+    min-height: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+  html[data-visual-mode] .workspace-nav .workspace-home {
+    flex: none;
+    min-width: 36px;
+    width: 36px;
+    padding: 0;
+    background: var(--night-1);
+    border-color: var(--hairline);
+  }
+  html[data-visual-mode] .workspace-nav [data-workspace-mode] {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* 2.3 Compact Top Utility Bar */
+  html[data-visual-mode] .topbar {
+    min-height: 42px;
+    padding: 4px max(10px, env(safe-area-inset-right, 0px)) 4px max(10px, env(safe-area-inset-left, 0px));
+    gap: 6px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .topbar .mobile-menu {
+    min-width: 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .topbar .top-actions {
+    gap: 5px;
+  }
+  html[data-visual-mode] .topbar .top-actions .button,
+  html[data-visual-mode] .topbar .top-actions .effects-menu > summary {
+    min-width: 38px;
+    width: 38px;
+    min-height: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 9px;
+    justify-content: center;
+  }
+
+  /* 2.4 Fixed Play Header (clean flex row, zero grid collision with Coach Film) */
+  html[data-visual-mode] .play-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px max(12px, env(safe-area-inset-right, 0px)) 5px max(12px, env(safe-area-inset-left, 0px));
+  }
+  html[data-visual-mode] .play-header > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  html[data-visual-mode] .play-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 17px;
+    font-weight: 720;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  html[data-visual-mode] .play-header .favorite-button {
+    flex: none;
+    min-width: 28px;
+    min-height: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+  }
+  html[data-visual-mode] .play-header .editor-status {
+    min-height: 18px;
+    font-size: 11px;
+    line-height: 1.3;
+    gap: 5px;
+    color: var(--text-3);
+  }
+  html[data-visual-mode] .play-header .editor-status :is(button, a) {
+    min-height: 26px;
+    padding: 2px 7px;
+    font-size: 11px;
+  }
+  html[data-visual-mode] .play-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    flex: none;
+    width: auto;
+    max-width: none;
+    gap: 4px;
+    margin: 0;
+  }
+  html[data-visual-mode] .play-actions :is([data-action=undo], [data-action=redo], .vertical-rule) {
+    display: none;
+  }
+  html[data-visual-mode] .play-actions .button {
+    min-height: 34px;
+    height: 34px;
+    padding: 0 9px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 9px;
+    white-space: nowrap;
+  }
+  html[data-visual-mode] .play-actions .icon-button {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 9px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+
+  /* 2.5 Single-row Canvas Heading (overflow: visible so popovers never clip!) */
+  html[data-visual-mode] .canvas-heading {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 3px 0 6px;
+    margin: 0;
+    overflow: visible;
+  }
+  html[data-visual-mode] .canvas-heading .board-size-controls {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+  }
+  html[data-visual-mode] .board-zoom-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    padding: 2px;
+    border-radius: 10px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .board-zoom-controls button {
+    min-width: 34px;
+    width: 34px;
+    min-height: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+  }
+  html[data-visual-mode] .board-zoom-controls output {
+    min-width: 38px;
+    font-size: 11.5px;
+    font-weight: 650;
+    text-align: center;
+    color: var(--text-2);
+  }
+  html[data-visual-mode] .board-advanced {
+    position: static;
+    margin-left: 0;
+  }
+  html[data-visual-mode] .board-advanced > summary {
+    min-width: 36px;
+    width: 36px;
+    min-height: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 9px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .board-dimensions {
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(26, 30, 36, 0.98);
+    border: 1px solid var(--hairline-strong);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  html[data-visual-mode] .canvas-heading .canvas-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+  html[data-visual-mode] .canvas-heading .selection-toolbar {
+    flex: none;
+    gap: 4px;
+  }
+  html[data-visual-mode] .canvas-heading .selection-toolbar button {
+    min-width: 36px;
+    width: 36px;
+    min-height: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 9px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .canvas-heading .selection-toolbar button > span {
+    display: none;
+  }
+  html[data-visual-mode] .canvas-heading .selection-count {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--text-1);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  html[data-visual-mode] .canvas-heading .view-tools {
+    display: flex;
+    gap: 4px;
+    margin: 0;
+  }
+  html[data-visual-mode] .canvas-heading .view-tools .tool-button {
+    min-width: 36px;
+    width: 36px;
+    min-height: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 9px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .canvas-heading .add-object-menu {
+    margin: 0;
+  }
+  html[data-visual-mode] .canvas-heading .add-object-menu > summary {
+    min-width: 36px;
+    width: 36px;
+    min-height: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--night-2);
+    border: 1px solid var(--hairline-strong);
+    color: var(--text-1);
+  }
+  html[data-visual-mode] .canvas-heading .add-object-menu > summary > span {
+    display: none;
+  }
+  html[data-visual-mode] .canvas-heading .add-object-menu > div {
+    right: 0;
+    left: auto;
+    min-width: 212px;
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(26, 30, 36, 0.98);
+    border: 1px solid var(--hairline-strong);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.65);
+  }
+
+  /* 2.6 Field Stage, Sleek Context Capsule & Subtle Resize Pill */
+  html[data-visual-mode] .field-wrap {
+    border-radius: 14px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 36px rgba(0, 0, 0, 0.48);
+  }
+  html[data-visual-mode] .field-wrap .field-tag {
+    bottom: 8px;
+    left: 8px;
+    padding: 3px 8px;
+    font-size: 10.5px;
+    opacity: 0.78;
+    border-radius: 999px;
+  }
+  html[data-visual-mode] .field-context:not(:empty) {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    transform: none;
+    max-width: none;
+    width: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 7px;
+    border-radius: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  html[data-visual-mode] .field-context::-webkit-scrollbar {
+    display: none;
+  }
+  html[data-visual-mode] .field-context:has(.selection-candidates) {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+  html[data-visual-mode] .field-context > span {
+    flex: none;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  html[data-visual-mode] .field-context .context-player small {
+    display: inline;
+    margin-left: 5px;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  html[data-visual-mode] .field-context button,
+  html[data-visual-mode] .field-context #draft-mode {
+    flex: none;
+    min-height: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  html[data-visual-mode] .field-context .context-primary {
+    background: var(--accent-main);
+    color: var(--on-accent);
+    border-color: transparent;
+  }
+  html[data-visual-mode] .board-height-resizer {
+    min-height: 20px;
+    height: 20px;
+    margin: 4px 0 0;
+    padding: 0;
+  }
+  html[data-visual-mode] .board-height-resizer > span:last-child {
+    display: none;
+  }
+  html[data-visual-mode] .canvas-hint {
+    margin-top: 4px;
+    padding: 2px 2px;
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+  html[data-visual-mode] .canvas-hint:not(:has(.drawing-steps)) {
+    display: none;
+  }
+
+  /* 2.7 Elevated Studio Stage Dock + Smooth Scroll-Snap Drawing Rail */
+  html[data-visual-mode] .workspace:not(.reference-play) .stage-dock {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-block-start: 6px;
+    padding: 7px;
+    border-radius: 16px;
+    background: var(--night-1);
+    border: 1px solid var(--hairline);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  html[data-visual-mode] .stage-dock .editor-mode {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 3px;
+    gap: 3px;
+    border-radius: 11px;
+    background: var(--night-0);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .stage-dock .editor-mode button {
+    min-height: 38px;
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  /* Horizontal scroll-snap touch rail replaces cramped 7-column grid */
+  html[data-visual-mode] .stage-dock .draw-tools {
+    display: flex !important;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 4px;
+    width: 100%;
+    padding: 3px;
+    border-radius: 11px;
+    background: var(--night-0);
+    border: 1px solid var(--hairline);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  html[data-visual-mode] .stage-dock .draw-tools::-webkit-scrollbar {
+    display: none;
+  }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-indicator {
+    display: none;
+  }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button {
+    flex: 0 0 auto;
+    min-width: 56px;
+    min-height: 46px;
+    height: auto;
+    padding: 5px 8px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    border-radius: 9px;
+    scroll-snap-align: start;
+    color: var(--text-2);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: background-color 140ms ease, color 140ms ease, transform 100ms ease;
+  }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button:active {
+    transform: scale(0.95);
+  }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button .tool-name {
+    display: block;
+    font-size: 11px;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button.active {
+    background: var(--accent-main);
+    color: var(--on-accent);
+    border-color: transparent;
+    font-weight: 700;
+    box-shadow: 0 3px 12px rgba(228, 231, 235, 0.22);
+  }
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button.active svg {
+    color: var(--on-accent);
+  }
+
+  /* Studio Rehearsal Transport inside Dock */
+  html[data-visual-mode] .stage-dock .playback {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 11px;
+    background: var(--night-0);
+    border: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .stage-dock .transport {
+    order: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+  html[data-visual-mode] .stage-dock .playback .play-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    flex: none;
+  }
+  html[data-visual-mode] .stage-dock .playback .transport .icon-button {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    flex: none;
+  }
+  html[data-visual-mode] .stage-dock .playback-top {
+    order: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 1px solid var(--hairline);
+  }
+  html[data-visual-mode] .stage-dock .playback-title {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  html[data-visual-mode] .stage-dock .playback-options {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  html[data-visual-mode] .stage-dock .speed-label select {
+    min-height: 34px;
+    height: 34px;
+    padding: 0 8px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+  html[data-visual-mode] .stage-dock .playback-options .icon-button {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  /* 2.8 Native Bottom Sheet Properties Panel */
+  html[data-visual-mode] .inspector-panel {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: min(76dvh, calc(var(--visible-height, 100dvh) - 18px));
+    border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+    background: linear-gradient(180deg, #1f242c 0%, #171a20 100%);
+    box-shadow: 0 -16px 56px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.28s;
+  }
+  html[data-visual-mode] .inspector-panel .panel-heading {
+    position: relative;
+    padding: 20px 12px 10px 18px;
+    touch-action: none;
+    user-select: none;
+  }
+  html[data-visual-mode] .inspector-panel .sheet-handle {
+    display: block;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+  }
+  html[data-visual-mode] .inspector-panel .inspector {
+    padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* 2.9 Full-width Bottom Sheet AI Assistant & Modals */
+  html[data-visual-mode] .board-ai.ba-docked .ba-panel {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-height: min(72dvh, calc(var(--visible-height, 100dvh) - 18px));
+    border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html[data-visual-mode] .modal-backdrop {
+    padding: env(safe-area-inset-top, 0px) 0 0;
+  }
+  html[data-visual-mode] .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+    max-height: calc(var(--visible-height, 100dvh) - 16px);
+  }
+
+  /* 2.10 Compact Studio Footer */
+  html[data-visual-mode] .app-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 14px 12px 10px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Ultra-narrow Phone Safety (<= 360px)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 360px) {
+  html[data-visual-mode] .cloud-bar-actions > button {
+    padding: 0 5px;
+    font-size: 10.5px;
+  }
+  html[data-visual-mode] .play-actions .button {
+    padding: 0 7px;
+    font-size: 11px;
+  }
+  html[data-visual-mode] .board-zoom-controls output {
+    min-width: 32px;
+    font-size: 11px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Mobile Login, Studio Home & Secondary Views (<= 720px)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* Above-the-fold dark studio login */
+  .login-layout {
+    background: var(--night-0);
+  }
+  .login-story {
+    min-height: 0;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 16px;
+    border-bottom: 1px solid var(--hairline);
+    background: radial-gradient(480px 220px at 90% 100%, rgba(228, 231, 235, 0.08), transparent 72%), #15181e;
+  }
+  .login-heading {
+    margin-top: 12px;
+    max-width: 280px;
+  }
+  .login-heading .section-kicker {
+    font-size: 11px;
+  }
+  .login-heading h1 {
+    font-size: 26px;
+    line-height: 1.15;
+    margin: 6px 0 4px;
+  }
+  .login-heading p {
+    display: none;
+  }
+  .login-pitch {
+    width: 210px;
+    height: 140px;
+    right: -68px;
+    bottom: -36px;
+    opacity: 0.24;
+  }
+  .login-panel {
+    padding: 22px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+    justify-content: flex-start;
+  }
+  .login-form-wrap {
+    margin: 0 auto;
+  }
+  .login-form-wrap h2 {
+    font-size: 23px;
+    margin: 6px 0 8px;
+  }
+  .login-description {
+    margin-bottom: 18px;
+    line-height: 1.55;
+  }
+  .login-submit {
+    min-height: 48px;
+    font-weight: 700;
+    border-radius: 10px;
+  }
+  .login-assistance {
+    margin: 14px 0 16px;
+    line-height: 1.65;
+  }
+  .login-panel-footer {
+    position: static;
+    margin-top: 22px;
+  }
+
+  /* Studio Home mobile refinement */
+  html[data-visual-mode] .studio-home-header {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+  html[data-visual-mode] .studio-home-brand > span {
+    font-size: 19px;
+  }
+  html[data-visual-mode] .studio-home-main {
+    padding: 18px 14px calc(44px + env(safe-area-inset-bottom, 0px));
+  }
+  html[data-visual-mode] .studio-home-intro h1 {
+    font-size: 26px;
+    margin: 4px 0 6px;
+  }
+  html[data-visual-mode] .studio-home-intro p {
+    font-size: 13px;
+  }
+  html[data-visual-mode] .studio-home .studio-choice {
+    border-radius: 14px;
+    gap: 4px;
+  }
+
+  /* Prevent accidental horizontal page bleed on Roster / AI Matchup */
+  #roster-root,
+  #ai-matchup-root {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+}
+
+/* Reduced motion respects user accessibility preference */
+@media (prefers-reduced-motion: reduce) {
+  html[data-visual-mode] .workspace .sidebar,
+  html[data-visual-mode] .inspector-panel,
+  html[data-visual-mode] .compact-nav button,
+  html[data-visual-mode] .stage-dock .draw-tools .tool-button {
+    transition: none !important;
+  }
+}

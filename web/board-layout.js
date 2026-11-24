@@ -11,6 +11,8 @@ const dimensionsMode = () => window.innerWidth <= 600 || (isCompactWorkspace() &
 export function createBoardLayout({ notify = () => {}, hasDraft = () => false,onChange=()=>{} } = {}) {
   const q = selector => document.querySelector(selector);
   let prefs = {}, expanded = false, zoom = 1, gesture = null, frame = null, pending = null;
+  const touchPointers = new Map();
+  let pinch = null;
   let dimensionsLayout = dimensionsMode(), dimensionsOpen = dimensionsLayout === 'inline';
   try {
     const saved = JSON.parse(localStorage.getItem(BOARD_LAYOUT_KEY));
@@ -131,6 +133,26 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
   }
 
   document.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'touch' && event.target.closest?.('.pitch-viewport')) {
+      const onInteractive = !!event.target.closest?.('[data-player],[data-route],[data-zone],[data-annotation],.point-handle');
+      if (!onInteractive && !document.querySelector('.field-wrap.is-dragging') && !hasDraft()) {
+        touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        if (touchPointers.size === 2) {
+          const [a, b] = [...touchPointers.values()];
+          const dist = Math.hypot(b.x - a.x, b.y - a.y);
+          const viewport = q('.pitch-viewport');
+          if (dist >= 16 && viewport) {
+            const rect = viewport.getBoundingClientRect();
+            pinch = {
+              startDist: dist,
+              startZoom: zoom,
+              ratioX: (viewport.scrollLeft + (a.x + b.x) / 2 - rect.left) / Math.max(1, viewport.scrollWidth),
+              ratioY: (viewport.scrollTop + (a.y + b.y) / 2 - rect.top) / Math.max(1, viewport.scrollHeight),
+            };
+          }
+        }
+      }
+    }
     const handle = event.target.closest('[data-board-resize]');
     if (!handle || event.button !== 0 || gesture) return;
     event.preventDefault();
@@ -142,18 +164,46 @@ export function createBoardLayout({ notify = () => {}, hasDraft = () => false,on
     document.body.classList.toggle('board-resizing-width', gesture.axis === 'width');
   });
   document.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch' && touchPointers.has(event.pointerId)) {
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pinch && touchPointers.size === 2) {
+        if (document.querySelector('.field-wrap.is-dragging') || hasDraft()) {
+          pinch = null;
+        } else {
+          const [a, b] = [...touchPointers.values()];
+          const dist = Math.hypot(b.x - a.x, b.y - a.y);
+          const nextZoom = Math.min(3, Math.max(1, Math.round(pinch.startZoom * (dist / pinch.startDist) * 100) / 100));
+          if (Math.abs(nextZoom - zoom) >= 0.02) {
+            zoom = nextZoom;
+            apply();
+            const viewport = q('.pitch-viewport');
+            if (viewport) {
+              const rect = viewport.getBoundingClientRect();
+              const midX = (a.x + b.x) / 2 - rect.left;
+              const midY = (a.y + b.y) / 2 - rect.top;
+              viewport.scrollLeft = Math.max(0, Math.min(viewport.scrollWidth - viewport.clientWidth, pinch.ratioX * viewport.scrollWidth - midX));
+              viewport.scrollTop = Math.max(0, Math.min(viewport.scrollHeight - viewport.clientHeight, pinch.ratioY * viewport.scrollHeight - midY));
+            }
+          }
+        }
+      }
+    }
     if (!gesture || event.pointerId !== gesture.pointerId) return;
     pending = { x: event.clientX, y: event.clientY };
     if (frame === null) frame = window.requestAnimationFrame(flush);
   });
+  function clearTouchPointer(pointerId) {
+    if (touchPointers.delete(pointerId) && touchPointers.size < 2) pinch = null;
+  }
   document.addEventListener('pointerup', event => {
+    clearTouchPointer(event.pointerId);
     if (!gesture || event.pointerId !== gesture.pointerId) return;
     pending = { x: event.clientX, y: event.clientY };
     finish();
   });
-  document.addEventListener('pointercancel', event => { if (event.pointerId === gesture?.pointerId) finish(true); });
-  document.addEventListener('lostpointercapture', event => { if (event.pointerId === gesture?.pointerId) finish(true); });
-  window.addEventListener('blur', () => finish(true));
+  document.addEventListener('pointercancel', event => { clearTouchPointer(event.pointerId); if (event.pointerId === gesture?.pointerId) finish(true); });
+  document.addEventListener('lostpointercapture', event => { clearTouchPointer(event.pointerId); if (event.pointerId === gesture?.pointerId) finish(true); });
+  window.addEventListener('blur', () => { touchPointers.clear(); pinch = null; finish(true); });
   window.addEventListener('resize', () => {
     finish(true); apply();
   });
