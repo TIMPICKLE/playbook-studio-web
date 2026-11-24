@@ -49,6 +49,60 @@
 .board-ai .ba-content { flex:1 1 auto; overflow:auto; overscroll-behavior:contain; min-height:0; touch-action:pan-y; scrollbar-width:thin; scroll-padding:12px; }
 .board-ai :is(.ba-welcome,.ba-output,.ba-config) { padding:14px; }
 .board-ai .ba-welcome strong { font-size:13.5px; font-weight:600; color:var(--ui-text,#f3f4f6); }
+.board-ai .ba-ready-banner {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  margin-top:10px; padding:8px 10px;
+  border:1px solid var(--ui-border-strong,#ffffff24); border-radius:var(--r-control,8px);
+  background:var(--ui-bg,#12151a);
+}
+.board-ai .ba-ready-status {
+  display:flex; align-items:center; gap:7px; min-width:0; flex:1;
+  font-size:12px; line-height:1.45; color:var(--ui-text-muted,#c3c9d2);
+}
+.board-ai .ba-ready-status > span { min-width:0; overflow-wrap:anywhere; }
+.board-ai .ba-ready-status i {
+  flex:none; width:8px; height:8px; border-radius:50%;
+  background:var(--ui-text-subtle,#9aa3b2);
+}
+.board-ai .ba-ready-banner[data-state=ready] .ba-ready-status { color:var(--ui-text,#f3f4f6); }
+.board-ai .ba-ready-banner[data-state=ready] i {
+  background:var(--ui-success,#8fe0b2);
+  box-shadow:0 0 0 3px rgba(143,224,178,0.16);
+}
+.board-ai .ba-ready-banner[data-state=setup] i {
+  background:var(--ui-warning,#f2cf89);
+  box-shadow:0 0 0 3px rgba(242,207,137,0.16);
+}
+.board-ai .ba-ready-action {
+  flex:none; padding:5px 10px; min-height:30px;
+  border:1px solid var(--ui-border-strong,#ffffff24); border-radius:var(--r-control,8px);
+  background:var(--ui-surface-raised,#222731); color:var(--ui-text,#f3f4f6);
+  font-size:12px; font-weight:600; line-height:1.35; white-space:nowrap;
+}
+.board-ai .ba-ready-action:hover:not(:disabled) {
+  background:var(--ui-surface-hover,#2d3442); border-color:rgba(255,255,255,0.3); color:#fff;
+}
+.board-ai .ba-ready-banner[data-state=setup] .ba-ready-action {
+  background:var(--ui-accent,#e4e7eb); color:var(--ui-on-accent,#111214); border-color:transparent;
+}
+.board-ai .ba-ready-banner[data-state=setup] .ba-ready-action:hover:not(:disabled) {
+  background:var(--accent-strong,#fff); color:var(--ui-on-accent,#111214);
+}
+.board-ai .ba-safety-strip {
+  display:flex; flex-wrap:wrap; gap:6px;
+  list-style:none; margin:10px 0 0; padding:0;
+}
+.board-ai .ba-safety-strip li {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px;
+  border:1px solid var(--ui-border,#ffffff14); border-radius:var(--r-pill,999px);
+  background:var(--ui-surface-raised,#252a32); color:var(--ui-text-muted,#c3c9d2);
+  font-size:11.5px; line-height:1.45;
+}
+.board-ai .ba-safety-strip li::before {
+  content:''; flex:none; width:4px; height:4px; border-radius:50%;
+  background:var(--ui-preview,#b4d4ff);
+}
 .board-ai .ba-examples { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 .board-ai .ba-pill {
   display:inline-flex; justify-content:center; align-items:center; gap:5px;
@@ -88,6 +142,7 @@
   outline:none; border-color:var(--ui-focus,#a9c1ff); box-shadow:var(--ui-focus-ring,0 0 0 3px #a9c1ff33);
 }
 .board-ai .ba-config small { color:var(--ui-text-muted,#c3c9d2); font-size:12px; line-height:1.65; }
+.board-ai .ba-config .ba-model-hint { color:var(--ui-text-subtle,#9aa3b2); font-size:11.5px; line-height:1.55; margin-top:-2px; }
 .board-ai .ba-config .ba-pill { justify-self:end; }
 .board-ai .ba-footer { flex:none; padding:6px 12px 12px; background:var(--ui-surface,#181c23); }
 .board-ai .ba-status { padding:5px 4px; color:var(--ui-text-muted,#c3c9d2); font-size:12px; overflow-wrap:anywhere; }
@@ -162,7 +217,7 @@
   max-height:min(58dvh,calc(100% - 80px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));
 }
 .board-ai.ba-docked .ba-heading { cursor:default; touch-action:pan-y; }
-.board-ai.ba-docked :is(.ba-icon,.ba-pill,.ba-fab) { min-height:44px; }
+.board-ai.ba-docked :is(.ba-icon,.ba-pill,.ba-fab,.ba-ready-action) { min-height:44px; }
 .board-ai.ba-docked .ba-icon { width:44px; height:44px; }
 .board-ai.ba-docked .ba-config :is(input,select),.board-ai.ba-docked :where(textarea,.ba-covered-prompt) { font-size:16px; }
 .board-ai.ba-docked .ba-config :is(input,select) { min-height:44px; }
@@ -172,6 +227,7 @@
 .board-ai.ba-docked .ba-panel.ba-collapsed .ba-expand { display:inline-flex; flex:1; }
 @media screen and (max-width:600px) {
   .board-ai .ba-fab { min-height:44px; right:8px; top:8px; }
+  .board-ai .ba-ready-banner { flex-wrap:wrap; }
   .board-ai.ba-docked .ba-panel { left:max(8px,env(safe-area-inset-left,0px))!important; width:auto; }
   .board-ai.ba-docked .ba-panel.ba-collapsed .ba-expand { min-width:0; }
   .board-ai .ba-config input,.board-ai :where(textarea,.ba-covered-prompt) { font-size:16px; }

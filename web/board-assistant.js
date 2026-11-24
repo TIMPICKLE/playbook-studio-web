@@ -27,11 +27,12 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       <div class="ba-content"><div class="ba-config" hidden><label><span data-text="provider"></span><select data-ba-provider>${Object.entries(MODEL_PROVIDER_PRESETS).map(([id,preset])=>`<option value="${e(id)}">${e(preset.label)}</option>`).join('')}</select></label>
         <label><span data-text="protocol"></span><select data-ba-protocol></select></label>
         <label data-ba-custom hidden><span>API Base URL</span><input data-ba-base-url type="url" maxlength="400" autocomplete="off" spellcheck="false" placeholder="https://api.example.com/v1"><small data-ba-url-hint></small></label>
-        <label><span data-text="model"></span><input data-ba-model value="gpt-6.1-terra" maxlength="160" autocomplete="off" spellcheck="false"></label>
+        <label><span data-text="model"></span><input data-ba-model value="gpt-6.1-terra" maxlength="160" autocomplete="off" spellcheck="false"><small class="ba-model-hint" data-text="modelHint"></small></label>
         <label><span data-text="key"></span><input data-ba-key type="password" autocomplete="off" maxlength="512" spellcheck="false"></label><small data-text="keyHint"></small>
         <button type="button" class="ba-pill" data-ba="done" data-text="done"></button></div>
-        <details class="ba-history" open hidden><summary data-ba-history-title></summary><ol class="ba-history-list"></ol></details><div class="ba-run-state" role="status" aria-live="polite" hidden></div><div class="ba-output" hidden></div><div class="ba-welcome"><strong data-ba-guide></strong><div class="ba-examples">
+        <details class="ba-history" open hidden><summary data-ba-history-title></summary><ol class="ba-history-list"></ol></details><div class="ba-run-state" role="status" aria-live="polite" hidden></div><div class="ba-output" hidden></div><div class="ba-welcome"><strong data-ba-guide></strong><div class="ba-ready-banner" data-ba-ready><span class="ba-ready-status"><i aria-hidden="true"></i><span data-ba-ready-text></span></span><button type="button" class="ba-ready-action" data-ba="settings" data-ba-ready-btn></button></div><ul class="ba-safety-strip" aria-label="AI safety"><li data-text="safetyPreview"></li><li data-text="safetyIterate"></li><li data-text="safetyUndo"></li></ul><div class="ba-examples">
         <button class="ba-pill" type="button" data-ba="edit" data-text="edit"></button>
+        <button class="ba-pill" type="button" data-ba="route-edit" data-text="routeEdit"></button>
         <button class="ba-pill" type="button" data-ba="search" data-text="search"></button></div></div>
         <details class="ba-trace" hidden><summary data-ba-trace-title></summary><ol class="ba-trace-list"></ol></details></div>
       <footer class="ba-footer"><button type="button" class="ba-mode ba-pill" data-ba="clear-mode" hidden></button><div class="ba-status" role="status" aria-live="polite"></div>
@@ -77,7 +78,24 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   let runState = 'idle', activeInstruction = '', lastError = null, lastAppliedTurns = [], floatingRequested = false;
   let staged = null, stagedTurns = [], selectedGroups = new Set(), groupError = '';
   loadConnection(getModelConnection());
-  const unsubscribeConnection = subscribeModelConnection(loadConnection);
+  const serverReady = () => !!getContext().serverConfigured;
+  function updateReadyBanner() {
+    const banner = q('[data-ba-ready]'), text = q('[data-ba-ready-text]'), action = q('[data-ba-ready-btn]');
+    if (!banner || !text || !action) return;
+    const lang = copy(), hasKey = !!key.value.trim(), modelId = model.value.trim(), server = serverReady();
+    const ready = server || (hasKey && !!modelId);
+    banner.dataset.state = ready ? 'ready' : 'setup';
+    if (hasKey && modelId) {
+      const providerLabel = provider.value === 'custom' ? lang.customProvider : (MODEL_PROVIDER_PRESETS[provider.value]?.label || provider.value);
+      text.textContent = `${lang.readyConfigured} · ${providerLabel} · ${modelId}`;
+    } else if (server) {
+      text.textContent = lang.readyServer;
+    } else {
+      text.textContent = lang.readyUnconfigured;
+    }
+    action.textContent = ready ? lang.editConfigAction : lang.configureAction;
+  }
+  const unsubscribeConnection = subscribeModelConnection(connection => { loadConnection(connection); updateReadyBanner(); });
   const turnsOf = handle => Array.isArray(handle.turns) && handle.turns.length ? handle.turns : [handle];
   const describe = (turn, fallback) => ({summary:turn.summary || turn.message || fallback?.message || '', operations:turn.operations || fallback?.operations || [],
     routeIds:turn.routeIds || [], zoneIds:turn.zoneIds || [], playerIds:turn.playerIds || []});
@@ -178,6 +196,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     label(button('mic'), Speech ? (recognition ? lang.micStop : lang.mic) : lang.micUnavailable);
     button('settings').disabled = running;
     button('settings').setAttribute('aria-expanded', String(!config.hidden));
+    const readyBtn = q('[data-ba-ready-btn]');
+    if (readyBtn) readyBtn.disabled = running;
     prompt.readOnly = running || !!applying || !!continuing;
   }
   function pill(action, text, disabled = false) {
@@ -320,7 +340,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   }
   function showConfig(show) {
     if (show) syncModelOptions();
-    config.hidden = !show; outputView(); updateButtons();
+    config.hidden = !show; updateReadyBanner(); outputView(); updateButtons();
     if (show) key.focus();
   }
   function promptText() {
@@ -383,7 +403,7 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     const returnFocus = root.contains(doc.activeElement);
     if (suspend) cancel();
     stopSpeech(); config.hidden = true; setOpen(false);
-    if (clear) { key.value = ''; reset(); }
+    if (clear) { key.value = ''; reset(); updateReadyBanner(); }
     if (returnFocus) (presentation?.trigger ?? button('open')).focus();
   }
   function updateGuide(ctx = getContext(), lang = copy()) {
@@ -403,7 +423,9 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     q('.ba-scope').textContent = ctx.title || '';
     updateGuide(ctx, lang);
     button('edit').hidden = !!ctx.readOnly;
+    button('route-edit').hidden = !!ctx.readOnly;
     prompt.placeholder = sharedLesson ? lang.sharedPrompt : clarification ? lang.clarified : lang.prompt;
+    updateReadyBanner();
     updateButtons(); outputView();
   }
   function mount(next) {
@@ -638,6 +660,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
         reply = null; runState = 'undone';
       }
       outputView(); announce(applied === false ? copy().undoExpired : copy().undone);
+    } else if (action === 'route-edit') {
+      selectedMode = 'edit'; clarification = ''; compose(copy().routeEditExample);
     } else if (action === 'edit' || action === 'search') {
       selectedMode = action; clarification = ''; prompt.value = copy()[action + 'Example']; updateButtons(); prompt.focus(); prompt.select();
     }
@@ -657,7 +681,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
   });
   ordinaryPrompt.addEventListener('input', updateButtons);
   coveredPrompt.addEventListener('input', () => { coveredDraft = ''; updateButtons(); });
-  provider.addEventListener('change', () => { key.value = ''; baseUrl.value = ''; model.value = MODEL_PROVIDER_PRESETS[provider.value].defaultModel; syncModelOptions(true); key.focus(); });
+  provider.addEventListener('change', () => { key.value = ''; baseUrl.value = ''; model.value = MODEL_PROVIDER_PRESETS[provider.value].defaultModel; syncModelOptions(true); updateReadyBanner(); key.focus(); });
+  for (const field of [model, key]) field.addEventListener('input', updateReadyBanner);
   root.addEventListener('keydown', event => {
     if (!presentation || event.key !== 'Tab') event.stopPropagation();
     if (event.isComposing || event.keyCode === 229) return;
@@ -734,5 +759,5 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     open(); setPrompt(String(instruction || '').slice(0,prompt.maxLength)); updateButtons(); prompt.focus();
     if (submit) void send();
   }
-  return {mount, presentIn, setSharedLesson, refresh, refreshLayout:syncPanelLayout, refreshPreview, open, close, destroy, adoptScope, notifyTransaction, compose};
+  return {mount, presentIn, setSharedLesson, refresh, refreshLayout:syncPanelLayout, refreshPreview, open, close, destroy, adoptScope, notifyTransaction, compose, isServerConfigured: () => serverReady()};
 }
