@@ -25,5 +25,10 @@ export default {
   empty: 'No matching plays. Try a formation or route concept.', matches: 'Madden play matches', added: 'Added', add: 'Add to playbook',
   editable: 'Editable', reference: 'Image', undo: 'Undo play edit', undone: 'Play edit undone.', undoExpired: 'The play has changed. Use Undo in the editor.',
   clarified: 'Add a clarification…', readonly: 'Read-only playbook. You can inspect, search and adjust the view.', addFailed: 'Could not add this play. Check your current playbook.',
-  change: 'Board updated.', changed: 'Switched play.', reason: 'Why it matches', original: 'Original command', followup: 'Clarification requested', answer: 'Your answer', guideSearch: 'Inspect a play, adjust the view, or search the library.'
+  change: 'Board updated.', changed: 'Switched play.', reason: 'Why it matches', original: 'Original command', followup: 'Clarification requested', answer: 'Your answer', guideSearch: 'Inspect a play, adjust the view, or search the library.',
+  readyConfigured: 'Model ready', readyServer: 'Server model ready · no key needed', readyUnconfigured: 'Model API key needed',
+  configureAction: 'Set up model', editConfigAction: 'Settings',
+  safetyPreview: 'Preview before applying', safetyIterate: 'Rehearse & refine', safetyUndo: 'One-click undo',
+  routeEdit: 'Edit a route', routeEditExample: 'Change X’s route to a post route breaking toward the middle.',
+  modelHint: 'When using your own API key, enter an active model ID from your provider (e.g. deepseek-chat, gpt-4o, claude-sonnet-4-6).'
 };

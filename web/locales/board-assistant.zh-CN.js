@@ -25,5 +25,10 @@ export default {
   empty: '未找到匹配战术，试试阵型名或路线概念。', matches: 'Madden 战术候选', added: '已加入', add: '加入战术本',
   editable: '可编辑', reference: '原图', undo: '撤销改图', undone: '已撤销本次改图。', undoExpired: '战术已有其他改动，请使用编辑器的撤销按钮。',
   clarified: '补充说明…', readonly: '当前战术本为只读，可查看、检索和调整视图。', addFailed: '未能加入，请检查当前战术本。',
-  change: '已更新战术板。', changed: '已切换战术。', reason: '推荐依据', original: '原指令', followup: '待确认', answer: '补充', guideSearch: '可以查看战术、调整视图或查找战术。'
+  change: '已更新战术板。', changed: '已切换战术。', reason: '推荐依据', original: '原指令', followup: '待确认', answer: '补充', guideSearch: '可以查看战术、调整视图或查找战术。',
+  readyConfigured: '模型已就绪', readyServer: '服务已预配置 · 可直接使用', readyUnconfigured: '尚未配置模型密钥',
+  configureAction: '去配置模型', editConfigAction: '模型设置',
+  safetyPreview: '先预览再应用', safetyIterate: '可演练与微调', safetyUndo: '支持一键撤销',
+  routeEdit: '改写一条路线', routeEditExample: '把 X 的路线改为向中路斜插的 Post 路线。',
+  modelHint: '使用自己账号的 API Key 时，请确认填写该服务商开通的实际模型 ID（如 deepseek-chat、gpt-4o、claude-sonnet-4-6）。'
 };
