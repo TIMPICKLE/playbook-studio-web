@@ -20,7 +20,7 @@ Playbook Studio 有两个 AI 入口：战术板助手负责编辑和操作，攻
 | 查看攻防图面简报和检索到的教练资料 | 工作台 → **AI分析战局** | 不需要 |
 | 结合资料生成有条件的攻防情景 | 同一分析页面 → 填写模型设置 → **分析对局** | 需要 |
 
-可以先打开[免登录演示](https://timpickle.github.io/playbook-studio-web/)体验。演示使用浏览器本地数据与内置攻防示例；团队共享使用[云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/)。
+可以先打开[免登录演示](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local)（或 [GitHub Pages 静态镜像](https://timpickle.github.io/playbook-studio-web/)）体验。演示使用浏览器本地数据与内置攻防示例；团队共享使用[云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/)。
 
 ## 5 人腰旗与 AI
 
@@ -43,6 +43,8 @@ Playbook Studio 有两个 AI 入口：战术板助手负责编辑和操作，攻
 | 其他兼容服务 | 三种格式均可选择；需要填写自定义 HTTPS 地址 |
 
 战术板助手和云端对位分析会调用工具，应选择**在所选 API 格式下支持工具调用**的模型。免登录对位分析仍是单次请求，但模型也需返回要求的结构化分析结果。支持某种 API 格式不代表服务商的每个模型都支持该格式或所需能力。
+
+> **模型 ID 提醒**：界面默认预填的模型 ID（如 `gpt-6.1-terra`、`deepseek-flash`）可能与您个人账号实际开通的模型不一致。使用自己的 API Key 时，请确认替换为该服务商当前可用且支持工具调用的模型 ID（如 `gpt-4o`、`deepseek-chat`、`claude-sonnet-4-6`、`openai/gpt-4o-mini`）。本地自部署同样为纯浏览器内存 BYOK，不支持通过服务端 `.dev.vars` 预填模型 Key。
 
 ### 自定义地址怎样填写
 
@@ -236,16 +238,18 @@ Playbook Studio 有两个 AI 入口：战术板助手负责编辑和操作，攻
 | 分析报告标为旧版本 | 可回看报告原图；对当前输入重新分析后再追问或转入编辑 |
 | 没有知识命中 | 核对概念词、覆盖假设与资料关键词；导入相关资料。无命中不应编造来源 |
 | 导入后队友看不到资料 | 资料当前按本机战术本隔离；导出知识包，交由队友在自己的设备导入 |
-| API 格式不兼容，或 HTTP 400／404 | 核对模型是否支持所选格式、地址前缀和最终端点；自定义网关不会被自动补 `/v1`，也不要把 Messages 当作 Claude Code 登录 |
+| API 格式不兼容，或 HTTP 400／404 | 核对模型是否支持所选格式、是否已替换预设默认模型 ID（`gpt-6.1-terra`／`deepseek-flash`）、地址前缀和最终端点；自定义网关不会被自动补 `/v1`，也不要把 Messages 当作 Claude Code 登录 |
 | 网络或 CORS 错误 | 浏览器直连需服务商允许跨域；云端自定义主机需管理员允许。检查网络，不要仅凭界面可选就认定服务可达 |
 | HTTP 401／403 | 核对所选服务商、模型权限和对应 Key；云端自定义主机还需检查允许列表 |
-| 超时或 HTTP 429 | 检查服务商额度、速率和云端短时频率保护；稍后重试。它们区别于旧的助手总查询配额 |
+| HTTP 503（提示关闭 LangSmith 跟踪） | 本地自部署或服务端宿主机存在 `LANGCHAIN_TRACING`（即使值为 `"false"`）、`LANGSMITH_TRACING`、`OTEL_ENABLED` 等环境变量；清除后重启服务 |
+| 超时或 HTTP 429 | 检查服务商额度、速率与云端共享频率保护（战术板助手与攻防分析合计每 60 秒 12 次）；稍后重试。它们区别于旧的助手总查询配额 |
 | 模型拒绝、回复截断或结果格式无效 | 不把空白或不完整回复当作已执行。检查模型的工具与输出能力，必要时换兼容模型或减少单次请求的复杂度 |
 | 手机或 iPad 不能开启数字模式 | 这些设备使用传统模式；仍可编辑和演练 |
 | 已显示「准备好」但没导入或打印 | 点击 **继续**后完成真实文件选择、导入确认或打印操作 |
 
 ## 进一步阅读
 
+- [Agent 本地部署与 AI 配置 Skill](../skills/playbook-studio-local-deploy/SKILL.md) · [AI 协议与安全契约参考](../skills/playbook-studio-local-deploy/references/ai-providers-and-protocols.md)
 - [战术板工具流程与维护](BOARD_ASSISTANT.md) · [共享命令与完整功能映射](EDITOR_COMMAND_ARCHITECTURE.md)
 - [UX 改造与验证记录](UX_REDESIGN.md) · [统一交互与设计规范](UX_DESIGN_SYSTEM.md)
 - [AI 分析、研究与评估入口](ai-analysis/README.md) · [PDF 本地预处理](ai-analysis/pdf-ingestion.md)

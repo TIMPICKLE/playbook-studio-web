@@ -2,11 +2,11 @@
 
 [简体中文](USER_GUIDE.md) · **English** · [Back to README](../README.en.md)
 
-Detailed instructions for editing, rehearsal, roster management, Madden imports and cloud collaboration. Start with the [no-sign-in demo](https://timpickle.github.io/playbook-studio-web/). For AI workflows, see the [AI feature guide](AI_GUIDE.en.md).
+Detailed instructions for editing, rehearsal, roster management, Madden imports and cloud collaboration. Start with the [no-sign-in demo](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) (or the [GitHub Pages mirror](https://timpickle.github.io/playbook-studio-web/)). For AI workflows, see the [AI feature guide](AI_GUIDE.en.md).
 
 ## Quick start
 
-1. Open the [demo workspace](https://timpickle.github.io/playbook-studio-web/). Select **Edit playbook**, then choose a sample or select **新建战术** (New play).
+1. Open the [demo workspace](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local). Select **Edit playbook**, then choose a sample or select **新建战术** (New play).
 2. Drag players into position. Use **添加对象** (Add objects) to add individual players or a complete **4–3 defensive formation**.
 3. Select a player, choose **跑动** (Route) or press `R`, then click to place route points. Press `Enter` or select **完成** (Finish).
 4. Switch to **战术演练** (Rehearsal) to play, pause, or scrub the timeline. The space bar also toggles playback.
@@ -29,13 +29,13 @@ This is a five-player diagram mode using the existing diagram grid, rather than 
 
 ## Quick tour
 
-On your first visit to the workspace home, play editor, AI analysis or player management, the tour highlights relevant modules and explains them beside the page. Choose **Next** or **Back** to browse, then **Get started** to finish the current page's tour. Automatic tours wait while you draw, rehearse, enter information or have a panel open.
+On your first visit to the play editor, AI matchup analysis or player management, the tour highlights relevant modules and explains them beside the page (the workspace home page no longer auto-starts a tour). Choose **Next** or **Back** to browse, then **Get started** to finish the current page's tour. Automatic tours wait while you draw, rehearse, enter information or have a panel open.
 
-Choose **Skip guide** or press `Esc` to leave at any time; automatic tours will then stop across all pages. To revisit a tour, choose **Quick tour** beside the language selector. Completing a tour only stops automatic guidance for that page; other pages can still show their tours on the first visit.
+Choose **Skip page** or press `Esc` to leave at any time; skipping is remembered per page and only stops automatic guidance for the current page, without suppressing first-visit tours on other pages. To revisit a tour, choose **Quick tour** beside the language selector on desktop, or open the **⋯** overflow menu on mobile and choose **Quick tour**.
 
-Completion and skip choices are stored in this browser's `localStorage`, independently of your account or shared playbook. Clearing site data or using another browser brings the tours back. The tour explains controls without changing plays, opening AI conversations or sending requests. On phones and iPads, it highlights visible playbook and properties menu buttons without opening drawers; try the controls after the tour.
+Completion and skip choices are stored in this browser's `localStorage`, independently of your account or shared playbook. Clearing site data or using another browser brings the tours back. The tour explains controls without changing plays, opening AI conversations or sending requests. On phones and iPads, it highlights visible playbook, properties and overflow menu buttons without opening drawers; try the controls after the tour.
 
-![The guided tour highlights properties, explains the feature, and offers previous, next and skip controls](assets/readme/onboarding-tour.jpg)
+![The dark studio guided tour highlights the AI assistant entry with per-page skip and replay controls](assets/readme/onboarding-tour.jpg)
 
 ## Keyboard shortcuts
 
@@ -64,7 +64,7 @@ For a custom personnel group, choose **Group options → Edit group details → 
 
 Open **Mesh · 浅交叉** from the play list and click a route on the field. Drag its solid control points to change the path. The right panel switches from play details to **路线设置** (Route settings).
 
-![The selected Y route exposes draggable control points; the right panel shows line styles, curves, and animation timing](assets/readme/route-editing-silver.jpg)
+![The selected route exposes draggable control points; the right panel shows line styles, curves, and animation timing](assets/readme/route-editing-dark.webp)
 
 | Task | Control |
 |---|---|
@@ -78,7 +78,7 @@ Open **Mesh · 浅交叉** from the play list and click a route on the field. Dr
 
 Select **战术演练** (Rehearse) below the field, then press play or the space bar. Drag the timeline to inspect player positions at a specific moment. The toolbar also provides speed, loop, and reset controls.
 
-![Mesh paused at 2.6 seconds during a pass, with playback, timeline, speed, and loop controls below the field](assets/readme/rehearsal-silver.jpg)
+![Mesh paused at 2.6 seconds during a pass, with playback, timeline, speed, and loop controls below the field](assets/readme/rehearsal-dark.webp)
 
 This example is paused at **2.6 seconds**, showing the crossing routes and the ball in flight. Switch back to **布阵与画线** (Edit) to make changes. Set the passer, receiver, and pass timing under **足球移动** (Ball movement) in the right panel.
 
@@ -93,11 +93,11 @@ Filter by team, formation group, specific formation, or English play name. Previ
 3. Click an image to preview it. Select **＋ 加入可编辑版** (Add editable version), or drag the card into the dashed target on the left.
 4. Close the library and continue editing. Next to the play title, **原图对照** (Original image) opens the source image, and **整理锋线间距** (Normalize line spacing) spreads crowded positions.
 
-![Eagles Gun Bunch TE results with the editable-only filter, play cards, add buttons, and drag target on the left](assets/readme/madden-library-silver.jpg)
+![Compact dark studio Madden library drawer showing 13 NFL teams, editable-only filter, play cards, and drop target](assets/readme/madden-library-drawer.webp)
 
 **MESH after importing:** the visible source routes are now selectable, editable objects. Continue adjusting player positions, route points, and rehearsal timing.
 
-![Imported Madden MESH with editable players, colored routes, original-image comparison, and line-spacing controls](assets/readme/madden-editable-silver.jpg)
+![Imported Madden MESH in the dark studio editor with editable players, colored routes, original-image comparison, and line-spacing controls](assets/readme/madden-editable-dark.webp)
 
 | Current Madden 27 catalog snapshot | Count |
 |---|---:|

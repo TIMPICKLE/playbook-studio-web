@@ -1,10 +1,12 @@
 # 部署手册 · 本地完整部署优先
 
-**简体中文** · [English](AGENT_DEPLOYMENT.en.md) · [返回 README](../README.md) · [AI 使用指南](AI_GUIDE.md)
+**简体中文** · [English](AGENT_DEPLOYMENT.en.md) · [返回 README](../README.md) · [AI 使用指南](AI_GUIDE.md) · [Agent 本地部署 Skill](../skills/playbook-studio-local-deploy/SKILL.md)
+
+> **给 AI Agent 执行部署？** 本仓库内置了标准 Agent Skill：[`skills/playbook-studio-local-deploy/SKILL.md`](../skills/playbook-studio-local-deploy/SKILL.md)（含 7 阶段预检与决策流、AI 协议契约、故障排查矩阵与验收模板，并由根目录 [`AGENTS.md`](../AGENTS.md) 自动引导）。把仓库交给 Claude Code、Codex、Cursor、Antigravity 等 Agent 时，直接让其按该 Skill 执行即可。
 
 推荐先在自己的电脑上运行**完整版本**：前端、API、数据库和团队账号都在本机，支持战术编辑、自动保存、球员管理、演练和 AI 功能。无需 ChatGPT 登录，也无需创建云端数据库。**AI 模型需要另外配置服务商、模型 ID 和 API Key**；本地部署本身不会附送模型额度。
 
-本文既可手动执行，也可交给能操作终端与文件的 AI Agent。所有命令均在项目根目录运行。
+本文既可手动执行，也可配合上述 Agent Skill 使用。所有命令均在项目根目录运行。
 
 **快速导航：** [部署方式](#选择部署方式) · [本地完整部署](#本地完整部署六步完成) · [配置 AI](#ai-功能配置) · [验收](#部署验收) · [日常维护](#重启升级与备份) · [常见问题](#常见问题) · [其他部署](#附录其他部署方式)
 
@@ -159,7 +161,7 @@ console.log('账号已创建，请登录：' + origin + '/editor/index.html');
 | OpenRouter | OpenAI Chat Completions、OpenAI Responses |
 | 自定义兼容服务 | 以上三种格式；另填 HTTPS 地址 |
 
-两个入口共用模型连接；非密钥偏好保存在本机浏览器，**密钥仅保存在当前页面内存**，刷新后需重新输入，切换服务商也会清空密钥。不需要为预设服务商设置统一的服务器 `OPENAI_API_KEY`。这里的「Claude Code Messages」指 Anthropic Messages API 格式，需要相应 API 凭据，不等同于 CLI 登录或订阅账号。
+两个入口共用模型连接；非密钥偏好保存在本机浏览器，**密钥仅保存在当前页面内存**，刷新后需重新输入，切换服务商也会清空密钥。本仓库没有任何服务端模型 Key 环境变量（在 `.dev.vars` 中填写 `OPENAI_API_KEY` 或 `DEEPSEEK_API_KEY` 不会生效）。界面预填的默认模型 ID（如 `gpt-6.1-terra`、`deepseek-flash`）可能与您个人账号实际开通的模型不同，使用个人 Key 时请替换为实际可用且支持工具调用的模型 ID（如 `gpt-4o`、`deepseek-chat`、`claude-sonnet-4-6`）。这里的「Claude Code Messages」指 Anthropic Messages API 格式，需要相应 API 凭据，不等同于 CLI 登录或订阅账号。
 
 本地完整版本由本机 API 转发模型请求。模型服务仍需联网，按所选服务商额度计费；本地完整部署**不包含离线大模型推理**。
 
@@ -173,7 +175,7 @@ AI_ALLOWED_HOSTS="gateway.example.com,api.example.net"
 
 页面中填写服务商要求的完整 HTTPS 基础路径或端点；允许列表只填主机名，不含协议、路径或端口。服务器仅接受标准 HTTPS 端口，不接受 URL 中的账号密码、查询参数或片段；也拒绝 `localhost`、以 `.localhost` / `.local` / `.internal` 结尾的主机名及 IP 地址。因此不能直接填写 `http://localhost:11434` 来连接 Ollama。
 
-API 路径拼接、工具调用、知识库与资料导入的完整说明见 **[AI 功能使用指南](AI_GUIDE.md)**。
+API 路径拼接、工具调用、知识库与资料导入的完整说明见 **[AI 功能使用指南](AI_GUIDE.md)**，完整协议契约与限流参数见 **[Skill AI 协议参考](../skills/playbook-studio-local-deploy/references/ai-providers-and-protocols.md)**。
 
 ## 部署验收
 
@@ -198,7 +200,7 @@ API 路径拼接、工具调用、知识库与资料导入的完整说明见 **[
 | 日常启动 | 在项目根目录运行 `npm start -- --port 8787`；无需重建表或重新初始化账号 |
 | 停止 | 服务终端按 `Ctrl+C` |
 | 数据备份 | 先停止服务，再备份整个 `.wrangler/state/`；另导出战术本 JSON，便于迁移 |
-| 运行时配置备份 | 单独保留自定义 `.dev.vars` 设置；不要提交密钥或复制到公开日志 |
+| 运行时配置备份 | 单独保留自定义 `.dev.vars` 设置（如保存在 `.sites-runtime/dev.vars.backup`）；不要提交密钥或复制到公开日志 |
 | 升级代码 | 先备份，检查未提交改动，再拉取代码、执行 `npm run install:ci` 与 `npm run build`；恢复所需运行时配置后启动 |
 | 后续数据库变化 | 对照新版本迁移说明，仅执行尚未应用的迁移；不要重放首次建表脚本 |
 
@@ -209,16 +211,19 @@ API 路径拼接、工具调用、知识库与资料导入的完整说明见 **[
 | 现象 | 排查与处理 |
 |---|---|
 | 找不到 `dist/server/wrangler.json` | 先完成 `npm run build`，再执行数据库与启动命令 |
-| `table already exists` | 当前数据库已有表。停止重复初始化；检查已应用的脚本，不要删除数据库 |
-| `/api/health` 报错或 `ready: false` | 确认启动的是 `npm start`，数据库脚本执行成功，且迁移与服务使用同一 `--persist-to` 路径 |
+| `table already exists` | 当前数据库已有表。停止重复初始化；先用只读 SQL 查询 `sqlite_master` 检查已有表，不要删除 `.wrangler/state/` |
+| `/api/health` 报错或 `ready: false` | 确认启动的是 `npm start`（不要用 `npm run dev`），数据库脚本执行成功，且迁移与服务使用同一 `--persist-to` 路径 |
 | 初始化接口返回 `404` | 检查构建后的 `dist/server/.dev.vars` 是否有 `PLAYBOOK_SETUP_KEY`，设置后是否已重启，客户端是否读到同一文件 |
 | 初始化返回 `403` | 检查请求 `Origin` 与访问地址是否一致；本文统一使用 `http://127.0.0.1:8787` |
 | 初始化返回 `409` | 账号已创建，直接登录；此接口不提供密码重置 |
-| 登录后似乎仍是演示数据 | 检查是否误用了 `/editor/local.html`；改用 `/editor/index.html` |
-| AI 提示缺少 Key、认证失败或模型不可用 | 分别检查两个入口的设置、协议、真实模型 ID、API Key 与服务商额度；刷新后需重新输入 Key |
+| 登录后似乎仍是演示数据 | 检查是否误用了 `/editor/local.html` 或 `npm run dev`（端口 5173 带 `mockAuth`）；改用 `npm start` 并访问 `/editor/index.html` |
+| AI 返回 HTTP `503` 提示关闭 LangSmith 跟踪 | 宿主机终端或 `.dev.vars` 存在 `LANGCHAIN_TRACING`（**即使值为 `"false"`**）、`LANGSMITH_TRACING`、`OTEL_ENABLED` 等变量；清除这些变量后再启动 `npm start` |
+| AI 提示缺少 Key、认证失败或模型不可用（`400/404`） | 核对服务商、协议、**是否已将预设默认模型 ID（`gpt-6.1-terra`/`deepseek-flash`）改为账号实际开通的模型 ID**、API Key 与额度；刷新后需重填 Key |
 | 自定义 AI 地址被拒绝 | 核对 `AI_ALLOWED_HOSTS`、HTTPS 路径与端口；使用符合上述限制的主机名，修改配置后重启 |
 | 重建后自定义 AI 网关失效 | `dist/` 已重建，恢复 `.dev.vars` 中的 `AI_ALLOWED_HOSTS` 等设置后再启动 |
 | 其他设备无法访问 | 默认只监听本机回环地址；手机或 iPad 上的 `127.0.0.1` 指向设备自身。跨设备访问需另行配置网络或使用公网版 |
+
+完整错误码排查表见 [Skill 故障排查矩阵](../skills/playbook-studio-local-deploy/references/troubleshooting.md)。
 
 ## 附录：其他部署方式
 
@@ -242,14 +247,10 @@ Madden 几何资源按需加载，首次离线访问尚未获取的分片无法�
 
 `npm start` 是本地 Worker 运行方式，不是公网生产服务。仓库没有一条可直接套用的通用 VPS 部署命令；公网配置、迁移和平台身份验证需按目标环境完成。详见[云端架构与运维](CLOUD.md)。修改网页后的发布检查见 [Web 平台优化与回归方法](WEB_PLATFORM_OPTIMIZATION.md)。
 
-### 可直接交给 Agent 的指令
+### 可直接交给 AI Agent 的指令
 
 ```text
-请按 docs/AGENT_DEPLOYMENT.md 在本机完整部署 Playbook Studio，默认不发布公网。
-先检查 Node、Git、分支及未提交改动，保留现有文件与数据库。
-完成依赖安装、前后端构建、本地 D1 首次迁移和团队账号初始化；已有数据库只补尚未应用的迁移。
-账号与初始化密钥仅通过本机受忽略文件处理，不写进聊天、日志或 Git；完成后关闭初始化入口。
-从 /editor/index.html 验证登录、自动保存、重启持久化、Madden、演练和 JSON 导出。
-说明两个 AI 入口共用的模型连接及密钥仅在当前页面内存保留；有授权 API 凭据时实测，没有时明确记录 AI 尚未连接。
-最后提供实际访问地址、源码版本、数据保存位置、维护方法和验证结果。
+请先阅读根目录 AGENTS.md 与 skills/playbook-studio-local-deploy/SKILL.md（含其 references/ 参考文档），按其中的 7 阶段流程在本机完整部署 Playbook Studio，默认不发布公网。
+严格遵守安全红线：先完成 Node、Git、LangSmith/OTEL 环境变量与端口 8787 预检；保留已有 .wrangler/state/ 并先用只读 SQL 检查表状态再决定迁移；账号与 PLAYBOOK_SETUP_KEY 仅通过受忽略的本机文件处理且不打印到聊天或日志，初始化后立即关闭 bootstrap 并清理临时文件。
+完成后按 verification-checklist.md 验收并输出结构化交付报告，明确说明两个 AI 入口共用纯浏览器内存 BYOK 配置、需替换预设默认模型 ID；无授权 API Key 时将实机模型调用标为 UNVERIFIED。
 ```

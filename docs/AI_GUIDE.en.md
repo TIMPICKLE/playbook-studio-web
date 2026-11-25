@@ -20,7 +20,7 @@ For a lesson, ask it to add a freeze-frame question, enter an answer and save th
 | Inspect diagram facts and retrieved coaching references | Workspace → **AI matchup analysis** | No |
 | Generate conditional offense-versus-defense scenarios | The same analysis page → model settings → **Analyze matchup** | Yes |
 
-Start with the [no-sign-in demo](https://timpickle.github.io/playbook-studio-web/), which uses browser-local data and sample matchups. Use the [cloud editor](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) for shared team playbooks.
+Start with the [no-sign-in demo](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) (or the [GitHub Pages mirror](https://timpickle.github.io/playbook-studio-web/)), which uses browser-local data and sample matchups. Use the [cloud editor](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) for shared team playbooks.
 
 ## 5v5 flag football and AI
 
@@ -43,6 +43,8 @@ Both AI entry points use the same provider and API-format settings in cloud and 
 | Custom compatible service | All three formats; enter a custom HTTPS address |
 
 The board assistant and cloud matchup analysis call tools. Choose a model that **supports tool calls through the selected API format**. No-sign-in matchup analysis remains a single request, but still requires the requested structured analysis result. Protocol support does not establish that every provider model supports that format or the required capabilities.
+
+> **Model ID note:** Prefilled defaults (`gpt-6.1-terra`, `deepseek-flash`) may not match an active model on your personal provider account. When using your own API key, replace the model ID with an enabled tool-calling model (for example, `gpt-4o`, `deepseek-chat`, `claude-sonnet-4-6`, or `openai/gpt-4o-mini`). Local full deployments are strictly browser-memory BYOK and do not read provider API keys from `.dev.vars`.
 
 ### Entering a custom address
 
@@ -236,16 +238,18 @@ Keys remain in current page memory. The no-sign-in version requests the provider
 | The report is marked outdated | Review its original diagram for reference; analyze the current input before following up or preparing edits |
 | No references match | Check concept terms, coverage assumptions and query words, or import relevant material. Missing references must not be fabricated |
 | A teammate cannot see imported knowledge | Packs are local to a browser and playbook. Export the pack for the teammate to import on their device |
-| Incompatible format, or HTTP 400 / 404 | Check model support for the chosen format, the address prefix and final endpoint. Custom gateways do not gain `/v1` automatically. Messages is not a Claude Code login |
+| Incompatible format, or HTTP 400 / 404 | Check model support for the chosen format, whether prefilled default model IDs (`gpt-6.1-terra` / `deepseek-flash`) were replaced with an active model ID, the address prefix, and the final endpoint. Custom gateways do not gain `/v1` automatically. Messages is not a Claude Code login |
 | Network or CORS error | Direct browser calls require provider CORS support; cloud custom hosts require administrator authorization. Check connectivity rather than assuming a selectable configuration is reachable |
 | HTTP 401 / 403 | Check the provider, model permission and matching API key; check the allowlist for a cloud custom host |
-| Timeout or HTTP 429 | Check provider credit, rate limits and cloud short-term frequency protection; retry later. These differ from the removed assistant query quota |
+| HTTP 503 (LangSmith tracing guard) | Local or server host shell sets `LANGCHAIN_TRACING` (even `"false"`), `LANGSMITH_TRACING`, or `OTEL_ENABLED`; unset them and restart the server |
+| Timeout or HTTP 429 | Check provider credit, rate limits and the shared cloud rate limit (12 requests per 60s across board assistant and matchup analysis); retry later. These differ from the removed assistant query quota |
 | Refusal, truncated output or invalid result format | Empty or incomplete output is not a completed action. Check tool and output support; use a compatible model or simplify the individual request if necessary |
 | Digital mode is unavailable on a phone or iPad | Those devices use traditional mode; editing and rehearsal remain available |
 | A file or print task says it is ready but has not finished | Select **Continue**, then complete file selection, import confirmation or printing in the real workflow |
 
 ## Further reading
 
+- [Agent local deployment & AI setup Skill](../skills/playbook-studio-local-deploy/SKILL.md) · [AI protocol & security reference](../skills/playbook-studio-local-deploy/references/ai-providers-and-protocols.md)
 - [Board tool flow and maintenance](BOARD_ASSISTANT.md) · [Shared commands and full feature mapping](EDITOR_COMMAND_ARCHITECTURE.md)
 - [UX changes and validation](UX_REDESIGN.md) · [Interaction and design system](UX_DESIGN_SYSTEM.md)
 - [Analysis research and evaluation](ai-analysis/README.md) · [Local PDF preprocessing](ai-analysis/pdf-ingestion.md)
