@@ -1,6 +1,9 @@
 // Runs the actual agent in a local workerd isolate using a synthetic provider.
 import { build } from 'esbuild';
 import { Miniflare } from 'miniflare';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -27,17 +30,22 @@ const source = `
   } };
 `;
 let mf;
+const persistRoot = mkdtempSync(path.join(tmpdir(), 'playbook-miniflare-'));
+const cleanup = async () => {
+  if (mf) await Promise.race([mf.dispose(), new Promise(resolve => setTimeout(resolve, 2000))]);
+  rmSync(persistRoot, { recursive: true, force: true });
+};
 try {
   const bundled = await build({ stdin: { contents: source, resolveDir: projectRoot, sourcefile: 'worker-agent-poc.mjs' }, bundle: true, platform: 'node', format: 'esm', target: 'es2022', write: false, logLevel: 'silent' });
-  mf = new Miniflare({ modules: true, script: bundled.outputFiles[0].text, compatibilityDate: '2026-05-15', compatibilityFlags: ['nodejs_compat'] });
+  mf = new Miniflare({ modules: true, script: bundled.outputFiles[0].text, compatibilityDate: '2026-05-15', compatibilityFlags: ['nodejs_compat'], defaultPersistRoot: persistRoot, cache: false, cachePersist: false });
   const response = await mf.dispatchFetch('https://agent-test.invalid/');
   const body = await response.json();
   if (response.status !== 200 || body.calls !== 2 || body.execution?.modelCalls !== 2 || body.execution?.toolCalls !== 1 || body.status !== 'limited') throw new Error('Worker returned an unexpected agent result');
   console.log('Worker agent graph, tool call and final validation passed.');
-  await Promise.race([mf.dispose(), new Promise(resolve => setTimeout(resolve, 2000))]);
+  await cleanup();
   process.exit(0);
 } catch (error) {
   console.error('Worker agent verification failed:', error?.message || 'unknown error');
-  if (mf) await Promise.race([mf.dispose(), new Promise(resolve => setTimeout(resolve, 2000))]);
+  await cleanup();
   process.exit(1);
 }
