@@ -15,5 +15,8 @@ pages/
 github-pages/
 .env*
 !.env.example
+.dev.vars
+**/.dev.vars
+.agents/
 *.tsbuildinfo
 web/data/huddle-art/
