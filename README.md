@@ -2,19 +2,60 @@
 
 <div align="center">
 
-<img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="420">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/playbook-studio-logo-dark-transparent.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/brand/playbook-studio-logo-light.svg">
+  <img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="460">
+</picture>
 
-# Playbook Studio
+<br>
 
-美式橄榄球战术工作台：布阵、画线、演练、教练讲解、AI 辅助分析与球队协作。
+**美式橄榄球战术工作台：布阵、画线、3D 演练、教练讲解、AI 辅助分析与球队协作。**
 
-[在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [体验账号](#在线体验) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md) · [Agent 本地部署 Skill](skills/playbook-studio-local-deploy/SKILL.md)
+[观看宣传片](#宣传片) · [在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [体验账号](#在线体验) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md) · [Agent 本地部署 Skill](skills/playbook-studio-local-deploy/SKILL.md)
 
 </div>
 
-![深色工作室主题的桌面工作台：顶部模块导航、左侧战术本与 Madden 入口、中央球场、右侧属性与 AI 助手任务区](docs/assets/readme/studio-workspace-dark.webp)
+## 宣传片
+
+<div align="center">
+
+<a href="https://github.com/TIMPICKLE/playbook-studio-web/blob/main/docs/assets/readme/playbook-studio-promo.mp4">
+  <img src="docs/assets/readme/playbook-studio-promo-preview.gif" alt="Playbook Studio 64 秒高清宣传片预览：ReactDrops 光学玻璃开场、5v5 腰旗、3D 球场、教练讲解台、双引擎 AI 与 Madden 战术库" width="100%">
+</a>
+
+<br>
+
+<sub>
+  <strong>64 秒 · 1080p 高清宣传片（含 120 BPM 原创配乐）</strong>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/TIMPICKLE/playbook-studio-web/raw/main/docs/assets/readme/playbook-studio-promo.mp4"><strong>▶ 观看 / 下载完整有声 MP4</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/assets/readme/playbook-studio-promo.mp4">查看视频文件</a>
+</sub>
+
+</div>
+
+<details>
+<summary>宣传片 9 幕内容导览（00:00 – 01:04）</summary>
+
+| 时间码 | 章节 | 亮点内容 |
+|---|---|---|
+| `00:00` | **品牌开场** | ReactDrops WebGL 2 `Glass Slab Logo` 光学玻璃切片演绎最新版 `P` 路线战术徽标 |
+| `00:08` | **战术画布** | Mesh 浅交叉实时路线绘制、`3.0 YD` 纵深标尺与 5v5 / 11v11 切换 |
+| `00:15` | **5v5 腰旗专场** | 腰旗专属模板、一键添加 5 人对手、中锋可接球提示与按页新手引导 |
+| `00:21` | **数字 3D 球场** | 平面与 WebGL 3D 球场一键切换、拖轴演练、石墨深色 ↔ 冷银浅色双主题 |
+| `00:29` | **教练讲解台** | Coach Film Room 定格出手关键帧、`H / Y 3.0 码` 实测纵深差与投屏提问课件 |
+| `00:36` | **板内 AI 助手** | 自然语言改图与三重安全保障（先预览再应用 · 可演练微调 · 一键撤销） |
+| `00:43` | **AI 战局分析** | 免 API Key 高对比攻防叠图与简报、13 条教练原则与纯浏览器内存 BYOK |
+| `00:50` | **Madden 库与全端生态** | 13 支 NFL 球队 1,827 套战术、移动端触控工作台、DEPTH CHART 与 20 版本协作 |
+| `00:57` | **品牌定版** | 在线体验入口、MIT 开源与 Agent 一键本地部署 |
+
+</details>
 
 ## 能做什么
+
+![深色工作室主题的桌面工作台：顶部模块导航、左侧战术本与 Madden 入口、中央球场、右侧属性与 AI 助手任务区](docs/assets/readme/studio-workspace-dark.webp)
 
 | 功能 | 说明 |
 |---|---|

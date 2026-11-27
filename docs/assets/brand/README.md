@@ -4,12 +4,11 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| [playbook-studio-logo.svg](playbook-studio-logo.svg) | 完整 Logo，银白色，透明背景 |
-| [playbook-studio-icon.svg](playbook-studio-icon.svg) | 独立球形图标，银白色，透明背景 |
-| [playbook-studio-logo-black.svg](playbook-studio-logo-black.svg) | 完整 Logo，深灰色，透明背景，适合浅色界面 |
-| [playbook-studio-icon-black.svg](playbook-studio-icon-black.svg) | 独立球形图标，深灰色，透明背景 |
-| [playbook-studio-logo-dark.svg](playbook-studio-logo-dark.svg) | 完整银白 Logo，带深灰背景的展示版 |
+| [playbook-studio-logo-dark-transparent.svg](playbook-studio-logo-dark-transparent.svg) | 完整 Logo，深色界面用（白字 + 战术绿 + 琥珀金箭头，透明背景） |
+| [playbook-studio-logo-light.svg](playbook-studio-logo-light.svg) | 完整 Logo，浅色界面用（深海军蓝 + 战术绿 + 琥珀金箭头，透明背景） |
+| [playbook-studio-logo-dark.svg](playbook-studio-logo-dark.svg) | 完整 Logo 展示版（深海军蓝 `#0C192C` 圆角底） |
+| [playbook-studio-logo-editable.svg](playbook-studio-logo-editable.svg) | 完整可编辑字体源文件 |
+| [playbook-studio-icon.svg](playbook-studio-icon.svg) | 独立 `P` 路线战术图标（深海军蓝 `#0C192C` 圆角底，适合头像与 favicon） |
+| [playbook-studio-icon-black.svg](playbook-studio-icon-black.svg) | 独立 `P` 路线战术图标（深色描边，透明背景，适合浅色界面与光效渲染） |
 
-所有 SVG 均使用可编辑矢量路径，字标已转曲，无字体或外部资源依赖。缝线、跑位箭头及字母内部均为透明镂空。
-
-银白色为 `#D8DCE2`，深灰色为 `#17191C`。修改 `artwork` 分组的 `fill` 即可统一改色；`symbol`、`wordmark-playbook`、`wordmark-studio` 为独立分组。
+所有 SVG 均采用独立矢量路径（`route-outer`、`route-inner`、`defense-x`、`tactical-arrow` 与 `wordmark` 独立分组），无外部依赖。

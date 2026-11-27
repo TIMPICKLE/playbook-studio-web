@@ -2,19 +2,60 @@
 
 <div align="center">
 
-<img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="420">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/playbook-studio-logo-dark-transparent.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/brand/playbook-studio-logo-light.svg">
+  <img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="460">
+</picture>
 
-# Playbook Studio
+<br>
 
-An American football workspace for drawing plays, rehearsal, coach film review, AI-assisted analysis and team collaboration.
+**An American football workspace for drawing plays, 3D rehearsal, coach film review, AI-assisted analysis and team collaboration.**
 
-[Live demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [Demo accounts](#live-demo) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md) · [Agent deploy Skill](skills/playbook-studio-local-deploy/SKILL.md)
+[Watch video](#showcase-video) · [Live demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [Demo accounts](#live-demo) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md) · [Agent deploy Skill](skills/playbook-studio-local-deploy/SKILL.md)
 
 </div>
 
-![Dark Studio desktop workspace showing top module navigation, playbook sidebar and Madden entry, field stage, and shared Properties / AI Assistant task panel](docs/assets/readme/studio-workspace-dark.webp)
+## Showcase video
+
+<div align="center">
+
+<a href="https://github.com/TIMPICKLE/playbook-studio-web/blob/main/docs/assets/readme/playbook-studio-promo.mp4">
+  <img src="docs/assets/readme/playbook-studio-promo-preview.gif" alt="Playbook Studio 64-second 1080p promo video preview featuring ReactDrops Glass Slab Logo opening, 5v5 flag football, 3D digital board, Coach Film Room, dual-engine AI and Madden play library" width="100%">
+</a>
+
+<br>
+
+<sub>
+  <strong>64s · 1080p full promotional film (with custom 120 BPM soundtrack)</strong>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/TIMPICKLE/playbook-studio-web/raw/main/docs/assets/readme/playbook-studio-promo.mp4"><strong>▶ Watch / Download full MP4 with audio</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/assets/readme/playbook-studio-promo.mp4">View video file</a>
+</sub>
+
+</div>
+
+<details>
+<summary>9-scene chapter guide (00:00 – 01:04)</summary>
+
+| Time | Chapter | Highlights |
+|---|---|---|
+| `00:00` | **Opening** | ReactDrops WebGL 2 `Glass Slab Logo` ray-traced glass discs revealing the new `P`-route emblem |
+| `00:08` | **Tactical canvas** | Animated **Mesh** route drawing, `3.0 YD` depth caliper, and 5v5 / 11v11 format switcher |
+| `00:15` | **5v5 flag football** | Dedicated 5v5 templates, one-click 5-player opponents, and per-page guided quick tour |
+| `00:21` | **Digital 3D board** | Instant flat ↔ WebGL 3D toggle, live rehearsal timeline, Dark Graphite ↔ Cool Silver wipe |
+| `00:29` | **Coach film room** | Release keyframe freeze, live `H / Y 3.0 yd` depth telemetry, and on-device interactive lesson deck |
+| `00:36` | **AI board assistant** | Natural-language editing with 3 safety safeguards (preview first, rehearse & refine, one-click undo) |
+| `00:43` | **AI matchup analysis** | Zero-key Cover 3 × Mesh overlay & facts brief, 13 coaching principles, and browser-memory BYOK |
+| `00:50` | **Madden & mobile** | 13 NFL teams / 1,827 plays, Dark Studio touch workspace, DEPTH CHART & 20-version team sync |
+| `00:57` | **Finale** | Online live demo, MIT open source, and one-command Agent local deployment |
+
+</details>
 
 ## What you can do
+
+![Dark Studio desktop workspace showing top module navigation, playbook sidebar and Madden entry, field stage, and shared Properties / AI Assistant task panel](docs/assets/readme/studio-workspace-dark.webp)
 
 | Feature | Capabilities |
 |---|---|
