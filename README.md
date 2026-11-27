@@ -8,7 +8,7 @@
 
 美式橄榄球战术工作台：布阵、画线、演练、教练讲解、AI 辅助分析与球队协作。
 
-[免登录体验](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) · [云端版](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md) · [Agent 本地部署 Skill](skills/playbook-studio-local-deploy/SKILL.md)
+[在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [体验账号](#在线体验) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md) · [Agent 本地部署 Skill](skills/playbook-studio-local-deploy/SKILL.md)
 
 </div>
 
@@ -31,13 +31,25 @@
 
 支持简体中文与英文，统一采用 **Dark Studio** 深色工作室界面。手机和 iPad 提供专为触控重设计的移动工作台与 `⋯` 溢出菜单；桌面支持传统平面球场与数字化 3D 战术板切换。[UX 改造与验证记录 →](docs/UX_REDESIGN.md) · [非 AI 严格验收记录 →](docs/acceptance/README.md)
 
+## 在线体验
+
+访问 **[在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html)**，使用以下任一体验账号登录 **C组（C组 · 战术本）**：
+
+| 账号 | 权限 | 密码 |
+|---|---|---|
+| `team_c_01` | Owner | `797016` |
+| `team_c_02` | Editor | `604869` |
+| `team_c_03` | Editor | `432973` |
+| `team_c_04` | Editor | `146939` |
+| `team_c_05` | Editor | `375900` |
+
 ## 快速开始
 
-1. 打开[免登录编辑器](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local)（或 [GitHub Pages 静态镜像](https://timpickle.github.io/playbook-studio-web/)），选择 **Mesh · 浅交叉**。
+1. 打开[在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html)，使用上方体验账号登录，选择 **Mesh · 浅交叉**。
 2. 选择内置示例或新建战术，拖动球员调整站位；「添加对象」可一次加入完整 **4–3 防守**（5 人腰旗支持一键添加 5 人对手）。
 3. 选中球员，按 `R` 并点击路线点，按 `Enter` 完成。
 4. 切到 **「战术演练」**，按空格播放／暂停，拖动时间轴检查跑位；桌面点击标题旁 **「讲解」** 进入全屏讲解台。
-5. 导出 JSON 备份；需要球队共享与持久化时，使用云端版或按下方 Skill 在本机部署完整服务。
+5. 导出 JSON 备份；需要球队独立私有部署与持久化时，按下方 Skill 在本机部署完整服务。
 
 [完整图解教程、快捷键与 DEPTH CHART 操作 →](docs/USER_GUIDE.md)
 
@@ -55,7 +67,7 @@
 
 战术定义了有效传球时，时间轴会标出「出手」和「到达」。纯防守布阵按编排显示球权，无比例的场地显示相对纵深。手机和 iPad 使用触屏工作区。
 
-[打开桌面演示](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [试用本机课件](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local?filmPilot=lesson#editor) · [试教材料与两套战术](docs/COACH_FILM_PILOT.md) · [讲解台验收记录](docs/acceptance/COACH_FILM.md)
+[打开在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html#editor) · [试用本机课件](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html?filmPilot=lesson#editor) · [试教材料与两套战术](docs/COACH_FILM_PILOT.md) · [讲解台验收记录](docs/acceptance/COACH_FILM.md)
 
 ### 在数字球场编辑与演练
 
@@ -118,8 +130,8 @@ Playbook Studio 提供两个互补且共用模型连接的 AI 入口，全部围
 ## 移动端与数据保存
 
 - **移动端触控工作台**：重设计后的 Dark Studio 移动端界面针对手机和 iPad 触控优化，提供紧凑球场画布、底部触控工具条，以及标题栏 `⋯` 溢出菜单（镜像、复制、Madden 战术库、导出、打印与重看新手引导）。
-- **免登录版**：数据保存在当前浏览器，不会自动跨设备同步；清理浏览器数据前请导出 JSON。
-- **云端／本地完整版**：以战术本为单位共享，管理员／编辑者／只读成员权限独立，支持恢复最近 20 个已保存版本。
+- **在线体验版本／本地完整部署**：以战术本为单位共享，管理员／编辑者／只读成员权限独立，支持恢复最近 20 个已保存版本。
+- **本地静态预览**：运行 `npm run start:local` 时数据保存在当前浏览器，不会自动跨设备同步；清理浏览器数据前请导出 JSON。
 - **显示与布局**：桌面支持画板缩放、展开与可调侧栏；数字化视图在 WebGL 不可用时自动切到可操作兼容视图。
 
 <p align="center">

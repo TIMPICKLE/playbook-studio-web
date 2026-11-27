@@ -8,7 +8,7 @@
 
 An American football workspace for drawing plays, rehearsal, coach film review, AI-assisted analysis and team collaboration.
 
-[Live demo · no sign-in](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) · [Cloud app](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md) · [Agent deploy Skill](skills/playbook-studio-local-deploy/SKILL.md)
+[Live demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [Demo accounts](#live-demo) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md) · [Agent deploy Skill](skills/playbook-studio-local-deploy/SKILL.md)
 
 </div>
 
@@ -31,13 +31,25 @@ An American football workspace for drawing plays, rehearsal, coach film review, 
 
 English and Simplified Chinese are supported in a unified **Dark Studio** theme. Phones and iPads get a redesigned touch workspace with a `⋯` overflow menu; desktops support both the traditional flat field and the digital 3D board. [UX changes and validation →](docs/UX_REDESIGN.md) · [Non-AI acceptance records →](docs/acceptance/README.md)
 
+## Live demo
+
+Open the **[online demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html)** and sign in with any of the following demo accounts for **Group C (`C组 · 战术本`)**:
+
+| Account | Role | Password |
+|---|---|---|
+| `team_c_01` | Owner | `797016` |
+| `team_c_02` | Editor | `604869` |
+| `team_c_03` | Editor | `432973` |
+| `team_c_04` | Editor | `146939` |
+| `team_c_05` | Editor | `375900` |
+
 ## Quick start
 
-1. Open the [no-sign-in editor](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local) (or the [GitHub Pages mirror](https://timpickle.github.io/playbook-studio-web/)) and select the **Mesh** sample play.
+1. Open the [online demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html), sign in with one of the demo accounts above, and select the **Mesh** sample play.
 2. Open a sample or create a play. Drag players into position; **Add objects** can add a complete **4–3 defense** (or 5-player opponents for 5v5 flag plays).
 3. Select a player, press `R`, click route points, then press `Enter` to finish.
 4. Switch to **Rehearse**, press Space to play or pause, and scrub the timeline; on desktop click **Film room** beside the play title for full-screen coaching playback.
-5. Export JSON backups. Use the cloud app or follow the Agent Skill below to run a full persistent local instance.
+5. Export JSON backups. Follow the Agent Skill below to run your own full persistent local instance.
 
 [Full visual walkthrough, shortcuts and DEPTH CHART instructions →](docs/USER_GUIDE.en.md)
 
@@ -55,7 +67,7 @@ Save up to three lesson stops on this device, each with a question, an answer an
 
 Release and arrival markers appear for a valid designed pass. Defense-only diagrams show possession when the play assigns it. Schematic fields report relative depth. Phones and iPads use the touch workspace.
 
-[Open the desktop demo](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local#editor) · [Try an on-device lesson](https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/local?filmPilot=lesson#editor) · [Study protocol and practice plays](docs/COACH_FILM_PILOT.md) · [Film room verification](docs/acceptance/COACH_FILM.md)
+[Open the online demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html#editor) · [Try an on-device lesson](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html?filmPilot=lesson#editor) · [Study protocol and practice plays](docs/COACH_FILM_PILOT.md) · [Film room verification](docs/acceptance/COACH_FILM.md)
 
 ### Edit and rehearse on the digital field
 
@@ -118,8 +130,8 @@ Open **Players · DEPTH CHART** for starters and backups in each personnel group
 ## Mobile, storage and devices
 
 - **Mobile touch workspace:** the redesigned Dark Studio mobile layout optimizes field height and touch controls for phones and iPads, with a header `⋯` overflow menu for mirroring, duplicating, Madden library, export, print, and replaying the quick tour.
-- **No-sign-in demo:** data stays in the current browser and does not sync across devices. Export JSON before clearing browser data.
-- **Cloud / full local deployment:** sharing and owner/editor/viewer permissions are scoped to each playbook, with recovery across the latest 20 saved versions.
+- **Online demo / full local deployment:** sharing and owner/editor/viewer permissions are scoped to each playbook, with recovery across the latest 20 saved versions.
+- **Local static preview:** when running `npm run start:local`, data stays in the current browser and does not sync across devices. Export JSON before clearing browser data.
 - **View and layout:** zoom and resize the field and panels on desktop; the digital view falls back to an interactive compatibility view when WebGL is unavailable.
 
 <p align="center">
