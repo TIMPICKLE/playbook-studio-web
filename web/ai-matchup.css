@@ -80,7 +80,7 @@
 .ai-empty {
   max-width: 1840px;
   margin: 0 auto;
-  padding: 28px clamp(18px, 3vw, 48px) 76px;
+  padding: 18px clamp(18px, 2.6vw, 42px) 64px;
   background-color: #0e1015;
   color: #f3f5f8;
   color-scheme: dark;
@@ -110,11 +110,11 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
 .ai-page-header {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
-  padding-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 .ai-page-header .ai-kicker {
   font-size: 11px;
@@ -125,15 +125,15 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
 .ai-page-header h1 {
   font-weight: 720;
   letter-spacing: -.035em;
-  font-size: clamp(28px, 2.8vw, 40px);
-  line-height: 1.2;
-  margin: 8px 0 8px;
+  font-size: clamp(24px, 2.2vw, 32px);
+  line-height: 1.18;
+  margin: 4px 0 4px;
   color: #f3f5f8;
 }
 .ai-page-header p {
   max-width: 660px;
-  font-size: 13.5px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.55;
   color: #b7c0cf;
   margin: 0;
 }
@@ -162,11 +162,11 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   text-decoration: none;
 }
 
-/* Primary 3-column workspace grid: center board spans vertically so it stays sticky while reading reports */
+/* Primary 3-column workspace grid: keep knowledge cards in the wide center column below the board */
 .ai-layout {
   display: grid;
   grid-template-columns: minmax(256px, 296px) minmax(0, 1fr) minmax(290px, 344px);
-  grid-template-areas: 'setup board results' 'knowledge board results';
+  grid-template-areas: 'setup board results' 'setup knowledge results';
   gap: 18px;
   align-items: start;
 }
@@ -445,14 +445,12 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   margin: 6px 0 14px;
 }
 
-/* Center: Sticky Matchup Overlay Board & Local Brief */
+/* Center top: Matchup Overlay Board & Local Brief */
 .ai-board-card {
   grid-area: board;
-  position: sticky;
-  top: calc(var(--cloud-height, 64px) + 14px);
-  align-self: start;
+  position: static;
   min-width: 0;
-  padding: 20px 22px;
+  padding: 16px 18px;
   background-color: #141720;
 }
 .ai-board-heading,
@@ -461,7 +459,7 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .ai-board-heading h2 {
   font-size: 16px;
@@ -501,13 +499,13 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
 
 .ai-local-brief {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 14px 0 16px;
+  padding: 10px 0 12px;
 }
 .ai-brief-heading {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   font-size: 12px;
   color: #d2d8e4;
 }
@@ -529,12 +527,12 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
 .ai-fact-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .ai-fact-grid > div {
   border-left: 1px solid rgba(255, 255, 255, 0.09);
-  padding-left: 14px;
+  padding-left: 12px;
   min-width: 0;
 }
 .ai-fact-grid > div:first-child {
@@ -542,18 +540,18 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   padding-left: 0;
 }
 .ai-fact-grid strong {
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1.05;
   letter-spacing: -.04em;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   color: #f3f5f8;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
 }
 .ai-fact-grid span {
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11.5px;
+  line-height: 1.35;
   color: #9aa3b2;
   display: block;
 }
@@ -562,16 +560,16 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   border-left: 2.5px solid #d69578;
   border-radius: 0 8px 8px 0;
   color: #cfd6e3;
-  font-size: 12.5px;
-  line-height: 1.7;
-  padding: 10px 13px;
-  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.55;
+  padding: 8px 11px;
+  margin: 0 0 8px;
 }
 .ai-brief-footnote {
   display: block;
   color: #9aa3b2;
   font-size: 11.5px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* Dark studio tactical diagram canvas (pairs with fieldTheme: 'dark') */
@@ -581,7 +579,7 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
-  min-height: 240px;
+  min-height: 220px;
   display: grid;
   place-items: center;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 24px rgba(0, 0, 0, 0.36);
@@ -590,7 +588,7 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   display: block;
   width: 100%;
   height: auto;
-  max-height: min(68dvh, 620px);
+  max-height: min(52dvh, 470px);
 }
 .ai-board .pitch-svg [role=button] { pointer-events: none; }
 .ai-board [data-player],
