@@ -162,11 +162,11 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   text-decoration: none;
 }
 
-/* Primary 3-column workspace grid */
+/* Primary 3-column workspace grid: center board spans vertically so it stays sticky while reading reports */
 .ai-layout {
   display: grid;
   grid-template-columns: minmax(256px, 296px) minmax(0, 1fr) minmax(290px, 344px);
-  grid-template-areas: 'setup board results' 'setup knowledge results';
+  grid-template-areas: 'setup board results' 'knowledge board results';
   gap: 18px;
   align-items: start;
 }
@@ -445,10 +445,12 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   margin: 6px 0 14px;
 }
 
-/* Center top: Matchup Overlay Board & Local Brief */
+/* Center: Sticky Matchup Overlay Board & Local Brief */
 .ai-board-card {
   grid-area: board;
-  position: static;
+  position: sticky;
+  top: calc(var(--cloud-height, 64px) + 14px);
+  align-self: start;
   min-width: 0;
   padding: 20px 22px;
   background-color: #141720;
@@ -591,10 +593,35 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
   max-height: min(68dvh, 620px);
 }
 .ai-board .pitch-svg [role=button] { pointer-events: none; }
+.ai-board [data-player],
+.ai-board [data-route],
+.ai-board [data-zone] {
+  transition: opacity 180ms ease, filter 180ms ease;
+}
 .ai-board .ai-evidence-dim { opacity: .22; }
 .ai-board .ai-evidence-active,
 .ai-page .ai-board .ai-evidence-active { filter: drop-shadow(0 0 8px rgba(232, 236, 242, 0.78)); }
 .ai-board .ai-evidence-active .route-stroke { stroke-width: 5; }
+.ai-evidence [data-ai-focus].is-focus-active {
+  border-color: rgba(232, 236, 242, 0.62);
+  background-color: rgba(232, 236, 242, 0.14);
+  color: #ffffff;
+}
+.ai-result-card.is-entering,
+.ai-scenario.is-entering {
+  animation: ai-card-enter 220ms var(--ease-out, cubic-bezier(.22, 1, .36, 1)) both;
+}
+@keyframes ai-card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-board [data-player],
+  .ai-board [data-route],
+  .ai-board [data-zone] { transition: none; }
+  .ai-result-card.is-entering,
+  .ai-scenario.is-entering { animation: none; transform: none; }
+}
 .ai-board-placeholder {
   font-size: 13px;
   color: #9aa3b2;
@@ -1458,6 +1485,7 @@ html[data-visual-mode] #ai-matchup-root .ai-page {
     grid-template-columns: 268px minmax(0, 1fr);
     grid-template-areas: 'setup board' 'setup knowledge' 'setup results';
   }
+  .ai-board-card { position: static; }
   #ai-results .ai-scenario-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #ai-results .ai-scenario-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ai-results-empty { padding: 22px; }

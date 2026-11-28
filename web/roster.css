@@ -67,7 +67,7 @@
   border-radius: var(--r-island, 14px);
   background: var(--night-1);
   box-shadow: var(--island-shadow);
-  overflow: hidden;
+  overflow: clip;
 }
 .roster-tools { padding: 14px 18px; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--hairline); }
 .roster-tools h2 { display: flex; gap: 9px; align-items: center; margin: 0 auto 0 0; font-size: 17px; font-weight: 700; }
@@ -98,8 +98,25 @@
   box-shadow: var(--ui-focus-ring, 0 0 0 3px #a9c1ff33);
 }
 .roster-results table { width: 100%; border-collapse: collapse; }
-.roster-results thead { background: rgba(255, 255, 255, 0.03); }
-.roster-results thead th { padding: 9px 16px; color: var(--text-3); font-size: 12px; font-weight: 600; text-align: start; }
+.roster-results thead { background: rgba(28, 32, 38, 0.94); }
+.roster-results thead th {
+  position: sticky;
+  top: var(--cloud-height, 56px);
+  z-index: 4;
+  padding: 9px 16px;
+  background: rgba(28, 32, 38, 0.94);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: start;
+  box-shadow: 0 1px 0 var(--hairline);
+}
+@supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .roster-results thead th {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}
 .roster-results tbody :is(th,td) { padding: 9px 16px; border-top: 1px solid var(--hairline); text-align: start; overflow-wrap: anywhere; }
 .roster-results tbody tr { transition: background-color 120ms ease; }
 .roster-results tbody tr:hover { background: rgba(255, 255, 255, 0.045); }

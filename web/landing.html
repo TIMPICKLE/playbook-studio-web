@@ -1,124 +1,388 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0C192C"><meta name="description" content="Playbook Studio 团队战术工作台：账号登录、云端保存、成员权限和橄榄球战术演练。"><title>Playbook Studio · 团队战术工作台</title><link rel="icon" href="./assets/brand/icon-32.png" sizes="32x32"><link rel="icon" href="./assets/brand/playbook-studio-icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./assets/brand/icon-180.png"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cloud.css"><link rel="stylesheet" href="./glass.css"><link rel="stylesheet" href="./liquid.css">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0C192C">
+  <meta name="description" content="Playbook Studio 团队战术工作台：账号登录、云端保存、成员权限和橄榄球战术演练。">
+  <title>Playbook Studio · 团队战术工作台</title>
+  <link rel="icon" href="./assets/brand/icon-32.png" sizes="32x32">
+  <link rel="icon" href="./assets/brand/playbook-studio-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/brand/icon-180.png">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./cloud.css">
+  <link rel="stylesheet" href="./glass.css">
+  <link rel="stylesheet" href="./liquid.css">
   <link rel="stylesheet" href="./visual-mode.css">
   <link rel="stylesheet" href="./layout-polish.css">
   <link rel="stylesheet" href="./theme.css">
-  <style>
-    /* Clean full-viewport hero framing and unified dark studio palette across visual modes */
-    html, body.entry-page {
-      background-color: var(--night-0, #14171b);
-      color: var(--text-1, #f3f4f6);
-      color-scheme: dark;
-    }
-    .entry-page .entry-header {
-      min-height: 76px;
-      padding: 18px 6%;
-      background: transparent;
-      border: 0;
-      border-bottom: 1px solid var(--hairline, rgba(255, 255, 255, 0.08));
-      box-shadow: none;
-    }
-    .entry-page .entry-main {
-      min-height: calc(100svh - 76px);
-      padding: 40px 6% 48px;
-      align-content: center;
-    }
-    .entry-page .entry-copy h1 {
-      color: var(--text-1, #f3f4f6);
-      line-height: 1.08;
-      margin: 16px 0 20px;
-    }
-    .entry-page .entry-copy > p {
-      color: var(--text-2, #c3c9d2);
-      font-size: 16px;
-      line-height: 1.75;
-    }
-    .entry-page .entry-permissions {
-      margin-top: 28px;
-      gap: 12px 24px;
-    }
-    .entry-page .entry-permissions b {
-      color: var(--text-1, #f3f4f6);
-      font-weight: 650;
-      margin-bottom: 2px;
-    }
-    .entry-page .entry-permissions span {
-      color: var(--text-3, #a0a9b7);
-    }
-    .entry-page .entry-demo {
-      padding: 20px;
-      background: var(--night-1, #1c2026);
-      border: 1px solid var(--hairline, rgba(255, 255, 255, 0.09));
-      border-radius: 22px;
-      box-shadow: 0 0 110px -30px rgba(128, 134, 144, 0.28), 0 36px 72px -36px rgba(0, 0, 0, 0.78);
-    }
-    .entry-page .demo-heading > span,
-    .entry-page .entry-demo > p {
-      color: var(--text-2, #c3c9d2);
-      font-size: 13px;
-    }
-    .entry-page .demo-heading [role=group] {
-      background: var(--night-2, #252a32);
-      border: 1px solid var(--hairline, rgba(255, 255, 255, 0.08));
-      border-radius: 999px;
-      padding: 3px;
-    }
-    .entry-page .demo-heading button {
-      border: 0;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--text-2, #c3c9d2);
-      padding: 6px 12px;
-      font-weight: 600;
-    }
-    .entry-page .demo-heading button.active {
-      background: var(--night-4, #3d4652);
-      color: var(--text-1, #f3f4f6);
-    }
-    .entry-page .entry-migration {
-      padding: 52px 6%;
-      background: var(--night-1, #1c2026);
-      border-top: 1px solid var(--hairline, rgba(255, 255, 255, 0.09));
-      border-bottom: 1px solid var(--hairline, rgba(255, 255, 255, 0.09));
-      box-shadow: none;
-    }
-    .entry-page .entry-migration h2 {
-      color: var(--text-1, #f3f4f6);
-      letter-spacing: -.02em;
-    }
-    .entry-page .entry-migration p {
-      color: var(--text-2, #c3c9d2);
-      font-size: 13.5px;
-      line-height: 1.75;
-    }
-    .entry-page .entry-migration .button.subtle {
-      background: var(--night-2, #252a32);
-      color: var(--text-1, #f3f4f6);
-      border: 1px solid var(--hairline-strong, rgba(255, 255, 255, 0.2));
-    }
-    .entry-page .entry-migration .button.subtle:hover {
-      background: var(--night-3, #303741);
-    }
-    .entry-page .entry-migration a {
-      color: var(--text-1, #f3f4f6);
-      font-size: 13.5px;
-      text-underline-offset: 4px;
-    }
-    .entry-page .entry-footer {
-      border-top: 0;
-      color: var(--text-3, #a0a9b7);
-    }
-    @media (max-width: 720px) {
-      .entry-page .entry-main { min-height: auto; padding: 28px 20px 36px; }
-      .entry-page .entry-demo { padding: 14px; border-radius: 16px; }
-      .entry-page .entry-migration > div + div { border-top-color: var(--hairline, rgba(255, 255, 255, 0.09)); }
-    }
-  </style>
+  <link rel="stylesheet" href="./landing.css">
 </head>
 <body class="entry-page">
-<header class="entry-header"><a class="entry-brand" href="./" aria-label="Playbook Studio"><img class="brand-logo brand-logo-light" src="./assets/brand/playbook-studio-logo-light.svg" width="200" height="60" alt="Playbook Studio"><img class="brand-logo brand-logo-dark" src="./assets/brand/playbook-studio-logo-dark-transparent.svg" width="200" height="60" alt="" aria-hidden="true"></a><div class="entry-header-actions"><label class="entry-language"><span class="sr-only" data-landing="language">语言</span><select id="entry-language" aria-label="语言"><option value="zh-CN">中文</option><option value="en">English</option></select></label><div id="entry-effects"></div><a class="button primary" href="https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/" data-landing="openWorkspace">进入工作台 →</a></div></header>
-<main class="entry-main"><section class="entry-copy"><span class="section-kicker brand-kicker" data-landing="kicker">从开球前，到下一次达阵。</span><h1><span data-landing="heading1">战术，</span><br><span data-landing="heading2">交给整支球队。</span></h1><p><span data-landing="intro1">排阵型，画路线，一起演练。</span><br><span data-landing="intro2">用管理员分配的账号登录，和团队使用同一份战术本。</span></p><a class="button primary entry-cta" href="https://playbook-studio-tim.kind-wolf-6204.chatgpt.site/editor/"><span data-landing="openCloud">进入云端共享版</span> <span aria-hidden="true">→</span></a><div class="entry-permissions"><span><b data-landing="owner">管理员</b> <span data-landing="ownerDesc">管理与恢复</span></span><span><b data-landing="editor">编辑者</b> <span data-landing="editorDesc">修改战术</span></span><span><b data-landing="viewer">只读成员</b> <span data-landing="viewerDesc">查看与演练</span></span></div></section><section class="entry-demo" aria-label="教学示例预览" data-landing-aria="demoAria"><div class="demo-heading"><span data-landing="demoHeading">先看一眼，战术如何展开。</span><div role="group" aria-label="选择教学示例" data-landing-aria="demoSelect"><button data-demo="offense" class="active" aria-pressed="true" data-landing="offense">进攻 · Mesh</button><button data-demo="defense" aria-pressed="false" data-landing="defense">防守 · Cover 3</button></div></div><div id="landing-preview"></div><p data-landing="demoCaption">教学示例 · 这里不会显示你的私有战术</p></section></main>
-<section class="entry-migration"><div><h2 data-landing="migrationHeading">把旧战术，带到新工作台。</h2><p data-landing="migrationDesc">旧版本地数据仍在原设备与浏览器里。先导出，再在云端「新建战术本」时上传 JSON。</p><button class="button subtle" id="export-local" data-landing="export">导出这台设备的本地战术</button><p id="migration-status" role="status" aria-live="polite"></p></div><div><span class="section-kicker" data-landing="tryHeading">也可以先试画一个战术</span><p data-landing="tryDesc">本地预览保留完整编辑功能，修改只保存在当前浏览器。</p><a href="./local.html" data-landing="tryLink">打开本地预览版 →</a></div></section>
-<footer class="entry-footer"><span>Playbook Studio</span><span data-landing="footerCloud">云端自动保存 · 按成员权限共享</span><span data-landing="footerLogin">已有 ChatGPT 账号可在登录页使用原入口</span></footer>
-<script type="module" src="./migrate.js"></script><script type="module" src="./entry-effects.js"></script></body></html>
+  <header class="entry-header">
+    <a class="entry-brand" href="./" aria-label="Playbook Studio">
+      <img class="brand-logo brand-logo-light" src="./assets/brand/playbook-studio-logo-light.svg" width="200" height="60" alt="Playbook Studio">
+      <img class="brand-logo brand-logo-dark" src="./assets/brand/playbook-studio-logo-dark-transparent.svg" width="200" height="60" alt="" aria-hidden="true">
+    </a>
+    <nav class="entry-nav" aria-label="页面导览" data-landing-aria="navAria">
+      <a href="#story" data-landing="navStory">战术叙事</a>
+      <a href="#library" data-landing="navLibrary">NFL 战术库</a>
+      <a href="#scenes" data-landing="navScenes">核心场景</a>
+      <a href="#migrate" data-landing="navMigrate">本地迁移</a>
+    </nav>
+    <div class="entry-header-actions">
+      <label class="entry-language">
+        <span class="sr-only" data-landing="language">语言</span>
+        <select id="entry-language" aria-label="语言">
+          <option value="zh-CN">中文</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <div id="entry-effects"></div>
+      <a class="button primary" href="https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html" data-landing="openWorkspace">进入工作台 →</a>
+    </div>
+  </header>
+
+  <div class="entry-hero">
+    <div class="entry-hero-backdrop" aria-hidden="true"></div>
+    <main class="entry-main">
+      <section class="entry-copy">
+        <div class="entry-brand-kicker-row">
+          <svg class="entry-opening-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+            <rect width="512" height="512" rx="112" fill="#0C192C"/>
+            <g transform="translate(79.86, 76.88) scale(1.24)">
+              <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="butt" stroke-linejoin="miter">
+                <circle class="mark-stroke mark-stroke-outer" cx="48.17" cy="240.87" r="37"/>
+                <path class="mark-stroke mark-stroke-outer" d="M 58.68 205.39 L 99.29 68.28 A 80 80 0 0 1 209.81 18.50"/>
+                <path class="mark-stroke mark-stroke-outer" d="M 255.89 86.81 A 80 80 0 0 1 176.00 171.00 H 131.49"/>
+              </g>
+              <g fill="none" stroke="#3E9B58" stroke-width="20" stroke-linecap="butt" stroke-linejoin="miter">
+                <path class="mark-stroke mark-stroke-inner" d="M 98.38 191.08 L 131.89 77.94 A 46 46 0 0 1 192.48 48.06"/>
+                <path class="mark-stroke mark-stroke-inner" d="M 221.99 91.80 A 46 46 0 0 1 176.00 137.00 H 141.12"/>
+              </g>
+              <polygon class="mark-arrow" fill="#EAA127" points="199.22,63.14 241.00,33.89 230.67,19.15 284.13,15.29 262.22,64.20 251.90,49.45 210.12,78.71"/>
+            </g>
+          </svg>
+          <span class="section-kicker brand-kicker" data-landing="kicker">从开球前，到下一次达阵。</span>
+        </div>
+        <h1>
+          <span class="mask-line" style="--mask-delay:80ms" data-landing="heading1">战术，</span><br>
+          <span class="mask-line" style="--mask-delay:170ms" data-landing="heading2">交给整支球队。</span>
+        </h1>
+        <p>
+          <span data-landing="intro1">排阵型，画路线，一起演练。</span><br>
+          <span data-landing="intro2">用管理员分配的账号登录，和团队使用同一份战术本。</span>
+        </p>
+        <div class="entry-cta-row">
+          <a class="button primary entry-cta" href="https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html">
+            <span data-landing="openCloud">进入云端共享版</span> <span aria-hidden="true">→</span>
+          </a>
+          <a class="entry-scroll-cue" href="#story">
+            <span data-landing="scrollHint">向下滚动，看一次战术如何成型</span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M8 3v10m0 0-3.5-3.5M8 13l3.5-3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+        <div class="entry-permissions">
+          <span><b data-landing="owner">管理员</b> <span data-landing="ownerDesc">管理与恢复</span></span>
+          <span><b data-landing="editor">编辑者</b> <span data-landing="editorDesc">修改战术</span></span>
+          <span><b data-landing="viewer">只读成员</b> <span data-landing="viewerDesc">查看与演练</span></span>
+        </div>
+      </section>
+
+      <section class="entry-demo" aria-label="教学示例预览" data-landing-aria="demoAria">
+        <div class="demo-heading">
+          <span data-landing="demoHeading">先看一眼，战术如何展开。</span>
+          <div role="group" aria-label="选择教学示例" data-landing-aria="demoSelect">
+            <button data-demo="offense" class="active" aria-pressed="true" data-landing="offense">进攻 · Mesh</button>
+            <button data-demo="defense" aria-pressed="false" data-landing="defense">防守 · Cover 3</button>
+          </div>
+        </div>
+        <div id="landing-preview"></div>
+        <p data-landing="demoCaption">教学示例 · 这里不会显示你的私有战术</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Scrollytelling · From Snap to Touchdown -->
+  <section id="story" class="entry-story-band">
+    <div class="entry-section">
+      <div class="entry-section-head" data-reveal>
+        <span class="section-kicker" data-landing="storyKicker">01 · 滚动叙事</span>
+        <h2 data-landing="storyTitle">一次达阵的诞生</h2>
+        <p data-landing="storyIntro">沿着球场时间轴向下浏览，看一套战术如何从开球前落位，一步步走到全队演练与 AI 战局推演。</p>
+      </div>
+
+      <div class="story-grid">
+        <div class="story-steps">
+          <button type="button" class="story-step is-active" data-story-step="0" data-story-caption-key="storyStep1Caption" aria-current="step">
+            <span class="story-step-tag" data-landing="storyStep1Tag">STEP 01 · 排兵布阵</span>
+            <h3 data-landing="storyStep1Title">5 人腰旗到 11 人全装备，一秒落位。</h3>
+            <p data-landing="storyStep1Desc">选择 Gun Trips、4–3 防守或自定义人员组，棋子在开球线精准落位，保持清晰码数参考。</p>
+          </button>
+
+          <button type="button" class="story-step" data-story-step="1" data-story-caption-key="storyStep2Caption" aria-current="false">
+            <span class="story-step-tag" data-landing="storyStep2Tag">STEP 02 · 路线描绘</span>
+            <h3 data-landing="storyStep2Title">主路线、选项路线与节奏节点，一笔成型。</h3>
+            <p data-landing="storyStep2Desc">绘制浅交叉 Mesh、垂直牵制与传球点；每一条路线都有独立节奏、箭头端帽与撤销记录。</p>
+          </button>
+
+          <button type="button" class="story-step" data-story-step="2" data-story-caption-key="storyStep3Caption" aria-current="false">
+            <span class="story-step-tag" data-landing="storyStep3Tag">STEP 03 · 同步演练</span>
+            <h3 data-landing="storyStep3Title">把静态战术板，变成 60fps 场上实景。</h3>
+            <p data-landing="storyStep3Desc">按真实跑动节奏同步演练 0.0s 到 2.4s，肉眼验证接球窗口、交错层次与传球出手时机。</p>
+          </button>
+
+          <button type="button" class="story-step" data-story-step="3" data-story-caption-key="storyStep4Caption" aria-current="false">
+            <span class="story-step-tag" data-landing="storyStep4Tag">STEP 04 · AI 战局推演</span>
+            <h3 data-landing="storyStep4Title">攻防叠图 + 条件推演，不靠猜。</h3>
+            <p data-landing="storyStep4Desc">将 Cover 3 三深区叠加到 Mesh 上，使用自带 API Key 调用主流模型，按图面事实给出 If / Then 建议。</p>
+          </button>
+
+          <button type="button" class="story-step" data-story-step="4" data-story-caption-key="storyStep5Caption" aria-current="false">
+            <span class="story-step-tag" data-landing="storyStep5Tag">STEP 05 · 整支球队共享</span>
+            <h3 data-landing="storyStep5Title">同一份云端战术本，按角色各司其职。</h3>
+            <p data-landing="storyStep5Desc">管理员掌控版本历史与成员权限，教练组在线编辑，球员在手机和 iPad 上随时复习演练。</p>
+          </button>
+        </div>
+
+        <aside class="story-stage-wrap" data-stage="formation" aria-label="交互式战术演变预览舞台" data-landing-aria="storyStageAria">
+          <div class="story-stage-top">
+            <span id="story-stage-caption" class="story-stage-caption" data-landing="storyStep1Caption">Gun Trips · 11 人进攻落位</span>
+            <div class="story-stage-telemetry">
+              <button type="button" id="story-replay" class="story-replay" hidden data-landing="storyReplay">重播演练</button>
+              <span id="story-clock" class="story-clock">0.0s</span>
+            </div>
+          </div>
+          <div id="story-stage-canvas" class="story-stage-canvas"></div>
+          <div id="story-ai-callout" class="story-callout" hidden>
+            <strong data-landing="storyAiCalloutTag">IF / THEN 战局焦点</strong>
+            <span data-landing="storyAiCalloutText">浅交叉双线压缩中路线卫时，关注 H / Y 交叉点后的空当窗口与弱侧牵制。</span>
+          </div>
+          <div id="story-team-bar" class="story-team-bar" hidden>
+            <span class="story-team-status" data-landing="storyTeamBadge">云端已同步 · 权限受保护</span>
+            <a class="button primary" href="https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html" data-landing="openWorkspace">进入工作台 →</a>
+          </div>
+          <div class="story-progress-dots" aria-hidden="true">
+            <span class="is-active"></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div hidden aria-hidden="true">
+            <span data-story-caption-source="storyStep1Caption" data-landing="storyStep1Caption">Gun Trips · 11 人进攻落位</span>
+            <span data-story-caption-source="storyStep2Caption" data-landing="storyStep2Caption">Mesh 浅交叉 · 路线矢量描绘</span>
+            <span data-story-caption-source="storyStep3Caption" data-landing="storyStep3Caption">实时演练 · 交叉窗口展开中</span>
+            <span data-story-caption-source="storyStep4Caption" data-landing="storyStep4Caption">Mesh × Cover 3 · 攻防叠图分析</span>
+            <span data-story-caption-source="storyStep5Caption" data-landing="storyStep5Caption">云端实时同步 · 角色权限清晰隔离</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dual-Row Marquee · 13 NFL Teams + BYOK Ecosystem -->
+  <section id="library" class="entry-marquee-band" aria-label="内置 NFL 战术库与 AI 生态概览" data-landing-aria="marqueeAria">
+    <div class="marquee-header" data-reveal>
+      <strong data-landing="marqueeTeamsLabel">内置 MADDEN NFL 战术资产</strong>
+      <span data-landing="marqueeTeamsStat">13 支球队 · 1,827 套战术 · 1,056 套可编辑</span>
+    </div>
+    <div class="marquee-viewport">
+      <div class="marquee-track">
+        <div class="marquee-group">
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#0e5a55">PHI</b>Eagles</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#462e7a">BAL</b>Ravens</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#8c2828">SF</b>49ers</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#a84d18">CIN</b>Bengals</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#1c478a">BUF</b>Bills</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#9e2328">KC</b>Chiefs</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#223a63">DAL</b>Cowboys</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#0e6770">MIA</b>Dolphins</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#175a8f">DET</b>Lions</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#245238">GB</b>Packers</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#1b4588">LAR</b>Rams</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#204c38">SEA</b>Seahawks</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#233457">HOU</b>Texans</span>
+        </div>
+        <div class="marquee-group" aria-hidden="true">
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#0e5a55">PHI</b>Eagles</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#462e7a">BAL</b>Ravens</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#8c2828">SF</b>49ers</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#a84d18">CIN</b>Bengals</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#1c478a">BUF</b>Bills</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#9e2328">KC</b>Chiefs</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#223a63">DAL</b>Cowboys</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#0e6770">MIA</b>Dolphins</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#175a8f">DET</b>Lions</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#245238">GB</b>Packers</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#1b4588">LAR</b>Rams</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#204c38">SEA</b>Seahawks</span>
+          <span class="marquee-pill"><b class="marquee-code" style="--team-tone:#233457">HOU</b>Texans</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="marquee-header" data-reveal style="--reveal-delay:60ms">
+      <strong data-landing="marqueeEcosystemLabel">自带密钥 BYOK 与多赛制支持</strong>
+      <span data-landing="marqueeEcosystemStat">支持主流模型 · 密钥仅驻留浏览器内存</span>
+    </div>
+    <div class="marquee-viewport is-reverse">
+      <div class="marquee-track">
+        <div class="marquee-group">
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8ee0aa"></i>OpenAI</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8fb8ff"></i>DeepSeek</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#f3c46b"></i>Claude</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#a9c1ff"></i>Gemini</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#d1d7e0"></i>OpenRouter</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8ee0aa"></i>Ollama Local</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#f3c46b"></i>5v5 Flag</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8fb8ff"></i>7v7 Passing</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#e8ecf2"></i>11v11 Tackle</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8ee0aa"></i>Coach Film Room</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#d1d7e0"></i>Depth Chart</span>
+        </div>
+        <div class="marquee-group" aria-hidden="true">
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8ee0aa"></i>OpenAI</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8fb8ff"></i>DeepSeek</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#f3c46b"></i>Claude</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#a9c1ff"></i>Gemini</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#d1d7e0"></i>OpenRouter</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8ee0aa"></i>Ollama Local</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#f3c46b"></i>5v5 Flag</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8fb8ff"></i>7v7 Passing</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#e8ecf2"></i>11v11 Tackle</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#8ee0aa"></i>Coach Film Room</span>
+          <span class="marquee-pill is-eco"><i class="marquee-dot" style="--dot-tone:#d1d7e0"></i>Depth Chart</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Horizontal Workflow Gallery -->
+  <section id="scenes" class="entry-section">
+    <div class="scenes-header-row">
+      <div class="entry-section-head" data-reveal>
+        <span class="section-kicker" data-landing="scenesKicker">02 · 工作流全景</span>
+        <h2 data-landing="scenesTitle">四个场景，打通从画板到球场。</h2>
+        <p data-landing="scenesIntro">为教练桌面的大屏精雕，也为场边 iPad 与手机的触控操作留出足够呼吸感。</p>
+      </div>
+      <div class="scenes-controls">
+        <button type="button" class="scenes-arrow" data-scenes-dir="prev" aria-label="上一个场景" data-landing-aria="scenesPrev">←</button>
+        <button type="button" class="scenes-arrow" data-scenes-dir="next" aria-label="下一个场景" data-landing-aria="scenesNext">→</button>
+      </div>
+    </div>
+
+    <div class="scenes-track" role="region" aria-label="核心工作场景横向画廊" data-landing-aria="scenesTrackAria" data-reveal>
+      <article class="scene-card">
+        <div class="scene-art" aria-hidden="true">
+          <svg viewBox="0 0 320 140" fill="none">
+            <rect x="12" y="10" width="296" height="120" rx="10" fill="#181c23" stroke="rgba(255,255,255,0.12)"/>
+            <path d="M12 48H308M12 86H308" stroke="rgba(255,255,255,0.08)"/>
+            <path d="M12 104H308" stroke="rgba(255,255,255,0.22)" stroke-dasharray="6 5"/>
+            <path d="M68 104V52L116 32" stroke="#e8ecf2" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M248 104V74L142 74" stroke="#3e9b58" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M108 104V82L218 82" stroke="#eaa127" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="68" cy="104" r="8" fill="#e8ecf2"/>
+            <circle cx="108" cy="104" r="8" fill="#eaa127"/>
+            <circle cx="160" cy="112" r="8" fill="#e8ecf2"/>
+            <circle cx="248" cy="104" r="8" fill="#3e9b58"/>
+          </svg>
+        </div>
+        <div class="scene-body">
+          <small data-landing="scene1Tag">01 · 平面精准编辑</small>
+          <h3 data-landing="scene1Title">零延迟画板，直接操作不等待动效。</h3>
+          <p data-landing="scene1Desc">拖拽跟手、路线草稿可撤回一点、5/7/11 人制与 Depth Chart 深度联动。</p>
+        </div>
+      </article>
+
+      <article class="scene-card">
+        <div class="scene-art" aria-hidden="true">
+          <svg viewBox="0 0 320 140" fill="none">
+            <polygon points="48,26 272,26 306,124 14,124" fill="#1b212a" stroke="rgba(255,255,255,0.15)"/>
+            <path d="M36 58H284M26 92H294" stroke="rgba(255,255,255,0.1)"/>
+            <ellipse cx="108" cy="94" rx="16" ry="8" fill="rgba(0,0,0,0.5)"/>
+            <ellipse cx="108" cy="88" rx="13" ry="7" fill="#d9dfe8"/>
+            <ellipse cx="160" cy="104" rx="16" ry="8" fill="rgba(0,0,0,0.5)"/>
+            <ellipse cx="160" cy="98" rx="13" ry="7" fill="#f3f5f8"/>
+            <ellipse cx="216" cy="92" rx="16" ry="8" fill="rgba(0,0,0,0.5)"/>
+            <ellipse cx="216" cy="86" rx="13" ry="7" fill="#779ab8"/>
+            <path d="M108 86C128 60 176 58 228 42" stroke="#eaa127" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="scene-body">
+          <small data-landing="scene2Tag">02 · 3D 石墨舞台</small>
+          <h3 data-landing="scene2Title">一键切换立体质感，汇报演示更有压迫感。</h3>
+          <p data-landing="scene2Desc">石墨球场与冷银立体棋子只改变视觉表现，不改动任何共享战术坐标。</p>
+        </div>
+      </article>
+
+      <article class="scene-card">
+        <div class="scene-art" aria-hidden="true">
+          <svg viewBox="0 0 320 140" fill="none">
+            <rect x="12" y="10" width="296" height="120" rx="10" fill="#151921" stroke="rgba(255,255,255,0.12)"/>
+            <rect x="12" y="10" width="160" height="120" rx="10" fill="rgba(62,155,88,0.08)"/>
+            <line x1="172" y1="10" x2="172" y2="130" stroke="#8ee0aa" stroke-width="1.6" stroke-dasharray="4 4"/>
+            <path d="M62 98C96 86 122 68 172 58" stroke="#e8ecf2" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M172 58C204 52 232 42 260 32" stroke="#eaa127" stroke-width="2.4" stroke-dasharray="5 5" stroke-linecap="round"/>
+            <circle cx="172" cy="58" r="7" fill="#e8ecf2"/>
+            <rect x="206" y="84" width="84" height="28" rx="7" fill="rgba(234,161,39,0.14)" stroke="rgba(234,161,39,0.5)"/>
+            <path d="M222 98H274" stroke="#f3c46b" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="scene-body">
+          <small data-landing="scene3Tag">03 · Coach Film 讲解台</small>
+          <h3 data-landing="scene3Title">停帧提问、码线遮罩揭示答案与走势。</h3>
+          <p data-landing="scene3Desc">最多 3 个课堂停点，对比两位球员实时纵深差，先提问再揭幕路线走势。</p>
+        </div>
+      </article>
+
+      <article class="scene-card">
+        <div class="scene-art" aria-hidden="true">
+          <svg viewBox="0 0 320 140" fill="none">
+            <rect x="12" y="10" width="176" height="120" rx="10" fill="#181c23" stroke="rgba(255,255,255,0.12)"/>
+            <ellipse cx="100" cy="48" rx="46" ry="18" fill="rgba(229,146,117,0.16)" stroke="#e59275" stroke-dasharray="4 4"/>
+            <path d="M52 104L142 62" stroke="#e8ecf2" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="52" cy="104" r="6.5" fill="#e8ecf2"/>
+            <circle cx="136" cy="48" r="6.5" fill="#e59275"/>
+            <rect x="200" y="10" width="108" height="34" rx="8" fill="#212733" stroke="rgba(255,255,255,0.18)"/>
+            <rect x="200" y="52" width="108" height="34" rx="8" fill="#1a1f28" stroke="rgba(255,255,255,0.09)"/>
+            <rect x="200" y="94" width="108" height="36" rx="8" fill="#1a1f28" stroke="rgba(255,255,255,0.09)"/>
+            <path d="M214 27H286M214 69H274M214 112H268" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="scene-body">
+          <small data-landing="scene4Tag">04 · AI 战局分析</small>
+          <h3 data-landing="scene4Title">左侧吸顶叠图，右侧情景报告联动高亮。</h3>
+          <p data-landing="scene4Desc">聚焦任意图面证据，叠图即时高亮对应球员与路线，并可一键回传画板提案。</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="scenes-meter" aria-hidden="true">
+      <div class="scenes-meter-fill"></div>
+    </div>
+  </section>
+
+  <section id="migrate" class="entry-migration">
+    <div data-reveal>
+      <h2 data-landing="migrationHeading">把旧战术，带到新工作台。</h2>
+      <p data-landing="migrationDesc">旧版本地数据仍在原设备与浏览器里。先导出，再在云端「新建战术本」时上传 JSON。</p>
+      <button class="button subtle" id="export-local" data-landing="export">导出这台设备的本地战术</button>
+      <p id="migration-status" role="status" aria-live="polite"></p>
+    </div>
+    <div data-reveal style="--reveal-delay:90ms">
+      <span class="section-kicker" data-landing="tryHeading">也可以先试画一个战术</span>
+      <p data-landing="tryDesc">本地预览保留完整编辑功能，修改只保存在当前浏览器。</p>
+      <a href="./local.html" data-landing="tryLink">打开本地预览版 →</a>
+    </div>
+  </section>
+
+  <footer class="entry-footer">
+    <span>Playbook Studio</span>
+    <span data-landing="footerCloud">云端自动保存 · 按成员权限共享</span>
+    <span data-landing="footerLogin">已有 ChatGPT 账号可在登录页使用原入口</span>
+  </footer>
+
+  <script type="module" src="./migrate.js"></script>
+  <script type="module" src="./entry-effects.js"></script>
+  <script type="module" src="./landing-motion.js"></script>
+</body>
+</html>

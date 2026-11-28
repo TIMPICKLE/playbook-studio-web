@@ -146,3 +146,37 @@
 .film-pitch .film-ball-body { fill: var(--pitch-ball); stroke: var(--pitch-ball-seam); stroke-width: 1; }
 .film-pitch .film-ball-laces { fill: none; stroke: var(--pitch-ball-seam); stroke-width: 1.1; }
 .film-pitch .film-ball-tether { fill: none; stroke: var(--pitch-ball); stroke-width: 1.4; }
+.film-pitch .film-reveal-rect {
+  transform-box: view-box;
+  transform-origin: 500px 550px;
+}
+.film-pitch .film-reveal-rect.is-revealing {
+  animation: film-curtain-reveal 440ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.film-pitch .film-reveal-scan {
+  stroke: var(--pitch-recent);
+  stroke-width: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+.film-pitch .film-reveal-scan.is-revealing {
+  animation: film-curtain-scan 440ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes film-curtain-reveal {
+  from { transform: scaleY(0.06); }
+  to { transform: scaleY(1); }
+}
+@keyframes film-curtain-scan {
+  0% { transform: translateY(484px); opacity: 0; }
+  18% { opacity: 0.58; }
+  85% { opacity: 0.35; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-pitch .film-reveal-rect.is-revealing,
+  .film-pitch .film-reveal-scan.is-revealing {
+    animation: none;
+    transform: none;
+    opacity: 0;
+  }
+}

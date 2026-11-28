@@ -13,7 +13,18 @@
 .film-lesson-row .film-control { font-size: .8125rem; min-height: 2.25rem; padding: .3rem .5rem; }
 .film-lesson [aria-pressed=true] { background: var(--film-active); color: var(--film-on-active); }
 .film-lesson-question { font-weight: 650; }
-.film-lesson-answer { padding-inline-start: .6rem; border-inline-start: 2px solid var(--film-signal); }
+.film-lesson-answer {
+  padding-inline-start: .6rem;
+  border-inline-start: 2px solid var(--film-signal);
+  animation: film-answer-unmask 320ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes film-answer-unmask {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateX(-4px); }
+  to { opacity: 1; clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-lesson-answer { animation: none; clip-path: none; transform: none; }
+}
 .film-lesson-status, .film-lesson-form label { color: var(--film-muted); font-size: .8125rem; }
 .film-lesson-status:empty { display: none; }
 .film-lesson-form label { display: block; margin-block: .55rem; }

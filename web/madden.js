@@ -110,6 +110,9 @@ export function createMaddenLibrary({ canEdit, getPlays, onImport }) {
     }, { passive: false });
     root.addEventListener('scroll', event => {
       if (event.target.classList?.contains('madden-team-tabs')) syncTeamRailFade();
+      if (event.target.classList?.contains('madden-results')) {
+        root.querySelector('.madden-result-heading')?.classList.toggle('is-scrolled', event.target.scrollTop > 4);
+      }
     }, true);
     root.addEventListener('input', event => {
       if (event.target.id === 'madden-team-search') { teamQuery = event.target.value; renderTeamResults(); return; }

@@ -49,8 +49,29 @@ dialog.coach-film[data-theme=light] {
   color-scheme: light;
 }
 .coach-film:not([open]) { display: none; }
+.coach-film[open] {
+  animation: film-room-open 340ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.coach-film[open] .film-shell {
+  animation: film-shell-rise 380ms cubic-bezier(.22, 1, .36, 1) both;
+}
 .coach-film::backdrop { background: #101317; }
 html:has(.coach-film[open]) { overflow: hidden; }
+@keyframes film-room-open {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes film-shell-rise {
+  from { opacity: 0.45; transform: translateY(10px) scale(0.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coach-film[open],
+  .coach-film[open] .film-shell {
+    animation: none;
+    transform: none;
+  }
+}
 
 .film-shell {
   display: grid;

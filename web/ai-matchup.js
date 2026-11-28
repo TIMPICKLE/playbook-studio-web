@@ -9,6 +9,7 @@ import { matchupKnowledgeQuery } from './analysis-evidence.js';
 import { isFlag5Play } from './game-formats.js';
 import { MODEL_PROVIDER_PRESETS, PROTOCOL_OPTIONS } from './model-protocol.js';
 import { getModelConnection, setModelConnection, subscribeModelConnection } from './model-connection.js';
+import { reducedMotion } from './motion.js';
 
 const ref = (side, type, id) => `${side}:${type}:${id}`;
 export function resolveHandoffContext(plays, context = {}) {
@@ -66,6 +67,8 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
   let active = false, result = null, activeScenario = 0, controller = null, generation = 0;
   const state = { offense: '', defense: '', perspective: '', coverage: 'unknown', mode: 'real_football', context: '', mirrorDefense: false, includeNotes: false, provider: 'deepseek', protocol: 'openai', model: modelDefaults.deepseek, apiKey: '', baseUrl: '', knowledgeQuery: '' };
   let reportSnapshot = null, followupQuestion = '', discussion = [], showingReportSnapshot = false, handingOff = false, runError = '', lastRunWasFollowup = false;
+  let pinnedFocusId = '', scrollLinkObserver = null;
+  const disconnectScrollLink = () => { scrollLinkObserver?.disconnect(); scrollLinkObserver = null; };
   const sessions = new Map();
   const connectionFields = ['provider','protocol','model','baseUrl','apiKey'];
   const knowledgeStore = createKnowledgeStore();
@@ -177,9 +180,9 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
   }
   function clearResult() {
     // Invalidation cancels the in-flight run, never erases a completed report.
-    generation++; controller?.abort(); controller = null; showingReportSnapshot = false;runError='';
+    generation++; controller?.abort(); controller = null; showingReportSnapshot = false; runError = ''; pinnedFocusId = ''; disconnectScrollLink();
     const results = active && root.querySelector('#ai-results');
-    if (results) { results.setAttribute('aria-busy','false');results.innerHTML = resultHTML(); paintEvidence(); }
+    if (results) { results.setAttribute('aria-busy','false');results.innerHTML = resultHTML(); paintEvidence(); syncResultScrollLink(); }
     resetBusy();
   }
   function resetBusy() {
@@ -195,7 +198,7 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
   }
   function show(showing) {
     active = showing; root.hidden = !showing;
-    if (!showing) { importGeneration++; importing = false; if (controller) { generation++; controller.abort(); controller = null; } return; }
+    if (!showing) { disconnectScrollLink(); importGeneration++; importing = false; if (controller) { generation++; controller.abort(); controller = null; } return; }
     render();
   }
   function onData(_data, record) {
@@ -242,6 +245,38 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
       const cancel=root.querySelector('[data-ai-action="cancel"]'); if(cancel)cancel.hidden=false;
     } else resetBusy();
     paintEvidence();
+    syncResultScrollLink();
+  }
+  function enterResults(selector = '.ai-result-card') {
+    if (reducedMotion(root.ownerDocument?.defaultView)) return;
+    const node = root.querySelector(selector);
+    if (!node) return;
+    node.classList.remove('is-entering');
+    void node.offsetWidth;
+    node.classList.add('is-entering');
+  }
+  function syncResultScrollLink() {
+    disconnectScrollLink();
+    const win = root.ownerDocument?.defaultView;
+    if (!active || !result || typeof win?.IntersectionObserver !== 'function') return;
+    const focusPills = [...root.querySelectorAll('#ai-results [data-ai-focus]')];
+    const scenarioNode = root.querySelector('#ai-results .ai-scenario');
+    if (!focusPills.length && !scenarioNode) return;
+    scrollLinkObserver = new win.IntersectionObserver(entries => {
+      if (pinnedFocusId) return;
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        if (entry.target.matches('[data-ai-focus]')) {
+          paintEvidence(entry.target.dataset.aiFocus);
+          return;
+        }
+        if (entry.target === scenarioNode) {
+          paintEvidence();
+        }
+      }
+    }, { rootMargin: '-22% 0px -48% 0px', threshold: 0.25 });
+    if (scenarioNode) scrollLinkObserver.observe(scenarioNode);
+    focusPills.forEach(pill => scrollLinkObserver.observe(pill));
   }
   function resultHTML() {
     const waiting = controller ? `<div class="ai-run-status ai-model-waiting" role="status"><span class="ai-waiting-indicator" aria-hidden="true"></span><span>${t('analysis.waiting')}<small>${t('analysis.retainingReport')}</small></span></div>` : '';
@@ -276,12 +311,16 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
     inspector.querySelector('[data-knowledge-action="close"]')?.focus();
   }
   function paintEvidence(focusId) {
-    const ids = new Set(staleReport() && !showingReportSnapshot ? [] : focusId ? [focusId] : result?.scenarios[activeScenario]?.evidenceIds || []);
+    const activeFocus = focusId || pinnedFocusId;
+    const ids = new Set(staleReport() && !showingReportSnapshot ? [] : activeFocus ? [activeFocus] : result?.scenarios[activeScenario]?.evidenceIds || []);
     const hasBoardEvidence = [...ids].some(id => id.startsWith('offense:') || id.startsWith('defense:'));
     root.querySelectorAll('.ai-board [data-player],.ai-board [data-route],.ai-board [data-zone]').forEach(node => {
       const id = node.dataset.player || node.dataset.route || node.dataset.zone;
       node.classList.toggle('ai-evidence-active', ids.has(id));
       node.classList.toggle('ai-evidence-dim', hasBoardEvidence && !ids.has(id));
+    });
+    root.querySelectorAll('#ai-results [data-ai-focus]').forEach(pill => {
+      pill.classList.toggle('is-focus-active', !!activeFocus && pill.dataset.aiFocus === activeFocus);
     });
   }
   function setField(node) {
@@ -344,12 +383,12 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
       result = response; reportSnapshot=runSnapshot; activeScenario = 0; showingReportSnapshot=false;
       if (question) { discussion=[...discussion,{question,summary:response.summary || response.scenarios?.[0]?.possibility || ''}]; followupQuestion=''; }
       else discussion=[];
-      const results = root.querySelector('#ai-results'); if (results) results.innerHTML = resultHTML(); paintEvidence();
+      const results = root.querySelector('#ai-results'); if (results) results.innerHTML = resultHTML(); pinnedFocusId = ''; paintEvidence(); enterResults('.ai-result-card'); syncResultScrollLink();
     } catch (err) {
       if (active && generation === run) showError(err?.name === 'AbortError' || err?.name === 'TimeoutError' ? (t("extra.analysisWasCanceledOrTimedOutThe")) : localizedAnalysisError(err));
     } finally {
       clearTimeout(timeout);
-      if (generation === run) { controller = null; resetBusy(); const results = root.querySelector('#ai-results'); if (results) { results.setAttribute('aria-busy','false');results.innerHTML = resultHTML();paintEvidence(); } }
+      if (generation === run) { controller = null; resetBusy(); const results = root.querySelector('#ai-results'); if (results) { results.setAttribute('aria-busy','false');results.innerHTML = resultHTML();paintEvidence();syncResultScrollLink(); } }
     }
   }
   async function editSuggestion() {
@@ -365,6 +404,22 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
       const alert=root.querySelector('.ai-error'); if(alert){alert.textContent=localizedAnalysisError(error);alert.hidden=false;}
     } finally {handingOff=false;if(button?.isConnected)button.disabled=false;}
   }
+  root.addEventListener('pointerover', event => {
+    const pill = event.target.closest?.('[data-ai-focus]');
+    if (pill && !pinnedFocusId) paintEvidence(pill.dataset.aiFocus);
+  });
+  root.addEventListener('pointerout', event => {
+    const pill = event.target.closest?.('[data-ai-focus]');
+    if (pill && !pinnedFocusId && !pill.contains(event.relatedTarget)) paintEvidence();
+  });
+  root.addEventListener('focusin', event => {
+    const pill = event.target.closest?.('[data-ai-focus]');
+    if (pill && !pinnedFocusId) paintEvidence(pill.dataset.aiFocus);
+  });
+  root.addEventListener('focusout', event => {
+    const pill = event.target.closest?.('[data-ai-focus]');
+    if (pill && !pinnedFocusId) paintEvidence();
+  });
   root.addEventListener('input', event => {
     if(event.target.matches('[data-ai-followup]')) {followupQuestion=event.target.value;return;}
     const node = event.target.closest('[data-ai-field]'); if (node && (node.tagName === 'INPUT' && node.type !== 'checkbox' || node.tagName === 'TEXTAREA')) setField(node);
@@ -373,11 +428,11 @@ export function createMatchupView({ root, request, getCurrent, getData, isDirty,
   root.addEventListener('click', event => {
     const removed = event.target.closest('[data-knowledge-delete]'); if (removed) { deleteKnowledgeSource(removed.dataset.knowledgeDelete); return; }
     const reference = event.target.closest('[data-knowledge-evidence]'); if (reference) { showKnowledgeEvidence(reference.dataset.knowledgeEvidence); return; }
-    const focused = event.target.closest('[data-ai-focus]'); if (focused) { paintEvidence(focused.dataset.aiFocus); return; }
+    const focused = event.target.closest('[data-ai-focus]'); if (focused) { pinnedFocusId = pinnedFocusId === focused.dataset.aiFocus ? '' : focused.dataset.aiFocus; paintEvidence(pinnedFocusId); return; }
     const knowledgeAction = event.target.closest('[data-knowledge-action]');
     if (knowledgeAction) { if (knowledgeAction.dataset.knowledgeAction === 'export') exportKnowledge(); else root.querySelector('.ai-source-inspector')?.remove(); return; }
     const scenario = event.target.closest('[data-ai-scenario]');
-    if (scenario && result) { activeScenario = Number(scenario.dataset.aiScenario); root.querySelector('#ai-results').innerHTML = resultHTML(); paintEvidence(); return; }
+    if (scenario && result) { activeScenario = Number(scenario.dataset.aiScenario); pinnedFocusId = ''; root.querySelector('#ai-results').innerHTML = resultHTML(); paintEvidence(); enterResults('.ai-scenario'); syncResultScrollLink(); return; }
     if (event.target.closest('[data-ai-action="cancel"]') && controller) {
       generation++; controller.abort(); controller = null; resetBusy();
       const results = root.querySelector('#ai-results'); if (results) {results.setAttribute('aria-busy','false');results.innerHTML = resultHTML();}

@@ -33,6 +33,22 @@ document.querySelector('#export-local')?.addEventListener('click', () => {
 const demo = document.querySelector('#landing-preview');
 if (demo) {
   const examples = starterWorkspace();
-  const show = type => { const play = type === 'defense' ? examples.plays.find(p => p.title.includes('Cover 3')) : examples.plays[0]; demo.innerHTML = fieldSVG(play, {}, { thumbnail: true, prefix: 'gateway' }); document.querySelectorAll('[data-demo]').forEach(b => { b.classList.toggle('active',b.dataset.demo === type); b.setAttribute('aria-pressed',String(b.dataset.demo === type)); }); };
-  show('offense'); document.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click',()=>show(b.dataset.demo)));
+  const reduced = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let rendered = false;
+  const show = type => {
+    const play = type === 'defense' ? examples.plays.find(p => p.title.includes('Cover 3')) : examples.plays[0];
+    demo.innerHTML = fieldSVG(play, {}, { thumbnail: true, prefix: 'gateway' });
+    if (rendered && !reduced()) {
+      demo.classList.remove('is-wiping');
+      void demo.offsetWidth;
+      demo.classList.add('is-wiping');
+    }
+    rendered = true;
+    document.querySelectorAll('[data-demo]').forEach(b => {
+      b.classList.toggle('active', b.dataset.demo === type);
+      b.setAttribute('aria-pressed', String(b.dataset.demo === type));
+    });
+  };
+  show('offense');
+  document.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => show(b.dataset.demo)));
 }

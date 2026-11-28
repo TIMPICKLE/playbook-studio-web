@@ -1,4 +1,4 @@
-const CACHE = 'playbook-studio-v18-onboarding-ai';
+const CACHE = 'playbook-studio-v19-motion-p0-p1';
 // Heavy graph and Madden geometry modules are fetched and cached on first use.
 const FILES = [
   './editor-history.js', './workspace-merge.js', './player-group.js', './editor-selection.js', './model-connection.js', './workspace-ui.js', './locales/madden-workflow.js',

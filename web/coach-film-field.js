@@ -215,6 +215,9 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
     return {zone,group};
   });
   const defs = svg(ground,'defs'), prefix = 'film-route-' + ++fieldCount;
+  const revealClipId = `${prefix}-reveal-clip`;
+  const revealClip = svg(defs, 'clipPath', { id: revealClipId });
+  const revealRect = svg(revealClip, 'rect', { x: 0, y: 0, width: WIDTH, height: HEIGHT, class: 'film-reveal-rect' });
   const routesLayer = svg(plan,'g',{transform:routeProjection});
   const flight = model.events.some(event=>event.id==='release') ? passFlightRoute(play) : null;
   const routes = (play.routes || []).map((route,i)=>addRoute(routesLayer,defs,route,prefix,i,flight));
@@ -222,6 +225,10 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
   for (const note of play.annotations || []) {
     svg(plan,'text',{x:num(fieldX(note.x)),y:num(fieldY(note.y)),class:'film-annotation'},note.text);
   }
+  const revealScan = svg(ground, 'line', {
+    x1: LEFT, x2: right, y1: TOP, y2: TOP,
+    class: 'film-reveal-scan', 'aria-hidden': true,
+  });
   const updateTeaching = addTeachingLayer(ground);
   const tokenLayer = svg(foreground, 'g', {class:'film-players'});
   const focusedLayer = svg(foreground, 'g', {class:'film-focused-players'});
@@ -284,8 +291,21 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
   function render(nextFrame, focusIds = nextFrame.focus.map(item=>item.id), referenceFrame = null, maskQuestion = false) {
     if (destroyed) return;
     if (questionMasked !== maskQuestion) {
+      const revealing = questionMasked && !maskQuestion;
       questionMasked = maskQuestion;
       visible(plan, !maskQuestion);
+      if (revealing && !reducedMotion) {
+        attr(plan, 'clip-path', `url(#${revealClipId})`);
+        revealRect.classList.remove('is-revealing');
+        revealScan.classList.remove('is-revealing');
+        void root.offsetWidth;
+        revealRect.classList.add('is-revealing');
+        revealScan.classList.add('is-revealing');
+      } else {
+        plan.removeAttribute('clip-path');
+        revealRect.classList.remove('is-revealing');
+        revealScan.classList.remove('is-revealing');
+      }
     }
     const previous = frame;
     frame = nextFrame;
@@ -381,6 +401,11 @@ export function createFilmField(host, { model, theme = 'dark', onPick, reducedMo
     },
     setReducedMotion(enabled) {
       reducedMotion = enabled;
+      if (enabled) {
+        plan.removeAttribute('clip-path');
+        revealRect.classList.remove('is-revealing');
+        revealScan.classList.remove('is-revealing');
+      }
       if (frame) updateTeaching(frame,reference,reducedMotion,questionMasked);
     },
     destroy() {

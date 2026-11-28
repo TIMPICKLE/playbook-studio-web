@@ -8,3 +8,13 @@
 @media(max-width:720px){.entry-header{padding:20px 21px}.entry-brand{font-size:16px;gap:7px}.entry-brand img{width:30px;height:30px}.entry-header .button{font-size:12px;min-height:35px;padding:7px 10px}.entry-main{display:flex;flex-direction:column;align-items:stretch;padding:35px 24px 38px;gap:35px}.entry-copy h1{font-size:49px;margin:16px 0 20px}.entry-copy>p{font-size:13px}.entry-cta{font-size:12px;min-height:44px;margin-top:22px}.entry-permissions{font-size:11px;gap:12px 23px;margin-top:24px}.entry-permissions b{font-size:12px}.demo-heading{flex-wrap:wrap;font-size:12px;gap:10px}.entry-demo>p{font-size:11px}.entry-migration{display:block;padding:28px 24px}.entry-migration>div+div{margin-top:29px;padding-top:24px;border-top:1px solid var(--hairline,#ffffff14)}.entry-migration h2{font-size:21px}.entry-migration p{font-size:12px}.entry-footer{padding:23px 24px;font-size:11px;gap:10px}.entry-footer>span:last-child{flex-basis:100%}}
 .member-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 @media(max-width:720px){.member-section-title{flex-wrap:wrap}.member-actions{flex-basis:100%;margin-top:4px}}
+.loading-workspace{min-height:70dvh;display:grid;place-content:center;justify-items:center;gap:14px;padding:40px 24px;text-align:center}
+.loading-workspace .loading-brand-stage{display:grid;justify-items:center;gap:12px;height:auto;padding:24px 32px;border-radius:18px;background:rgba(28,32,38,.78);border:1px solid var(--hairline,#ffffff18);animation:none;box-shadow:0 24px 64px -32px rgba(0,0,0,.85)}
+.loading-brand-mark{width:56px;height:56px;display:block;border-radius:14px;box-shadow:0 12px 30px -12px rgba(0,0,0,.75)}
+.loading-brand-name{font-size:15px;font-weight:650;letter-spacing:-.02em;color:var(--text-1,#f3f4f6)}
+.loading-brand-mark .load-stroke{stroke-dasharray:420;stroke-dashoffset:0;animation:cloud-route-breathe 1.65s cubic-bezier(.22,1,.36,1) infinite}
+.loading-brand-mark .load-stroke-inner{animation-delay:.16s}
+.loading-brand-mark .load-arrow{transform-origin:240px 45px;animation:cloud-arrow-pulse 1.65s cubic-bezier(.22,1,.36,1) infinite}
+@keyframes cloud-route-breathe{0%{stroke-dashoffset:420;opacity:.35}55%,82%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:-420;opacity:.35}}
+@keyframes cloud-arrow-pulse{0%,28%{opacity:.35;transform:scale(.86)}58%,82%{opacity:1;transform:scale(1)}100%{opacity:.35;transform:scale(.86)}}
+@media(prefers-reduced-motion:reduce){.loading-brand-mark .load-stroke,.loading-brand-mark .load-arrow{animation:none;stroke-dashoffset:0;opacity:1;transform:none}}
