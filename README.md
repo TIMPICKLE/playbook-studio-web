@@ -2,15 +2,11 @@
 
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/playbook-studio-logo-dark-transparent.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/brand/playbook-studio-logo-light.svg">
-  <img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="460">
-</picture>
+<img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="420">
 
-<br>
+# Playbook Studio
 
-**美式橄榄球战术工作台：布阵、画线、3D 演练、教练讲解、AI 辅助分析与球队协作。**
+美式橄榄球战术工作台：布阵、画线、3D 演练、教练讲解、AI 辅助分析与球队协作。
 
 [观看宣传片](#宣传片) · [在线体验版本](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [体验账号](#在线体验) · [AI 功能详解](docs/AI_GUIDE.md) · [使用指南](docs/USER_GUIDE.md) · [部署手册](docs/AGENT_DEPLOYMENT.md) · [Agent 本地部署 Skill](skills/playbook-studio-local-deploy/SKILL.md)
 

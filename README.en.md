@@ -2,15 +2,11 @@
 
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/playbook-studio-logo-dark-transparent.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/brand/playbook-studio-logo-light.svg">
-  <img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="460">
-</picture>
+<img src="docs/assets/brand/playbook-studio-logo-light.svg" alt="Playbook Studio" width="420">
 
-<br>
+# Playbook Studio
 
-**An American football workspace for drawing plays, 3D rehearsal, coach film review, AI-assisted analysis and team collaboration.**
+An American football workspace for drawing plays, 3D rehearsal, coach film review, AI-assisted analysis and team collaboration.
 
 [Watch video](#showcase-video) · [Live demo](https://playbook-d8gv8tvxiac9ddb6d-1539632452.ap-shanghai.app.tcloudbase.com/editor/index.html) · [Demo accounts](#live-demo) · [AI feature guide](docs/AI_GUIDE.en.md) · [User guide](docs/USER_GUIDE.en.md) · [Deployment](docs/AGENT_DEPLOYMENT.en.md) · [Agent deploy Skill](skills/playbook-studio-local-deploy/SKILL.md)
 
