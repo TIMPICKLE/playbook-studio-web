@@ -43,3 +43,12 @@ html[data-digital-board=loading] .field-tag::after{content:'材质加载中';fon
 .pitch-stage.is-perspective > .history-transition {transform:var(--board-projection);transform-origin:0 0;transform-box:border-box}
 .pitch-stage.is-fallback .history-transition :is(.player-body,.player-label) {opacity:1}
 @media print {.history-transition{display:none}}
+
+/* P2.1 · 2D <-> 3D visual mode yard-line curtain sweep */
+.pitch-viewport.is-mode-sweeping {position:relative}
+.pitch-viewport.is-mode-sweeping > .pitch-stage {animation:mode-curtain-reveal 420ms cubic-bezier(.22,1,.36,1) both}
+.mode-sweep-bar {position:absolute;inset:0 auto 0 0;width:3px;z-index:6;pointer-events:none;background:linear-gradient(180deg,transparent 0%,rgba(232,236,242,.92) 50%,transparent 100%);box-shadow:0 0 22px 4px rgba(169,193,255,.34);animation:mode-curtain-bar 420ms cubic-bezier(.22,1,.36,1) both}
+@keyframes mode-curtain-reveal {from{clip-path:inset(0 100% 0 0);opacity:.74}to{clip-path:inset(0 0 0 0);opacity:1}}
+@keyframes mode-curtain-bar {0%{left:0%;opacity:0}12%{opacity:.95}88%{opacity:.7}100%{left:100%;opacity:0}}
+@media (prefers-reduced-motion:reduce) {.pitch-viewport.is-mode-sweeping > .pitch-stage,.mode-sweep-bar{animation:none;clip-path:none}.mode-sweep-bar{display:none}}
+@media print {.mode-sweep-bar{display:none!important}}

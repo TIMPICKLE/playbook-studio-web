@@ -944,3 +944,37 @@ html[lang="en"] .entry-page .entry-copy h1 { white-space: normal; font-size: cla
 :is(.studio-home-brand,.login-brand) img.brand-logo{width:200px;height:42px}.entry-brand img.brand-logo{width:200px;height:42px}
 html[data-visual-mode] .brand{gap:8px}html[data-visual-mode] .brand img.brand-icon{width:42px;height:42px;aspect-ratio:1;object-fit:contain}html[data-visual-mode] .brand>.brand-wordmark{font:800 18px/1 var(--font-display);letter-spacing:.04em;white-space:nowrap}html[data-visual-mode] .brand>.brand-wordmark>span{display:inline;margin-left:5px;color:var(--text-2);font:500 18px/1 var(--font-display)}html[data-visual-mode] .help-intro img.brand-icon{width:48px;height:48px;aspect-ratio:1;object-fit:contain}
 @media(max-width:720px){:is(.entry-brand,.studio-home-brand,.login-brand) img.brand-logo{width:160px;height:48px}.cloud-brand img.brand-logo{width:132px;height:40px}}
+
+/* P2.3 · Desktop play-list hover thumbnail preview popover */
+.play-preview-popover {
+  position: fixed;
+  z-index: 68;
+  width: 312px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(24, 28, 35, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--text-1, #f3f4f6);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-6px, 0, 0) scale(0.985);
+  transition: opacity 160ms var(--ease-out, cubic-bezier(.22, 1, .36, 1)), transform 160ms var(--ease-out, cubic-bezier(.22, 1, .36, 1));
+}
+@supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
+  .play-preview-popover {
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+}
+.play-preview-popover[hidden] { display: none; }
+.play-preview-popover.is-visible { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+.play-preview-art { border-radius: 10px; overflow: hidden; background: #15181e; border: 1px solid rgba(255, 255, 255, 0.08); }
+.play-preview-art svg { display: block; width: 100%; height: auto; }
+.play-preview-meta { margin-top: 10px; display: grid; gap: 3px; }
+.play-preview-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.play-preview-title strong { font-size: 13.5px; font-weight: 650; color: var(--text-1, #f3f4f6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.play-preview-title span { flex: none; padding: 1px 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: var(--text-2, #c3c9d2); font-size: 11px; font-weight: 600; }
+.play-preview-meta small { font-size: 11.5px; color: var(--text-3, #9aa4b2); }
+@media (max-width: 1180px), (hover: none), print { .play-preview-popover { display: none !important; } }
+@media (prefers-reduced-motion: reduce) { .play-preview-popover { transition: none; transform: none; } }

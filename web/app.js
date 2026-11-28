@@ -31,12 +31,13 @@ import { fieldSVG, updateAnimation, bindGestureGeometry, previewDraft, displayCo
 import { fieldCoordinates } from './field-coordinates.js';
 import { createScrubPresentation } from './scrub-presentation.js';
 import { createPlaybackClock } from './playback-clock.js';
-import { enterContext, enterPlayers, revealPlay, enterWorkbench } from './motion.js';
+import { enterContext, enterPlayers, revealPlay, enterWorkbench, reducedMotion } from './motion.js';
 import { effectsControl, initEffects, syncPageDecoration, burstAt, setEffectsMode, visualMode } from './effects.js';
 import { createBoardLayout, boardSizeControls, boardHeightHandle, boardWidthHandle } from './board-layout.js';
 import { initViewportLayout, captureEditorScroll } from './viewport-layout.js';
 import { createWorkspacePanels,isCompactWorkspace } from './workspace-panels.js';
 import { createPlayThumbnails } from './play-thumbnails.js';
+import { createPlayPreviewPopover } from './play-preview-popover.js';
 import { createOnboarding } from './onboarding.js';
 import { onboardingSteps, onboardingLabels } from './onboarding-steps.js';
 import { patchEditorHTML } from './editor-render.js';
@@ -142,6 +143,17 @@ const drawingTools = ['route','block','motion','pass'];
 const boardLayout = createBoardLayout({ notify: message => toast(message), hasDraft: () => !!draft,onChange:()=>boardAssistant?.refreshLayout?.() });
 const panels = createWorkspacePanels();
 const thumbnails = createPlayThumbnails();
+const playPreviewPopover = createPlayPreviewPopover({
+  getPlay: id => state.data.plays.find(play => play.id === id),
+  formatMeta: play => {
+    const league = getPlayLeague(play);
+    const leagueText = league === 5 ? uxCopy('5v5 Flag', '5 人腰旗') : uxCopy(`${league}v${league}`, `${league} 人制`);
+    const countText = play.reference
+      ? uxCopy('Reference diagram', '原图参考')
+      : uxCopy(`${play.players.length} players · ${play.routes.length} routes`, `${play.players.length} 球员 · ${play.routes.length} 路线`);
+    return { badge: leagueText, stats: `${play.formation} · ${countText}` };
+  },
+});
 const viewSettings = () => ({ ...state.data.settings, ...viewOverrides, visualMode: document.documentElement.dataset.visualMode || 'traditional' });
 const canEdit = () => cloudMode() ? !!shared?.canEdit : !localRecovery;
 const editBlockedMessage = () => localRecovery ? recoveryMessage : shared?.sync?.viewError ? t("feedback.the_play_view_could_not_update_reload_before_editing") : t("feedback.you_have_read_only_access_and_cannot_edit_this_shared_p");
@@ -266,6 +278,7 @@ function clearAssistantPreview({keepLayer = false, refresh = true, notify = true
   assistantPreviewFrame = null;
   const previous = assistantPreview;
   assistantPreview = null;
+  previous?.stopCompare?.();
   previous?.transition.cancel();
   previous?.restore();
   if (!keepLayer) previous?.svg.remove();
@@ -428,14 +441,68 @@ function showAssistantPreview(play, original, {reuse, refresh = true} = {}) {
     for (const node of rehearsalOnly) node.style.visibility = 'hidden';
   };
   const restore = () => { for (const [node,opacity] of hidden) node.style.opacity = opacity; };
+  let compareState = null;
+  const stopCompare = () => {
+    if (!compareState) return;
+    compareState.before.remove();
+    compareState.after.remove();
+    compareState.hud.remove();
+    stage.style.removeProperty('--compare-split');
+    svg.style.visibility = '';
+    compareState = null;
+  };
+  const setCompare = percent => {
+    if (!compareState) return;
+    const clamped = Math.max(0, Math.min(100, Number(percent) || 0));
+    const value = `${clamped}%`;
+    stage.style.setProperty('--compare-split', value);
+    compareState.hud.style.setProperty('--compare-split', value);
+    compareState.range.value = String(clamped);
+  };
+  const toggleCompare = () => {
+    if (compareState) { stopCompare(); return false; }
+    if (assistantPreviewFrame) { cancelAnimationFrame(assistantPreviewFrame); assistantPreviewFrame = null; }
+    transition.finish();
+    const field = document.querySelector('#field');
+    if (!field || !stage.isConnected) return false;
+    const makeLayer = (targetPlay, prefix, cls) => {
+      const tpl = document.createElement('template');
+      tpl.innerHTML = fieldSVG(targetPlay, viewSettings(), { prefix });
+      const node = tpl.content.firstElementChild;
+      node.classList.add('assistant-compare-layer', cls);
+      node.setAttribute('aria-hidden', 'true');
+      node.querySelectorAll('[tabindex]').forEach(el => el.removeAttribute('tabindex'));
+      return node;
+    };
+    const before = makeLayer(original, 'assistant-cmp-before', 'assistant-compare-before');
+    const after = makeLayer(play, 'assistant-cmp-after', 'assistant-compare-after');
+    const hud = document.createElement('div');
+    hud.className = 'assistant-compare-hud';
+    const beforeLabel = uxCopy('Before', '原图');
+    const afterLabel = uxCopy('Proposal', 'AI 提案');
+    const sliderLabel = uxCopy('Drag to compare original play and AI proposal', '拖动对比原图与 AI 提案');
+    hud.innerHTML = `<span class="assistant-compare-tag is-before">${e(beforeLabel)}</span><span class="assistant-compare-tag is-after">${e(afterLabel)}</span><input type="range" class="assistant-compare-range" min="0" max="100" value="50" aria-label="${e(sliderLabel)}"><div class="assistant-compare-divider" aria-hidden="true"><span class="assistant-compare-handle">↔</span></div>`;
+    const range = hud.querySelector('.assistant-compare-range');
+    range.addEventListener('input', () => setCompare(range.value));
+    svg.style.visibility = 'hidden';
+    stage.append(before, after);
+    field.append(hud);
+    compareState = { before, after, hud, range };
+    setCompare(50);
+    return true;
+  };
   const ready = () => !stage.classList.contains('is-three') || digitalBoard?.backgroundReady !== false;
   const transition = animateAssistantLayer({layer:svg,beforeSvg:source.content.firstElementChild,ready,reducedMotion:!!reuse || assistantMotionReduced()});
-  assistantPreview = Object.assign(reuse || {}, { play, original, svg, restore, transition, mask, rehearse, resetRehearsal });
+  assistantPreview = Object.assign(reuse || {}, {
+    play, original, svg, restore, transition, mask, rehearse, resetRehearsal,
+    toggleCompare, stopCompare, setCompare, isComparing: () => !!compareState,
+  });
   if (refresh) digitalBoard?.refreshBackground();
   return assistantPreview;
 }
 function rehearseAssistantPreview() {
   if (!assistantPreview) return;
+  assistantPreview.stopCompare?.();
   assistantPreview.transition.finish();
   assistantPreview.rehearse();
   if (assistantPreviewFrame) cancelAnimationFrame(assistantPreviewFrame);
@@ -448,16 +515,39 @@ function rehearseAssistantPreview() {
   };
   assistantPreviewFrame = requestAnimationFrame(step);
 }
+let modeSweepTimer = 0;
+function playVisualModeSweep() {
+  if (reducedMotion(window)) return;
+  const viewport = $('#field .pitch-viewport');
+  if (!viewport) return;
+  if (modeSweepTimer) { window.clearTimeout(modeSweepTimer); modeSweepTimer = 0; }
+  viewport.querySelector('.mode-sweep-bar')?.remove();
+  viewport.classList.remove('is-mode-sweeping');
+  void viewport.offsetWidth;
+  const bar = document.createElement('div');
+  bar.className = 'mode-sweep-bar';
+  bar.setAttribute('aria-hidden', 'true');
+  viewport.append(bar);
+  viewport.classList.add('is-mode-sweeping');
+  const finish = () => {
+    if (modeSweepTimer) { window.clearTimeout(modeSweepTimer); modeSweepTimer = 0; }
+    viewport.classList.remove('is-mode-sweeping');
+    bar.remove();
+  };
+  bar.addEventListener('animationend', finish, { once: true });
+  modeSweepTimer = window.setTimeout(finish, 500);
+}
 document.addEventListener('playbook:effects-changed', () => {
   clearHistoryTransition();
   const svg = $('#field .pitch-stage > .pitch-svg');
   if (svg && !svg.classList.contains('reference-svg') && (svg.dataset.fieldSurface === 'enamel') !== (visualMode() === 'digital')) {
     renderField({preservePreview:true, syncDigital:false});
+    playVisualModeSweep();
   }
   if (assistantMotionReduced()) assistantPreview?.transition.finish();
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { pausePlayback(); clearHistoryTransition(); assistantPreview?.transition.finish(); cancelFieldGesture(); }
+  if (document.hidden) { pausePlayback(); clearHistoryTransition(); assistantPreview?.transition.finish(); cancelFieldGesture(); playPreviewPopover.hide(); }
   // The board's visibility listener presents its renderer after the editable SVG is current.
   else presentTimelineSeek(undefined, false);
 });
@@ -807,6 +897,8 @@ function mountBoardAssistant() {
             operations: staged.operations, routeIds: staged.routeIds, zoneIds: staged.zoneIds, playerIds: staged.playerIds,
             discard() { active = false; if (stagedEdit?.handle === handle) stagedEdit = null; clearAssistantPreview({notify:false}); },
             isVisible, rehearse: rehearseAssistantPreview,
+            compare: () => assistantPreview === shown ? shown.toggleCompare?.() : false,
+            isComparing: () => assistantPreview === shown && !!shown.isComparing?.(),
             // Dropping the newest turn keeps the earlier ones staged.
             revert: staged.steps.length > 1 ? () => { guard(); const next = restage(staged.steps.slice(0,-1)); active = false; return present(next); } : undefined,
             selectTurns(indices) {
@@ -893,6 +985,7 @@ function closeFilmRoom() {
 
 async function enterFilmRoom(checkVersion) {
   if (filmLaunch || filmRoom || $('#app').hidden || !filmRoomAvailable()) return false;
+  playPreviewPopover.hide();
   const launch = { scope: assistantScope() };
   filmLaunch = launch;
   const restoreScroll = captureEditorScroll({samePlay:true});
@@ -1190,6 +1283,7 @@ function render({restoringHistory = false, historyFrame = null} = {}) {
     if (renderedFieldState !== fieldState()) renderField({syncDigital:!restoringHistory});
   } else { $('#app').innerHTML = html; renderedFieldState = fieldState(); }
   thumbnails.mount($('.play-list'), plays);
+  playPreviewPopover.mount($('.play-list'));
   bindField(); syncEditorChrome(); protectReadOnly(); protectReference(); boardLayout.mount(); maddenLibrary.refresh(); mountBoardAssistant();
   if ($('#personnel-group')?.value) previewPersonnel();
   restoreScroll();

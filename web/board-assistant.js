@@ -234,6 +234,12 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
     output.append(pill('apply', visible ? lang.apply : lang.repreview, busy || selectionChanged), pill('discard', lang.discard, busy));
     if (staged.revert) output.append(pill('revert', lang.revert, busy || selectionChanged));
     if (visible && staged.rehearse) output.append(pill('rehearse', lang.rehearse));
+    if (visible && staged.compare) {
+      const comparing = !!staged.isComparing?.();
+      const compareBtn = pill('compare', comparing ? lang.exitCompare : lang.compare);
+      compareBtn.setAttribute('aria-pressed', String(comparing));
+      output.append(compareBtn);
+    }
   }
   function historyView() {
     const lang = copy(), records = thread.records(), history = q('.ba-history'), list = q('.ba-history-list');
@@ -616,7 +622,8 @@ export function createBoardAssistant({host, getContext, onRequest, onAdd, onHigh
       } catch (error) { continuing = null; b.disabled = false; updateButtons(); announce(error?.message || copy().error,true); }
     }
     else if (action === 'discard' && staged) { discardStaged(); lastError = null; runState = 'idle'; panel.classList.remove('ba-collapsed'); outputView(); announce(copy().discarded); }
-    else if (action === 'rehearse' && staged) staged.rehearse?.();
+    else if (action === 'rehearse' && staged) { staged.rehearse?.(); outputView(); }
+    else if (action === 'compare' && staged) { staged.compare?.(); outputView(); }
     else if (action === 'update-groups' && staged?.selectTurns && !pending && !applying && selectedGroups.size) {
       const preview = staged, indices = [...selectedGroups].sort((a,b)=>a-b), oldRecords = stagedTurns.slice();
       applying = preview; runState = 'previewing'; outputView(); updateButtons();

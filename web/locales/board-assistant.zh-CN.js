@@ -30,5 +30,6 @@ export default {
   configureAction: '去配置模型', editConfigAction: '模型设置',
   safetyPreview: '先预览再应用', safetyIterate: '可演练与微调', safetyUndo: '支持一键撤销',
   routeEdit: '改写一条路线', routeEditExample: '把 X 的路线改为向中路斜插的 Post 路线。',
-  modelHint: '使用自己账号的 API Key 时，请确认填写该服务商开通的实际模型 ID（如 deepseek-chat、gpt-4o、claude-sonnet-4-6）。'
+  modelHint: '使用自己账号的 API Key 时，请确认填写该服务商开通的实际模型 ID（如 deepseek-chat、gpt-4o、claude-sonnet-4-6）。',
+  compare: '对比原图', exitCompare: '退出对比', compareBefore: '原图', compareAfter: 'AI 提案', compareSlider: '拖动对比原图与 AI 提案'
 };

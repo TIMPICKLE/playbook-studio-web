@@ -30,5 +30,6 @@ export default {
   configureAction: 'Set up model', editConfigAction: 'Settings',
   safetyPreview: 'Preview before applying', safetyIterate: 'Rehearse & refine', safetyUndo: 'One-click undo',
   routeEdit: 'Edit a route', routeEditExample: 'Change X’s route to a post route breaking toward the middle.',
-  modelHint: 'When using your own API key, enter an active model ID from your provider (e.g. deepseek-chat, gpt-4o, claude-sonnet-4-6).'
+  modelHint: 'When using your own API key, enter an active model ID from your provider (e.g. deepseek-chat, gpt-4o, claude-sonnet-4-6).',
+  compare: 'Compare', exitCompare: 'Exit compare', compareBefore: 'Before', compareAfter: 'Proposal', compareSlider: 'Drag to compare original play and AI proposal'
 };
