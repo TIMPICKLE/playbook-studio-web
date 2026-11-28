@@ -2,7 +2,7 @@ import { z } from './vendor/assistant-zod.js';
 import { COLORS, FORMATIONS, clone, defaultBallHolder, formationPlayers, mirrorPlay, movePlayer, setBallHolder, uid } from './model.js';
 import { spaceMaddenLine } from './madden-model.js';
 import { linkRosterPlayer, personnelAssignments } from './board-personnel.js';
-import { LEAGUE_SIZES, defaultFormation, getPlayLeague, resolveFormation } from './game-formats.js';
+import { LEAGUE_SIZES, defaultFormation, defaultPersonnelFor, getPlayLeague, isAutoPersonnel, resolveFormation } from './game-formats.js';
 import { movePlayerGroup, removePlayerGroup } from './player-group.js';
 
 const id = z.string().min(1).max(100);
@@ -228,7 +228,11 @@ export function runEditorPlayCommand(play, input, { idFactory = uid, roster = []
     if (retained.length + players.length > 40) fail('Player limit reached.');
     const retainedIds = new Set(retained.map(player => player.id));
     play.players = [...players, ...retained]; play.formation = formation; play.league = league;
-    if (league !== previousLeague) play.personnel = league === 11 ? '11 personnel' : league === 5 ? '5v5 Flag' : `${league} players`;
+    if (league !== previousLeague) {
+      play.personnel = defaultPersonnelFor(play.book, formation, league, 'en');
+    } else if (!custom && isAutoPersonnel(play.personnel)) {
+      play.personnel = defaultPersonnelFor(play.book, formation, league, /人制|腰旗/.test(play.personnel) ? 'zh-CN' : 'en');
+    }
     play.routes = play.routes.filter(route => retainedIds.has(route.playerId)).map(route => route.blockTargets
       ? { ...route, blockTargets: route.blockTargets.map(target => retainedIds.has(target) ? target : null) } : route);
     if (!retained.length || side === 'defense') play.zones = [];

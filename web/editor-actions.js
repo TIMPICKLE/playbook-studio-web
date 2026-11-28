@@ -1,7 +1,7 @@
 import { z } from './vendor/assistant-zod.js';
 import { clone, decodeWorkspace, defaultBallHolder, encodeWorkspace, FORMATIONS, makePlay } from './model.js';
 import { hasEditableTrace, makeMaddenPlay } from './madden-model.js';
-import { LEAGUE_SIZES, getPlayLeague, isFlag5Play } from './game-formats.js';
+import { LEAGUE_SIZES, defaultCategoryFor, defaultPersonnelFor, getPlayLeague, isFlag5Play } from './game-formats.js';
 
 const id = z.string().trim().min(1).max(100);
 const book = z.enum(['offense', 'defense', 'special']);
@@ -9,7 +9,7 @@ const count = z.union(LEAGUE_SIZES.map(value => z.literal(value)));
 const action = (kind, fields = {}) => z.strictObject({kind:z.literal(kind), ...fields});
 const changing = (kind, fields) => action(kind, fields).refine(value => Object.keys(value).length > 1, {message:'Specify at least one setting.'});
 const definitions = [
-  ['play_create', 'workspace', 'Create a play using an existing built-in or saved formation.', false, true, ['new', 'create-play'], action('play_create', {title:z.string().trim().min(1).max(120), book, formation:z.string().trim().min(1).max(107), count})],
+  ['play_create', 'workspace', 'Create a play using an existing built-in or saved formation.', false, true, ['new', 'create-play'], action('play_create', {title:z.string().trim().min(1).max(120), book, formation:z.string().trim().min(1).max(107), count, category:z.string().trim().min(1).max(60).optional()})],
   ['play_duplicate', 'workspace', 'Duplicate a real play, optionally giving the copy a title.', false, true, ['duplicate'], action('play_duplicate', {playId:id, title:z.string().trim().min(1).max(120).optional()})],
   ['play_delete', 'workspace', 'Delete a real play while retaining at least one play in the book.', true, true, ['delete-play', 'confirm-delete'], action('play_delete', {playId:id})],
   ['formation_save', 'workspace', 'Save the current editable starting positions as a custom formation.', false, true, ['save-formation', 'confirm-formation'], action('formation_save', {name:z.string().trim().min(1).max(100)})],
@@ -155,10 +155,10 @@ export function prepareEditorActions({data, selectedId, catalogRows} = {}, value
       }
       play = identifyPlay(play, makeId);
       play.createdAt = now;
-      if (english(locale)) {
-        play.category = action.book === 'defense' ? 'Zone defense' : 'Pass';
-        if (action.count !== 11) play.personnel = action.count === 5 ? '5v5 Flag' : `${action.count} players`;
+      if (!action.category) {
+        play.category = defaultCategoryFor(action.book, play.formation, locale);
       }
+      play.personnel = defaultPersonnelFor(action.book, play.formation, action.count, english(locale) ? 'en' : 'zh-CN');
       next.plays.push(play); nextId = play.id; next.settings.league = action.count;
       changes.push(words(locale, `Create play · ${play.title}`, `新建战术 · ${play.title}`));
     } else if (action.kind === 'play_duplicate') {

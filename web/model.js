@@ -1,6 +1,6 @@
 import { array, choice, fail, id, text, uid, unique } from './model-values.js';
 import { appendDepthGroups, defaultDepthChart, validateDepthChart } from './depth-model.js';
-import { BUILT_IN_FORMATIONS, LEAGUE_SIZES, resolveFormation } from './game-formats.js';
+import { BUILT_IN_FORMATIONS, DEFENSE_FORMATIONS, LEAGUE_SIZES, defaultCategoryFor, defaultPersonnelFor, resolveFormation } from './game-formats.js';
 export { uid };
 
 export const VERSION = 1;
@@ -27,7 +27,7 @@ export function formationPlayers(formation = 'Gun Trips', count = 11, side) {
   // Low-level callers may create partial diagrams; selectable league formats
   // remain the explicit shared list used by workspace and command validation.
   if (!Number.isInteger(count) || count < 1 || count > 12) fail('不支持的人数制');
-  const defense = side === 'defense' || ['4–3', '3–4', 'Nickel', '4-3', '3-4', 'Flag 5 Zone', 'Flag 5 Man'].includes(formation);
+  const defense = side === 'defense' || DEFENSE_FORMATIONS.includes(formation);
   formation = resolveFormation(formation, defense ? 'defense' : 'offense', count);
   if (count === 5) {
     const points = flag5Points[formation] || flag5Points[defense ? 'Flag 5 Zone' : 'Flag 5 Spread'];
@@ -39,12 +39,24 @@ export function formationPlayers(formation = 'Gun Trips', count = 11, side) {
       ? [['LE', 40, 57], ['NT', 50, 57], ['RE', 60, 57], ['OLB', 29, 53], ['MLB', 44, 48], ['MLB', 56, 48], ['OLB', 71, 53], ['CB', 15, 52], ['CB', 86, 52], ['SS', 37, 34], ['FS', 64, 29]]
       : [['DE', 34, 57], ['DT', 45, 57], ['DT', 56, 57], ['DE', 67, 57], ['W', 36, 46], ['M', 51, 46], ['S', 65, 46], ['CB', 14, 53], ['CB', 86, 53], ['SS', 35, 31], ['FS', 66, 29]];
     if (formation === 'Nickel') points[6] = ['NB', 75, 45];
+    if (formation === 'Dime') { points[4] = ['NB', 28, 47]; points[5] = ['M', 50, 46]; points[6] = ['DB', 74, 47]; points[9] = ['SS', 36, 30]; points[10] = ['FS', 64, 30]; }
   } else {
     points = [['LT', 40, 67], ['LG', 45, 67], ['C', 50, 67], ['RG', 55, 67], ['RT', 60, 67], ['QB', 50, 77], ['RB', 60, 79], ['X', 13, 67], ['Y', 72, 70], ['Z', 87, 67], ['H', 80, 73]];
     if (formation === 'Gun Doubles') { points[8] = ['Y', 26, 70]; points[10] = ['H', 73, 70]; }
+    if (formation === 'Gun Empty') { points[6] = ['RB', 22, 70]; points[7] = ['X', 11, 67]; points[8] = ['Y', 33, 70]; points[9] = ['Z', 89, 67]; points[10] = ['H', 75, 70]; }
     if (formation === 'I Formation') { points[5] = ['QB', 50, 71]; points[6] = ['RB', 50, 85]; points[8] = ['TE', 66, 67]; points[10] = ['FB', 50, 78]; }
     if (formation === 'Singleback') { points[5] = ['QB', 50, 71]; points[6] = ['RB', 50, 83]; points[8] = ['TE', 66, 67]; points[10] = ['H', 25, 70]; }
+    if (formation === 'Pistol') { points[5] = ['QB', 50, 75]; points[6] = ['RB', 50, 83]; points[8] = ['TE', 66, 67]; points[10] = ['H', 26, 70]; }
     if (formation === 'Field Goal') { points[5] = ['H', 50, 80]; points[6] = ['K', 62, 88]; points[7] = ['LE', 27, 67]; points[8] = ['TE', 67, 67]; points[9] = ['RE', 73, 67]; points[10] = ['TE', 33, 67]; }
+    if (formation === 'Punt') {
+      points = [['LT', 40, 67], ['LG', 45, 67], ['C', 50, 67], ['RG', 55, 67], ['RT', 60, 67], ['P', 50, 88], ['PP', 55, 76], ['X', 12, 67], ['LW', 34, 69], ['Z', 88, 67], ['RW', 66, 69]];
+    }
+    if (formation === 'Kickoff') {
+      points = [['L2', 24, 72], ['L4', 41, 72], ['L5', 46, 72], ['R5', 54, 72], ['R4', 59, 72], ['K', 50, 82], ['R2', 76, 72], ['L1', 14, 72], ['L3', 33, 72], ['R1', 86, 72], ['R3', 67, 72]];
+    }
+    if (formation === 'Kick Return') {
+      points = [['LT', 32, 52], ['LG', 41, 52], ['C', 50, 52], ['RG', 59, 52], ['RT', 68, 52], ['LR', 42, 88], ['RR', 58, 88], ['LE', 18, 55], ['LUB', 42, 70], ['RE', 82, 55], ['RUB', 58, 70]];
+    }
   }
   // In reduced-player leagues, retain skill positions rather than only linemen.
   const order = defense ? [0, 1, 3, 5, 7, 8, 9, 10, 2, 4, 6] : [2, 5, 6, 7, 9, 8, 10, 0, 4, 1, 3];
@@ -55,8 +67,11 @@ export function formationPlayers(formation = 'Gun Trips', count = 11, side) {
 }
 
 export function defaultBallHolder(players) {
-  return players.find(player => player.side === 'offense' && player.label === 'QB')?.id
-    ?? players.find(player => player.side === 'offense')?.id ?? '';
+  for (const role of ['QB', 'RB', 'H', 'P', 'K', 'LR', 'KR']) {
+    const match = players.find(player => player.side === 'offense' && player.label === role);
+    if (match) return match.id;
+  }
+  return players.find(player => player.side === 'offense')?.id ?? '';
 }
 
 export function setBallHolder(play, holderId, explicit = false) {
@@ -70,10 +85,12 @@ export function setBallHolder(play, holderId, explicit = false) {
   if (!holderId || holderId === ball.receiverId) ball.receiverId = '';
 }
 
-export function makePlay({ title = '新战术', formation = 'Gun Trips', book = 'offense', count = 11 } = {}) {
+export function makePlay({ title = '新战术', formation = 'Gun Trips', book = 'offense', count = 11, category } = {}) {
   formation = resolveFormation(formation, book, count);
   const players = formationPlayers(formation, count, book === 'defense' ? 'defense' : 'offense');
-  return { id: uid(), title, book, formation, ...(LEAGUE_SIZES.includes(count) ? { league: count } : {}), category: book === 'defense' ? '区域防守' : '传球', personnel: count === 11 ? '11 personnel' : count === 5 ? '5 人腰旗' : `${count} 人制`, notes: '', favorite: false, players, routes: [], zones: [], annotations: [], ball: { holderId: defaultBallHolder(players), receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString() };
+  const resolvedCategory = typeof category === 'string' && category.trim() ? category.trim().slice(0, 60) : defaultCategoryFor(book, formation, 'zh-CN');
+  const personnel = defaultPersonnelFor(book, formation, count, 'zh-CN');
+  return { id: uid(), title, book, formation, ...(LEAGUE_SIZES.includes(count) ? { league: count } : {}), category: resolvedCategory, personnel, notes: '', favorite: false, players, routes: [], zones: [], annotations: [], ball: { holderId: defaultBallHolder(players), receiverId: '', passAt: 2, arriveAt: 3 }, createdAt: new Date().toISOString() };
 }
 
 export function addRoute(play, label, waypoints, kind = 'route', options = {}) {

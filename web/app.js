@@ -7,7 +7,7 @@ import { createBoardAssistant } from './board-assistant.js';
 import { animateAssistantLayer } from './assistant-transition.js';
 import { captureHistoryFrame, presentHistoryFrame } from './history-transition.js';
 import { withDefense43 } from './defense-formation.js';
-import { LEAGUE_SIZES, getPlayLeague, isFlag5Play, formationOptions, defaultFormation } from './game-formats.js';
+import { LEAGUE_SIZES, getPlayLeague, isFlag5Play, formationOptions, formationGroups, defaultFormation, categoryOptions, defaultCategoryFor, recommendedFormationForCategory, defaultPersonnelFor } from './game-formats.js';
 import { competingMainRoutes, prepareWaypointMove, runEditorPlayCommand } from './editor-play-commands.js';
 import { prepareEditorActions, usesLivePlayback } from './editor-actions.js';
 import { selectedPlayerIds, playerSelection, togglePlayerSelection } from './editor-selection.js';
@@ -26,7 +26,7 @@ import { clearDepthPlayer } from './depth-model.js';
 import { personnelAssignments, refreshRosterBindings } from './board-personnel.js';
 import { createMatchupView, resolveHandoffContext } from './ai-matchup.js';
 import { createDemoRequest } from './ai-demo.js';
-import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, prepareWorkspaceAppend, preparePlayerTranslation, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
+import { BOOKS, COLORS, STORAGE_KEY, clone, uid, clamp, escapeHTML as e, starterWorkspace, formationPlayers, defaultBallHolder, prepareWorkspaceAppend, preparePlayerTranslation, animationLength, encodeWorkspace, decodeWorkspace, validatePlay, History } from './model.js';
 import { fieldSVG, updateAnimation, bindGestureGeometry, previewDraft, displayColor, syncFieldHitTargets, fieldHitCandidates } from './field.js';
 import { fieldCoordinates } from './field-coordinates.js';
 import { createScrubPresentation } from './scrub-presentation.js';
@@ -161,7 +161,7 @@ const readActions = new Set(['madden-library','compare-source','choose','book','
 for(const action of ['coach-film','film-pilot-event','assistant-task','properties-task','multi-select','choose-hit','retry-save','replay-onboarding'])readActions.add(action);
 function protectReadOnly() {
   if (canEdit()) return;
-  document.querySelectorAll('[data-prop],[data-ball],#apply-formation').forEach(n => { n.disabled = true; });
+  document.querySelectorAll('[data-prop],[data-ball],[data-category-preset],#apply-formation').forEach(n => { n.disabled = true; });
   document.querySelectorAll('#app [data-action]').forEach(n => { const [action,value]=n.dataset.action.split(':'); if (!readActions.has(action) && !(action==='tool' && value==='select')) n.disabled=true; });
 }
 const current = () => state.data.plays.find(p => p.id === state.selectedId) || state.data.plays[0];
@@ -1460,10 +1460,14 @@ function previewPersonnel() {
   }
   $('[data-action="apply-personnel"]').disabled = !canEdit() || !changes.length;
 }
+function categoryPresetRow(play) {
+  const presets = categoryOptions(play.book, getLocale());
+  return `<div class="category-presets" role="group" aria-label="${e(t('editor.category_presets_label'))}">${presets.map(cat => `<button type="button" class="category-chip ${play.category === cat ? 'is-active' : ''}" data-category-preset="${e(cat)}" aria-pressed="${play.category === cat}">${e(cat)}</button>`).join('')}</div>`;
+}
 function inspector() {
   const p = current(), obj = selectedObject();
   let content;
-  if (p.reference) return `${hasEditableTrace(p.reference.catalogId) ? `<button class="button primary full" data-action="convert-reference">${t("editorExtra.create_editable_copy")}</button>` : ''}<div class="madden-source-box"><strong>${e(p.reference.game)} · ${e(teamDisplayName(p.reference.team))}</strong><p>${e(p.formation)}</p><p>${t("editorExtra.the_original_diagram_retains_its_routes_and_w")}</p><a href="${e(p.reference.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("editorExtra.view_source_on_huddle_gg")}</a></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}<div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="8" aria-label="${t("editor.coach_notes")}" placeholder="${t("editorExtra.situations_reads_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button><div class="inspector-note">${icon('check')}${cloudMode() ? t("editor.uses_this_playbook_s_save_and_membership_permissions") : t("editor.autosaved_in_this_browser")}</div>`;
+  if (p.reference) return `${hasEditableTrace(p.reference.catalogId) ? `<button class="button primary full" data-action="convert-reference">${t("editorExtra.create_editable_copy")}</button>` : ''}<div class="madden-source-box"><strong>${e(p.reference.game)} · ${e(teamDisplayName(p.reference.team))}</strong><p>${e(p.formation)}</p><p>${t("editorExtra.the_original_diagram_retains_its_routes_and_w")}</p><a href="${e(p.reference.sourceUrl)}" target="_blank" rel="noopener noreferrer">${t("editorExtra.view_source_on_huddle_gg")}</a></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}${categoryPresetRow(p)}<div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="8" aria-label="${t("editor.coach_notes")}" placeholder="${t("editorExtra.situations_reads_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button><div class="inspector-note">${icon('check')}${cloudMode() ? t("editor.uses_this_playbook_s_save_and_membership_permissions") : t("editor.autosaved_in_this_browser")}</div>`;
   if (selection?.type === 'players') {
     const english=getLocale()==='en', ids=selectedPlayerIds(p,selection), players=p.players.filter(player=>ids.includes(player.id));
     content=`<div class="inspector-heading"><span>${english?'Selected players':'已选球员'}</span><span class="tag">${ids.length}</span></div><p class="muted small">${english?'Drag a selected player to move the whole group. Routes move with their owners. One Undo restores the group.':'拖动任一已选球员移动整组；关联路线一起移动，一次撤销恢复整组。'}</p><ul class="selection-player-list">${players.map(player=>`<li>${e(player.label)}${player.name?` · ${e(player.name)}`:''}<small> · ${player.side==='offense'?t('editor.offense'):t('editor.defense')}</small></li>`).join('')}</ul><div class="selection-nudge" role="group" aria-label="${english?'Move group by one board unit':'整组移动一个画板单位'}">${[['left','←'],['up','↑'],['down','↓'],['right','→']].map(([direction,label])=>`<button class="button subtle" data-action="selection-nudge:${direction}" aria-label="${english?`Move group ${direction}`:({left:'整组左移',up:'整组上移',down:'整组下移',right:'整组右移'})[direction]}">${label}</button>`).join('')}</div><button class="button danger full" data-action="delete-selection">${icon('trash')}${english?`Delete ${ids.length} players`:`删除 ${ids.length} 名球员`}</button>`;
@@ -1478,7 +1482,7 @@ function inspector() {
   } else if (selection?.type === 'annotation' && obj) {
     content = `<div class="inspector-heading"><span>${t("editor.text_annotation")}</span></div>${fieldInput(t("editor.annotation_text"), 'text', obj.text, 'text', 'maxlength="200"')}<p class="muted small">${t("editor.drag_the_text_to_reposition_it")}</p><button class="button danger full" data-action="delete-selection">${icon('trash')}${t("editor.delete_annotation")}</button>`;
   } else {
-    content = `<div class="inspector-heading"><span>${t("editor.play_details")}</span><span class="tag">${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')}</span></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}<label class="form-field"><span>${t("editor.formation_template")}</span><select id="apply-formation"><option value="">${e(p.formation)}</option>${formationChoices(p.book, getPlayLeague(p), '', true)}</select></label><p class="muted small" data-play-format>${e(leagueLabel(getPlayLeague(p)))}${isFlag5Play(p) ? ` · ${t('editor.flag5_hint')}` : ''}</p>${fieldInput(t("editor.personnel"), 'personnel', p.personnel, 'text', 'maxlength="80"')}${personnelPicker(p)}<div class="formation-actions"><button data-action="save-formation">${icon('save')}${t("editorExtra.save_formation")}</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? t("editorExtra.remove") : t("editorExtra.add")}${t("editorExtra.opposing_formation")}</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="5" aria-label="${t("editor.coach_notes")}" placeholder="${t("editor.reads_routes_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><details class="inspector-section ball-section" ${ballSectionOpen ? 'open' : ''}><summary class="inspector-heading"><span>${t("editor.ball_movement")}</span><small>${e(ballSummary(p))}</small></summary><label class="form-field"><span>${t("editor.ball_carrier")}</span><select data-ball="holderId">${option('', t("editor.no_ball_carrier"), p.ball.holderId)}${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>${t("editor.pass_to")}</span><select data-ball="receiverId" ${p.ball.holderId ? '' : 'disabled'}><option value="">${t("editor.no_pass_run")}</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput(t("editor.release_time"), 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput(t("editor.arrival_time"), 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div></details><div class="inspector-divider"></div><label class="check-label"><input id="show-names" type="checkbox" ${viewSettings().showNames ? 'checked' : ''}>${t("editor.show_player_names")}</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button>`;
+    content = `<div class="inspector-heading"><span>${t("editor.play_details")}</span><span class="tag">${t(p.book === 'offense' ? 'editor.offense' : p.book === 'defense' ? 'editor.defense' : 'editor.special_teams')}</span></div>${fieldInput(t("editor.play_name"), 'title', p.title, 'text', 'maxlength="120"')}${fieldInput(t("editor.category"), 'category', p.category, 'text', 'maxlength="60"')}${categoryPresetRow(p)}<label class="form-field"><span>${t("editor.formation_template")}</span><select id="apply-formation"><option value="">${e(formationLabel(p.formation))} · ${e(t('editor.current_formation_badge'))}</option>${formationChoices(p.book, getPlayLeague(p), '', true)}</select></label><p class="muted small" data-play-format>${e(leagueLabel(getPlayLeague(p)))}${isFlag5Play(p) ? ` · ${t('editor.flag5_hint')}` : ''}</p>${fieldInput(t("editor.personnel"), 'personnel', p.personnel, 'text', 'maxlength="80"')}${personnelPicker(p)}<div class="formation-actions"><button data-action="save-formation">${icon('save')}${t("editorExtra.save_formation")}</button><button data-action="opponents">${icon('team')} ${p.players.some(v => v.side === (p.book === 'defense' ? 'offense' : 'defense')) ? t("editorExtra.remove") : t("editorExtra.add")}${t("editorExtra.opposing_formation")}</button></div><div class="inspector-divider"></div><div class="inspector-heading"><span>${t("editor.coach_notes")}</span></div><textarea data-prop="notes" rows="5" aria-label="${t("editor.coach_notes")}" placeholder="${t("editor.reads_routes_adjustments")}" maxlength="10000">${e(p.notes)}</textarea><div class="inspector-divider"></div><details class="inspector-section ball-section" ${ballSectionOpen ? 'open' : ''}><summary class="inspector-heading"><span>${t("editor.ball_movement")}</span><small>${e(ballSummary(p))}</small></summary><label class="form-field"><span>${t("editor.ball_carrier")}</span><select data-ball="holderId">${option('', t("editor.no_ball_carrier"), p.ball.holderId)}${p.players.map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.holderId)).join('')}</select></label><label class="form-field"><span>${t("editor.pass_to")}</span><select data-ball="receiverId" ${p.ball.holderId ? '' : 'disabled'}><option value="">${t("editor.no_pass_run")}</option>${p.players.filter(v => v.id !== p.ball.holderId).map(v => option(v.id, `${v.label}${v.name ? ' · ' + v.name : ''}`, p.ball.receiverId)).join('')}</select></label><div class="form-row">${fieldInput(t("editor.release_time"), 'ball.passAt', p.ball.passAt, 'number', 'min="0" max="10" step="0.1"')}${fieldInput(t("editor.arrival_time"), 'ball.arriveAt', p.ball.arriveAt, 'number', 'min="0.1" max="15" step="0.1"')}</div></details><div class="inspector-divider"></div><label class="check-label"><input id="show-names" type="checkbox" ${viewSettings().showNames ? 'checked' : ''}>${t("editor.show_player_names")}</label><button class="button danger quiet full" data-action="delete-play">${icon('trash')}${t("editor.delete_play")}</button>`;
   }
   return `${content}${selection ? `<button class="back-details" data-action="clear-selection">${t("editorExtra.back_to_play_details")}</button>` : ''}<div class="inspector-note">${icon('check')}${localRecovery || shared?.sync?.viewError ? t("editor.editing_and_autosave_are_paused_until_recovery_complete") : cloudMode() ? (canEdit() ? t("editor.all_changes_sync_to_the_shared_playbook") : t("editor.you_have_read_only_access")) : t("editor.all_changes_are_saved_in_this_browser")}</div>`;
 }
@@ -1818,6 +1822,10 @@ function openModal(title, body, footer = '', wide = false) {
     // A queued close event from an old step must never close its replacement.
     if (root.querySelector('dialog') === dialog) closeModal();
   });
+  for (const select of root.querySelectorAll('select')) {
+    const explicit = select.querySelector('option[selected]');
+    if (explicit && select.value !== explicit.value) select.value = explicit.value;
+  }
   const initial = root.querySelector('.modal-body input:not([readonly]):not(:disabled),.modal-body select:not(:disabled),.modal-body textarea:not(:disabled)') || root.querySelector('footer .primary:not(:disabled),header button');
   initial?.setAttribute('autofocus', '');
   document.body.classList.add('modal-open');
@@ -1876,30 +1884,201 @@ const formationLabel = name => ({
   'Flag 5 Spread': t('editor.flag5_spread'), 'Flag 5 Trips': t('editor.flag5_trips'),
   'Flag 5 Bunch': t('editor.flag5_bunch'), 'Flag 5 Zone': t('editor.flag5_zone'), 'Flag 5 Man': t('editor.flag5_man'),
 })[name] || name;
+const FORMATION_DESC_KEYS = {
+  'Gun Trips': 'formation.desc.gun_trips',
+  'Gun Doubles': 'formation.desc.gun_doubles',
+  'Gun Empty': 'formation.desc.gun_empty',
+  Singleback: 'formation.desc.singleback',
+  Pistol: 'formation.desc.pistol',
+  'I Formation': 'formation.desc.i_formation',
+  '4–3': 'formation.desc.4_3',
+  '3–4': 'formation.desc.3_4',
+  Nickel: 'formation.desc.nickel',
+  Dime: 'formation.desc.dime',
+  'Field Goal': 'formation.desc.field_goal',
+  Punt: 'formation.desc.punt',
+  Kickoff: 'formation.desc.kickoff',
+  'Kick Return': 'formation.desc.kick_return',
+  'Flag 5 Spread': 'formation.desc.flag5_spread',
+  'Flag 5 Trips': 'formation.desc.flag5_trips',
+  'Flag 5 Bunch': 'formation.desc.flag5_bunch',
+  'Flag 5 Zone': 'formation.desc.flag5_zone',
+  'Flag 5 Man': 'formation.desc.flag5_man',
+};
+const formationSubtitle = name => {
+  const normalized = { '4-3': '4–3', '3-4': '3–4' }[name] || name;
+  return FORMATION_DESC_KEYS[normalized] ? t(FORMATION_DESC_KEYS[normalized]) : t('editor.custom_formation');
+};
 function formationChoices(unit, count, selected, inspector = false) {
+  const groups = formationGroups(unit, count);
+  const saved = state.data.formations.filter(formation => formation.book === unit && getPlayLeague(formation) === count);
+  const prefix = inspector ? 'builtin:' : '';
+  const builtinHtml = groups.map(group => `<optgroup label="${e(t(`editor.group_${group.key}`))}">${group.items.map(name => option(prefix + name, formationLabel(name), selected)).join('')}</optgroup>`).join('');
+  const customHtml = saved.length
+    ? `<optgroup label="${e(t('editor.group_custom'))}">${saved.map(formation => option('custom:' + formation.id, formation.name + ' · ' + t('editor.custom_formation'), selected)).join('')}</optgroup>`
+    : '';
+  return builtinHtml + customHtml;
+}
+function newCategoryChipsHTML(unit, activeCategory) {
+  return categoryOptions(unit, getLocale()).map(cat => `<button type="button" class="category-chip ${activeCategory === cat ? 'is-active' : ''}" data-new-category="${e(cat)}" aria-pressed="${activeCategory === cat}">${e(cat)}</button>`).join('');
+}
+function newFormationCardsHTML(unit, count, selected) {
   const builtins = formationOptions(unit, count);
   const saved = state.data.formations.filter(formation => formation.book === unit && getPlayLeague(formation) === count);
-  return builtins.map(name => option((inspector ? 'builtin:' : '') + name, formationLabel(name), selected)).join('') +
-    saved.map(formation => option('custom:' + formation.id, formation.name + ' · ' + t('editor.custom_formation'), selected)).join('');
+  const builtinCards = builtins.map(name => `<button type="button" class="formation-card-btn ${selected === name ? 'is-active' : ''}" data-new-formation-pick="${e(name)}" aria-pressed="${selected === name}"><strong>${e(formationLabel(name))}</strong><small>${e(formationSubtitle(name))}</small></button>`).join('');
+  const customCards = saved.map(formation => {
+    const value = `custom:${formation.id}`;
+    return `<button type="button" class="formation-card-btn is-custom ${selected === value ? 'is-active' : ''}" data-new-formation-pick="${e(value)}" aria-pressed="${selected === value}"><strong>${e(formation.name)}</strong><small>${e(t('editor.custom_formation'))} · ${formation.players.length}</small></button>`;
+  }).join('');
+  return builtinCards + customCards;
 }
-function refreshNewFormation() {
-  const unit = $('#new-book').value, count = Number($('#new-count').value), select = $('#new-formation');
-  const previous = select.value;
-  select.innerHTML = formationChoices(unit, count, previous);
-  if (![...select.options].some(option => option.value === previous)) select.value = defaultFormation(unit, count);
+function buildModalPreviewPlay(unit, count, formationValue, categoryValue) {
+  const custom = formationValue.startsWith('custom:')
+    ? state.data.formations.find(item => item.id === formationValue.slice(7) && item.book === unit && getPlayLeague(item) === count)
+    : null;
+  const side = unit === 'defense' ? 'defense' : 'offense';
+  const players = custom
+    ? custom.players.map((p, index) => ({ ...clone(p), id: p.id || `pv-${index}`, name: '' }))
+    : formationPlayers(formationValue, count, side);
+  const resolvedName = custom ? custom.name : formationValue;
+  const category = (categoryValue || '').trim() || defaultCategoryFor(unit, resolvedName, getLocale());
+  const personnel = custom
+    ? defaultPersonnelFor(unit, '', count, getLocale())
+    : defaultPersonnelFor(unit, resolvedName, count, getLocale());
+  return {
+    play: {
+      id: 'new-play-preview',
+      title: $('#new-title')?.value.trim() || t('modal.new_play'),
+      book: unit,
+      formation: resolvedName,
+      league: count,
+      category,
+      personnel,
+      notes: '',
+      favorite: false,
+      players,
+      routes: [],
+      zones: [],
+      annotations: [],
+      ball: { holderId: defaultBallHolder(players), receiverId: '', passAt: 2, arriveAt: 3 },
+    },
+    displayFormation: custom ? custom.name : formationLabel(resolvedName),
+    subtitle: custom ? `${t('editor.custom_formation')} · ${leagueLabel(count)}` : formationSubtitle(resolvedName),
+    personnel,
+    category,
+  };
+}
+function syncNewPlayPreview() {
+  const grid = $('.new-play-grid');
+  if (!grid) return;
+  const unit = $('#new-book').value, count = Number($('#new-count').value), select = $('#new-formation'), catInput = $('#new-category');
+  const activeCat = catInput?.value.trim() || '';
+  for (const chip of grid.querySelectorAll('[data-new-category]')) {
+    const active = chip.dataset.newCategory === activeCat;
+    chip.classList.toggle('is-active', active);
+    chip.setAttribute('aria-pressed', String(active));
+  }
+  for (const card of grid.querySelectorAll('[data-new-formation-pick]')) {
+    const active = card.dataset.newFormationPick === select.value;
+    card.classList.toggle('is-active', active);
+    card.setAttribute('aria-pressed', String(active));
+  }
+  const preview = buildModalPreviewPlay(unit, count, select.value, activeCat);
+  const previewMount = $('#new-formation-preview');
+  if (previewMount) previewMount.innerHTML = fieldSVG(preview.play, { ...state.data.settings, showNames: false }, { prefix: 'new-modal' });
+  const nameNode = $('#new-preview-formation'), personnelNode = $('#new-preview-personnel'), catNode = $('#new-preview-category'), subNode = $('#new-preview-subtitle');
+  if (nameNode) nameNode.textContent = preview.displayFormation;
+  if (personnelNode) personnelNode.textContent = preview.personnel;
+  if (catNode) catNode.textContent = preview.category;
+  if (subNode) subNode.textContent = preview.subtitle;
   const note = $('#new-format-note');
-  note.hidden = count !== 5;
-  note.textContent = t('editor.flag5_hint');
+  if (note) {
+    note.hidden = count !== 5;
+    note.textContent = t('editor.flag5_hint');
+  }
+}
+function applyNewModalCategory(nextCategory, { fromInput = false } = {}) {
+  const grid = $('.new-play-grid'), catInput = $('#new-category'), select = $('#new-formation');
+  if (!grid || !catInput || !select) return;
+  if (!fromInput) catInput.value = nextCategory;
+  grid.dataset.categoryTouched = 'true';
+  if (grid.dataset.formationTouched !== 'true') {
+    const unit = $('#new-book').value, count = Number($('#new-count').value);
+    const recommended = recommendedFormationForCategory(unit, count, catInput.value);
+    if ([...select.options].some(opt => opt.value === recommended)) select.value = recommended;
+  }
+  syncNewPlayPreview();
+}
+function applyNewModalFormation(nextFormation, { fromSelect = false } = {}) {
+  const grid = $('.new-play-grid'), catInput = $('#new-category'), select = $('#new-formation');
+  if (!grid || !select) return;
+  if (!fromSelect && [...select.options].some(opt => opt.value === nextFormation)) select.value = nextFormation;
+  grid.dataset.formationTouched = 'true';
+  if (grid.dataset.categoryTouched !== 'true' && catInput && !select.value.startsWith('custom:')) {
+    catInput.value = defaultCategoryFor($('#new-book').value, select.value, getLocale());
+  }
+  syncNewPlayPreview();
+}
+function refreshNewFormation({ resetUnit = false } = {}) {
+  const grid = $('.new-play-grid'), unit = $('#new-book').value, count = Number($('#new-count').value), select = $('#new-formation'), catInput = $('#new-category');
+  const previous = select.value;
+  if (resetUnit && grid) {
+    grid.dataset.categoryTouched = 'false';
+    grid.dataset.formationTouched = 'false';
+  }
+  select.innerHTML = formationChoices(unit, count, resetUnit ? '' : previous);
+  if (!resetUnit && [...select.options].some(option => option.value === previous)) {
+    select.value = previous;
+  } else if (grid?.dataset.categoryTouched === 'true' && catInput?.value.trim()) {
+    const recommended = recommendedFormationForCategory(unit, count, catInput.value);
+    select.value = [...select.options].some(option => option.value === recommended) ? recommended : defaultFormation(unit, count);
+  } else {
+    select.value = defaultFormation(unit, count);
+  }
+  if (catInput && grid?.dataset.categoryTouched !== 'true' && !select.value.startsWith('custom:')) {
+    catInput.value = defaultCategoryFor(unit, select.value, getLocale());
+  }
+  const chips = $('#new-category-presets'), cards = $('#new-formation-cards');
+  if (chips) chips.innerHTML = newCategoryChipsHTML(unit, catInput?.value.trim() || '');
+  if (cards) cards.innerHTML = newFormationCardsHTML(unit, count, select.value);
+  syncNewPlayPreview();
 }
 function newModal() {
   const count = state.data.settings.league;
-  openModal(t('modal.new_play'), `<p class="muted">${t('modal.choose_a_formation_and_draw_your_ideas_on_the_fiel')}</p>
-    <label class="form-field"><span>${t('modal.play_name')}</span><input id="new-title" value="${t('modal.new_play')}" maxlength="120"></label>
-    <div class="form-row"><label class="form-field"><span>${t('modal.playbook')}</span><select id="new-book">${Object.entries(BOOKS).map(([value]) => option(value, t(value === 'offense' ? 'editor.offense' : value === 'defense' ? 'editor.defense' : 'editor.special_teams'), book)).join('')}</select></label>
-    <label class="form-field"><span>${t('modal.players_per_side')}</span><select id="new-count">${LEAGUE_SIZES.map(value => option(String(value), leagueLabel(value), String(count))).join('')}</select></label></div>
-    <label class="form-field"><span>${t('modal.formation')}</span><select id="new-formation">${formationChoices(book, count, defaultFormation(book, count))}</select></label>
-    <p class="muted small" id="new-format-note" ${count === 5 ? '' : 'hidden'}>${t('editor.flag5_hint')}</p>`,
-    `<button class="button subtle" data-action="close-modal">${t('modal.cancel')}</button><button class="button primary" data-action="create-play">${t('modal.create_play')}</button>`);
+  const activeFilterCategory = filter && filter !== 'favorite' ? filter : '';
+  const initialFormation = formationFilter && formationOptions(book, count).includes(formationFilter)
+    ? formationFilter
+    : activeFilterCategory
+      ? recommendedFormationForCategory(book, count, activeFilterCategory)
+      : defaultFormation(book, count);
+  const initialCategory = activeFilterCategory || defaultCategoryFor(book, initialFormation, getLocale());
+  const preview = buildModalPreviewPlay(book, count, initialFormation, initialCategory);
+  openModal(t('modal.new_play'), `<div class="new-play-grid" data-category-touched="${Boolean(activeFilterCategory)}" data-formation-touched="${Boolean(formationFilter && formationOptions(book, count).includes(formationFilter))}">
+    <div class="new-play-form">
+      <p class="muted small new-play-lead">${t('modal.choose_a_formation_and_draw_your_ideas_on_the_fiel')}</p>
+      <label class="form-field"><span>${t('modal.play_name')}</span><input id="new-title" value="${t('modal.new_play')}" maxlength="120"></label>
+      <div class="form-row"><label class="form-field"><span>${t('modal.playbook')}</span><select id="new-book">${Object.entries(BOOKS).map(([value]) => option(value, t(value === 'offense' ? 'editor.offense' : value === 'defense' ? 'editor.defense' : 'editor.special_teams'), book)).join('')}</select></label>
+      <label class="form-field"><span>${t('modal.players_per_side')}</span><select id="new-count">${LEAGUE_SIZES.map(value => option(String(value), leagueLabel(value), String(count))).join('')}</select></label></div>
+      <label class="form-field"><span>${t('editor.category')}</span><input id="new-category" value="${e(initialCategory)}" placeholder="${e(t('modal.category_placeholder'))}" maxlength="60"></label>
+      <div class="category-presets" id="new-category-presets" role="group" aria-label="${e(t('editor.category_presets_label'))}">${newCategoryChipsHTML(book, initialCategory)}</div>
+      <label class="form-field"><span>${t('modal.formation')}</span><select id="new-formation">${formationChoices(book, count, initialFormation)}</select></label>
+      <div class="new-formation-cards" id="new-formation-cards" role="group" aria-label="${e(t('modal.formation_cards_label'))}">${newFormationCardsHTML(book, count, initialFormation)}</div>
+    </div>
+    <aside class="new-formation-stage" aria-label="${e(t('modal.formation_preview'))}">
+      <div class="new-formation-stage-head">
+        <div><span class="stage-kicker">${t('modal.formation_preview')}</span><strong id="new-preview-formation">${e(preview.displayFormation)}</strong></div>
+        <span class="stage-pill" id="new-preview-personnel">${e(preview.personnel)}</span>
+      </div>
+      <div class="new-formation-preview" id="new-formation-preview">${fieldSVG(preview.play, { ...state.data.settings, showNames: false }, { prefix: 'new-modal' })}</div>
+      <div class="new-formation-stage-foot">
+        <span class="stage-pill accent" id="new-preview-category">${e(preview.category)}</span>
+        <span class="stage-sub" id="new-preview-subtitle">${e(preview.subtitle)}</span>
+      </div>
+      <p class="muted small" id="new-format-note" ${count === 5 ? '' : 'hidden'}>${t('editor.flag5_hint')}</p>
+      <p class="muted small new-smart-hint">${t('modal.smart_linked_hint')}</p>
+    </aside>
+  </div>`,
+    `<button class="button subtle" data-action="close-modal">${t('modal.cancel')}</button><button class="button primary" data-action="create-play">${t('modal.create_play')}</button>`, true);
 }
 function textModal(at) { openModal(t("modal.add_annotation"), `<label class="form-field"><span>${t("modal.annotation")}</span><input id="annotation-text" placeholder="${t("modal.example_read_1_shallow_cross")}" maxlength="200"></label>`, `<button class="button primary" data-action="create-text" data-x="${at.x}" data-y="${at.y}">${t("modal.place_annotation")}</button>`); }
 function exportModal() {
@@ -2119,8 +2298,9 @@ const actions = {
   'create-play': () => {
     if (state.data.plays.length >= 500) { toast(t("modal.the_playbook_can_contain_at_most_500_plays"), { type: 'warning' }); return; }
     const title = $('#new-title').value.trim(), b = $('#new-book').value, form = $('#new-formation').value, count = Number($('#new-count').value);
+    const rawCategory = $('#new-category')?.value.trim() || '';
     if (!title) { feedback(t("modal.enter_a_play_name_before_creating_it")); $('#new-title').focus(); return; }
-    closeModal(); applyWorkspaceActions([{kind:'play_create',title,book:b,formation:form,count}]);
+    closeModal(); applyWorkspaceActions([{kind:'play_create',title,book:b,formation:form,count,...(rawCategory ? { category: rawCategory } : {})}]);
   },
   'create-text': node => { const value = $('#annotation-text').value.trim(); if (!value) { toast(t("modal.enter_annotation_text"), { type: 'warning' }); return; } closeModal(); const result=applyPlayCommand({kind:'annotation_add',text:value,x:Number(node.dataset.x),y:Number(node.dataset.y)}); if(result){selection={type:'annotation',id:result.createdId};tool='select';refreshSelection();} },
   'save-formation': () => openModal(t("modal.save_custom_formation"), `<p class="muted small">${t("modal.only_starting_positions_labels_and_colors_are_save")}</p><label class="form-field"><span>${t("modal.formation_name")}</span><input id="formation-name" value="${e(current().formation)} · 自定义" maxlength="100"></label>`, `<button class="button primary" data-action="confirm-formation">${t("modal.save_formation")}</button>`),
@@ -2169,6 +2349,17 @@ document.addEventListener('pointerdown', event => {
 });
 document.addEventListener('click', event => {
   for(const menu of document.querySelectorAll('.add-object-menu[open],.play-more-menu[open],.account-menu[open]'))if(!menu.contains(event.target))menu.open=false;
+  const categoryPreset = event.target.closest('[data-category-preset]');
+  if (categoryPreset && !categoryPreset.disabled) {
+    if (!canEdit()) { toast(editBlockedMessage(), { type: 'warning' }); return; }
+    const nextCategory = categoryPreset.dataset.categoryPreset;
+    if (nextCategory && current().category !== nextCategory) applyPlayCommand({ kind: 'play_update', patch: { category: nextCategory } });
+    return;
+  }
+  const newCategoryBtn = event.target.closest('[data-new-category]');
+  if (newCategoryBtn && !newCategoryBtn.disabled) { applyNewModalCategory(newCategoryBtn.dataset.newCategory); return; }
+  const newFormationBtn = event.target.closest('[data-new-formation-pick]');
+  if (newFormationBtn && !newFormationBtn.disabled) { applyNewModalFormation(newFormationBtn.dataset.newFormationPick); return; }
   const node = event.target.closest('[data-action]'); if (!node || node.disabled) return;
   const [name, ...parts] = node.dataset.action.split(':'), value = parts.join(':');
   if (current().reference && ['mirror','rehearse-mode','add-player','add-defense-43','opponents','save-formation'].includes(name)) { toast(t("editorExtra.the_original_diagram_has_no_editable_player_c"), { type: 'info' }); return; }
@@ -2234,6 +2425,7 @@ document.addEventListener('input', event => {
     if (isUnsolicitedSearchAutofill(input, event)) { input.value = query; return; }
     searchInput(input);
   }
+  if (input.id === 'new-category' && !event.isComposing) applyNewModalCategory(input.value, { fromInput: true });
   if(input.id==='timeline')seekTimeline(input);
 });
 document.addEventListener('pointerup', event => {
@@ -2245,7 +2437,10 @@ document.addEventListener('change', event => {
   if (input === filmFieldDraft) return;
   if (input.id === 'timeline') { seekTimeline(input, true); return; }
   if (!canEdit() && (input.dataset.prop || input.dataset.ball || input.id === 'apply-formation')) return;
-  if (input.id === 'new-count' || input.id === 'new-book') refreshNewFormation();
+  if (input.id === 'new-book') refreshNewFormation({ resetUnit: true });
+  else if (input.id === 'new-count') refreshNewFormation();
+  else if (input.id === 'new-formation') applyNewModalFormation(input.value, { fromSelect: true });
+  else if (input.id === 'new-category') applyNewModalCategory(input.value, { fromInput: true });
   else if (input.id === 'category-filter') { filter = input.value; refreshPlayList(); }
   else if (input.id === 'formation-filter') { formationFilter = input.value; refreshPlayList(); }
   else if (input.id === 'personnel-group') previewPersonnel();
@@ -2292,6 +2487,19 @@ document.addEventListener('change', event => {
     if (!command || !applyPlayCommand(command,{redraw:false})) {
       if (input.type==='checkbox') input.checked=!!previous[key]; else input.value=previous[key]??'';
       return;
+    }
+    if (!selection && key === 'category') {
+      const cat = current().category;
+      for (const chip of document.querySelectorAll('.inspector [data-category-preset]')) {
+        const active = chip.dataset.categoryPreset === cat;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', String(active));
+      }
+      const catSelect = $('#category-filter');
+      if (catSelect) {
+        const cats = [...new Set(state.data.plays.filter(p => p.book === book).map(p => p.category))];
+        catSelect.innerHTML = `<option value="">${t("editor.all_categories")}</option><option value="favorite" ${filter === 'favorite' ? 'selected' : ''}>${t("editor.favorites")}</option>${cats.map(c => `<option value="${e(c)}" ${c === filter ? 'selected' : ''}>${e(c)}</option>`).join('')}`;
+      }
     }
     if (selection?.type==='route' && key==='kind') $('[data-prop="endCap"]').value=selectedObject().endCap;
     if (selection?.type==='player' && (key==='roster'||key==='name')) {
